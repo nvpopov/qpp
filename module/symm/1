@@ -1,0 +1,78 @@
+\documentclass[12pt]{report} 
+ 
+\usepackage{longtable} 
+\usepackage{mathtext}   
+\usepackage{amssymb} 
+\usepackage[T2A]{fontenc}  
+\usepackage{indentfirst} 
+\usepackage{amsbsy} 
+\usepackage{epsf} 
+ 
+\setlength\belowcaptionskip{10pt} 
+\renewcommand{\baselinestretch}{1.5} 
+\begin{document} 
+ 
+\newcommand{\rr}{\boldsymbol{r}} 
+\newcommand{\kk}{\boldsymbol{k}} 
+\newcommand{\RR}{\boldsymbol{R}} 
+\newcommand{\fsp}{\mbox{ }} 
+\renewcommand{\le}{\leqslant} 
+\renewcommand{\ge}{\geqslant} 
+\newcommand{\ds}{\displaystyle} 
+\newcommand{\eps}{\varepsilon} 
+\newcommand{\fmbr}{\begin{array}{c}} 
+\newcommand{\fm}{\end{array}} 
+\newcommand{\ra}{{\rightarrow}} 
+\newcommand{\eq}{\begin{equation}} 
+\newcommand{\eeq}{\end{equation}} 
+\newcommand{\arsh}{\mathop{\rm arsh}\nolimits} 
+ 
+$E$ $E$
+
+$C_{2x}$ $C_{2x}$
+
+$C_{2y}$ $C_{2y}$
+
+$C_{2z}$ $C_{2z}$
+
+$C_{3{<}111{>}}$ $C_{3{<}111{>}}^2$
+
+$C_{3{<}11\overline{1}{>}}$ $C_{3{<}11\overline{1}{>}}^2$
+
+$C_{3{<}1\overline{1}1{>}}$ $C_{3{<}1\overline{1}1{>}}^2$
+
+$C_{3{<}\overline{1}11{>}}$ $C_{3{<}\overline{1}11{>}}^2$
+
+$C_{3{<}111{>}}^2$ $C_{3{<}111{>}}$
+
+$C_{3{<}11\overline{1}{>}}^2$ $C_{3{<}11\overline{1}{>}}$
+
+$C_{3{<}1\overline{1}1{>}}^2$ $C_{3{<}1\overline{1}1{>}}$
+
+$C_{3{<}\overline{1}11{>}}^2$ $C_{3{<}\overline{1}11{>}}$
+
+$\sigma_{x+y}$ $\sigma_{x+y}$
+
+$\sigma_{x-y}$ $\sigma_{x-y}$
+
+$\sigma_{x+z}$ $\sigma_{x+z}$
+
+$\sigma_{x-z}$ $\sigma_{x-z}$
+
+$\sigma_{y+z}$ $\sigma_{y+z}$
+
+$\sigma_{y-z}$ $\sigma_{y-z}$
+
+$S_{4x}$ $S_{4x}^3$
+
+$S_{4x}^3$ $S_{4x}$
+
+$S_{4y}$ $S_{4y}^3$
+
+$S_{4y}^3$ $S_{4y}$
+
+$S_{4z}$ $S_{4z}^3$
+
+$S_{4z}^3$ $S_{4z}$
+
+\end{document} 

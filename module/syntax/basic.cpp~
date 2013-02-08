@@ -1,0 +1,10 @@
+#include "basic.hpp"
+
+namespace qpp{
+
+  int strnf(std::string s)
+  {
+    
+  }
+
+};

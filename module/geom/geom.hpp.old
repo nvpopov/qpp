@@ -1,0 +1,472 @@
+#ifndef _QPP_CLUSTER_H
+#define _QPP_CLUSTER_H
+
+#include <lace/lace3d.hpp>
+#include <vector>
+//#define array std::vector
+
+namespace qpp{
+
+  template<int PERIODICITY>
+  struct _check_periodicity;
+
+  template<>
+  struct _check_periodicity<0>
+  {
+    enum{ok=0};
+  };
+
+  template<>
+  struct _check_periodicity<1>
+  {
+    enum{ok=1};
+  };
+
+  template<>
+  struct _check_periodicity<2>
+  {
+    enum{ok=2};
+  };
+
+  template<>
+  struct _check_periodicity<3>
+  {
+    enum{ok=3};
+  };
+
+  //----------------------------------------------------------------------
+
+  template<class VALTYPE>
+  struct rotrans
+  {
+    lace::vector3d<VALTYPE> T;
+    lace::matrix3d<VALTYPE> R;
+
+    rotrans()
+    {
+      T = VALTYPE(0);
+      R = VALTYPE(1);
+    }
+
+    rotrans(lace::vector3d<VALTYPE> _T )
+    {
+      T=_T;
+      R = VALTYPE(1);
+    }
+
+    rotrans(lace::matrix3d<VALTYPE> _R)
+    {
+      T = VALTYPE(0);
+      R = _R;
+    }
+
+    rotrans(lace::vector3d<VALTYPE> _T, lace::matrix3d<VALTYPE> _R)
+    {
+      T = _T;
+      R = _R;
+    }
+
+    inline rotrans<VALTYPE> operator*(rotrans<VALTYPE> b)
+    {
+      return rotrans<VALTYPE>(T + R*b.T, R*b.R);
+    }
+
+  };
+
+
+  //----------------------------------------------------------------------
+
+  template<int PERIODICITY, class VALTYPE=double>
+  class geometry{
+    
+    int nat;
+    array<lace::vector3d<VALTYPE> > coord;
+    lace::vector3d<VALTYPE> transl[PERIODICITY];
+
+
+    static inline void _check(){
+#line 48 "geom.hpp: illegal value of PERIODICITY in geometry template instantiation"
+      int i=_check_periodicity<PERIODICITY>::ok;
+    }
+    
+#line 53 "geom.hpp"
+  public:
+
+    class iterator;
+
+    // ------------------------- index class defines complex indicies ------
+    class index{
+    protected:
+      int at;
+      int cl[PERIODICITY];
+
+    public:
+      inline index& operator=(int _at)
+      {
+	at=_at;
+	if (PERIODICITY>0)
+	  cl[0]=0;
+	if (PERIODICITY>1)
+	  cl[1]=0;
+	if (PERIODICITY>2)
+	  cl[2]=0;
+      }
+
+      inline operator int(){return at;}
+
+      inline int atom(){return at;}
+
+      inline int cell(int dim){return cl[dim];}
+      
+      inline void set(int _at, int i1=0, int i2=0, int i3=0)
+      {
+	at=_at;
+	if (PERIODICITY>0)
+	  cl[0]=i1;
+	if (PERIODICITY>1)
+	  cl[1]=i2;
+	if (PERIODICITY>2)
+	  cl[2]=i3;
+      }
+
+      inline void setatom(int _at){at=_at;}
+
+      inline void setcell(int dim, int i){cl[dim]=i;}
+      
+      index(){
+	_check();
+	set(0);
+      }
+      
+      index(int _at, int i1=0, int i2=0, int i3=0)
+      {
+	_check();
+	set(_at,i1,i2,i3);
+      }      
+      
+      inline bool operator==(geometry<PERIODICITY,VALTYPE>::index i)
+      {
+	if (PERIODICITY==0)
+	  return at == i.at;
+	else if (PERIODICITY==1)
+	  return at == i.at && cl[0] == i.cl[0];
+	else if (PERIODICITY==2)
+	  return at == i.at && cl[0] == i.cl[0] && cl[1] == i.cl[1];
+	else if (PERIODICITY==3)
+	  return at == i.at && cl[0] == i.cl[0] && cl[1] == i.cl[1] && cl[2] == i.cl[2];
+      }
+
+    };
+
+    // -------- iterator class to enumerate atoms in this and neighbouring cells --------------
+        
+    class iterator : public index{
+
+      //geometry<ATOM,PERIODICITY>::index a, b;
+      index a, b;
+
+      using geometry<PERIODICITY,VALTYPE>::index::at;
+      using geometry<PERIODICITY,VALTYPE>::index::cl;
+      //      geometry<PERIODICITY,VALTYPE> *g;
+    public:
+
+      iterator(geometry<PERIODICITY,VALTYPE> &g)
+      // default iterator goes through neighbouring cell only
+      {
+	a.setatom(0);
+	for (int d=0; d < PERIODICITY; d++)
+	  a.setcell(d,-1);
+	b.setatom(g.nat - 1);
+	for (int d=0; d < PERIODICITY; d++)
+	  b.setcell(d,1);	
+      }
+
+      iterator(index _a, index _b)
+      {
+	a = _a;
+	b = _b;
+      }
+
+      inline index begin(){return a;}
+
+      //      inline index end(){return b;}
+
+      inline index end(){return index(-1,0,0,0);}
+
+      inline iterator& operator=(index i)
+      {
+	at = i.atom();
+	for (int d = 0; d<PERIODICITY; d++)
+	  cl[d] = i.cell(d);
+      }
+
+      inline bool operator==(index i)
+      {
+	bool res = (at == i.atom());
+	if (res)
+	  for (int d = 0; d<PERIODICITY; d++)
+	    if ( cl[d] != i.cell(d) ) 
+	      {
+		res = false;
+		break;
+	      }
+	return res;
+      }
+
+      inline bool operator!=(index i)
+      {
+	if (PERIODICITY==0)
+	  return at != i.atom();
+	else if (PERIODICITY==1)
+	  return at != i.atom() || cl[0] != i.cell(0);
+	else if (PERIODICITY==2)
+	  return at != i.atom() || cl[0] != i.cell(0) || cl[1] != i.cell(1);
+	else if (PERIODICITY==3)
+	  return at != i.atom() || cl[0] != i.cell(0) || cl[1] != i.cell(1) || cl[2] != i.cell(2);
+      }
+               
+      iterator& operator++(int)      
+      {
+	if (*this == b)
+	  {
+	    *this = end();
+	    return *this;
+	  }
+
+	at++;
+	if (at > b.atom() && PERIODICITY>0)
+	  {
+	    at=a.atom();
+	    int d=0;
+	    while(d < PERIODICITY)
+	      {
+		cl[d]++;
+		if (cl[d] > b.cell(d))
+		  {
+		    for(int dd=0; dd<=d; dd++)
+		      cl[d] = a.cell(dd);
+		    d++;
+		  }
+		else 
+		  break;
+	      }
+	  }
+	return *this;
+
+      }  
+
+    };
+
+    //---------------------------- iterator end -------------------------
+
+    class bonding_table
+    {
+      int nat;
+      array<int> _nbonds;
+      array<array<index> > _neigs;
+    public:
+      
+      bonding_table(){nat=0;}
+
+      bonding_table(geometry<PERIODICITY,VALTYPE> &g)
+      {
+	
+      }
+
+      inline int nbonds(int at)
+      {
+	return _nbonds[at];
+      }
+
+      inline index bond(int at, int i)
+      {
+	return _neigs[at][i];
+      }
+
+    };
+
+    //---------------------------- iterator end -------------------------
+
+    geometry(){
+      _check();
+      nat = 0;
+    }
+
+    geometry(lace::vector3d<VALTYPE> v1, lace::vector3d<VALTYPE> v2=0e0, 
+	     lace::vector3d<VALTYPE> v3=0e0)
+    {
+      _check();
+      if (PERIODICITY>0)
+	transl[0]=v1;
+      if (PERIODICITY>1)
+	transl[1]=v2;
+      if (PERIODICITY>2)
+	transl[2]=v3;
+      nat = 0;
+    }
+    
+    //    inline ATOM& atom(index i){return atoms[i.atom()];}
+    
+    void add(lace::vector3d<VALTYPE> crd)
+    {
+      coord.push_back(crd);
+      nat++;
+    }
+
+    void add(VALTYPE _x, VALTYPE _y, VALTYPE _z)
+    {
+      coord.push_back(lace::vector3d<VALTYPE>(_x,_y,_z));
+      nat++;
+    }
+
+    inline int size(){return nat;}
+
+    inline lace::vector3d<VALTYPE> r_cell(int i1=0, int i2=0, int i3=0)
+    {
+      std::cout << transl[0] << transl[1] << transl[2] << "\n";
+
+      lace::vector3d<VALTYPE> r=0e0;
+      if (PERIODICITY>0)
+	r += i1*transl[0];
+      if (PERIODICITY>1)
+	r += i2*transl[1];
+      if (PERIODICITY>2)
+	r += i3*transl[2];
+      return r;
+    }
+    
+    inline lace::vector3d<VALTYPE> r_atom(int i)
+    {
+      return coord[i];
+    }
+
+    inline lace::vector3d<VALTYPE> r(index i)
+    {
+      if (PERIODICITY==0)
+	return coord[i.atom()];
+      if (PERIODICITY==1)
+	return coord[i.atom()] + transl[0]*i.cell(0);
+      if (PERIODICITY==2)
+	return coord[i.atom()] + transl[0]*i.cell(0) 
+	  + transl[1]*i.cell(1);
+      if (PERIODICITY==3)
+	return coord[i.atom()] + transl[0]*i.cell(0) 
+	  + transl[1]*i.cell(1) + transl[2]*i.cell(2);
+    }
+    
+    inline VALTYPE& x_atom(int i, int j){return coord[i](j);}
+
+    inline lace::vector3d<VALTYPE>& T(int i)
+    {
+      return transl[i];
+    }
+
+
+    // Functions for PERIODICITY==3
+    inline lace::vector3d<VALTYPE> frac2cart(lace::vector3d<VALTYPE> frac)
+    {
+      return frac(0)*transl[0] + frac(1)*transl[1] + frac(2)*transl[2];
+    }
+
+    inline lace::vector3d<VALTYPE> cart2frac(lace::vector3d<VALTYPE> r)
+    { 
+      lace::matrix3d<VALTYPE> A(transl[0],transl[1],transl[2]);
+      //      std::cout << A;
+      return lace::solve3d(A, r);
+    }
+
+    inline lace::vector3d<VALTYPE> reduce(lace::vector3d<VALTYPE> r)  
+    {
+      lace::vector3d<VALTYPE> f = cart2frac(r);
+      f(0) -= int(f(0));
+      f(1) -= int(f(1));
+      f(2) -= int(f(2));
+      return frac2cart(f);
+    }
+
+    inline lace::vector3d<VALTYPE> reduce_cntr(lace::vector3d<VALTYPE> r)  
+    {
+      lace::vector3d<VALTYPE> f = cart2frac(r);
+      for (int i=0; i<3; i++)
+	{
+	  f(i) -= int(f(i));
+	  if ( f(i) > VALTYPE(1)/2 ) f(i)-=1;
+	}
+      return frac2cart(f);
+    }
+
+    inline bool in_cell(lace::vector3d<VALTYPE> r)
+    {
+      lace::vector3d<VALTYPE> f = cart2frac(r);
+      return 
+	VALTYPE(0)<=f(0) && f(0) < VALTYPE(1) &&
+	VALTYPE(0)<=f(1) && f(1) < VALTYPE(1) &&
+	VALTYPE(0)<=f(2) && f(2) < VALTYPE(1);	
+    }
+
+    inline bool in_cntr_cell(lace::vector3d<VALTYPE> r)
+    {
+      lace::vector3d<VALTYPE> f = cart2frac(r);
+      return 
+	-VALTYPE(1)/2 <= f(0) && f(0) < VALTYPE(1)/2 &&
+	-VALTYPE(1)/2 <= f(1) && f(1) < VALTYPE(1)/2 &&
+	-VALTYPE(1)/2 <= f(2) && f(2) < VALTYPE(1)/2;	
+    }
+
+    void reduce_cntr()
+    // fixme -- not efficient
+    {
+      for (int i=0; i<nat; i++)
+	coord[i] = reduce_cntr(coord[i]);
+    }
+
+    void cut_cntr()
+    // fixme -- not efficient
+    {
+      
+    }
+
+    void transform(rotrans<VALTYPE> RT)
+    {
+      for (int i=0; i<nat; i++)
+	coord[i] = RT.T + RT.R*coord[i];
+      for (int i=0; i<3; i++)
+	transl[i] = RT.R*transl[i];
+    }
+
+    void scale(VALTYPE s)
+    {
+      for (int i=0; i<PERIODICITY; i++)
+	transl[i] *= s;
+      for (int i=0; i<nat; i++)
+	coord[i] *= s;
+    }
+
+  };
+
+  template<int PERIODICITY, class VALTYPE>
+  geometry<PERIODICITY,VALTYPE> replicate(geometry<PERIODICITY,VALTYPE> &uc, int n1, int n2=1, int n3=1) 
+  {
+    geometry<PERIODICITY,VALTYPE> g;
+    typename geometry<PERIODICITY,VALTYPE>::index i1(0,0,0,0);
+    typename geometry<PERIODICITY,VALTYPE>::index i2(uc.size()-1, n1-1, n2-1, n3-1);
+    typename geometry<PERIODICITY,VALTYPE>::iterator i(i1,i2);
+
+    for (i=i.begin(); i!=i.end(); i++)
+      g.add(uc.r(i));
+    return g;
+  }
+
+  template<int PERIODICITY, class VALTYPE>
+  geometry<PERIODICITY,VALTYPE> operator*(rotrans<VALTYPE> RT, 
+					  geometry<PERIODICITY,VALTYPE> g)
+  {
+    geometry<PERIODICITY,VALTYPE> g1 = g;
+    g1.transform(RT);
+    return g1;
+  }
+
+};
+
+#endif
+

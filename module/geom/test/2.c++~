@@ -1,0 +1,7 @@
+#include<iostream>
+#include<geom/geom.hpp>
+
+int main()
+{
+  
+}

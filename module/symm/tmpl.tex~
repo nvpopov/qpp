@@ -1,0 +1,59 @@
+% -*-coding: koi8-r;-*-
+
+\documentclass[12pt]{report}
+
+\usepackage{longtable}
+\usepackage{mathtext}  
+\usepackage{amssymb}
+\usepackage[T2A]{fontenc} 
+\usepackage[koi8-r]{inputenc}
+\usepackage[russian]{babel}  
+\usepackage{indentfirst}
+\usepackage{amsbsy}
+\usepackage{epsf}
+%\usepackage{caption}
+
+\righthyphenmin=2
+\textwidth=16.5cm
+\oddsidemargin=0cm
+\evensidemargin=0cm
+\textheight=25.0cm
+\topmargin=-1.5cm
+
+\setlength\belowcaptionskip{10pt}
+%\captionfont{\bf}
+\renewcommand{\baselinestretch}{1.5}
+\begin{document}
+
+\newcommand{\rr}{\boldsymbol{r}}
+\newcommand{\kk}{\boldsymbol{k}}
+\newcommand{\RR}{\boldsymbol{R}}
+\newcommand{\fsp}{\mbox{ }}
+\renewcommand{\le}{\leqslant}
+\renewcommand{\ge}{\geqslant}
+\newcommand{\ds}{\displaystyle}
+\newcommand{\eps}{\varepsilon}
+\newcommand{\fmbr}{\begin{array}{c}}
+\newcommand{\fm}{\end{array}}
+\newcommand{\ra}{{\rightarrow}}
+\newcommand{\eq}{\begin{equation}}
+\newcommand{\eeq}{\end{equation}}
+\newcommand{\arsh}{\mathop{\rm arsh}\nolimits}
+
+\newcommand{\tochap}[1]{\addtocontents{toc}{\vspace{1em}\hbox to \textwidth{\bf #1 \hfil \thepage}}}
+
+Привет, Петя!
+\\
+\\
+Да, я собирался написать письмо Александру Леонидовичу, но потом свалился с гриппом. Грипп этот идет из Гонконга, у нас уже переболели почти все. До Петербурга он тоже добрался -- Абаренков успел им переболеть. Наверное, и до вас доберется, если еще не добрался. Так что готовьтесь -- грипп этот довольно тяжелый, неделю держится 39.
+
+Насчет вторых производных -- если бы ты мог сделать их до середины апреля, это было бы замечательно. С другой стороны, я понимаю, что ты человек занятый. Мне сейчас нужно принять некое решение, что именно будет делать дипломник -- и для этого желательно знать, есть ли смысл ждать вторые производные в эти сроки. Напиши.
+
+Над PSEUDOBONDом я планирую работать. Насколько я понимаю, Абаренков собирается к вам в апреле. Видимо, тогда мне и нужно будет решить, что именно делать. Сейчас по этому направлению у меня временное затишье.
+\\
+\\
+Best regards,
+
+Андрей.
+
+\end{document}

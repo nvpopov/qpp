@@ -1,0 +1,214 @@
+Eigval
+
+
+VECTOR SUMMA shape requested
+
+The resulting summa shape is Vector shape Dense dim:  x 12
+vector sum shape: Dense x 12
+Good aliasing found!
+   -0.10544652    -0.10544652    -0.10544652    -0.02231790    -0.02231790    -0.02231790     0.01133835     0.01133835     0.01133835     0.09165813     0.09165813     1.00000000 
+Eigvec
+  -0.33016    0.29728   -0.22938    0.28231    0.34964   -0.21921   -0.01641    0.49747   -0.04750    0.06907    0.40236    0.28868 
+  -0.24753   -0.03551    0.43297   -0.08075   -0.19332   -0.45399   -0.16770   -0.46030    0.10002    0.06907    0.40236    0.28868 
+   0.41322    0.21013   -0.18734   -0.40552    0.07856    0.28175   -0.06545   -0.18716   -0.45901    0.06907    0.40236    0.28868 
+   0.16447   -0.47189   -0.01625    0.20396   -0.23488    0.39145    0.24955    0.14999    0.40648    0.06907    0.40236    0.28868 
+   0.35036    0.35578   -0.02592   -0.03445   -0.33403   -0.37045    0.46972    0.12566    0.11652    0.31392   -0.26100    0.28868 
+  -0.03151   -0.01976    0.49861   -0.37955    0.23633    0.22381   -0.28960    0.37453    0.16081    0.31392   -0.26100    0.28868 
+  -0.05209   -0.49093   -0.07920    0.18241    0.44879   -0.12375    0.26298   -0.27360   -0.32556    0.31392   -0.26100    0.28868 
+  -0.26676    0.15491   -0.39350    0.23158   -0.35109    0.27039   -0.44309   -0.22659    0.04822    0.31392   -0.26100    0.28868 
+  -0.14812    0.16730    0.44729    0.34057   -0.22216    0.29096    0.20075    0.06235   -0.45366   -0.38299   -0.14136    0.28868 
+   0.10496   -0.43098   -0.23075   -0.19586   -0.28079   -0.36441   -0.30670    0.33932   -0.20197   -0.38299   -0.14136    0.28868 
+   0.46903    0.17089    0.02846    0.32183    0.37849   -0.05633   -0.25933   -0.22504    0.36346   -0.38299   -0.14136    0.28868 
+  -0.42586    0.09278   -0.24501   -0.46654    0.12446    0.12979    0.36529   -0.17664    0.29217   -0.38299   -0.14136    0.28868 
+
+
+
+
+subspaces found with dims:
+3 3 3 2 1 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+first=1
+\documentclass[12pt]{report} 
+ 
+\usepackage{longtable} 
+\usepackage{mathtext}   
+\usepackage{amssymb} 
+\usepackage[T2A]{fontenc}  
+\usepackage{indentfirst} 
+\usepackage{amsbsy} 
+\usepackage{epsf} 
+ 
+\setlength\belowcaptionskip{10pt} 
+\renewcommand{\baselinestretch}{1.5} 
+\begin{document} 
+ 
+\newcommand{\rr}{\boldsymbol{r}} 
+\newcommand{\kk}{\boldsymbol{k}} 
+\newcommand{\RR}{\boldsymbol{R}} 
+\newcommand{\fsp}{\mbox{ }} 
+\renewcommand{\le}{\leqslant} 
+\renewcommand{\ge}{\geqslant} 
+\newcommand{\ds}{\displaystyle} 
+\newcommand{\eps}{\varepsilon} 
+\newcommand{\fmbr}{\begin{array}{c}} 
+\newcommand{\fm}{\end{array}} 
+\newcommand{\ra}{{\rightarrow}} 
+\newcommand{\eq}{\begin{equation}} 
+\newcommand{\eeq}{\end{equation}} 
+\newcommand{\arsh}{\mathop{\rm arsh}\nolimits} 
+ 
+\center{The group multiplication table:}
+
+\begin{tabular}{c | c c c c c c c c c c c c } 
+& $E$& $C_{2x}$& $C_{2y}$& $C_{2z}$& $C_{3(111)}$& $C_{3(1\overline{11})}$& $C_{3(\overline{1}1\overline{1})}$& $C_{3(\overline{11}1)}$& $C_{3(111)}^2$& $C_{3(1\overline{11})}^2$& $C_{3(\overline{1}1\overline{1})}^2$& $C_{3(\overline{11}1)}^2$\\ 
+ \hline 
+ $E$& $E$& $C_{2x}$& $C_{2y}$& $C_{2z}$& $C_{3(111)}$& $C_{3(1\overline{11})}$& $C_{3(\overline{1}1\overline{1})}$& $C_{3(\overline{11}1)}$& $C_{3(111)}^2$& $C_{3(1\overline{11})}^2$& $C_{3(\overline{1}1\overline{1})}^2$& $C_{3(\overline{11}1)}^2$\\
+$C_{2x}$& $C_{2x}$& $E$& $C_{2z}$& $C_{2y}$& $C_{3(\overline{11}1)}$& $C_{3(\overline{1}1\overline{1})}$& $C_{3(1\overline{11})}$& $C_{3(111)}$& $C_{3(\overline{1}1\overline{1})}^2$& $C_{3(\overline{11}1)}^2$& $C_{3(111)}^2$& $C_{3(1\overline{11})}^2$\\
+$C_{2y}$& $C_{2y}$& $C_{2z}$& $E$& $C_{2x}$& $C_{3(1\overline{11})}$& $C_{3(111)}$& $C_{3(\overline{11}1)}$& $C_{3(\overline{1}1\overline{1})}$& $C_{3(\overline{11}1)}^2$& $C_{3(\overline{1}1\overline{1})}^2$& $C_{3(1\overline{11})}^2$& $C_{3(111)}^2$\\
+$C_{2z}$& $C_{2z}$& $C_{2y}$& $C_{2x}$& $E$& $C_{3(\overline{1}1\overline{1})}$& $C_{3(\overline{11}1)}$& $C_{3(111)}$& $C_{3(1\overline{11})}$& $C_{3(1\overline{11})}^2$& $C_{3(111)}^2$& $C_{3(\overline{11}1)}^2$& $C_{3(\overline{1}1\overline{1})}^2$\\
+$C_{3(111)}$& $C_{3(111)}$& $C_{3(\overline{1}1\overline{1})}$& $C_{3(\overline{11}1)}$& $C_{3(1\overline{11})}$& $C_{3(111)}^2$& $C_{3(\overline{1}1\overline{1})}^2$& $C_{3(\overline{11}1)}^2$& $C_{3(1\overline{11})}^2$& $E$& $C_{2y}$& $C_{2z}$& $C_{2x}$\\
+$C_{3(1\overline{11})}$& $C_{3(1\overline{11})}$& $C_{3(\overline{11}1)}$& $C_{3(\overline{1}1\overline{1})}$& $C_{3(111)}$& $C_{3(\overline{11}1)}^2$& $C_{3(1\overline{11})}^2$& $C_{3(111)}^2$& $C_{3(\overline{1}1\overline{1})}^2$& $C_{2y}$& $E$& $C_{2x}$& $C_{2z}$\\
+$C_{3(\overline{1}1\overline{1})}$& $C_{3(\overline{1}1\overline{1})}$& $C_{3(111)}$& $C_{3(1\overline{11})}$& $C_{3(\overline{11}1)}$& $C_{3(1\overline{11})}^2$& $C_{3(\overline{11}1)}^2$& $C_{3(\overline{1}1\overline{1})}^2$& $C_{3(111)}^2$& $C_{2z}$& $C_{2x}$& $E$& $C_{2y}$\\
+$C_{3(\overline{11}1)}$& $C_{3(\overline{11}1)}$& $C_{3(1\overline{11})}$& $C_{3(111)}$& $C_{3(\overline{1}1\overline{1})}$& $C_{3(\overline{1}1\overline{1})}^2$& $C_{3(111)}^2$& $C_{3(1\overline{11})}^2$& $C_{3(\overline{11}1)}^2$& $C_{2x}$& $C_{2z}$& $C_{2y}$& $E$\\
+$C_{3(111)}^2$& $C_{3(111)}^2$& $C_{3(\overline{11}1)}^2$& $C_{3(1\overline{11})}^2$& $C_{3(\overline{1}1\overline{1})}^2$& $E$& $C_{2z}$& $C_{2x}$& $C_{2y}$& $C_{3(111)}$& $C_{3(\overline{11}1)}$& $C_{3(1\overline{11})}$& $C_{3(\overline{1}1\overline{1})}$\\
+$C_{3(1\overline{11})}^2$& $C_{3(1\overline{11})}^2$& $C_{3(\overline{1}1\overline{1})}^2$& $C_{3(111)}^2$& $C_{3(\overline{11}1)}^2$& $C_{2z}$& $E$& $C_{2y}$& $C_{2x}$& $C_{3(\overline{1}1\overline{1})}$& $C_{3(1\overline{11})}$& $C_{3(\overline{11}1)}$& $C_{3(111)}$\\
+$C_{3(\overline{1}1\overline{1})}^2$& $C_{3(\overline{1}1\overline{1})}^2$& $C_{3(1\overline{11})}^2$& $C_{3(\overline{11}1)}^2$& $C_{3(111)}^2$& $C_{2x}$& $C_{2y}$& $E$& $C_{2z}$& $C_{3(\overline{11}1)}$& $C_{3(111)}$& $C_{3(\overline{1}1\overline{1})}$& $C_{3(1\overline{11})}$\\
+$C_{3(\overline{11}1)}^2$& $C_{3(\overline{11}1)}^2$& $C_{3(111)}^2$& $C_{3(\overline{1}1\overline{1})}^2$& $C_{3(1\overline{11})}^2$& $C_{2y}$& $C_{2x}$& $C_{2z}$& $E$& $C_{3(1\overline{11})}$& $C_{3(\overline{1}1\overline{1})}$& $C_{3(111)}$& $C_{3(\overline{11}1)}$\\
+\end{tabular}
+
+\\
+Classes of conjugated elements:
+\\
+\{ $E$\},\{ $C_{2x}$ $C_{2z}$ $C_{2y}$\},\{ $C_{3(111)}$ $C_{3(1\overline{11})}$ $C_{3(\overline{1}1\overline{1})}$ $C_{3(\overline{11}1)}$\},\{ $C_{3(111)}^2$ $C_{3(1\overline{11})}^2$ $C_{3(\overline{1}1\overline{1})}^2$ $C_{3(\overline{11}1)}^2$\}
+
+Character table:
+
+
+\begin{tabular}{c | c c c c } 
+& 0& 1& 2& 3\\ 
+ \hline 
+ T& 3& -1& 0& 0\\
+E& 2& 2& -1& -1\\
+A& 1& 1& 1& 1\\
+\end{tabular}
+
+\end{document} 

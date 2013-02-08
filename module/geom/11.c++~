@@ -1,0 +1,11 @@
+#include <iostream>
+
+class empty{
+};
+
+int main()
+{
+  empty a,b;
+
+  std::cout << a==b? "yes" : "no" << "\n";
+}

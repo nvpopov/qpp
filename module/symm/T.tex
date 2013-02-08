@@ -1,0 +1,66 @@
+\documentclass[12pt]{report} 
+ 
+\usepackage{longtable} 
+\usepackage{mathtext}   
+\usepackage{amssymb} 
+\usepackage[T2A]{fontenc}  
+\usepackage{indentfirst} 
+\usepackage{amsbsy} 
+\usepackage{epsf} 
+ 
+\setlength\belowcaptionskip{10pt} 
+\renewcommand{\baselinestretch}{1.5} 
+\begin{document} 
+ 
+\newcommand{\rr}{\boldsymbol{r}} 
+\newcommand{\kk}{\boldsymbol{k}} 
+\newcommand{\RR}{\boldsymbol{R}} 
+\newcommand{\fsp}{\mbox{ }} 
+\renewcommand{\le}{\leqslant} 
+\renewcommand{\ge}{\geqslant} 
+\newcommand{\ds}{\displaystyle} 
+\newcommand{\eps}{\varepsilon} 
+\newcommand{\fmbr}{\begin{array}{c}} 
+\newcommand{\fm}{\end{array}} 
+\newcommand{\ra}{{\rightarrow}} 
+\newcommand{\eq}{\begin{equation}} 
+\newcommand{\eeq}{\end{equation}} 
+\newcommand{\arsh}{\mathop{\rm arsh}\nolimits} 
+ 
+\center{The group multiplication table:}
+
+\begin{tabular}{c | c c c c c c c c c c c c } 
+& $E$& $C_{2x}$& $C_{2y}$& $C_{2z}$& $C_{3{<}111{>}}$& $C_{3{<}1\overline{11}{>}}$& $C_{3{<}\overline{1}1\overline{1}{>}}$& $C_{3{<}\overline{11}1{>}}$& $C_{3{<}111{>}}^2$& $C_{3{<}1\overline{11}{>}}^2$& $C_{3{<}\overline{1}1\overline{1}{>}}^2$& $C_{3{<}\overline{11}1{>}}^2$\\ 
+ \hline 
+ $E$& $E$& $C_{2x}$& $C_{2y}$& $C_{2z}$& $C_{3{<}111{>}}$& $C_{3{<}1\overline{11}{>}}$& $C_{3{<}\overline{1}1\overline{1}{>}}$& $C_{3{<}\overline{11}1{>}}$& $C_{3{<}111{>}}^2$& $C_{3{<}1\overline{11}{>}}^2$& $C_{3{<}\overline{1}1\overline{1}{>}}^2$& $C_{3{<}\overline{11}1{>}}^2$\\
+$C_{2x}$& $C_{2x}$& $E$& $C_{2z}$& $C_{2y}$& $C_{3{<}\overline{11}1{>}}$& $C_{3{<}\overline{1}1\overline{1}{>}}$& $C_{3{<}1\overline{11}{>}}$& $C_{3{<}111{>}}$& $C_{3{<}\overline{1}1\overline{1}{>}}^2$& $C_{3{<}\overline{11}1{>}}^2$& $C_{3{<}111{>}}^2$& $C_{3{<}1\overline{11}{>}}^2$\\
+$C_{2y}$& $C_{2y}$& $C_{2z}$& $E$& $C_{2x}$& $C_{3{<}1\overline{11}{>}}$& $C_{3{<}111{>}}$& $C_{3{<}\overline{11}1{>}}$& $C_{3{<}\overline{1}1\overline{1}{>}}$& $C_{3{<}\overline{11}1{>}}^2$& $C_{3{<}\overline{1}1\overline{1}{>}}^2$& $C_{3{<}1\overline{11}{>}}^2$& $C_{3{<}111{>}}^2$\\
+$C_{2z}$& $C_{2z}$& $C_{2y}$& $C_{2x}$& $E$& $C_{3{<}\overline{1}1\overline{1}{>}}$& $C_{3{<}\overline{11}1{>}}$& $C_{3{<}111{>}}$& $C_{3{<}1\overline{11}{>}}$& $C_{3{<}1\overline{11}{>}}^2$& $C_{3{<}111{>}}^2$& $C_{3{<}\overline{11}1{>}}^2$& $C_{3{<}\overline{1}1\overline{1}{>}}^2$\\
+$C_{3{<}111{>}}$& $C_{3{<}111{>}}$& $C_{3{<}\overline{1}1\overline{1}{>}}$& $C_{3{<}\overline{11}1{>}}$& $C_{3{<}1\overline{11}{>}}$& $C_{3{<}111{>}}^2$& $C_{3{<}\overline{1}1\overline{1}{>}}^2$& $C_{3{<}\overline{11}1{>}}^2$& $C_{3{<}1\overline{11}{>}}^2$& $E$& $C_{2y}$& $C_{2z}$& $C_{2x}$\\
+$C_{3{<}1\overline{11}{>}}$& $C_{3{<}1\overline{11}{>}}$& $C_{3{<}\overline{11}1{>}}$& $C_{3{<}\overline{1}1\overline{1}{>}}$& $C_{3{<}111{>}}$& $C_{3{<}\overline{11}1{>}}^2$& $C_{3{<}1\overline{11}{>}}^2$& $C_{3{<}111{>}}^2$& $C_{3{<}\overline{1}1\overline{1}{>}}^2$& $C_{2y}$& $E$& $C_{2x}$& $C_{2z}$\\
+$C_{3{<}\overline{1}1\overline{1}{>}}$& $C_{3{<}\overline{1}1\overline{1}{>}}$& $C_{3{<}111{>}}$& $C_{3{<}1\overline{11}{>}}$& $C_{3{<}\overline{11}1{>}}$& $C_{3{<}1\overline{11}{>}}^2$& $C_{3{<}\overline{11}1{>}}^2$& $C_{3{<}\overline{1}1\overline{1}{>}}^2$& $C_{3{<}111{>}}^2$& $C_{2z}$& $C_{2x}$& $E$& $C_{2y}$\\
+$C_{3{<}\overline{11}1{>}}$& $C_{3{<}\overline{11}1{>}}$& $C_{3{<}1\overline{11}{>}}$& $C_{3{<}111{>}}$& $C_{3{<}\overline{1}1\overline{1}{>}}$& $C_{3{<}\overline{1}1\overline{1}{>}}^2$& $C_{3{<}111{>}}^2$& $C_{3{<}1\overline{11}{>}}^2$& $C_{3{<}\overline{11}1{>}}^2$& $C_{2x}$& $C_{2z}$& $C_{2y}$& $E$\\
+$C_{3{<}111{>}}^2$& $C_{3{<}111{>}}^2$& $C_{3{<}\overline{11}1{>}}^2$& $C_{3{<}1\overline{11}{>}}^2$& $C_{3{<}\overline{1}1\overline{1}{>}}^2$& $E$& $C_{2z}$& $C_{2x}$& $C_{2y}$& $C_{3{<}111{>}}$& $C_{3{<}\overline{11}1{>}}$& $C_{3{<}1\overline{11}{>}}$& $C_{3{<}\overline{1}1\overline{1}{>}}$\\
+$C_{3{<}1\overline{11}{>}}^2$& $C_{3{<}1\overline{11}{>}}^2$& $C_{3{<}\overline{1}1\overline{1}{>}}^2$& $C_{3{<}111{>}}^2$& $C_{3{<}\overline{11}1{>}}^2$& $C_{2z}$& $E$& $C_{2y}$& $C_{2x}$& $C_{3{<}\overline{1}1\overline{1}{>}}$& $C_{3{<}1\overline{11}{>}}$& $C_{3{<}\overline{11}1{>}}$& $C_{3{<}111{>}}$\\
+$C_{3{<}\overline{1}1\overline{1}{>}}^2$& $C_{3{<}\overline{1}1\overline{1}{>}}^2$& $C_{3{<}1\overline{11}{>}}^2$& $C_{3{<}\overline{11}1{>}}^2$& $C_{3{<}111{>}}^2$& $C_{2x}$& $C_{2y}$& $E$& $C_{2z}$& $C_{3{<}\overline{11}1{>}}$& $C_{3{<}111{>}}$& $C_{3{<}\overline{1}1\overline{1}{>}}$& $C_{3{<}1\overline{11}{>}}$\\
+$C_{3{<}\overline{11}1{>}}^2$& $C_{3{<}\overline{11}1{>}}^2$& $C_{3{<}111{>}}^2$& $C_{3{<}\overline{1}1\overline{1}{>}}^2$& $C_{3{<}1\overline{11}{>}}^2$& $C_{2y}$& $C_{2x}$& $C_{2z}$& $E$& $C_{3{<}1\overline{11}{>}}$& $C_{3{<}\overline{1}1\overline{1}{>}}$& $C_{3{<}111{>}}$& $C_{3{<}\overline{11}1{>}}$\\
+\end{tabular}
+
+
+Classes of conjugated elements:
+
+\{ $E$\},\{ $C_{2x}$ $C_{2z}$ $C_{2y}$\},\{ $C_{3{<}111{>}}$ $C_{3{<}1\overline{11}{>}}$ $C_{3{<}\overline{1}1\overline{1}{>}}$ $C_{3{<}\overline{11}1{>}}$\},\{ $C_{3{<}111{>}}^2$ $C_{3{<}1\overline{11}{>}}^2$ $C_{3{<}\overline{1}1\overline{1}{>}}^2$ $C_{3{<}\overline{11}1{>}}^2$\}
+
+Character table:
+
+\newline
+
+\begin{tabular}{c | c c c c } 
+& $E$& $3C_2$& $4C_3$& $4C_3^2$\\ 
+ \hline 
+$A$& 1& 1& 1& 1\\
+$E$& 2& 2& -1& -1\\
+ $T$& 3& -1& 0& 0\\
+\end{tabular}
+
+\end{document} 

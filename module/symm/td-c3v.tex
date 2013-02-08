@@ -1,0 +1,101 @@
+\documentclass[12pt]{report} 
+ 
+\usepackage{longtable} 
+\usepackage{mathtext}   
+\usepackage{amssymb} 
+\usepackage[T2A]{fontenc}  
+\usepackage{indentfirst} 
+\usepackage{amsbsy} 
+\usepackage{epsf} 
+ 
+\setlength\belowcaptionskip{10pt} 
+\renewcommand{\baselinestretch}{1.5} 
+\begin{document} 
+ 
+\newcommand{\rr}{\boldsymbol{r}} 
+\newcommand{\kk}{\boldsymbol{k}} 
+\newcommand{\RR}{\boldsymbol{R}} 
+\newcommand{\fsp}{\mbox{ }} 
+\renewcommand{\le}{\leqslant} 
+\renewcommand{\ge}{\geqslant} 
+\newcommand{\ds}{\displaystyle} 
+\newcommand{\eps}{\varepsilon} 
+\newcommand{\fmbr}{\begin{array}{c}} 
+\newcommand{\fm}{\end{array}} 
+\newcommand{\ra}{{\rightarrow}} 
+\newcommand{\eq}{\begin{equation}} 
+\newcommand{\eeq}{\end{equation}} 
+\newcommand{\arsh}{\mathop{\rm arsh}\nolimits} 
+ 
+\center{The group multiplication table:}
+
+\begin{tabular}{c | c c c c c c } 
+& $E$& $C_3$& $C_3^2$& $\sigma_0$& $\sigma_1$& $\sigma_2$\\ 
+ \hline 
+ $E$& $E$& $C_3$& $C_3^2$& $\sigma_0$& $\sigma_1$& $\sigma_2$\\
+$C_3$& $C_3$& $C_3^2$& $E$& $\sigma_2$& $\sigma_0$& $\sigma_1$\\
+$C_3^2$& $C_3^2$& $E$& $C_3$& $\sigma_1$& $\sigma_2$& $\sigma_0$\\
+$\sigma_0$& $\sigma_0$& $\sigma_1$& $\sigma_2$& $E$& $C_3$& $C_3^2$\\
+$\sigma_1$& $\sigma_1$& $\sigma_2$& $\sigma_0$& $C_3^2$& $E$& $C_3$\\
+$\sigma_2$& $\sigma_2$& $\sigma_0$& $\sigma_1$& $C_3$& $C_3^2$& $E$\\
+\end{tabular}
+
+\\
+Classes of conjugated elements:
+\\
+\{ $E$\},\{ $C_3$ $C_3^2$\},\{ $\sigma_0$ $\sigma_1$ $\sigma_2$\}
+
+Character table:
+
+
+\begin{tabular}{c c | c c c } 
+& & $E$& $2C_3$& $3\sigma_v$\\ 
+ \hline 
+& $A_1$& 1& 1& 1\\
+$C_{3v}$& $A_2$& 1& 1& -1\\
+& $E$& 2& -1& 0\\
+\hline
+&$A_1$& 1& 1& 1\\
+&$A_2$& 1& 1& -1\\
+$T_d$& $E$& 2& -1& 0\\
+&$T_1$&3 &0 &-1 \\
+&$T_2$&3 &0 &1 \\
+\end{tabular}
+
+$$
+\begin{array}{l}
+A_1(T_d)=A_1(C_{3v})\\
+A_2(T_d)=A_2(C_{3v})\\
+E(T_d)=E(C_{3v})\\
+T_1(T_d)=E(C_{3v})+A_2(C_{3v})\\
+T_2(T_d)=E(C_{3v})+A_1(C_{3v})
+\end{array}
+$$
+
+\begin{tabular}{c c | c c c}
+ &  & $E$& $2C_3$& $3\sigma_v$\\ 
+\hline
+$C_{3v}$ & \multicolumn{4}{c}{
+ $\left\{
+    \begin{tabular}{c | c c c}
+$A_1$& 1& 1& 1\\
+$A_2$& 1& 1& -1\\
+ $E$& 2& -1& 0\\
+     \end{tabular}
+ \right.$
+}\\
+\hline
+$T_{d}$ & \multicolumn{4}{c}{
+ $\left\{
+    \begin{tabular}{c | c c c}
+$A_1$& 1& 1& 1\\
+$A_2$& 1& 1& -1\\
+ $E$& 2& -1& 0\\
+$T_1$&3 &0 &-1 \\
+$T_2$&3 &0 &1 \\
+     \end{tabular}
+ \right.$
+}\\
+\end{tabular}
+
+\end{document} 

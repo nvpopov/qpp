@@ -1,0 +1,31 @@
+#include <iostream>
+
+template <class A>
+class B : public A{
+public:
+
+  virtual void who(){std::cout << "I am B\n";}
+
+};
+
+class AA{
+public:
+
+  virtual void who(){std::cout << "I am AA\n";}
+
+};
+
+int main()
+{
+  AA aa;
+
+  aa.who();
+
+  B<AA> b;
+
+  b.who();
+
+  B<int> i;
+
+  i.who();
+}

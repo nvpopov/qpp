@@ -1,0 +1,175 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+subspaces found with dims:
+5 1 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\documentclass[12pt]{report} 
+ 
+\usepackage{longtable} 
+\usepackage{mathtext}   
+\usepackage{amssymb} 
+\usepackage[T2A]{fontenc}  
+\usepackage{indentfirst} 
+\usepackage{amsbsy} 
+\usepackage{epsf} 
+ 
+\setlength\belowcaptionskip{10pt} 
+\renewcommand{\baselinestretch}{1.5} 
+\begin{document} 
+ 
+\newcommand{\rr}{\boldsymbol{r}} 
+\newcommand{\kk}{\boldsymbol{k}} 
+\newcommand{\RR}{\boldsymbol{R}} 
+\newcommand{\fsp}{\mbox{ }} 
+\renewcommand{\le}{\leqslant} 
+\renewcommand{\ge}{\geqslant} 
+\newcommand{\ds}{\displaystyle} 
+\newcommand{\eps}{\varepsilon} 
+\newcommand{\fmbr}{\begin{array}{c}} 
+\newcommand{\fm}{\end{array}} 
+\newcommand{\ra}{{\rightarrow}} 
+\newcommand{\eq}{\begin{equation}} 
+\newcommand{\eeq}{\end{equation}} 
+\newcommand{\arsh}{\mathop{\rm arsh}\nolimits} 
+ 
+\center{The group multiplication table:}
+
+\begin{tabular}{c | c c c c c c } 
+& $E$& $[021]$& $[102]$& $[120]$& $[201]$& $[210]$\\ 
+ \hline 
+ $E$& $E$& $[021]$& $[102]$& $[120]$& $[201]$& $[210]$\\
+$[021]$& $[021]$& $E$& $[201]$& $[210]$& $[102]$& $[120]$\\
+$[102]$& $[102]$& $[120]$& $E$& $[021]$& $[210]$& $[201]$\\
+$[120]$& $[120]$& $[102]$& $[210]$& $[201]$& $E$& $[021]$\\
+$[201]$& $[201]$& $[210]$& $[021]$& $E$& $[120]$& $[102]$\\
+$[210]$& $[210]$& $[201]$& $[120]$& $[102]$& $[021]$& $E$\\
+\end{tabular}
+
+\\
+Classes of conjugated elements:
+\\
+\{ $E$\},\{ $[021]$ $[210]$ $[102]$\},\{ $[120]$ $[201]$\}
+
+Character table:
+
+
+\begin{tabular}{c | c c c } 
+& 0& 1& 2\\ 
+ \hline 
+ & 5& 0.3062004& 0.419025\\
+\end{tabular}
+
+\end{document} 
