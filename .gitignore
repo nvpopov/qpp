@@ -16,3 +16,4 @@ CMakeCache*
 *.cmake
 CMakeFiles
 Makefile
+*.c++~
