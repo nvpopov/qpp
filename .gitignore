@@ -11,3 +11,8 @@
 *.lai
 *.la
 *.a
+
+CMakeCache*
+*.cmake
+CMakeFiles
+Makefile
