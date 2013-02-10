@@ -1,3 +1,2 @@
-MESSAGE(STATUS "Entering tools/embedding ")
-MESSAGE(STATUS "Test")
+PROJECT(embedding)
 INSTALL(FILES embed DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)

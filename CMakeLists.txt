@@ -1,7 +1,35 @@
 cmake_minimum_required (VERSION 2.6)
+
 project(qpp)
+set (qpp_VERSION_MAJOR 0)
+set (qpp_VERSION_MINOR 1)
+
+#Detect system bitness
+set(bitness 32)
+if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+  set(bitness 64)  
+endif()
+
+set(BLAS_INCLUDE "-" CACHE STRING "Blas include dir")
+set(BLAS_LIB "-" CACHE STRING "Blas library dir")
+set(LAPACK_INCLUDE "-" CACHE STRING "Lapack include dir")
+set(LAPACK_LIB "-" CACHE STRING "Lapack lib dir")
+
+ 
+include_directories(${LAPACK_INCLUDE})
+include_directories(${BLAS_INCLUDE})
+
+#Create system-depend build directories
+file(MAKE_DIRECTORY build/${CMAKE_SYSTEM_NAME}${bitness}/bin)
+file(MAKE_DIRECTORY build/${CMAKE_SYSTEM_NAME}${bitness}/lib)
+
+#Set output directories
+set( EXECUTABLE_OUTPUT_PATH build/${CMAKE_SYSTEM_NAME}${bitness}/bin)
+set( LIBRARY_OUTPUT_PATH build/${CMAKE_SYSTEM_NAME}${bitness}/lib)
+
+add_subdirectory(modules)
 
 option(QPP_BUILD_TOOLS "Build third-part tools")
 if (QPP_BUILD_TOOLS)
-	add_subdirectory(./tools/embedding)
+	add_subdirectory(tools)
 endif(QPP_BUILD_TOOLS)
