@@ -5,7 +5,6 @@
 #include <ostream>
 #include <sstream>
 #include <boost/format.hpp>
-#include <lace/complex.hpp>
 
 namespace lace{
 
@@ -45,9 +44,7 @@ namespace lace{
 
     inline VALTYPE& z(){return r[2];}
 
-    inline VALTYPE norm2(){return r[0]*r[0]+r[1]*r[1]+r[2]*r[2];}
-
-    inline VALTYPE norm(){return std::sqrt(norm2());}
+    inline VALTYPE norm(){return std::sqrt(r[0]*r[0]+r[1]*r[1]+r[2]*r[2]);}
 
     inline vector3d<VALTYPE> operator+(vector3d<VALTYPE> v)
     {
@@ -142,20 +139,14 @@ namespace lace{
   {
     return v1(0)*v2(0) + v1(1)*v2(1) + v1(2)*v2(2);
   }
- 
-  template<class VALTYPE>
-  inline VALTYPE norm2(vector3d<VALTYPE> v)
-  {
-    return v(0)*v(0) + v(1)*v(1) + v(2)*v(2);
-  }
 
   template<class VALTYPE>
   inline VALTYPE norm(vector3d<VALTYPE> v)
   {
-    return std::sqrt(norm2(v));
+    return std::sqrt(v(0)*v(0) + v(1)*v(1) + v(2)*v(2));
   }
 
- /*---------------------------------------------------------*/
+  /*---------------------------------------------------------*/
 
   template<class VALTYPE = double>
   class matrix3d{
@@ -387,43 +378,6 @@ namespace lace{
       Z = det(A0, A1, b);
     return vector3d<VALTYPE>(X, Y, Z)/D;
   }
-
-  //-------------------------------------------------
-
-  template<class VALTYPE>
-  vector3d<typename lace::numeric_type<VALTYPE>::complex> solve_cubeq(VALTYPE a, VALTYPE b, VALTYPE c, VALTYPE d)
-  // Solves ax^3 + bx^2 + cx + d = 0
-  {
-    b /= a;
-    c /= a;
-    d /= a;
-    typename lace::numeric_type<VALTYPE>::complex I(VALTYPE(0),VALTYPE(1));
-    VALTYPE aa = c/3 - b*b/9, bb = d/2 - b*c/6 + b*b*b/27;
-    VALTYPE discr1 = aa*aa*aa + bb*bb;
-    typename lace::numeric_type<VALTYPE>::complex discr2;
-    if (discr1 > VALTYPE(0))
-      {
-	VALTYPE discr23 = std::sqrt(discr1) - bb;
-	int sgn = (discr23>0)? 1 : -1;
-	discr23 *= sgn;
-	discr2 = sgn*std::exp(std::log(discr23)/3);
-      }
-    else
-      {
-	discr2 = -bb + std::sqrt(-discr1)*I;
-	VALTYPE dabs = lace::abs(discr2), darg = lace::arg(discr2);
-	discr2 = lace::polar(std::exp(std::log(dabs)/3),darg/3);
-      }
-    typename lace::numeric_type<VALTYPE>::complex r1 = discr2 - aa/discr2, r2 = discr2 + aa/discr2;
-    return vector3d<typename lace::numeric_type<VALTYPE>::complex>( r1 - b/3, 
-								   -r1/2 + std::sqrt(3.0)*r2*I/2 - b/3, 
-								   -r1/2 - std::sqrt(3.0)*r2*I/2 - b/3);
-  }
-
-  //-------------------------------------------------
-
-  template<class VALTYPE>
-  void diagon
 
   //-------------------------------------------------
 

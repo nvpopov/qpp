@@ -121,71 +121,49 @@ namespace lace{
   inline long double conj(long double x)
   { return x; }
 
-  inline float real(float x)
-  { return x; }
-
-  inline double real(double x)
-  { return x; }
-
-  inline long double real(long double x)
-  { return x; }
-
-
   template<typename VALTYPE>
   struct numeric_type;
 
   template<>
   struct numeric_type<float>
   {
-    typedef float real;
-    static bool is_real(){return true;}
-    static bool is_complex(){return false;}
-    static float I(){return float(0);}
+    inline bool is_real(){return true;}
+    inline bool is_complex(){return false;}
   };
 
   template<>
   struct numeric_type<double>
   {
-    typedef double real;
-    static bool is_real(){return true;}
-    static bool is_complex(){return false;}
-    static double I(){return double(0);}
+    inline bool is_real(){return true;}
+    inline bool is_complex(){return false;}
   };
 
   template<>
   struct numeric_type<longdouble>
   {
-    typedef long double real;
-    static bool is_real(){return true;}
-    static bool is_complex(){return false;}
-    static long double I(){return (long double)(0);}
+    inline bool is_real(){return true;}
+    inline bool is_complex(){return false;}
   };
 
   template<>
   struct numeric_type<fcomplex>
   {
-    typedef float real;
-    static bool is_real(){return false;}
-    static bool is_complex(){return true;}
-    static fcomplex I(){return fcomplex(0,1);}
+    inline bool is_real(){return false;}
+    inline bool is_complex(){return true;}
   };
 
   template<>
   struct numeric_type<dcomplex>
   {
-    typedef double real;
-    static bool is_real(){return false;}
-    static bool is_complex(){return true;}
-    static dcomplex I(){return dcomplex(0,1);}
+    inline bool is_real(){return false;}
+    inline bool is_complex(){return true;}
   };
 
   template<>
   struct numeric_type<lcomplex>
   {
-    typedef long double real;
-    static bool is_real(){return false;}
-    static bool is_complex(){return true;}
-    static lcomplex I(){return lcomplex(0,1);}
+    inline bool is_real(){return false;}
+    inline bool is_complex(){return true;}
   };
 
 };

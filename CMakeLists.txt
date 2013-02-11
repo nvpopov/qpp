@@ -23,18 +23,24 @@ ENDIF()
  
 include_directories(${LAPACK_INCLUDE})
 include_directories(${BLAS_INCLUDE})
+include_directories(modules/)
 
 #Create system-depend build directories
-file(MAKE_DIRECTORY build/${CMAKE_SYSTEM_NAME}${bitness}/bin)
-file(MAKE_DIRECTORY build/${CMAKE_SYSTEM_NAME}${bitness}/lib)
+file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/build/${CMAKE_SYSTEM_NAME}${bitness}/bin)
+file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/build/${CMAKE_SYSTEM_NAME}${bitness}/lib)
 
 #Set output directories
-set( EXECUTABLE_OUTPUT_PATH build/${CMAKE_SYSTEM_NAME}${bitness}/bin)
-set( LIBRARY_OUTPUT_PATH build/${CMAKE_SYSTEM_NAME}${bitness}/lib)
+set( EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/build/${CMAKE_SYSTEM_NAME}${bitness}/bin)
+set( LIBRARY_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/build/${CMAKE_SYSTEM_NAME}${bitness}/lib)
 
 add_subdirectory(modules)
 
 option(QPP_BUILD_TOOLS "Build third-part tools")
 if (QPP_BUILD_TOOLS)
 	add_subdirectory(tools)
+endif(QPP_BUILD_TOOLS)
+
+option(QPP_BUILD_SAMPLES "Build or not to build samples")
+if (QPP_BUILD_TOOLS)
+	add_subdirectory(examples)
 endif(QPP_BUILD_TOOLS)
