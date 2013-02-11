@@ -1,9 +1,0 @@
-#include <symm/symm.hpp>
-#include <lace/lace3d.hpp>
-#include <iostream>
-
-int main()
-{
-  qpp::symmgroup<lace::matrix3d<double> > G;
-  
-}
