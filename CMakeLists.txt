@@ -15,6 +15,11 @@ set(BLAS_LIB "-" CACHE STRING "Blas library dir")
 set(LAPACK_INCLUDE "-" CACHE STRING "Lapack include dir")
 set(LAPACK_LIB "-" CACHE STRING "Lapack lib dir")
 
+FIND_PACKAGE(Boost)
+IF (Boost_FOUND)
+    INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIR})
+    ADD_DEFINITIONS( "-DHAS_BOOST" )
+ENDIF()
  
 include_directories(${LAPACK_INCLUDE})
 include_directories(${BLAS_INCLUDE})

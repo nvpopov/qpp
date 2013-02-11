@@ -1,7 +1,7 @@
 #ifndef _QPP_SPECFUNC_H
 #define _QPP_SPECFUNC_H
 
-#include <physconst.hpp>
+#include <mathf/physconst.hpp>
 #include <lace/lace.hpp>
 #include <lace/lace3d.hpp>
 
