@@ -285,7 +285,7 @@ namespace _lace_main{
       matrix<VALTYPE,MTP_DST> *DST = (matrix<VALTYPE,MTP_DST>*)(&dest);  
       matrix<VALTYPE,MTP_SRC> *SRC = (matrix<VALTYPE,MTP_SRC>*)(&src);
 
-      assert( is_convertable(DST->shape(),SRC->shape()) && "Invalid matrix conversion" );
+	//assert( is_convertable(DST->shape(),SRC->shape()) && "Invalid matrix conversion" );
       // Use copy method
       DST->copy(*SRC);
     }

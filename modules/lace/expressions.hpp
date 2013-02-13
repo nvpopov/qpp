@@ -10,10 +10,9 @@ namespace _lace_expressions{
   // --- Just for debug ---
   void indent(int shift);
   
-  // ------------------------------------------------------------------------
-  // The base of all expression classes
-
-  //  template<typename VALTYPE>
+  /**
+   * @brief The base of all expression classes
+   **/
   class abstract_expression : public tree_node{
     
     //    typedef abstract_expression<VALTYPE> XPR;

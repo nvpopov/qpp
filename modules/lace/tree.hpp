@@ -13,6 +13,12 @@ namespace _lace_tree{
 
     typedef int UIDTYPE;
     
+	/**
+	 *@brief Test brief
+	 * 
+	 * 
+	 * 
+	 **/
     int nref;
     // Number of other objects (tree nodes) which reference this node
     

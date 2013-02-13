@@ -9,23 +9,23 @@
 
 namespace lace{
 
-  using _lace_expressions::matrix;
-  using _lace_expressions::vector;
-  using _lace_storage::rectang;
-  using _lace_storage::symmetric;
-  using _lace_storage::hermitian;  
-  using _lace_storage::banddiag;   
-  using _lace_storage::symmband;   
-  using _lace_storage::hermband;   
-  using _lace_storage::triang;
-  using _lace_storage::matrix_type;
-  using _lace_storage::vector_type;
-  using _lace_expressions::sub;
-  using _lace_storage::dense;
-  using _lace_storage::sparse;
-  using _lace_storage::matrix_shape;
+	using _lace_expressions::matrix;
+	using _lace_expressions::vector;
+	using _lace_storage::rectang;
+	using _lace_storage::symmetric;
+	using _lace_storage::hermitian;  
+	using _lace_storage::banddiag;   
+	using _lace_storage::symmband;   
+	using _lace_storage::hermband;   
+	using _lace_storage::triang;
+	using _lace_storage::matrix_type;
+	using _lace_storage::vector_type;
+	using _lace_expressions::sub;
+	using _lace_storage::dense;
+	using _lace_storage::sparse;
+	using _lace_storage::matrix_shape;
 
-  using _lace_storage::eigvals_valtype;
+	using _lace_storage::eigvals_valtype;
 
   /* ----------------------------------------------------------------
                    High level functions
@@ -60,7 +60,6 @@ namespace lace{
 	    A.size(0) == y.size(0) &&
 	    x.size(1) == y.size(1));
     
-
     matrix<VALTYPE,MTP> _A;
     if (globals::preserv_matrix)
       {

@@ -10,28 +10,32 @@ if(CMAKE_SIZEOF_VOID_P EQUAL 8)
   set(bitness 64)  
 endif()
 
-
 set(BLAS_INCLUDE "-" CACHE STRING "Blas include dir")
 set(BLAS_LIB "-" CACHE STRING "Blas library dir")
 set(LAPACK_INCLUDE "-" CACHE STRING "Lapack include dir")
 set(LAPACK_LIB "-" CACHE STRING "Lapack lib dir")
 set(LA_TYPE "MKL" CACHE STRING "Type of linear algebra library, (MKL,ACML)")
 
-IF (NOT (LA_TYPE EQUAL "MKL" and LA_TYPE EQUAL "ACML"))
+#IF ((${LA_TYPE} EQUAL "MKL") or (${LA_TYPE} EQUAL "ACML"))
+#
+##ENDIF()
 
-ENDIF()
+if (LA_TYPE EQUAL "MKL")
+	set(BLAS_LIBS_COM
+	-L${BLAS_LIB}
+	-l mkl_core
+	)
+	include_directories(${BLAS_INCLUDE})
+	message(STATUS "MKL!")
+endif()
 
-FIND_PACKAGE(Boost)
+find_package(Boost)
 IF (Boost_FOUND)
-    INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIR})
-    ADD_DEFINITIONS( "-DHAS_BOOST" )
-ENDIF()
-
-find_package(BLAS)
-find_package(LAPACK)
+    include_directories(${Boost_INCLUDE_DIR})
+    add_definitions( "-DHAS_BOOST" )
+endif()
  
-include_directories(${LAPACK_INCLUDE})
-include_directories(${BLAS_INCLUDE})
+ 
 include_directories(modules/)
 
 #Create system-depend build directories
