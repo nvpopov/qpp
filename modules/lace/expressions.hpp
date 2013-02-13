@@ -1349,7 +1349,7 @@ namespace _lace_expressions{
     void bind(abstract_expression *xpr, int i1, int i2)
     {
       if ( ((expression_summa<VALTYPE,XPR>*)this) -> nbound++ == 0) 
-	for(int i = i1; i<=i2; i++) add( (XPR*)(xpr -> xnext(i)) );
+	for(int i = i1; i<=i2; i++) this-> add( (XPR*)(xpr -> xnext(i)) );
     }
     
     virtual int nterms(){return ((summa_literal<VALTYPE,XPR>*)this) -> terms.size();}

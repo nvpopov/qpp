@@ -138,6 +138,7 @@ namespace lace{
   struct numeric_type<float>
   {
     typedef float real;
+    typedef fcomplex complex;
     static bool is_real(){return true;}
     static bool is_complex(){return false;}
     static float I(){return float(0);}
@@ -147,6 +148,7 @@ namespace lace{
   struct numeric_type<double>
   {
     typedef double real;
+    typedef dcomplex complex;
     static bool is_real(){return true;}
     static bool is_complex(){return false;}
     static double I(){return double(0);}
@@ -156,6 +158,7 @@ namespace lace{
   struct numeric_type<longdouble>
   {
     typedef long double real;
+    typedef lcomplex complex;
     static bool is_real(){return true;}
     static bool is_complex(){return false;}
     static long double I(){return (long double)(0);}
@@ -165,6 +168,7 @@ namespace lace{
   struct numeric_type<fcomplex>
   {
     typedef float real;
+    typedef fcomplex complex;
     static bool is_real(){return false;}
     static bool is_complex(){return true;}
     static fcomplex I(){return fcomplex(0,1);}
@@ -174,6 +178,7 @@ namespace lace{
   struct numeric_type<dcomplex>
   {
     typedef double real;
+    typedef dcomplex complex;
     static bool is_real(){return false;}
     static bool is_complex(){return true;}
     static dcomplex I(){return dcomplex(0,1);}
@@ -183,6 +188,7 @@ namespace lace{
   struct numeric_type<lcomplex>
   {
     typedef long double real;
+    typedef lcomplex complex;
     static bool is_real(){return false;}
     static bool is_complex(){return true;}
     static lcomplex I(){return lcomplex(0,1);}

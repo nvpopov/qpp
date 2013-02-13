@@ -244,26 +244,21 @@ namespace _lace_main{
 
     //--------------------------------------------------------------------------------//
 
-    virtual matrix_shape reshape(matrix_shape src) 
-    {
-      assert( _lace_storage::is_convertable(MTP_DST, MTP_SRC) && "Invalid matrix conversion" );
+	virtual matrix_shape reshape(matrix_shape src) 
+	{
+		assert( _lace_storage::is_convertable(MTP_DST, MTP_SRC) && "Invalid matrix conversion" );
 
-      // We have to check additional parameters of the shape
-      if ( MTP_DST == triang )
-	return matrix_shape(MTP_DST, src.n, src.tag);
-
-      else if ( is_banded(MTP_DST))
-	return matrix_shape(MTP_DST, src.n, src.m, src.ku, src.kl );	  
-
-      else
-	return matrix_shape(MTP_DST, src.n, src.m);
+		// We have to check additional parameters of the shape
+		if ( MTP_DST == triang ) return matrix_shape(MTP_DST, src.n, src.tag);
+		else if ( is_banded(MTP_DST)) return matrix_shape(MTP_DST, src.n, src.m, src.ku, src.kl );	  
+		else return matrix_shape(MTP_DST, src.n, src.m);
     }
     
     virtual matrix_shape reshape(matrix_expression<VALTYPE> &src)
     {
-      matrix<VALTYPE,MTP_SRC> *SRC = (matrix<VALTYPE,MTP_SRC>*)(&src);
-      return reshape( SRC -> shape() );
-    } 
+		matrix<VALTYPE,MTP_SRC> *SRC = (matrix<VALTYPE,MTP_SRC>*)(&src);
+		return reshape( SRC -> shape() );
+	} 
     
     //--------------------------------------------------------------------------------//
 
