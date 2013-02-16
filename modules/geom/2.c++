@@ -1,27 +1,38 @@
 #include <iostream>
 
-template<int>
-struct s;
+class A{
+public:
+  static int counter;
+  int UID;
+  int something;
 
+  A(){counter++; UID=counter;}
 
-template<>
-struct s<1>
-{
-  enum{
-    f=1
-  } flag;
+  A(int s){counter++; UID=counter; something=s;}
+
+  A(const A & a){counter++; UID=counter; something=a.something;}
+
+  void info() const{std::cout << "UID= " << UID << " essence= " << something << std::endl;}
+
 };
 
-template<>
-struct s<2>
+int A::counter = 0;
+
+void receive(const A & a)
 {
-  enum{
-    f=2
-  } flag;
-};
+  std::cout << "receive : ";
+  const A *p = &a;
+  p->info();
+}
 
 int main()
 {
-#line 25 "Illegal value of periodicity"
-  std::cout << s<1>::f << "\n";
+  A a(5);
+  A b(a);
+
+  a.info();
+  b.info();
+  receive(a);
+
+  receive(*new A(7));
 }

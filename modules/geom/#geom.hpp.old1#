@@ -22,84 +22,84 @@ namespace qpp{
   // No attempts are made to optimize the data manipulation within
   // this type, due to very small dimensions the overhead is 
   // considered to be negligible
-  //  template <class ELEM,int DIM>
-  //class simple_vector{
-  //  ELEM data[DIM];
-  //public:
+  template <class ELEM,int DIM>
+  class simple_vector{
+    ELEM data[DIM];
+  public:
     
-  //  simple_vector()
-  //  {}
+    simple_vector()
+    {}
 
-  //  simple_vector(ELEM *_data)
-  //  {
-  //    for (int i=0; i<DIM; i++)
-  //	data[i]=_data[i];
-  //  }
+    simple_vector(ELEM *_data)
+    {
+      for (int i=0; i<DIM; i++)
+	data[i]=_data[i];
+    }
     
-  //  inline ELEM & operator()(int i)
-  //  { return data[i]; }
+    inline ELEM & operator()(int i)
+    { return data[i]; }
     
-  //  inline simple_vector<ELEM,DIM>  operator+(simple_vector b)
-  //  {
-  //    ELEM cdata[DIM];
-  //    for (int i=0; i<DIM; i++)
-  //	cdata[i] = data[i]+b.data[i];
-  //   return simple_vector<ELEM,DIM>(cdata);
-  //  }
+    inline simple_vector<ELEM,DIM>  operator+(simple_vector b)
+    {
+      ELEM cdata[DIM];
+      for (int i=0; i<DIM; i++)
+	cdata[i] = data[i]+b.data[i];
+      return simple_vector<ELEM,DIM>(cdata);
+    }
 
-  //  inline simple_vector<ELEM,DIM>  operator-(simple_vector b)
-  // {
-  //  ELEM cdata[DIM];
-  //  for (int i=0; i<DIM; i++)
-  //	cdata[i] = data[i]-b.data[i];
-  //  return simple_vector<ELEM,DIM>(cdata);
-  //}
+    inline simple_vector<ELEM,DIM>  operator-(simple_vector b)
+    {
+      ELEM cdata[DIM];
+      for (int i=0; i<DIM; i++)
+	cdata[i] = data[i]-b.data[i];
+      return simple_vector<ELEM,DIM>(cdata);
+    }
 
-  //inline simple_vector<ELEM,DIM>  operator*(ELEM b)
-  //{
-  //  ELEM cdata[DIM];
-  //  for (int i=0; i<DIM; i++)
-  //	cdata[i] = data[i]*b;
-  //  return simple_vector<ELEM,DIM>(cdata);
-  //}
+    inline simple_vector<ELEM,DIM>  operator*(ELEM b)
+    {
+      ELEM cdata[DIM];
+      for (int i=0; i<DIM; i++)
+	cdata[i] = data[i]*b;
+      return simple_vector<ELEM,DIM>(cdata);
+    }
     
-  //};
+  };
   
-  //template <class ELEM,int DIM>
-  //inline simple_vector<ELEM,DIM>  operator*(ELEM a, simple_vector<ELEM,DIM> b)
-  //{
-  //  ELEM cdata[DIM];/
-  //  for (int i=0; i<DIM; i++)
-  //    cdata[i] = a*b(i);
-  //  return simple_vector<ELEM,DIM>(cdata);
-  // }
+  template <class ELEM,int DIM>
+  inline simple_vector<ELEM,DIM>  operator*(ELEM a, simple_vector<ELEM,DIM> b)
+  {
+    ELEM cdata[DIM];
+    for (int i=0; i<DIM; i++)
+      cdata[i] = a*b(i);
+    return simple_vector<ELEM,DIM>(cdata);
+  }
 
   // functions to simplify the creation of 1,2 and 3-dimensional
   // simple vectors
 
-  //template <class ELEM>  
-  //simple_vector<ELEM,1> sv1(ELEM x)
-  //{
-  //simple_vector<ELEM,1> v;
-  ///v(0) = x;
-  // return v;
-  //}
+  template <class ELEM>  
+  simple_vector<ELEM,1> sv1(ELEM x)
+  {
+    simple_vector<ELEM,1> v;
+    v(0) = x;
+    return v;
+  }
 
-  //template <class ELEM>  
-  //simple_vector<ELEM,2> sv2(ELEM x, ELEM y)
-  // {
-  //simple_vector<ELEM,2> v;
-  //v(0) = x; v(1)=y;
-  //return v;
-  //}
+  template <class ELEM>  
+  simple_vector<ELEM,2> sv2(ELEM x, ELEM y)
+  {
+    simple_vector<ELEM,2> v;
+    v(0) = x; v(1)=y;
+    return v;
+  }
 
-  //template <class ELEM>  
-  //simple_vector<ELEM,3> sv1(ELEM x, ELEM y, ELEM z)
-  //{
-  //simple_vector<ELEM,3> v;
-  //v(0) = x; v(1) = y; v(2) = z;
-  //return v;
-  //}
+  template <class ELEM>  
+  simple_vector<ELEM,3> sv1(ELEM x, ELEM y, ELEM z)
+  {
+    simple_vector<ELEM,3> v;
+    v(0) = x; v(1) = y; v(2) = z;
+    return v;
+  }
     
   //--------------------------------------------------------------//
 
@@ -130,29 +130,26 @@ namespace qpp{
     inline VALTYPE & operator()(int i, int j)
     { return v[i](j); }
     
-    inline lace::vector3d<VALTYPE> frac2cart(lace::vector3d<VALTYPE> frac) const
+    inline lace::vector3d<VALTYPE> frac2cart(lace::vector3d<VALTYPE> frac)
     // transforms fractional coordinates to cartesian
-    // Works for any DIM, but the vector frac still should be 3d
-    // if DIM<3, frac(i) components with i>=DIM are not used
-    { 
-      lace::vector3d<VALTYPE> res=VALTYPE(0);
-      for (int i=0; i<DIM; i++)
-    	res+=frac(i)*v[i];
-      return res;
+    // only works for DIM==3
+    // fixme - add the check here
+    {
+      return frac(0)*v[0] + frac(1)*v[1] + frac(2)*v[2];
     }
-    
-    //   inline lace::vector3d<VALTYPE> frac2cart(simple_vector<VALTYPE,DIM> frac)
+
+    inline lace::vector3d<VALTYPE> frac2cart(simple_vector<VALTYPE,DIM> frac)
     // fractional to cartesian coordinates
     // works for DIM=1,2,3
     // here we use simple_vector to pass fractional coords
-    //{
-    //  lace::vector3d<VALTYPE> res=VALTYPE(0);
-    //  for (int i=0; i<DIM; i++)
-    //	res+=frac(i)*v[i];
-    // return res;
-    //}
+    {
+      lace::vector3d<VALTYPE> res=VALTYPE(0);
+      for (int i=0; i<DIM; i++)
+	res+=frac(i)*v[i];
+      return res;
+    }
 
-    inline lace::vector3d<VALTYPE> cart2frac(lace::vector3d<VALTYPE> r) const
+    inline lace::vector3d<VALTYPE> cart2frac(lace::vector3d<VALTYPE> r)
     // cartesian to fractional
     // works for DIM==3 only
     { 
@@ -160,7 +157,7 @@ namespace qpp{
       return lace::solve3d(A, r);
     }
 
-    inline lace::vector3d<VALTYPE> reduce(lace::vector3d<VALTYPE> r)  const
+    inline lace::vector3d<VALTYPE> reduce(lace::vector3d<VALTYPE> r)  
     // Brings the point r into the volume of unit cell
     // by translations
     // unit cell is defined as parallelepiped with one vertex in
@@ -174,7 +171,7 @@ namespace qpp{
       return frac2cart(f);
     }
 
-    inline lace::vector3d<VALTYPE> reduce_cntr(lace::vector3d<VALTYPE> r) const
+    inline lace::vector3d<VALTYPE> reduce_cntr(lace::vector3d<VALTYPE> r)  
     // Brings the point r into the volume of unit cell
     // by translations
     // unit cell is defined as parallelepiped CENTRED in the
@@ -189,12 +186,12 @@ namespace qpp{
       return frac2cart(f);
     }
 
-    inline lace::vector3d<VALTYPE> reduce_wz(lace::vector3d<VALTYPE> r) const
+    inline lace::vector3d<VALTYPE> reduce_wz(lace::vector3d<VALTYPE> r)  
     // Brings r into Wigner-Zeitz unit cell
     // fixme - implement this!
     {}
 
-    inline bool in_cell(lace::vector3d<VALTYPE> r) const
+    inline bool in_cell(lace::vector3d<VALTYPE> r)
     // Answers the question whether r belongs to the unit cell
     {
       lace::vector3d<VALTYPE> f = cart2frac(r);
@@ -205,7 +202,7 @@ namespace qpp{
     }
 
 
-    inline bool in_cell_cntr(lace::vector3d<VALTYPE> r) const
+    inline bool in_cell_cntr(lace::vector3d<VALTYPE> r)
     // does r belong to unit cell centred at the coords origin?
     {
       lace::vector3d<VALTYPE> f = cart2frac(r);
@@ -215,7 +212,7 @@ namespace qpp{
         -VALTYPE(1)/2 <= f(2) && f(2) < VALTYPE(1)/2;   
     }
 
-    inline bool in_cell_wz(lace::vector3d<VALTYPE> r) const
+    inline bool in_cell_wz(lace::vector3d<VALTYPE> r)
     // does r belong to Wigner-Zeitz unit cell
     // fixme - implement this!
     {}
@@ -232,18 +229,18 @@ namespace qpp{
   class index{
   protected:
     int at;
-    int cll[DIM];
+    simple_vector<int,DIM> cll;
     
   public:
     inline index& operator=(int _at)
     {
       at=_at;
       if (DIM>0)
-	cll[0]=0;
+	cll(0)=0;
       if (DIM>1)
-	cll[1]=0;
+	cll(1)=0;
       if (DIM>2)
-	cll[2]=0;
+	cll(2)=0;
       return *this;
     }
     
@@ -251,22 +248,22 @@ namespace qpp{
     
     inline int atom(){return at;}
     
-    inline int cell(int d){return cll[d];}
+    inline int cell(int d){return cll(d);}
     
     inline void set(int _at, int i1=0, int i2=0, int i3=0)
     {
       at=_at;
       if (DIM>0)
-	cll[0]=i1;
+	cll(0)=i1;
       if (DIM>1)
-	cll[1]=i2;
+	cll(1)=i2;
       if (DIM>2)
-	cll[2]=i3;
+	cll(2)=i3;
     }
     
     inline void setatom(int _at){at=_at;}
     
-    inline void setcell(int d, int i){cll[d]=i;}
+    inline void setcell(int d, int i){cll(d)=i;}
     
     index(){
       //	_check();
@@ -284,11 +281,11 @@ namespace qpp{
       if (DIM==0)
 	return at == i.at;
       else if (DIM==1)
-	return at == i.at && cll[0] == i.cll[0];
+	return at == i.at && cll(0) == i.cll(0);
       else if (DIM==2)
-	return at == i.at && cll[0] == i.cll[0] && cll[1] == i.cll[1];
+	return at == i.at && cll(0) == i.cll(0) && cll(1) == i.cll(1);
       else if (DIM==3)
-	return at == i.at && cll[0] == i.cll[0] && cll[1] == i.cll[1] && cll[2] == i.cll[2];
+	return at == i.at && cll(0) == i.cll(0) && cll(1) == i.cll(1) && cll(2) == i.cll(2);
     }
     
   };
@@ -297,8 +294,8 @@ namespace qpp{
 
 
   // The geometry class stores atoms together with their
-  // coordinates. As POINT is a template parameter, you can
-  // use almost everything as POINT, even emply class.
+  // coordinates. As ATOM is a template parameter, you can
+  // use almost everything as ATOM, even emply class.
   //
   // In this latter case you get just points with coordinates
   // Such object can be used to store, say, displacement 
@@ -308,13 +305,13 @@ namespace qpp{
   // about atoms as well
 
   // geometry is an ancestor for molecule
-  template<int DIM, class VALTYPE>
+  template<class ATOM, int DIM, class VALTYPE>
   class geometry{
 
     int nat;
     // Number of atoms/points
 
-    //    std::vector<POINT> atm;
+    std::vector<ATOM> atm;
     // Storage of atoms
 
     std::vector<lace::vector3d<VALTYPE> > crd;
@@ -339,7 +336,7 @@ namespace qpp{
 
     public:
 
-      iterator(const geometry<DIM,VALTYPE> &g)
+      iterator(const geometry<ATOM,DIM,VALTYPE> &g)
       // default iterator goes through neighbouring cells only
       {
 	a.setatom(0);
@@ -443,47 +440,47 @@ namespace qpp{
       nat = 0;
     }
 
-    void add_point(const lace::vector3d<VALTYPE> & r)
+    void add(const ATOM & a, const lace::vector3d<VALTYPE> & r)
     {
-      //      atm.push_back(a);
+      atm.push_back(a);
       crd.push_back(r);
       nat++;
     }
 
-    void add_point(VALTYPE _x, VALTYPE _y, VALTYPE _z)
+    void add(const ATOM & a, VALTYPE _x, VALTYPE _y, VALTYPE _z)
     {
-      //      atm.push_back(a);
+      atm.push_back(a);
       crd.push_back(lace::vector3d<VALTYPE>(_x,_y,_z));
       nat++;
     }
 
-    void del_point(const int i)
+    void del(int i)
     {
-      //      atm.erase(i);
-      crd.erase(crd.begin()+i);
+      atm.erase(i);
+      crd.erase(i);
       nat--;
     }
 
-    void insert_point(const int i, const lace::vector3d<VALTYPE> &r)
+    void insert(int i, const ATOM & a, const lace::vector3d<VALTYPE> & r)
     {
-      //      atm.insert(i,a);
-      crd.insert(crd.begin()+i,r);
+      atm.insert(i,a);
+      crd.insert(i,r);
       nat++;
     }
     
-    void insert_point(const int i, const VALTYPE _x, const VALTYPE _y, const VALTYPE _z)
+    void insert(int i, const ATOM & a, VALTYPE _x, VALTYPE _y, VALTYPE _z)
     {
-      //      atm.insert(i,a);
-      crd.insert(crd.begin()+i,lace::vector3d<VALTYPE>(_x,_y,_z));
+      atm.insert(i,a);
+      crd.insert(i,lace::vector3d<VALTYPE>(_x,_y,_z));
       nat++;
     }
 
-    inline int size(){return crd.size();}
+    inline int size(){return atm.size();}
 
-    //    inline POINT& atom(index<DIM> i){return atm[i.atom()];}
+    inline ATOM& atom(index<DIM> i){return atm[i.atom()];}
 
     // Position gives the position of i-th atom
-    inline lace::vector3d<VALTYPE>& point_coord(int i){return crd[i];}
+    inline lace::vector3d<VALTYPE>& atom_coord(int i){return crd[i];}
 
     // Unlike position(i), coord(i) gives the coordinates of either
     // this atom in this unit cell or the coordinates of its image
@@ -527,8 +524,52 @@ namespace qpp{
     void clear()
     {
       crd.clear();
-      // atm.clear();
+      atm.clear();
       nat = 0;
+    }
+
+    // Atomic type table
+    // fixme - think about forming type table when atoms are added
+  private:
+    std::vector<ATOM> atm_types;
+    std::vector<int> type_table;
+
+  public:
+
+    inline int natm_types(){return atm_types.size();}
+    
+    inline ATOM& atom_of_type(int t){return atm_types[t];}
+
+    inline int type_of_atom(ATOM at)
+    {
+      int t;
+      for (t=0; t < atm_types.size(); t++)
+	if ( atm_types[t] == at )
+	  break;
+      if (t == atm_types.size())
+	return -1;
+      else 
+	return t;
+    }
+
+    inline int atm_type_table(int i){return type_table[i];}
+
+    virtual void build_type_table()
+    {
+      atm_types.clear();
+      type_table.resize(size());
+
+      for (int i=0; i<size(); i++)
+	{
+	  int t = type_of_atom(atm[i]);
+	  if (t == -1)
+	    {
+	      t = atm_types.size();
+	      atm_types.push_back(atm[i]);
+	    }
+	  type_table[i] = t;
+	}
+
     }
 
   };
@@ -541,27 +582,27 @@ namespace qpp{
   // These can be the displacements of atoms or normal mode vector,
   // or something else.
 
-  template<int DIM, class VALTYPE>
+  template<class ATOM, int DIM, class VALTYPE>
   class molecule_vector
   {
-    geometry<DIM,VALTYPE> *owner;
+    geometry<ATOM,DIM,VALTYPE> *owner;
 
   public:
     std::vector<lace::vector3d<VALTYPE> > coord;
 
     //    friend 
-    // molecule_vector<POINT,DIM,VALTYPE> operator*(VALTYPE s, const molecule_vector<POINT,DIM,VALTYPE> &v);
+    // molecule_vector<ATOM,DIM,VALTYPE> operator*(VALTYPE s, const molecule_vector<ATOM,DIM,VALTYPE> &v);
 
   public:
 
     molecule_vector(){owner=NULL;}
 
-    molecule_vector(geometry<DIM,VALTYPE> *_owner)
+    molecule_vector(geometry<ATOM,DIM,VALTYPE> *_owner)
     {
       setgeom(_owner);      
     }
 
-    molecule_vector(const molecule_vector<DIM,VALTYPE> & v)
+    molecule_vector(const molecule_vector<ATOM,DIM,VALTYPE> & v)
     {
       setgeom(v.owner);
       if (owner != NULL)
@@ -569,12 +610,12 @@ namespace qpp{
 	  coord[i] = v.coord[i];
     }
 
-    inline geometry<DIM,VALTYPE> *geom() const
+    inline geometry<ATOM,DIM,VALTYPE> *geom() const
     {
       return owner;
     }
 
-    void setgeom(geometry<DIM,VALTYPE> *_owner)
+    void setgeom(geometry<ATOM,DIM,VALTYPE> *_owner)
     {
       owner = _owner;
       if (owner!=NULL)
@@ -605,35 +646,35 @@ namespace qpp{
       return coord[i/3](i%3);
     }
 
-    molecule_vector<DIM,VALTYPE>  operator+(const molecule_vector<DIM,VALTYPE> &v)
+    molecule_vector<ATOM,DIM,VALTYPE>  operator+(const molecule_vector<ATOM,DIM,VALTYPE> &v)
     {
       assert(size() == v.size());
-      molecule_vector<DIM,VALTYPE> res(owner);
+      molecule_vector<ATOM,DIM,VALTYPE> res(owner);
       for (int i=0; i < coord.size(); i++)
 	res.coord[i] = coord[i] + v.coord[i];
       return res;
     }
 
-    molecule_vector<DIM,VALTYPE>  operator-(const molecule_vector<DIM,VALTYPE> &v)
+    molecule_vector<ATOM,DIM,VALTYPE>  operator-(const molecule_vector<ATOM,DIM,VALTYPE> &v)
     {
       assert(size() == v.size());
-      molecule_vector<DIM,VALTYPE> res(owner);
+      molecule_vector<ATOM,DIM,VALTYPE> res(owner);
       for (int i=0; i < coord.size(); i++)
 	res.coord[i] = coord[i] - v.coord[i];
       return res;
     }
 
-    molecule_vector<DIM,VALTYPE>  operator*(VALTYPE s)
+    molecule_vector<ATOM,DIM,VALTYPE>  operator*(VALTYPE s)
     {
-      molecule_vector<DIM,VALTYPE> res(owner);
+      molecule_vector<ATOM,DIM,VALTYPE> res(owner);
       for (int i=0; i < coord.size(); i++)
 	res.coord[i] = s*coord[i];
       return res;
     }
 
-    molecule_vector<DIM,VALTYPE>  operator/(VALTYPE s)
+    molecule_vector<ATOM,DIM,VALTYPE>  operator/(VALTYPE s)
     {
-      molecule_vector<DIM,VALTYPE> res(owner);
+      molecule_vector<ATOM,DIM,VALTYPE> res(owner);
       for (int i=0; i < coord.size(); i++)
 	res.coord[i] = coord[i]/s;
       return res;
@@ -649,18 +690,18 @@ namespace qpp{
 
   };
 
-  template<int DIM, class VALTYPE>
-  molecule_vector<DIM,VALTYPE> operator*(VALTYPE s, const molecule_vector<DIM,VALTYPE> &v)
+  template<class ATOM, int DIM, class VALTYPE>
+  molecule_vector<ATOM,DIM,VALTYPE> operator*(VALTYPE s, const molecule_vector<ATOM,DIM,VALTYPE> &v)
   {
-    molecule_vector<DIM,VALTYPE> res(v.geom());
+    molecule_vector<ATOM,DIM,VALTYPE> res(v.geom());
     for (int i=0; i < v.coord.size(); i++)
       res.coord[i] = s*v.coord[i];
     return res;
   }
 
-  template<int DIM, class VALTYPE>
-  typename lace::numeric_type<VALTYPE>::real scal(molecule_vector<DIM,VALTYPE> &v1, 
-						  molecule_vector<DIM,VALTYPE> &v2)
+  template<class ATOM, int DIM, class VALTYPE>
+  typename lace::numeric_type<VALTYPE>::real scal(molecule_vector<ATOM,DIM,VALTYPE> &v1, 
+						  molecule_vector<ATOM,DIM,VALTYPE> &v2)
   {
     typename lace::numeric_type<VALTYPE>::real s;
     for (int i=0; i<v1.size()*3; i++)
@@ -668,11 +709,11 @@ namespace qpp{
     return s;
   }
 
-  template<int DIM, class VALTYPE, class TRANSFORM>
-  molecule_vector<DIM,VALTYPE> operator*(TRANSFORM T, molecule_vector<DIM,VALTYPE> &v)
+  template<class ATOM, int DIM, class VALTYPE, class TRANSFORM>
+  molecule_vector<ATOM,DIM,VALTYPE> operator*(TRANSFORM T, molecule_vector<ATOM,DIM,VALTYPE> &v)
   {
     lace::matrix3d<VALTYPE> R(T);
-    molecule_vector<DIM,VALTYPE> res(v.geom());
+    molecule_vector<ATOM,DIM,VALTYPE> res(v.geom());
     for (int i=0; i < v.size(); i++)
       {
 	lace::vector3d<VALTYPE> rnew = T * v.geom()->atom_coord(i);

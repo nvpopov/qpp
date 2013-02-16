@@ -11,34 +11,28 @@
 #include<geom/geom.hpp>
 #include<geom/molecule.hpp>
 //#include<symm/shenflis.hpp>
-#include<geom/molio.hpp>
+//#include<geom/molio.hpp>
 
 
 int main()
 {
-  qpp::molecule<3,double> M("test");
-  //  qpp::geometry<3,double> G;
+  qpp::molecule<3,double> M;
+  qpp::geometry<3,double> G;
   std::ifstream inp("si.xyz");
 
-  /*M.add(qpp::qpp_atom("Li",3),lace::vector3d<double>(1,0,0));
-  M.add(qpp::qpp_atom("Li",3),lace::vector3d<double>(1,1,0));
-  M.add(qpp::classical_atom("Li_cl",3),lace::vector3d<double>(1,1,1));
-  M.insert(0,qpp::qpp_atom("Li",3),lace::vector3d<double>(0,0,0));
-  */
-
-
-  qpp::xyz_molecule_input<3,double>(inp).read(M);
-  M.build_type_table();
-
-  qpp::qpp_molecule_output<3,double>(std::cout).write(M);
+  M.add(qpp::generic_atom("Li",3),lace::vector3d<double>(1,0,0));
+  M.add(*new qpp::generic_atom("Li",3),lace::vector3d<double>(1,0,0));
+  M.add(*new qpp::generic_atom("Li",3),lace::vector3d<double>(1,1,0));
+  M.add(*new qpp::generic_atom("Li",3),lace::vector3d<double>(1,1,1));
+  M.insert(0,*new qpp::generic_atom("Li",3),lace::vector3d<double>(0,0,0));
 
   //  M.add(qpp::generic_atom("Li"),lace::vector3d<double>(1,0,0));
   //  M.add(qpp::generic_atom("Li"),lace::vector3d<double>(1,1,0));
   //  M.add(qpp::generic_atom("Li"),lace::vector3d<double>(1,1,1));
   //  M.insert(0,qpp::generic_atom("Li"),lace::vector3d<double>(0,0,0));
 
-  //for (int i=0; i<M.size(); i++)
-  //  std::cout << M.atom(i).info() << " " << M.coord(i) << "\n";
+  for (int i=0; i<M.size(); i++)
+    std::cout << M.atom(i).info() << " " << M.coord(i) << "\n";
   //  read_xyz(inp, G);
   
   //  write_xyz(std::cout, G);
@@ -49,7 +43,7 @@ int main()
   //for(int i=0; i < M.natom_types(); i++)
   //  std::cout << i << " " << M.atom_of_type(i).name << "\n";
 
-  //std::cout << "\n\n";
+  std::cout << "\n\n";
 
   //  qpp::molecule<std::string,3,double>::index ii(14,-1,2,6);
   //  std::cout << ii << "\n";
@@ -65,7 +59,7 @@ int main()
   //	% M.atom_coord(i)(0) % M.atom_coord(i)(1) % M.atom_coord(i)(2);
   //    for (int j=0; j<M.nnbr(i); j++)
   //	std::cout << " " << M.nbr_table(i,j);
-  //    std::cout << "\n";
+      std::cout << "\n";
       //  }
 }
 
