@@ -4,18 +4,25 @@
 
 //#include <lace/shape.hpp>
 //#include <lace/storage.hpp>
-#include <lace/matrix.hpp>
-#include <lace/vector.hpp>
 //#include <lace/expressions.hpp>
+
+#include<lace/blas_mtr.hpp>
+#include<lace/blas_vtr.hpp>
+#include<lace/blas_mv.hpp>
+#include<lace/matrix.hpp>
+#include<lace/vector.hpp>
+//#include<lace/lace.hpp>
 
 // Forward declarations
 namespace _lace_main{
 
   using _lace_storage::matrix_type;
   using _lace_storage::n_matrix_type;
+  using _lace_storage::matrix_shape;
 
   using _lace_storage::vector_type;
   using _lace_storage::n_vector_type;
+  using _lace_storage::vector_shape;
 
   using _lace_storage::rectang;    
   using _lace_storage::symmetric;  
@@ -24,13 +31,18 @@ namespace _lace_main{
   using _lace_storage::symmband;   
   using _lace_storage::hermband;   
   using _lace_storage::triang;      
+
+  using _lace_storage::dense;
+  using _lace_storage::sparse;
+
   using _lace_expressions::matrix_expression;
   using _lace_expressions::vector_expression;
-  using _lace_storage::matrix_type;
-  using _lace_storage::matrix_shape;
-  using _lace_storage::vector_type;
-  using _lace_storage::vector_shape;
+  using _lace_expressions::matrix;
+  using _lace_expressions::vector;
   using _lace_expressions::sub;
+
+  using _lace_expressions::_transp;
+  using _lace_expressions::_herm;
 
 
   /* ====================================================== *
@@ -50,19 +62,14 @@ namespace _lace_main{
 
     virtual void scale(matrix_expression<VALTYPE> &a, VALTYPE s) =0;
 
-    virtual void setval(matrix_expression<VALTYPE> &a, VALTYPE s) =0;
-
     virtual void scale(matrix_expression<VALTYPE> &a, VALTYPE s, sub I, sub J) =0;
 
-    virtual void setval(matrix_expression<VALTYPE> &a, VALTYPE s, sub I, sub J) =0;
+    virtual void fill(matrix_expression<VALTYPE> &a, VALTYPE s) =0;
 
-    virtual matrix_shape T_shape(matrix_shape shp) =0;
-    
-    virtual matrix_shape MIJ_shape(matrix_shape shp, sub I, sub J ) =0;
+    virtual void fill(matrix_expression<VALTYPE> &a, VALTYPE s, sub I, sub J) =0;
 
-    virtual vector_shape MIj_shape(matrix_shape shp, sub I, int j) = 0;
-
-    virtual vector_shape MiJ_shape(matrix_shape shp, int i, sub J) = 0;
+    // for debug
+    virtual VALTYPE * ptr(matrix_expression<VALTYPE> &a, int i, int j) =0;
 
   };
 
@@ -76,13 +83,14 @@ namespace _lace_main{
 
     virtual void scale(vector_expression<VALTYPE> &a, VALTYPE s) =0;
 
-    virtual void setval(vector_expression<VALTYPE> &a, VALTYPE s) =0;
-
     virtual void scale(vector_expression<VALTYPE> &a, VALTYPE s, sub I) =0;
 
-    virtual void setval(vector_expression<VALTYPE> &a, VALTYPE s, sub I) =0;
+    virtual void fill(vector_expression<VALTYPE> &a, VALTYPE s) =0;
 
-    virtual vector_shape VI_shape(vector_shape shp, sub I ) =0;  
+    virtual void fill(vector_expression<VALTYPE> &a, VALTYPE s, sub I) =0;
+
+    virtual VALTYPE * ptr(vector_expression<VALTYPE> &a, int i) =0;
+
   };
 
   // ----------------- Convertors ----------------------
@@ -91,36 +99,22 @@ namespace _lace_main{
   class m_convertor_engine{
   public:
     
-    virtual bool is_convertable(matrix_shape dest, matrix_shape src) =0;
-
-    virtual matrix_shape reshape(matrix_shape src) =0;
-
-    virtual matrix_shape reshape(matrix_expression<VALTYPE> &src) =0;
-
     virtual void convert( matrix_expression<VALTYPE> &dest, sub IA, sub JA,
 			  matrix_expression<VALTYPE> &src,  sub IB, sub JB) =0;
 
     virtual void convert( matrix_expression<VALTYPE> &dest, matrix_expression<VALTYPE> &src) =0;
 
-    virtual matrix_expression<VALTYPE>& convert(matrix_expression<VALTYPE> &src) =0;
   };
 
   template<class VALTYPE>
   class v_convertor_engine{
   public:
     
-    virtual bool is_convertable(vector_shape dest, vector_shape src) =0;
-
-//     virtual vector_shape reshape(vector_shape src) =0;
-
-//     virtual vector_shape reshape(vector_expression<VALTYPE> &src) =0;
-
     virtual void convert( vector_expression<VALTYPE> &dest, sub Iu,
 			  vector_expression<VALTYPE> &src,  sub Iv) =0;
     
     virtual void convert( vector_expression<VALTYPE> &dest, vector_expression<VALTYPE> &src) =0;
     
-//     virtual vector_expression<VALTYPE>& convert(vector_expression<VALTYPE> &src) =0;
   };
     
   // -------------------- Binary operations ------------------
@@ -128,16 +122,6 @@ namespace _lace_main{
   template<class VALTYPE>
   class mm_binary_engine{
   public:
-    
-//     virtual bool is_addable(matrix_shape dest, matrix_shape src) =0;
-
-//     virtual bool is_multiplicable(matrix_shape shp1, matrix_shape shp2) =0;
-
-    virtual matrix_shape MpM_shape(matrix_shape shp1, matrix_shape shp2) =0;
-
-    virtual matrix_shape MxM_shape(matrix_shape shp1, matrix_shape shp2) =0;
-    // we put is_multiplicable() and multiplic_shape() into summator since they depend only
-    // on two mtype parameters
 
     virtual void MpM(matrix_expression<VALTYPE> &A, matrix_expression<VALTYPE> &B, 
 		     VALTYPE beta, int OP = 0 ) =0;
@@ -156,24 +140,14 @@ namespace _lace_main{
   class vv_binary_engine{
   public:
     
-    virtual bool is_addable(vector_shape dest, vector_shape src) =0;
-
-    virtual vector_shape VpV_shape(vector_shape shp1, vector_shape shp2) =0;
-
-    //    virtual matrix_shape prod_shape(matrix_shape shp1, matrix_shape shp2) =0;
-    // we put is_multiplicable() and multiplic_shape() into summator since they depend only
-    // on two mtype parameters
-
-    virtual matrix_shape VxV_shape(vector_shape shp1, vector_shape shp2) =0;
-
     virtual void VpV(vector_expression<VALTYPE> &u, vector_expression<VALTYPE> &v, 
 		       VALTYPE beta) =0;
-    // performes A = A + beta*B;
+    // performes u += beta*v
 
     virtual void VpV(vector_expression<VALTYPE> &u, sub Iu,
 		     vector_expression<VALTYPE> &v, sub Iv,
 		     VALTYPE beta ) =0;
-    // performes A(IA,JA) = A(IA,JA) + beta*B(IB,JB);
+    // performes u(Iu) += v(Iv)
 
   };
 
@@ -183,23 +157,17 @@ namespace _lace_main{
   class vm_binary_engine{
   public:
 
-    virtual bool MIj_conform(vector_shape vshp, matrix_shape mshp, sub I, int j) =0;
+    virtual void MIj(vector_expression<VALTYPE> &v, matrix_expression<VALTYPE> &m, 
+		     int j, VALTYPE beta) =0;
 
-    virtual bool MiJ_conform(vector_shape vshp, matrix_shape mshp, int i, sub J) =0;
+    virtual void MIj(vector_expression<VALTYPE> &v, sub Iv, matrix_expression<VALTYPE> &m, 
+		     sub Im, int j, VALTYPE beta) =0;
 
-    virtual void MIj(vector_expression<VALTYPE> &v, matrix_expression<VALTYPE> &M, sub I, int j) =0;
+    virtual void MiJ(vector_expression<VALTYPE> &v, matrix_expression<VALTYPE> &m, 
+		     int i, VALTYPE beta) =0;
 
-    virtual void MiJ(vector_expression<VALTYPE> &v, matrix_expression<VALTYPE> &M, int i, sub J) =0;
-
-    virtual vector_shape MxV_shape(matrix_shape mshp, vector_shape vshp) = 0;
-
-//     virtual bool V2D_conform(matrix_shape mshp, vector_shape vshp) =0;
-
-//     virtual bool D2V_conform(vector_shape vshp, matrix_shape mshp) =0;
-
-//     virtual void V2D(matrix_expression<VALTYPE> &M, vector_expression<VALTYPE> &v) =0;
-
-//     virtual void D2V(vector_expression<VALTYPE> &v, matrix_expression<VALTYPE> &M) =0;
+    virtual void MiJ(vector_expression<VALTYPE> &v, sub Jv, matrix_expression<VALTYPE> &m, 
+		     int i, sub Jm, VALTYPE beta) =0;
 
   };
 
@@ -265,8 +233,8 @@ namespace _lace_main{
   template<class VALTYPE>
   class wizard
   {
-    static m_unary_engine<VALTYPE>       *_m_unary       [n_matrix_type];
-    static m_convertor_engine<VALTYPE>   *_m_convertor   [n_matrix_type][n_matrix_type];
+    static m_unary_engine<VALTYPE>      *_m_unary       [n_matrix_type];
+    static m_convertor_engine<VALTYPE>  *_m_convertor   [n_matrix_type][n_matrix_type];
     static mm_binary_engine<VALTYPE>     *_m_binary      [n_matrix_type][n_matrix_type];
     static mmm_ternary_engine<VALTYPE>   *_m_ternary     [n_matrix_type][n_matrix_type][n_matrix_type];
 
@@ -326,6 +294,313 @@ namespace _lace_main{
 
   };
 
+  /* ======================================================== *
+   *                                                          *
+   *                 Specialization of "engines"              *
+   *                                                          *
+   * ======================================================== */
+
+
+  // ------------------------------------------------------------
+  //
+  //             unary_matrix_engine implementation 
+  // ------------------------------------------------------------
+
+  template<class VALTYPE, matrix_type MTRTYPE>
+  class m_unary : public m_unary_engine<VALTYPE> {
+  public:
+
+    virtual matrix_expression<VALTYPE>& create(matrix_shape shp)
+    {
+      /* debug
+      std::cout << "m_unary " << _lace_storage::mtype_spelling[MTRTYPE] << " called\n";
+      shp.debug();
+      */
+      return * new matrix<VALTYPE,MTRTYPE>(shp);
+    }
+
+    virtual void scale(matrix_expression<VALTYPE> &a, VALTYPE s)
+    {
+      matrix<VALTYPE,MTRTYPE> *A = (matrix<VALTYPE,MTRTYPE>*)(&a);
+      _lace_storage::scale_mtr(*(A->_mtr),s);
+    }
+
+    virtual void scale(matrix_expression<VALTYPE> &a, VALTYPE s, sub I, sub J)
+    {
+      matrix<VALTYPE,MTRTYPE> *A = (matrix<VALTYPE,MTRTYPE>*)(&a);
+      _lace_storage::scale_mtr(*(A->_mtr),s,I,J);
+    }
+
+    virtual void fill(matrix_expression<VALTYPE> &a, VALTYPE s)
+    {
+      matrix<VALTYPE,MTRTYPE> *A = (matrix<VALTYPE,MTRTYPE>*)(&a);
+      _lace_storage::fill_mtr(*(A->_mtr),s);
+    }
+
+    virtual void fill(matrix_expression<VALTYPE> &a, VALTYPE s, sub I, sub J)
+    {
+      matrix<VALTYPE,MTRTYPE> *A = (matrix<VALTYPE,MTRTYPE>*)(&a);
+      _lace_storage::fill_mtr(*(A->_mtr),s,I,J);
+    }
+
+    virtual VALTYPE * ptr(matrix_expression<VALTYPE> &a, int i, int j)
+    {
+      matrix<VALTYPE,MTRTYPE> *A = (matrix<VALTYPE,MTRTYPE>*)(&a);
+      return &((*A)(i,j));
+    }
+
+ };
+
+  // ------------------------------------------------------------
+  //             unary_vector_engine implementation 
+  // ------------------------------------------------------------
+
+  template<typename VALTYPE, vector_type VTYPE>
+  class v_unary : public v_unary_engine<VALTYPE>
+  {
+  public:
+
+    virtual vector_expression<VALTYPE>& create(vector_shape shp)
+    {
+      return * new vector<VALTYPE,VTYPE>(shp);
+    }
+
+    virtual void scale(vector_expression<VALTYPE> &a, VALTYPE s)
+    {
+      vector<VALTYPE,VTYPE> * _a = (vector<VALTYPE,VTYPE> *)(&a);
+      _lace_storage::scale_vtr(*(_a->_vtr),s);
+    }
+
+    virtual void scale(vector_expression<VALTYPE> &a, VALTYPE s, sub I)
+    {     
+      vector<VALTYPE,VTYPE> *_a = (vector<VALTYPE,VTYPE>*)(&a);
+      _lace_storage::scale_vtr(*(_a->_vtr),s,I);
+    }
+
+    virtual void fill(vector_expression<VALTYPE> &a, VALTYPE s)
+    {
+      vector<VALTYPE,VTYPE> * _a = (vector<VALTYPE,VTYPE> *)(&a);
+      _lace_storage::fill_vtr(*(_a->_vtr),s);
+    }
+
+    virtual void fill(vector_expression<VALTYPE> &a, VALTYPE s, sub I)
+    {     
+      vector<VALTYPE,VTYPE> *_a = (vector<VALTYPE,VTYPE>*)(&a);
+      _lace_storage::fill_vtr(*(_a->_vtr),s,I);
+    }
+
+    virtual VALTYPE * ptr(vector_expression<VALTYPE> &a, int i)
+    {
+      vector<VALTYPE,VTYPE> *_a = (vector<VALTYPE,VTYPE>*)(&a);
+      return &((*_a)(i));
+    }
+
+ };
+
+  // -----------------------------------------------------------------------
+
+  template<class VALTYPE, matrix_type MTP_DST, matrix_type MTP_SRC>
+  class m_convertor : public m_convertor_engine<VALTYPE>
+  {
+   public:    
+    
+    //--------------------------------------------------------------------------------//
+    
+    virtual void convert( matrix_expression<VALTYPE> &dest, matrix_expression<VALTYPE> &src)
+    {
+      matrix<VALTYPE,MTP_DST> *DST = (matrix<VALTYPE,MTP_DST>*)(&dest);  
+      matrix<VALTYPE,MTP_SRC> *SRC = (matrix<VALTYPE,MTP_SRC>*)(&src);
+
+      _lace_storage::convert_mtr(*(DST->_mtr),*(SRC->_mtr));
+    }
+
+    virtual void convert( matrix_expression<VALTYPE> &dest, sub IA, sub JA,
+			  matrix_expression<VALTYPE> &src,  sub IB, sub JB)
+    {
+      matrix<VALTYPE,MTP_DST> *DST = (matrix<VALTYPE,MTP_DST>*)(&dest);  
+      matrix<VALTYPE,MTP_SRC> *SRC = (matrix<VALTYPE,MTP_SRC>*)(&src);
+      
+      _lace_storage::convert_mtr(*(DST->_mtr), IA, JA, *(SRC->_mtr), IB, JB);
+    }
+
+    /*
+    virtual matrix_expression<VALTYPE>& convert(matrix_expression<VALTYPE> &src)
+    {
+      matrix<VALTYPE,MTP_DST> *DST = new matrix<VALTYPE,MTP_DST>( reshape(src) );
+      convert(*DST,src);
+      return *DST;
+    }
+    */
+  };
+
+  // -----------------------------------------------------------------------
+
+  template<class VALTYPE, vector_type VTP_DST, vector_type VTP_SRC>
+  class v_convertor : public v_convertor_engine<VALTYPE>{
+  public:
+    
+
+    virtual void convert( vector_expression<VALTYPE> &dest, sub Iu,
+			  vector_expression<VALTYPE> &src,  sub Iv)
+    {
+      vector<VALTYPE,VTP_DST> *DEST = (vector<VALTYPE,VTP_DST>*)(&dest);
+      vector<VALTYPE,VTP_SRC> *SRC  = (vector<VALTYPE,VTP_DST>*)(&src);
+      
+      _lace_storage::convert_vtr(*(DEST->_vtr), Iu, *(SRC->_vtr), Iv);
+    }
+    
+    virtual void convert( vector_expression<VALTYPE> &dest, vector_expression<VALTYPE> &src)
+    {
+      assert(is_convertable(dest.shape(), src.shape()));
+      vector<VALTYPE,VTP_DST> *DEST = (vector<VALTYPE,VTP_DST>*)(&dest);
+      vector<VALTYPE,VTP_SRC> *SRC  = (vector<VALTYPE,VTP_DST>*)(&src);
+
+      _lace_storage::convert_vtr(*(DEST->_vtr),*(SRC->_vtr));
+    }
+
+  };
+
+  //---------------------------------------------------------------------------//
+  //                                                                           //
+  //                  binary_martix_engine implamentation                      //
+  //---------------------------------------------------------------------------//
+
+  template<class VALTYPE, matrix_type MTP_DST, matrix_type MTP_SRC>
+  class mm_binary : public mm_binary_engine<VALTYPE>
+  {
+   public:
+
+    virtual void MpM(matrix_expression<VALTYPE> &a, matrix_expression<VALTYPE> &b, 
+		     VALTYPE beta, int OP = 0)
+    {
+      matrix<VALTYPE,MTP_DST> *A = (matrix<VALTYPE,MTP_DST>*)(&a);
+      matrix<VALTYPE,MTP_SRC> *B = (matrix<VALTYPE,MTP_SRC>*)(&b);
+      _lace_storage::add_mtr(*(A->_mtr), *(B->_mtr), beta, OP);
+    }
+
+    virtual void MpM(matrix_expression<VALTYPE> &a, sub IA, sub JA, 
+		     matrix_expression<VALTYPE> &b, sub IB, sub JB, 
+		     VALTYPE beta, int OP = 0 )
+    {
+      matrix<VALTYPE,MTP_DST> *A = (matrix<VALTYPE,MTP_DST>*)(&a);
+      matrix<VALTYPE,MTP_SRC> *B = (matrix<VALTYPE,MTP_SRC>*)(&b);
+      
+      _lace_storage::add_mtr(*(A->_mtr), IA,JA, *(B->_mtr), IB, JB, beta, OP);
+    }
+
+  };
+
+  //---------------------------------------------------------------------------//
+  //                                                                           //
+  //                  binary_vector_engine implamentation                      //
+  //---------------------------------------------------------------------------//
+  
+  template<class VALTYPE, vector_type VTP_DST, vector_type VTP_SRC>
+  class vv_binary : public vv_binary_engine<VALTYPE>{
+  public:
+    
+    virtual void VpV(vector_expression<VALTYPE> &u, vector_expression<VALTYPE> &v,
+		     VALTYPE beta)
+    {
+      vector<VALTYPE,VTP_DST> *U = (vector<VALTYPE,VTP_DST>*)(&u);
+      vector<VALTYPE,VTP_SRC> *V = (vector<VALTYPE,VTP_SRC>*)(&v);
+ 
+      _lace_storage::add_vtr(*(U->_vtr),*(V->_vtr),beta);
+    }
+
+    virtual void VpV(vector_expression<VALTYPE> &u, sub Iu,
+		     vector_expression<VALTYPE> &v, sub Iv,
+		     VALTYPE beta )
+    {
+      vector<VALTYPE,VTP_DST> *U = (vector<VALTYPE,VTP_DST>*)(&u);
+      vector<VALTYPE,VTP_SRC> *V = (vector<VALTYPE,VTP_SRC>*)(&v);
+
+      _lace_storage::add_vtr(*(U->_vtr), Iu, *(V->_vtr), Iv, beta);
+    }
+
+  };
+     
+  template<class VALTYPE, vector_type VTP, matrix_type MTP>
+  class vm_binary: public vm_binary_engine<VALTYPE>{
+  public:
+
+    virtual void MIj(vector_expression<VALTYPE> &v, matrix_expression<VALTYPE> &m, 
+		     int j, VALTYPE beta)
+    {
+      vector<VALTYPE,VTP> *V = (vector<VALTYPE,VTP>*)(&v);
+      matrix<VALTYPE,MTP> *M = (matrix<VALTYPE,MTP>*)(&m);
+
+      _lace_storage::mtr_column(*(V->_vtr), *(M->_mtr),j);
+    }
+
+    virtual void MIj(vector_expression<VALTYPE> &v, sub Iv, matrix_expression<VALTYPE> &m, 
+		     sub Im, int j, VALTYPE beta)
+    {
+      vector<VALTYPE,VTP> *V = (vector<VALTYPE,VTP>*)(&v);
+      matrix<VALTYPE,MTP> *M = (matrix<VALTYPE,MTP>*)(&m);
+
+      _lace_storage::mtr_column(*(V->_vtr), Iv, *(M->_mtr), Im, j);
+    }
+
+    virtual void MiJ(vector_expression<VALTYPE> &v, matrix_expression<VALTYPE> &m, 
+		     int i, VALTYPE beta)
+    {
+      vector<VALTYPE,VTP> *V = (vector<VALTYPE,VTP>*)(&v);
+      matrix<VALTYPE,MTP> *M = (matrix<VALTYPE,MTP>*)(&m);
+
+      _lace_storage::mtr_row(*(V->_vtr), *(M->_mtr),i);
+    }
+
+    virtual void MiJ(vector_expression<VALTYPE> &v, sub Jv, matrix_expression<VALTYPE> &m, 
+		     int i, sub Jm, VALTYPE beta)
+    {
+      vector<VALTYPE,VTP> *V = (vector<VALTYPE,VTP>*)(&v);
+      matrix<VALTYPE,MTP> *M = (matrix<VALTYPE,MTP>*)(&m);
+
+      _lace_storage::mtr_row(*(V->_vtr), Jv, *(M->_mtr), i, Jm);
+    }
+
+
+  };
+
+  //--------------------------------------------------------//
+  //                  Matrix multiplication                 //
+  //--------------------------------------------------------//
+
+  template<class VALTYPE,matrix_type MTPA,matrix_type MTPB,matrix_type MTPC>
+  class mmm_ternary : public mmm_ternary_engine<VALTYPE> {
+  public:
+    
+    
+    virtual void MxM(matrix_expression<VALTYPE> &a, matrix_expression<VALTYPE> &b, 
+		     matrix_expression<VALTYPE> &c, VALTYPE alpha, VALTYPE beta,
+		     int OP_B = 0, int OP_C = 0)
+    {
+      matrix<VALTYPE,MTPA> *A = (matrix<VALTYPE,MTPA>*)(&a);
+      matrix<VALTYPE,MTPB> *B = (matrix<VALTYPE,MTPB>*)(&b);
+      matrix<VALTYPE,MTPC> *C = (matrix<VALTYPE,MTPC>*)(&c); 
+
+      _lace_storage::mul_mtr(*(A->_mtr), *(B->_mtr), *(C->_mtr), alpha, beta, OP_B, OP_C);
+    }
+    
+    virtual void MxM(matrix_expression<VALTYPE> &a, sub IA, sub JA,
+		     matrix_expression<VALTYPE> &b, sub IB, sub JB,
+		     matrix_expression<VALTYPE> &c, sub IC, sub JC,
+		     VALTYPE alpha, VALTYPE beta,
+		     int OP_B = 0, int OP_C = 0)
+    {
+      matrix<VALTYPE,MTPA> *A = (matrix<VALTYPE,MTPA>*)(&a);
+      matrix<VALTYPE,MTPB> *B = (matrix<VALTYPE,MTPB>*)(&b);
+      matrix<VALTYPE,MTPC> *C = (matrix<VALTYPE,MTPC>*)(&c); 
+
+      _lace_storage::mul_mtr(*(A->_mtr), IA, JA, 
+			     *(B->_mtr), IB, JB,
+			     *(C->_mtr), IC, JC, 
+			     alpha, beta, OP_B, OP_C);      
+    }
+    
+  };
+  
 };
 
 #endif

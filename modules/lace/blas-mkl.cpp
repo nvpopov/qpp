@@ -94,7 +94,7 @@ namespace _lace_storage{
       return 'C';
   }
 
-
+  /*
   template<>
   void mulmm<float,rectang,rectang,rectang>(matrix_shape shpa, float *A, 
 					    matrix_shape shpb, float *B, 
@@ -213,6 +213,6 @@ namespace _lace_storage{
 // 						       lace::dcomplex alpha, lace::dcomplex beta,
 // 						       int opa, int opb){}
    
-
+*/
 };
 

@@ -19,7 +19,22 @@ namespace _lace_expressions{
   class vector : public vector_expression<VALTYPE>
   {
 
+    /*
+    friend class _lace_main::m_unary_engine<VALTYPE>;
+    friend class _lace_main::v_unary_engine<VALTYPE>;
+    friend class _lace_main::m_convertor_engine<VALTYPE>;
+    friend class _lace_main::v_convertor_engine<VALTYPE>;
+    friend class _lace_main::mm_binary_engine<VALTYPE>;
+    friend class _lace_main::vv_binary_engine<VALTYPE>;
+    friend class _lace_main::vm_binary_engine<VALTYPE>;
+    friend class _lace_main::mmm_ternary_engine<VALTYPE>;
+    friend class _lace_main::vmv_ternary_engine<VALTYPE>;
+
+    friend class _lace_main::v_unary<VALTYPE,VTYPE>;
+    */
+  public:
     vector_storage<VALTYPE,VTYPE> *_vtr;
+  private:
 
     typedef  vector<VALTYPE,VTYPE> SELF;
 
@@ -72,7 +87,9 @@ namespace _lace_expressions{
     vector<VALTYPE,VTYPE>& operator=(vector_expression<VALTYPE> &xpr)
     {
       vector_expression<VALTYPE> *trg = this;
+      /*temp
       process_expr<VALTYPE,vector_expression<VALTYPE> >(trg, &xpr);
+      */
       return *this;
     }
 

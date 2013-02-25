@@ -1,8 +1,10 @@
-#ifndef _LACE_BLAS_H
-#define _LACE_BLAS_H
+#ifndef _LACE_BLAS1_H
+#define _LACE_BLAS1_H
 
 #include<lace/complex.hpp>
 #include<lace/shape.hpp>
+#include<lace/storage.hpp>
+#include<lace/range.hpp>
 
 namespace _lace_storage{
 
@@ -33,16 +35,6 @@ namespace _lace_storage{
 
   //   template<typename VALTYPE>
   //   void asum(int n, VALTYPE *x, int incx);
-
-
-  template<typename VALTYPE, matrix_type MTPA, matrix_type MTPB, matrix_type MTPC>
-  void mulmm(matrix_shape shpa, VALTYPE *A, matrix_shape shpb, VALTYPE *B, matrix_shape shpc, VALTYPE *C,
-	     VALTYPE alpha, VALTYPE beta, int opa, int opb);
-  //
-  // C = alpha*op(A)*op(B) + beta*C
-  //
-  // This is defined not for all possible A,B,C types combinations bu only for those provided by BLAS
-  // Other combinations are done with default_mmm_ternary engine (see engine.hpp)
 
   // --------- Template specialization for axpy ------------
 
@@ -99,91 +91,6 @@ namespace _lace_storage{
 
   template<>
   void conj<lace::dcomplex>(int n, lace::dcomplex *x, int incx);
-
-  // ---------- Template specialization for mulmm ----------
-
-  template<>
-  void mulmm<float,rectang,rectang,rectang>(matrix_shape shpa, float *A, 
-					    matrix_shape shpb, float *B, 
-					    matrix_shape shpc, float *C,
-					    float alpha, float beta, 
-					    int opa, int opb);
-  
-  template<>
-  void mulmm<double,rectang,rectang,rectang>(matrix_shape shpa, double *A, 
-					     matrix_shape shpb, double *B, 
-					     matrix_shape shpc, double *C,
-					     double alpha, double beta,
-					     int opa, int opb);
-  
-  template<>
-  void mulmm<lace::fcomplex,rectang,rectang,rectang>(matrix_shape shpa, lace::fcomplex *A, 
-						     matrix_shape shpb, lace::fcomplex *B, 
-						     matrix_shape shpc, lace::fcomplex *C,
-						     lace::fcomplex alpha, lace::fcomplex beta,
-						     int opa, int opb);
-  
-  template<>
-  void mulmm<lace::dcomplex,rectang,rectang,rectang>(matrix_shape shpa, lace::dcomplex *A, 
-						     matrix_shape shpb, lace::dcomplex *B, 
-						     matrix_shape shpc, lace::dcomplex *C,
-						     lace::dcomplex alpha, lace::dcomplex beta,
-						     int opa, int opb);
-  
-  template<>
-  void mulmm<float,symmetric,rectang,rectang>(matrix_shape shpa, float *A, 
-					      matrix_shape shpb, float *B, 
-					      matrix_shape shpc, float *C,
-					      float alpha, float beta, 
-					      int opa, int opb);
-  
-  template<>
-  void mulmm<double,symmetric,rectang,rectang>(matrix_shape shpa, double *A, 
-					       matrix_shape shpb, double *B, 
-					       matrix_shape shpc, double *C,
-					       double alpha, double beta,
-					       int opa, int opb);
-  template<>
-  void mulmm<float,rectang,symmetric,rectang>(matrix_shape shpa, float *A, 
-					      matrix_shape shpb, float *B, 
-					      matrix_shape shpc, float *C,
-					      float alpha, float beta, 
-					      int opa, int opb);
-  
-  template<>
-  void mulmm<double,rectang,symmetric,rectang>(matrix_shape shpa, double *A, 
-					       matrix_shape shpb, double *B, 
-					       matrix_shape shpc, double *C,
-					       double alpha, double beta,
-					       int opa, int opb);
-  
-  template<>
-  void mulmm<lace::fcomplex,hermitian,rectang,rectang>(matrix_shape shpa, lace::fcomplex *A, 
-						       matrix_shape shpb, lace::fcomplex *B, 
-						       matrix_shape shpc, lace::fcomplex *C,
-						       lace::fcomplex alpha, lace::fcomplex beta,
-						       int opa, int opb);
-  
-  template<>
-  void mulmm<lace::dcomplex,hermitian,rectang,rectang>(matrix_shape shpa, lace::dcomplex *A, 
-						       matrix_shape shpb, lace::dcomplex *B, 
-						       matrix_shape shpc, lace::dcomplex *C,
-						       lace::dcomplex alpha, lace::dcomplex beta,
-						       int opa, int opb);
-
-  template<>
-  void mulmm<lace::fcomplex,rectang,hermitian,rectang>(matrix_shape shpa, lace::fcomplex *A, 
-						       matrix_shape shpb, lace::fcomplex *B, 
-						       matrix_shape shpc, lace::fcomplex *C,
-						       lace::fcomplex alpha, lace::fcomplex beta,
-						       int opa, int opb);
-  
-  template<>
-  void mulmm<lace::dcomplex,rectang,hermitian,rectang>(matrix_shape shpa, lace::dcomplex *A, 
-						       matrix_shape shpb, lace::dcomplex *B, 
-						       matrix_shape shpc, lace::dcomplex *C,
-						       lace::dcomplex alpha, lace::dcomplex beta,
-						       int opa, int opb);
    
 };
 

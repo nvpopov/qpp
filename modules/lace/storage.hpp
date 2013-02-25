@@ -111,6 +111,13 @@ namespace _lace_storage{
       resize(shp);
     }
 
+    // Explicit dimensions are given
+    matrix_storage(int n, int m) : _shp(rectang,n,m), nref(this) 
+    {
+      _vals = NULL;
+      resize(_shp);
+    }
+
     // Copy constructor
     matrix_storage( matrix_storage<VALTYPE,rectang> &s) : _shp(s._shp), nref(this) 
     {
@@ -483,14 +490,14 @@ namespace _lace_storage{
 
     inline void resize(matrix_shape shp)
     {
-//       _shp = shp;
-//       assert( _shp.mtype == banddiag && 
-// 	      "Incosistent matrix type in matrix_storage<VALTYPE,triang> constructor" );
-//       assert( _shp.n == _shp.m && "Attempt to create triangular matrix with N != M " );
-//       _memsize = _shp.n*(_shp.n+1)/2;
+      _shp = shp;
+      assert( _shp.mtype == banddiag && 
+	      "Incosistent matrix type in matrix_storage<VALTYPE,triang> constructor" );
+      assert( _shp.n == _shp.m && "Attempt to create triangular matrix with N != M " );
+      _memsize = _shp.n*(_shp.ku + _shp.kl +1);
 
-//       if (_vals != NULL) delete _vals;
-//       _vals = new VALTYPE [_memsize];
+      if (_vals != NULL) delete _vals;
+      _vals = new VALTYPE [_memsize];
     }
 
     // Unary BLAS operations:
@@ -514,14 +521,30 @@ namespace _lace_storage{
 	_vals[i] = s;
     }
   
-    // Access operator & function
-
-    inline VALTYPE & operator()(int i, int j)
-    {
+    inline bool defined(int i, int j)
+    { 
+      return j-i <= _shp.ku && i-j <= _shp.kl;
     }
+
+    inline bool unique(int i, int j)
+    { 
+      return j-i <= _shp.ku && i-j <= _shp.kl;
+    }
+
+    // Access operator & function
 
     inline VALTYPE* ptr(int i, int j)
     {
+      int ku = _shp.ku, kl = _shp.kl;
+      if (defined(i,j))
+	return &_vals[ j*(kl+ku+1) + ku + i -j ];
+      else
+	return NULL;
+    }
+
+    inline VALTYPE & operator()(int i, int j)
+    {
+      return *ptr(i,j);
     }
 
     matrix_shape shape()
@@ -533,14 +556,6 @@ namespace _lace_storage{
     {
       assert( (dim==0 || dim==1) && "Illegal dimension" );    
       return _shp.n;
-    }
-
-    inline bool defined(int i, int j)
-    { 
-    }
-
-    inline bool unique(int i, int j)
-    { 
     }
 
     ~matrix_storage()
@@ -992,7 +1007,7 @@ namespace _lace_storage{
    *                                                           *
    * --------------------------------------------------------- */
 
-  template<class VALTYPE, vector_type VTYPE>
+  template<class VALTYPE, vector_type VTYPE = dense>
   class vector_storage;
 
   //---------------------------------------------------//
@@ -1019,6 +1034,13 @@ namespace _lace_storage{
     {
       _vals = NULL;
       resize(shp);
+    }
+
+    // construct vector of given size
+    vector_storage( int n ) : _shp(dense,n) , nref(this) 
+    {
+      _vals = NULL;
+      resize(_shp);
     }
 
     // Copy constructor

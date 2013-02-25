@@ -2,6 +2,7 @@
 #define _LACE_EXPRESSIONS_H
 
 #include <lace/tree.hpp>
+#include <lace/complex.hpp>
 
 namespace _lace_expressions{
 
@@ -1823,6 +1824,28 @@ namespace _lace_main
 
   template<typename VALTYPE>
   class wizard;
+  /*
+  template<typename VALTYPE> class m_unary_engine;
+  template<typename VALTYPE> class v_unary_engine;
+  template<typename VALTYPE> class m_convertor_engine;
+  template<typename VALTYPE> class v_convertor_engine;
+  template<typename VALTYPE> class mm_binary_engine;
+  template<typename VALTYPE> class vv_binary_engine;
+  template<typename VALTYPE> class vm_binary_engine;
+  template<typename VALTYPE> class mmm_ternary_engine;
+  template<typename VALTYPE> class vmv_ternary_engine;
+
+  template<typename VALTYPE, _lace_storage::matrix_type> class m_unary;
+  template<typename VALTYPE, _lace_storage::vector_type> class v_unary;
+  template<typename VALTYPE, _lace_storage::matrix_type, _lace_storage::matrix_type> class m_convertor;
+  template<typename VALTYPE, _lace_storage::vector_type, _lace_storage::vector_type> class v_convertor;
+  template<typename VALTYPE, _lace_storage::matrix_type, _lace_storage::matrix_type> class mm_binary;
+  
+  template<typename VALTYPE> class vv_binary;
+  template<typename VALTYPE> class vm_binary;
+  template<typename VALTYPE> class mmm_ternary;
+  template<typename VALTYPE> class vmv_ternary;*/
+
 };
 
 #endif

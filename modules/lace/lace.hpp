@@ -1,7 +1,7 @@
 #ifndef _LACE_H
 #define _LACE_H
 
-#include <lace/calculator.hpp>
+//#include <lace/calculator.hpp>
 #include <lace/wizard_instance.hpp>
 #include <lace/globals.hpp>
 #include <lace/lapack.hpp>
@@ -30,7 +30,7 @@ namespace lace{
   /* ----------------------------------------------------------------
                    High level functions
      ---------------------------------------------------------------- */
-
+  /*
   template<typename VALTYPE, matrix_type MTP>
   void solve_lu(matrix<VALTYPE,MTP> &A, vector<VALTYPE> &y, vector<VALTYPE> &x)
   {
@@ -111,7 +111,7 @@ namespace lace{
 					    _A.ptr(0,0),eig_vals.ptr(0),eig_vec.ptr(0,0));
   }
 
-
+  */
 };
 
 #endif

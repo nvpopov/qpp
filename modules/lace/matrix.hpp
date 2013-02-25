@@ -7,15 +7,10 @@
 
 #include <boost/format.hpp>
 
-//#include <lace/shape.hpp>
 #include <lace/storage.hpp>
-//#include <lace/tree.hpp>
-//#include <lace/expressions.hpp>
 #include <lace/matrix_expressions.hpp>
 #include <lace/vector_expressions.hpp>
-//#include <lace/complex.hpp>
 #include <lace/element.hpp>
-//#include <lace/engine.hpp>
 #include <lace/globals.hpp>
 
 namespace _lace_expressions{
@@ -42,9 +37,34 @@ namespace _lace_expressions{
   template <typename VALTYPE, matrix_type MTRTYPE = _lace_storage::rectang>
   class matrix : public matrix_expression<VALTYPE>
   {
+    /*
+    friend class _lace_main::m_unary_engine<VALTYPE>;
+    friend class _lace_main::v_unary_engine<VALTYPE>;
+    friend class _lace_main::m_convertor_engine<VALTYPE>;
+    friend class _lace_main::v_convertor_engine<VALTYPE>;
+    friend class _lace_main::mm_binary_engine<VALTYPE>;
+    friend class _lace_main::vv_binary_engine<VALTYPE>;
+    friend class _lace_main::vm_binary_engine<VALTYPE>;
+    friend class _lace_main::mmm_ternary_engine<VALTYPE>;
+    friend class _lace_main::vmv_ternary_engine<VALTYPE>;
 
+    friend class _lace_main::m_unary<VALTYPE,MTRTYPE>;
+
+    template<matrix_type MTP2>
+    friend class _lace_main::mm_binary<VALTYPE,MTRTYPE,MTP2>;
+    friend class _lace_main::v_unary<VALTYPE,MTRTYPE>;
+    friend class _lace_main::m_convertor<VALTYPE,MTRTYPE>;
+    friend class _lace_main::v_convertor<VALTYPE,MTRTYPE>;
+    friend class _lace_main::mm_binary<VALTYPE,MTRTYPE>;
+    friend class _lace_main::vv_binary<VALTYPE,MTRTYPE>;
+    friend class _lace_main::vm_binary<VALTYPE,MTRTYPE>;
+    friend class _lace_main::mmm_ternary<VALTYPE,MTRTYPE>;
+    friend class _lace_main::vmv_ternary<VALTYPE,MTRTYPE>;
+    */
+
+  public:
     matrix_storage<VALTYPE,MTRTYPE> *_mtr;
-
+  private:
     typedef matrix<VALTYPE,MTRTYPE> SELF;
 
     void _print_me_matrix(int shift = 0)
@@ -130,7 +150,9 @@ namespace _lace_expressions{
     matrix<VALTYPE,MTRTYPE>& operator=(matrix_expression<VALTYPE> &xpr)
     {      
       matrix_expression<VALTYPE> *trg = this;
+      /* temp
       process_expr<VALTYPE,matrix_expression<VALTYPE> >(trg, &xpr);
+      */
       return *this;
     }
 

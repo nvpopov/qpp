@@ -1110,6 +1110,7 @@ namespace _lace_expressions{
 
   //------------------------------------------------------------------------------
 
+  /*
   template<typename VALTYPE>
   matrix_shape submatrix<VALTYPE>::shape()
   {
@@ -1121,9 +1122,9 @@ namespace _lace_expressions{
       }
     return shp;
   }
-
+  */
   //------------------------------------------------------------------------------
-
+  /*
   template<typename VALTYPE>
   vector_shape subvector<VALTYPE>::shape()
   {
@@ -1135,7 +1136,7 @@ namespace _lace_expressions{
       }
     return shp;
   }
-
+  */
   //------------------------------------------------------------------------------
   
   template<typename VALTYPE>

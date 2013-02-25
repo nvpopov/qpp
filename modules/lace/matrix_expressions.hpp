@@ -32,7 +32,9 @@ namespace _lace_expressions{
 
 //    typedef matrix_shape shape_type;
 
+    /* temp
     virtual void calculate_expr(matrix_expression<VALTYPE>* &target, VALTYPE scale = VALTYPE(1e0) );
+    */
 
     typedef expression_literal<VALTYPE,matrix_expression<VALTYPE> >  literal;
     typedef expression_scaling<VALTYPE,matrix_expression<VALTYPE> >  scaling;
@@ -164,7 +166,9 @@ namespace _lace_expressions{
 	return this;
     }
 
+    /* temp
     virtual void calculate_expr(XPR* &target, VALTYPE scale = VALTYPE(1e0) );
+    */
 
     virtual matrix_shape shape();
 
@@ -390,18 +394,24 @@ namespace _lace_expressions{
 	return this;
     }
     
-    virtual matrix_shape shape();
-
-//     virtual bool lvalue()
-//     {
-//       return mtr -> lvalue();
-//     }
+    virtual matrix_shape shape()
+    {
+      if ( !shape_defined)
+	{
+	  matrix_shape base_shp = mtr -> shape();
+	  shp = MIJ_shape( base_shp, I->rng(), J->rng() );
+	  shape_defined = true;
+	}
+      return shp;
+    }
 
     virtual submatrix<VALTYPE>& operator=(matrix_expression<VALTYPE> &xpr)
     {
       //      std::cout << "Submatrix assignment called\n";
       matrix_expression<VALTYPE> *trg = this;
+      /* temp
       process_expr<VALTYPE,matrix_expression<VALTYPE> >(trg,&xpr);
+      */
       return *this;
     }
     

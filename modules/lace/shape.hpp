@@ -5,7 +5,13 @@
 #include<cassert>
 #include<iostream>
 
+namespace _lace_expressions{
+  struct sub;
+};
+
 namespace _lace_storage{
+
+  using _lace_expressions::sub;
 
   //---------------------------------------------//
   //                Matrix types                 //
@@ -244,7 +250,37 @@ namespace _lace_storage{
 //   {
 //     return vector_shape();
 //   }
-  
+
+
+  matrix_shape transp_shape(matrix_shape shp);
+
+  matrix_shape MIJ_shape(matrix_shape shp, sub I, sub J );
+
+  vector_shape MIj_shape(matrix_shape shp, sub I, int j);
+
+  vector_shape MiJ_shape(matrix_shape shp, int i, sub J);
+
+  vector_shape VI_shape(vector_shape shp, sub I );
+
+  bool mtr_is_convertable(matrix_shape dest, matrix_shape src);
+
+  matrix_shape reshape(matrix_type dst, matrix_shape src);
+
+  bool mtr_is_addable(matrix_shape dest, matrix_shape src);
+
+  matrix_shape MpM_shape(matrix_shape shp1, matrix_shape shp2);
+
+  matrix_shape MxM_shape(matrix_shape shp1, matrix_shape shp2);
+
+  bool mtr_is_multiplicable(matrix_shape shp1, matrix_shape shp2);
+
+  matrix_shape MxM_shape(matrix_shape shp1, matrix_shape shp2);
+
+  bool vtr_is_addable(vector_shape dest, vector_shape src);
+
+  vector_shape VpV_shape(vector_shape shp1, vector_shape shp2);
+
+  matrix_shape VxV_shape(vector_shape shp1, vector_shape shp2);
 
 };
 
@@ -253,19 +289,13 @@ namespace _lace_expressions{
   using _lace_storage::matrix_type;
   using _lace_storage::vector_type;
 
-  // Forward declaration of vector and matrix main objects
-
-//   template<class VALTYPE>
-//   class matrix_object;
-
-//   template<class VALTYPE> 
-//   class vector_object;
-
   template<class VALTYPE, matrix_type MTRTYPE>
   class matrix;
 
   template<class VALTYPE, vector_type VECTYPE> 
   class vector;
+
+  struct sub;
 
 };
 
