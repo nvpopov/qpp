@@ -198,8 +198,6 @@ namespace _lace_main{
 
     //   virtual vector_shape MxV_shape(matrix_shape mshp, vector_shape vshp) = 0;
 
-    virtual bool MxV_conform(vector_shape dst, matrix_shape mshp, vector_shape src) =0;
-
     virtual void MxV(vector_expression<VALTYPE> &u, matrix_expression<VALTYPE> &A,
 		     vector_expression<VALTYPE> &v, VALTYPE alpha, VALTYPE beta, int OP = 0 ) = 0;
     // Does u = alpha*u + beta*A*v
@@ -220,7 +218,6 @@ namespace _lace_main{
 		     VALTYPE alpha, VALTYPE beta ) =0;
     // A(IA,JA) = alpha*A(IA,JA) + beta* u(Iu)%v(Jv)
     
-
   };
 
 
@@ -570,8 +567,7 @@ namespace _lace_main{
   template<class VALTYPE,matrix_type MTPA,matrix_type MTPB,matrix_type MTPC>
   class mmm_ternary : public mmm_ternary_engine<VALTYPE> {
   public:
-    
-    
+        
     virtual void MxM(matrix_expression<VALTYPE> &a, matrix_expression<VALTYPE> &b, 
 		     matrix_expression<VALTYPE> &c, VALTYPE alpha, VALTYPE beta,
 		     int OP_B = 0, int OP_C = 0)
@@ -601,6 +597,61 @@ namespace _lace_main{
     
   };
   
+  // --------------------------------------------------------
+  //   Matrix by vector and outer product
+  // --------------------------------------------------------
+
+
+  template<typename VALTYPE, vector_type VTP_DST, matrix_type MTP, vector_type VTP_SRC>
+  class vmv_ternary : public vmv_ternary_engine<VALTYPE>{
+  public:
+
+    virtual void MxV(vector_expression<VALTYPE> &u, matrix_expression<VALTYPE> &a,
+		     vector_expression<VALTYPE> &v, VALTYPE alpha, VALTYPE beta, int OP = 0 )
+    {
+      vector<VALTYPE,VTP_DST> *U = (vector<VALTYPE,VTP_DST>*)(&u);
+      matrix<VALTYPE,MTP>     *A = (matrix<VALTYPE,MTP>*)(&a);
+      vector<VALTYPE,VTP_SRC> *V = (vector<VALTYPE,VTP_SRC>*)(&v);
+
+      _lace_storage::mul_mv(*(U->_vtr),*(A->_mtr),*(V->_vtr),alpha,beta,OP);
+    }
+
+    virtual void MxV(vector_expression<VALTYPE> &u, sub Iu,
+		     matrix_expression<VALTYPE> &a, sub IA, sub JA,
+		     vector_expression<VALTYPE> &v, sub Jv,
+		     VALTYPE alpha, VALTYPE beta, int OP = 0 )
+    {
+      vector<VALTYPE,VTP_DST> *U = (vector<VALTYPE,VTP_DST>*)(&u);
+      matrix<VALTYPE,MTP>     *A = (matrix<VALTYPE,MTP>*)(&a);
+      vector<VALTYPE,VTP_SRC> *V = (vector<VALTYPE,VTP_SRC>*)(&v);
+
+      _lace_storage::mul_mv(*(U->_vtr), Iu, *(A->_mtr), IA, JA, *(V->_vtr), Jv, alpha, beta, OP);
+    }
+    
+    virtual void VxV(matrix_expression<VALTYPE> &a, vector_expression<VALTYPE> &u, 
+		     vector_expression<VALTYPE> &v, VALTYPE alpha, VALTYPE beta )
+    {
+      vector<VALTYPE,VTP_DST> *U = (vector<VALTYPE,VTP_DST>*)(&u);
+      matrix<VALTYPE,MTP>     *A = (matrix<VALTYPE,MTP>*)(&a);
+      vector<VALTYPE,VTP_SRC> *V = (vector<VALTYPE,VTP_SRC>*)(&v);
+
+      _lace_storage::outer_prod(*(A->_mtr), *(U->_vtr), *(V->_vtr), alpha, beta);
+    }
+    
+    virtual void VxV(matrix_expression<VALTYPE> &a, sub IA, sub JA,
+		     vector_expression<VALTYPE> &u, sub Iu,
+		     vector_expression<VALTYPE> &v, sub Jv,
+		     VALTYPE alpha, VALTYPE beta )
+    {
+      vector<VALTYPE,VTP_DST> *U = (vector<VALTYPE,VTP_DST>*)(&u);
+      matrix<VALTYPE,MTP>     *A = (matrix<VALTYPE,MTP>*)(&a);
+      vector<VALTYPE,VTP_SRC> *V = (vector<VALTYPE,VTP_SRC>*)(&v);
+
+      _lace_storage::outer_prod(*(A->_mtr), IA, JA, *(U->_vtr), Iu, *(V->_vtr), Jv, alpha, beta);
+    } 
+    
+  };
+
 };
 
 #endif
