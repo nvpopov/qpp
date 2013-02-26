@@ -1,6 +1,7 @@
 #include<lace/matrix.hpp>
 #include<lace/vector.hpp>
 #include<lace/wizard_instance.hpp>
+#include <lace/lace.hpp>
 
 using namespace _lace_expressions;
 using namespace _lace_storage;

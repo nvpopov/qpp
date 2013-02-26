@@ -86,13 +86,7 @@ namespace _lace_tree{
 	{
 	  next(n) -> nref--;
 	  if ( next(n) -> nref == 0)
-	    {
-	      if (lace::globals::debug)
-		{
-		  //std::cout << "Unlinking ";
-		  //next(n) -> print_tree(0);
-		  //std::cout << "\n";		  
-		}	      
+	    {	      	      
 	      for (int i = 0; i<next(n) -> nnext(); i++) 	      
 		next(n) -> unlink_tree(i);
 	      next(n) -> free();

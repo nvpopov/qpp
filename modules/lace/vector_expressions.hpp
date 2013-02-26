@@ -25,12 +25,10 @@ namespace _lace_expressions{
 
     typedef vector_shape shape_type;
     
-    /* temp
     static void process_expr(vector_expression<VALTYPE>* &target, 
 			     vector_expression<VALTYPE> *xpr);
 
     virtual void calculate_expr(vector_expression<VALTYPE>* &target, VALTYPE scale = VALTYPE(1e0) );
-    */
 
     typedef expression_literal<VALTYPE,SELF>     literal;
     typedef expression_binop<VALTYPE,SELF>       binop;
@@ -244,9 +242,7 @@ namespace _lace_expressions{
       mixtyped_product<VALTYPE, vector_expression<VALTYPE>, 
 		       matrix_expression<VALTYPE>, vector_expression<VALTYPE> > (l,r,_mul_mv){}
 
-    /* temp
     virtual void calculate_expr(vector_expression<VALTYPE>* &target, VALTYPE scale = VALTYPE(1e0) );
-    */    
 
     virtual vector_shape shape();
 
@@ -510,9 +506,7 @@ namespace _lace_expressions{
     {
       std::cout << "Subvector assignment called\n";
       vector_expression<VALTYPE> *trg = this;
-      /* temp
       process_expr<VALTYPE,vector_expression<VALTYPE> >(trg, &xpr);
-      */
       return *this;
     }
 

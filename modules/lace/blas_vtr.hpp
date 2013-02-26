@@ -50,7 +50,7 @@ namespace _lace_storage
   template<typename VALTYPE, vector_type VTP_DST, vector_type VTP_SRC>
   void convert_vtr( vector_storage<VALTYPE,VTP_DST> &dest, vector_storage<VALTYPE,VTP_SRC> &src)
   {
-    assert(is_convertable(dest.shape(), src.shape()));
+    assert(vtr_is_convertable(dest.shape(), src.shape()));
     
     for (int i=0; i < src.size(); i++)
       if ( dest.unique(i))

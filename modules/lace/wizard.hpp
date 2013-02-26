@@ -448,7 +448,7 @@ namespace _lace_main{
     
     virtual void convert( vector_expression<VALTYPE> &dest, vector_expression<VALTYPE> &src)
     {
-      assert(is_convertable(dest.shape(), src.shape()));
+      assert(vtr_is_convertable(dest.shape(), src.shape()));
       vector<VALTYPE,VTP_DST> *DEST = (vector<VALTYPE,VTP_DST>*)(&dest);
       vector<VALTYPE,VTP_SRC> *SRC  = (vector<VALTYPE,VTP_DST>*)(&src);
 

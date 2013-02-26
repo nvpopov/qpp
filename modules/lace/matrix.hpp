@@ -150,9 +150,7 @@ namespace _lace_expressions{
     matrix<VALTYPE,MTRTYPE>& operator=(matrix_expression<VALTYPE> &xpr)
     {      
       matrix_expression<VALTYPE> *trg = this;
-      /* temp
       process_expr<VALTYPE,matrix_expression<VALTYPE> >(trg, &xpr);
-      */
       return *this;
     }
 

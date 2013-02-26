@@ -1,7 +1,7 @@
 #include <cassert>
 #include <cstring>
 #include <lace/matrix.hpp>
-#include <lace/engine.hpp>
+//#include <lace/engine.hpp>
 #include <lace/wizard_instance.hpp>
 #include <string>
 #include <sstream>

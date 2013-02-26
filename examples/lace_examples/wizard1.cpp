@@ -1,5 +1,6 @@
 #include<lace/matrix.hpp>
 #include<lace/wizard_instance.hpp>
+#include<lace/lace.hpp>
 #include<boost/format.hpp>
 
 using namespace _lace_expressions;

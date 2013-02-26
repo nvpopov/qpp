@@ -1,8 +1,9 @@
 #ifndef _LACE_CALCULATOR_H
 #define _LACE_CALCULATOR_H
 
-#include <lace/engine.hpp>
+//#include <lace/engine.hpp>
 #include <lace/globals.hpp>
+#include <lace/wizard_instance.hpp>
 
 namespace _lace_expressions{
 
@@ -258,8 +259,7 @@ namespace _lace_expressions{
 // 	  std::cout <<"Target shape: \n"; 
 // 	  target-> shape().debug();
 	  assert(  
-		 wizard<VALTYPE>::M2M( target -> mtype(), res_shape.mtype ).
-		 is_convertable( target -> shape(), res_shape ) &&
+		 _lace_storage::mtr_is_convertable( target -> shape(), res_shape ) &&
 		 "The result shape does not conform to expression shape in SUMMA calculation  "
 		 );
 	}
@@ -370,9 +370,9 @@ namespace _lace_expressions{
       if ( !good_alias )
 	{
 	  if (!a_submtr)
-	    wizard<VALTYPE>::M( target -> mtype() ).setval( *trg_mtr, (VALTYPE)0 );
+	    wizard<VALTYPE>::M( target -> mtype() ).fill( *trg_mtr, (VALTYPE)0 );
 	  else
-	    wizard<VALTYPE>::M( target -> mtype() ).setval( *trg_mtr, (VALTYPE)0 , sub_IA, sub_JA);
+	    wizard<VALTYPE>::M( target -> mtype() ).fill( *trg_mtr, (VALTYPE)0 , sub_IA, sub_JA);
 	}
 
       // -----------------  Main loop over terms -------------------- //
@@ -507,7 +507,7 @@ namespace _lace_expressions{
 	  if (i==0)
 	    shp = shp1;
 	  else
-	    shp = wizard<VALTYPE>::MM( shp.mtype, shp1.mtype).MpM_shape(shp,shp1);
+	    shp = _lace_storage::MpM_shape(shp,shp1);
 
 	  assert( ! is_empty(shp) && "Shape non conformant in matrix summation");
 	}
@@ -665,7 +665,8 @@ namespace _lace_expressions{
 	    std::cout << "\n";
 	  }
 	
-	this -> shp = wizard<VALTYPE>::MM(shp_a.mtype,shp_b.mtype).MxM_shape(shp_a,shp_b);
+	//	this -> shp = wizard<VALTYPE>::MM(shp_a.mtype,shp_b.mtype).MxM_shape(shp_a,shp_b);
+	this -> shp = _lace_storage::MxM_shape(shp_a,shp_b);
 	this -> shape_defined = true;
       }
     return this -> shp;
@@ -706,7 +707,8 @@ namespace _lace_expressions{
 	this -> shp = ((matrix_expression<VALTYPE>*)(this ->next(0))) -> shape();
 	this -> shape_defined = true;
       }
-    return wizard<VALTYPE>::M(this -> shp.mtype).T_shape( this -> shp);
+    //    return wizard<VALTYPE>::M(this -> shp.mtype).T_shape( this -> shp);
+    return _lace_storage::transp_shape( this -> shp);
   }
 
   //------------------------------------------------------------------------------
@@ -746,8 +748,9 @@ namespace _lace_expressions{
 // 	  std::cout <<"Target shape: \n"; 
 // 	  target-> shape().debug();
 	  assert(  
-		 wizard<VALTYPE>::V2V( target -> vtype(), res_shape.vtype ).
-		 is_convertable( target -> shape(), res_shape ) &&
+		 //		 wizard<VALTYPE>::V2V( target -> vtype(), res_shape.vtype ).
+		 //		 is_convertable( target -> shape(), res_shape ) &&
+		 _lace_storage::vtr_is_convertable( target -> shape(), res_shape ) &&
 		 "The result shape does not conform to expression shape in SUMMA calculation  "
 		 );
 	}
@@ -814,7 +817,8 @@ namespace _lace_expressions{
       if (bad_alias)
 	{
 	  tmp_target = & wizard<VALTYPE>::V(res_shape.vtype).create(res_shape);
-	  wizard<VALTYPE>::V(res_shape.vtype).setval(*tmp_target, VALTYPE(0));
+	  //	  wizard<VALTYPE>::V(res_shape.vtype).setval(*tmp_target, VALTYPE(0));
+	  wizard<VALTYPE>::V(res_shape.vtype).fill(*tmp_target, VALTYPE(0));
 	}
       else
 	tmp_target = actual_target;
@@ -874,8 +878,7 @@ namespace _lace_expressions{
 			<<  _lace_storage::vtype_spelling[tmp_target -> vtype()]
 			<< "  term -> vtype = " 
 			<< _lace_storage::vtype_spelling[term -> vtype()] << "\n";
-	      std::cout << "addable" << wizard<VALTYPE>::VV(tmp_target -> vtype(), term -> vtype()).
-		is_addable(tmp_target -> shape(), term -> shape()) << "\n";
+	      std::cout << "addable" << _lace_storage::vtr_is_addable(tmp_target -> shape(), term -> shape()) << "\n";
 
 	      // Do summation
 	      if (term_subvtr)
@@ -923,7 +926,7 @@ namespace _lace_expressions{
 	  if (i==0)
 	    shp = shp1;
 	  else
-	    shp = wizard<VALTYPE>::VV( shp.vtype, shp1.vtype).VpV_shape(shp,shp1);
+	    shp = _lace_storage::VpV_shape(shp,shp1);
 
 	  assert( ! is_empty(shp) && "Shape non conformant is vector summation");
 	}
@@ -1007,7 +1010,8 @@ namespace _lace_expressions{
       {
 	matrix_shape mshp = ((matrix_expression<VALTYPE>*)(this -> left)) -> shape();
 	vector_shape vshp = ((vector_expression<VALTYPE>*)(this -> right)) -> shape();
-	this -> shp = wizard<VALTYPE>::VM(vshp.vtype, mshp.mtype).MxV_shape(mshp,vshp);
+	//	this -> shp = wizard<VALTYPE>::VM(vshp.vtype, mshp.mtype).MxV_shape(mshp,vshp);
+	this -> shp = _lace_storage::MxV_shape(mshp,vshp);
 	this -> shape_defined = true;
       }
     return this -> shp;
@@ -1063,7 +1067,8 @@ namespace _lace_expressions{
       {
 	vector_shape shp1 = ((vector_expression<VALTYPE>*)(this -> left)) -> shape();
 	vector_shape shp2 = ((vector_expression<VALTYPE>*)(this -> right)) -> shape();
-	this -> shp = wizard<VALTYPE>::VV(shp1.vtype, shp2.vtype).VxV_shape(shp1,shp2);
+	//	this -> shp = wizard<VALTYPE>::VV(shp1.vtype, shp2.vtype).VxV_shape(shp1,shp2);
+	this -> shp = _lace_storage::VxV_shape(shp1,shp2);
 	this -> shape_defined = true;
       }
     return this -> shp;    

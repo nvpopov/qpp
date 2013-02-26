@@ -76,7 +76,7 @@ namespace _lace_storage{
   template<typename VALTYPE, matrix_type MTP_DST, matrix_type MTP_SRC>
   void convert_mtr(matrix_storage<VALTYPE,MTP_DST> & dest, matrix_storage<VALTYPE,MTP_SRC> & src)
   {
-    assert( is_convertable(dest.shape(),src.shape()) && "Invalid matrix conversion" );
+    assert( mtr_is_convertable(dest.shape(),src.shape()) && "Invalid matrix conversion" );
 
     // Not a very efficient way to do this, but it's default
     for (int i=0; i<src.size(0); i++)

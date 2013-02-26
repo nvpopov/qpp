@@ -23,18 +23,9 @@ namespace _lace_expressions{
   class matrix_expression : public abstract_expression
   {
 
-    //  protected:
-    
   public:    
 
-//     static void process_expr(matrix_expression<VALTYPE>* &target, 
-// 			     matrix_expression<VALTYPE> *xpr);
-
-//    typedef matrix_shape shape_type;
-
-    /* temp
     virtual void calculate_expr(matrix_expression<VALTYPE>* &target, VALTYPE scale = VALTYPE(1e0) );
-    */
 
     typedef expression_literal<VALTYPE,matrix_expression<VALTYPE> >  literal;
     typedef expression_scaling<VALTYPE,matrix_expression<VALTYPE> >  scaling;
@@ -165,10 +156,8 @@ namespace _lace_expressions{
       else 
 	return this;
     }
-
-    /* temp
-    virtual void calculate_expr(XPR* &target, VALTYPE scale = VALTYPE(1e0) );
-    */
+    
+    virtual void calculate_expr(XPR* &target, VALTYPE scale = VALTYPE(1e0) );    
 
     virtual matrix_shape shape();
 
@@ -409,9 +398,7 @@ namespace _lace_expressions{
     {
       //      std::cout << "Submatrix assignment called\n";
       matrix_expression<VALTYPE> *trg = this;
-      /* temp
       process_expr<VALTYPE,matrix_expression<VALTYPE> >(trg,&xpr);
-      */
       return *this;
     }
     

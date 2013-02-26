@@ -83,7 +83,7 @@ namespace _lace_storage{
 	    {
 	      for (int j=0; j < V.size(); j++)
 		if ( A.defined(j,i) && V.defined(j) )
-		  r += conj(A(j,i))*V(j);
+		  r += lace::conj(A(j,i))*V(j);
 	    }
 	  // fixme OP == _herm
 	  U(i) *= alpha;
@@ -132,7 +132,7 @@ namespace _lace_storage{
 		for (int jv=Jv.begin(); jv < Jv.end(); jv += Jv.inc)
 		  {
 		    if ( A.defined(iA,jA) && V.defined(jv) )
-		      r += conj(A(jA,iA))*V(jv);
+		      r += lace::conj(A(jA,iA))*V(jv);
 		    jA += JA.inc;
 		    
 		  }	  

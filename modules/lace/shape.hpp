@@ -264,6 +264,8 @@ namespace _lace_storage{
 
   bool mtr_is_convertable(matrix_shape dest, matrix_shape src);
 
+  bool vtr_is_convertable(vector_shape dest, vector_shape src);
+
   matrix_shape reshape(matrix_type dst, matrix_shape src);
 
   bool mtr_is_addable(matrix_shape dest, matrix_shape src);
@@ -281,6 +283,8 @@ namespace _lace_storage{
   vector_shape VpV_shape(vector_shape shp1, vector_shape shp2);
 
   matrix_shape VxV_shape(vector_shape shp1, vector_shape shp2);
+
+  vector_shape MxV_shape(matrix_shape mshp, vector_shape vshp);
 
 };
 
