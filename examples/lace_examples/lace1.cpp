@@ -2,6 +2,7 @@
 #include<boost/format.hpp>
 #include<cmath>
 #include<lace/lace.hpp>
+#include<lace/shape.hpp>
 
 using namespace lace;
 

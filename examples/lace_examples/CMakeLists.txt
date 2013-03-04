@@ -30,8 +30,13 @@ target_link_libraries(blas1 lace)
 #add_executable(wizard3 wizard3.cpp)
 #target_link_libraries(wizard3 lace)
 
+<<<<<<< HEAD
 add_executable(lace1 lace1.cpp)
 target_link_libraries(lace1 lace)
 
 add_executable(lace2 lace2.cpp)
 target_link_libraries(lace2 lace)
+=======
+#add_executable(lace1 lace1.cpp)
+#target_link_libraries(lace1 lace)
+>>>>>>> 84eeb4080bd0c84ba7845184dfd5172c959ce8ed
