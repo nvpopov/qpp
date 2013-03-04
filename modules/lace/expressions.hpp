@@ -585,30 +585,13 @@ namespace _lace_expressions{
 //       return * new equality_expression<VALTYPE,XPR>(*this,A);
 //     }
 
-//     XPR& operator=(SELF &A)
-//     {
-//       return * new equality_expression<VALTYPE,XPR>(*this,A);
-//     }
+     virtual XPR& operator=(XPR &A)
+     {
+       return * new equality_expression<VALTYPE,XPR>(*this,A);
+     }
 
   };
     
-  // --- Binary operation ---------------------------------------------------------
-//   template <typename VALTYPE,class XPR>
-//   class _binop_specific{
-//   public:
-//     //    typedef char shape_type;
-    
-//     static void calculate_expr(XPR* &target, XPR *xpr, VALTYPE scale)
-//     {
-//       assert(false && "This should not happed -- binop_specific prototype called");
-//     }
-
-//     static typename shape_type<XPR>::type shape(XPR *xpr)
-//     {
-//       assert(false && "This should not happed -- binop_specific prototype called");
-//     }
-
-//   };
 
   template<typename VALTYPE,class XPR>
   class expression_binop : public XPR{
@@ -774,7 +757,7 @@ namespace _lace_expressions{
 
     virtual typename shape_type<XPR>::type shape();
 
-    virtual void print_tree(int shift=0)
+    /*   virtual void print_tree(int shift=0)
     {
       if (shift>0)
 	{
@@ -783,7 +766,7 @@ namespace _lace_expressions{
 	}
       expression_binop<VALTYPE,XPR>::print_tree(shift);
     }
-
+    */
     virtual abstract_expression* copy( int mask = 0 )
     {
       if ( (mask & _equals) == 0 )

@@ -1,7 +1,7 @@
 #ifndef _LACE_H
 #define _LACE_H
 
-#include <lace/calculator.hpp>
+#include <lace/engine.hpp>
 #include <lace/wizard_instance.hpp>
 #include <lace/globals.hpp>
 #include <lace/lapack.hpp>

@@ -147,7 +147,7 @@ namespace _lace_expressions{
 
     //----------------------  Assignment ------------------------
 
-    matrix<VALTYPE,MTRTYPE>& operator=(matrix_expression<VALTYPE> &xpr)
+    virtual matrix<VALTYPE,MTRTYPE>& operator=(matrix_expression<VALTYPE> &xpr)
     {      
       matrix_expression<VALTYPE> *trg = this;
       process_expr<VALTYPE,matrix_expression<VALTYPE> >(trg, &xpr);

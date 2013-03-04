@@ -66,5 +66,7 @@ namespace lace{
   bool globals::preserv_matrix = true;
 
   bool globals::debug = false;
+
+  bool globals::auto_reshape = false;
   
 };

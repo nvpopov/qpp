@@ -5,10 +5,21 @@
 
 using namespace lace;
 
+void prnmtr( matrix<double,rectang> &C)
+{
+  for (int i=0; i<C.size(0); i++)
+    {
+      for (int j=0; j<C.size(1); j++)
+	std::cout << boost::format("%8.3f")%C(i,j);
+      std::cout << "\n";
+    }
+}
+
+
 int main()
 {
   int N = 6, M = 5;
-  matrix<double,rectang> A(N,M), B(N,M);
+  matrix<double,rectang> A(N,M), B(N,M), C;
 
   A = 1e0;
 
@@ -16,14 +27,16 @@ int main()
     for (int j=0; j<B.size(1); j++)
       B(i,j) = i+j*.1;
 
+  prnmtr(B);
+  std::cout << "\n\n";
+
+  //lace::globals::debug = true;
   //  A = A + B;
 
-  A(sub(0,M-1,2),sub(0,M-1)) = B(sub(0,M-1),sub(0,M-1,2)).T();
+  lace::globals::debug = true;
 
-  for (int i=0; i<A.size(0); i++)
-    {
-      for (int j=0; j<A.size(1); j++)
-	std::cout << boost::format("%8.3f")%A(i,j);
-      std::cout << "\n";
-    }
+  C = B(sub(0,M-1),sub(0,M-1,2)).T();
+  //A(sub(0,M-1,2),sub(0,M-1)) 
+
+  prnmtr(C);
 }

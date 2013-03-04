@@ -55,9 +55,9 @@ namespace _lace_expressions{
     
     matrix_expression<VALTYPE>& operator*(matrix_expression<VALTYPE> &A); 
 
-    vector_expression<VALTYPE>& operator*(vector_expression<VALTYPE> &v); 
+    vector_expression<VALTYPE>& operator*(vector_expression<VALTYPE> &v);
 
-    // Unary operators
+     // Unary operators
     
     matrix_expression<VALTYPE>& T();
     

@@ -8,6 +8,8 @@ namespace lace{
 
     static bool preserv_matrix;
 
+    static bool auto_reshape;
+
     static bool debug;
 
   };

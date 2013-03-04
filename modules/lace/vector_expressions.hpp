@@ -25,8 +25,8 @@ namespace _lace_expressions{
 
     typedef vector_shape shape_type;
     
-    static void process_expr(vector_expression<VALTYPE>* &target, 
-			     vector_expression<VALTYPE> *xpr);
+    //   static void process_expr(vector_expression<VALTYPE>* &target, 
+    //			     vector_expression<VALTYPE> *xpr);
 
     virtual void calculate_expr(vector_expression<VALTYPE>* &target, VALTYPE scale = VALTYPE(1e0) );
 
