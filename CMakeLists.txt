@@ -56,3 +56,8 @@ option(QPP_BUILD_SAMPLES "Build or not to build samples")
 if (QPP_BUILD_TOOLS)
 	add_subdirectory(examples)
 endif(QPP_BUILD_TOOLS)
+
+option(QPP_BUILD_TESTS "build tests executable")
+if (QPP_BUILD_TESTS)
+        add_subdirectory(tests)
+endif(QPP_BUILD_TESTS)
