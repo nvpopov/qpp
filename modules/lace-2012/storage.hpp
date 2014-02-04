@@ -2,8 +2,8 @@
 #ifndef _LACE_STORAGE_H
 #define _LACE_STORAGE_H
 
-#include <lace/shape.hpp>
-#include <lace/element.hpp>
+#include <lace-2012/shape.hpp>
+#include <lace-2012/element.hpp>
 #include <cstring>
 
 namespace _lace_storage{

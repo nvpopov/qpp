@@ -1,3 +1,5 @@
 #add_subdirectory(test1-gbf_tabulate)
 #add_subdirectory(test2-lace1)
 add_subdirectory(lace_examples)
+add_subdirectory(geom_examples)
+add_subdirectory(zpattern)

@@ -24,9 +24,14 @@ namespace lace{
       r[0] = s; r[1] = s; r[2] = s;
     }
     
-    vector3d(VALTYPE x, VALTYPE y, VALTYPE z)
+    inline void set(VALTYPE x, VALTYPE y, VALTYPE z)
     {
       r[0] = x; r[1] = y; r[2] = z;
+    }
+
+    vector3d(VALTYPE x, VALTYPE y, VALTYPE z)
+    {
+      set(x,y,z);
     }
 
     vector3d(const vector3d<VALTYPE>& v)
@@ -110,6 +115,14 @@ namespace lace{
       x() *= s;
       y() *= s;
       z() *= s;
+      return *this;
+    }
+
+    inline vector3d<VALTYPE>& operator/=(VALTYPE s)
+    {
+      x() /= s;
+      y() /= s;
+      z() /= s;
       return *this;
     }
 

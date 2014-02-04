@@ -1,476 +1,142 @@
-nonempty: "molecule Ca4F8_embed{"
-nonempty: "molecule Ca4F8_embed{"
-remove blanks "molecule Ca4F8_embed{"
-removed "molecule Ca4F8_embed{"
-remove blanks " Ca4F8_embed{"
-removed "Ca4F8_embed{"
-nonempty: "Ca4F8_embed{"
-remove blanks "Ca4F8_embed{"
-removed "Ca4F8_embed{"
-remove blanks "{"
-removed "{"
-nonempty: "{"
-statement molecule Ca4F8_embed
-nonempty: "{"
-nonempty: "fragment CaF2_UC(atom,x,y,z,charge){"
-nonempty: "fragment CaF2_UC(atom,x,y,z,charge){"
-remove blanks "fragment CaF2_UC(atom,x,y,z,charge){"
-removed "fragment CaF2_UC(atom,x,y,z,charge){"
-remove blanks " CaF2_UC(atom,x,y,z,charge){"
-removed "CaF2_UC(atom,x,y,z,charge){"
-nonempty: "CaF2_UC(atom,x,y,z,charge){"
-remove blanks "CaF2_UC(atom,x,y,z,charge){"
-removed "CaF2_UC(atom,x,y,z,charge){"
-remove blanks "(atom,x,y,z,charge){"
-removed "(atom,x,y,z,charge){"
-nonempty: "(atom,x,y,z,charge){"
-statement fragment CaF2_UC
-nonempty: "(atom,x,y,z,charge){"
-remove blanks "atom,x,y,z,charge){"
-removed "atom,x,y,z,charge){"
-remove blanks ",x,y,z,charge){"
-removed ",x,y,z,charge){"
-parameter[0] = "" value[0] = atom
-remove blanks "x,y,z,charge){"
-removed "x,y,z,charge){"
-remove blanks ",y,z,charge){"
-removed ",y,z,charge){"
-parameter[1] = "" value[1] = x
-remove blanks "y,z,charge){"
-removed "y,z,charge){"
-remove blanks ",z,charge){"
-removed ",z,charge){"
-parameter[2] = "" value[2] = y
-remove blanks "z,charge){"
-removed "z,charge){"
-remove blanks ",charge){"
-removed ",charge){"
-parameter[3] = "" value[3] = z
-remove blanks "charge){"
-removed "charge){"
-remove blanks "){"
-removed "){"
-parameter[4] = "" value[4] = charge
-nonempty: "{"
-    Ca  0.00  0.00  0.00   2.00
-    F   1.38  1.38  1.38  -0.25
-    F   1.38  1.38 -1.38  -0.25
-    F   1.38 -1.38  1.38  -0.25
-    F   1.38 -1.38 -1.38  -0.25
-    F  -1.38  1.38  1.38  -0.25
-    F  -1.38  1.38 -1.38  -0.25
-    F  -1.38 -1.38  1.38  -0.25
-    F  -1.38 -1.38 -1.38  -0.25
-  }
-nonempty: "vectors{"
-here1
-nonempty: "vectors{"
-remove blanks "vectors{"
-removed "vectors{"
-remove blanks "{"
-removed "{"
-nonempty: "{"
-remove blanks "{"
-removed "{"
-remove blanks "{"
-removed "{"
-nonempty: "{"
-statement vectors 
-nonempty: "{"
-    2.76 2.76 0.00
-    2.76 0.00 2.76
-    0.00 2.76 2.76
-  }
-nonempty: "replicate(CaF2_UC,sphere(R=25.0),center(1.38,1.38,1.38))"
-here2
-nonempty: "replicate(CaF2_UC,sphere(R=25.0),center(1.38,1.38,1.38))"
-remove blanks "replicate(CaF2_UC,sphere(R=25.0),center(1.38,1.38,1.38))"
-removed "replicate(CaF2_UC,sphere(R=25.0),center(1.38,1.38,1.38))"
-remove blanks "(CaF2_UC,sphere(R=25.0),center(1.38,1.38,1.38))"
-removed "(CaF2_UC,sphere(R=25.0),center(1.38,1.38,1.38))"
-nonempty: "(CaF2_UC,sphere(R=25.0),center(1.38,1.38,1.38))"
-remove blanks "(CaF2_UC,sphere(R=25.0),center(1.38,1.38,1.38))"
-removed "(CaF2_UC,sphere(R=25.0),center(1.38,1.38,1.38))"
-remove blanks "(CaF2_UC,sphere(R=25.0),center(1.38,1.38,1.38))"
-removed "(CaF2_UC,sphere(R=25.0),center(1.38,1.38,1.38))"
-nonempty: "(CaF2_UC,sphere(R=25.0),center(1.38,1.38,1.38))"
-statement replicate 
-nonempty: "(CaF2_UC,sphere(R=25.0),center(1.38,1.38,1.38))"
-remove blanks "CaF2_UC,sphere(R=25.0),center(1.38,1.38,1.38))"
-removed "CaF2_UC,sphere(R=25.0),center(1.38,1.38,1.38))"
-remove blanks ",sphere(R=25.0),center(1.38,1.38,1.38))"
-removed ",sphere(R=25.0),center(1.38,1.38,1.38))"
-parameter[0] = "" value[0] = CaF2_UC
-remove blanks "sphere(R=25.0),center(1.38,1.38,1.38))"
-removed "sphere(R=25.0),center(1.38,1.38,1.38))"
-remove blanks "(R=25.0),center(1.38,1.38,1.38))"
-removed "(R=25.0),center(1.38,1.38,1.38))"
-parameter[1] = sphere
-nested parameters block
-nonempty: "(R=25.0),center(1.38,1.38,1.38))"
-remove blanks "R=25.0),center(1.38,1.38,1.38))"
-removed "R=25.0),center(1.38,1.38,1.38))"
-remove blanks "=25.0),center(1.38,1.38,1.38))"
-removed "=25.0),center(1.38,1.38,1.38))"
-remove blanks "25.0),center(1.38,1.38,1.38))"
-removed "25.0),center(1.38,1.38,1.38))"
-remove blanks "),center(1.38,1.38,1.38))"
-removed "),center(1.38,1.38,1.38))"
-parameter[0] = R value[0] = 25.0
-debug:
-",center(1.38,1.38,1.38))"
-end nested parameters block
-remove blanks "center(1.38,1.38,1.38))"
-removed "center(1.38,1.38,1.38))"
-remove blanks "(1.38,1.38,1.38))"
-removed "(1.38,1.38,1.38))"
-parameter[2] = center
-nested parameters block
-nonempty: "(1.38,1.38,1.38))"
-remove blanks "1.38,1.38,1.38))"
-removed "1.38,1.38,1.38))"
-remove blanks ",1.38,1.38))"
-removed ",1.38,1.38))"
-parameter[0] = "" value[0] = 1.38
-remove blanks "1.38,1.38))"
-removed "1.38,1.38))"
-remove blanks ",1.38))"
-removed ",1.38))"
-parameter[1] = "" value[1] = 1.38
-remove blanks "1.38))"
-removed "1.38))"
-remove blanks "))"
-removed "))"
-parameter[2] = "" value[2] = 1.38
-debug:
-")"
-end nested parameters block
-nonempty: "replace( Ca, Ca_cls, sphere(R=15.0))"
-nonempty: "replace( Ca, Ca_cls, sphere(R=15.0))"
-remove blanks "replace( Ca, Ca_cls, sphere(R=15.0))"
-removed "replace( Ca, Ca_cls, sphere(R=15.0))"
-remove blanks "( Ca, Ca_cls, sphere(R=15.0))"
-removed "( Ca, Ca_cls, sphere(R=15.0))"
-nonempty: "( Ca, Ca_cls, sphere(R=15.0))"
-remove blanks "( Ca, Ca_cls, sphere(R=15.0))"
-removed "( Ca, Ca_cls, sphere(R=15.0))"
-remove blanks "( Ca, Ca_cls, sphere(R=15.0))"
-removed "( Ca, Ca_cls, sphere(R=15.0))"
-nonempty: "( Ca, Ca_cls, sphere(R=15.0))"
-statement replace 
-nonempty: "( Ca, Ca_cls, sphere(R=15.0))"
-remove blanks " Ca, Ca_cls, sphere(R=15.0))"
-removed "Ca, Ca_cls, sphere(R=15.0))"
-remove blanks ", Ca_cls, sphere(R=15.0))"
-removed ", Ca_cls, sphere(R=15.0))"
-parameter[0] = "" value[0] = Ca
-remove blanks " Ca_cls, sphere(R=15.0))"
-removed "Ca_cls, sphere(R=15.0))"
-remove blanks ", sphere(R=15.0))"
-removed ", sphere(R=15.0))"
-parameter[1] = "" value[1] = Ca_cls
-remove blanks " sphere(R=15.0))"
-removed "sphere(R=15.0))"
-remove blanks "(R=15.0))"
-removed "(R=15.0))"
-parameter[2] = sphere
-nested parameters block
-nonempty: "(R=15.0))"
-remove blanks "R=15.0))"
-removed "R=15.0))"
-remove blanks "=15.0))"
-removed "=15.0))"
-remove blanks "15.0))"
-removed "15.0))"
-remove blanks "))"
-removed "))"
-parameter[0] = R value[0] = 15.0
-debug:
-")"
-end nested parameters block
-nonempty: "replace(  F,  F_cls, sphere(R=15.0))"
-nonempty: "replace(  F,  F_cls, sphere(R=15.0))"
-remove blanks "replace(  F,  F_cls, sphere(R=15.0))"
-removed "replace(  F,  F_cls, sphere(R=15.0))"
-remove blanks "(  F,  F_cls, sphere(R=15.0))"
-removed "(  F,  F_cls, sphere(R=15.0))"
-nonempty: "(  F,  F_cls, sphere(R=15.0))"
-remove blanks "(  F,  F_cls, sphere(R=15.0))"
-removed "(  F,  F_cls, sphere(R=15.0))"
-remove blanks "(  F,  F_cls, sphere(R=15.0))"
-removed "(  F,  F_cls, sphere(R=15.0))"
-nonempty: "(  F,  F_cls, sphere(R=15.0))"
-statement replace 
-nonempty: "(  F,  F_cls, sphere(R=15.0))"
-remove blanks "  F,  F_cls, sphere(R=15.0))"
-removed "F,  F_cls, sphere(R=15.0))"
-remove blanks ",  F_cls, sphere(R=15.0))"
-removed ",  F_cls, sphere(R=15.0))"
-parameter[0] = "" value[0] = F
-remove blanks "  F_cls, sphere(R=15.0))"
-removed "F_cls, sphere(R=15.0))"
-remove blanks ", sphere(R=15.0))"
-removed ", sphere(R=15.0))"
-parameter[1] = "" value[1] = F_cls
-remove blanks " sphere(R=15.0))"
-removed "sphere(R=15.0))"
-remove blanks "(R=15.0))"
-removed "(R=15.0))"
-parameter[2] = sphere
-nested parameters block
-nonempty: "(R=15.0))"
-remove blanks "R=15.0))"
-removed "R=15.0))"
-remove blanks "=15.0))"
-removed "=15.0))"
-remove blanks "15.0))"
-removed "15.0))"
-remove blanks "))"
-removed "))"
-parameter[0] = R value[0] = 15.0
-debug:
-")"
-end nested parameters block
-nonempty: "fragment QM_cluster{"
-nonempty: "fragment QM_cluster{"
-remove blanks "fragment QM_cluster{"
-removed "fragment QM_cluster{"
-remove blanks " QM_cluster{"
-removed "QM_cluster{"
-nonempty: "QM_cluster{"
-remove blanks "QM_cluster{"
-removed "QM_cluster{"
-remove blanks "{"
-removed "{"
-nonempty: "{"
-statement fragment QM_cluster
-nonempty: "{"
-    F_QM   0.00  0.00  0.00
-    F_QM   2.76  0.00  0.00
-    F_QM  -2.76  0.00  0.00
-    F_QM   0.00  2.76  0.00
-    F_QM   0.00 -2.76  0.00
-    F_QM   0.00  0.00  2.76 
-    F_QM   0.00  0.00 -2.76 
-    Ca_QM  1.38  1.38  1.38
-    Ca_QM  1.38 -1.38 -1.38
-    Ca_QM -1.38  1.38 -1.38
-    Ca_QM  1.38 -1.38  1.38
-  }
-nonempty: "replace(QM_cluster)"
-here1
-nonempty: "replace(QM_cluster)"
-remove blanks "replace(QM_cluster)"
-removed "replace(QM_cluster)"
-remove blanks "(QM_cluster)"
-removed "(QM_cluster)"
-nonempty: "(QM_cluster)"
-remove blanks "(QM_cluster)"
-removed "(QM_cluster)"
-remove blanks "(QM_cluster)"
-removed "(QM_cluster)"
-nonempty: "(QM_cluster)"
-statement replace 
-nonempty: "(QM_cluster)"
-remove blanks "QM_cluster)"
-removed "QM_cluster)"
-remove blanks ")"
-removed ")"
-parameter[0] = "" value[0] = QM_cluster
-nonempty: "atom Ca_QM{"
-nonempty: "atom Ca_QM{"
-remove blanks "atom Ca_QM{"
-removed "atom Ca_QM{"
-remove blanks " Ca_QM{"
-removed "Ca_QM{"
-nonempty: "Ca_QM{"
-remove blanks "Ca_QM{"
-removed "Ca_QM{"
-remove blanks "{"
-removed "{"
-nonempty: "{"
-statement atom Ca_QM
-nonempty: "{"
-nonempty: "number = 20"
-nonempty: "number = 20"
-remove blanks "number = 20"
-removed "number = 20"
-remove blanks " = 20"
-removed "= 20"
-nonempty: "= 20"
-nonempty: "20"
-remove blanks "20"
-removed "20"
-nonempty: "basis 6-31G"
-nonempty: "basis 6-31G"
-remove blanks "basis 6-31G"
-removed "basis 6-31G"
-remove blanks " 6-31G"
-removed "6-31G"
-nonempty: "6-31G"
-remove blanks "6-31G"
-removed "6-31G"
-nonempty: "}"
-statement basis 6-31G
-nonempty: "}"
-nonempty: "}"
-remove blanks "}"
-removed "}"
-remove blanks "}"
-removed "}"
-nonempty: "}"
-nonempty: "atom F_QM{"
-remove blanks "atom F_QM{"
-removed "atom F_QM{"
-remove blanks " F_QM{"
-removed "F_QM{"
-nonempty: "F_QM{"
-remove blanks "F_QM{"
-removed "F_QM{"
-remove blanks "{"
-removed "{"
-nonempty: "{"
-statement atom F_QM
-nonempty: "{"
-nonempty: "number(9)"
-nonempty: "number(9)"
-remove blanks "number(9)"
-removed "number(9)"
-remove blanks "(9)"
-removed "(9)"
-nonempty: "(9)"
-remove blanks "(9)"
-removed "(9)"
-remove blanks "(9)"
-removed "(9)"
-nonempty: "(9)"
-statement number 
-nonempty: "(9)"
-remove blanks "9)"
-removed "9)"
-remove blanks ")"
-removed ")"
-parameter[0] = "" value[0] = 9
-nonempty: "basis 6-31G"
-nonempty: "basis 6-31G"
-remove blanks "basis 6-31G"
-removed "basis 6-31G"
-remove blanks " 6-31G"
-removed "6-31G"
-nonempty: "6-31G"
-remove blanks "6-31G"
-removed "6-31G"
-nonempty: "}"
-statement basis 6-31G
-nonempty: "}"
-nonempty: "}"
-remove blanks "}"
-removed "}"
-remove blanks "}"
-removed "}"
-nonempty: "}"
-nonempty: "atom Ca_cls{"
-remove blanks "atom Ca_cls{"
-removed "atom Ca_cls{"
-remove blanks " Ca_cls{"
-removed "Ca_cls{"
-nonempty: "Ca_cls{"
-remove blanks "Ca_cls{"
-removed "Ca_cls{"
-remove blanks "{"
-removed "{"
-nonempty: "{"
-statement atom Ca_cls
-nonempty: "{"
-nonempty: "number = 20"
-nonempty: "number = 20"
-remove blanks "number = 20"
-removed "number = 20"
-remove blanks " = 20"
-removed "= 20"
-nonempty: "= 20"
-nonempty: "20"
-remove blanks "20"
-removed "20"
-nonempty: "charge(2.0)"
-nonempty: "charge(2.0)"
-remove blanks "charge(2.0)"
-removed "charge(2.0)"
-remove blanks "(2.0)"
-removed "(2.0)"
-nonempty: "(2.0)"
-remove blanks "(2.0)"
-removed "(2.0)"
-remove blanks "(2.0)"
-removed "(2.0)"
-nonempty: "(2.0)"
-statement charge 
-nonempty: "(2.0)"
-remove blanks "2.0)"
-removed "2.0)"
-remove blanks ")"
-removed ")"
-parameter[0] = "" value[0] = 2.0
-nonempty: "}"
-nonempty: "}"
-remove blanks "}"
-removed "}"
-remove blanks "}"
-removed "}"
-nonempty: "}"
-nonempty: "atom F_cls{"
-remove blanks "atom F_cls{"
-removed "atom F_cls{"
-remove blanks " F_cls{"
-removed "F_cls{"
-nonempty: "F_cls{"
-remove blanks "F_cls{"
-removed "F_cls{"
-remove blanks "{"
-removed "{"
-nonempty: "{"
-statement atom F_cls
-nonempty: "{"
-nonempty: "number = 9"
-nonempty: "number = 9"
-remove blanks "number = 9"
-removed "number = 9"
-remove blanks " = 9"
-removed "= 9"
-nonempty: "= 9"
-nonempty: "9"
-remove blanks "9"
-removed "9"
-nonempty: "charge = -1.0"
-nonempty: "charge = -1.0"
-remove blanks "charge = -1.0"
-removed "charge = -1.0"
-remove blanks " = -1.0"
-removed "= -1.0"
-nonempty: "= -1.0"
-nonempty: "-1.0"
-remove blanks "-1.0"
-removed "-1.0"
-nonempty: "alpha = 0.5"
-nonempty: "alpha = 0.5"
-remove blanks "alpha = 0.5"
-removed "alpha = 0.5"
-remove blanks " = 0.5"
-removed "= 0.5"
-nonempty: "= 0.5"
-nonempty: "0.5"
-remove blanks "0.5"
-removed "0.5"
-nonempty: "}"
-nonempty: "}"
-remove blanks "}"
-removed "}"
-remove blanks "}"
-removed "}"
-nonempty: "}"
-nonempty: "}"
-remove blanks "}"
-removed "}"
-remove blanks "}"
-removed "}"
-nonempty: ""
+2.c++: In function ‘qpp_statement* parse_qpp_statement(tokenizer<char>)’:
+2.c++:407:14: error: no match for ‘operator==’ in ‘smb == '('’
+2.c++:407:14: note: candidates are:
+In file included from /usr/include/c++/4.7/vector:65:0,
+                 from 2.c++:4:
+/usr/include/c++/4.7/bits/stl_vector.h:1370:5: note: template<class _Tp, class _Alloc> bool std::operator==(const std::vector<_Tp, _Alloc>&, const std::vector<_Tp, _Alloc>&)
+/usr/include/c++/4.7/bits/stl_vector.h:1370:5: note:   template argument deduction/substitution failed:
+2.c++:407:14: note:   ‘std::string {aka std::basic_string<char>}’ is not derived from ‘const std::vector<_Tp, _Alloc>’
+In file included from /usr/include/c++/4.7/bits/locale_facets.h:50:0,
+                 from /usr/include/c++/4.7/bits/basic_ios.h:39,
+                 from /usr/include/c++/4.7/ios:45,
+                 from /usr/include/c++/4.7/ostream:40,
+                 from /usr/include/c++/4.7/iostream:40,
+                 from 2.c++:1:
+/usr/include/c++/4.7/bits/streambuf_iterator.h:206:5: note: template<class _CharT, class _Traits> bool std::operator==(const std::istreambuf_iterator<_CharT, _Traits>&, const std::istreambuf_iterator<_CharT, _Traits>&)
+/usr/include/c++/4.7/bits/streambuf_iterator.h:206:5: note:   template argument deduction/substitution failed:
+2.c++:407:14: note:   ‘std::string {aka std::basic_string<char>}’ is not derived from ‘const std::istreambuf_iterator<_CharT, _Traits>’
+In file included from /usr/include/c++/4.7/string:54:0,
+                 from /usr/include/c++/4.7/bits/locale_classes.h:42,
+                 from /usr/include/c++/4.7/bits/ios_base.h:43,
+                 from /usr/include/c++/4.7/ios:43,
+                 from /usr/include/c++/4.7/ostream:40,
+                 from /usr/include/c++/4.7/iostream:40,
+                 from 2.c++:1:
+/usr/include/c++/4.7/bits/basic_string.h:2516:5: note: template<class _CharT, class _Traits, class _Alloc> bool std::operator==(const std::basic_string<_CharT, _Traits, _Alloc>&, const _CharT*)
+/usr/include/c++/4.7/bits/basic_string.h:2516:5: note:   template argument deduction/substitution failed:
+2.c++:407:14: note:   mismatched types ‘const _CharT*’ and ‘char’
+In file included from /usr/include/c++/4.7/string:54:0,
+                 from /usr/include/c++/4.7/bits/locale_classes.h:42,
+                 from /usr/include/c++/4.7/bits/ios_base.h:43,
+                 from /usr/include/c++/4.7/ios:43,
+                 from /usr/include/c++/4.7/ostream:40,
+                 from /usr/include/c++/4.7/iostream:40,
+                 from 2.c++:1:
+/usr/include/c++/4.7/bits/basic_string.h:2504:5: note: template<class _CharT, class _Traits, class _Alloc> bool std::operator==(const _CharT*, const std::basic_string<_CharT, _Traits, _Alloc>&)
+/usr/include/c++/4.7/bits/basic_string.h:2504:5: note:   template argument deduction/substitution failed:
+2.c++:407:14: note:   mismatched types ‘const _CharT*’ and ‘std::basic_string<char>’
+In file included from /usr/include/c++/4.7/string:54:0,
+                 from /usr/include/c++/4.7/bits/locale_classes.h:42,
+                 from /usr/include/c++/4.7/bits/ios_base.h:43,
+                 from /usr/include/c++/4.7/ios:43,
+                 from /usr/include/c++/4.7/ostream:40,
+                 from /usr/include/c++/4.7/iostream:40,
+                 from 2.c++:1:
+/usr/include/c++/4.7/bits/basic_string.h:2490:5: note: template<class _CharT> typename __gnu_cxx::__enable_if<std::__is_char<_Tp>::__value, bool>::__type std::operator==(const std::basic_string<_CharT>&, const std::basic_string<_CharT>&)
+/usr/include/c++/4.7/bits/basic_string.h:2490:5: note:   template argument deduction/substitution failed:
+2.c++:407:14: note:   mismatched types ‘const std::basic_string<_CharT>’ and ‘char’
+In file included from /usr/include/c++/4.7/string:54:0,
+                 from /usr/include/c++/4.7/bits/locale_classes.h:42,
+                 from /usr/include/c++/4.7/bits/ios_base.h:43,
+                 from /usr/include/c++/4.7/ios:43,
+                 from /usr/include/c++/4.7/ostream:40,
+                 from /usr/include/c++/4.7/iostream:40,
+                 from 2.c++:1:
+/usr/include/c++/4.7/bits/basic_string.h:2483:5: note: template<class _CharT, class _Traits, class _Alloc> bool std::operator==(const std::basic_string<_CharT, _Traits, _Alloc>&, const std::basic_string<_CharT, _Traits, _Alloc>&)
+/usr/include/c++/4.7/bits/basic_string.h:2483:5: note:   template argument deduction/substitution failed:
+2.c++:407:14: note:   mismatched types ‘const std::basic_string<_CharT, _Traits, _Alloc>’ and ‘char’
+In file included from /usr/include/c++/4.7/string:43:0,
+                 from /usr/include/c++/4.7/bits/locale_classes.h:42,
+                 from /usr/include/c++/4.7/bits/ios_base.h:43,
+                 from /usr/include/c++/4.7/ios:43,
+                 from /usr/include/c++/4.7/ostream:40,
+                 from /usr/include/c++/4.7/iostream:40,
+                 from 2.c++:1:
+/usr/include/c++/4.7/bits/allocator.h:124:5: note: template<class _Tp> bool std::operator==(const std::allocator<_Tp1>&, const std::allocator<_Tp1>&)
+/usr/include/c++/4.7/bits/allocator.h:124:5: note:   template argument deduction/substitution failed:
+2.c++:407:14: note:   ‘std::string {aka std::basic_string<char>}’ is not derived from ‘const std::allocator<_Tp1>’
+In file included from /usr/include/c++/4.7/string:43:0,
+                 from /usr/include/c++/4.7/bits/locale_classes.h:42,
+                 from /usr/include/c++/4.7/bits/ios_base.h:43,
+                 from /usr/include/c++/4.7/ios:43,
+                 from /usr/include/c++/4.7/ostream:40,
+                 from /usr/include/c++/4.7/iostream:40,
+                 from 2.c++:1:
+/usr/include/c++/4.7/bits/allocator.h:119:5: note: template<class _T1, class _T2> bool std::operator==(const std::allocator<_T1>&, const std::allocator<_T2>&)
+/usr/include/c++/4.7/bits/allocator.h:119:5: note:   template argument deduction/substitution failed:
+2.c++:407:14: note:   ‘std::string {aka std::basic_string<char>}’ is not derived from ‘const std::allocator<_T1>’
+In file included from /usr/include/c++/4.7/bits/stl_algobase.h:68:0,
+                 from /usr/include/c++/4.7/bits/char_traits.h:41,
+                 from /usr/include/c++/4.7/ios:41,
+                 from /usr/include/c++/4.7/ostream:40,
+                 from /usr/include/c++/4.7/iostream:40,
+                 from 2.c++:1:
+/usr/include/c++/4.7/bits/stl_iterator.h:343:5: note: template<class _IteratorL, class _IteratorR> bool std::operator==(const std::reverse_iterator<_IteratorL>&, const std::reverse_iterator<_IteratorR>&)
+/usr/include/c++/4.7/bits/stl_iterator.h:343:5: note:   template argument deduction/substitution failed:
+2.c++:407:14: note:   ‘std::string {aka std::basic_string<char>}’ is not derived from ‘const std::reverse_iterator<_IteratorL>’
+In file included from /usr/include/c++/4.7/bits/stl_algobase.h:68:0,
+                 from /usr/include/c++/4.7/bits/char_traits.h:41,
+                 from /usr/include/c++/4.7/ios:41,
+                 from /usr/include/c++/4.7/ostream:40,
+                 from /usr/include/c++/4.7/iostream:40,
+                 from 2.c++:1:
+/usr/include/c++/4.7/bits/stl_iterator.h:293:5: note: template<class _Iterator> bool std::operator==(const std::reverse_iterator<_Iterator>&, const std::reverse_iterator<_Iterator>&)
+/usr/include/c++/4.7/bits/stl_iterator.h:293:5: note:   template argument deduction/substitution failed:
+2.c++:407:14: note:   ‘std::string {aka std::basic_string<char>}’ is not derived from ‘const std::reverse_iterator<_Iterator>’
+In file included from /usr/include/c++/4.7/bits/stl_algobase.h:65:0,
+                 from /usr/include/c++/4.7/bits/char_traits.h:41,
+                 from /usr/include/c++/4.7/ios:41,
+                 from /usr/include/c++/4.7/ostream:40,
+                 from /usr/include/c++/4.7/iostream:40,
+                 from 2.c++:1:
+/usr/include/c++/4.7/bits/stl_pair.h:206:5: note: template<class _T1, class _T2> bool std::operator==(const std::pair<_T1, _T2>&, const std::pair<_T1, _T2>&)
+/usr/include/c++/4.7/bits/stl_pair.h:206:5: note:   template argument deduction/substitution failed:
+2.c++:407:14: note:   ‘std::string {aka std::basic_string<char>}’ is not derived from ‘const std::pair<_T1, _T2>’
+In file included from /usr/include/c++/4.7/iosfwd:42:0,
+                 from /usr/include/c++/4.7/ios:39,
+                 from /usr/include/c++/4.7/ostream:40,
+                 from /usr/include/c++/4.7/iostream:40,
+                 from 2.c++:1:
+/usr/include/c++/4.7/bits/postypes.h:218:5: note: template<class _StateT> bool std::operator==(const std::fpos<_StateT>&, const std::fpos<_StateT>&)
+/usr/include/c++/4.7/bits/postypes.h:218:5: note:   template argument deduction/substitution failed:
+2.c++:407:14: note:   ‘std::string {aka std::basic_string<char>}’ is not derived from ‘const std::fpos<_StateT>’
+In file included from /usr/include/c++/4.7/x86_64-linux-gnu/bits/c++allocator.h:34:0,
+                 from /usr/include/c++/4.7/bits/allocator.h:48,
+                 from /usr/include/c++/4.7/string:43,
+                 from /usr/include/c++/4.7/bits/locale_classes.h:42,
+                 from /usr/include/c++/4.7/bits/ios_base.h:43,
+                 from /usr/include/c++/4.7/ios:43,
+                 from /usr/include/c++/4.7/ostream:40,
+                 from /usr/include/c++/4.7/iostream:40,
+                 from 2.c++:1:
+/usr/include/c++/4.7/ext/new_allocator.h:129:5: note: template<class _Tp> bool __gnu_cxx::operator==(const __gnu_cxx::new_allocator<_Tp>&, const __gnu_cxx::new_allocator<_Tp>&)
+/usr/include/c++/4.7/ext/new_allocator.h:129:5: note:   template argument deduction/substitution failed:
+2.c++:407:14: note:   ‘std::string {aka std::basic_string<char>}’ is not derived from ‘const __gnu_cxx::new_allocator<_Tp>’
+In file included from /usr/include/c++/4.7/bits/stl_algobase.h:68:0,
+                 from /usr/include/c++/4.7/bits/char_traits.h:41,
+                 from /usr/include/c++/4.7/ios:41,
+                 from /usr/include/c++/4.7/ostream:40,
+                 from /usr/include/c++/4.7/iostream:40,
+                 from 2.c++:1:
+/usr/include/c++/4.7/bits/stl_iterator.h:813:5: note: template<class _Iterator, class _Container> bool __gnu_cxx::operator==(const __gnu_cxx::__normal_iterator<_Iterator, _Container>&, const __gnu_cxx::__normal_iterator<_Iterator, _Container>&)
+/usr/include/c++/4.7/bits/stl_iterator.h:813:5: note:   template argument deduction/substitution failed:
+2.c++:407:14: note:   ‘std::string {aka std::basic_string<char>}’ is not derived from ‘const __gnu_cxx::__normal_iterator<_Iterator, _Container>’
+In file included from /usr/include/c++/4.7/bits/stl_algobase.h:68:0,
+                 from /usr/include/c++/4.7/bits/char_traits.h:41,
+                 from /usr/include/c++/4.7/ios:41,
+                 from /usr/include/c++/4.7/ostream:40,
+                 from /usr/include/c++/4.7/iostream:40,
+                 from 2.c++:1:
+/usr/include/c++/4.7/bits/stl_iterator.h:807:5: note: template<class _IteratorL, class _IteratorR, class _Container> bool __gnu_cxx::operator==(const __gnu_cxx::__normal_iterator<_IteratorL, _Container>&, const __gnu_cxx::__normal_iterator<_IteratorR, _Container>&)
+/usr/include/c++/4.7/bits/stl_iterator.h:807:5: note:   template argument deduction/substitution failed:
+2.c++:407:14: note:   ‘std::string {aka std::basic_string<char>}’ is not derived from ‘const __gnu_cxx::__normal_iterator<_IteratorL, _Container>’

@@ -4,9 +4,9 @@
 
 #include <boost/format.hpp>
 
-#include <lace/storage.hpp>
-#include <lace/matrix_expressions.hpp>
-#include <lace/vector_expressions.hpp>
+#include <lace-2012/storage.hpp>
+#include <lace-2012/matrix_expressions.hpp>
+#include <lace-2012/vector_expressions.hpp>
 
 namespace _lace_expressions{
 

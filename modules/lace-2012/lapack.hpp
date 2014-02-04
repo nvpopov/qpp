@@ -4,8 +4,8 @@
 // #include <lace/matrix.hpp>
 // #include <lace/vector.hpp>
 
-#include <lace/shape.hpp>
-#include <lace/complex.hpp>
+#include <lace-2012/shape.hpp>
+#include <lace-2012/complex.hpp>
 
 namespace _lace_storage{
 

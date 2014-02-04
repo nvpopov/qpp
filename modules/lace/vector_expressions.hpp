@@ -72,10 +72,12 @@ namespace _lace_expressions{
 
     virtual int basetype(){return _vector;}
     
-    virtual vector_shape shape()
+    static vector_shape shape()
     { return _lace_storage::vector_shape(); }
 
-    virtual _lace_storage::vector_type vtype(){return shape().vtype;}
+    //    virtual _lace_storage::vector_type vtype(){return shape().vtype;}
+
+    virtual _lace_storage::vector_type type(){}
 
     virtual void reshape( vector_shape shp )
     { assert( false && "Error: vector_expression::reshape is just an interface to vector::reshape and should never be used"); }
@@ -514,7 +516,7 @@ namespace _lace_expressions{
     {
       if (vtr -> gettype() & _actual)
 	{
-	  _lace_main::wizard<VALTYPE>::V(vtr->vtype()).scale(*vtr, s, I->rng());
+	  _lace_main::wizard<VALTYPE>::V(vtr->type()).scale(*vtr, s, I->rng());
 	  return *this;
 	}
       else
@@ -525,7 +527,7 @@ namespace _lace_expressions{
     {
       if (vtr -> gettype() & _actual)
 	{
-	  _lace_main::wizard<VALTYPE>::V(vtr->vtype()).fill(*vtr, s, I->rng());
+	  _lace_main::wizard<VALTYPE>::V(vtr->type()).fill(*vtr, s, I->rng());
 	  return *this;
 	}
       else

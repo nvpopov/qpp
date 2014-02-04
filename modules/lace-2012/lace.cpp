@@ -1,11 +1,11 @@
 #include <iostream>
 #include <cassert>
 #include <cstring>
-#include <lace/lace.hpp>
+#include <lace-2012/lace.hpp>
 #include <string>
 #include <sstream>
 #include <boost/format.hpp>
-#include <lace/matrix_expressions.hpp>
+#include <lace-2012/matrix_expressions.hpp>
 
 namespace _lace_expressions{
 

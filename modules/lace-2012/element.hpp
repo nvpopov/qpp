@@ -1,8 +1,8 @@
 #ifndef _LACE_ELEMENT_H
 #define _LACE_ELEMENT_H
 
-#include <lace/complex.hpp>
-#include <lace/shape.hpp>
+#include <lace-2012/complex.hpp>
+#include <lace-2012/shape.hpp>
 
 namespace _lace_storage{
 

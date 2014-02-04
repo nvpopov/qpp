@@ -1,12 +1,7 @@
 #ifndef _LACE_WIZARD_INSTANCE_H
 #define _LACE_WIZARD_INSTANCE_H
 
-// #include <lace/shape.hpp>
-// #include <lace/storage.hpp>
-// #include <lace/matrix.hpp>
-// #include <lace/expressions.hpp>
-#include <lace/wizard.hpp>
-//#include <lace/engine.hpp>
+#include <lace-2012/wizard.hpp>
 
 namespace _lace_main{
 

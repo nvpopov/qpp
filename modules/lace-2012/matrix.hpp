@@ -7,16 +7,11 @@
 
 #include <boost/format.hpp>
 
-//#include <lace/shape.hpp>
-#include <lace/storage.hpp>
-//#include <lace/tree.hpp>
-//#include <lace/expressions.hpp>
-#include <lace/matrix_expressions.hpp>
-#include <lace/vector_expressions.hpp>
-//#include <lace/complex.hpp>
-#include <lace/element.hpp>
-//#include <lace/engine.hpp>
-#include <lace/globals.hpp>
+#include <lace-2012/storage.hpp>
+#include <lace-2012/matrix_expressions.hpp>
+#include <lace-2012/vector_expressions.hpp>
+#include <lace-2012/element.hpp>
+#include <lace-2012/globals.hpp>
 
 namespace _lace_expressions{
 

@@ -3,9 +3,9 @@
 
 //#include <lace/tree.hpp>
 //#include <lace/shape.hpp>
-#include <lace/expressions.hpp>
-#include <lace/range.hpp>
-#include <lace/globals.hpp>
+#include <lace-2012/expressions.hpp>
+#include <lace-2012/range.hpp>
+#include <lace-2012/globals.hpp>
 
 //#include <bits/cpp_type_traits.h>
 

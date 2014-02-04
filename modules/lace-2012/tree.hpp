@@ -2,7 +2,7 @@
 #define _LACE_TREE_H
 
 #include <vector>
-#include <lace/globals.hpp>
+#include <lace-2012/globals.hpp>
 
 namespace _lace_tree{
   

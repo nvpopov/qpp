@@ -1,8 +1,8 @@
 #ifndef _LACE_CALCULATOR_H
 #define _LACE_CALCULATOR_H
 
-#include <lace/engine.hpp>
-#include <lace/globals.hpp>
+#include <lace-2012/engine.hpp>
+#include <lace-2012/globals.hpp>
 
 namespace _lace_expressions{
 

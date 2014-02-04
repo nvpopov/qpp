@@ -1,9 +1,7 @@
 #ifndef _LACE_VECTOR_EXPRESSIONS_H
 #define _LACE_VECTOR_EXPRESSIONS_H
 
-//#include <lace/tree.hpp>
-#include <lace/expressions.hpp>
-//#include <lace/matrix_expressions.hpp>
+#include <lace-2012/expressions.hpp>
 
 namespace _lace_expressions{
 

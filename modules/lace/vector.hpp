@@ -195,7 +195,7 @@ namespace _lace_expressions{
     
     virtual bool is_same(vector_expression<VALTYPE> &a)
     {
-      if ( a.gettype() == gettype() && a.vtype() == VTYPE )
+      if ( a.gettype() == gettype() && a.type() == VTYPE )
 	{
 	  return ((vector<VALTYPE,VTYPE>*)(&a)) -> _vtr == _vtr;
 	}

@@ -1,118 +1,34 @@
 #ifndef _QPP_GEOM_H
 #define _QPP_GEOM_H
 
+#include <vector>
+#include <cmath>
 #include <lace/lace3d.hpp>
 #include <lace/lace.hpp>
 #include <symm/symm.hpp>
-#include <vector>
-#include <cmath>
+#include <io/qppdata.hpp>
+#include <constants.hpp>
 
 namespace qpp{
 
-  //fixme - bring all numeric constansts and tolerance thresholds to one place
-  double symmtol = 1e-5;
-
-  // Very simple realization of vectors of fixed dimesion
-  // Presumably dimesion is 1, 2, or 3 (however, it can larger)
-  // simple vectors can be added, subtracted and multiplied by number
-  //
-  // Defined here just for convinience of manipulating 
-  // fractional coordinates and related values
-  //
-  // No attempts are made to optimize the data manipulation within
-  // this type, due to very small dimensions the overhead is 
-  // considered to be negligible
-  //  template <class ELEM,int DIM>
-  //class simple_vector{
-  //  ELEM data[DIM];
-  //public:
-    
-  //  simple_vector()
-  //  {}
-
-  //  simple_vector(ELEM *_data)
-  //  {
-  //    for (int i=0; i<DIM; i++)
-  //	data[i]=_data[i];
-  //  }
-    
-  //  inline ELEM & operator()(int i)
-  //  { return data[i]; }
-    
-  //  inline simple_vector<ELEM,DIM>  operator+(simple_vector b)
-  //  {
-  //    ELEM cdata[DIM];
-  //    for (int i=0; i<DIM; i++)
-  //	cdata[i] = data[i]+b.data[i];
-  //   return simple_vector<ELEM,DIM>(cdata);
-  //  }
-
-  //  inline simple_vector<ELEM,DIM>  operator-(simple_vector b)
-  // {
-  //  ELEM cdata[DIM];
-  //  for (int i=0; i<DIM; i++)
-  //	cdata[i] = data[i]-b.data[i];
-  //  return simple_vector<ELEM,DIM>(cdata);
-  //}
-
-  //inline simple_vector<ELEM,DIM>  operator*(ELEM b)
-  //{
-  //  ELEM cdata[DIM];
-  //  for (int i=0; i<DIM; i++)
-  //	cdata[i] = data[i]*b;
-  //  return simple_vector<ELEM,DIM>(cdata);
-  //}
-    
-  //};
-  
-  //template <class ELEM,int DIM>
-  //inline simple_vector<ELEM,DIM>  operator*(ELEM a, simple_vector<ELEM,DIM> b)
-  //{
-  //  ELEM cdata[DIM];/
-  //  for (int i=0; i<DIM; i++)
-  //    cdata[i] = a*b(i);
-  //  return simple_vector<ELEM,DIM>(cdata);
-  // }
-
-  // functions to simplify the creation of 1,2 and 3-dimensional
-  // simple vectors
-
-  //template <class ELEM>  
-  //simple_vector<ELEM,1> sv1(ELEM x)
-  //{
-  //simple_vector<ELEM,1> v;
-  ///v(0) = x;
-  // return v;
-  //}
-
-  //template <class ELEM>  
-  //simple_vector<ELEM,2> sv2(ELEM x, ELEM y)
-  // {
-  //simple_vector<ELEM,2> v;
-  //v(0) = x; v(1)=y;
-  //return v;
-  //}
-
-  //template <class ELEM>  
-  //simple_vector<ELEM,3> sv1(ELEM x, ELEM y, ELEM z)
-  //{
-  //simple_vector<ELEM,3> v;
-  //v(0) = x; v(1) = y; v(2) = z;
-  //return v;
-  //}
-    
   //--------------------------------------------------------------//
 
   // The struct to store 1, 2 or 3 translation vectors
-  template<int DIM,class VALTYPE=double>
-  struct periodic_cell{
+  template<int DIM,class VALTYPE=double, class charT = char, class traits = std::char_traits<charT> >
+  struct periodic_cell :  public qpp_object<charT,traits>{
     lace::vector3d<VALTYPE> v[DIM];
 
-    periodic_cell()
-    {}
+    using typename qpp_object<charT,traits>::string;
+
+    string _name;
+
+    periodic_cell(string __name = "")
+    {
+      _name = __name;
+    }
 
     periodic_cell(VALTYPE a, VALTYPE b, VALTYPE c,
-		  VALTYPE alpha, VALTYPE beta, VALTYPE gamma)
+		  VALTYPE alpha, VALTYPE beta, VALTYPE gamma, string __name = "")
     // for DIM==3
     {
       v[0] = lace::vector3d<VALTYPE>(a,VALTYPE(0),VALTYPE(0));
@@ -122,6 +38,19 @@ namespace qpp{
       VALTYPE ny = (std::cos(alpha) - nx*std::cos(gamma))/std::sin(gamma);
       VALTYPE nz = std::sqrt(1-nx*nx-ny*ny);
       v[2] = lace::vector3d<VALTYPE>(nx,ny,nz)*c;
+
+      _name = __name;
+    }
+
+    periodic_cell(lace::vector3d<VALTYPE > a, lace::vector3d<VALTYPE > b=0, lace::vector3d<VALTYPE > c=0)
+    {
+      _name = "";
+      if (DIM>0)
+	v[0] = a;
+      if (DIM>1)
+	v[1] = b;
+      if (DIM>2)
+	v[2] = c;
     }
 
     inline lace::vector3d<VALTYPE> & operator()(int i)
@@ -220,6 +149,48 @@ namespace qpp{
     // fixme - implement this!
     {}
 
+    virtual string category()
+    {
+      return "vectors";
+    }
+
+    virtual string name()
+    {
+      return _name;
+    }
+
+    virtual int gettype()
+    {
+      int d;
+      if (DIM==0)
+	d = qppdata_dim0;
+      else if (DIM==1)
+	d = qppdata_dim1;
+      else if (DIM==2)
+	d = qppdata_dim2;
+      else if (DIM==3)
+	d = qppdata_dim3;
+      return qppdata_vectors | d;
+    }
+
+    virtual void write(std::basic_ostream<charT,traits> &os, int offset=0)
+    {
+      for (int k=0; k<offset; k++) os << " ";
+      os << "vectors";
+      if (_name != "")
+	os << " " << _name;
+      os << "(" << DIM << "d){\n";
+
+      for (int i=0; i<DIM; i++)
+	{
+	  for (int k=0; k<offset+2; k++) os << " ";
+	  os << boost::format(" %11.6f %11.6f %11.6f\n") % v[i](0) % v[i](1) % v[i](2);	  
+	}
+
+      for (int k=0; k<offset; k++) os << " ";
+      os << "}\n";
+    }
+
   };
 
   // ------------------- index class ----------------------
@@ -232,7 +203,7 @@ namespace qpp{
   class index{
   protected:
     int at;
-    int cll[DIM];
+    int cll[DIM];    
     
   public:
     inline index& operator=(int _at)
@@ -247,7 +218,7 @@ namespace qpp{
       return *this;
     }
     
-    //      inline operator int(){return at;}
+    inline operator int(){return at;}
     
     inline int atom(){return at;}
     
@@ -293,11 +264,31 @@ namespace qpp{
     
   };
 
+  /*  template<typename _CharT, class _Traits, int DIM>
+  std::basic_ostream<_CharT, _Traits>&
+  operator<<(std::basic_ostream<_CharT, _Traits>& __os, index<DIM> i)
+  {
+    std::basic_ostringstream<_CharT, _Traits> __s;
+    __s.flags(__os.flags());
+    __s.imbue(__os.getloc());
+    __s.precision(__os.precision());
+    
+    __s << i.atom();
+    if (DIM>0)
+      {
+	__s << "("  << i.cell(0);
+	for (int d=1; d<DIM; d++)
+	  __s << "," << i.cell(d);
+	__s << ")";
+      }
+    return __os << __s.str();
+  }
+  */
   //--------------------------------------------------------------//
 
 
   // The geometry class stores atoms together with their
-  // coordinates. As POINT is a template parameter, you can
+  // coordinates. As ATOM is a template parameter, you can
   // use almost everything as POINT, even emply class.
   //
   // In this latter case you get just points with coordinates
@@ -308,38 +299,51 @@ namespace qpp{
   // about atoms as well
 
   // geometry is an ancestor for molecule
-  template<int DIM, class VALTYPE>
-  class geometry{
+  template< int DIM, class VALTYPE=double, class ATLABEL = std::string, class charT = char, 
+	    class traits = std::char_traits<charT> >
+  class geometry : public qpp_object<charT,traits>{
+
+  protected:
 
     int nat;
     // Number of atoms/points
 
-    //    std::vector<POINT> atm;
+    std::vector<ATLABEL> atm;
     // Storage of atoms
 
     std::vector<lace::vector3d<VALTYPE> > crd;
     // Their coordinates
 
-  public:
-    periodic_cell<DIM,VALTYPE> cell;
-    // Unit cell vectors for 1,2,3d periodicity
+    using typename qpp_object<charT,traits>::string;
 
+    string _name;
+
+  private:
+
+    VALTYPE *_ngbr_disttable;
+
+  public:
+    periodic_cell<DIM,VALTYPE,charT,traits> cell;
+    bool update_types, update_neighbours;
+    
+    // Unit cell vectors for 1,2,3d periodicity
+    
     // ------------------- iterator class --------------------
     // Iterator allows you run through all (or some) atoms of this cell
     // and of surrounding cells
-        
+    
     class iterator : public index<DIM>{
-
+      
       index<DIM> a, b;
       // a - from
       // b - to
-
+      
       using index<DIM>::at;
       using index<DIM>::cll;
-
+      
     public:
-
-      iterator(const geometry<DIM,VALTYPE> &g)
+      
+      iterator(const geometry<DIM, VALTYPE, ATLABEL, charT, traits> &g)
       // default iterator goes through neighbouring cells only
       {
 	a.setatom(0);
@@ -349,15 +353,15 @@ namespace qpp{
 	for (int d=0; d < DIM; d++)
 	  b.setcell(d,1);	
       }
-
+      
       iterator(index<DIM> _a, index<DIM> _b)
       {
 	a = _a;
 	b = _b;
       }
-
+      
       inline index<DIM> begin(){return a;}
-
+      
       //      inline index end(){return b;}
 
       inline index<DIM> end(){return index<DIM>(-1,0,0,0);}
@@ -366,7 +370,7 @@ namespace qpp{
       {
 	at = i.atom();
 	for (int d = 0; d<DIM; d++)
-	  cll(d) = i.cell(d);
+	  cll[d] = i.cell(d);
       }
 
       inline bool operator==(index<DIM> i)
@@ -374,7 +378,7 @@ namespace qpp{
 	bool res = (at == i.atom());
 	if (res)
 	  for (int d = 0; d<DIM; d++)
-	    if ( cll(d) != i.cell(d) ) 
+	    if ( cll[d] != i.cell(d) ) 
 	      {
 		res = false;
 		break;
@@ -387,11 +391,11 @@ namespace qpp{
 	if (DIM==0)
 	  return at != i.atom();
 	else if (DIM==1)
-	  return at != i.atom() || cll(0) != i.cell(0);
+	  return at != i.atom() || cll[0] != i.cell(0);
 	else if (DIM==2)
-	  return at != i.atom() || cll(0) != i.cell(0) || cll(1) != i.cell(1);
+	  return at != i.atom() || cll[0] != i.cell(0) || cll[1] != i.cell(1);
 	else if (DIM==3)
-	  return at != i.atom() || cll(0) != i.cell(0) || cll(1) != i.cell(1) || cll(2) != i.cell(2);
+	  return at != i.atom() || cll[0] != i.cell(0) || cll[1] != i.cell(1) || cll[2] != i.cell(2);
       }
                
       iterator& operator++(int)      
@@ -409,11 +413,11 @@ namespace qpp{
 	    int d=0;
 	    while(d < DIM)
 	      {
-		cll(d)++;
-		if (cll(d) > b.cell(d))
+		cll[d]++;
+		if (cll[d] > b.cell(d))
 		  {
 		    for(int dd=0; dd<=d; dd++)
-		      cll(d) = a.cell(dd);
+		      cll[d] = a.cell(dd);
 		    d++;
 		  }
 		else 
@@ -429,68 +433,48 @@ namespace qpp{
     // ---------------------------------------------------------
   public:
 
-    geometry(){nat=0;}
-
-    geometry(lace::vector3d<VALTYPE> v1, lace::vector3d<VALTYPE> v2=0e0, 
-	     lace::vector3d<VALTYPE> v3=0e0)
+    virtual string category()
     {
-      if (DIM>0)
-	cell(0)=v1;
-      if (DIM>1)
-	cell(1)=v2;
-      if (DIM>2)
-	cell(2)=v3;
-      nat = 0;
+      return "geometry";
     }
 
-    void add_point(const lace::vector3d<VALTYPE> & r)
+    virtual string name()
     {
-      //      atm.push_back(a);
-      crd.push_back(r);
-      nat++;
+      return _name;
     }
 
-    void add_point(VALTYPE _x, VALTYPE _y, VALTYPE _z)
+    void setname(string __name)
     {
-      //      atm.push_back(a);
-      crd.push_back(lace::vector3d<VALTYPE>(_x,_y,_z));
-      nat++;
+      _name = __name;
     }
 
-    void del_point(const int i)
+    virtual int gettype()
     {
-      //      atm.erase(i);
-      crd.erase(crd.begin()+i);
-      nat--;
-    }
-
-    void insert_point(const int i, const lace::vector3d<VALTYPE> &r)
-    {
-      //      atm.insert(i,a);
-      crd.insert(crd.begin()+i,r);
-      nat++;
-    }
-    
-    void insert_point(const int i, const VALTYPE _x, const VALTYPE _y, const VALTYPE _z)
-    {
-      //      atm.insert(i,a);
-      crd.insert(crd.begin()+i,lace::vector3d<VALTYPE>(_x,_y,_z));
-      nat++;
+      int d;
+      if (DIM==0)
+	d = qppdata_dim0;
+      else if (DIM==1)
+	d = qppdata_dim1;
+      else if (DIM==2)
+	d = qppdata_dim2;
+      else if (DIM==3)
+	d = qppdata_dim3;
+      return qppdata_geometry | d;
     }
 
     inline int size(){return crd.size();}
 
-    //    inline POINT& atom(index<DIM> i){return atm[i.atom()];}
+    inline ATLABEL& atom(index<DIM> i){return atm[i.atom()];}
 
-    // Position gives the position of i-th atom
-    inline lace::vector3d<VALTYPE>& point_coord(int i){return crd[i];}
+    // coord gives the coordinates of i-th atom in the cell
+    inline lace::vector3d<VALTYPE>& coord(int i){return crd[i];}
 
-    // Unlike position(i), coord(i) gives the coordinates of either
+    // Unlike coord(i), full_coord(i) gives the coordinates of either
     // this atom in this unit cell or the coordinates of its image
     // in neighbouring cells
     // In other words
     // coord(i) = cell_coord(i) + atom_coord(i)
-    inline lace::vector3d<VALTYPE> coord(index<DIM> i)
+    inline lace::vector3d<VALTYPE> full_coord(index<DIM> i)
     {
       if (DIM==0)
 	return crd[i.atom()];
@@ -524,173 +508,427 @@ namespace qpp{
 	crd[i] *= s;
     }
 
-    void clear()
+    virtual void write(std::basic_ostream<charT,traits> &os, int offset=0)
     {
-      crd.clear();
-      // atm.clear();
-      nat = 0;
-    }
-
-  };
-
-  // -----------------------------------------------------
-  
-  // Molecule vector is the 3N - dimensional vector, i.e.
-  // the object which ascribes usual 3d vector to every atom
-  // of some molecule.
-  // These can be the displacements of atoms or normal mode vector,
-  // or something else.
-
-  template<int DIM, class VALTYPE>
-  class molecule_vector
-  {
-    geometry<DIM,VALTYPE> *owner;
-
-  public:
-    std::vector<lace::vector3d<VALTYPE> > coord;
-
-    //    friend 
-    // molecule_vector<POINT,DIM,VALTYPE> operator*(VALTYPE s, const molecule_vector<POINT,DIM,VALTYPE> &v);
-
-  public:
-
-    molecule_vector(){owner=NULL;}
-
-    molecule_vector(geometry<DIM,VALTYPE> *_owner)
-    {
-      setgeom(_owner);      
-    }
-
-    molecule_vector(const molecule_vector<DIM,VALTYPE> & v)
-    {
-      setgeom(v.owner);
-      if (owner != NULL)
-	for (int i=0; i<size(); i++)
-	  coord[i] = v.coord[i];
-    }
-
-    inline geometry<DIM,VALTYPE> *geom() const
-    {
-      return owner;
-    }
-
-    void setgeom(geometry<DIM,VALTYPE> *_owner)
-    {
-      owner = _owner;
-      if (owner!=NULL)
+      for (int k=0; k<offset; k++) os << " ";
+      os << "geometry";
+      if (_name != "")
+	os << " " << _name;
+      os << "(" << DIM << "d){\n";
+      
+      for (int i=0; i<size(); i++)
 	{
-	  coord.resize(owner -> size());
-	  for (int i=0; i < coord.size(); i++)
-	    coord[i] = VALTYPE(0);
+	  for (int k=0; k<offset+2; k++) os << " ";
+	  os << atm[i] << boost::format(" %11.6f %11.6f %11.6f\n") % crd[i].x() % crd[i].y() %crd[i].z();
+	  
+	}
+
+      for (int k=0; k<offset; k++) os << " ";
+      os << "}\n";
+    }
+
+    //------------------- Type table operations -------------------------
+
+  private:
+    std::vector<ATLABEL> _atm_types;
+    std::vector<int> _type_table;
+
+  public:
+
+    // Number of atomic types in molecule
+    inline int n_atom_types() const
+    {
+      return _atm_types.size();
+    }
+    
+    // Reference to atom of type number t (not the atom number t in atomic list!)
+    inline ATLABEL atom_of_type(int t) const
+    {
+      return _atm_types[t];
+    }
+
+    // Number of type of certain ATOM at
+    inline int type_of_atom(const ATLABEL at) const
+    {
+      int t;
+      for (t=0; t < _atm_types.size(); t++)
+	if ( _atm_types[t] == at )
+	  break;
+      if (t == _atm_types.size())
+	return -1;
+      else 
+	return t;
+    }
+    
+    // 
+    inline int type_table(int i) const
+    {return _type_table[i];}
+
+
+    virtual void build_type_table()
+    {
+      _atm_types.clear();
+      _type_table.resize(size());
+      
+      for (int i=0; i<size(); i++)
+	{
+	  int t = type_of_atom(atom(i));
+	  if (t == -1)
+	    {
+	      t = _atm_types.size();
+	      _atm_types.push_back(atom(i));
+	    }
+	  _type_table[i] = t;
+	}
+      _ngbr_disttable_resize();
+    }
+    
+    void clear_type_table()
+    {
+      _atm_types.clear();
+      _type_table.resize(size());  
+    }
+
+    // ------------------- Neighbours table operations -----------------------
+  private:
+    std::vector<std::vector<index<DIM> > > _ngbr_table;
+    
+    struct _ngbr_record{ 
+      ATLABEL at1, at2; 
+      VALTYPE d;
+
+      _ngbr_record(ATLABEL _at1, ATLABEL _at2, VALTYPE _d)
+      {
+	at1 = _at1;
+	at2 = _at2;
+	d = _d;
+      }
+    };
+
+  public:
+    lace::vector3d<VALTYPE> Rmin, Rmax;
+    VALTYPE grainsize;
+    int grain_nx, grain_ny, grain_nz;
+
+    std::vector<std::vector<index<DIM> > > _grains; 
+
+    std::vector<_ngbr_record> _ngbr_records;
+
+    inline int _ngbr_record_match(ATLABEL at1, ATLABEL at2, int i)
+    {
+      return ( at1 == _ngbr_records[i].at1 && at2 == _ngbr_records[i].at2 ) ||
+	( at2 == _ngbr_records[i].at1 && at1 == _ngbr_records[i].at2 );
+    }
+
+    inline void _ngbr_disttable_resize()
+    {
+      if (_ngbr_disttable!=NULL)
+	delete _ngbr_disttable;
+      _ngbr_disttable = new VALTYPE[n_atom_types()*n_atom_types()];
+    }
+
+    void _grain_setup()
+    {
+      grainsize = VALTYPE(0);
+      for (int i=0; i<n_atom_types()*n_atom_types(); i++)
+	if (_ngbr_disttable[i] > grainsize )
+	  grainsize = _ngbr_disttable[i];
+      Rmin = Rmax = coord(0);
+      for (int i=1; i<size(); i++)
+	{
+	  if ( Rmin.x() > coord(i).x() ) 
+	    Rmin.x() = coord(i).x();
+	  if ( Rmax.x() < coord(i).x() ) 
+	    Rmax.x() = coord(i).x();
+	  if ( Rmin.y() > coord(i).y() ) 
+	    Rmin.y() = coord(i).y();
+	  if ( Rmax.y() < coord(i).y() ) 
+	    Rmax.y() = coord(i).y();
+	  if ( Rmin.z() > coord(i).z() ) 
+	    Rmin.z() = coord(i).z();
+	  if ( Rmax.z() < coord(i).z() ) 
+	    Rmax.z() = coord(i).z();
+	}
+      grain_nx = int( (Rmax.x()-Rmin.x())/grainsize ) + 3;
+      grain_ny = int( (Rmax.y()-Rmin.y())/grainsize ) + 3;
+      grain_nz = int( (Rmax.z()-Rmin.z())/grainsize ) + 3;
+
+      //debug
+      //std::cout << "Grain setup:\n" << grain_nx<<"x"<<grain_ny<<"x"<<grain_nz<<"\n";
+      //std::cout << "grain size= " << grainsize << " corners= " << Rmin << Rmax << "\n";
+    }
+
+    inline std::vector<index<DIM> > & grains(int i, int j, int k)
+    {
+      return _grains[i*grain_ny*grain_nz + j*grain_nz + k];
+    }
+
+    void _graining()
+    {
+      for (int i=0; i<_grains.size(); i++)
+	_grains[i].clear();
+      _grains.clear();
+      _grains.resize(grain_nx*grain_ny*grain_nz);
+      iterator at(*this);
+      for ( at = at.begin(); at != at.end(); at++)
+	{
+	  lace::vector3d<VALTYPE> r = full_coord(at);
+	  int i = int( (r.x()-Rmin.x())/grainsize ) + 1;
+	  int j = int( (r.y()-Rmin.y())/grainsize ) + 1;
+	  int k = int( (r.z()-Rmin.z())/grainsize ) + 1;
+
+	  if ( i>=0 && i<grain_nx && j>=0 && j<grain_ny && k>=0 && k<grain_nz)
+	    grains(i,j,k).push_back(at);
+	}
+
+      //      debug
+      /*
+      std::cout << "graining finished\n";
+      for (int i=0; i<grain_nx; i++)
+	for (int j=0; j<grain_ny; j++)
+	  for (int k=0; k<grain_nz; k++)
+	    {
+	      std::cout << i << " " << j << " " << k;
+	      for (int l=0; l<grains(i,j,k).size(); l++)
+		std::cout << grains(i,j,k)[l];
+	      std::cout << "\n";
+	    }
+      */
+    }
+
+  public:
+
+    VALTYPE default_ngbr_distance;
+
+    // Number of neighbours of i-th atom
+    inline int n_ngbr(int i)
+    {
+      return _ngbr_table[i].size();
+    }
+    
+    // j-th neighbour of i-th atom
+    inline index<DIM> ngbr_table(int i, int j)
+    {
+      return _ngbr_table[i][j];
+    }
+
+    index<DIM> ngbr(index<DIM> i, int j)
+    {
+      index<DIM> res = ngbr_table(i,j);
+      for (int a=0; a<DIM; a++)
+	res.setcell( a, res.cell(a)+i.cell(a) );
+      return res;
+    }
+
+    VALTYPE ngbr_distance(ATLABEL at1, ATLABEL at2)
+    {
+      bool found = false;
+      int i;
+      for (i=0; i<_ngbr_records.size(); i++)
+	if (_ngbr_record_match(at1,at2,i))
+	  {
+	    found = true;
+	    break;
+	  }
+      return found? _ngbr_records[i].d : default_ngbr_distance;
+    }
+
+    void set_ngbr_distance(ATLABEL at1, ATLABEL at2, VALTYPE d)
+    {
+      bool found = false;
+      int i;
+      for (i=0; i<_ngbr_records.size(); i++)
+	if (_ngbr_record_match(at1,at2,i))
+	  {
+	    found = true;
+	    break;
+	  }
+      if (found)
+	_ngbr_records[i].d = d;
+      else
+	_ngbr_records.push_back(_ngbr_record(at1,at2,d));
+    }
+
+    VALTYPE ngbr_disttable(int i, int j)
+    {
+      if (_ngbr_disttable!=NULL)
+	return _ngbr_disttable[i*n_atom_types()+j];
+      else
+	return default_ngbr_distance;
+    }
+
+    inline void build_ngbr_disttable()
+    {
+      int n = n_atom_types();
+      for (int i=0; i<n; i++)
+	for (int j=0; j<=i; j++)
+	  _ngbr_disttable[n*i+j] = _ngbr_disttable[n*j+i] = 
+	    ngbr_distance(atom_of_type(i),atom_of_type(j));
+    }
+
+    void build_ngbr_table()
+    {
+      _grain_setup();
+      _graining();
+      for (int i=0; i<_ngbr_table.size(); i++)
+	_ngbr_table[i].clear();
+
+      _ngbr_table.resize(size());
+
+      for (int i = 1; i < grain_nx; i++)
+	for (int j = 1; j < grain_ny; j++)
+	  for (int k = 1; k < grain_nz; k++)
+	    {
+	      int g1 = i*grain_ny*grain_nz + j*grain_nz + k;
+	      if (_grains[g1].size()>0)
+		for (int di=-1; di<=0; di++)
+		  for (int dj=-1; dj<=-di; dj++) 
+		    for (int dk=-1; dk<=-di || dk<=-dj; dk++)
+		      {
+			int g2 = (i+di)*grain_ny*grain_nz + (j+dj)*grain_nz + k+dk;
+			for (int c2 = 0; c2 < _grains[g2].size(); c2++)
+			  for (int c1 = 0; c1 < ( g1==g2? c2 : _grains[g1].size()); c1++)
+			    {
+			      index<DIM> at1 = _grains[g1][c1];
+			      index<DIM> at2 = _grains[g2][c2];
+			      VALTYPE r = norm(full_coord(at1) - full_coord(at2));
+			      if ( r <= ngbr_disttable(type_table(at1), type_table(at2)))
+				{
+				  if ( at1 == index<DIM>(at1,0,0,0) )
+				    {
+				      _ngbr_table[at1].push_back(at2);
+				      if ( at2 != index<DIM>(at2,0,0,0) )
+					{
+					  for (int dd=0; dd<DIM; dd++)
+					    at1.setcell(dd,-at2.cell(dd));
+					  _ngbr_table[at2].push_back(at1);	
+					}
+				    }
+				  if ( at2 == index<DIM>(at2,0,0,0) )
+				    _ngbr_table[at2].push_back(at1);				  
+				}
+			    }
+		      }
+	    }
+    }
+
+    // --------------- Constructors & destructors --------------------
+
+    geometry(string __name = ""){
+      nat=0;
+      _name = __name;
+      update_types = false;
+      update_neighbours = false;
+      _ngbr_disttable = NULL;
+      default_ngbr_distance = VALTYPE(0);
+    }
+
+    geometry(lace::vector3d<VALTYPE> v1, lace::vector3d<VALTYPE> v2=0e0, 
+	     lace::vector3d<VALTYPE> v3=0e0, string __name = "")
+    {
+      if (DIM>0)
+	cell(0)=v1;
+      if (DIM>1)
+	cell(1)=v2;
+      if (DIM>2)
+	cell(2)=v3;
+      nat = 0;
+      _name = __name;
+      update_types = false;
+      update_neighbours = false;
+      _ngbr_disttable = NULL;
+      default_ngbr_distance = VALTYPE(0);
+    }
+
+    ~geometry()
+    {
+      if (_ngbr_disttable!=NULL)
+	delete _ngbr_disttable;
+    }
+
+    void copy(geometry<DIM, VALTYPE, ATLABEL, charT, traits> &G)
+    {
+      clear();
+      nat = G.nat;
+      atm = G.atm;
+      crd = G.crd;
+    }
+
+    // ----------------------- Manipulations with atoms -----------------------
+
+    virtual void add(ATLABEL a, const lace::vector3d<VALTYPE> & r)
+    {
+      atm.push_back(a);
+      crd.push_back(r);
+      nat++;
+      if (update_types)
+	{
+	  int t = type_of_atom(a);
+	  if (t == -1)
+	    {
+	      t = _atm_types.size();
+	      _atm_types.push_back(a);
+	      if (update_neighbours)
+		{
+		  _ngbr_disttable_resize();
+		  build_ngbr_disttable();
+		}	      
+	    }
+	  _type_table.push_back(t);
 	}
     }
 
-    inline int size() const
+    virtual void add(ATLABEL a, const VALTYPE _x, const VALTYPE _y, const VALTYPE _z)
     {
-      return coord.size();
+      add(a,lace::vector3d<VALTYPE>(_x,_y,_z));
     }
 
-    inline VALTYPE & operator()(int i, int j)
+    virtual void erase(const int i)
     {
-      return coord[i](j);
+      atm.erase(atm.begin()+i);
+      crd.erase(crd.begin()+i);
+      nat--;
+      if (update_types)
+	_type_table.erase(_type_table.begin()+i);
     }
 
-    inline lace::vector3d<VALTYPE> & operator()(int i)
+    virtual void insert(const int i, ATLABEL a, const lace::vector3d<VALTYPE> &r)
     {
-      return coord[i];
+      atm.insert(atm.begin()+i,a);
+      crd.insert(crd.begin()+i,r);
+      nat++;
+      if (update_types)
+	{
+	  int t = type_of_atom(a);
+	  if (t == -1)
+	    {
+	      t = _atm_types.size();
+	      _atm_types.push_back(a);
+	      if (update_neighbours)
+		{
+		  _ngbr_disttable_resize();
+		  build_ngbr_disttable();
+		}
+	    }
+	  _type_table.insert(_type_table.begin()+i,t);
+	}
+    }
+    
+    virtual void insert(const int i, ATLABEL a, const VALTYPE _x, const VALTYPE _y, const VALTYPE _z)
+    {
+      insert(i,a,lace::vector3d<VALTYPE>(_x,_y,_z));
     }
 
-    inline VALTYPE & operator[](int i)
+    void clear()
     {
-      return coord[i/3](i%3);
-    }
-
-    molecule_vector<DIM,VALTYPE>  operator+(const molecule_vector<DIM,VALTYPE> &v)
-    {
-      assert(size() == v.size());
-      molecule_vector<DIM,VALTYPE> res(owner);
-      for (int i=0; i < coord.size(); i++)
-	res.coord[i] = coord[i] + v.coord[i];
-      return res;
-    }
-
-    molecule_vector<DIM,VALTYPE>  operator-(const molecule_vector<DIM,VALTYPE> &v)
-    {
-      assert(size() == v.size());
-      molecule_vector<DIM,VALTYPE> res(owner);
-      for (int i=0; i < coord.size(); i++)
-	res.coord[i] = coord[i] - v.coord[i];
-      return res;
-    }
-
-    molecule_vector<DIM,VALTYPE>  operator*(VALTYPE s)
-    {
-      molecule_vector<DIM,VALTYPE> res(owner);
-      for (int i=0; i < coord.size(); i++)
-	res.coord[i] = s*coord[i];
-      return res;
-    }
-
-    molecule_vector<DIM,VALTYPE>  operator/(VALTYPE s)
-    {
-      molecule_vector<DIM,VALTYPE> res(owner);
-      for (int i=0; i < coord.size(); i++)
-	res.coord[i] = coord[i]/s;
-      return res;
-    }
-
-    VALTYPE norm()
-    {
-      VALTYPE s = VALTYPE(0);
-      for (int i=0; i < coord.size(); i++)
-	s += lace::scal(coord[i],coord[i]);
-      return std::sqrt(s);
+      crd.clear();
+      atm.clear();
+      nat = 0;
+      clear_type_table();
     }
 
   };
 
-  template<int DIM, class VALTYPE>
-  molecule_vector<DIM,VALTYPE> operator*(VALTYPE s, const molecule_vector<DIM,VALTYPE> &v)
-  {
-    molecule_vector<DIM,VALTYPE> res(v.geom());
-    for (int i=0; i < v.coord.size(); i++)
-      res.coord[i] = s*v.coord[i];
-    return res;
-  }
-
-  template<int DIM, class VALTYPE>
-  typename lace::numeric_type<VALTYPE>::real scal(molecule_vector<DIM,VALTYPE> &v1, 
-						  molecule_vector<DIM,VALTYPE> &v2)
-  {
-    typename lace::numeric_type<VALTYPE>::real s;
-    for (int i=0; i<v1.size()*3; i++)
-      s += lace::conj(v1[i])*v2[i];
-    return s;
-  }
-
-  template<int DIM, class VALTYPE, class TRANSFORM>
-  molecule_vector<DIM,VALTYPE> operator*(TRANSFORM T, molecule_vector<DIM,VALTYPE> &v)
-  {
-    lace::matrix3d<VALTYPE> R(T);
-    molecule_vector<DIM,VALTYPE> res(v.geom());
-    for (int i=0; i < v.size(); i++)
-      {
-	lace::vector3d<VALTYPE> rnew = T * v.geom()->atom_coord(i);
-	int j;
-	bool found = false;
-	for (j=0; j<v.size(); j++)
-	  if ( lace::norm(rnew - v.geom()->atom_coord(j) ) <= symmtol )
-	    {
-	      found = true; break;
-	    }
-	// fixme - think about this behavoir for non-symmetric mols
-	if (!found) j = i;
-	res(j) = R*v(i);
-      }
-    
-    return res;
-  }
- 
 };
 
 #endif

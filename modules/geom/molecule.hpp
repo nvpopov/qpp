@@ -10,31 +10,21 @@
 namespace qpp{
   
   template<int DIM, class VALTYPE>
-  class molecule : public geometry<DIM,VALTYPE>{
-
+  class molecule{ //: public geometry<DIM,VALTYPE>{
+    
   public:
-
-    //typedef index<DIM> index;
-    typedef qpp_atom ATOM;
-    typedef typename geometry<DIM,VALTYPE>::iterator iterator;
-    using geometry<DIM,VALTYPE>::size;
-    using geometry<DIM,VALTYPE>::coord;
-    using geometry<DIM,VALTYPE>::add_point;
-    using geometry<DIM,VALTYPE>::del_point;
-    using geometry<DIM,VALTYPE>::insert_point;
-
-    //    using geometry<POINT,DIM,VALTYPE>::atom;
-
-
+    
     // Molecule always has unique string identifier
     std::string name;
-
+    // typedef qpp_atom ATOM;
+    
     // Atomic type table
     // fixme - think about forming type table when atoms are added
   private:
-    std::vector<ATOM*> atm;
+    
+    geometry<qpp_atom*,DIM,VALTYPE> *geom; 
 
-    std::vector<ATOM*> atm_types;
+    std::vector<qpp_atom*> atm_types;
     std::vector<int> type_table;
 
     // Neighbours table stuff
@@ -44,50 +34,66 @@ namespace qpp{
     
   public:
 
-    molecule(std::string _name)
+    molecule(std::string _name, geometry<qpp_atom*,DIM,VALTYPE> * _geom = new geometry<qpp_atom*,DIM,VALTYPE>)
     {
       name = _name;
+      geom = _geom;
     }
 
     // Atom list manipulation methods
 
-    inline ATOM& atom(int i){return *(atm[i]);}
+    inline qpp_atom& atom(int i){return *(geom -> atom(i));}
 
-    inline void add(const ATOM &a, const lace::vector3d<VALTYPE> & r)
+    inline void add(const qpp_atom &a, const lace::vector3d<VALTYPE> & r)
     {
-      atm.push_back(a.copy()); 
-      add_point(r);
+      geom->add_point(a.copy(),r);
     }
 
-    void add(ATOM a,  VALTYPE _x,  VALTYPE _y,  VALTYPE _z)
+    void add(const qpp_atom &a,  VALTYPE _x,  VALTYPE _y,  VALTYPE _z)
     {
-      atm.push_back(a.copy());
-      add_point(_x,_y,_z);
+      //      atm.push_back(a.copy());
+      geom->add_point(a.copy(),_x,_y,_z);
     }
 
     void del( int i)
     {
-      delete atm[i];
-      atm.erase(atm.begin()+i);
-      del_point(i);
+      delete geom->getatom(i);
+      //      atm.erase(atm.begin()+i);
+      geom->del_point(i);
     }
 
-    void insert(int i, const ATOM &a, const lace::vector3d<VALTYPE> & r)
+    void insert(int i, const qpp_atom &a, const lace::vector3d<VALTYPE> & r)
     {
-      atm.insert(atm.begin()+i,a.copy());
-      insert_point(i,r);
+      //      atm.insert(atm.begin()+i,a.copy());
+      geom->insert_point(i,a.copy(),r);
     }
     
-    void insert(int i, const ATOM &a, VALTYPE _x, VALTYPE _y, VALTYPE _z)
+    void insert(int i, const qpp_atom &a, VALTYPE _x, VALTYPE _y, VALTYPE _z)
     {
-      atm.insert(atm.begin()+i,a.copy());
-      insert_point(i,_x,_y,_z);
+      //      atm.insert(atm.begin()+i,a.copy());
+      geom->insert_point(i,a.copy(),_x,_y,_z);
     }
 
     inline int size() const
     {
-      return atm.size();
+      return geom->size();
     }
+
+    periodic_cell<DIM,VALTYPE> & cell()
+    {
+      return geom->cell;
+    }
+
+    lace::vector3d<VALTYPE> & cell(int i)
+    {
+      return geom->cell(i);
+    }
+
+    lace::vector3d<VALTYPE> coord(index<DIM> i)
+    {
+      return geom->full_coord(i);
+    }
+
 
     //------------------- Type table manipulations -------------------------
 
@@ -99,13 +105,13 @@ namespace qpp{
     }
     
     // Reference to atom of type number t (not the atom number t in atomic list!)
-    inline ATOM& atom_of_type(int t) const
+    inline qpp_atom& atom_of_type(int t) const
     {
       return *(atm_types[t]);
     }
 
     // Number of type of certain ATOM at
-    inline int type_of_atom(const ATOM & at) const
+    inline int type_of_atom(const qpp_atom & at) const
     {
       int t;
       for (t=0; t < atm_types.size(); t++)
@@ -157,7 +163,7 @@ namespace qpp{
     // to be neighbours
     // Can be used as lvalue, f.e.
     // nbr_distance("Si","O") = 2.7;
-    inline VALTYPE & nbr_distance(ATOM & at1, ATOM & at2)
+    inline VALTYPE & nbr_distance(qpp_atom & at1, qpp_atom & at2)
     {return _nbr_disttable(type_of_atom(at1),type_of_atom(at2));}
 
     // Set all neighbours distances to one value
@@ -188,11 +194,11 @@ namespace qpp{
       for (int i=0; i<size(); i++)
 	{
 	  //	  std::cout << i <<"\n";
-	  iterator j(*this);
+	  typename geometry<qpp_atom*,DIM,VALTYPE>::iterator j(geom);
 	  for (j = j.begin(); j!=j.end(); j++)
 	    if (j!=index<DIM>(i))
 	      {
-		VALTYPE r12 = lace::norm(coord(i) - coord(j));
+		VALTYPE r12 = lace::norm(geom->full_coord(i) - geom->full_coord(j));
 		//std::cout << j.atom();
 		//for (int k=0; k < DIM; k++)
 		//  std::cout << " " << j.cell(k);

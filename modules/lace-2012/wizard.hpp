@@ -2,11 +2,8 @@
 #ifndef _LACE_WIZARD_H
 #define _LACE_WIZARD_H
 
-//#include <lace/shape.hpp>
-//#include <lace/storage.hpp>
-#include <lace/matrix.hpp>
-#include <lace/vector.hpp>
-//#include <lace/expressions.hpp>
+#include <lace-2012/matrix.hpp>
+#include <lace-2012/vector.hpp>
 
 // Forward declarations
 namespace _lace_main{

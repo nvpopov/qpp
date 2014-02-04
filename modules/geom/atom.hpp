@@ -66,7 +66,7 @@ namespace qpp{
     virtual std::string info() const
     {
       std::stringstream ss;
-      ss << name << "{ number = " << number << "}";
+      ss << name << "{ number = " << number << ";}";
       return ss.str();
     }
 
@@ -76,6 +76,18 @@ namespace qpp{
     }
 
   };
+
+  // -------------------------------------------------
+
+  std::string nameofatom(std::string at)
+  {
+    return at;
+  }
+
+  std::string nameofatom(qpp_atom * at)
+  {
+    return at -> name;
+  }
 
   // -------------------------------------------------
   // Classical atoms

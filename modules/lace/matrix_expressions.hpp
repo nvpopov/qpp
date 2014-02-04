@@ -82,10 +82,12 @@ namespace _lace_expressions{
       return res;
     }
 
-    virtual _lace_storage::matrix_shape shape() 
+    static _lace_storage::matrix_shape shape() 
     { return _lace_storage::empty_shape(); }
     
-    virtual _lace_storage::matrix_type mtype(){return shape().mtype;}
+    //    virtual _lace_storage::matrix_type mtype(){return shape().mtype;}
+
+    virtual _lace_storage::matrix_type type(){}
 
     virtual int gettype() = 0;
     //{return _matrix + _proto;}

@@ -37,30 +37,6 @@ namespace _lace_expressions{
   template <typename VALTYPE, matrix_type MTRTYPE = _lace_storage::rectang>
   class matrix : public matrix_expression<VALTYPE>
   {
-    /*
-    friend class _lace_main::m_unary_engine<VALTYPE>;
-    friend class _lace_main::v_unary_engine<VALTYPE>;
-    friend class _lace_main::m_convertor_engine<VALTYPE>;
-    friend class _lace_main::v_convertor_engine<VALTYPE>;
-    friend class _lace_main::mm_binary_engine<VALTYPE>;
-    friend class _lace_main::vv_binary_engine<VALTYPE>;
-    friend class _lace_main::vm_binary_engine<VALTYPE>;
-    friend class _lace_main::mmm_ternary_engine<VALTYPE>;
-    friend class _lace_main::vmv_ternary_engine<VALTYPE>;
-
-    friend class _lace_main::m_unary<VALTYPE,MTRTYPE>;
-
-    template<matrix_type MTP2>
-    friend class _lace_main::mm_binary<VALTYPE,MTRTYPE,MTP2>;
-    friend class _lace_main::v_unary<VALTYPE,MTRTYPE>;
-    friend class _lace_main::m_convertor<VALTYPE,MTRTYPE>;
-    friend class _lace_main::v_convertor<VALTYPE,MTRTYPE>;
-    friend class _lace_main::mm_binary<VALTYPE,MTRTYPE>;
-    friend class _lace_main::vv_binary<VALTYPE,MTRTYPE>;
-    friend class _lace_main::vm_binary<VALTYPE,MTRTYPE>;
-    friend class _lace_main::mmm_ternary<VALTYPE,MTRTYPE>;
-    friend class _lace_main::vmv_ternary<VALTYPE,MTRTYPE>;
-    */
 
   public:
     matrix_storage<VALTYPE,MTRTYPE> *_mtr;
@@ -94,7 +70,7 @@ namespace _lace_expressions{
 
   public:
 
-    //----------------------- Constructors ------------------
+    //----------------------- Constructors ----------------------
 
     matrix() 
     { 
@@ -157,7 +133,7 @@ namespace _lace_expressions{
     matrix<VALTYPE,MTRTYPE>& operator=(matrix<VALTYPE,MTRTYPE> &M)
     {      
       matrix_expression<VALTYPE> *trg = this;
-      if (is_empty())
+      if (is_empty() || lace::globals::auto_reshape )
 	reshape(M.shape());
       else
 	assert( shape() == M.shape() && "Shape does not conform in matrix assignment");
@@ -293,7 +269,7 @@ namespace _lace_expressions{
 
     virtual bool is_same(matrix_expression<VALTYPE> &a)
     {
-      if ( a.gettype() == gettype() && a.mtype() == MTRTYPE )
+      if ( a.gettype() == gettype() && a.type() == MTRTYPE )
 	{
 	  return ((matrix<VALTYPE,MTRTYPE>*)(&a)) -> _mtr == _mtr;
 	}

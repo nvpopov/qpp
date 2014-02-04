@@ -14,15 +14,16 @@ molecule Ca4F8_embed
     F  -1.38 -1.38 -1.38  -0.25
   }
 
-  vectors{
+  vectors(angstrom)
+  {
     2.76 2.76 0.00
     2.76 0.00 2.76
     0.00 2.76 2.76
   }
 
-  replicate(CaF2_UC,sphere(R=25.0),center(1.38,1.38,1.38))
-  replace( Ca, Ca_cls, sphere(R=15.0))
-  replace(  F,  F_cls, sphere(R=15.0))
+  replicate(CaF2_UC,sphere(R=25.0),center(1.38,1.38,1.38));
+  replace( Ca, Ca_cls, sphere(R=15.0));
+  replace(  F,  F_cls, sphere(R=15.0));
 
   fragment QM_cluster{
     F_QM   0.00  0.00  0.00
@@ -38,27 +39,29 @@ molecule Ca4F8_embed
     Ca_QM  1.38 -1.38  1.38
   }
 
-  replace(QM_cluster)
+  replace(QM_cluster);
 
   atom Ca_QM{
-    number = 20
-    basis 6-31G
+    number = 20;
+    basis 6-31G;
   }
 
   atom F_QM{
-    number(9)
-    basis 6-31G
+    number(9);
+    basis 6-31G;
   }
 
   atom Ca_cls{
-    number = 20
-    charge(2.0)
+    number = 20;
+    charge(2.0);
   }
 
   atom F_cls{
-    number = 9
-    charge = -1.0
-    alpha = 0.5
+    number = 9;
+    charge = -1.0;
+    alpha = 0.5;
   }
+
+  pair_potential(Ca_QM,Ca_cls,buckingham,A=1231.23,rho=.123,C=.012);
 
 }

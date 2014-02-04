@@ -1,10 +1,10 @@
 #ifndef _LACE_H
 #define _LACE_H
 
-#include <lace/calculator.hpp>
-#include <lace/wizard_instance.hpp>
-#include <lace/globals.hpp>
-#include <lace/lapack.hpp>
+#include <lace-2012/calculator.hpp>
+#include <lace-2012/wizard_instance.hpp>
+#include <lace-2012/globals.hpp>
+#include <lace-2012/lapack.hpp>
 //#include <lace/hlevel.hpp>
 
 namespace lace{

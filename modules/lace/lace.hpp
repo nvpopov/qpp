@@ -30,7 +30,7 @@ namespace lace{
   /* ----------------------------------------------------------------
                    High level functions
      ---------------------------------------------------------------- */
-  /*
+  
   template<typename VALTYPE, matrix_type MTP>
   void solve_lu(matrix<VALTYPE,MTP> &A, vector<VALTYPE> &y, vector<VALTYPE> &x)
   {
@@ -111,7 +111,7 @@ namespace lace{
 					    _A.ptr(0,0),eig_vals.ptr(0),eig_vec.ptr(0,0));
   }
 
-  */
+  
 };
 
 #endif

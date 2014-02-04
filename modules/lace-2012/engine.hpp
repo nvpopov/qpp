@@ -2,8 +2,8 @@
 #define _LACE_ENGINE_H
 
 //#include <lace/matrix.hpp>
-#include <lace/wizard.hpp>
-#include <lace/blas.hpp>
+#include <lace-2012/wizard.hpp>
+#include <lace-2012/blas.hpp>
 #include <typeinfo>
 
 namespace _lace_main{

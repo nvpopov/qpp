@@ -1248,15 +1248,17 @@ namespace _lace_expressions{
       _summa_specific<VALTYPE,XPR>::calculate_expr(target,this);
     }
 
+    
     virtual typename shape_type<XPR>::type shape()
     {
       if ( ! shape_defined )
 	{
-	  shp = _summa_specific<VALTYPE,XPR>::shape(this);
+	  // shp = _summa_specific<VALTYPE,XPR>::shape(this);
 	  shape_defined = true;
 	}
       return shp;
     }
+    
 
     virtual XPR& operator=(XPR &A)
     {

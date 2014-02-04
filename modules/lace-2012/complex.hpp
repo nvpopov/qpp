@@ -29,7 +29,7 @@ typedef long double longdouble;
 #define altcomplex1 fcomplex
 #define altcomplex2 dcomplex
 
-#include <lace/complex_repeater.hpp>
+#include <lace-2012/complex_repeater.hpp>
 
 #undef REAL
 #undef complex
@@ -42,7 +42,7 @@ typedef long double longdouble;
 #define altcomplex1 fcomplex
 #define altcomplex2 lcomplex
 
-#include <lace/complex_repeater.hpp>
+#include <lace-2012/complex_repeater.hpp>
 
 #undef REAL
 #undef complex
@@ -55,7 +55,7 @@ typedef long double longdouble;
 #define altcomplex1 dcomplex
 #define altcomplex2 lcomplex
 
-#include <lace/complex_repeater.hpp>
+#include <lace-2012/complex_repeater.hpp>
 
 #undef REAL
 #undef complex

@@ -1,2 +1,6 @@
+add_subdirectory(lace-2012)
 add_subdirectory(lace)
 add_subdirectory(mathf)
+add_subdirectory(geom)
+add_subdirectory(io)
+add_subdirectory(symm)

@@ -1,7 +1,7 @@
 #ifndef _LACE_EXPRESSIONS_H
 #define _LACE_EXPRESSIONS_H
 
-#include <lace/tree.hpp>
+#include <lace-2012/tree.hpp>
 
 namespace _lace_expressions{
 
