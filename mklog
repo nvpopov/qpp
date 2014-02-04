@@ -1,0 +1,54 @@
+[ 22%] Built target lace
+[ 33%] Built target mathf
+[ 44%] Built target test1-gbf_tabulate
+[ 55%] Built target blas1
+[ 66%] Built target blas3
+[ 77%] Built target cubeq
+[ 88%] Built target herm_element
+[100%] Building CXX object examples/lace_examples/CMakeFiles/wizard1.dir/wizard1.cpp.o
+Linking CXX executable ../../build/Linux64/bin/wizard1
+CMakeFiles/wizard1.dir/wizard1.cpp.o: In function `_lace_expressions::abstract_expression::abstract_expression()':
+wizard1.cpp:(.text._ZN17_lace_expressions19abstract_expressionC2Ev[_ZN17_lace_expressions19abstract_expressionC5Ev]+0x25): undefined reference to `_lace_expressions::abstract_expression::xpr_counter'
+wizard1.cpp:(.text._ZN17_lace_expressions19abstract_expressionC2Ev[_ZN17_lace_expressions19abstract_expressionC5Ev]+0x35): undefined reference to `_lace_expressions::abstract_expression::xpr_counter'
+wizard1.cpp:(.text._ZN17_lace_expressions19abstract_expressionC2Ev[_ZN17_lace_expressions19abstract_expressionC5Ev]+0x5d): undefined reference to `_lace_expressions::abstract_expression::xpr_total_number'
+wizard1.cpp:(.text._ZN17_lace_expressions19abstract_expressionC2Ev[_ZN17_lace_expressions19abstract_expressionC5Ev]+0x66): undefined reference to `_lace_expressions::abstract_expression::xpr_total_number'
+CMakeFiles/wizard1.dir/wizard1.cpp.o: In function `_lace_expressions::abstract_expression::~abstract_expression()':
+wizard1.cpp:(.text._ZN17_lace_expressions19abstract_expressionD2Ev[_ZN17_lace_expressions19abstract_expressionD5Ev]+0x15): undefined reference to `_lace_expressions::abstract_expression::xpr_total_number'
+wizard1.cpp:(.text._ZN17_lace_expressions19abstract_expressionD2Ev[_ZN17_lace_expressions19abstract_expressionD5Ev]+0x1e): undefined reference to `_lace_expressions::abstract_expression::xpr_total_number'
+CMakeFiles/wizard1.dir/wizard1.cpp.o: In function `_lace_expressions::subrange_expression::print_me(int)':
+wizard1.cpp:(.text._ZN17_lace_expressions19subrange_expression8print_meEi[_ZN17_lace_expressions19subrange_expression8print_meEi]+0x96): undefined reference to `_lace_expressions::indent(int)'
+CMakeFiles/wizard1.dir/wizard1.cpp.o:(.rodata._ZTVN17_lace_expressions17matrix_expressionIdEE[_ZTVN17_lace_expressions17matrix_expressionIdEE]+0xc0): undefined reference to `_lace_expressions::matrix_expression<double>::calculate_expr(_lace_expressions::matrix_expression<double>*&, double)'
+CMakeFiles/wizard1.dir/wizard1.cpp.o:(.rodata._ZTVN17_lace_expressions6matrixIdLN13_lace_storage11matrix_typeE0EEE[_ZTVN17_lace_expressions6matrixIdLN13_lace_storage11matrix_typeE0EEE]+0xc0): undefined reference to `_lace_expressions::matrix_expression<double>::calculate_expr(_lace_expressions::matrix_expression<double>*&, double)'
+CMakeFiles/wizard1.dir/wizard1.cpp.o:(.rodata._ZTVN17_lace_expressions6matrixIdLN13_lace_storage11matrix_typeE1EEE[_ZTVN17_lace_expressions6matrixIdLN13_lace_storage11matrix_typeE1EEE]+0xc0): undefined reference to `_lace_expressions::matrix_expression<double>::calculate_expr(_lace_expressions::matrix_expression<double>*&, double)'
+CMakeFiles/wizard1.dir/wizard1.cpp.o:(.rodata._ZTVN17_lace_expressions6matrixIdLN13_lace_storage11matrix_typeE2EEE[_ZTVN17_lace_expressions6matrixIdLN13_lace_storage11matrix_typeE2EEE]+0xc0): undefined reference to `_lace_expressions::matrix_expression<double>::calculate_expr(_lace_expressions::matrix_expression<double>*&, double)'
+CMakeFiles/wizard1.dir/wizard1.cpp.o: In function `_lace_expressions::matrix<double, (_lace_storage::matrix_type)0>::operator=(_lace_expressions::matrix_expression<double>&)':
+wizard1.cpp:(.text._ZN17_lace_expressions6matrixIdLN13_lace_storage11matrix_typeE0EEaSERNS_17matrix_expressionIdEE[_ZN17_lace_expressions6matrixIdLN13_lace_storage11matrix_typeE0EEaSERNS_17matrix_expressionIdEE]+0x27): undefined reference to `void _lace_expressions::process_expr<double, _lace_expressions::matrix_expression<double> >(_lace_expressions::matrix_expression<double>*&, _lace_expressions::matrix_expression<double>*)'
+CMakeFiles/wizard1.dir/wizard1.cpp.o: In function `_lace_expressions::matrix<double, (_lace_storage::matrix_type)0>::debug(int)':
+wizard1.cpp:(.text._ZN17_lace_expressions6matrixIdLN13_lace_storage11matrix_typeE0EE5debugEi[_ZN17_lace_expressions6matrixIdLN13_lace_storage11matrix_typeE0EE5debugEi]+0x1c): undefined reference to `_lace_expressions::indent(int)'
+CMakeFiles/wizard1.dir/wizard1.cpp.o: In function `_lace_expressions::matrix<double, (_lace_storage::matrix_type)1>::operator=(_lace_expressions::matrix_expression<double>&)':
+wizard1.cpp:(.text._ZN17_lace_expressions6matrixIdLN13_lace_storage11matrix_typeE1EEaSERNS_17matrix_expressionIdEE[_ZN17_lace_expressions6matrixIdLN13_lace_storage11matrix_typeE1EEaSERNS_17matrix_expressionIdEE]+0x27): undefined reference to `void _lace_expressions::process_expr<double, _lace_expressions::matrix_expression<double> >(_lace_expressions::matrix_expression<double>*&, _lace_expressions::matrix_expression<double>*)'
+CMakeFiles/wizard1.dir/wizard1.cpp.o: In function `_lace_expressions::matrix<double, (_lace_storage::matrix_type)1>::debug(int)':
+wizard1.cpp:(.text._ZN17_lace_expressions6matrixIdLN13_lace_storage11matrix_typeE1EE5debugEi[_ZN17_lace_expressions6matrixIdLN13_lace_storage11matrix_typeE1EE5debugEi]+0x1c): undefined reference to `_lace_expressions::indent(int)'
+CMakeFiles/wizard1.dir/wizard1.cpp.o: In function `_lace_expressions::matrix<double, (_lace_storage::matrix_type)2>::operator=(_lace_expressions::matrix_expression<double>&)':
+wizard1.cpp:(.text._ZN17_lace_expressions6matrixIdLN13_lace_storage11matrix_typeE2EEaSERNS_17matrix_expressionIdEE[_ZN17_lace_expressions6matrixIdLN13_lace_storage11matrix_typeE2EEaSERNS_17matrix_expressionIdEE]+0x27): undefined reference to `void _lace_expressions::process_expr<double, _lace_expressions::matrix_expression<double> >(_lace_expressions::matrix_expression<double>*&, _lace_expressions::matrix_expression<double>*)'
+CMakeFiles/wizard1.dir/wizard1.cpp.o: In function `_lace_expressions::matrix<double, (_lace_storage::matrix_type)2>::debug(int)':
+wizard1.cpp:(.text._ZN17_lace_expressions6matrixIdLN13_lace_storage11matrix_typeE2EE5debugEi[_ZN17_lace_expressions6matrixIdLN13_lace_storage11matrix_typeE2EE5debugEi]+0x1c): undefined reference to `_lace_expressions::indent(int)'
+CMakeFiles/wizard1.dir/wizard1.cpp.o: In function `_lace_expressions::matrix<double, (_lace_storage::matrix_type)0>::_print_me_matrix(int)':
+wizard1.cpp:(.text._ZN17_lace_expressions6matrixIdLN13_lace_storage11matrix_typeE0EE16_print_me_matrixEi[_ZN17_lace_expressions6matrixIdLN13_lace_storage11matrix_typeE0EE16_print_me_matrixEi]+0x64): undefined reference to `_lace_expressions::indent(int)'
+CMakeFiles/wizard1.dir/wizard1.cpp.o: In function `_lace_expressions::matrix<double, (_lace_storage::matrix_type)1>::_print_me_matrix(int)':
+wizard1.cpp:(.text._ZN17_lace_expressions6matrixIdLN13_lace_storage11matrix_typeE1EE16_print_me_matrixEi[_ZN17_lace_expressions6matrixIdLN13_lace_storage11matrix_typeE1EE16_print_me_matrixEi]+0x64): undefined reference to `_lace_expressions::indent(int)'
+CMakeFiles/wizard1.dir/wizard1.cpp.o: In function `_lace_expressions::matrix<double, (_lace_storage::matrix_type)2>::_print_me_matrix(int)':
+wizard1.cpp:(.text._ZN17_lace_expressions6matrixIdLN13_lace_storage11matrix_typeE2EE16_print_me_matrixEi[_ZN17_lace_expressions6matrixIdLN13_lace_storage11matrix_typeE2EE16_print_me_matrixEi]+0x64): undefined reference to `_lace_expressions::indent(int)'
+CMakeFiles/wizard1.dir/wizard1.cpp.o:(.rodata._ZTVN17_lace_expressions9submatrixIdEE[_ZTVN17_lace_expressions9submatrixIdEE]+0xc0): undefined reference to `_lace_expressions::matrix_expression<double>::calculate_expr(_lace_expressions::matrix_expression<double>*&, double)'
+CMakeFiles/wizard1.dir/wizard1.cpp.o:(.rodata._ZTVN17_lace_expressions9submatrixIdEE[_ZTVN17_lace_expressions9submatrixIdEE]+0xd8): undefined reference to `_lace_expressions::submatrix<double>::shape()'
+CMakeFiles/wizard1.dir/wizard1.cpp.o: In function `_lace_expressions::submatrix<double>::print_tree(int)':
+wizard1.cpp:(.text._ZN17_lace_expressions9submatrixIdE10print_treeEi[_ZN17_lace_expressions9submatrixIdE10print_treeEi]+0xeb): undefined reference to `_lace_expressions::indent(int)'
+wizard1.cpp:(.text._ZN17_lace_expressions9submatrixIdE10print_treeEi[_ZN17_lace_expressions9submatrixIdE10print_treeEi]+0x12b): undefined reference to `_lace_expressions::indent(int)'
+CMakeFiles/wizard1.dir/wizard1.cpp.o: In function `_lace_expressions::submatrix<double>::print_me(int)':
+wizard1.cpp:(.text._ZN17_lace_expressions9submatrixIdE8print_meEi[_ZN17_lace_expressions9submatrixIdE8print_meEi]+0x24): undefined reference to `_lace_expressions::indent(int)'
+CMakeFiles/wizard1.dir/wizard1.cpp.o: In function `_lace_expressions::submatrix<double>::operator=(_lace_expressions::matrix_expression<double>&)':
+wizard1.cpp:(.text._ZN17_lace_expressions9submatrixIdEaSERNS_17matrix_expressionIdEE[_ZN17_lace_expressions9submatrixIdEaSERNS_17matrix_expressionIdEE]+0x27): undefined reference to `void _lace_expressions::process_expr<double, _lace_expressions::matrix_expression<double> >(_lace_expressions::matrix_expression<double>*&, _lace_expressions::matrix_expression<double>*)'
+collect2: error: ld returned 1 exit status
+make[2]: *** [build/Linux64/bin/wizard1] Error 1
+make[1]: *** [examples/lace_examples/CMakeFiles/wizard1.dir/all] Error 2
+make: *** [all] Error 2

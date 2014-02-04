@@ -1,0 +1,28 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$class__lace__tree_1_1tree__node.html" title="_lace_tree::tree_node" alt="" coords="5,660,152,689"/>
+<area shape="rect" id="node3" href="$class__lace__expressions_1_1abstract__expression.html" title="The base of all expression classes." alt="" coords="201,651,343,698"/>
+<area shape="rect" id="node5" href="$class__lace__expressions_1_1matrix__expression.html" title="_lace_expressions:\l:matrix_expression\&lt;\l VALTYPE \&gt;" alt="" coords="400,240,539,304"/>
+<area shape="rect" id="node25" href="$class__lace__expressions_1_1rawvector__expression.html" title="_lace_expressions:\l:rawvector_expression\l\&lt; VALTYPE \&gt;" alt="" coords="393,555,545,619"/>
+<area shape="rect" id="node31" href="$class__lace__expressions_1_1scalar__expression.html" title="_lace_expressions:\l:scalar_expression\&lt;\l VALTYPE \&gt;" alt="" coords="400,643,539,707"/>
+<area shape="rect" id="node37" href="$class__lace__expressions_1_1subrange__expression.html" title="_lace_expressions:\l:subrange_expression" alt="" coords="395,730,544,777"/>
+<area shape="rect" id="node39" href="$class__lace__expressions_1_1vector__expression.html" title="_lace_expressions:\l:vector_expression\&lt;\l VALTYPE \&gt;" alt="" coords="400,849,539,913"/>
+<area shape="rect" id="node7" href="$class__lace__expressions_1_1matrix.html" title="_lace_expressions:\l:matrix\&lt; VALTYPE, MTRTYPE \&gt;" alt="" coords="619,5,837,51"/>
+<area shape="rect" id="node9" href="$class__lace__expressions_1_1submatrix.html" title="_lace_expressions:\l:submatrix\&lt; VALTYPE \&gt;" alt="" coords="645,74,811,121"/>
+<area shape="rect" id="node11" href="$class__lace__expressions_1_1expression__binop.html" title="_lace_expressions:\l:expression_binop\&lt; VALTYPE,\l matrix_expression\&lt; VALTYPE \&gt; \&gt;" alt="" coords="615,144,841,208"/>
+<area shape="rect" id="node15" href="$class__lace__expressions_1_1expression__unop.html" title="_lace_expressions:\l:expression_unop\&lt; VALTYPE,\l matrix_expression\&lt; VALTYPE\l \&gt;, matrix_expression\&lt; VALTYPE \&gt; \&gt;" alt="" coords="607,231,849,313"/>
+<area shape="rect" id="node19" href="$class__lace__expressions_1_1matrix.html" title="_lace_expressions:\l:matrix\&lt; VALTYPE, lace\l::rectang \&gt;" alt="" coords="645,336,811,400"/>
+<area shape="rect" id="node21" href="$class__lace__expressions_1_1mixtyped__product.html" title="_lace_expressions:\l:mixtyped_product\&lt; VALTYPE,\l matrix_expression\&lt; VALTYPE\l \&gt;, vector_expression\&lt; VALTYPE\l \&gt;, vector_expression\&lt; VALTYPE \&gt; \&gt;" alt="" coords="607,424,849,523"/>
+<area shape="rect" id="node13" href="$class__lace__expressions_1_1mulmm__expression.html" title="_lace_expressions:\l:mulmm_expression\&lt; VALTYPE \&gt;" alt="" coords="911,153,1132,199"/>
+<area shape="rect" id="node17" href="$class__lace__expressions_1_1transpmatrix__expression.html" title="_lace_expressions:\l:transpmatrix_expression\l\&lt; VALTYPE \&gt;" alt="" coords="937,240,1105,304"/>
+<area shape="rect" id="node23" href="$class__lace__expressions_1_1outer__product.html" title="_lace_expressions:\l:outer_product\&lt; VALTYPE \&gt;" alt="" coords="927,450,1116,497"/>
+<area shape="rect" id="node27" href="$class__lace__expressions_1_1expression__unop.html" title="_lace_expressions:\l:expression_unop\&lt; VALTYPE,\l rawvector_expression\&lt; VALTYPE\l \&gt;, vector_expression\&lt; VALTYPE \&gt; \&gt;" alt="" coords="607,546,849,627"/>
+<area shape="rect" id="node29" href="$class__lace__expressions_1_1transpvector__expression.html" title="_lace_expressions:\l:transpvector_expression\l\&lt; VALTYPE \&gt;" alt="" coords="937,555,1105,619"/>
+<area shape="rect" id="node33" href="$class__lace__expressions_1_1scalar__conjugate.html" title="_lace_expressions:\l:scalar_conjugate\&lt; VALTYPE \&gt;" alt="" coords="624,650,832,697"/>
+<area shape="rect" id="node35" href="$class__lace__expressions_1_1scalar__number.html" title="_lace_expressions:\l:scalar_number\&lt; VALTYPE \&gt;" alt="" coords="631,719,825,766"/>
+<area shape="rect" id="node41" href="$class__lace__expressions_1_1subvector.html" title="_lace_expressions:\l:subvector\&lt; VALTYPE \&gt;" alt="" coords="645,789,811,835"/>
+<area shape="rect" id="node43" href="$class__lace__expressions_1_1vector.html" title="_lace_expressions:\l:vector\&lt; VALTYPE, VTYPE \&gt;" alt="" coords="629,858,827,905"/>
+<area shape="rect" id="node45" href="$class__lace__expressions_1_1expression__unop.html" title="_lace_expressions:\l:expression_unop\&lt; VALTYPE,\l vector_expression\&lt; VALTYPE\l \&gt;, rawvector_expression\&lt; VALTYPE \&gt; \&gt;" alt="" coords="596,927,860,1009"/>
+<area shape="rect" id="node49" href="$class__lace__expressions_1_1mixtyped__product.html" title="_lace_expressions:\l:mixtyped_product\&lt; VALTYPE,\l vector_expression\&lt; VALTYPE\l \&gt;, matrix_expression\&lt; VALTYPE\l \&gt;, vector_expression\&lt; VALTYPE \&gt; \&gt;" alt="" coords="607,1032,849,1131"/>
+<area shape="rect" id="node47" href="$class__lace__expressions_1_1transprvector__expression.html" title="_lace_expressions:\l:transprvector_expression\l\&lt; VALTYPE \&gt;" alt="" coords="936,936,1107,1000"/>
+<area shape="rect" id="node51" href="$class__lace__expressions_1_1matrix__by__vector.html" title="_lace_expressions:\l:matrix_by_vector\&lt; VALTYPE \&gt;" alt="" coords="916,1058,1127,1105"/>
+</map>
