@@ -4,10 +4,13 @@
 #include <io/geomio.hpp>
 #include <boost/format.hpp>			
 #include <geom/zmt.hpp>
+#include <geom/zpt.hpp>
 #include <time.h>
 #include <stdlib.h>
 
 // -------------- Type table & neighbours table for simple molecule ---------------------
+
+typedef qpp::zpattern<3> zpt;
 
 int main()
 {
@@ -28,22 +31,43 @@ int main()
   //g.write(std::cout);
   g.add("X", 2.9253, 4.11701, 2.49663);
 
-  g.default_ngbr_distance = 1.8;
+  g.ngbr.default_distance = 1.8;
   g.build_type_table();
-  g.build_ngbr_disttable();
-  g.build_ngbr_table();
-
-
-  /*
-  for (int i=0; i<g.size(); i++)
-    for (int j=0; j<g.n_ngbr(i); j++)
-      {
-	qpp::index<3> k = g.ngbr(i,j);
-	std::cout << g.atom(i) << " " << i << " " << g.atom(k) << " " << k << " " <<  norm(g.coord(i) - g.full_coord(k)) << "\n";
-      }
-  */
+  g.ngbr.build_disttable();
+  g.ngbr.build();
   
-  qpp::zpattern<3> z;
+  qpp::zpattern<3> z(g,"hren");
+
+  try
+    {
+      
+      z.add_point(zpt::zpt_point("C1","C"),zpt::zsearch);
+      z.add_point(zpt::zpt_point("C2","C"),zpt::zsearch);
+      z.add_point(zpt::zpt_point("C3","C"),zpt::zsearch);
+      z.add_point(zpt::zpt_point("Cnew","C"),zpt::zinsert);
+      z.add_point(zpt::zpt_point("Cbad","C"),zpt::zavoid);
+      
+      double rcc_min=1.2, rcc_max = 1.6, rcc=1.4, amin = 102.0, amax = 140.0;
+
+      z.add_relation(* new zpt::bond_relation("C1","C2", rcc_min, rcc_max, z));
+      z.add_relation(* new zpt::bond_relation("C1","C3", rcc_min, rcc_max,z));
+      z.add_relation(* new zpt::angle_relation("C2","C1","C3", amin, amax, z,"alpha"));
+      z.add_relation(* new zpt::bond_relation("C1","Cnew", *new zpt::linear_dependence(rcc, z), z));
+      z.add_relation(* new zpt::angle_relation("Cnew","C1","C2",
+					       (*new zpt::linear_dependence(180,z)).term("alpha",-0.5),z));
+      z.add_relation(* new zpt::dyhedral_relation("Cnew", "C1", "C2", "C3", -30.0, 30.0, z));
+      z.add_relation(* new zpt::bond_relation("Cnew", "Cbad", 0e0, rcc, z));
+      
+      z.write(std::cout);
+      z.debug();
+    }
+  
+  catch ( qpp::qpp_exception<char> & e)
+    {
+      std::cout << e.what() << "\n";
+    }
+  
+  /*
   z.add(qpp::zpt_record<double>("O",1.8));
   z.add(qpp::zpt_record<double>("Cl").bond(0, 1.7,1.8));
   z.add(qpp::zpt_record<double>("Si").bond(0, 1.55,1.65).angle(1, 85.0, 100.0));
@@ -61,5 +85,6 @@ int main()
       for (int i=0; i< z.size(); i++)
 	g.atom(z.bound(i)) = "N";
     }
+  */
       
 }

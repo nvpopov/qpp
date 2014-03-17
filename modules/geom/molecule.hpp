@@ -3,7 +3,7 @@
 
 #include <geom/geom.hpp>
 #include <string>
-#include <lace/lace.hpp>
+//#include <lace/lace.hpp>
 #include <geom/atom.hpp>
 #include <vector>
 

@@ -4,8 +4,8 @@
 #include <vector>
 #include <cmath>
 #include <lace/lace3d.hpp>
-#include <lace/lace.hpp>
-#include <symm/symm.hpp>
+//#include <lace/lace.hpp>
+//#include <symm/symm.hpp>
 #include <io/qppdata.hpp>
 #include <constants.hpp>
 
@@ -54,6 +54,7 @@ namespace qpp{
     }
 
     inline lace::vector3d<VALTYPE> & operator()(int i)
+    // fixme - not obvious convention
     { return v[i]; } 
 
     inline VALTYPE & operator()(int i, int j)
@@ -173,6 +174,10 @@ namespace qpp{
       return qppdata_vectors | d;
     }
 
+    virtual void error(string const &){}
+
+    virtual string error(){return "";}
+
     virtual void write(std::basic_ostream<charT,traits> &os, int offset=0)
     {
       for (int k=0; k<offset; k++) os << " ";
@@ -264,7 +269,7 @@ namespace qpp{
     
   };
 
-  /*  template<typename _CharT, class _Traits, int DIM>
+  template<typename _CharT, class _Traits, int DIM>
   std::basic_ostream<_CharT, _Traits>&
   operator<<(std::basic_ostream<_CharT, _Traits>& __os, index<DIM> i)
   {
@@ -283,7 +288,7 @@ namespace qpp{
       }
     return __os << __s.str();
   }
-  */
+  
   //--------------------------------------------------------------//
 
 
@@ -305,7 +310,7 @@ namespace qpp{
 
   protected:
 
-    int nat;
+    //int nat;
     // Number of atoms/points
 
     std::vector<ATLABEL> atm;
@@ -314,13 +319,11 @@ namespace qpp{
     std::vector<lace::vector3d<VALTYPE> > crd;
     // Their coordinates
 
+    std::vector<char> _shadow;
+
     using typename qpp_object<charT,traits>::string;
 
-    string _name;
-
-  private:
-
-    VALTYPE *_ngbr_disttable;
+    string _name, _error;
 
   public:
     periodic_cell<DIM,VALTYPE,charT,traits> cell;
@@ -338,29 +341,76 @@ namespace qpp{
       // a - from
       // b - to
       
+      geometry<DIM, VALTYPE, ATLABEL, charT, traits> * geom;
+
       using index<DIM>::at;
       using index<DIM>::cll;
+
+      void inc()
+      {
+	if (*this == b)
+	  *this = end();
+
+	if ( *this == end())
+	  return;
+
+	at++;
+	if (at > b.atom() && DIM>0)
+	  {
+	    at=a.atom();
+	    int d=0;
+	    while(d < DIM)
+	      {
+		cll[d]++;
+		if (cll[d] > b.cell(d))
+		  {
+		    for(int dd=0; dd<=d; dd++)
+		      cll[d] = a.cell(dd);
+		    d++;
+		  }
+		else 
+		  break;
+	      }
+	  }
+	
+      }  
       
     public:
       
-      iterator(const geometry<DIM, VALTYPE, ATLABEL, charT, traits> &g)
+      iterator(geometry<DIM, VALTYPE, ATLABEL, charT, traits> &g)
       // default iterator goes through neighbouring cells only
       {
 	a.setatom(0);
 	for (int d=0; d < DIM; d++)
 	  a.setcell(d,-1);
-	b.setatom(g.nat - 1);
+	b.setatom(g.nat() - 1);
 	for (int d=0; d < DIM; d++)
-	  b.setcell(d,1);	
+	  b.setcell(d,1);
+	geom = &g;
       }
       
       iterator(index<DIM> _a, index<DIM> _b)
       {
 	a = _a;
 	b = _b;
+	geom = NULL;
       }
-      
-      inline index<DIM> begin(){return a;}
+
+      iterator(index<DIM> _a, index<DIM> _b, geometry<DIM, VALTYPE, ATLABEL, charT, traits> &g)
+      {
+	a = _a;
+	b = _b;
+	geom = &g;
+      }     
+
+      inline index<DIM> begin()
+      {
+	iterator tmp(a,b,*geom);
+	tmp = a;
+	while ( geom != NULL && tmp != end() ? geom -> shadow(tmp) : false)
+	  tmp.inc();
+	return tmp;
+      }
       
       //      inline index end(){return b;}
 
@@ -398,35 +448,12 @@ namespace qpp{
 	  return at != i.atom() || cll[0] != i.cell(0) || cll[1] != i.cell(1) || cll[2] != i.cell(2);
       }
                
-      iterator& operator++(int)      
+      iterator& operator++(int)
       {
-	if (*this == b)
-	  {
-	    *this = end();
-	    return *this;
-	  }
-
-	at++;
-	if (at > b.atom() && DIM>0)
-	  {
-	    at=a.atom();
-	    int d=0;
-	    while(d < DIM)
-	      {
-		cll[d]++;
-		if (cll[d] > b.cell(d))
-		  {
-		    for(int dd=0; dd<=d; dd++)
-		      cll[d] = a.cell(dd);
-		    d++;
-		  }
-		else 
-		  break;
-	      }
-	  }
-	return *this;
-
-      }  
+	do
+	  { inc();}
+	while ( geom != NULL && *this != end() ? geom -> shadow(*this) : false);
+      }
 
     };
 
@@ -463,6 +490,7 @@ namespace qpp{
     }
 
     inline int size(){return crd.size();}
+    inline int nat(){return crd.size();}
 
     inline ATLABEL& atom(index<DIM> i){return atm[i.atom()];}
 
@@ -504,8 +532,19 @@ namespace qpp{
     {
       for (int i=0; i<DIM; i++)
 	cell(i) *= s;
-      for (int i=0; i<nat; i++)
+      for (int i=0; i<nat(); i++)
 	crd[i] *= s;
+    }
+
+    virtual void error(string const & what)
+    { 
+      _error = what;
+      throw qpp_exception<charT,traits>(this);
+    }
+
+    virtual string error()
+    {
+      return _error;
     }
 
     virtual void write(std::basic_ostream<charT,traits> &os, int offset=0)
@@ -535,6 +574,9 @@ namespace qpp{
 
   public:
 
+    class neighbours_table;
+    neighbours_table ngbr;
+
     // Number of atomic types in molecule
     inline int n_atom_types() const
     {
@@ -548,7 +590,7 @@ namespace qpp{
     }
 
     // Number of type of certain ATOM at
-    inline int type_of_atom(const ATLABEL at) const
+    inline int type_of_atom(const ATLABEL & at) const
     {
       int t;
       for (t=0; t < _atm_types.size(); t++)
@@ -580,7 +622,7 @@ namespace qpp{
 	    }
 	  _type_table[i] = t;
 	}
-      _ngbr_disttable_resize();
+      ngbr.resize_disttable();
     }
     
     void clear_type_table()
@@ -589,242 +631,257 @@ namespace qpp{
       _type_table.resize(size());  
     }
 
-    // ------------------- Neighbours table operations -----------------------
-  private:
-    std::vector<std::vector<index<DIM> > > _ngbr_table;
-    
-    struct _ngbr_record{ 
-      ATLABEL at1, at2; 
-      VALTYPE d;
-
-      _ngbr_record(ATLABEL _at1, ATLABEL _at2, VALTYPE _d)
+    // ------------------- Neighbours table -----------------------
+    class neighbours_table{
+      std::vector<std::vector<index<DIM> > > _table;
+      
+      struct _ngbr_record{ 
+	ATLABEL at1, at2; 
+	VALTYPE d;
+	
+	_ngbr_record(ATLABEL _at1, ATLABEL _at2, VALTYPE _d)
+	{
+	  at1 = _at1;
+	  at2 = _at2;
+	  d = _d;
+	}
+      };
+      
+      std::vector<_ngbr_record> _records;
+      VALTYPE *_disttable;
+      
+      lace::vector3d<VALTYPE> Rmin, Rmax;
+      VALTYPE grainsize;
+      int grain_nx, grain_ny, grain_nz;
+      std::vector<std::vector<index<DIM> > > _grains; 
+      
+      geometry<DIM, VALTYPE, ATLABEL, charT, traits> & geom;
+      
+      inline int _record_match(ATLABEL at1, ATLABEL at2, int i)
       {
-	at1 = _at1;
-	at2 = _at2;
-	d = _d;
+	return ( at1 == _records[i].at1 && at2 == _records[i].at2 ) ||
+	  ( at2 == _records[i].at1 && at1 == _records[i].at2 );
       }
-    };
+      
+      void _grain_setup()
+      {
+	// find largest neighbourung distance
+	grainsize = VALTYPE(0);
+	int ntp = geom.n_atom_types();
+	for (int i=0; i<ntp*ntp; i++)
+	  if (_disttable[i] > grainsize )
+	    grainsize = _disttable[i];
+	Rmin = Rmax = geom.coord(0);
+	for (int i=1; i<geom.size(); i++)
+	  {
+	    if ( Rmin.x() > geom.coord(i).x() ) 
+	      Rmin.x() = geom.coord(i).x();
+	    if ( Rmax.x() < geom.coord(i).x() ) 
+	      Rmax.x() = geom.coord(i).x();
+	    if ( Rmin.y() > geom.coord(i).y() ) 
+	      Rmin.y() = geom.coord(i).y();
+	    if ( Rmax.y() < geom.coord(i).y() ) 
+	      Rmax.y() = geom.coord(i).y();
+	    if ( Rmin.z() > geom.coord(i).z() ) 
+	      Rmin.z() = geom.coord(i).z();
+	    if ( Rmax.z() < geom.coord(i).z() ) 
+	      Rmax.z() = geom.coord(i).z();
+	  }
+	grain_nx = int( (Rmax.x()-Rmin.x())/grainsize ) + 3;
+	grain_ny = int( (Rmax.y()-Rmin.y())/grainsize ) + 3;
+	grain_nz = int( (Rmax.z()-Rmin.z())/grainsize ) + 3;
+	
+	//debug
+	//std::cout << "Grain setup:\n" << grain_nx<<"x"<<grain_ny<<"x"<<grain_nz<<"\n";
+	//std::cout << "grain size= " << grainsize << " corners= " << Rmin << Rmax << "\n";
+      }
 
-  public:
-    lace::vector3d<VALTYPE> Rmin, Rmax;
-    VALTYPE grainsize;
-    int grain_nx, grain_ny, grain_nz;
-
-    std::vector<std::vector<index<DIM> > > _grains; 
-
-    std::vector<_ngbr_record> _ngbr_records;
-
-    inline int _ngbr_record_match(ATLABEL at1, ATLABEL at2, int i)
-    {
-      return ( at1 == _ngbr_records[i].at1 && at2 == _ngbr_records[i].at2 ) ||
-	( at2 == _ngbr_records[i].at1 && at1 == _ngbr_records[i].at2 );
-    }
-
-    inline void _ngbr_disttable_resize()
-    {
-      if (_ngbr_disttable!=NULL)
-	delete _ngbr_disttable;
-      _ngbr_disttable = new VALTYPE[n_atom_types()*n_atom_types()];
-    }
-
-    void _grain_setup()
-    {
-      grainsize = VALTYPE(0);
-      for (int i=0; i<n_atom_types()*n_atom_types(); i++)
-	if (_ngbr_disttable[i] > grainsize )
-	  grainsize = _ngbr_disttable[i];
-      Rmin = Rmax = coord(0);
-      for (int i=1; i<size(); i++)
-	{
-	  if ( Rmin.x() > coord(i).x() ) 
-	    Rmin.x() = coord(i).x();
-	  if ( Rmax.x() < coord(i).x() ) 
-	    Rmax.x() = coord(i).x();
-	  if ( Rmin.y() > coord(i).y() ) 
-	    Rmin.y() = coord(i).y();
-	  if ( Rmax.y() < coord(i).y() ) 
-	    Rmax.y() = coord(i).y();
-	  if ( Rmin.z() > coord(i).z() ) 
-	    Rmin.z() = coord(i).z();
-	  if ( Rmax.z() < coord(i).z() ) 
-	    Rmax.z() = coord(i).z();
-	}
-      grain_nx = int( (Rmax.x()-Rmin.x())/grainsize ) + 3;
-      grain_ny = int( (Rmax.y()-Rmin.y())/grainsize ) + 3;
-      grain_nz = int( (Rmax.z()-Rmin.z())/grainsize ) + 3;
-
-      //debug
-      //std::cout << "Grain setup:\n" << grain_nx<<"x"<<grain_ny<<"x"<<grain_nz<<"\n";
-      //std::cout << "grain size= " << grainsize << " corners= " << Rmin << Rmax << "\n";
-    }
-
-    inline std::vector<index<DIM> > & grains(int i, int j, int k)
-    {
-      return _grains[i*grain_ny*grain_nz + j*grain_nz + k];
-    }
-
-    void _graining()
-    {
-      for (int i=0; i<_grains.size(); i++)
-	_grains[i].clear();
-      _grains.clear();
-      _grains.resize(grain_nx*grain_ny*grain_nz);
-      iterator at(*this);
-      for ( at = at.begin(); at != at.end(); at++)
-	{
-	  lace::vector3d<VALTYPE> r = full_coord(at);
-	  int i = int( (r.x()-Rmin.x())/grainsize ) + 1;
-	  int j = int( (r.y()-Rmin.y())/grainsize ) + 1;
-	  int k = int( (r.z()-Rmin.z())/grainsize ) + 1;
-
-	  if ( i>=0 && i<grain_nx && j>=0 && j<grain_ny && k>=0 && k<grain_nz)
-	    grains(i,j,k).push_back(at);
-	}
-
-      //      debug
-      /*
-      std::cout << "graining finished\n";
-      for (int i=0; i<grain_nx; i++)
-	for (int j=0; j<grain_ny; j++)
+      inline std::vector<index<DIM> > & grains(int i, int j, int k)
+      {
+	return _grains[i*grain_ny*grain_nz + j*grain_nz + k];
+      }
+      
+      void _graining()
+      {
+	for (int i=0; i<_grains.size(); i++)
+	  _grains[i].clear();
+	_grains.clear();
+	_grains.resize(grain_nx*grain_ny*grain_nz);
+	geometry<DIM, VALTYPE, ATLABEL, charT, traits>::iterator at(geom);
+	for ( at = at.begin(); at != at.end(); at++)
+	  {
+	    lace::vector3d<VALTYPE> r = geom.full_coord(at);
+	    int i = int( (r.x()-Rmin.x())/grainsize ) + 1;
+	    int j = int( (r.y()-Rmin.y())/grainsize ) + 1;
+	    int k = int( (r.z()-Rmin.z())/grainsize ) + 1;
+	    
+	    if ( i>=0 && i<grain_nx && j>=0 && j<grain_ny && k>=0 && k<grain_nz)
+	      grains(i,j,k).push_back(at);
+	  }
+	
+	//      debug
+	/*
+	  std::cout << "graining finished\n";
+	  for (int i=0; i<grain_nx; i++)
+	  for (int j=0; j<grain_ny; j++)
 	  for (int k=0; k<grain_nz; k++)
-	    {
-	      std::cout << i << " " << j << " " << k;
-	      for (int l=0; l<grains(i,j,k).size(); l++)
-		std::cout << grains(i,j,k)[l];
-	      std::cout << "\n";
-	    }
-      */
-    }
-
-  public:
-
-    VALTYPE default_ngbr_distance;
-
-    // Number of neighbours of i-th atom
-    inline int n_ngbr(int i)
-    {
-      return _ngbr_table[i].size();
-    }
-    
-    // j-th neighbour of i-th atom
-    inline index<DIM> ngbr_table(int i, int j)
-    {
-      return _ngbr_table[i][j];
-    }
-
-    index<DIM> ngbr(index<DIM> i, int j)
-    {
-      index<DIM> res = ngbr_table(i,j);
-      for (int a=0; a<DIM; a++)
-	res.setcell( a, res.cell(a)+i.cell(a) );
-      return res;
-    }
-
-    VALTYPE ngbr_distance(ATLABEL at1, ATLABEL at2)
-    {
-      bool found = false;
-      int i;
-      for (i=0; i<_ngbr_records.size(); i++)
-	if (_ngbr_record_match(at1,at2,i))
 	  {
-	    found = true;
-	    break;
+	  std::cout << i << " " << j << " " << k;
+	  for (int l=0; l<grains(i,j,k).size(); l++)
+	  std::cout << grains(i,j,k)[l];
+	  std::cout << "\n";
 	  }
-      return found? _ngbr_records[i].d : default_ngbr_distance;
-    }
+	*/
+      }
 
-    void set_ngbr_distance(ATLABEL at1, ATLABEL at2, VALTYPE d)
-    {
-      bool found = false;
-      int i;
-      for (i=0; i<_ngbr_records.size(); i++)
-	if (_ngbr_record_match(at1,at2,i))
-	  {
-	    found = true;
-	    break;
-	  }
-      if (found)
-	_ngbr_records[i].d = d;
-      else
-	_ngbr_records.push_back(_ngbr_record(at1,at2,d));
-    }
+    public:
 
-    VALTYPE ngbr_disttable(int i, int j)
-    {
-      if (_ngbr_disttable!=NULL)
-	return _ngbr_disttable[i*n_atom_types()+j];
-      else
-	return default_ngbr_distance;
-    }
+      VALTYPE default_distance;
+      
+      neighbours_table( geometry<DIM, VALTYPE, ATLABEL, charT, traits> & g) : geom(g)
+      {
+	_disttable = NULL;
+	default_distance = VALTYPE(0);
+      } 
 
-    inline void build_ngbr_disttable()
-    {
-      int n = n_atom_types();
-      for (int i=0; i<n; i++)
-	for (int j=0; j<=i; j++)
-	  _ngbr_disttable[n*i+j] = _ngbr_disttable[n*j+i] = 
-	    ngbr_distance(atom_of_type(i),atom_of_type(j));
-    }
+      // Number of neighbours of i-th atom
+      inline int n(int i)
+      {
+	return _table[i].size();
+      }
+      
+      // j-th neighbour of i-th atom
+      inline index<DIM> table(int i, int j) const
+      {
+	return _table[i][j];
+      }
 
-    void build_ngbr_table()
-    {
-      _grain_setup();
-      _graining();
-      for (int i=0; i<_ngbr_table.size(); i++)
-	_ngbr_table[i].clear();
+      inline index<DIM> operator()(index<DIM> i, int j) const
+      {
+	index<DIM> res = table(i,j);
+	for (int a=0; a<DIM; a++)
+	  res.setcell( a, res.cell(a)+i.cell(a) );
+	return res;
+      }
 
-      _ngbr_table.resize(size());
-
-      for (int i = 1; i < grain_nx; i++)
-	for (int j = 1; j < grain_ny; j++)
-	  for (int k = 1; k < grain_nz; k++)
+      VALTYPE distance(ATLABEL at1, ATLABEL at2)
+      {
+	bool found = false;
+	int i;
+	for (i=0; i<_records.size(); i++)
+	  if (_record_match(at1,at2,i))
 	    {
-	      int g1 = i*grain_ny*grain_nz + j*grain_nz + k;
-	      if (_grains[g1].size()>0)
-		for (int di=-1; di<=0; di++)
-		  for (int dj=-1; dj<=-di; dj++) 
-		    for (int dk=-1; dk<=-di || dk<=-dj; dk++)
-		      {
-			int g2 = (i+di)*grain_ny*grain_nz + (j+dj)*grain_nz + k+dk;
-			for (int c2 = 0; c2 < _grains[g2].size(); c2++)
-			  for (int c1 = 0; c1 < ( g1==g2? c2 : _grains[g1].size()); c1++)
-			    {
-			      index<DIM> at1 = _grains[g1][c1];
-			      index<DIM> at2 = _grains[g2][c2];
-			      VALTYPE r = norm(full_coord(at1) - full_coord(at2));
-			      if ( r <= ngbr_disttable(type_table(at1), type_table(at2)))
-				{
-				  if ( at1 == index<DIM>(at1,0,0,0) )
-				    {
-				      _ngbr_table[at1].push_back(at2);
-				      if ( at2 != index<DIM>(at2,0,0,0) )
-					{
-					  for (int dd=0; dd<DIM; dd++)
-					    at1.setcell(dd,-at2.cell(dd));
-					  _ngbr_table[at2].push_back(at1);	
-					}
-				    }
-				  if ( at2 == index<DIM>(at2,0,0,0) )
-				    _ngbr_table[at2].push_back(at1);				  
-				}
-			    }
-		      }
+	      found = true;
+	      break;
 	    }
-    }
+	return found? _records[i].d : default_distance;
+      }
+
+      void set_distance(ATLABEL at1, ATLABEL at2, VALTYPE d)
+      {
+	bool found = false;
+	int i;
+	for (i=0; i<_records.size(); i++)
+	  if (_record_match(at1,at2,i))
+	    {
+	      found = true;
+	      break;
+	    }
+	if (found)
+	  _records[i].d = d;
+	else
+	  _records.push_back(_ngbr_record(at1,at2,d));
+      }
+
+      void clear_distance()
+      {
+	_records.clear();
+      }
+      
+      inline void resize_disttable()
+      {
+	if (_disttable!=NULL)
+	  delete _disttable;
+	int N = geom.n_atom_types();
+	_disttable = new VALTYPE[N*N];
+      }
+      
+      VALTYPE distance(int i, int j)
+      {
+	if (_disttable!=NULL)
+	  return _disttable[i*geom.n_atom_types()+j];
+	else
+	  return default_distance;
+      }
+
+      inline void build_disttable()
+      {
+	int n = geom.n_atom_types();
+	for (int i=0; i<n; i++)
+	  for (int j=0; j<=i; j++)
+	    _disttable[n*i+j] = _disttable[n*j+i] = 
+	      distance(geom.atom_of_type(i),geom.atom_of_type(j));
+      }
+      
+      void build()
+      {
+	_grain_setup();
+	_graining();
+	for (int i=0; i<_table.size(); i++)
+	  _table[i].clear();
+	
+	_table.resize(geom.size());
+	
+	for (int i = 1; i < grain_nx; i++)
+	  for (int j = 1; j < grain_ny; j++)
+	    for (int k = 1; k < grain_nz; k++)
+	      {
+		int g1 = i*grain_ny*grain_nz + j*grain_nz + k;
+		if (_grains[g1].size()>0)
+		  for (int di=-1; di<=0; di++)
+		    for (int dj=-1; dj<=-di; dj++) 
+		      for (int dk=-1; dk<=-di || dk<=-dj; dk++)
+			{
+			  int g2 = (i+di)*grain_ny*grain_nz + (j+dj)*grain_nz + k+dk;
+			  for (int c2 = 0; c2 < _grains[g2].size(); c2++)
+			    for (int c1 = 0; c1 < ( g1==g2? c2 : _grains[g1].size()); c1++)
+			      {
+				index<DIM> at1 = _grains[g1][c1];
+				index<DIM> at2 = _grains[g2][c2];
+				VALTYPE r = norm(geom.full_coord(at1) - geom.full_coord(at2));
+				if ( r <= distance(geom.type_table(at1), geom.type_table(at2)))
+				  {
+				    if ( at1 == index<DIM>(at1,0,0,0) )
+				      {
+					_table[at1].push_back(at2);
+					if ( at2 != index<DIM>(at2,0,0,0) )
+					  {
+					    for (int dd=0; dd<DIM; dd++)
+					      at1.setcell(dd,-at2.cell(dd));
+					    _table[at2].push_back(at1);	
+					  }
+				      }
+				    if ( at2 == index<DIM>(at2,0,0,0) )
+				      _table[at2].push_back(at1);				  
+				  }
+			      }
+			}
+	      }
+      }
+      
+    };
 
     // --------------- Constructors & destructors --------------------
 
-    geometry(string __name = ""){
-      nat=0;
+    geometry(string __name = "") : ngbr(*this)
+    {
       _name = __name;
       update_types = false;
       update_neighbours = false;
-      _ngbr_disttable = NULL;
-      default_ngbr_distance = VALTYPE(0);
     }
 
     geometry(lace::vector3d<VALTYPE> v1, lace::vector3d<VALTYPE> v2=0e0, 
-	     lace::vector3d<VALTYPE> v3=0e0, string __name = "")
+	     lace::vector3d<VALTYPE> v3=0e0, string __name = "") : ngbr(*this)
     {
       if (DIM>0)
 	cell(0)=v1;
@@ -832,26 +889,23 @@ namespace qpp{
 	cell(1)=v2;
       if (DIM>2)
 	cell(2)=v3;
-      nat = 0;
       _name = __name;
       update_types = false;
       update_neighbours = false;
-      _ngbr_disttable = NULL;
-      default_ngbr_distance = VALTYPE(0);
     }
 
     ~geometry()
     {
-      if (_ngbr_disttable!=NULL)
-	delete _ngbr_disttable;
+      //if (_ngbr_disttable!=NULL)
+      //delete _ngbr_disttable;
     }
 
     void copy(geometry<DIM, VALTYPE, ATLABEL, charT, traits> &G)
     {
       clear();
-      nat = G.nat;
       atm = G.atm;
       crd = G.crd;
+      _shadow = G._shadow;
     }
 
     // ----------------------- Manipulations with atoms -----------------------
@@ -860,7 +914,7 @@ namespace qpp{
     {
       atm.push_back(a);
       crd.push_back(r);
-      nat++;
+      _shadow.push_back((char)false);
       if (update_types)
 	{
 	  int t = type_of_atom(a);
@@ -870,8 +924,8 @@ namespace qpp{
 	      _atm_types.push_back(a);
 	      if (update_neighbours)
 		{
-		  _ngbr_disttable_resize();
-		  build_ngbr_disttable();
+		  ngbr.resize_disttable();
+		  ngbr.build_disttable();
 		}	      
 	    }
 	  _type_table.push_back(t);
@@ -887,16 +941,16 @@ namespace qpp{
     {
       atm.erase(atm.begin()+i);
       crd.erase(crd.begin()+i);
-      nat--;
+      _shadow.erase(_shadow.begin()+i);
       if (update_types)
 	_type_table.erase(_type_table.begin()+i);
     }
 
-    virtual void insert(const int i, ATLABEL a, const lace::vector3d<VALTYPE> &r)
+    virtual void insert(int i, ATLABEL a, const lace::vector3d<VALTYPE> &r)
     {
       atm.insert(atm.begin()+i,a);
       crd.insert(crd.begin()+i,r);
-      nat++;
+      _shadow.insert(_shadow.begin()+i,(char)false);
       if (update_types)
 	{
 	  int t = type_of_atom(a);
@@ -906,15 +960,15 @@ namespace qpp{
 	      _atm_types.push_back(a);
 	      if (update_neighbours)
 		{
-		  _ngbr_disttable_resize();
-		  build_ngbr_disttable();
+		  ngbr.resize_disttable();
+		  ngbr.build_disttable();
 		}
 	    }
 	  _type_table.insert(_type_table.begin()+i,t);
 	}
     }
     
-    virtual void insert(const int i, ATLABEL a, const VALTYPE _x, const VALTYPE _y, const VALTYPE _z)
+    virtual void insert(int i, ATLABEL a, const VALTYPE _x, const VALTYPE _y, const VALTYPE _z)
     {
       insert(i,a,lace::vector3d<VALTYPE>(_x,_y,_z));
     }
@@ -923,8 +977,13 @@ namespace qpp{
     {
       crd.clear();
       atm.clear();
-      nat = 0;
+      _shadow.clear();
       clear_type_table();
+    }
+
+    inline bool & shadow(int i)
+    {
+      return *((bool*)&_shadow[i]);
     }
 
   };

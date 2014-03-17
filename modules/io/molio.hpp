@@ -2,7 +2,7 @@
 #define _QPP_MOLIO_H
 
 #include <lace/lace3d.hpp>
-#include <lace/lace.hpp>
+//#include <lace/lace.hpp>
 #include <symm/symm.hpp>
 #include <geom/geom.hpp>
 #include <geom/molecule.hpp>

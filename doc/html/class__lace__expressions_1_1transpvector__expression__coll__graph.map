@@ -1,7 +1,0 @@
-<map id="_lace_expressions::transpvector_expression&lt; VALTYPE &gt;" name="_lace_expressions::transpvector_expression&lt; VALTYPE &gt;">
-<area shape="rect" id="node2" href="$class__lace__expressions_1_1expression__unop.html" title="_lace_expressions:\l:expression_unop\&lt; VALTYPE,\l rawvector_expression\&lt; VALTYPE\l \&gt;, vector_expression\&lt; VALTYPE \&gt; \&gt;" alt="" coords="663,5,905,86"/>
-<area shape="rect" id="node4" href="$class__lace__expressions_1_1rawvector__expression.html" title="_lace_expressions:\l:rawvector_expression\l\&lt; VALTYPE \&gt;" alt="" coords="416,13,568,77"/>
-<area shape="rect" id="node6" href="$class__lace__expressions_1_1abstract__expression.html" title="The base of all expression classes." alt="" coords="204,22,345,69"/>
-<area shape="rect" id="node8" href="$class__lace__tree_1_1tree__node.html" title="_lace_tree::tree_node" alt="" coords="5,31,152,60"/>
-<area shape="rect" id="node13" href="$struct__lace__expressions_1_1shape__type_3_01rawvector__expression_3_01VALTYPE_01_4_01_4.html" title="_lace_expressions:\l:shape_type\&lt; rawvector\l_expression\&lt; VALTYPE \&gt; \&gt;" alt="" coords="399,101,585,165"/>
-</map>

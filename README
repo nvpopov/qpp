@@ -1,5 +1,8 @@
 Q++ Libraries for Computational Chemistry
-xp
-===
-test
-qpp
+
+1.How to build (out of source build version)
+	Create temporary directory 
+	> mkdir ./build
+	> cd ./build; cmake ../
+
+2.Linking with 

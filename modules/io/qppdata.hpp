@@ -8,23 +8,26 @@
 namespace qpp{
 
   enum{
-    qppdata_parameter   = 0x10000,
-    qppdata_declaration = 0x20000,
-    qppdata_geometry  = 0x40000,
-    qppdata_vectors   = 0x80000,
-    qppdata_basis     = 0x100000,
-    qppdata_manyfold  = 0x200000,
-    qppdata_zmatrix   = 0x400000,
-    qppdata_zpattern  = 0x800000,
+    qppdata_parameter   = 1,
+    qppdata_declaration = 2,
+    qppdata_geometry  = 3,
+    qppdata_vectors   = 4,
+    qppdata_basis     = 5,
+    qppdata_manyfold  = 6,
+    qppdata_zmatrix   = 7,
+    qppdata_zpattern  = 8,
+    qppdata_zpt_bond  = 9,
+    qppdata_zpt_angle = 10,
+    qppdata_zpt_dihedral = 11,
+    qppdata_zpt_surfangle = 12,
     
-    qppdata_string    = 0x0001,
-    qppdata_int       = 0x0002,
-    qppdata_double    = 0x0004,
-    qppdata_dim0      = 0x0008,
-    qppdata_dim1      = 0x0010,
-    qppdata_dim2      = 0x0020,
-    qppdata_dim3      = 0x0040,
-    qppdata_xgeom     = 0x0080
+    qppdata_dim0      = 0x0010000,
+    qppdata_dim1      = 0x0020000,
+    qppdata_dim2      = 0x0040000,
+    qppdata_dim3      = 0x0080000,
+    qppdata_string    = 0x0100000,
+    qppdata_int       = 0x0200000,
+    qppdata_double    = 0x0400000
   };
 
   // -------------------------------------------------------
@@ -40,8 +43,27 @@ namespace qpp{
 
     virtual int gettype() =0;
 
-    virtual void write(std::basic_ostream<charT,traits> &os, int offset=0) =0;
+    virtual void error(string const & what) =0;
+
+    virtual string error() =0;
+
+    virtual void write(std::basic_ostream<charT,traits> &os, int offset=0) =0;    
     
+  };
+
+  // --------------------------------------------------------------------------------------
+  template <class charT=std::string::value_type , class traits = std::char_traits<charT> >
+  class qpp_exception{
+    
+    qpp_object<charT,traits> * _who;
+
+  public:
+    qpp_exception(qpp_object<charT,traits> * __who)
+    { _who = __who;}
+
+    qpp_object<charT,traits> & who(){return _who;}
+
+    typename qpp_object<charT,traits>::string what(){return _who->error();}
   };
   
   // --------------------------------------------------------------------------------------

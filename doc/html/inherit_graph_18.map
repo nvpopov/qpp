@@ -1,5 +1,0 @@
-<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$class__lace__main_1_1mmm__ternary__engine.html" title="_lace_main::mmm_ternary\l_engine\&lt; VALTYPE \&gt;" alt="" coords="5,14,181,61"/>
-<area shape="rect" id="node3" href="$class__lace__main_1_1default__mmm__ternary.html" title="_lace_main::default\l_mmm_ternary\&lt; VALTYPE,\l MTPA, MTPB, MTPC \&gt;" alt="" coords="231,5,415,69"/>
-<area shape="rect" id="node5" href="$class__lace__main_1_1blas__mmm__ternary.html" title="_lace_main::blas_mmm\l_ternary\&lt; VALTYPE, MTPA,\l MTPB, MTPC \&gt;" alt="" coords="465,5,655,69"/>
-</map>

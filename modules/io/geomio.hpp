@@ -3,7 +3,7 @@
 
 #include <lace/lace3d.hpp>
 //#include <lace/lace.hpp>
-#include <symm/symm.hpp>
+//#include <symm/symm.hpp>
 #include <geom/geom.hpp>
 //#include <geom/molecule.hpp>
 #include <vector>
@@ -23,6 +23,7 @@ namespace qpp{
 
   // index i/o
 
+  /*
   template<typename _CharT, class _Traits, int DIM>
   std::basic_ostream<_CharT, _Traits>&
   operator<<(std::basic_ostream<_CharT, _Traits>& __os, 
@@ -38,7 +39,7 @@ namespace qpp{
      __s << ")";
     return __os << __s.str();
   }
-
+  */
   // --------------------------------------------------------------------//
 
   template<class charT = char, class traits = std::char_traits<charT> >
@@ -112,7 +113,7 @@ namespace qpp{
 	for (int i=0; i<3; i++)
 	  out << boost::format("%12.6f") % geom.cell(d,i);
     else
-      std::cout << geom.name();
+      out << geom.name();
     out << "\n";
     for (int i=0; i<geom.size(); i++)
       out << boost::format("%-4s %12.6f %12.6f %12.6f\n") % geom.atom(i) % geom.coord(i)(0) 

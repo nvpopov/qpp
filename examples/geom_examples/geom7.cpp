@@ -19,10 +19,10 @@ int main()
   //  g.cell.write(std::cout);
   //  g.write(std::cout);
 
-  g.default_ngbr_distance = 2.4;
+  g.ngbr.default_distance = 2.4;
   g.build_type_table();
-  g.build_ngbr_disttable();
-  g.build_ngbr_table();
+  g.ngbr.build_disttable();
+  g.ngbr.build();
 
   /*
   for (int i=0; i<g.size(); i++)

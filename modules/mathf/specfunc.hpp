@@ -2,7 +2,7 @@
 #define _QPP_SPECFUNC_H
 
 #include <constants.hpp>
-#include <lace/lace.hpp>
+//#include <lace/lace.hpp>
 #include <lace/lace3d.hpp>
 
 namespace qpp{
@@ -41,7 +41,7 @@ namespace qpp{
   //                 Orthogonal polynomials
   // -------------------------------------------------------------
 
-  void Pl_legendre(double x, int l, lace::vector<double> & Pl)
+  void Pl_legendre(double x, int l, std::vector<double> & Pl)
   // Returns Legendre polynomials of variable x from 0 to l-th order
   // in the vector Pl.
   //                   n
@@ -51,14 +51,14 @@ namespace qpp{
   //           2  n!  dx
   //
   {
-    Pl(0) = 1e0;
+    Pl.at(0) = 1e0;
     
     double pl_prev = 1e0, pl = x;
     double pl_next;
     
     for (int k = 1; k<=l; k++)
       {
-	Pl(k) = pl;
+	Pl.at(k) = pl;
 	
 	pl_next = pl*x*(2*k + 1)/(k + 1) - pl_prev*k/(k+1);
 	pl_prev = pl;
@@ -69,7 +69,7 @@ namespace qpp{
   
   //------------------------------------------------------
   
-  void Pn_Jacobi(double x, double alpha, int n, lace::vector<double> & Pn)
+  void Pn_Jacobi(double x, double alpha, int n, std::vector<double> & Pn)
   // Jacobi polynomials are defined here as
   //
   //
@@ -83,17 +83,17 @@ namespace qpp{
   {
     double p, p_1, p_2;
     
-    Pn(0) = p_2 = 1e0;
+    Pn.at(0) = p_2 = 1e0;
     
     if (n>=1)
-      Pn(1) =  p_1 = (alpha + 1e0)*(1e0 - 2*x);
+      Pn.at(1) =  p_1 = (alpha + 1e0)*(1e0 - 2*x);
     
     for (int k = 2; k <= n; k++)
       {
 	p = (alpha + k -.5e0)*(1e0 - 2*x)*p_1 - .5e0*(alpha + k - 1e0)*p_2;
 	p *= 2*(alpha+k)/((2*alpha+k)*k);
 	
-	Pn(k) = p;
+	Pn.at(k) = p;
 	
 	p_2 = p_1;
 	p_1 = p;
@@ -102,7 +102,7 @@ namespace qpp{
 
   // ------------------------------------------------------
 
-  void Pn_laguerre(double x, double alpha, int n, lace::vector<double> & Pn)
+  void Pn_laguerre(double x, double alpha, int n, std::vector<double> & Pn)
   // Laguerre polynomials defined as:
 
   //
@@ -115,16 +115,16 @@ namespace qpp{
   {
     double p, p_1, p_2;
     
-    Pn(0) = p_2 = 1e0;
+    Pn.at(0) = p_2 = 1e0;
     
     if (n>=1)
-      Pn(1) =  p_1 = alpha + 1e0 - x;
+      Pn.at(1) =  p_1 = alpha + 1e0 - x;
     
     for (int k = 2; k <= n; k++)
       {
 	p = -( (x-alpha-2*k+1)*p_1 + (alpha+k-1)*p_2 )/k;
 	
-	Pn(k) = p;
+	Pn.at(k) = p;
 	
 	p_2 = p_1;
 	p_1 = p;
@@ -159,15 +159,15 @@ namespace qpp{
   
   //------------------------------------------------------
   
-  void Fn_boys(double x, int n, lace::vector<double> & Fn)
+  void Fn_boys(double x, int n, std::vector<double> & Fn)
   {
     double sx = std::sqrt(x);
     double ex = std::exp(-x);
     
-    Fn(0) = erf(sx)/sx;
+    Fn.at(0) = erf(sx)/sx;
     double hspi = std::sqrt(pi)/2;
     for (int k=0; k<n; k++)
-      Fn(k+1) = ( (2*k+1)*Fn(k) - ex/hspi )/(2*x);
+      Fn.at(k+1) = ( (2*k+1)*Fn.at(k) - ex/hspi )/(2*x);
   }
 
   //------------------------------------------------------
@@ -210,7 +210,7 @@ namespace qpp{
       }
   }
 
-  void In_bessel(int n, double x, lace::vector<double> & In, double predexp = 0e0)
+  void In_bessel(int n, double x, std::vector<double> & In, double predexp = 0e0)
   {
     double I0 = I0_bessel(x, predexp);
     double tx = 2e0/x;
@@ -227,25 +227,25 @@ namespace qpp{
 	bip = bi;
 	bi = bim;
 	
-	if (j<=n+1) In(j-1) = bi;
+	if (j<=n+1) In.at(j-1) = bi;
 	
 	if ( bi > big )
 	  {
 	    bi  *= small;
 	    bip *= small;
 	    
-	    for (int i=j-1; i<=n; i++) In(i) *= small;
+	    for (int i=j-1; i<=n; i++) In.at(i) *= small;
 	  }
       }
     
-    for (int i=0; i<=n; i++) In(i) *= I0/bi;
+    for (int i=0; i<=n; i++) In.at(i) *= I0/bi;
   }
   
   // -------------------------------------------------------------
   //                 Spherical harmonics
   // -------------------------------------------------------------
 
-  void Qml_legendre(int l, int m, double x, lace::vector<double> & Qml)
+  void Qml_legendre(int l, int m, double x, std::vector<double> & Qml)
   //  Returns array Qml, where Qml(l-m) is
   //
   //               ________
@@ -267,15 +267,15 @@ namespace qpp{
     
     if ( int(m/2)*2 != m ) Cmm = -Cmm;
     
-    Qml(0)=Cmm;
+    Qml.at(0)=Cmm;
     
-    if ( n>0 ) Qml(1) = std::sqrt(2*m+1)*x*Qml(0);
+    if ( n>0 ) Qml.at(1) = std::sqrt(2*m+1)*x*Qml.at(0);
     
     for (int i=2; i<=n; i++ )
       {
 	int ll = m+i;
-	Qml(i) = (2*ll-1)*x*Qml(i-1) - std::sqrt( (ll-1)*(ll-1e0) - m*m )*Qml(i-2);
-	Qml(i) /= std::sqrt(ll*ll - m*m);
+	Qml.at(i) = (2*ll-1)*x*Qml.at(i-1) - std::sqrt( (ll-1)*(ll-1e0) - m*m )*Qml.at(i-2);
+	Qml.at(i) /= std::sqrt(ll*ll - m*m);
       }
   }
 
@@ -284,12 +284,12 @@ namespace qpp{
   double Ylm_spherical(int l, int m, double theta)
   // Spherical harmonics Y_lm without the exp(i*m*phi) multiplier
   {
-    lace::vector<double> Q(l-m+1);
+    std::vector<double> Q(l-m+1);
     int sgn = 1;
     if (m<0 && 2*int(m/2)!=m ) sgn = -1; 
     if (m<0) m = -m;
     Qml_legendre(l,m,std::cos(theta),Q);
-    return  sgn*std::sqrt((2*l+1)/(4*pi))*Q(l-m);
+    return  sgn*std::sqrt((2*l+1)/(4*pi))*Q.at(l-m);
   }
 
   // fixme - implement Ylm returning array of values!

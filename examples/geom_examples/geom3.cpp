@@ -6,19 +6,23 @@
 
 int main()
 {
-  qpp::geometry<0> g;
+  qpp::geometry<3> g;
+  
+  g.cell(0) = lace::vector3d<double>(4,0,0);
+  g.cell(1) = lace::vector3d<double>(0,6,0);
+  g.cell(2) = lace::vector3d<double>(0,0,4);
 
   /*
   g.update_types = true;
   g.update_neighbours = true;
   */
 
-  g.default_ngbr_distance = 1.2;
-  g.set_ngbr_distance("Carbon","Carbon",1.6);
-  g.set_ngbr_distance("Carbon","Oxygen",1.4);
-  g.set_ngbr_distance("Coronium","Newtonium",-1);
-  g.set_ngbr_distance("Oxygen","Nitrogen",1.53);
-  g.set_ngbr_distance("Carbon","Nitrogen",1.35);
+  g.ngbr.default_distance = 1.2;
+  g.ngbr.set_distance("Carbon","Carbon",1.8);
+  g.ngbr.set_distance("Carbon","Oxygen",1.6);
+  g.ngbr.set_distance("Coronium","Newtonium",8);
+  g.ngbr.set_distance("Oxygen","Nitrogen",1.53);
+  g.ngbr.set_distance("Carbon","Nitrogen",1.35);
 
   g.add("Carbon",       -1.676283510,      0.000000000,      1.911126199);
   g.add("Oxygen",       -1.753146399,      1.141923181,      1.514919538);
@@ -34,8 +38,12 @@ int main()
   g.add("Hydrogen",       -0.733613146,     -1.005425023,      3.538407817);
   g.insert(6, "Nitrogen",       -1.721124037,      0.666230718,      4.332560746);
 
+  g.shadow(0) = true;
+  g.shadow(1) = true;
+  //  g.shadow(4) = true;
+
   g.build_type_table();
-  g.build_ngbr_disttable();
+  g.ngbr.build_disttable();
   //  g.build_ngbr_table();
 
 
@@ -55,14 +63,14 @@ int main()
     {
       std::cout << boost::format("%5i") % i;
       for (int j=0; j<g.n_atom_types(); j++)
-	std::cout << boost::format("%10.5f") % g.ngbr_disttable(i,j);
+	std::cout << boost::format("%10.5f") % g.ngbr.distance(i,j);
       std::cout << "\n";
     }
 
   for (int i=0; i<g.size(); i++)
     std::cout << g.type_table(i) << " " << g.coord(i).x() << " " << g.coord(i).y() << " " << g.coord(i).z() << "\n";
 
-
+  /*
   g._grain_setup();
   std::cout << g.grainsize << "\n";
   std::cout << g.Rmin << g.Rmax << g.grain_nx << " " << g.grain_ny << " " << g.grain_nz << "\n";
@@ -77,14 +85,19 @@ int main()
       for (int k=0; k < g.grain_nz; k++ )
 	for (int a=0; a< g.grains(i,j,k).size(); a++)
 	  std::cout << i << " " << j << " " << k << " " << (g.grains(i,j,k)[a]) << "\n";
-
-  g.build_ngbr_table();
+  */
+  g.ngbr.build();
 
   for (int i=0; i<g.size(); i++)
-    for (int j=0; j<g.n_ngbr(i); j++)
+    for (int j=0; j<g.ngbr.n(i); j++)
       {
-	int k = g.ngbr_table(i,j);
+	qpp::index<3> k = g.ngbr.table(i,j);
 	std::cout << g.atom(i) << " " << i << " " << g.atom(k) << " " << k << " " <<  norm(g.coord(i) - g.coord(k)) << "\n";
       }
+
+  std::cout << "Iterator work:\n";
+  qpp::geometry<3>::iterator i(g);
+  for (i=i.begin(); i!=i.end(); i++)
+    std::cout << i << " ";
 }
 
