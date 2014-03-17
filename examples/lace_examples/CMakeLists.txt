@@ -38,3 +38,10 @@ target_link_libraries(lace3 lace)
 
 #add_executable(lace2 lace2.cpp)
 #target_link_libraries(lace2 lace)
+#add_executable(lace1 lace1.cpp)
+#target_link_libraries(lace1 lace)
+
+#add_executable(lace2 lace2.cpp)
+#target_link_libraries(lace2 lace)
+#add_executable(lace1 lace1.cpp)
+#target_link_libraries(lace1 lace)
