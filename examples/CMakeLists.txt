@@ -2,4 +2,5 @@
 #add_subdirectory(test2-lace1)
 #add_subdirectory(lace_examples)
 add_subdirectory(geom_examples)
+add_subdirectory(symm_examples)
 add_subdirectory(zpattern)

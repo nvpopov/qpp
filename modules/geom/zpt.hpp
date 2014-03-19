@@ -1006,8 +1006,8 @@ namespace qpp{
     {
       occupied.clear();
       occupied.resize(geom->nat(),false);
-      //      noapply.clear();
-      //noapply.resize(geom->nat(),false);
+      noapply.clear();
+      noapply.resize(geom->nat(),false);
       for (int i=0; i<n_points(); i++)
 	unbind(i);
     }

@@ -23,7 +23,7 @@ int main()
 
 
   //  double R=(1+std::sqrt(5.))*std::sqrt(3.)*rcc/4; //c20
-  //  double R=3.46; //c60
+  //double R=3.46; //c60
   double R=3.8; //c70
   //  double R=2.18; //c24
   //double R=11.85; //c720
@@ -33,14 +33,14 @@ int main()
   p.push_back(v2d(qpp::pi/2,0));
   p.push_back(sph.ruler(p[0],v2d(1,0),rcc));
   //  p.push_back(sph.protract(p[0],p[1],rcc,0.6*qpp::pi));
-  p.push_back(sph.protract(p[0],p[1],rcc,2*qpp::pi/3));
+  p.push_back(sph.triangul(p[0],p[1],rcc,3*qpp::pi/5));
   
 
   for (int i=0; i<p.size(); i++)
     G.add("C", sph.map(p[i]) );
 
   typedef qpp::zpattern<0,double> zpt;
-  std::vector<zpt> z1(3),z2(3);
+  std::vector<zpt> z1(3),z2(2);
   
   // ----------------------------------------------------------------- 
   z1[0].add_point(zpt::zpt_point("C1","C"),zpt::zsearch);
@@ -147,13 +147,13 @@ int main()
   z2[1].add_relation(* new zpt::bond_relation("CX1","C5", 0, rcc_min, z2[1]));
   z2[1].add_relation(* new zpt::bond_relation("CX2","C6", 0, rcc_min, z2[1]));
   //----------------------------------------------------------------------------
-  z2[2].add_point(zpt::zpt_point("C1","C"),zpt::zsearch);
+  /*  z2[2].add_point(zpt::zpt_point("C1","C"),zpt::zsearch);
   z2[2].add_point(zpt::zpt_point("C2","C"),zpt::zdelete);
   z2[2].add_point(zpt::zpt_point("C3","C"),zpt::zdelete);
 
   z2[2].add_relation(* new zpt::bond_relation("C1","C2", 0, 1.8, z2[2]));
   z2[2].add_relation(* new zpt::bond_relation("C2","C3", 0, 1.8, z2[2]));
-  z2[2].add_relation(* new zpt::bond_relation("C3","C1", 0, 1.8, z2[2]));
+  z2[2].add_relation(* new zpt::bond_relation("C3","C1", 0, 1.8, z2[2]));*/
   //----------------------------------------------------------------------------
 
   qpp::init_rand();
@@ -186,11 +186,18 @@ int main()
 		    {
 		      queue2 = true;
 		      std::stringstream s;
-		      s << "pattern " << j << " = ";
+		      s << "queue 2 pattern " << j << " = ";
 		      for (int k=0; k<z2[j].n_points(); k++)
-			s << " " << z2[j].bound(j);
+			s << " " << z2[j].bound(k);
 		      
 		      G.setname(s.str());
+		      for (int k=0; k<z2[j].n_points(); k++)
+			if (z2[j].point_type(k)!=zpt::zavoid)
+			  G.atom(z2[j].bound(k)) = "N";
+		      qpp::write_xyz(f,G);
+		      for (int k=0; k<z2[j].n_points(); k++)
+			if (z2[j].point_type(k)!=zpt::zavoid)
+			  G.atom(z2[j].bound(k)) = "C";
 		      qpp::write_xyz(f,G);
 		    }
 	      }
@@ -198,11 +205,18 @@ int main()
 	      {
 		contin = true;
 		std::stringstream s;
-		s << "pattern " << i << " = ";
+		s << "queue 1 pattern " << i << " = ";
 		for (int k=0; k<z1[i].n_points(); k++)
 		  s << " " << z1[i].bound(k);
 		
 		G.setname(s.str());
+		for (int k=0; k<z1[i].n_points(); k++)
+		  if (z1[i].point_type(k)!=zpt::zavoid)
+		    G.atom(z1[i].bound(k)) = "N";
+		qpp::write_xyz(f,G);
+		for (int k=0; k<z1[i].n_points(); k++)
+		  if (z1[i].point_type(k)!=zpt::zavoid)
+		    G.atom(z1[i].bound(k)) = "C";
 		qpp::write_xyz(f,G);
 	      }
 	    }
