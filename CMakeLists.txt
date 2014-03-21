@@ -4,6 +4,7 @@ project(qpp)
 set (qpp_VERSION_MAJOR 0)
 set (qpp_VERSION_MINOR 1)
 
+set(CMAKE_CXX_FLAGS "-std=\"c++11\"")
 #Detect system bitness
 set(bitness 32)
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
