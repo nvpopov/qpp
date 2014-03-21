@@ -167,6 +167,11 @@ int main()
   G.ngbr.build_disttable();
   G.ngbr.build();
   
+  for (int i=0; i<z1.size(); i++)
+    z1[i].init(sph,p,G);
+  for (int i=0; i<z2.size(); i++)
+    z2[i].init(sph,p,G);
+
   bool contin = true;
 
   try {
@@ -182,7 +187,7 @@ int main()
 		queue2 = false;
 		lst2.set(0,z2.size()-1);
 		for (int j=lst2.begin(); !lst2.end(); j=lst2.next())
-		  if (z2[j].apply(sph,p,G,lst) )
+		  if (z2[j].apply_surf(lst) )
 		    {
 		      queue2 = true;
 		      std::stringstream s;
@@ -201,7 +206,7 @@ int main()
 		      qpp::write_xyz(f,G);
 		    }
 	      }
-	    if ( z1[i].apply(sph,p,G,lst) )
+	    if ( z1[i].apply_surf(lst) )
 	      {
 		contin = true;
 		std::stringstream s;

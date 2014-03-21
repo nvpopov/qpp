@@ -1420,14 +1420,10 @@ namespace qpp{
 
     // ------------------------------------------------------------------
 
-    bool apply( parametric_surface<VALTYPE,charT,traits> &m, 
-		std::vector<lace::vector2d<VALTYPE> > &p, 
-		geometry<DIM, VALTYPE, ATLABEL, charT, traits> &g, integer_lister &lst)
+    bool apply_surf(integer_lister &lst)
+
     {
       //prepare
-      geom = &g;
-      mfold = &m;
-      parm = &p;
       unbind_all();
 
       setngbrdist();
@@ -1458,15 +1454,27 @@ namespace qpp{
       if (res)
 	{
 	  // delete marked atoms
-	  for (int i=g.nat()-1; i>=0; i--)
-	    if (g.shadow(i))
+	  for (int i=geom->nat()-1; i>=0; i--)
+	    if (geom->shadow(i))
 	      {
-		g.erase(i);
-		p.erase(p.begin()+i);
+		geom->erase(i);
+		parm->erase(parm->begin()+i);
 	      }
 	}
       return res;
     }
+
+
+    bool init( parametric_surface<VALTYPE,charT,traits> &m, 
+	       std::vector<lace::vector2d<VALTYPE> > &p, 
+	       geometry<DIM, VALTYPE, ATLABEL, charT, traits> &g)
+    {
+      //prepare
+      geom = &g;
+      mfold = &m;
+      parm = &p;
+    }
+
 
   };
 
