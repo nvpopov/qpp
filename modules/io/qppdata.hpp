@@ -30,6 +30,8 @@ namespace qpp{
     qppdata_double    = 0x0400000
   };
 
+  typedef int qppdata_type;
+
   // -------------------------------------------------------
   template <class charT=std::string::value_type , class traits = std::char_traits<charT> >
   class qpp_object{

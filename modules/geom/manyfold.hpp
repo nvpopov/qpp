@@ -23,10 +23,11 @@ namespace qpp{
     using typename qpp_object<charT,traits>::string;
     string _name, _error;
 
+  public:
+
     VALTYPE geomtol;
     int maxiter;
 
-  public:
 
     /*
     virtual VALTYPE xi_min() =0;
@@ -203,7 +204,7 @@ namespace qpp{
 	  C2 = B + distance*(C2-B)/norm(C2-B);
 	  c2 = project(C2);
 
-	  //std::cout << norm(C-C2) << "\n";
+	  //std::cout << norm(C-C2) << " " << geomtol*pi/180 << "\n";
 
 	  if (norm(C-C2) < geomtol*pi/180) break;
 
@@ -250,6 +251,7 @@ namespace qpp{
 	  c2 = project(C2);
 	  C2 = map(c2);
 	  
+	  // std::cout << norm(C-C2) << " " <<  geomtol*pi/180 << "\n";
 	  if (norm(C-C2) < geomtol*pi/180) break;
 
 	  C=C2;
