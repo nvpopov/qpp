@@ -12,16 +12,18 @@
 #include <stdlib.h>  
 #include <lbfgs.h>
 
+using qpp::pi;
+
 typedef double REAL;
 
 typedef lace::vector2d<REAL> v2d;
 typedef lace::vector3d<REAL> v3d;
 
 //REAL R=5, r=2.42, rcc=1.45;
-REAL R=3.4, r=1.7, rcc=1.45;
-qpp::parametric_torus<REAL> mfold(R,r);
+REAL R=3.6, r=1.7, rcc=1.45;
+qpp::parametric_surface<REAL> * mfold;
 qpp::geometry<0,REAL> G;
-std::ofstream f("tor.xyz");
+std::ofstream f;
 
 // -----------------------------------------------------------------------------------------
 
@@ -54,7 +56,7 @@ REAL surf_grad(void *instance, const REAL *x, REAL *g, const int n, const REAL s
   for (int i=0; i<G.nat(); i++)
     {
       v2d p(x[2*i],x[2*i+1]);
-      G.coord(i) = mfold.map(p);
+      G.coord(i) = mfold->map(p);
     }
 
   //  std::cout << "surf_grad1\n";
@@ -80,8 +82,8 @@ REAL surf_grad(void *instance, const REAL *x, REAL *g, const int n, const REAL s
       v2d pgrd(0e0,0e0);
       for (int j=0; j<2; j++)
 	for (int k=0; k<3; k++)
-	  //pgrd(j) += mfold.dx_dxi(x[2*i],x[2*i+1],k,j)*(grad[i](k) - sgrad(k)/G.nat());
-	  pgrd(j) += mfold.dx_dxi(x[2*i],x[2*i+1],k,j)*grad[i](k);
+	  //pgrd(j) += mfold->dx_dxi(x[2*i],x[2*i+1],k,j)*(grad[i](k) - sgrad(k)/G.nat());
+	  pgrd(j) += mfold->dx_dxi(x[2*i],x[2*i+1],k,j)*grad[i](k);
       g[2*i] = pgrd(0);
       g[2*i+1] = pgrd(1);
     }
@@ -146,7 +148,7 @@ void optimize_surf( std::vector< lace::vector2d<REAL> > & parm)
     {
       parm[i](0) = x[2*i];
       parm[i](1) = x[2*i+1];
-      G.coord(i) = mfold.map(parm[i]);
+      G.coord(i) = mfold->map(parm[i]);
     }
  
   
@@ -155,16 +157,59 @@ void optimize_surf( std::vector< lace::vector2d<REAL> > & parm)
   printf("  energ = %f\n", energ);
 }
 
+
+void conf2(std::vector<v2d> & p)
+{
+  REAL theta = std::asin(std::sqrt(3.0)*rcc/(4*r));
+  REAL phi = std::asin(0.5*rcc/(R-r));
+
+  p.push_back(v2d( theta, phi));
+  p.push_back(v2d( theta,-phi));
+  p.push_back(v2d( -theta, phi+qpp::pi));
+  p.push_back(v2d( -theta,-phi+qpp::pi));
+  p.push_back(v2d( -theta, phi+qpp::pi/3));
+  p.push_back(v2d( -theta,-phi+qpp::pi/3));
+  p.push_back(v2d(  theta, phi+2*qpp::pi/3));
+  p.push_back(v2d(  theta,-phi+2*qpp::pi/3));
+  p.push_back(v2d(  theta, phi-2*qpp::pi/3));
+  p.push_back(v2d(  theta,-phi-2*qpp::pi/3));
+  p.push_back(v2d( -theta, phi-qpp::pi/3));
+  p.push_back(v2d( -theta,-phi-qpp::pi/3));
+
+  v2d p1 = mfold->triangul(p[0],p[1],rcc,-2*qpp::pi/3);
+  p.push_back(p1);
+  p.push_back(v2d( p1.x, -p1.y));
+  p.push_back(v2d(-p1.x, pi-p1.y));
+  p.push_back(v2d(-p1.x, pi+p1.y));
+  p.push_back(v2d( p1.x,  p1.y+2*pi/3));
+  p.push_back(v2d( p1.x, -p1.y+2*pi/3));
+  p.push_back(v2d( p1.x,  p1.y-2*pi/3));
+  p.push_back(v2d( p1.x, -p1.y-2*pi/3));
+  p.push_back(v2d(-p1.x,  p1.y+pi/3));
+  p.push_back(v2d(-p1.x, -p1.y+pi/3));
+  p.push_back(v2d(-p1.x,  p1.y-pi/3));
+  p.push_back(v2d(-p1.x, -p1.y-pi/3));
+
+  p.push_back(v2d(-p1.x, 0));  
+  p.push_back(v2d( p1.x, pi));  
+  p.push_back(v2d( p1.x, pi/3));  
+  p.push_back(v2d( p1.x,-pi/3));  
+  p.push_back(v2d(-p1.x, 2*pi/3));  
+  p.push_back(v2d(-p1.x,-2*pi/3));  
+}
+
+
 void conf1(std::vector<v2d> & p)
 {
-  REAL phi0 = std::acos(0.5*rcc/(R-r));
+  REAL phi0 = std::asin(0.5*rcc/(R-r));
   p.push_back(v2d(0e0, phi0));
   p.push_back(v2d(0e0,-phi0));
   p.push_back(v2d(0e0,2*qpp::pi/3+phi0));
   p.push_back(v2d(0e0,2*qpp::pi/3-phi0));
   p.push_back(v2d(0e0,4*qpp::pi/3+phi0));
   p.push_back(v2d(0e0,4*qpp::pi/3-phi0));
-  v2d p1 = mfold.triangul(p[0],p[1],rcc,4*qpp::pi/7);
+
+  v2d p1 = mfold->triangul(p[0],p[1],rcc, 0.7*qpp::pi);
   p.push_back(p1);
   p.push_back(v2d(-p1.x, p1.y));
   p.push_back(v2d( p1.x,-p1.y));
@@ -177,40 +222,58 @@ void conf1(std::vector<v2d> & p)
   p.push_back(v2d(-p1.x,-p1.y));
 
   p1.y += 2*qpp::pi/3;
+  p.push_back(p1);
+  p.push_back(v2d(-p1.x, p1.y));
+  p.push_back(v2d( p1.x,-p1.y));
+  p.push_back(v2d(-p1.x,-p1.y));
+  
+  v2d p2 = mfold->triangul(p[9],p[11],rcc, 2*qpp::pi/3);
+  p.push_back(p2);
+  p.push_back(v2d(-p2.x, p2.y));
+  p.push_back(v2d( p2.x,-p2.y));
+  p.push_back(v2d(-p2.x,-p2.y));
 
-  /*
-  v2d p2 = (mfold.triangul2b(p[5],rcc,p[6],rcc))[1];
+  p2.y +=  2*qpp::pi/3;
   p.push_back(p2);
-  p2.x *= -1;
+  p.push_back(v2d(-p2.x, p2.y));
+  p.push_back(v2d( p2.x,-p2.y));
+  p.push_back(v2d(-p2.x,-p2.y));
+
+  p2.y +=  2*qpp::pi/3;
   p.push_back(p2);
-  p2.y += qpp::pi;
-  p.push_back(p2);
-  p2.x *= -1;
-  p.push_back(p2);*/
+  p.push_back(v2d(-p2.x, p2.y));
+  p.push_back(v2d( p2.x,-p2.y));
+  p.push_back(v2d(-p2.x,-p2.y));
 }
 
 void conf0(std::vector<v2d> & p)
 {
   p.push_back(v2d(0,0));
-  p.push_back(mfold.ruler(p[0],v2d(0,1),rcc));  
-  p.push_back(mfold.triangul(p[0],p[1],rcc,5*qpp::pi/7));
+  p.push_back(mfold->ruler(p[0],v2d(0,1),rcc));  
+  p.push_back(mfold->triangul(p[0],p[1],rcc,5*qpp::pi/7));
 }
 
 //-------------------------------------------------------------------------------------------
 
-int main()
+int main(int argc, char* argv[])
 {
   std::vector<v2d> p;
+
+  R = atof(argv[1]);
+  r = atof(argv[2]);
+  f.open(argv[3]);
+
+  mfold = new qpp::parametric_torus<REAL>(R,r);
 
   //qpp::parametric_plane<REAL> plane;
   //  REAL R=4.2, r=1.7, rcc=1.4;
 
   //  qpp::parametric_torus<REAL> mfold(R,r);
-  //  mfold.geomtol = 1e-4;
+  //  mfold->geomtol = 1e-4;
   /*
   p.push_back(v2d(qpp::pi/2,0));
-  p.push_back(mfold.ruler(p[0],v2d(1,0),rcc));
-  p.push_back(mfold.protract(p[0],p[1],rcc,2*qpp::pi/3));
+  p.push_back(mfold->ruler(p[0],v2d(1,0),rcc));
+  p.push_back(mfold->protract(p[0],p[1],rcc,2*qpp::pi/3));
   */
 
   qpp::geometry<2,REAL> uc;
@@ -261,7 +324,7 @@ int main()
   /*
   for (int i=0; i<grph.nat(); i++)
     { 
-      v2d p0 = mfold.project(grph.coord(i));
+      v2d p0 = mfold->project(grph.coord(i));
       if ( qpp::pi/3 < p0(0) && 2*qpp::pi/3 > p0(0))
 	{
 	  p.push_back(p0);
@@ -273,7 +336,7 @@ int main()
     }
   */
   for (int i=0; i<p.size(); i++)
-    G.add("C", mfold.map(p[i]) );
+    G.add("C", mfold->map(p[i]) );
 
 
   std::cout << "here3\n";
@@ -531,10 +594,10 @@ int main()
     G.ngbr.build();
     
     for (int i=0; i<zz.size();i++)
-      zz[i]->init(mfold,p,G);
+      zz[i]->init(*mfold,p,G);
 
     for (int i=0; i<zd.size();i++)
-      zd[i]->init(mfold,p,G);
+      zd[i]->init(*mfold,p,G);
 
     bool contin = true, contin1 = true, finished=false;;
 
@@ -543,7 +606,7 @@ int main()
       while(contin)
 	{
 	  
-	  if ( G.nat() > 30)
+	  if ( G.nat() > 10)
 	    {
 	      optimize_surf(p);
 	      G.ngbr.build();
