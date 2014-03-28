@@ -160,32 +160,25 @@ void conf1(std::vector<v2d> & p)
   REAL phi0 = std::acos(0.5*rcc/(R-r));
   p.push_back(v2d(0e0, phi0));
   p.push_back(v2d(0e0,-phi0));
-  p.push_back(v2d(0e0,qpp::pi+phi0));
-  p.push_back(v2d(0e0,qpp::pi-phi0));
+  p.push_back(v2d(0e0,2*qpp::pi/3+phi0));
+  p.push_back(v2d(0e0,2*qpp::pi/3-phi0));
+  p.push_back(v2d(0e0,4*qpp::pi/3+phi0));
+  p.push_back(v2d(0e0,4*qpp::pi/3-phi0));
   v2d p1 = mfold.triangul(p[0],p[1],rcc,4*qpp::pi/7);
   p.push_back(p1);
-  p1.x*=-1;
-  p.push_back(p1);
-  p1.y*=-1;
-  p.push_back(p1);
-  p1.x*=-1;
-  p.push_back(p1);  
+  p.push_back(v2d(-p1.x, p1.y));
+  p.push_back(v2d( p1.x,-p1.y));
+  p.push_back(v2d(-p1.x,-p1.y));
+
   p1.y += 2*qpp::pi/3;
   p.push_back(p1);
-  p1.x*=-1;
-  p.push_back(p1);
-  p1.y*=-1;
-  p.push_back(p1);
-  p1.x*=-1;
-  p.push_back(p1);  
+  p.push_back(v2d(-p1.x, p1.y));
+  p.push_back(v2d( p1.x,-p1.y));
+  p.push_back(v2d(-p1.x,-p1.y));
+
   p1.y += 2*qpp::pi/3;
-  p.push_back(p1);
-  p1.x*=-1;
-  p.push_back(p1);
-  p1.y*=-1;
-  p.push_back(p1);
-  p1.x*=-1;
-  p.push_back(p1);  
+
+  /*
   v2d p2 = (mfold.triangul2b(p[5],rcc,p[6],rcc))[1];
   p.push_back(p2);
   p2.x *= -1;
@@ -193,7 +186,7 @@ void conf1(std::vector<v2d> & p)
   p2.y += qpp::pi;
   p.push_back(p2);
   p2.x *= -1;
-  p.push_back(p2);
+  p.push_back(p2);*/
 }
 
 void conf0(std::vector<v2d> & p)
@@ -239,7 +232,7 @@ int main()
 
   std::cout << "here1\n";
 
-  conf1(p);
+  conf0(p);
 
   //  REAL R=(1+std::sqrt(5.))*std::sqrt(3.)*rcc/4; //c20
   //REAL R=3.46; //c60
