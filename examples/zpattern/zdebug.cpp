@@ -74,7 +74,7 @@ try{
 	}
     }
  }
-catch (qpp::qpp_exception<char, std::char_traits<char> > & err)
+catch (qpp::qpp_exception & err)
    {
      std::cout << err.what()<< "\n";
    }

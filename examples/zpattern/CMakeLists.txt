@@ -13,8 +13,8 @@ add_executable(zdebug zdebug.cpp)
 #add_executable(graphene graphene.cpp)
 #target_link_libraries(graphene lace)
 
-add_executable(fullerene fullerene.cpp)
-target_link_libraries(fullerene lbfgs)
+#add_executable(fullerene fullerene.cpp)
+#target_link_libraries(fullerene lbfgs)
 
 add_executable(tor tor.cpp)
 target_link_libraries(tor lbfgs)

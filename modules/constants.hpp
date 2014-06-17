@@ -15,6 +15,10 @@ namespace qpp{
 
   double symmtol = 1e-5;
 
+  double const default_geomtol = 1e-6;
+
+  //double geomtol = default_geomtol;
+
 };
 
 #endif

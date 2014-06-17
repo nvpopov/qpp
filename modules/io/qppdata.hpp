@@ -7,181 +7,203 @@
 
 namespace qpp{
 
+#ifdef WCHAR
+
+#define CHAR wchar
+#define STRING std::wstring
+
+#else
+
+#define CHAR char
+#define STRING std::string
+
+#endif
+
+  typedef std::char_traits<CHAR> TRAITS;
+
   enum{
-    qppdata_parameter   = 1,
-    qppdata_declaration = 2,
-    qppdata_geometry  = 3,
-    qppdata_vectors   = 4,
-    qppdata_basis     = 5,
-    qppdata_manyfold  = 6,
-    qppdata_zmatrix   = 7,
-    qppdata_zpattern  = 8,
-    qppdata_zpt_bond  = 9,
-    qppdata_zpt_angle = 10,
-    qppdata_zpt_dihedral = 11,
-    qppdata_zpt_surfangle = 12,
-    
-    qppdata_dim0      = 0x0010000,
-    qppdata_dim1      = 0x0020000,
-    qppdata_dim2      = 0x0040000,
-    qppdata_dim3      = 0x0080000,
-    qppdata_string    = 0x0100000,
-    qppdata_int       = 0x0200000,
-    qppdata_double    = 0x0400000
+    data_parameter     = 0x000200,
+    data_declaration   = 0x000400,
+    data_geometry      = 0x000800,
+    data_xgeometry     = 0x001000,
+    data_vectors       = 0x002000,
+    data_basis         = 0x004000,
+    data_manyfold      = 0x008000,
+    data_zmatrix       = 0x010000,
+    data_zpattern      = 0x020000,
+    data_zpt_bond      = 0x040000,
+    data_zpt_angle     = 0x080000,
+    data_zpt_dihedral  = 0x100000,
+    data_zpt_surfangle = 0x200000,
+    data_geom_modifier = 0x400000,
+    data_region        = 0x800000,
+
+    // additional bits for some of these types
+    data_dim0        = 0x001,
+    data_dim1        = 0x002,
+    data_dim2        = 0x004,
+    data_dim3        = 0x008,
+    data_type_int    = 0x010,
+    data_type_bool   = 0x020,
+    data_type_double = 0x040,
+    data_type_float  = 0x080,
+    data_type_string = 0x100,
   };
 
-  typedef int qppdata_type;
+  typedef long int qppobject_type;
+
+  template<class T>
+  struct data_type
+  {
+    static const qppobject_type type;
+  };
+
+  // fixme - this should not be in .hpp file
+  template<>
+  const qppobject_type data_type<int>::type = data_type_int;
+  template<>
+  const qppobject_type data_type<bool>::type = data_type_bool;
+  template<>
+  const qppobject_type data_type<double>::type = data_type_double;
+  template<>
+  const qppobject_type data_type<float>::type = data_type_float;
+  template<>
+  const qppobject_type data_type<STRING>::type = data_type_string;
 
   // -------------------------------------------------------
-  template <class charT=std::string::value_type , class traits = std::char_traits<charT> >
   class qpp_object{
   public:
 
-    typedef std::basic_string<charT,traits> string;
+    virtual int n_next() const =0;
 
-    virtual string category() =0;
+    virtual qpp_object* next(int i) =0;
 
-    virtual string name() =0;
+    virtual STRING category() const=0;
 
-    virtual int gettype() =0;
+    virtual STRING name() const=0;
 
-    virtual void error(string const & what) =0;
+    virtual qppobject_type gettype() const=0;
 
-    virtual string error() =0;
+    virtual void error(STRING const & what) =0;
 
-    virtual void write(std::basic_ostream<charT,traits> &os, int offset=0) =0;    
+    virtual STRING error() =0;
+
+    virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const =0;    
     
   };
 
   // --------------------------------------------------------------------------------------
-  template <class charT=std::string::value_type , class traits = std::char_traits<charT> >
   class qpp_exception{
     
-    qpp_object<charT,traits> * _who;
+    qpp_object * _who;
 
   public:
-    qpp_exception(qpp_object<charT,traits> * __who)
+    qpp_exception(qpp_object * __who)
     { _who = __who;}
 
-    qpp_object<charT,traits> & who(){return _who;}
+    qpp_object & who(){return * _who;}
 
-    typename qpp_object<charT,traits>::string what(){return _who->error();}
+    typename STRING what(){return _who->error();}
   };
   
   // --------------------------------------------------------------------------------------
 
-  template <class charT=std::string::value_type, class traits = std::char_traits<charT> >
-  class qpp_data_array
+  template <class T>
+  class qpp_parameter : public qpp_object
   {
   protected:
-    std::vector<qpp_object<charT,traits>*> arr;
+    STRING _name;
+    T _value;
 
-    typedef std::basic_string<charT,traits> string;
-
-  public:
-    
-    int size(){return arr.size();}
-    
-    qpp_object<charT,traits> & operator[](int i){return *arr[i];}
-
-    qpp_object<charT,traits> & operator()(string str, int i=0){}
-    
-    virtual void add(qpp_object<charT,traits> & p)
-    {
-      arr.push_back(&p);
-    }
-
-    string category(int i)
-    { return arr[i]->category();}
-
-    string name(int i)
-    { return arr[i]->name();}
-    
-    ~qpp_data_array()
-    {
-      for (int i=0; i < arr.size(); i++)
-	delete arr[i];
-    }
-    
-    void debug(int shift=0)
-    {
-      std::cout << "list of size " << size() << "\n";
-      for (int i=0; i<size(); i++)
-	{
-	  for (int j=0; j<shift+2; j++) std::cout << " "; 
-	  std::cout << "node " << i << ":";
-	  arr[i]->debug(shift+2);
-	}
-      for (int j=0; j<shift; j++) std::cout << " "; 
-      std::cout << "end_of_list\n";
-    }
-    
-  };
-
-  // -------------------------------------------------------------
-
-  template <class charT=std::string::value_type, class traits = std::char_traits<charT> >
-  class qpp_parameter_tree;
-
-  // -------------------------------------------------------------
-
-  template <class charT=std::string::value_type, class traits = std::char_traits<charT> >
-  class qpp_param_array : public qpp_data_array<charT,traits>
-  {
-    using typename qpp_data_array<charT,traits>::string;
-    using qpp_data_array<charT,traits>::arr;
+    // fixme - this actually should be array of parameters
+    std::vector<qpp_object*> _nested_parm;
+    int _line;
 
   public:
 
-    virtual void add(qpp_object<charT,traits> & p)
-    {
-      if ( p.gettype() & qppdata_parameter )
-	arr.push_back(&p);
-      else
-	{
-	  // fixme - some error management? 
-	}
-    }
-
-    string value(int i)
-    {
-      return ((qpp_parameter_tree<charT,traits>*)(arr[i])) -> value();
-    }
-
-  };
-
-  // -------------------------------------------------------------
-
-  template <class charT, class traits>
-  class qpp_parameter_tree : public qpp_object<charT,traits>
-  {
-
-    using typename qpp_object<charT,traits>::string;
-    string _name, _value;
-
-  public:
-
-    qpp_param_array<charT,traits> parameters;
-
-    qpp_parameter_tree(string __name, string __value, int line=0)
+    qpp_parameter(const STRING & __name, const T & __value, int __line=0)
     {
       _name = __name;
       _value = __value;
+      _line = __line;
     }
 
-    virtual string category()
+    int n_parm() const
+    {
+      _nested_parm.size();
+    }
+
+    qpp_object & nested_parm(int i) const
+    {
+      return * _nested_parm[i];
+    }
+
+    std::vector<qpp_object* > & nested_parm() 
+    {
+      return _nested_parm;
+    }
+
+    void add_parm(qpp_object & p)
+    {
+      _nested_parm.push_back(&p);
+    }
+      
+    void ins_parm(int i, qpp_object & p)
+    {
+      _nested_parm.insert(_nested_parm.begin(),&p);
+    }    
+
+    void del_parm(int i)
+    {
+      _nested_parm.erase(_nested_parm.begin()+i);
+    }
+
+    virtual int n_next() const
+    {
+      return n_parm();
+    }
+
+    virtual qpp_object* next(int i)
+    {
+      return &nested_parm(i);
+    }
+
+    virtual STRING category() const
     { return "parameter"; }
 
-    virtual string name()
+    virtual STRING name() const
     { return _name; }
 
-    string value()
+    T value() const
     { return _value; }
 
-    virtual int gettype(){return qppdata_parameter | qppdata_string;} 
+    T & value()
+    { return _value; }
+
+    int line() const
+    { return _line;}
+
+    virtual qppobject_type gettype() const
+    {return data_parameter | data_type<T>::type;} 
     
-    virtual void write(std::basic_ostream<charT,traits> &os, int offset=0)
+    virtual void error(STRING const & what)
     {
+      //fixme
+    }
+
+    virtual STRING error()
+    {
+      //fixme
+    }
+
+    virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const
+    {
+
+      //debug
+      //os << "parameter " << name() << " = " << "\"" << value() << "\"" 
+      //<< " nested= " << _nested_parm.size() << "\n";
+      //std::cerr << "parameter " << name() << " = " << "\"" << value() << "\"" 
+      //	 << " nested= " << _nested_parm.size() << "\n";
 
       for (int i=0; i<offset; i++)
 	os << " ";
@@ -189,13 +211,13 @@ namespace qpp{
 	os << _name << " = " << _value;
       else
 	os << _name << _value;
-      if (parameters.size()>0)
+      if (n_parm()>0)
 	{
 	  os << "(";
-	  for (int i=0; i<parameters.size(); i++)
+	  for (int i=0; i<n_parm(); i++)
 	    {
-	      parameters[i].write(os);
-	      if (i<parameters.size()-1)
+	      nested_parm(i).write(os);
+	      if (i<n_parm()-1)
 		os << ", ";
 	    }
 	  os << ")";	  
@@ -208,84 +230,103 @@ namespace qpp{
 
   // ------------------------------------------------------------
 
-  template <class charT, class traits = std::char_traits<charT> >
-  class qpp_declaration_tree : public qpp_object<charT,traits>
+  class qpp_declaration : public qpp_parameter<STRING>
   {
-    using typename qpp_object<charT,traits>::string;
-    
-    string _cat, _name;
-    int _line_number;
+  protected:
+    STRING _cat;
+    std::vector<qpp_object*> _nested_decl;
 
   public:
 
-    qpp_data_array<charT,traits> declarations;
-    qpp_param_array<charT,traits> parameters;
-
-    qpp_declaration_tree(string __cat, string __name, int line=0)
+    qpp_declaration(const STRING & __cat, const STRING & __name, int __line = 0) : 
+      qpp_parameter<STRING>(__name,"",__line)
     {
       _cat = __cat;
-      _name = __name;
-      _line_number = line;
     }
 
-    virtual string category()
+    virtual STRING category() const
     { return _cat; }
 
-    virtual string name()
-    { return _name; }
+    virtual qppobject_type gettype() const
+    {return data_declaration;}
 
-    virtual int gettype(){return qppdata_declaration | qppdata_string;}
-
-    /*
-    virtual void debug(int shift)
+    int n_decl() const
     {
-      //for (int i=0; i<shift; i++) std::cout << " ";
-      std::cout << "declaration \"" << _field1 << "\" \"" << _field2 << "\"\n";
-      if (parameters.size()>0)
-	{
-	  for (int i=0; i<shift; i++) std::cout << " ";
-	  std::cout << "nested parameters ";
-	  parameters.debug(shift);
-	}
-      if (declarations.size()>0)
-	{
-	  for (int i=0; i<shift; i++) std::cout << " ";
-	  std::cout << "nested declarations ";
-	  declarations.debug(shift);
-	}
+      _nested_decl.size();
     }
-    */
 
-    virtual void write(std::basic_ostream<charT,traits> &os, int offset=0)
+    qpp_object & nested_decl(int i) const
     {
-      os << "declaration_tree write " << parameters.size() << " " << declarations.size() << "\n";
+      return * _nested_decl[i];
+    }
+
+    std::vector<qpp_object* > & nested_decl() 
+    {
+      return _nested_decl;
+    }
+
+    void add_decl(qpp_object & p)
+    {
+      _nested_decl.push_back(&p);
+    }
+      
+    void ins_decl(int i, qpp_object & p)
+    {
+      _nested_decl.insert(_nested_decl.begin(),&p);
+    }    
+
+    void del_decl(int i)
+    {
+      _nested_decl.erase(_nested_decl.begin()+i);
+    }
+
+    virtual int n_next() const
+    {
+      return n_parm()+n_decl();
+    }
+
+    virtual qpp_object* next(int i)
+    {
+      if (0<=i && i<n_parm())
+	return &nested_parm(i);
+      else if (n_parm()<=i && i<n_parm()+n_decl())
+	return &nested_decl(i-n_parm());
+      //      else error();
+    }
+
+    virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const
+    {
+      //debug
+      //os << "declaration_tree write " << n_parm() << " " << n_decl() << "\n";
       
       for (int i=0; i<offset; i++)
 	os << " ";
-      if ( _cat != "" && _name != "")
-	os << _cat << " " << _name;
+      if ( _cat != "" && name() != "")
+	os << _cat << " " << name();
       else
-	os << _cat << _name;
+	os << _cat << name();
 
-      if (parameters.size()>0)
+      if (n_parm()>0)
 	{
 	  os << "(";
-	  for (int i=0; i<parameters.size(); i++)
+	  for (int i=0; i<n_parm(); i++)
 	    {
-	      parameters[i].write(os);
-	      if (i<parameters.size()-1)
+	      //	      _nested_parm[i]->write(os);
+	      //os << nested_parm(i).category() << "\n";
+	      nested_parm(i).write(os);
+	      if (i<n_parm()-1)
 		os << ", ";
 	    }
 	  os << ")";
 	}
-      if (declarations.size()>0)
+      if (n_decl()>0)
 	{
 	  os << "\n";
 	  for (int i=0; i<offset+2; i++)
 	    os << " ";
 	  os << "{\n";
-	  for (int i=0; i<declarations.size(); i++)
-	    declarations[i].write(os,offset+4);
+	  for (int i=0; i<n_decl(); i++)
+	    nested_decl(i).write(os,offset+4);
 	  for (int i=0; i<offset+2; i++)
 	    os << " ";
 	  os << "}\n";

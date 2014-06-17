@@ -8,48 +8,50 @@
 #include <iostream>
 #include <io/qppdata.hpp>
 #include <geom/geom.hpp>
-#include <geom/atom.hpp>
+#include <geom/geom_extras.hpp>
+//#include <geom/atom.hpp>
 
 #include <stdlib.h>
 
 namespace _qpp_internal{
 
+  using qpp::TRAITS;
+
   // -------------------- Simple tokenizer -----------------------------------
 
-  template<typename _CharT, class _Traits = std::char_traits<_CharT> >
   class tokenizer
   {
-    std::basic_istream<_CharT, _Traits> * _input;
-    std::basic_string<_CharT> _buff, _dump, _sepr;
+    std::basic_istream<CHAR,TRAITS> * _input;
+    STRING _buff, _dump, _sepr;
     int _line_number;
     
   public:
     
-    tokenizer(std::basic_istream<_CharT, _Traits> & input)
+    tokenizer(std::basic_istream<CHAR,TRAITS> & input)
     {
       _input = & input;
       _dump = " \t";
       _line_number = 0;
     }
 
-    tokenizer(std::basic_string<_CharT> str)
+    tokenizer(const STRING & str)
     {
-      _input = new std::stringstream(str);
+      _input = new std::basic_stringstream<CHAR,TRAITS>(str);
       _dump = " \t";
       _line_number = 0;
     }
     
-    void dump(std::basic_string<_CharT> smb)
+    void dump(const STRING & smb)
     {
       _dump = smb;
     }
     
-    void separate(std::basic_string<_CharT> smb)
+    void separate(const STRING & smb)
     {
       _sepr = smb;
     }
     
-    std::basic_string<_CharT> get()
+    STRING get()
     {
       int i;
       if (_buff == "" )
@@ -72,7 +74,7 @@ namespace _qpp_internal{
       if ( _input -> eof() )
 	return "";
       
-      std::basic_string<_CharT> rez;
+      STRING rez;
       i = _buff.find_first_of(_sepr + _dump);
       if (i==0)
 	{
@@ -93,7 +95,7 @@ namespace _qpp_internal{
       return rez;
     }
     
-    void back(std::basic_string<_CharT> s)
+    void back(STRING s)
     {
       _buff = s + " " + _buff;
     }
@@ -112,7 +114,7 @@ namespace _qpp_internal{
 
   // -----------------------------------------------------------
   
-  void qpp_data_error(std::string s, int l)
+  void qpp_data_error(STRING s, int l)
   // fixme - think of some error management
   {
     std::cerr << s << " in line " << l << "\n";
@@ -121,16 +123,17 @@ namespace _qpp_internal{
 
   // -----------------------------------------------------------
 
-  void tolower(std::string s)
+  void tolower(STRING & s)
   {
     std::transform(s.begin(), s.end(), s.begin(), ::tolower);
   }
 
-  
-  std::vector<std::string> &split(const std::string &s, char delim, std::vector<std::string> &elems) 
+  // -----------------------------------------------------------  
+
+  std::vector<STRING> &split(const STRING &s, CHAR delim, std::vector<STRING> &elems) 
   {
-    std::stringstream ss(s);
-    std::string item;
+    std::basic_stringstream<CHAR,TRAITS> ss(s);
+    STRING item;
     while (std::getline(ss, item, delim)) 
       if (item.size()>0)
 	elems.push_back(item);
@@ -138,9 +141,11 @@ namespace _qpp_internal{
     return elems;
   }
 
-  std::vector<std::string> split(const std::string &s, char delim = ' ') 
+  // -----------------------------------------------------------
+
+  std::vector<STRING> split(const STRING &s, CHAR delim = ' ') 
   {
-    std::vector<std::string> elems;
+    std::vector<STRING> elems;
     split(s, delim, elems);
     return elems;
   }
@@ -148,48 +153,54 @@ namespace _qpp_internal{
   // -------------------------------- string to type T convertor ----------------------------
   
   template<typename T>
-  T s2t(std::string val);
+  T s2t(const STRING & val);
   
   template<>
-  double s2t<double>(std::string val)
+  double s2t<double>(const STRING & val)
   {
     return atof(val.c_str());
   }
 
   template<>
-  float s2t<float>(std::string val)
+  float s2t<float>(const STRING & val)
   {
     return atof(val.c_str());
   }
   
   template<>
-  int s2t<int>(std::string val)
+  int s2t<int>(const STRING & val)
   {
     return atoi(val.c_str());
   }
 
   template<>
-  bool s2t<bool>(std::string val)
+  bool s2t<bool>(const STRING & val)
   {
-    tolower(val);
-    if ( (val == "y") || (val == "yes") || (val == "true") || (val == "t") || (val == "1"))
+    STRING val1 = val;
+    tolower(val1);
+    if ( (val1 == "y") || (val1 == "yes") || (val1 == "true") || (val1 == "t") || (val1 == "1"))
       return true;
-    else if ((val == "n") || (val == "no") || (val == "false") || (val == "f") || (val == "0"))
+    else if ((val1 == "n") || (val1 == "no") || (val1 == "false") || (val1 == "f") || (val1 == "0"))
       return false;
     else
       {} //fixme - error handling
   }
+
   // ----------------------------------------------------------------
 
-  template <class charT, class traits>
-  qpp::qpp_param_array<charT,traits> * parse_parameters(tokenizer<charT,traits> & tok)
+  void parse_parameters(std::vector<qpp::qpp_object*> & lst, tokenizer & tok);
+
+  // ----------------------------------------------------------------
+
+  void parse_parameters(std::vector<qpp::qpp_parameter<STRING>*> & lst, tokenizer & tok)
   {
+    std::vector<qpp::qpp_object*> nested_lst;
     tok.dump(" \t");
     tok.separate(",;{}()=");
-    qpp::qpp_param_array<charT,traits> * lst = new  qpp::qpp_param_array<charT,traits>, * nested_lst = NULL;
     
-    std::string field1, field2, smb;
+    STRING field1, field2, smb;
     bool first = true, nested = false;
+    lst.clear();
     
     do
       {
@@ -199,7 +210,7 @@ namespace _qpp_internal{
 	  {
 	    if (field1 == ")" && first)
 	      // empty parameter list
-	      return lst;
+	      return;
 	    else 
 	      qpp_data_error("Incorrect parameter list", tok.line_number());
 	  }
@@ -231,7 +242,7 @@ namespace _qpp_internal{
 	if (smb == "(")
 	  // nested parameter list
 	  {
-	    nested_lst = parse_parameters(tok);
+	    parse_parameters(nested_lst, tok);
 	    nested = true;
 	    smb = tok.get();
 	  }
@@ -244,11 +255,13 @@ namespace _qpp_internal{
 	    field2 = "";
 	  }
 	
-	qpp::qpp_parameter_tree<charT,traits> * pn = new qpp::qpp_parameter_tree<charT,traits>(field1,field2);
+	qpp::qpp_parameter<STRING> * pn = new qpp::qpp_parameter<STRING>(field1,field2);
 	if (nested)
-	  pn -> parameters = *nested_lst;
+	  for (int i=0; i<nested_lst.size(); i++)
+	    pn -> add_parm(*nested_lst[i]);
 	
-	lst -> add(*pn);
+	
+	lst.push_back(pn);
 	
 	if (smb == ")")
 	  // We are finished
@@ -258,60 +271,82 @@ namespace _qpp_internal{
 	  qpp_data_error("Error: \',\' expected in parameter list", tok.line_number());
 	
       } while(true);
+
+    //debug
+    //std::cout << "paramlist:";
+    //for (int i=0; i<lst.size(); i++)
+    //  lst[i]->write(std::cout);
     
-    return lst;
+    //    return lst;
+  }
+
+  void parse_parameters(std::vector<qpp::qpp_object*> & lst, tokenizer & tok)
+  {
+    std::vector<qpp::qpp_parameter<STRING>*> parm;
+    parse_parameters(parm,tok);
+    lst.clear();
+    for (int i=0; i<parm.size(); i++)
+      lst.push_back(parm[i]);
   }
 
   // ---------------------------------------------------------
-
-  template <int DIM, class VALTYPE, class charT, class traits>
-  qpp::geometry<qpp::qpp_atom*, DIM, VALTYPE, charT,traits> * 
-  parse_geom(qpp::qpp_param_array<charT,traits> * parm, std::basic_string<charT,traits> name, 
-	     tokenizer<charT,traits> & tok)
+  
+  template <int DIM, class VALTYPE> 
+  qpp::geometry<DIM, VALTYPE> *  parse_geom(std::vector<qpp::qpp_object*> & parm, 
+					    STRING name, tokenizer & tok)
   {
     tok.separate("}");
     tok.dump("");
 
     bool xtra = false, xchrg = false, xmass = false;
     int nxr=0, nxi=0, nxb=0;
-    std::string format;
+    STRING format;
+    std::vector<STRING> rnames, inames, bnames;
 
-    if (parm == NULL)
+    if (parm.size()==0)
       format = "axyz";
     else
       {
 	int i=0;
-	if ( parm -> value(0) == "3d" || parm -> value(0) == "2d" || 
-	     parm -> value(0) == "1d" || parm -> value(0) == "0d")
+	STRING sd = ((qpp::qpp_parameter<STRING>*)parm[0]) -> value();
+	if ( sd == "3d" || sd == "2d" || 
+	     sd == "1d" || sd == "0d")
 	  i=1;
-	while (i < parm->size())
+	while (i < parm.size())
 	  {
-	    std::string v = parm -> value(i);
+	    STRING v = ((qpp::qpp_parameter<STRING>*)parm[i]) -> value();
+	    STRING pname = ((qpp::qpp_parameter<STRING>*)parm[i]) -> name();
 	    tolower(v);
 	    if (v == "atom")
 	      format += "a";
 	    else if ( v == "x" || v == "y" || v == "z")
 	      format += v;
+	    /*
 	    else if ( v == "charge")
 	      {
 		format += "q";
 		xchrg = true;
 	      }
+	    */
 	    else if ( v == "real")
 	      {
 		format += "r";
 		nxr++;
+		rnames.push_back(pname);
 	      }
 	    else if ( v == "int")
 	      {
 		format += "i";
 		nxi++;
+		inames.push_back(pname);
 	      }
 	    else if ( v == "bool")
 	      {
 		format += "b";
 		nxb++;
+		bnames.push_back(pname);
 	      }
+	    /*
 	    else if ( v == "mass")
 	      {
 		format += "m";
@@ -319,6 +354,7 @@ namespace _qpp_internal{
 	      }
 	    else if ( v == "number" || v == "num" || v == "mendeleev" )
 	      format += "n";
+	    */
 	    else
 	      qpp_data_error("Bad geometry format: unrecognized field "+v,tok.line_number());
 	    i++;
@@ -339,46 +375,52 @@ namespace _qpp_internal{
       }
 
     bool xgeom = xchrg || nxr>0 || nxi>0 || nxb>0;
-    qpp::geometry<qpp::qpp_atom*, DIM, VALTYPE, charT,traits> * geom;
-    qpp::xtr_geometry<qpp::qpp_atom*, DIM, VALTYPE, charT,traits> * xtr_geom = NULL;
+    qpp::geometry<DIM, VALTYPE> * geom;
+    qpp::xtr_geometry<DIM, VALTYPE> * xtr_geom = NULL;
 
     if (xgeom)
       {
-	xtr_geom = new qpp::xtr_geometry<qpp::qpp_atom*, DIM, VALTYPE, charT,traits>(xchrg,nxr,nxi,nxb,name);
+	xtr_geom = new qpp::xtr_geometry<DIM, VALTYPE>(nxr,nxi,nxb,name);
 	geom = xtr_geom;
+	for (int i=0; i<nxr; i++)
+	  xtr_geom -> xreal_name(i) = rnames[i];
+	for (int i=0; i<nxi; i++)
+	  xtr_geom -> xint_name(i) = inames[i];
+	for (int i=0; i<nxb; i++)
+	  xtr_geom -> xbool_name(i) = bnames[i];
       }
     else
-      geom = new qpp::geometry<qpp::qpp_atom*, DIM, VALTYPE, charT,traits>(name);
+      geom = new qpp::geometry<DIM, VALTYPE>(name);
 
     int nat = 0;
 
     while(true)
       {
-	std::basic_string<charT,traits> line = tok.get();
+	STRING line = tok.get();
 	//std::cout << "\"" << line <<"\"" << "\n";
 	if (line == "}")
 	  break;
-	std::vector<std::basic_string<charT,traits> > fields = split(line);
+	std::vector<STRING> fields = split(line);
 
 	if (fields.size() == 0)
 	  continue;
-
+  
 	/*	std::cout << fields.size() << " " << format.size()<< "\n";
 	for (int i=0; i<fields.size(); i++)	
 	std::cout << i << "|" << fields[i] << "\n";
 	*/
-	
+  
 	if ( fields.size() != format.size() )
 	  qpp_data_error("Error: wrong number of fields",tok.line_number());
 
 	if (format == "axyz")
-	  geom -> add_point( new qpp::qpp_atom(fields[0]), s2t<VALTYPE>(fields[1]), 
-			     s2t<VALTYPE>(fields[2]), s2t<VALTYPE>(fields[3]) );
+	  geom -> add( fields[0], s2t<VALTYPE>(fields[1]), 
+		       s2t<VALTYPE>(fields[2]), s2t<VALTYPE>(fields[3]) );
 	else
 	  {
-	    geom -> add_point( NULL, VALTYPE(0), VALTYPE(0), VALTYPE(0));	 
+	    geom -> add( "", VALTYPE(0), VALTYPE(0), VALTYPE(0));	 
 
-	    std::string aname = "";
+	    STRING aname = "";
 	    int anum = 0, ixr = 0, ixi = 0, ixb = 0;
 	    VALTYPE ax = 0, ay = 0, az = 0, amass = 0, achrg = 0;
 	    for (int i=0; i < fields.size(); i++)
@@ -387,19 +429,19 @@ namespace _qpp_internal{
 		  {
 		  case 'a': aname = fields[i];
 		    break;
-		  case 'n': anum = s2t<int>(fields[i]);
-		    break;
+		    //case 'n': anum = s2t<int>(fields[i]);
+		    // break;
 		  case 'x': ax = s2t<VALTYPE>(fields[i]);
 		    break;
 		  case 'y': ay = s2t<VALTYPE>(fields[i]);
 		    break;
 		  case 'z': az = s2t<VALTYPE>(fields[i]);
 		    break;
-		  case 'q': achrg = s2t<VALTYPE>(fields[i]);
-		    xtr_geom -> charge(nat) = achrg;		   
-		    break;
-		  case 'm': amass = s2t<VALTYPE>(fields[i]);
-		    break;
+		    //case 'q': achrg = s2t<VALTYPE>(fields[i]);
+		    //  xtr_geom -> charge(nat) = achrg;		   
+		    //  break;
+		    //case 'm': amass = s2t<VALTYPE>(fields[i]);
+		    //break;
 		  case 'r': xtr_geom -> xtr_real(nat,ixr) = s2t<VALTYPE>(fields[i]);
 		    ixr++; break;
 		  case 'i': xtr_geom -> xtr_int(nat,ixi) = s2t<int>(fields[i]);
@@ -409,9 +451,9 @@ namespace _qpp_internal{
 		  }		
 	      }
 	    if ( xchrg || xmass )
-	      geom -> atom(nat) = new qpp::classical_atom(aname, anum, achrg, amass);
+	      geom -> atom(nat) = aname;
 	    else
-	      geom -> atom(nat) = new qpp::qpp_atom(aname, anum);
+	      geom -> atom(nat) = aname;
 	    geom -> coord(nat) = lace::vector3d<VALTYPE>(ax,ay,az);
 	  }
 	nat++;
@@ -428,37 +470,38 @@ namespace _qpp_internal{
 
   // ---------------------------------------------------------
 
-  template <class charT, class traits>
-  qpp::qpp_object<charT,traits> * parse_any_geom(int dim, qpp::qpp_param_array<charT,traits> * parm, 
-						 std::basic_string<charT,traits> name, tokenizer<charT,traits> & tok)
+  qpp::qpp_object *parse_any_geom(int dim, std::vector<qpp::qpp_object*>& parm, STRING name, tokenizer & tok)
   {
+
     if (dim == 0)
-      return parse_geom<0,double,charT,traits>(parm,name,tok);
+      return parse_geom<0,double>(parm,name,tok);
     else if (dim == 1)
-      return parse_geom<1,double,charT,traits>(parm,name,tok);
+      return parse_geom<1,double>(parm,name,tok);
     else if (dim == 2)
-      return parse_geom<2,double,charT,traits>(parm,name,tok);
+      return parse_geom<2,double>(parm,name,tok);
     else if (dim == 3)
-      return parse_geom<3,double,charT,traits>(parm,name,tok);
+      return parse_geom<3,double>(parm,name,tok);
+
   }
 
+
   // ---------------------------------------------------------
-  template <int DIM, class VALTYPE, class charT, class traits>
-  qpp::periodic_cell<DIM, VALTYPE, charT,traits> * 
-  parse_vectors(qpp::qpp_param_array<charT,traits> * parm, std::basic_string<charT,traits> name, 
-	     tokenizer<charT,traits> & tok)
+  template <int DIM, class VALTYPE>
+  qpp::periodic_cell<DIM, VALTYPE> * parse_vectors(std::vector<qpp::qpp_object*> & parm, 
+						   STRING name, tokenizer & tok)
   {
     tok.separate("}");
     tok.dump("");
 
-    qpp::periodic_cell<DIM, VALTYPE, charT,traits>  * cl = new qpp::periodic_cell<DIM, VALTYPE, charT,traits>(name);
+    qpp::periodic_cell<DIM, VALTYPE>  
+      * cl = new qpp::periodic_cell<DIM, VALTYPE>(name);
     int i = 0;
     while(true)
       {
-	std::basic_string<charT,traits> line = tok.get();
+	STRING line = tok.get();
 	if (line == "}")
 	  break;
-	std::vector<std::basic_string<charT,traits> > fields = split(line);
+	std::vector<STRING> fields = split(line);
 	
 	if (fields.size() == 0)
 	  continue;
@@ -482,26 +525,26 @@ namespace _qpp_internal{
 
   // ---------------------------------------------------------
 
-  template <class charT, class traits>
-  qpp::qpp_object<charT,traits> * parse_any_vectors(int dim, qpp::qpp_param_array<charT,traits> * parm, 
-						 std::basic_string<charT,traits> name, tokenizer<charT,traits> & tok)
+  qpp::qpp_object * parse_any_vectors(int dim, std::vector<qpp::qpp_object*>& parm, 
+				      STRING name, tokenizer & tok)
   {
-    if (dim == 0)
-      return parse_vectors<0,double,charT,traits>(parm,name,tok);
-    else if (dim == 1)
-      return parse_vectors<1,double,charT,traits>(parm,name,tok);
-    else if (dim == 2)
-      return parse_vectors<2,double,charT,traits>(parm,name,tok);
-    else if (dim == 3)
-      return parse_vectors<3,double,charT,traits>(parm,name,tok);
-  }
 
+    if (dim == 0)
+      return parse_vectors<0,double>(parm,name,tok);
+    else if (dim == 1)
+      return parse_vectors<1,double>(parm,name,tok);
+    else if (dim == 2)
+      return parse_vectors<2,double>(parm,name,tok);
+    else if (dim == 3)
+      return parse_vectors<3,double>(parm,name,tok);
+
+  }
+  
   // ---------------------------------------------------------
   
-  template <class charT, class traits>
-  qpp::qpp_object<charT,traits> * parse_declaration(tokenizer<charT,traits> & tok)
+  qpp::qpp_object * parse_declaration(tokenizer & tok)
   {
-    std::basic_string<charT,traits> field1, field2, smb;
+    STRING field1, field2, smb;
     
     tok.dump(" \t");
     tok.separate(",;{}()=");
@@ -520,12 +563,12 @@ namespace _qpp_internal{
 	if ( field2.find_first_of(",;{}()=") != std::string::npos )
 	  qpp_data_error("Error: identifier expected after \'=\' sign ",tok.line_number());
 	
-	qpp::qpp_parameter_tree<charT,traits> * pn = new qpp::qpp_parameter_tree<charT,traits>(field1,field2);
+	qpp::qpp_parameter<STRING> * pn = new qpp::qpp_parameter<STRING>(field1,field2);
 	smb = tok.get();
 	
 	if (smb=="(")
 	  {
-	    pn -> parameters = * parse_parameters(tok);
+	    parse_parameters(pn -> nested_parm(), tok);
 	    smb = tok.get();
 	  }
 	//	else
@@ -547,13 +590,13 @@ namespace _qpp_internal{
 
   //std::cout << "debug1: f1= " << field1 << " f2= " << field2 << " smb= " << smb << "\n";
 
-    qpp::qpp_param_array<charT,traits>  *parm = NULL;
+    std::vector<qpp::qpp_object*>  parm;
     bool must_have_nested = true;
     
     if (smb == "(")
       // object name() case
       {
-	parm = parse_parameters(tok);
+	parse_parameters(parm,tok);
 	must_have_nested = false;
 	smb = tok.get();
       }
@@ -562,13 +605,14 @@ namespace _qpp_internal{
       {
 	// determine the dimension first
 	int dim = 0;
-	if (parm != NULL && parm -> size() > 0)
+	if (parm.size() > 0)
 	  {
-	    if ( parm->value(0) == "3d" )
+	    STRING s = ((qpp::qpp_parameter<STRING>*)parm[0])->value();
+	    if ( s == "3d" )
 	      dim = 3;
-	    else if ( parm->value(0) == "2d" )
+	    else if ( s == "2d" )
 	      dim = 2;
-	    else if ( parm->value(0) == "1d" )
+	    else if ( s == "1d" )
 	      dim = 1;
 	  }
 	// debug
@@ -583,19 +627,24 @@ namespace _qpp_internal{
       {
 		// determine the dimension first
 	int dim = 3;
-	if (parm != NULL && parm -> size() > 0)
+	if ( parm.size() > 0)
 	  {
-	    if ( parm->value(0) == "3d" )
+	    STRING s = ((qpp::qpp_parameter<STRING>*)
+	       parm[0])->value();
+	    if ( s == "3d" )
 	      dim = 3;
-	    else if ( parm->value(0) == "2d" )
+	    else if ( s == "2d" )
 	      dim = 2;
-	    else if ( parm->value(0) == "1d" )
+	    else if ( s == "1d" )
 	      dim = 1;
 	  }
 	return parse_any_vectors(dim, parm, field2, tok);
       }
       
-    qpp::qpp_declaration_tree<charT,traits> * pn = new qpp::qpp_declaration_tree<charT,traits>(field1,field2);
+    qpp::qpp_declaration * pn = new qpp::qpp_declaration(field1,field2);
+
+    for (int i=0; i<parm.size(); i++)
+      pn -> add_parm(*parm[i]);
 
     //else
     //  pn -> parlist = new qpp_parameter_list;
@@ -615,7 +664,7 @@ namespace _qpp_internal{
 	  {
 	    //std::cout << "debug3: " << smb << "\n";
 	    tok.back(smb);
-	    pn -> declarations.add( * parse_declaration(tok) );	
+	    pn -> add_decl( * parse_declaration(tok) );	
 	    smb = tok.get();
 	  }
       }

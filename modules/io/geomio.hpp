@@ -5,6 +5,7 @@
 //#include <lace/lace.hpp>
 //#include <symm/symm.hpp>
 #include <geom/geom.hpp>
+#include <geom/geom_extras.hpp>
 //#include <geom/molecule.hpp>
 #include <vector>
 #include <cmath>
@@ -42,11 +43,10 @@ namespace qpp{
   */
   // --------------------------------------------------------------------//
 
-  template<class charT = char, class traits = std::char_traits<charT> >
-  int strnf(std::basic_string<charT,traits> s)
+  int strnf(const STRING & s)
   {
-    std::stringstream ss(s);
-    std::basic_string<charT,traits> a;
+    std::basic_stringstream<CHAR,TRAITS> ss(s);
+    STRING a;
     int nf = 0;
     for (nf=0; ss >> a; a!="") nf++;
     return nf;
@@ -56,14 +56,13 @@ namespace qpp{
   //     function for reading simple xyz format into geometry object    //
   // -------------------------------------------------------------------//
   
-  template< int DIM, class VALTYPE=double, class ATLABEL = std::string, class charT = char, 
-	    class traits = std::char_traits<charT> >
-  void read_xyz(std::basic_istream<charT, traits>  & inp, qpp::geometry<DIM,VALTYPE,ATLABEL,charT,traits> & geom)
+  template< int DIM, class VALTYPE=double>
+  void read_xyz(std::basic_istream<CHAR,TRAITS> & inp, geometry<DIM,VALTYPE> & geom)
   {
-    std::basic_string<charT,traits> s;
+    STRING s;
     std::getline(inp,s);
     int nat;
-    std::stringstream(s) >> nat;
+    std::basic_stringstream<CHAR,TRAITS>(s) >> nat;
     std::getline(inp,s);
     // fixme - check these are numbers!
     if (DIM==3)
@@ -72,7 +71,7 @@ namespace qpp{
 	if ( nf==9 || nf == 6 )
 	  {
 	    VALTYPE vv[nf];
-	    std::stringstream ss(s);
+	    std::basic_stringstream<CHAR,TRAITS> ss(s);
 	    for (int i=0; i<nf; i++) ss >> vv[i];
 	    if (nf==9)
 	      {
@@ -92,54 +91,56 @@ namespace qpp{
 	    // Analise the line, recognize .xyz type
 	  }
 	//	char s1[max_atomic_name_length];
-	std::basic_string<charT,traits> s1;
+	STRING s1;
 	VALTYPE x,y,z;
-	std::stringstream tmps(s);
+	std::basic_stringstream<CHAR,TRAITS> tmps(s);
 	tmps >> s1 >> x >> y >> z;
-	geom.add(ATLABEL(s1),x,y,z);
+	geom.add(s1,x,y,z);
       } 
   }
   
   // -------------------------------------------------------------------//  
   //                writing geometry into simple xyz                    //
   // -------------------------------------------------------------------//
-  template< int DIM, class VALTYPE=double, class ATLABEL = std::string, class charT = char, 
-	    class traits = std::char_traits<charT> >
-  void write_xyz(std::basic_ostream<charT, traits>  & out, qpp::geometry<DIM,VALTYPE,ATLABEL,charT,traits> & geom)
+  template< int DIM, class VALTYPE=double, class TRANSFORM >
+  void write_xyz(std::basic_ostream<CHAR,TRAITS>  & out, 
+		 const qpp::gen_geometry<DIM,VALTYPE,TRANSFORM> & geom)
   {
-    out << geom.size() << "\n";
+    out << geom.nat() << "\n";
+    /*
     if (DIM>0)
       for (int d = 0; d<DIM; d++)
 	for (int i=0; i<3; i++)
 	  out << boost::format("%12.6f") % geom.cell(d,i);
     else
-      out << geom.name();
+    */
+    out << geom.name();
     out << "\n";
     for (int i=0; i<geom.size(); i++)
       out << boost::format("%-4s %12.6f %12.6f %12.6f\n") % geom.atom(i) % geom.coord(i)(0) 
 	% geom.coord(i)(1) % geom.coord(i)(2);
   }
-  /*
+
   // -------------------------------------------------------------------//
   //        writing geometry into xyz file together with displacements       //
   // -------------------------------------------------------------------//
-  template <class ATOM, int DIM, class VALTYPE, typename _CharT, class _Traits>
-  void write_xyz(std::basic_ostream<_CharT, _Traits>  & out, qpp::geometry<ATOM,DIM,VALTYPE> & geom, 
-		 const qpp::molecule_vector<ATOM,DIM,VALTYPE> & v)
+  template< int DIM, class VALTYPE=double, class TRANSFORM  >
+  void write_xyz(std::basic_ostream<CHAR,TRAITS>  & out, 
+		 const qpp::gen_geometry<DIM,VALTYPE,TRANSFORM> & geom,
+		 const qpp::molecule_vector<DIM,VALTYPE,TRANSFORM> & v)
   {
-    out << geom.size() << "\n";
+    out << geom.nat() << "\n";
+    /*
     for (int d = 0; d<DIM; d++)
       for (int i=0; i<3; i++)
 	out << boost::format("%12.6f") % geom.cell(d,i);
+    */
+    out << geom.name();
     out << "\n";
-    qpp::molecule_vector<ATOM,DIM,VALTYPE> vv(v);
     for (int i=0; i<geom.size(); i++)
-      out << boost::format("%-4s %12.6f %12.6f %12.6f %12.6f %12.6f %12.6f\n") % geom.atom(i) 
-	% geom.atom_coord(i)(0) % geom.atom_coord(i)(1) % geom.atom_coord(i)(2)
-	% vv(i,0) % vv(i,1) % vv(i,2);
+      out << boost::format("%-4s %12.6f %12.6f %12.6f atom_vector %12.6f %12.6f %12.6f\n") % geom.atom(i) 
+	% geom.coord(i)(0) % geom.coord(i)(1) % geom.coord(i)(2) % v(i,0) % v(i,1) % v(i,2);
   }
-  */
-
 
 };
 

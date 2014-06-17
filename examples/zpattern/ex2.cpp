@@ -25,7 +25,7 @@ int main()
   
   qpp::geometry<3> g( cl.cell(0)*N, cl.cell(1)*M, cl.cell(2)*K);
   for ( i=i.begin(); i!=i.end(); i++)
-    g.add(cl.atom(i),cl.full_coord(i));
+    g.add(cl.atom(i),cl.position(i));
    
   //qpp::write_xyz(std::cout,g);
   //g.write(std::cout);
@@ -62,7 +62,7 @@ int main()
       z.debug();
     }
   
-  catch ( qpp::qpp_exception<char> & e)
+  catch ( qpp::qpp_exception & e)
     {
       std::cout << e.what() << "\n";
     }

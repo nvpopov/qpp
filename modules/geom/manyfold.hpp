@@ -12,16 +12,14 @@ namespace qpp{
 #define v2d lace::vector2d<VALTYPE>
 #define v3d lace::vector3d<VALTYPE>
 
-  double const default_geomtol = 1e-10;
   int const default_maxiter = 100;
 
-  template <class VALTYPE, class charT=std::string::value_type , class traits = std::char_traits<charT> >
-  class parametric_surface : public qpp_object<charT,traits>{
+  template <class VALTYPE>
+  class parametric_surface : public qpp_object{
 
   protected:
     
-    using typename qpp_object<charT,traits>::string;
-    string _name, _error;
+    STRING _name, _error;
 
   public:
 
@@ -77,23 +75,29 @@ namespace qpp{
 
     virtual VALTYPE surface_angle(v2d p1, v2d p2, v2d p3) =0;
 
-    virtual string name() // fixme - const
+    virtual STRING name() const
     {
       return _name;
     }
 
-    virtual int gettype() // fixme - const
+    virtual qppobject_type gettype() const
     {
-      return qppdata_manyfold;
+      return data_manyfold;
     }
 
-    virtual void error(string const & what)
+    virtual int n_next() const
+    { return 0; }
+
+    virtual qpp_object* next(int i)
+    { return NULL; }
+
+    virtual void error(STRING const & what)
     { 
       _error = what;
-      throw qpp_exception<charT,traits>(this);
+      throw qpp_exception(this);
     }
     
-    virtual string error()
+    virtual STRING error()
     {
       return _error;
     }
@@ -103,18 +107,18 @@ namespace qpp{
 
   // --------------------------------------------------------------------
   // The important class of surfaces with diagonal metric tensor
-  template <class VALTYPE, class charT=std::string::value_type , class traits = std::char_traits<charT> >
-  class orthoparametric_surface : public parametric_surface<VALTYPE,charT,traits>
+  template <class VALTYPE>
+  class orthoparametric_surface : public parametric_surface<VALTYPE>
   {
 
-    using parametric_surface<VALTYPE,charT,traits>::dx_dxi;
+    using parametric_surface<VALTYPE>::dx_dxi;
 
   public:
 
-    using parametric_surface<VALTYPE,charT,traits>::geomtol;
-    using parametric_surface<VALTYPE,charT,traits>::maxiter;
-    using parametric_surface<VALTYPE,charT,traits>::map;
-    using parametric_surface<VALTYPE,charT,traits>::project;
+    using parametric_surface<VALTYPE>::geomtol;
+    using parametric_surface<VALTYPE>::maxiter;
+    using parametric_surface<VALTYPE>::map;
+    using parametric_surface<VALTYPE>::project;
 
     virtual v2d gdiag(const v2d &v) const =0;
     // Square root of the diagonal components of the metric tensor
@@ -328,20 +332,18 @@ namespace qpp{
 
   // -----------------------------------------------------------------------------------
   
-  template <class VALTYPE, class charT=std::string::value_type , class traits = std::char_traits<charT> >
-  class parametric_sphere : public orthoparametric_surface<VALTYPE,charT,traits>{
+  template <class VALTYPE>
+  class parametric_sphere : public orthoparametric_surface<VALTYPE>{
     
     VALTYPE R;
 
-    using typename qpp_object<charT,traits>::string;
-
   protected:
-    using parametric_surface<VALTYPE,charT,traits>::_name;
+    using parametric_surface<VALTYPE>::_name;
     
   public:
 
-    using parametric_surface<VALTYPE,charT,traits>::geomtol;
-    using parametric_surface<VALTYPE,charT,traits>::maxiter;
+    using parametric_surface<VALTYPE>::geomtol;
+    using parametric_surface<VALTYPE>::maxiter;
 
     parametric_sphere(const VALTYPE & _R)
     { 
@@ -404,12 +406,12 @@ namespace qpp{
     }
  
     // derived from qpp_object
-    virtual string category() //const
+    virtual STRING category() const
     {
       return "sphere";
     }
 
-    virtual void write(std::basic_ostream<charT,traits> &os, int offset=0)
+    virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const
     {
       // fixme - write all data 
       for (int k=0; k<offset; k++) os << " ";
@@ -426,25 +428,22 @@ namespace qpp{
 
   // -----------------------------------------------------------------------------------------------
 
-  template <class VALTYPE, class charT=std::string::value_type , class traits = std::char_traits<charT> >
-  class parametric_torus : public orthoparametric_surface<VALTYPE,charT,traits>{
-
-    using typename qpp_object<charT,traits>::string;
-    //    using parametric_surface<VALTYPE,charT,traits>::map;
+  template <class VALTYPE>
+  class parametric_torus : public orthoparametric_surface<VALTYPE>{
 
     VALTYPE a,b;
     v3d origin, axis;
     lace::matrix3d<VALTYPE> Rot;
     
   protected:
-    using parametric_surface<VALTYPE,charT,traits>::_name;
+    using parametric_surface<VALTYPE>::_name;
 
   public:
 
-    using parametric_surface<VALTYPE,charT,traits>::geomtol;
-    using parametric_surface<VALTYPE,charT,traits>::maxiter;
+    using parametric_surface<VALTYPE>::geomtol;
+    using parametric_surface<VALTYPE>::maxiter;
 
-    parametric_torus( VALTYPE _a, VALTYPE _b, string __name = "") : origin(0,0,0), axis(0,0,1)
+    parametric_torus( VALTYPE _a, VALTYPE _b, STRING __name = "") : origin(0,0,0), axis(0,0,1)
     {
       a = _a; 
       b = _b;
@@ -455,7 +454,7 @@ namespace qpp{
     }
 
     parametric_torus( VALTYPE _a, VALTYPE _b, v3d _origin, 
-		      v3d _axis, string __name = "") 
+		      v3d _axis, STRING __name = "") 
     {
       a = _a; 
       b = _b;
@@ -533,12 +532,12 @@ namespace qpp{
     }
  
     // derived from qpp_object
-    virtual string category() //const
+    virtual STRING category() const
     {
       return "torus";
     }
 
-    virtual void write(std::basic_ostream<charT,traits> &os, int offset=0)
+    virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const
     {
       // fixme - write all data 
       for (int k=0; k<offset; k++) os << " ";
@@ -555,23 +554,21 @@ namespace qpp{
   
   // ----------------------------------------------------------------------------
 
-  template <class VALTYPE, class charT=std::string::value_type , class traits = std::char_traits<charT> >
-  class parametric_plane : public orthoparametric_surface<VALTYPE,charT,traits>{
-
-    using typename qpp_object<charT,traits>::string;
+  template <class VALTYPE>
+  class parametric_plane : public orthoparametric_surface<VALTYPE>{
 
     v3d origin, axis;
     lace::matrix3d<VALTYPE> Rot;
     
   protected:
-    using parametric_surface<VALTYPE,charT,traits>::_name;
+    using parametric_surface<VALTYPE>::_name;
 
   public:
 
-    using parametric_surface<VALTYPE,charT,traits>::geomtol;
-    using parametric_surface<VALTYPE,charT,traits>::maxiter;
+    using parametric_surface<VALTYPE>::geomtol;
+    using parametric_surface<VALTYPE>::maxiter;
 
-    parametric_plane(string __name = "") : origin(0,0,0), axis(0,0,1)
+    parametric_plane(STRING __name = "") : origin(0,0,0), axis(0,0,1)
     {
       Rot = VALTYPE(1);
       _name = __name;
@@ -579,7 +576,7 @@ namespace qpp{
       maxiter = default_maxiter;
     }
 
-    parametric_plane( v3d _origin, v3d _axis, string __name = "") 
+    parametric_plane( v3d _origin, v3d _axis, STRING __name = "") 
     {
       origin = _origin;
       axis = _axis;
@@ -634,12 +631,12 @@ namespace qpp{
     }
  
     // derived from qpp_object
-    virtual string category() //const
+    virtual STRING category() const
     {
       return "plane";
     }
 
-    virtual void write(std::basic_ostream<charT,traits> &os, int offset=0)
+    virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const
     {
       // fixme - write all data 
       for (int k=0; k<offset; k++) os << " ";
@@ -737,7 +734,7 @@ namespace qpp{
       return "plane";
     }
 
-    virtual void write(std::basic_ostream<charT,traits> &os, int offset=0)
+    virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0)
     {
       // fixme - write all data 
       for (int k=0; k<offset; k++) os << " ";

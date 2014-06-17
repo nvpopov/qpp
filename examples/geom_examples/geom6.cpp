@@ -25,6 +25,6 @@ int main()
     for (int j=0; j<g.ngbr.n(i); j++)
       {
 	qpp::index<3> k = g.ngbr.table(i,j);
-	std::cout << g.atom(i) << " " << i << " " << g.atom(k) << " " << k << " " <<  norm(g.coord(i) - g.full_coord(k)) << "\n";
+	std::cout << g.atom(i) << " " << i << " " << g.atom(k) << " " << k << " " <<  norm(g.position(i) - g.position(k)) << "\n";
       }
 }

@@ -11,45 +11,53 @@
 
 namespace qpp{
 
-  std::string ptype_name [] = {"search", "avoid", "delete", "insert"};
+  STRING ptype_name [] = {"search", "avoid", "delete", "insert"};
 
 
-  template <int DIM,class VALTYPE=double, class ATLABEL = std::string, 
-	    class charT = char, class traits = std::char_traits<charT> >   
-  class zpattern : public qpp_object<charT,traits> {
+  template <int DIM,class VALTYPE=double, class TRANSFORM = periodic_cell<DIM,VALTYPE> >   
+  class zpattern : public qpp_object {
 
-    using typename qpp_object<charT,traits>::string;
-    string _name, _error;
+    STRING _name, _error;
 
-    geometry<DIM,VALTYPE,ATLABEL,charT,traits> *geom;
-    parametric_surface<VALTYPE,charT,traits> *mfold;
-    std::vector<lace::vector2d<VALTYPE> > *parm;   
+    gen_geometry<DIM,VALTYPE,TRANSFORM> *geom;
+    parametric_surface<VALTYPE> *mfold;
+    //std::vector<lace::vector2d<VALTYPE> > *parm;   
     
   public:
 
-    VALTYPE geomtol;
+    VALTYPE geomtol, symmtrap_radius;
 
-    zpattern(const string & __name = ""){_name = __name; geomtol = default_geomtol;}
+    zpattern(const STRING & __name = "")
+    {
+      _name = __name; 
+      geomtol = default_geomtol;      
+    }
 
-    zpattern(geometry<DIM,VALTYPE,ATLABEL,charT,traits> & g, const string & __name = "")
+    zpattern(gen_geometry<DIM,VALTYPE,TRANSFORM> & g, const STRING & __name = "")
     {
       geom = &g;
       _name = __name;
-      geomtol = default_geomtol;
+      geomtol = geom->geomtol;
+    }
+
+    // kostyl for commented "parm"
+    lace::vector2d<VALTYPE> parm(int i)
+    {
+      return lace::vector2d<VALTYPE>(geom->coord(i).x(), geom->coord(i).y());
     }
 
     // ---------------- "Points" - named points to be identified with atoms --------------
 
     struct zpt_point{
-      string nickname;
-      ATLABEL atom;
+      STRING nickname;
+      STRING atom;
       bool is_bound;
       index<DIM> bound;
 
       zpt_point()
       {	is_bound = false; }
 
-      zpt_point(string const & nick, ATLABEL const & at)
+      zpt_point(STRING const & nick, STRING const & at)
       {
 	nickname = nick;
 	atom = at;
@@ -76,15 +84,15 @@ namespace qpp{
 
     inline zpt_point & point(int i) { return *points_registry[i];}
 
-    inline ptype point_type(int i){ return points_types[i];}
+    inline ptype point_type(int i) const{ return points_types[i];}
 
     inline zpt_point & point(int i, int ptp) { return *(points_registry[points_idx[ptp][i]]);}
 
-    inline int point_idx(int i, int ptp) { return points_idx[ptp][i];}
+    inline int point_idx(int i, int ptp) const{ return points_idx[ptp][i];}
 
-    inline int n_points(){ return points_registry.size();}
+    inline int n_points() const{ return points_registry.size();}
 
-    inline int n_points(int ptp){ return points_idx[ptp].size();}
+    inline int n_points(int ptp) const{ return points_idx[ptp].size();}
 
     /*
     bool point_already(zpt_point * cp, ptype ptp)
@@ -159,27 +167,26 @@ namespace qpp{
     std::vector<char> occupied, noapply;
   public:
 
-    class linear_dependence : public qpp_object<charT,traits>{
-      using typename qpp_object<charT,traits>::string;
-      zpattern<DIM,VALTYPE,ATLABEL,charT,traits> * owner;
-      string _name;
+    class linear_dependence : public qpp_object{
+      zpattern<DIM,VALTYPE,TRANSFORM> * owner;
+      STRING _name;
 
       VALTYPE v0;
       std::vector<VALTYPE> coeffs;
-      std::vector<string> varnames;
+      std::vector<STRING> varnames;
       std::vector<int> varidx;
 
     public:
 
-      linear_dependence(VALTYPE _v0, zpattern<DIM,VALTYPE,ATLABEL,charT,traits> & _owner,
-			string const &__name = "")
+      linear_dependence(VALTYPE _v0, zpattern<DIM,VALTYPE,TRANSFORM> & _owner,
+			STRING const &__name = "")
       { 
 	v0 = _v0; 
 	_name = __name;
 	owner = & _owner;
       }
 
-      linear_dependence & term(string const & vn, VALTYPE cc)
+      linear_dependence & term(STRING const & vn, VALTYPE cc)
       {
 	varnames.push_back(vn);
 	coeffs.push_back(cc);
@@ -225,20 +232,30 @@ namespace qpp{
 	return res;
       }
 
-      virtual string category()
+      virtual STRING category() const
       { return "lindep";}
 
-      virtual string name()
+      virtual STRING name() const
       { return _name;}
 
-      virtual int gettype()
-      {}
+      virtual qppobject_type gettype() const
+      {
+	//fixme
+      }
 
-      virtual void error(string const &){}
+      virtual int n_next() const
+      { return 0;}
+
+      virtual qpp_object* next(int i)
+      {
+	return NULL;
+      }
+
+      virtual void error(STRING const &){}
       
-      virtual string error(){return "";}
+      virtual STRING error(){return "";}
 
-      virtual void write(std::basic_ostream<charT,traits> &os, int offset=0)
+      virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const
       {
 	for (int k=0; k<offset; k++) os << " ";
 	os << "lindep";
@@ -253,13 +270,11 @@ namespace qpp{
 
     };
 
-    class geometry_relation : public qpp_object<charT,traits>{      
+    class geometry_relation : public qpp_object{      
     protected:
 
-      using typename qpp_object<charT,traits>::string;
-
-      zpattern<DIM,VALTYPE,ATLABEL,charT,traits> * owner;
-      string _name;
+      zpattern<DIM,VALTYPE,TRANSFORM> * owner;
+      STRING _name;
 
       std::vector<int> _points;
       bool exact;
@@ -298,7 +313,7 @@ namespace qpp{
 
       virtual VALTYPE value() =0;
       virtual int n_points() =0;
-      virtual string point_nick(int i) =0;      
+      virtual STRING point_nick(int i) =0;      
 
       virtual bool satisfy()
       {
@@ -336,7 +351,7 @@ namespace qpp{
       bool is_range()
       { return !is_exact();}
       
-      virtual string name()
+      virtual STRING name() const
       { return _name; }
 
       int point(int i)
@@ -361,16 +376,16 @@ namespace qpp{
 	return n_undefined() == 0;
       }
 
-      virtual void error(string const &){}
+      virtual void error(STRING const &){}
 
-      virtual string error(){return "";}
+      virtual STRING error(){return "";}
 
     };
 
     //----------------------------------------------
 
     class bond_relation : public geometry_relation {
-      string at1, at2;
+      STRING at1, at2;
 
     protected:
       //      using typename zpattern<DIM,VALTYPE,ATLABEL,charT,traits>::geometry_relation::owner;
@@ -385,8 +400,8 @@ namespace qpp{
       
     public:
 
-      bond_relation(string const & _at1, string const &_at2, VALTYPE _bmin, VALTYPE _bmax, 
-		    zpattern<DIM,VALTYPE,ATLABEL,charT,traits> & z, string const &__name = "")
+      bond_relation(STRING const & _at1, STRING const &_at2, VALTYPE _bmin, VALTYPE _bmax, 
+		    zpattern<DIM,VALTYPE,TRANSFORM> & z, STRING const &__name = "")
       {
 	at1 = _at1;
 	at2 = _at2;
@@ -399,8 +414,8 @@ namespace qpp{
 	match_points();
       }
 
-      bond_relation(string const & _at1, string const &_at2, linear_dependence &__formula,
-		    zpattern<DIM,VALTYPE,ATLABEL,charT,traits> & z, string const &__name = "")
+      bond_relation(STRING const & _at1, STRING const &_at2, linear_dependence &__formula,
+		    zpattern<DIM,VALTYPE,TRANSFORM> & z, STRING const &__name = "")
       {
 	at1 = _at1;
 	at2 = _at2;
@@ -422,13 +437,13 @@ namespace qpp{
 	  {
 	    index<DIM> i1 = owner->point(point(0)).bound,	      
 	      i2 = owner->point(point(1)).bound;
-	    return norm(owner->geom->full_coord(i1) - owner->geom->full_coord(i2));
+	    return norm(owner->geom->position(i1) - owner->geom->position(i2));
 	  }
       }
 
       virtual int n_points(){return 2;}
 
-      virtual string point_nick(int i)
+      virtual STRING point_nick(int i)
       {
 	if (i==0)
 	  return at1;
@@ -436,16 +451,24 @@ namespace qpp{
 	  return at2;
       }
       
-      virtual string category()
+      virtual STRING category() const
       {
 	return "bond";
       }
 
       
-      virtual int gettype()
-      { return qppdata_zpt_bond; }
+      virtual qppobject_type gettype() const
+      { return data_zpt_bond; }
       
-      virtual void write(std::basic_ostream<charT,traits> &os, int offset=0)
+      virtual int n_next() const
+      { return 0;}
+
+      virtual qpp_object* next(int i)
+      {
+	return NULL;
+      }
+
+      virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const
       {
 	for (int k=0; k<offset; k++) os << " ";
 	os << "bond";
@@ -466,7 +489,7 @@ namespace qpp{
     //-------------------------------------------------
 
     class angle_relation : public geometry_relation {
-      string at1, at2, at3;
+      STRING at1, at2, at3;
 
     protected:
       using geometry_relation::owner;
@@ -480,9 +503,9 @@ namespace qpp{
       
     public:
 
-      angle_relation(string const & _at1, string const &_at2, string const &_at3,
+      angle_relation(STRING const & _at1, STRING const &_at2, STRING const &_at3,
 		    VALTYPE _amin, VALTYPE _amax, 
-		     zpattern<DIM,VALTYPE,ATLABEL,charT,traits> & z, string const &__name = "")
+		     zpattern<DIM,VALTYPE,TRANSFORM> & z, STRING const &__name = "")
       {
 	at1 = _at1;
 	at2 = _at2;
@@ -496,8 +519,8 @@ namespace qpp{
 	match_points();
       }
 
-      angle_relation(string const & _at1, string const &_at2, string const &_at3, linear_dependence &__formula,
-		    zpattern<DIM,VALTYPE,ATLABEL,charT,traits> & z, string const &__name = "")
+      angle_relation(STRING const & _at1, STRING const &_at2, STRING const &_at3, linear_dependence &__formula,
+		    zpattern<DIM,VALTYPE,TRANSFORM> & z, STRING const &__name = "")
       {
 	at1 = _at1;
 	at2 = _at2;
@@ -520,8 +543,8 @@ namespace qpp{
 	      i2 = owner->point(point(1)).bound,
 	      i3 = owner->point(point(2)).bound;
 	    lace::vector3d<VALTYPE> n1, n2;
-	    n1 = owner->geom->full_coord(i1) - owner->geom->full_coord(i2);
-	    n2 = owner->geom->full_coord(i3) - owner->geom->full_coord(i2);
+	    n1 = owner->geom->position(i1) - owner->geom->position(i2);
+	    n2 = owner->geom->position(i3) - owner->geom->position(i2);
 	    n1 /= norm(n1);
 	    n2 /= norm(n2);
 
@@ -531,7 +554,7 @@ namespace qpp{
       
       virtual int n_points(){return 3;}
 
-      virtual string point_nick(int i)
+      virtual STRING point_nick(int i)
       {
 	if (i==0)
 	  return at1;
@@ -541,16 +564,24 @@ namespace qpp{
 	  return at3;
       }
       
-      virtual string category()
+      virtual STRING category() const
       {
 	return "angle";
       }
 
       
-      virtual int gettype()
-      { return qppdata_zpt_angle; }
+      virtual qppobject_type gettype() const
+      { return data_zpt_angle; }
+
+      virtual int n_next() const
+      { return 0;}
+
+      virtual qpp_object* next(int i)
+      {
+	return NULL;
+      }
       
-      virtual void write(std::basic_ostream<charT,traits> &os, int offset=0)
+      virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const
       {
 	for (int k=0; k<offset; k++) os << " ";
 	os << "angle";
@@ -571,7 +602,7 @@ namespace qpp{
     //-------------------------------------------------
 
     class surfangle_relation : public geometry_relation {
-      string at1, at2, at3;
+      STRING at1, at2, at3;
 
     protected:
       using geometry_relation::owner;
@@ -585,9 +616,9 @@ namespace qpp{
       
     public:
 
-      surfangle_relation(string const & _at1, string const &_at2, string const &_at3,
+      surfangle_relation(STRING const & _at1, STRING const &_at2, STRING const &_at3,
 			 VALTYPE _amin, VALTYPE _amax, 
-			 zpattern<DIM,VALTYPE,ATLABEL,charT,traits> & z, string const &__name = "")
+			 zpattern<DIM,VALTYPE,TRANSFORM> & z, STRING const &__name = "")
       {
 	at1 = _at1;
 	at2 = _at2;
@@ -601,9 +632,9 @@ namespace qpp{
 	match_points();
       }
 
-      surfangle_relation(string const & _at1, string const &_at2, string const &_at3, 
+      surfangle_relation(STRING const & _at1, STRING const &_at2, STRING const &_at3, 
 			 linear_dependence &__formula,
-			 zpattern<DIM,VALTYPE,ATLABEL,charT,traits> & z, string const &__name = "")
+			 zpattern<DIM,VALTYPE,TRANSFORM> & z, STRING const &__name = "")
       {
 	at1 = _at1;
 	at2 = _at2;
@@ -636,14 +667,14 @@ namespace qpp{
 	    n1 /= norm(n1);
 	    n2 /= norm(n2);
 	    */
-	    return owner->mfold->surface_angle((*owner->parm)[i1],
-					       (*owner->parm)[i2],(*owner->parm)[i3])*180/pi;
+	    return owner->mfold->surface_angle(owner->parm(i1),
+					       owner->parm(i2),owner->parm(i3))*180/pi;
 	  }
       }
       
       virtual int n_points(){return 3;}
 
-      virtual string point_nick(int i)
+      virtual STRING point_nick(int i)
       {
 	if (i==0)
 	  return at1;
@@ -653,16 +684,24 @@ namespace qpp{
 	  return at3;
       }
       
-      virtual string category()
+      virtual STRING category() const
       {
 	return "surfangle";
       }
 
       
-      virtual int gettype()
-      { return qppdata_zpt_surfangle; }
+      virtual qppobject_type gettype() const
+      { return data_zpt_surfangle; }
       
-      virtual void write(std::basic_ostream<charT,traits> &os, int offset=0)
+      virtual int n_next() const
+      { return 0;}
+
+      virtual qpp_object* next(int i)
+      {
+	return NULL;
+      }
+
+      virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const
       {
 	for (int k=0; k<offset; k++) os << " ";
 	os << "surfangle";
@@ -683,7 +722,7 @@ namespace qpp{
     //-------------------------------------------------
 
     class dyhedral_relation : public geometry_relation {
-      string at1, at2, at3, at4;
+      STRING at1, at2, at3, at4;
 
     protected:
       using geometry_relation::owner;
@@ -697,9 +736,9 @@ namespace qpp{
       
     public:
 
-      dyhedral_relation(string const & _at1, string const &_at2, string const &_at3, string const &_at4,
+      dyhedral_relation(STRING const & _at1, STRING const &_at2, STRING const &_at3, STRING const &_at4,
 			VALTYPE _dmin, VALTYPE _dmax, 
-			zpattern<DIM,VALTYPE,ATLABEL,charT,traits> & z, string const &__name = "")
+			zpattern<DIM,VALTYPE,TRANSFORM> & z, STRING const &__name = "")
       {
 	at1 = _at1;
 	at2 = _at2;
@@ -714,9 +753,9 @@ namespace qpp{
 	match_points();
       }
 
-      dyhedral_relation(string const & _at1, string const &_at2, string const &_at3, string const &_at4, 
+      dyhedral_relation(STRING const & _at1, STRING const &_at2, STRING const &_at3, STRING const &_at4, 
 			linear_dependence &__formula,
-			zpattern<DIM,VALTYPE,ATLABEL,charT,traits> & z, string const &__name = "")
+			zpattern<DIM,VALTYPE,TRANSFORM> & z, STRING const &__name = "")
       {
 	at1 = _at1;
 	at2 = _at2;
@@ -741,14 +780,14 @@ namespace qpp{
 	      i3 = owner->point(point(2)).bound,
 	      i4 = owner->point(point(3)).bound;
 
-	    return get_dyhedral(owner->geom->full_coord(i1), owner->geom->full_coord(i2),
-				owner->geom->full_coord(i3), owner->geom->full_coord(i4));
+	    return get_dyhedral(owner->geom->position(i1), owner->geom->position(i2),
+				owner->geom->position(i3), owner->geom->position(i4));
 	  }
       }
       
       virtual int n_points(){return 4;}
 
-      virtual string point_nick(int i)
+      virtual STRING point_nick(int i)
       {
 	if (i==0)
 	  return at1;
@@ -760,16 +799,24 @@ namespace qpp{
 	  return at4;
       }
       
-      virtual string category()
+      virtual STRING category() const
       {
 	return "dihedral";
       }
 
       
-      virtual int gettype()
-      {	return qppdata_zpt_dihedral; }
+      virtual qppobject_type gettype() const
+      {	return data_zpt_dihedral; }
       
-      virtual void write(std::basic_ostream<charT,traits> &os, int offset=0)
+      virtual int n_next() const
+      { return 0;}
+
+      virtual qpp_object* next(int i)
+      {
+	return NULL;
+      }
+
+      virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const
       {
 	for (int k=0; k<offset; k++) os << " ";
 	os << "dihedral";
@@ -811,22 +858,22 @@ namespace qpp{
 	}
     }
     
-    inline int n_rel()
+    inline int n_rel() const
     { return relation_registry.size();}
     
     inline geometry_relation & rel(int i)
     { return *relation_registry[i];}
 
-    inline int n_rel_of_point(int i)
+    inline int n_rel_of_point(int i) const
     { return _rel_of_point[i].size();}
 
-    inline int rel_of_point(int i, int j)
+    inline int rel_of_point(int i, int j) const
     { return _rel_of_point[i][j];}
 
-    inline int n_point_of_rel(int i)
+    inline int n_point_of_rel(int i) //const
     { return rel(i).n_points();}
 
-    inline int point_of_rel(int i, int j)
+    inline int point_of_rel(int i, int j) const
     { return rel(i).point(j);}
 
     inline void bind(int i, index<DIM> j)
@@ -856,30 +903,40 @@ namespace qpp{
 
     // ----------------------------------------------------------------------
 
-    virtual string category()
+    virtual STRING category() const
     { return "zpattern"; }
 
-    virtual string name()
+    virtual STRING name() const
     { return _name; }
       
-    void setname(string __name)
+    void setname(STRING __name)
     { _name = __name; }
 
-    virtual int gettype()
-    { return qppdata_zpattern;}
+    virtual qppobject_type gettype() const
+    { return data_zpattern;}
       
-    virtual void error(string const & what)
+    virtual int n_next() const
     { 
-      _error = what;
-      throw new qpp_exception<charT,traits>(this);
+      //fixme
     }
     
-    virtual string error()
+    virtual qpp_object* next(int i)
+    {
+      //fixme
+    }
+
+    virtual void error(STRING const & what)
+    { 
+      _error = what;
+      throw new qpp_exception(this);
+    }
+    
+    virtual STRING error()
     {
       return _error;
     }
     
-    virtual void write(std::basic_ostream<charT,traits> &os, int offset=0)
+    virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const
     {
       for (int k=0; k<offset; k++) os << " ";
       os << "zpattern";
@@ -892,7 +949,8 @@ namespace qpp{
 	    for (int k=0; k<offset+2; k++) os << " ";
 	    os << ptype_name[ptp] << "(";
 	    for (int k=0; k<n_points(ptp); k++)
-	      os << point(k,ptp).nickname<<"=" << point(k,ptp).atom 
+	      os << points_registry[points_idx[ptp][k]] -> nickname  << "=" 
+		 << points_registry[points_idx[ptp][k]] -> atom 
 		 << (k<n_points(ptp)-1 ? "," : "");	  
 	    os << ");\n";
 	  }
@@ -903,7 +961,7 @@ namespace qpp{
 
       for (int i=0; i<n_rel(); i++)
 	{
-	  relation_registry[i]->write(os,offset+2);
+	  relation_registry[i] -> write(os,offset+2);
 	  os << ";\n";
 	}
       os << "}\n";
@@ -924,11 +982,11 @@ namespace qpp{
 	{
 	  std::cout << boost::format("%3i ") % i;
 	  int t = rel(i).gettype();
-	  if (t==qppdata_zpt_bond)
+	  if (t==data_zpt_bond)
 	    std::cout << "b";
-	  else if (t==qppdata_zpt_angle)
+	  else if (t==data_zpt_angle)
 	    std::cout << "a"; 
-	  else if (t==qppdata_zpt_dihedral)
+	  else if (t==data_zpt_dihedral)
 	    std::cout << "d";
 
 	  for (int j=0; j<rel(i).n_points(); j++)
@@ -990,11 +1048,11 @@ namespace qpp{
 	  
 	  if ( rel(k).is_exact() && rel(k).formula().is_defined() && rel(k).n_undefined()==1 )
 	    {
-	      if (rel(k).gettype() == qppdata_zpt_bond)
+	      if (rel(k).gettype() == data_zpt_bond)
 		ibnd.push_back(k);
-	      else  if (rel(k).gettype() == qppdata_zpt_angle || rel(k).gettype() == qppdata_zpt_surfangle)
+	      else  if (rel(k).gettype() == data_zpt_angle || rel(k).gettype() == data_zpt_surfangle)
 		iang.push_back(k);
-	      else if (rel(k).gettype() == qppdata_zpt_dihedral)
+	      else if (rel(k).gettype() == data_zpt_dihedral)
 		idhd.push_back(k);
 	    }
 	}
@@ -1029,6 +1087,16 @@ namespace qpp{
 	  }
 	}
       return res;
+    }
+
+    // ---------------------------------------------------------------------
+
+    void symmtrap(lace::vector2d<VALTYPE> & p)
+    {
+      lace::vector3d<VALTYPE> r(p.x,p.y,0e0);
+      geom -> symm().symmtrap(r,symmtrap_radius);
+      p.x = r.x();
+      p.y = r.y();
     }
 
     // ---------------------------------------------------------------------
@@ -1212,7 +1280,7 @@ namespace qpp{
 	      
 	      //std::cout << "Two bonds: " << at1 << " " << b1 << " " << at2 << " " << b2 << "\n";
 
-	      new_pt = mfold->triangul2b((*parm)[at1],b1,(*parm)[at2],b2);
+	      new_pt = mfold->triangul2b(parm(at1),b1,parm(at2),b2);
 
 	      //std::cout << "new points: " << new_pt.size() << "\n"; 
 	    }
@@ -1230,29 +1298,34 @@ namespace qpp{
 
 	      //std::cout << "Inserting " << at1  << " " << at2 << " bond= " 
 	      //<< b << " angle= " << a << "\n";
-	      if (rel(iang[0]).gettype() == qppdata_zpt_angle)
+	      if (rel(iang[0]).gettype() == data_zpt_angle)
 		{
 		  //std::cout << "triangul generated points\n";
-		  new_pt.push_back(mfold->triangul((*parm)[at1],(*parm)[at2],b,pi*a/180));
-		  new_pt.push_back(mfold->triangul((*parm)[at1],(*parm)[at2],b,-pi*a/180));
+		  new_pt.push_back(mfold->triangul(parm(at1),parm(at2),b,pi*a/180));
+		  new_pt.push_back(mfold->triangul(parm(at1),parm(at2),b,-pi*a/180));
 		}
-	      else if (rel(iang[0]).gettype() == qppdata_zpt_surfangle)
+	      else if (rel(iang[0]).gettype() == data_zpt_surfangle)
 		{
 		  //std::cout << "protract generated points\n";
-		  new_pt.push_back(mfold->protract((*parm)[at1],(*parm)[at2],b, pi*a/180));
-		  new_pt.push_back(mfold->protract((*parm)[at1],(*parm)[at2],b,-pi*a/180));
+		  new_pt.push_back(mfold->protract(parm(at1),parm(at2),b, pi*a/180));
+		  new_pt.push_back(mfold->protract(parm(at1),parm(at2),b,-pi*a/180));
 		}
 	    }
 	  else if (iang.size()==2)
 	    // fixme - implement later
 	    error("Inserting new point on the basis of two angles is not supported yet");
+
+	  for (int j=0; j<new_pt.size(); j++)
+	    symmtrap(new_pt[j]);
+
 	  lst.set(0,new_pt.size()-1);
 	  bool res = false;
 	  for (int j=lst.begin(); !lst.end(); j=lst.next())
 	    {
-	      int inew = parm->size();
-	      parm->push_back(new_pt[j]);
-	      geom -> add(point(insrt).atom, mfold->map(new_pt[j]));
+	      int inew = geom->nat();
+	      //	      parm->push_back(new_pt[j]);
+	      geom -> add(point(insrt).atom, new_pt[j].x, new_pt[j].y, 0e0);
+	      //geom -> add(point(insrt).atom, mfold->map(new_pt[j]));
 	      occupied.push_back(true);
 	      noapply.push_back(false);
 
@@ -1281,7 +1354,7 @@ namespace qpp{
 		{
 		  unbind(insrt);
 		  geom -> erase(inew);
-		  parm->pop_back();
+		  //parm->pop_back();
 		  occupied.pop_back();
 		  noapply.pop_back();
 		  geom->build_type_table();
@@ -1410,7 +1483,7 @@ namespace qpp{
       for (int i = 0; i<n_rel(); i++)
 	if (rel(i).is_bond() && !rel(i).is_exact())
 	  {
-	    ATLABEL at1, at2;
+	    STRING at1, at2;
 	    at1 = point(rel(i).point(0)).atom;
 	    at2 = point(rel(i).point(1)).atom;
 	    if ( geom->ngbr.distance(at1,at2) < rel(i).vmax)
@@ -1426,6 +1499,7 @@ namespace qpp{
       //prepare
       unbind_all();
 
+      geom -> build_type_table();
       setngbrdist();
       geom -> ngbr.build_disttable();
       geom -> ngbr.build();
@@ -1458,13 +1532,13 @@ namespace qpp{
 	    if (geom->shadow(i))
 	      {
 		geom->erase(i);
-		parm->erase(parm->begin()+i);
+		//parm->erase(parm->begin()+i);
 	      }
 	}
       return res;
     }
 
-
+    /*
     bool init( parametric_surface<VALTYPE,charT,traits> &m, 
 	       std::vector<lace::vector2d<VALTYPE> > &p, 
 	       geometry<DIM, VALTYPE, ATLABEL, charT, traits> &g)
@@ -1474,7 +1548,15 @@ namespace qpp{
       mfold = &m;
       parm = &p;
     }
-
+    */
+    bool init_surf( gen_geometry<DIM, VALTYPE,TRANSFORM> &g, VALTYPE st_rad = 0e0)
+    {
+      //prepare
+      geom = &g;
+      mfold = & g.symm().mfold();
+      //      parm = &p;
+      symmtrap_radius = st_rad;
+    }
 
   };
 

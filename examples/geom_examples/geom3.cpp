@@ -88,16 +88,21 @@ int main()
   */
   g.ngbr.build();
 
+  std::cout << " --------------- ngbr table ------------------\n";
+
   for (int i=0; i<g.size(); i++)
     for (int j=0; j<g.ngbr.n(i); j++)
       {
 	qpp::index<3> k = g.ngbr.table(i,j);
-	std::cout << g.atom(i) << " " << i << " " << g.atom(k) << " " << k << " " <<  norm(g.coord(i) - g.coord(k)) << "\n";
+	std::cout << g.atom(i) << " " << i << " " << g.atom(k) << " " << k << " " <<  
+	  norm(g.position(i) - g.position(k)) << "\n";
       }
 
+  /*
   std::cout << "Iterator work:\n";
   qpp::geometry<3>::iterator i(g);
   for (i=i.begin(); i!=i.end(); i++)
     std::cout << i << " ";
+  */
 }
 

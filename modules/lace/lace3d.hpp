@@ -319,6 +319,13 @@ namespace lace{
 				 a[6]-b(2,0), a[7]-b(2,1), a[8]-b(2,2));
     } 
 
+    inline matrix3d<VALTYPE> operator-() const
+    {
+      return  matrix3d<VALTYPE>( -a[0], -a[1], -a[2],
+				 -a[3], -a[4], -a[5],
+				 -a[6], -a[7], -a[8]);
+    }
+
     inline matrix3d<VALTYPE> operator*(VALTYPE alpha) const
     {
       return  matrix3d<VALTYPE>( a[0]*alpha, a[1]*alpha, a[2]*alpha,
@@ -404,9 +411,9 @@ namespace lace{
   //-------------------------------------------------
 
   template<class VALTYPE>
-  matrix3d<VALTYPE> RotMtrx(const vector3d<VALTYPE> & n, VALTYPE phi)
+  matrix3d<VALTYPE> RotMtrx(const vector3d<VALTYPE> & nn, VALTYPE phi)
   {
-    n = n/norm(n);
+    vector3d<VALTYPE> n = nn/norm(nn);
 
     VALTYPE c = std::cos(phi), s = std::sin(phi);
     return matrix3d<VALTYPE>
@@ -416,9 +423,9 @@ namespace lace{
   }
 
   template<class VALTYPE>
-  matrix3d<VALTYPE> Sigma(const vector3d<VALTYPE> & n)
+  matrix3d<VALTYPE> Sigma(const vector3d<VALTYPE> & nn)
   {
-    n = n/norm(n);
+    vector3d<VALTYPE> n = nn/norm(nn);
     return matrix3d<VALTYPE>
       ( 1e0 - 2*n(0)*n(0), -2*n(0)*n(1),      -2*n(0)*n(2),
 	-2*n(0)*n(1),      1e0 - 2*n(1)*n(1), -2*n(1)*n(2),
@@ -657,6 +664,18 @@ namespace lace{
     // fixme - implement everything else!
 
   };
+
+  template<typename _CharT, class _Traits, class VALTYPE>
+  std::basic_ostream<_CharT, _Traits>&
+  operator<<(std::basic_ostream<_CharT, _Traits>& __os, vector2d<VALTYPE> v)
+  {
+    std::basic_ostringstream<_CharT, _Traits> __s;
+    __s.flags(__os.flags());
+    __s.imbue(__os.getloc());
+    __s.precision(__os.precision());
+    __s << "(" << v(0) << "," << v(1) <<  ")";
+    return __os << __s.str();
+  }
 
 };
 

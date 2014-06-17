@@ -25,7 +25,7 @@ int main()
   for ( i=i.begin(); i!=i.end(); i++)
     {
       //     std::cout << uc.atom(i) << uc.full_coord(i)<< "\n";
-      g.add(uc.atom(i),uc.full_coord(i));
+      g.add(uc.atom(i),uc.position(i));
     }
   
   g.add("Cl",(g.coord(5)+g.coord(16)+g.coord(23))/3);

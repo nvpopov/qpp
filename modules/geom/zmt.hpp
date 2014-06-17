@@ -61,8 +61,8 @@ namespace qpp{
   // --------------------------------------------------------------------------------
   // place the point at given bond length and angle from three points on parametric surface
   // the role of dyhedral is only to determine on which side of r1-r2 bond the new point must be
-  template<class VALTYPE, class charT=std::string::value_type , class traits = std::char_traits<charT> >
-  lace::vector2d<VALTYPE> zpoint( parametric_surface<VALTYPE,charT,traits> &mfold, lace::vector2d<VALTYPE> p1, 
+  template<class VALTYPE>
+  lace::vector2d<VALTYPE> zpoint( parametric_surface<VALTYPE> &mfold, lace::vector2d<VALTYPE> p1, 
 				  lace::vector2d<VALTYPE> p2,lace::vector2d<VALTYPE> p3, 
 				  VALTYPE bond, VALTYPE angle, VALTYPE dyhedral)
   {
@@ -86,14 +86,14 @@ namespace qpp{
   }
 
   // ------------------- Simple Z-matrix -----------------------
-  template <class VALTYPE=double, class ATLABEL = std::string, class charT = char, class traits = std::char_traits<charT> >
+  template <class VALTYPE=double>
   struct zmt_record{
     
-    ATLABEL atom;
+    STRING atom;
     int at1, at2, at3;
     VALTYPE bond, angle, dyhedral;
 
-    zmt_record(ATLABEL at, int _at1 = -1, VALTYPE _bond = 0, 
+    zmt_record(STRING at, int _at1 = -1, VALTYPE _bond = 0, 
 	       int _at2 = -1, VALTYPE _angle = 0, int _at3 = -1, VALTYPE _dyhedral = 0)
     {
       atom = at;
@@ -128,17 +128,16 @@ namespace qpp{
   //------------------------------------------------------------------------------------
 
 
-  template <class VALTYPE=double, class ATLABEL = std::string, class charT = char, class traits = std::char_traits<charT> >   
-  class zmatrix : public qpp_object<charT,traits>{
+  template <class VALTYPE=double>   
+  class zmatrix : public qpp_object{
     
-    using typename qpp_object<charT,traits>::string;
-    std::vector<zmt_record<VALTYPE,ATLABEL,charT,traits> > data;
+    std::vector<zmt_record<VALTYPE> > data;
 
-    string _name, _error;
+    STRING _name, _error;
 
   public:
 
-    zmatrix(string __name = "")
+    zmatrix(STRING __name = "")
     {
       _name = __name;
     }
@@ -148,17 +147,17 @@ namespace qpp{
       return data.size();
     }
 
-    zmt_record<VALTYPE,ATLABEL,charT,traits> & operator()(int i)
+    zmt_record<VALTYPE> & operator()(int i)
     {
       return data[i];
     }
 
-    void add(const zmt_record<VALTYPE,ATLABEL,charT,traits> & z)
+    void add(const zmt_record<VALTYPE> & z)
     {
       data.push_back(z);
     }
 
-    void insert(int i, zmt_record<VALTYPE,ATLABEL,charT,traits> z)
+    void insert(int i, zmt_record<VALTYPE> z)
     {
       data.insert(data.begin()+i, z);
     }
@@ -174,7 +173,7 @@ namespace qpp{
     }
 
     template<int DIM>
-    void zmt2cart(geometry<DIM,VALTYPE,ATLABEL,charT,traits> &geom)
+    void zmt2cart(geometry<DIM,VALTYPE> &geom)
     {
       // fixme - check if it complies with g98
 
@@ -209,9 +208,9 @@ namespace qpp{
     }
 
     template<int DIM>
-    void zmt2surf( parametric_surface<VALTYPE,charT,traits> &mfold, 
+    void zmt2surf( parametric_surface<VALTYPE> &mfold, 
 		   lace::vector2d<VALTYPE> p0, lace::vector2d<VALTYPE> n0, int upside,
-		   geometry<DIM,VALTYPE,ATLABEL,charT,traits> &geom,
+		   geometry<DIM,VALTYPE> &geom,
 		   std::vector<lace::vector2d<VALTYPE> > &parm //fixme - that's temporary kostyl
 		   // put it inside the extended geometry class
 		   )
@@ -247,33 +246,39 @@ namespace qpp{
 
 
     // inherited from qpp_object    
-    virtual string category()
+    virtual STRING category() const
     {
       return "zmatrix";
     }
 
-    virtual string name()
+    virtual STRING name() const
     {
       return _name;
     }
 
-    virtual int gettype()
+    virtual qppobject_type gettype() const
     {
-      return qppdata_zmatrix;
+      return data_zmatrix;
     }
 
-    virtual void error(string const & what)
+    virtual void error(STRING const & what)
     { 
       _error = what;
-      throw qpp_exception<charT,traits>(this);
+      throw qpp_exception(this);
     }
     
-    virtual string error()
+    virtual STRING error()
     {
       return _error;
     }
 
-    virtual void write(std::basic_ostream<charT,traits> &os, int offset=0)
+    virtual int n_next() const
+    { return 0;}
+
+    virtual qpp_object* next(int i)
+    { return NULL;}
+
+    virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const
     {
       for (int k=0; k<offset; k++) os << " ";
       os << "zmatrix";

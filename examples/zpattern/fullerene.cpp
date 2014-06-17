@@ -242,7 +242,7 @@ int main()
   qpp::geometry<0,REAL> grph;
 
   for (uci = uci.begin(); uci != uci.end(); uci++)
-    grph.add("C",uc.full_coord(uci));
+    grph.add("C",uc.position(uci));
 
 
   std::cout << "here1\n";

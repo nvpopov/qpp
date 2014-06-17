@@ -19,3 +19,8 @@ Makefile
 *.c++~
 *.hpp~
 *.cpp~
+*.gz
+build/*
+build/*/*
+build/*/*/*
+build/*/*/*/*
