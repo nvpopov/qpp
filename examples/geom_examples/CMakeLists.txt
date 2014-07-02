@@ -1,5 +1,3 @@
-project(geom_examples)
-
 #add_executable(geom1 geom1.cpp)
 
 add_executable(geom2 geom2.cpp)
@@ -34,3 +32,4 @@ add_executable(molvec molvec.cpp)
 add_executable(symplicator symplicator.cpp)
 
 add_executable(surfplicator surfplicator.cpp)
+target_link_libraries(surfplicator qpp)

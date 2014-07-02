@@ -1,5 +1,3 @@
-project(zpattern)
-
 add_executable(ex1 ex1.cpp)
 #target_link_libraries(ex1 lace)
 
@@ -9,6 +7,7 @@ add_executable(ex2 ex2.cpp)
 #add_executable(zsrch zsrch.cpp)
 
 add_executable(zdebug zdebug.cpp)
+target_link_libraries(zdebug qpp)
 
 #add_executable(graphene graphene.cpp)
 #target_link_libraries(graphene lace)
@@ -17,6 +16,6 @@ add_executable(zdebug zdebug.cpp)
 #target_link_libraries(fullerene lbfgs)
 
 add_executable(tor tor.cpp)
-target_link_libraries(tor lbfgs)
+target_link_libraries(tor lbfgs qpp)
 
 

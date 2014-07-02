@@ -1,7 +1,7 @@
 molecule Ca4F8_embed
 {
 
-  fragment CaF2_UC(3d,atom,x,y,z,charge)
+  fragment CaF2_UC(3d,atom,x,y,z,real)
   {
     Ca  0.00  0.00  0.00   2.00
     F   1.38  1.38  1.38  -0.25

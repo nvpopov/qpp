@@ -13,7 +13,7 @@ namespace qpp{
 
   // -------------- Tolerance thresholds -------------------
 
-  double symmtol = 1e-5;
+  double const symmtol = 1e-5;
 
   double const default_geomtol = 1e-6;
 
