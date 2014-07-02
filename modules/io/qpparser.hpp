@@ -9,6 +9,7 @@
 #include <io/qppdata.hpp>
 #include <geom/geom.hpp>
 #include <geom/geom_extras.hpp>
+#include <basis/basis.hpp>
 //#include <geom/atom.hpp>
 
 #include <stdlib.h>
@@ -24,6 +25,7 @@ namespace _qpp_internal{
     std::basic_istream<CHAR,TRAITS> * _input;
     STRING _buff, _dump, _sepr;
     int _line_number;
+    bool sstr;
     
   public:
     
@@ -32,6 +34,7 @@ namespace _qpp_internal{
       _input = & input;
       _dump = " \t";
       _line_number = 0;
+      sstr = false;
     }
 
     tokenizer(const STRING & str)
@@ -39,6 +42,13 @@ namespace _qpp_internal{
       _input = new std::basic_stringstream<CHAR,TRAITS>(str);
       _dump = " \t";
       _line_number = 0;
+      sstr = true;
+    }
+
+    ~tokenizer()
+    {
+      if (sstr)
+	delete _input;
     }
     
     void dump(const STRING & smb)
@@ -57,38 +67,63 @@ namespace _qpp_internal{
       if (_buff == "" )
 	{
 	  std::getline(*_input, _buff);
+
 	  _line_number++;
 	}
+
       do
 	{
 	  i = _buff.find_first_not_of(_dump);
+	  
+	  //debug
+	  //std::cout << "i = " << i << "\""  << _buff << "\"\n";
 	  if (i != std::string::npos)
 	    {
 	      _buff = _buff.substr(i);
 	      break;
 	    }
-	  std::getline(*_input, _buff);	
-	  _line_number++;
-	} while ( !_input -> eof() );
+	  else if ( !_input -> eof() )
+	    {
+	      std::getline(*_input, _buff);	
+	      _line_number++;
+	    }
+	  else
+	    {
+	      _buff = "";
+	      break;
+	    }
+	} while ( true );
       
-      if ( _input -> eof() )
+      if ( _input -> eof() && _buff.size()==0 )
 	return "";
       
+      //debug
+      //std::cout << "\"" << _buff << "\"\n";
+
       STRING rez;
       i = _buff.find_first_of(_sepr + _dump);
       if (i==0)
 	{
+	  //debug
+	  //std::cout << "here1\n";
+
 	  rez = _buff.substr(0,1);
 	  _buff = _buff.substr(1);
 	  
 	}
       else if (i != std::string::npos)
 	{
+	  //debug
+	  //std::cout << "here2\n";
+
 	  rez =  _buff.substr(0,i);
 	  _buff = _buff.substr(i);
 	}
       else
 	{
+	  //debug
+	  //std::cout << "here3\n";
+
 	  rez =  _buff;
 	  _buff = "";
 	}
@@ -130,60 +165,61 @@ namespace _qpp_internal{
 
   // -----------------------------------------------------------  
 
-  std::vector<STRING> &split(const STRING &s, CHAR delim, std::vector<STRING> &elems) 
+  void split(const STRING &s, std::vector<STRING> &elems, STRING delims = " \t") 
   {
-    std::basic_stringstream<CHAR,TRAITS> ss(s);
-    STRING item;
-    while (std::getline(ss, item, delim)) 
-      if (item.size()>0)
-	elems.push_back(item);
+    tokenizer tok(s);
+    tok.dump(delims);
+    tok.separate("");
+    elems.clear();
+
+    do {
+      STRING item = tok.get();
+      //std::cout << "split:\"" << item << "\"";
+      if (item.size()==0)
+	break;
+      elems.push_back(item);
+    } while(true);
     
-    return elems;
   }
 
   // -----------------------------------------------------------
 
-  std::vector<STRING> split(const STRING &s, CHAR delim = ' ') 
+  std::vector<STRING> split(const STRING &s, STRING delims = " \t") 
   {
     std::vector<STRING> elems;
-    split(s, delim, elems);
+    split(s, elems, delims);
     return elems;
   }
   
   // -------------------------------- string to type T convertor ----------------------------
   
   template<typename T>
-  T s2t(const STRING & val);
-  
-  template<>
-  double s2t<double>(const STRING & val)
+  bool s2t(const STRING & s, T & val)
   {
-    return atof(val.c_str());
-  }
-
-  template<>
-  float s2t<float>(const STRING & val)
-  {
-    return atof(val.c_str());
+    std::basic_stringstream<CHAR,TRAITS> ss(s);
+    ss >> val;
+    return !ss.fail();
   }
   
   template<>
-  int s2t<int>(const STRING & val)
+  bool s2t<bool>(const STRING & s, bool & val)
   {
-    return atoi(val.c_str());
-  }
-
-  template<>
-  bool s2t<bool>(const STRING & val)
-  {
-    STRING val1 = val;
-    tolower(val1);
-    if ( (val1 == "y") || (val1 == "yes") || (val1 == "true") || (val1 == "t") || (val1 == "1"))
-      return true;
-    else if ((val1 == "n") || (val1 == "no") || (val1 == "false") || (val1 == "f") || (val1 == "0"))
-      return false;
+    STRING s1 = s;
+    tolower(s1);
+    if ( (s1 == "y") || (s1 == "yes") || (s1 == "true") || (s1 == "t") || (s1 == "1"))
+      {
+	val = true;
+	return true;
+      }
+    else if ((s1 == "n") || (s1 == "no") || (s1 == "false") || (s1 == "f") || (s1 == "0"))
+      {
+	val = false;
+	return true;
+      }
     else
-      {} //fixme - error handling
+      {
+	return false;
+      }
   }
 
   // ----------------------------------------------------------------
@@ -397,10 +433,20 @@ namespace _qpp_internal{
     while(true)
       {
 	STRING line = tok.get();
+	
+	//debug
 	//std::cout << "\"" << line <<"\"" << "\n";
+
 	if (line == "}")
 	  break;
+	if (line.find_first_not_of(" \t") == std::string::npos && tok.get() == "}")
+	  break;
+
 	std::vector<STRING> fields = split(line);
+
+	//debug
+	//for (int i=0; i<fields.size(); i++)
+	//  std::cout << "split:: \"" << fields[i] << "\"\n";
 
 	if (fields.size() == 0)
 	  continue;
@@ -414,8 +460,14 @@ namespace _qpp_internal{
 	  qpp_data_error("Error: wrong number of fields",tok.line_number());
 
 	if (format == "axyz")
-	  geom -> add( fields[0], s2t<VALTYPE>(fields[1]), 
-		       s2t<VALTYPE>(fields[2]), s2t<VALTYPE>(fields[3]) );
+	  {
+	    lace::vector3d<VALTYPE> r;
+	    if ( (!s2t<VALTYPE>(fields[1], r(0))) || (!s2t<VALTYPE>(fields[2], r(1))) || 
+		 (!s2t<VALTYPE>(fields[3], r(2))) )
+	      qpp_data_error("Error: coordinate (real number) expected",tok.line_number());
+	    
+	    geom -> add( fields[0], r);
+	  }
 	else
 	  {
 	    geom -> add( "", VALTYPE(0), VALTYPE(0), VALTYPE(0));	 
@@ -431,22 +483,22 @@ namespace _qpp_internal{
 		    break;
 		    //case 'n': anum = s2t<int>(fields[i]);
 		    // break;
-		  case 'x': ax = s2t<VALTYPE>(fields[i]);
+		  case 'x': s2t<VALTYPE>(fields[i], ax);
 		    break;
-		  case 'y': ay = s2t<VALTYPE>(fields[i]);
+		  case 'y': s2t<VALTYPE>(fields[i], ay);
 		    break;
-		  case 'z': az = s2t<VALTYPE>(fields[i]);
+		  case 'z': s2t<VALTYPE>(fields[i], az);
 		    break;
 		    //case 'q': achrg = s2t<VALTYPE>(fields[i]);
 		    //  xtr_geom -> charge(nat) = achrg;		   
 		    //  break;
 		    //case 'm': amass = s2t<VALTYPE>(fields[i]);
 		    //break;
-		  case 'r': xtr_geom -> xtr_real(nat,ixr) = s2t<VALTYPE>(fields[i]);
+		  case 'r': s2t<VALTYPE>(fields[i], xtr_geom -> xtr_real(nat,ixr));
 		    ixr++; break;
-		  case 'i': xtr_geom -> xtr_int(nat,ixi) = s2t<int>(fields[i]);
+		  case 'i': s2t<int>(fields[i], xtr_geom -> xtr_int(nat,ixi) );
 		    ixi++; break;
-		  case 'b': xtr_geom -> xtr_bool(nat,ixb) = s2t<bool>(fields[i]);
+		  case 'b': s2t<bool>(fields[i], xtr_geom -> xtr_bool(nat,ixb) );
 		    ixb++; break;
 		  }		
 	      }
@@ -499,8 +551,12 @@ namespace _qpp_internal{
     while(true)
       {
 	STRING line = tok.get();
+
 	if (line == "}")
 	  break;
+	if (line.find_first_not_of(" \t") == std::string::npos && tok.get() == "}")
+	  break;
+
 	std::vector<STRING> fields = split(line);
 	
 	if (fields.size() == 0)
@@ -512,13 +568,16 @@ namespace _qpp_internal{
 	  qpp_data_error("Number of vectors is not equal to cell dimension",tok.line_number());
 
 	for (int j=0; j<3; j++)
-	  (*cl)(i,j) = s2t<VALTYPE>(fields[j]);
+	  s2t<VALTYPE>( fields[j], (*cl)(i,j) );
 
 	i++;
       }
 
     if ( i < DIM)
       qpp_data_error("Number of vectors is not equal to cell dimension",tok.line_number());
+
+    tok.dump(" \t");
+    tok.separate(",;{}()=");
 
     return cl;
   }
@@ -539,7 +598,139 @@ namespace _qpp_internal{
       return parse_vectors<3,double>(parm,name,tok);
 
   }
+
+  // ---------------------------------------------------------
+
+  template<class FREAL>
+  qpp::qpp_object * parse_g98_basis(std::vector<qpp::qpp_object*>& parm, 
+				    STRING name, tokenizer & tok)
+  {
+    qpp::gencon_basis<FREAL> *bas = new qpp::gencon_basis<FREAL>(name);
+
+    tok.separate("}");
+    tok.dump("");
+    
+    STRING line = tok.get();
+
+    do{
+
+      std::vector<STRING> lbls;
+      split(line, lbls);
+
+      bas -> new_rcrd();
+
+      int n;
+      if ( !s2t<int>(lbls[lbls.size()-1],n) || n!=0)
+	qpp_data_error("The list of atoms must terminate with 0",tok.line_number());
+	
+      for(int i=0; i<lbls.size()-1; i++)
+	{
+	  if ( s2t<int>(lbls[i],n) )
+	    bas -> add_number(n);
+	  else
+	    bas -> add_label(lbls[i]);
+	}
+
+      //debug
+      std::cout << "labels:";
+      int nr = bas->nrcrd()-1;
+      for(int i=0; i<bas->rcrd(nr).labels.size(); i++)
+	std::cout << " " << bas->rcrd(nr).labels[i];
+      std::cout << "\nnumbers:";
+      for(int i=0; i<bas->rcrd(nr).numbers.size(); i++)
+	std::cout << " " << bas->rcrd(nr).numbers[i];
+      std::cout << "\n";
+
+      line = tok.get();
+      do{
+	
+	tolower(line);
+	split(line, lbls);
+	if (lbls[0]=="****")
+	  break;
+	if (lbls.size()!=3)
+	  qpp_data_error("Orbital definition expected, must contain 3 fields",tok.line_number());
+	
+	int l1,l2,np;
+	if (lbls[0] == "s")
+	  l1=l2=0;
+	else if (lbls[0] == "p")
+	  l1=l2=1;
+	else if (lbls[0] == "d")
+	  l1=l2=2;
+	else if (lbls[0] == "f")
+	  l1=l2=3;
+	else if (lbls[0] == "g")
+	  l1=l2=4;
+	else if (lbls[0] == "sp")
+	  { l1=0; l2=1; }
+	else if (lbls[0] == "spd")
+	  { l1=0; l2=2; }
+	else
+	  qpp_data_error("Orbital type notation (s,p,d,..) expected",tok.line_number());
+	
+	if ( !s2t<int>(lbls[1],np) )
+	  qpp_data_error("Number of primitive gaussians expected",tok.line_number());
+	
+	qpp::gencon_shell<FREAL> sh(np,l2-l1+1);
+	for (int i=0; i<=l2-l1; i++)
+	  sh.l(i) = l1+i;
+
+	//debug
+	std::cout << "shell " << bas -> rcrd(nr).shells.size() << " nprim = " << np << " l =";
+	for (int i=0; i<=l2-l1; i++)
+	  std::cout << sh.l(i) << " ";
+	std::cout << "\n";
+
+	for (int p=0; p<np; p++)
+	  {
+	    line = tok.get();
+	    std::vector<STRING> fld;
+	    split(line, fld);
+	    if (fld.size()!=l2-l1+2)
+	      qpp_data_error("Orbital exponent and contraction coefficient(s) expected",tok.line_number());
+	    if ( !s2t<FREAL>(fld[0], sh.alpha(p)) )
+	      qpp_data_error("Orbital exponent (real) expected",tok.line_number());
+	    for (int i=0; i<=l2-l1; i++)
+	      if ( !s2t<FREAL>(fld[i+1], sh.coeff(i,p)) )
+		qpp_data_error("Contraction coefficient (real) expected",tok.line_number());
+	  }
+	bas -> add_shell(sh);
+	
+	//debug
+	bas -> rcrd(nr).shells[bas -> rcrd(nr).shells.size()-1].write_g98(std::cout);
+	    
+	line = tok.get();
+      } while(true);
   
+      line = tok.get();
+
+      if (line == "}")
+	break;
+      if (line.find_first_not_of(" \t") == std::string::npos && tok.get() == "}")
+	break;
+
+    } while(true);
+
+    tok.dump(" \t");
+    tok.separate(",;{}()=");
+
+    return bas;
+  }
+
+  // ---------------------------------------------------------
+
+  qpp::qpp_object * parse_any_basis(std::vector<qpp::qpp_object*>& parm, 
+				    STRING name, tokenizer & tok)
+  {
+    if (parm.size()>0)
+      {
+	STRING basfmt = ((qpp::qpp_parameter<STRING>*)parm[0])->value();
+	if (basfmt == "g98" || basfmt == "gauss" || basfmt == "gaussian")
+	  return parse_g98_basis<double>(parm,name,tok);
+      }
+  }
+
   // ---------------------------------------------------------
   
   qpp::qpp_object * parse_declaration(tokenizer & tok)
@@ -640,6 +831,9 @@ namespace _qpp_internal{
 	  }
 	return parse_any_vectors(dim, parm, field2, tok);
       }
+
+    if ( field1 == "basis" && smb == "{" )
+      return parse_any_basis(parm, field2, tok);
       
     qpp::qpp_declaration * pn = new qpp::qpp_declaration(field1,field2);
 
