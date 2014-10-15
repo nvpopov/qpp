@@ -1,4 +1,40 @@
 #include "io/qpparser.hpp"
+
+namespace qpp{
+
+  // -----------------------------------------------------------
+  template<>
+  bool s2t<bool>(const STRING & s, bool & val)
+  {
+    STRING s1 = s;
+    _qpp_internal::tolower(s1);
+    if ( (s1 == "y") || (s1 == "yes") || (s1 == "true") || (s1 == "t") || (s1 == "1"))
+      {
+	val = true;
+	return true;
+      }
+    else if ((s1 == "n") || (s1 == "no") || (s1 == "false") || (s1 == "f") || (s1 == "0"))
+      {
+	val = false;
+	return true;
+      }
+    else
+      {
+	return false;
+      }
+  }
+
+  void qpp_read(std::basic_istream<CHAR,TRAITS> & is, std::vector<qpp::qpp_object*> & decls)
+  {
+    _qpp_internal::tokenizer t(is);
+    qpp::qpp_object * decl;
+    while ( (decl=parse_declaration(t)) != NULL)
+      decls.push_back(decl);
+  }
+
+};
+
+
 namespace _qpp_internal{
   
 
@@ -163,28 +199,6 @@ namespace _qpp_internal{
     return elems;
   }
 
-  // -----------------------------------------------------------
-  template<>
-  bool s2t<bool>(const STRING & s, bool & val)
-  {
-    STRING s1 = s;
-    tolower(s1);
-    if ( (s1 == "y") || (s1 == "yes") || (s1 == "true") || (s1 == "t") || (s1 == "1"))
-      {
-	val = true;
-	return true;
-      }
-    else if ((s1 == "n") || (s1 == "no") || (s1 == "false") || (s1 == "f") || (s1 == "0"))
-      {
-	val = false;
-	return true;
-      }
-    else
-      {
-	return false;
-      }
-  }
-
   // ----------------------------------------------------------------
 
   void parse_parameters(std::vector<qpp::qpp_parameter<STRING>*> & lst, tokenizer & tok)
@@ -341,6 +355,10 @@ namespace _qpp_internal{
     tok.separate(",;{}()=");
     
     field1 = tok.get();
+
+    if (field1 == "")
+      return NULL;
+
     if ( field1.find_first_of(",;{}()=") != std::string::npos )
       qpp_data_error("Error: identifier expected, special character found", tok.line_number());
     

@@ -24,6 +24,12 @@ int main()
   G.add("Li_cl",1,1,1);
 
   G.insert(0, "Li", lace::vector3d<double>(0,0,0), {1.1, 2.2,3.3},{13},{false});
+  G.erase(G.nat()-1);
+
+  G.insert(G.nat(),"F_shl",lace::vector3d<double>(1,1,1),{-1,4,5,6},{7},{true});
+  G.add("Cl",lace::vector3d<double>(2,1,1));
+
+
   G.write(std::cout);
   
 }

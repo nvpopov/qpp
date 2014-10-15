@@ -27,7 +27,7 @@ qpp::geometry<0,REAL> G;
 std::ofstream f;
 
 #define DIM 0
-typedef qpp::gen_geometry<DIM,REAL,qpp::surf_symplicator<DIM,REAL> > surfgeom;
+typedef qpp::geometry<DIM,REAL,qpp::surf_symplicator<DIM,REAL> > surfgeom;
 typedef qpp::zpattern<DIM,REAL,qpp::surf_symplicator<DIM,REAL> > zpt;
 
 surfgeom * g;
@@ -331,95 +331,20 @@ void conf2(surfgeom & g)
 
 int main(int argc, char* argv[])
 {
-  //  std::vector<v2d> p;
-
   
   R = atof(argv[1]);
   r = atof(argv[2]);
   f.open(argv[3]);
   
-  /*
-  R=3.8;
-  r=1.7;
-  f.open("1.xyz");
-  */
   mfold = new qpp::parametric_torus<REAL>(R,r);
   //mfold = new qpp::parametric_sphere<REAL>(R);
+
   qpp::surf_symplicator<DIM,REAL> symm(*mfold);  
-
-  /* cs
-  symm(0) = Sigma(lace::vector3d<double>(0,1,0));
-  symm.order[0]=2;
-  */
-
-  /* c3 
-  symm(0) = lace::vector3d<double>(0,2*pi/3,0);
-  symm.order[0]=3;
-  */
-
-  /* c2 
-  symm(0) = qpp::rotrans<DIM,REAL>(lace::vector3d<double>(0,2*pi/6,0),Sigma(lace::vector3d<double>(1,0,0)));
-  symm.order[0]=6;
-  */
   g = new surfgeom(symm);
-
   g->geomtol = 1e-5;
 
-  /*
-  qpp::geometry<2,REAL> uc;
-  uc.cell(0) = v3d(3*rcc,0e0,0e0);
-  uc.cell(1) = v3d(0e0,std::sqrt(3.)*rcc,0e0);
-  
-  uc.add("C",0,0,0);
-  uc.add("C",-rcc/2,std::sqrt(3.)*rcc/2,0);
-  uc.add("C",rcc,0,0);
-  uc.add("C",1.5*rcc,std::sqrt(3.)*rcc/2,0);
-
-  qpp::geometry<2,REAL>::iterator uci(qpp::index<2>(0,-10,-10),qpp::index<2>(3,10,10));
-
-  qpp::geometry<0,REAL> grph;
-
-  for (uci = uci.begin(); uci != uci.end(); uci++)
-    grph.add("C",uc.position(uci));
-
-
-  std::cout << "here1\n";
-
-  for (int i=0; i<grph.nat(); i++)
-    {
-      //grph.coord(i).x() -= rcc/2;
-      //grph.coord(i).y() -= sqrt(3.)*rcc/2;
-      grph.coord(i).z() += r;
-    }
-
-  std::ofstream gg("grph.xyz");
-  qpp::write_xyz(gg, grph);
-  */
-
-  /*
-  for (int i=0; i<grph.nat(); i++)
-    { 
-      v2d p0 = mfold->project(grph.coord(i));
-      if ( qpp::pi/3 < p0(0) && 2*qpp::pi/3 > p0(0))
-	{
-	  p.push_back(p0);
-	  //p.push_back(v2d(-p0.x,p0.y+qpp::pi));
-	  //p0(0) *= -1;
-	  //p0(1) += qpp::pi/6;
-	  //p.push_back(p0);
-	}
-    }
-  */
-
-  //  conf0(*g);
   conf0(*g);
   g2G(*g,G);
-
-  //  for (int i=0; i<p.size(); i++)
-  //    G.add("C", mfold->map(p[i]) );
-
-
-  std::cout << "here3\n";
 
   std::vector<zpt*> zz,zd;
 
@@ -722,20 +647,28 @@ int main(int argc, char* argv[])
     z2f.add_relation(* new zpt::bond_relation("CX","C0", rcc_min, rcc_max, z2f));
     // ---------------------------------------------------------------------------
 
+    // std::ofstream ptrn("z.qpp");
+    // for (int i=0; i<zz.size(); i++)
+    //   zz[i]->write(ptrn);
+    // for (int i=0; i<zd.size(); i++)
+    //   zd[i]->write(ptrn);
+    // z2f.write(ptrn);
+    // ptrn.close();
+
     qpp::init_rand();
     qpp::random_integer_lister lst,lst1,lst2;
      
     //    std::ofstream f("tor.xyz");
     qpp::write_xyz(f, G);
     
-    G.ngbr.default_distance = 3.1;
-    G.build_type_table();
-    G.ngbr.build_disttable();
-    G.ngbr.build();
+    // G.ngbr.default_distance = 3.1;
+    // G.build_type_table();
+    // G.ngbr.build_disttable();
+    // G.ngbr.build();
 
-    g->build_type_table();
-    g->ngbr.default_distance = 1.8;
-    g->ngbr.build_disttable();
+    // g->build_type_table();
+    // g->ngbr.default_distance = 1.8;
+    // g->ngbr.build_disttable();
     
     for (int i=0; i<zz.size();i++)
       zz[i]->init_surf(*g, 0.8);
@@ -755,14 +688,14 @@ int main(int argc, char* argv[])
 	  if ( G.nat() > 5)
 	    {
 	      optimize_surf(*g);
-	      g->ngbr.build();
+	      //g->ngbr.build();
 	    }
 	  
 	  contin = false;
 	  lst1.set(0,zz.size()-1);
 	  for (int i=lst1.begin(); !lst1.end(); i=lst1.next())
 	    {
-	      if ( zz[i]->apply_surf( lst) )
+	      if ( zz[i]->apply( lst) )
 		{
 		  contin = true;
 		  
@@ -781,7 +714,7 @@ int main(int argc, char* argv[])
 
       finished = true;
       contin1 = true;
-      if (z2f.apply_surf(lst))
+      if (z2f.apply(lst))
 	{
 	  finished = false;
 	  std::stringstream s;
@@ -798,7 +731,7 @@ int main(int argc, char* argv[])
 	  lst1.set(0,zd.size()-1);
 	  for (int i=lst1.begin(); !lst1.end(); i=lst1.next())
 	    {
-	      if ( zd[i]->apply_surf( lst) )
+	      if ( zd[i]->apply( lst) )
 		{
 		  contin1 = true;
 		  finished = false;

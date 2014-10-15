@@ -39,7 +39,7 @@ int main()
   //  aq(2).cell = & bounds;
 
   //  gen_geometry<2,double,std::string,char,std::char_traits<char>, symplicator<2,double> > G(ss);
-  gen_geometry<3,double,symplicator<3,double> > G(aq);
+  geometry<3,double,symplicator<3,double> > G(aq);
 
 
   G.add("Si", -0.157112881952,  4.278734169998,  1.816202173796);
@@ -66,7 +66,7 @@ int main()
 
   geometry<0,double> GG;
 
-  gen_geometry<3,double,symplicator<3,double> >::iterator 
+  geometry<3,double,symplicator<3,double> >::iterator 
     i( qpp::index<3>(0, -1, -1, 2), qpp::index<3>( G.nat()-1, 4, 4, 6) );
 
   for ( i=i.begin(); i!=i.end(); i++ )

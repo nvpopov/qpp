@@ -14,8 +14,40 @@
 
 #include <stdlib.h>
 
+namespace qpp{
+
+  // -------------------------------- string to type T convertor ----------------------------
+  
+  template<typename T>
+  bool s2t(const STRING & s, T & val)
+  {
+    std::basic_stringstream<CHAR,TRAITS> ss(s);
+    ss >> val;
+    return !ss.fail();
+  }
+  
+  template<>
+  bool s2t<bool>(const STRING & s, bool & val);
+
+  // -------------------------------------------------------------
+
+  template<typename T>
+  STRING t2s(const T & val)
+  {
+    std::basic_stringstream<CHAR,TRAITS> ss;
+    ss << val;
+    return ss.str();
+  }
+
+  // -------------------------------------------------------------
+
+  void qpp_read(std::basic_istream<CHAR,TRAITS> & is, std::vector<qpp::qpp_object*> & decls);
+
+};
+
 namespace _qpp_internal{
 
+  using qpp::s2t;
   using qpp::TRAITS;
 
   // -------------------- Simple tokenizer -----------------------------------
@@ -65,19 +97,6 @@ namespace _qpp_internal{
 
   std::vector<STRING> split(const STRING &s, STRING delims = " \t");
 
-  // -------------------------------- string to type T convertor ----------------------------
-  
-  template<typename T>
-  bool s2t(const STRING & s, T & val)
-  {
-    std::basic_stringstream<CHAR,TRAITS> ss(s);
-    ss >> val;
-    return !ss.fail();
-  }
-  
-  template<>
-  bool s2t<bool>(const STRING & s, bool & val);
-
   // ----------------------------------------------------------------
 
   void parse_parameters(std::vector<qpp::qpp_object*> & lst, tokenizer & tok);
@@ -89,6 +108,9 @@ namespace _qpp_internal{
   qpp::geometry<DIM, VALTYPE> *  parse_geom(std::vector<qpp::qpp_object*> & parm, 
 					    STRING name, tokenizer & tok)
   {
+    //debug
+    // std::cerr << "parse_geom\n";
+
     tok.separate("}");
     tok.dump("");
 
@@ -153,9 +175,11 @@ namespace _qpp_internal{
 	      qpp_data_error("Bad geometry format: unrecognized field "+v,tok.line_number());
 	    i++;
 	  }
+	if (format=="")
+	  format = "axyz";
 
 	// debug
-	std::cout << format << "\n";
+	//std::cout << format << "\n";
 	if ( std::count(format.begin(),format.end(),'a') > 1)
 	  qpp_data_error("Bad geometry format: atoms requested more then once",tok.line_number());
 	if ( std::count(format.begin(),format.end(),'x') > 1)
@@ -169,6 +193,10 @@ namespace _qpp_internal{
       }
 
     bool xgeom = xchrg || nxr>0 || nxi>0 || nxb>0;
+
+    //std::cout << "parse_geom: xgeom= " << xgeom << "n r i b = " << nxr << " " 
+    //	      << nxi << " " << nxb << "\n";
+
     qpp::geometry<DIM, VALTYPE> * geom;
     qpp::xtr_geometry<DIM, VALTYPE> * xtr_geom = NULL;
 
@@ -215,7 +243,10 @@ namespace _qpp_internal{
 	*/
   
 	if ( fields.size() != format.size() )
-	  qpp_data_error("Error: wrong number of fields",tok.line_number());
+	  {
+	    std::cerr << "format \"" << format << "\"\n";
+	    qpp_data_error("Error: wrong number of fields",tok.line_number());
+	  }
 
 	if (format == "axyz")
 	  {
@@ -228,6 +259,8 @@ namespace _qpp_internal{
 	  }
 	else
 	  {
+	    //debug
+	    //std::cerr << format << "\n";
 	    geom -> add( "", VALTYPE(0), VALTYPE(0), VALTYPE(0));	 
 
 	    STRING aname = "";
@@ -252,11 +285,11 @@ namespace _qpp_internal{
 		    //  break;
 		    //case 'm': amass = s2t<VALTYPE>(fields[i]);
 		    //break;
-		  case 'r': s2t<VALTYPE>(fields[i], xtr_geom -> xtr_real(nat,ixr));
+		  case 'r': s2t<VALTYPE>(fields[i], xtr_geom -> xtr_real(ixr,nat));
 		    ixr++; break;
-		  case 'i': s2t<int>(fields[i], xtr_geom -> xtr_int(nat,ixi) );
+		  case 'i': s2t<int>(fields[i], xtr_geom -> xtr_int(ixi,nat) );
 		    ixi++; break;
-		  case 'b': s2t<bool>(fields[i], xtr_geom -> xtr_bool(nat,ixb) );
+		  case 'b': s2t<bool>(fields[i], xtr_geom -> xtr_bool(ixb,nat) );
 		    ixb++; break;
 		  }		
 	      }
@@ -272,7 +305,8 @@ namespace _qpp_internal{
     tok.dump(" \t");
     tok.separate(",;{}()=");
 
-    // geom -> write(std::cout);
+    //geom -> write(std::cout);
+    //std::cout << geom->gettype() << "\n";
 
     return geom;
   }
@@ -337,7 +371,7 @@ namespace _qpp_internal{
   qpp::qpp_object * parse_g98_basis(std::vector<qpp::qpp_object*>& parm, 
 				    STRING name, tokenizer & tok)
   {
-    qpp::gencon_basis<FREAL> *bas = new qpp::gencon_basis<FREAL>(name);
+    qpp::gencon_basis_data<FREAL> *bas = new qpp::gencon_basis_data<FREAL>(name);
 
     tok.separate("}");
     tok.dump("");
@@ -363,15 +397,17 @@ namespace _qpp_internal{
 	    bas -> add_label(lbls[i]);
 	}
 
-      //debug
-      std::cout << "labels:";
       int nr = bas->nrcrd()-1;
+      //debug
+      /*
+      std::cout << "labels:";
       for(int i=0; i<bas->rcrd(nr).labels.size(); i++)
 	std::cout << " " << bas->rcrd(nr).labels[i];
       std::cout << "\nnumbers:";
       for(int i=0; i<bas->rcrd(nr).numbers.size(); i++)
 	std::cout << " " << bas->rcrd(nr).numbers[i];
       std::cout << "\n";
+      */
 
       line = tok.get();
       do{
@@ -409,10 +445,12 @@ namespace _qpp_internal{
 	  sh.l(i) = l1+i;
 
 	//debug
+	/*
 	std::cout << "shell " << bas -> rcrd(nr).shells.size() << " nprim = " << np << " l =";
 	for (int i=0; i<=l2-l1; i++)
 	  std::cout << sh.l(i) << " ";
 	std::cout << "\n";
+	*/
 
 	for (int p=0; p<np; p++)
 	  {

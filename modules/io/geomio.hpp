@@ -15,6 +15,7 @@
 #include <iomanip>
 #include <fstream>
 #include <ios>
+#include <algorithm>
 #include <boost/format.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
@@ -104,7 +105,7 @@ namespace qpp{
   // -------------------------------------------------------------------//
   template< int DIM, class VALTYPE=double, class TRANSFORM >
   void write_xyz(std::basic_ostream<CHAR,TRAITS>  & out, 
-		 const qpp::gen_geometry<DIM,VALTYPE,TRANSFORM> & geom)
+		 const qpp::geometry<DIM,VALTYPE,TRANSFORM> & geom)
   {
     out << geom.nat() << "\n";
     /*
@@ -126,7 +127,7 @@ namespace qpp{
   // -------------------------------------------------------------------//
   template< int DIM, class VALTYPE=double, class TRANSFORM  >
   void write_xyz(std::basic_ostream<CHAR,TRAITS>  & out, 
-		 const qpp::gen_geometry<DIM,VALTYPE,TRANSFORM> & geom,
+		 const qpp::geometry<DIM,VALTYPE,TRANSFORM> & geom,
 		 const qpp::molecule_vector<DIM,VALTYPE,TRANSFORM> & v)
   {
     out << geom.nat() << "\n";
@@ -140,6 +141,30 @@ namespace qpp{
     for (int i=0; i<geom.size(); i++)
       out << boost::format("%-4s %12.6f %12.6f %12.6f atom_vector %12.6f %12.6f %12.6f\n") % geom.atom(i) 
 	% geom.coord(i)(0) % geom.coord(i)(1) % geom.coord(i)(2) % v(i,0) % v(i,1) % v(i,2);
+  }
+
+  // -------------------------------------------------------------
+  template< int DIM>
+  bool compare_atindex(const qpp::index<DIM> & at1, const qpp::index<3> & at2)
+  {
+    return at1.atom() > at2.atom();
+  }
+
+  template< int DIM, class VALTYPE=double, class TRANSFORM  >
+  void write_ngbr(std::basic_ostream<CHAR,TRAITS>  & out, 
+		  typename geometry<DIM,VALTYPE,TRANSFORM>::neighbours_table & ngbr)
+  {
+    for (int i=0; i<ngbr.geom->nat(); i++)
+      {
+	out << i << " " << ngbr.geom->atom(i);
+	std::vector<qpp::index<DIM> > nn;
+	for (int j=0; j<ngbr.n(i); j++)
+	  nn.push_back(ngbr(i,j));
+	std::sort(nn.begin(),nn.end(),compare_atindex<DIM>);
+	for (int j=0; j<nn.size(); j++)
+	  out << " " << nn[j] << " " << norm(ngbr.geom->position(i)-ngbr.geom->position(nn[j]));
+	out << "\n";
+      }
   }
 
 };

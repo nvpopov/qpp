@@ -9,11 +9,11 @@ int main()
   parametric_torus<double> tor(4,2);
   surf_symplicator<3,double> symm(tor);
  
-  symm(0) = lace::vector3d<double>(0, 2*pi/3, 0);
+  symm(0) = lace::vector3d<double>(0e0, 2*pi/3, 0e0);
   symm(1) = Sigma(lace::vector3d<double>(0,1,0));
   symm(2) = Sigma(lace::vector3d<double>(1,0,0));
 
-  gen_geometry<3, double, surf_symplicator<3,double> > G(symm);
+  geometry<3, double, surf_symplicator<3,double> > G(symm);
 
   /*
   int n=2, m=5;
@@ -29,7 +29,7 @@ int main()
 
   geometry<0,double> GG;
 
-  gen_geometry<3,double,symplicator<3,double> >::iterator 
+  geometry<3,double,symplicator<3,double> >::iterator 
     i( qpp::index<3>(0, 0,0,0), qpp::index<3>( G.nat()-1, 3,2,2) );
 
   for ( i=i.begin(); i!=i.end(); i++ )

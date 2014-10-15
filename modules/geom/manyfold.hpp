@@ -5,12 +5,15 @@
 #include <constants.hpp>
 #include <io/qppdata.hpp>
 #include <mathf/specfunc.hpp>
+#include <geom/geom.hpp>
 #include <cmath>
-
-namespace qpp{
 
 #define v2d lace::vector2d<VALTYPE>
 #define v3d lace::vector3d<VALTYPE>
+
+namespace qpp{
+
+  // ------------------ Parametric surface --------------------
 
   int const default_maxiter = 100;
 
@@ -82,7 +85,7 @@ namespace qpp{
 
     virtual qppobject_type gettype() const
     {
-      return data_manyfold;
+      return qtype_manyfold;
     }
 
     virtual int n_next() const
@@ -649,6 +652,13 @@ namespace qpp{
     }
 
   };
+
+  // ---------------------------------------------------------------------
+
+  template <class VALTYPE>
+  void decl2surf(qpp_declaration * decl, parametric_surface<VALTYPE> & surf)
+  {}
+
 
   /*
   template <class VALTYPE, class charT=std::string::value_type , class traits = std::char_traits<charT> >

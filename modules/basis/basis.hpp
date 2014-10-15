@@ -65,6 +65,13 @@ namespace qpp{
 	_coeff[i] = sh._coeff[i];
     }
 
+    ~gencon_shell()
+    {
+      delete _l;
+      delete _alpha;
+      delete _coeff;
+    }
+
     inline int nprim() const
     { return _nprim; }
 
@@ -93,7 +100,6 @@ namespace qpp{
     {
       if (_nl != sh._nl || _nprim != sh._nprim)
 	return false;
-      bool res = true;
       for (int i=0; i<_nl; i++)
 	if (_l[i] != sh._l[i])
 	  return false;
@@ -105,6 +111,42 @@ namespace qpp{
 	  return false;
 
       return true;
+    }
+
+    bool same_alpha(const gencon_shell<FREAL> & sh) const
+    {
+      if (_nprim != sh._nprim)
+	return false;
+      for (int i=0; i<_nprim; i++)
+	if ( std::abs(_alpha[i] - sh._alpha[i]) > eps )
+	  return false;
+
+      return true;
+    }
+
+    void merge(const gencon_shell<FREAL> & sh)
+    {
+      int * new_l = new int[nshells()+sh.nshells()];
+      for (int i=0; i<nshells(); i++)
+	new_l[i] = _l[i];
+      for (int i=0; i<sh.nshells(); i++)
+	new_l[i+nshells()] = sh._l[i];
+
+      FREAL * new_coeff = new FREAL[nprim()*(nshells()+sh.nshells())];
+      for (int p=0; p<nprim(); p++)
+	{
+	  for (int i=0; i<nshells(); i++)
+	    new_coeff[i*nprim()+p] = _coeff[i*nprim()+p];
+	  for (int i=0; i<sh.nshells(); i++)
+	    new_coeff[(i+nshells())*nprim()+p] = sh._coeff[i*nprim()+p];
+	}
+      
+      delete _coeff;
+      delete _l;
+      _coeff = new_coeff;
+      _l = new_l;
+
+      _nl = nshells() + sh.nshells();
     }
 
     virtual void write_g98(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const
@@ -139,7 +181,7 @@ namespace qpp{
   // ----------------------------------------------------------------------
   
   template <class FREAL=double>
-  class gencon_basis : public qpp_object{
+  class gencon_basis_data : public qpp_object{
 
   public:
     struct atom_record{
@@ -156,8 +198,8 @@ namespace qpp{
 
   public:
 
-    gencon_basis(const STRING & __name = "")
-    { _name = __name; }
+    gencon_basis_data(const STRING & __name = "")
+    { _name = __name; }    
 
     inline int nrcrd() const
     { return _rcrd.size();}
@@ -170,19 +212,43 @@ namespace qpp{
       _rcrd.push_back( atom_record() );
     }
 
+    void add_number(int r, int num)
+    {
+      _rcrd[r].numbers.push_back(num);
+    }
+
+    void add_label(int r, const STRING & lbl)
+    {
+      _rcrd[r].labels.push_back(lbl);
+    }
+
+    void add_shell(int r, const gencon_shell<FREAL> & sh)
+    {
+      bool found = false;
+      for (int i=0; i<_rcrd[r].shells.size(); i++)
+	if ( _rcrd[r].shells[i].same_alpha(sh))
+	  {
+	    _rcrd[r].shells[i].merge(sh);
+	    found = true;
+	    break;
+	  }
+      if (!found)
+	_rcrd[r].shells.push_back(sh);
+    }
+
     void add_number(int num)
     {
-      _rcrd[_rcrd.size()-1].numbers.push_back(num);
+      add_number(_rcrd.size()-1,num);
     }
 
     void add_label(const STRING & lbl)
     {
-      _rcrd[_rcrd.size()-1].labels.push_back(lbl);
+      add_label(_rcrd.size()-1,lbl);
     }
 
     void add_shell(const gencon_shell<FREAL> & sh)
     {
-      _rcrd[_rcrd.size()-1].shells.push_back(sh);
+      add_shell(_rcrd.size()-1,sh);
     }
 
     virtual int n_next() const
@@ -198,7 +264,7 @@ namespace qpp{
     { return _name;}
 
     virtual qppobject_type gettype() const
-    { return data_basis | data_basis_gauss | data_type<FREAL>::type; }
+    { return qtype_basis | qtype_basis_gauss | qtype_data<FREAL>::type; }
 
     virtual void error(STRING const & what)
     {
@@ -233,7 +299,11 @@ namespace qpp{
 	    os << _rcrd[j].numbers[k] << " ";
 	  os << "0\n";
 	  for (int k=0; k<_rcrd[j].shells.size(); k++)
-	    _rcrd[j].shells[k].write_g98(os,offset+4);
+	    {
+	      //debug
+	      os << "shell number " << k << "\n";
+	      _rcrd[j].shells[k].write_g98(os,offset+4);
+	    }
 	  for (int i=0; i<offset+4; i++) os << " ";
 	  os << "****\n";
 	}
@@ -267,14 +337,12 @@ namespace qpp{
   
   // ----------------------------------------------------------------------
 
-  template <class FREAL=double, int DIM=0 , class CREAL=double, class TRANSFORM = periodic_cell<DIM,CREAL> >
-  class gauss_cart_basis {//: public basis<FREAL>{
-
-    STRING _name;
+  template <class FREAL=double, int DIM=0 , class CREAL=double, 
+	    class TRANSFORM = periodic_cell<DIM,CREAL> >
+  class gauss_cart_basis{
 
     gencon_shell<FREAL> * _shells;
-    gen_geometry<DIM,CREAL,TRANSFORM> * _geom;
-
+    geometry<DIM,CREAL,TRANSFORM> * _geom;
 
   public:
 

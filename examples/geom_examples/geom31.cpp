@@ -6,6 +6,11 @@
 
 // -------------- Type table & neighbours table for simple molecule ---------------------
 
+bool compat(const qpp::index<3> & at1, const qpp::index<3> & at2)
+{
+  return at1.atom() > at2.atom();
+}
+
 int main()
 {
   qpp::geometry<3> uc,g;
@@ -28,21 +33,64 @@ int main()
 	    at = "F";
 	}
       g.add(at, uc.position(I));
-      std::cout << g.nat() << " " << at << " " << I << "\n"; 
+      // std::cout << g.nat() << " " << at << " " << I << "\n"; 
     }
 
   g.cell(0) = uc.cell(0)*3;
   g.cell(1) = uc.cell(1)*3;
   g.cell(2) = uc.cell(2)*3;
 
-  std::ofstream ff("a-qx3.xyz");
+  std::ofstream ff("a-qx3.xyz"), t1("ngbr1"), t2("ngbr2");
 
   write_xyz(ff,g);
 
+  g.ngbr.default_distance = 1.7;
+  g.build_type_table();
+  g.ngbr.build_disttable();
+
+  for (int i=g.nat()/1; i>50; i-=3) g.shadow(i)=true;
+  g.ngbr.build();
+
+  g.add_dependent(&g.ngbr);
+
+
+  for (int i=g.nat()-1; i>0; i-=4) g.erase(i);  
+
+  for (int i=10; i<g.nat(); i+=10) g.insert(i, g.atom(i/2), g.coord(i/2)*.5);  
+  //  g.erase(192);
+
+  for (int i=11; i<g.nat(); i+=17) g.add(g.atom(i/2), g.coord(i/2)*.5);  
+
+  for (int i=0; i<g.nat(); i++)
+    {
+      t1 << i << " " << g.atom(i);
+      std::vector<qpp::index<3> > nn;
+      for (int j=0; j<g.ngbr.n(i); j++)
+	nn.push_back(g.ngbr(i,j));
+      std::sort(nn.begin(),nn.end(),compat);
+      for (int j=0; j<nn.size(); j++)
+	t1 << " " << nn[j];
+      t1 << "\n";
+    }
+
+  g.ngbr.build();
+
+  for (int i=0; i<g.nat(); i++)
+    {
+      t2 << i << " " << g.atom(i);
+      std::vector<qpp::index<3> > nn;
+      for (int j=0; j<g.ngbr.n(i); j++)
+	nn.push_back(g.ngbr(i,j));
+      std::sort(nn.begin(),nn.end(),compat);
+      for (int j=0; j<nn.size(); j++)
+	t2 << " " << nn[j];
+      t2 << "\n";
+    }
+  /*
   uc.ngbr.default_distance = 1.7;
   uc.build_type_table();
   uc.ngbr.build_disttable();
-
+  */
   /*
   g.ngbr.set_distance("Carbon","Carbon",1.8);
   g.ngbr.set_distance("Carbon","Oxygen",1.6);
@@ -71,6 +119,7 @@ int main()
   //  g.build_ngbr_table();
   */
 
+  /*
   std::cout << " --- Atomic types: ---\n";
 
   for (int i=0; i<uc.n_atom_types(); i++)
@@ -93,7 +142,7 @@ int main()
 
   for (int i=0; i<uc.size(); i++)
     std::cout << uc.type_table(i) << " " << uc.coord(i).x() << " " << uc.coord(i).y() << " " << uc.coord(i).z() << "\n";
-
+  */
   /*
   g._grain_setup();
   std::cout << g.grainsize << "\n";
@@ -110,6 +159,7 @@ int main()
 	for (int a=0; a< g.grains(i,j,k).size(); a++)
 	  std::cout << i << " " << j << " " << k << " " << (g.grains(i,j,k)[a]) << "\n";
   */
+  /*
   uc.ngbr.build();
 
   for (int i=0; i<uc.size(); i++)
@@ -118,7 +168,7 @@ int main()
 	qpp::index<3> k = uc.ngbr.table(i,j);
 	std::cout << uc.atom(i) << " " << i << " " << uc.atom(k) << " " << k << " " <<  norm(uc.position(i) - uc.position(k)) << "\n";
       }
-
+  */
   /*
   std::cout << "Iterator work:\n";
   qpp::geometry<3>::iterator i(g);

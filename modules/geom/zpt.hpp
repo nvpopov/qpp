@@ -4,28 +4,33 @@
 #include <geom/geom.hpp>
 #include <geom/zmt.hpp>
 #include <io/qppdata.hpp>
+#include <io/qpparser.hpp>
 #include <mathf/intlst.hpp>
 #include <string>
 #include <iostream>
 #include <boost/format.hpp>
+//debug
+#include <stdlib.h>  
+#include <io/geomio.hpp>
 
 namespace qpp{
 
   STRING ptype_name [] = {"search", "avoid", "delete", "insert"};
 
 
-  template <int DIM,class VALTYPE=double, class TRANSFORM = periodic_cell<DIM,VALTYPE> >   
-  class zpattern : public qpp_object {
+  template <int DIM,class CREAL=double, class TRANSFORM = periodic_cell<DIM,CREAL> >   
+  class zpattern : public qpp_object, public geometry_dependent {
 
     STRING _name, _error;
 
-    gen_geometry<DIM,VALTYPE,TRANSFORM> *geom;
-    parametric_surface<VALTYPE> *mfold;
-    //std::vector<lace::vector2d<VALTYPE> > *parm;   
+    geometry<DIM,CREAL,TRANSFORM> *geom;
+    typename geometry<DIM,CREAL,TRANSFORM>::neighbours_table * ngbr;
+    parametric_surface<CREAL> *mfold;
+    //std::vector<lace::vector2d<CREAL> > *parm;   
     
   public:
 
-    VALTYPE geomtol, symmtrap_radius;
+    CREAL geomtol, symmtrap_radius;
 
     zpattern(const STRING & __name = "")
     {
@@ -33,7 +38,7 @@ namespace qpp{
       geomtol = default_geomtol;      
     }
 
-    zpattern(gen_geometry<DIM,VALTYPE,TRANSFORM> & g, const STRING & __name = "")
+    zpattern(geometry<DIM,CREAL,TRANSFORM> & g, const STRING & __name = "")
     {
       geom = &g;
       _name = __name;
@@ -41,9 +46,9 @@ namespace qpp{
     }
 
     // kostyl for commented "parm"
-    lace::vector2d<VALTYPE> parm(int i)
+    lace::vector2d<CREAL> parm(int i)
     {
-      return lace::vector2d<VALTYPE>(geom->coord(i).x(), geom->coord(i).y());
+      return lace::vector2d<CREAL>(geom->coord(i).x(), geom->coord(i).y());
     }
 
     // ---------------- "Points" - named points to be identified with atoms --------------
@@ -168,17 +173,17 @@ namespace qpp{
   public:
 
     class linear_dependence : public qpp_object{
-      zpattern<DIM,VALTYPE,TRANSFORM> * owner;
+      zpattern<DIM,CREAL,TRANSFORM> * owner;
       STRING _name;
 
-      VALTYPE v0;
-      std::vector<VALTYPE> coeffs;
+      CREAL v0;
+      std::vector<CREAL> coeffs;
       std::vector<STRING> varnames;
       std::vector<int> varidx;
 
     public:
 
-      linear_dependence(VALTYPE _v0, zpattern<DIM,VALTYPE,TRANSFORM> & _owner,
+      linear_dependence(CREAL _v0, zpattern<DIM,CREAL,TRANSFORM> & _owner,
 			STRING const &__name = "")
       { 
 	v0 = _v0; 
@@ -186,7 +191,7 @@ namespace qpp{
 	owner = & _owner;
       }
 
-      linear_dependence & term(STRING const & vn, VALTYPE cc)
+      linear_dependence & term(STRING const & vn, CREAL cc)
       {
 	varnames.push_back(vn);
 	coeffs.push_back(cc);
@@ -201,27 +206,28 @@ namespace qpp{
 	      }
 	  }
 	if (!vnfound)
-	  owner->error("Variable " + vn + " is not defined in zpattern realtions");
+	  owner->error("Variable " + vn + " is not defined in relations of zpattern " 
+		       + owner->name());
 	return *this;
       }
 
       int n_terms()
       { return varnames.size();}
 
-      VALTYPE value()
+      CREAL value()
       {
-	VALTYPE res = v0;
+	CREAL res = v0;
 	for (int i=0; i<varidx.size(); i++)
 	  res += coeffs[i]*owner->relation_registry[varidx[i]] -> value();
 	return res;
       }
 
-      VALTYPE is_defined()
+      CREAL is_defined()
       {
 	bool res = true;
 	for (int i = 0; i<varidx.size(); i++)
 	  {
-	    //	    std::cout << "term " << i << " rel " << varidx[i] << "\n";
+	    //	    std::cerr << "term " << i << " rel " << varidx[i] << "\n";
 
 	    if (!owner -> rel(varidx[i]).is_defined())
 	      {
@@ -240,7 +246,7 @@ namespace qpp{
 
       virtual qppobject_type gettype() const
       {
-	//fixme
+	return qtype_zpt_lindep | qtype_data<CREAL>::type;
       }
 
       virtual int n_next() const
@@ -273,7 +279,7 @@ namespace qpp{
     class geometry_relation : public qpp_object{      
     protected:
 
-      zpattern<DIM,VALTYPE,TRANSFORM> * owner;
+      zpattern<DIM,CREAL,TRANSFORM> * owner;
       STRING _name;
 
       std::vector<int> _points;
@@ -286,14 +292,14 @@ namespace qpp{
 	for (int i=0; i<n_points(); i++)
 	  {
 	    //debug
-	    //std::cout << i << " " << point_nick(i) << "\n";
+	    //std::cerr << i << " " << point_nick(i) << "\n";
 
 	    int k;
 	    _points[i] = -1;
 	    for (k=0; k<owner->n_points(); k++)
 	      {
 		// debug
-		//std::cout << k << "\n";
+		//std::cerr << k << "\n";
 		//std:: cout << "=" << owner->point(k).nickname << "\n";
 
 	      if (point_nick(i)==owner->point(k).nickname)
@@ -309,30 +315,30 @@ namespace qpp{
       }
 
     public:      
-      VALTYPE vmin,vmax;
+      CREAL vmin,vmax;
 
-      virtual VALTYPE value() =0;
+      virtual CREAL value() =0;
       virtual int n_points() =0;
       virtual STRING point_nick(int i) =0;      
 
       virtual bool satisfy()
       {
-	//std::cout << "psat: ";
-	//write(std::cout);
+	//std::cerr << "psat: ";
+	//write(std::cerr);
 	//debug();
-	//std::cout << " defined= " << is_defined() << "\n";
+	//std::cerr << " defined= " << is_defined() << "\n";
 	if (is_defined())
 	  {
 	    if (exact)
 	      {
-		//std::cout << "value= " << value() << " formula= " << _formula -> value() 
+		//std::cerr << "value= " << value() << " formula= " << _formula -> value() 
 		//	  << " diff= " << boost::format("%25.20f\n")%(value() - _formula -> value());
 		return _formula -> is_defined() ? std::abs(value() - _formula -> value()) <= owner -> geomtol : false;
 		
 	      }
 	    else
 	      {
-		//std::cout << " " << vmin <<  " " << vmax << " " << value() << "\n";
+		//std::cerr << " " << vmin <<  " " << vmax << " " << value() << "\n";
 		return ( vmin <= value() && vmax >=value() );
 	      }
 	  }
@@ -388,7 +394,7 @@ namespace qpp{
       STRING at1, at2;
 
     protected:
-      //      using typename zpattern<DIM,VALTYPE,ATLABEL,charT,traits>::geometry_relation::owner;
+      //      using typename zpattern<DIM,CREAL,ATLABEL,charT,traits>::geometry_relation::owner;
       using geometry_relation::owner;
       using geometry_relation::vmin;
       using geometry_relation::vmax;
@@ -400,8 +406,8 @@ namespace qpp{
       
     public:
 
-      bond_relation(STRING const & _at1, STRING const &_at2, VALTYPE _bmin, VALTYPE _bmax, 
-		    zpattern<DIM,VALTYPE,TRANSFORM> & z, STRING const &__name = "")
+      bond_relation(STRING const & _at1, STRING const &_at2, CREAL _bmin, CREAL _bmax, 
+		    zpattern<DIM,CREAL,TRANSFORM> & z, STRING const &__name = "")
       {
 	at1 = _at1;
 	at2 = _at2;
@@ -415,7 +421,7 @@ namespace qpp{
       }
 
       bond_relation(STRING const & _at1, STRING const &_at2, linear_dependence &__formula,
-		    zpattern<DIM,VALTYPE,TRANSFORM> & z, STRING const &__name = "")
+		    zpattern<DIM,CREAL,TRANSFORM> & z, STRING const &__name = "")
       {
 	at1 = _at1;
 	at2 = _at2;
@@ -429,7 +435,7 @@ namespace qpp{
       virtual bool is_bond()
       { return true;} 
 
-      virtual VALTYPE value()
+      virtual CREAL value()
       {
 	if (!is_defined())
 	  return -1;
@@ -458,7 +464,9 @@ namespace qpp{
 
       
       virtual qppobject_type gettype() const
-      { return data_zpt_bond; }
+      { 
+	return qtype_zpt_bond | qtype_data<CREAL>::type; 
+      }
       
       virtual int n_next() const
       { return 0;}
@@ -504,8 +512,8 @@ namespace qpp{
     public:
 
       angle_relation(STRING const & _at1, STRING const &_at2, STRING const &_at3,
-		    VALTYPE _amin, VALTYPE _amax, 
-		     zpattern<DIM,VALTYPE,TRANSFORM> & z, STRING const &__name = "")
+		    CREAL _amin, CREAL _amax, 
+		     zpattern<DIM,CREAL,TRANSFORM> & z, STRING const &__name = "")
       {
 	at1 = _at1;
 	at2 = _at2;
@@ -520,7 +528,7 @@ namespace qpp{
       }
 
       angle_relation(STRING const & _at1, STRING const &_at2, STRING const &_at3, linear_dependence &__formula,
-		    zpattern<DIM,VALTYPE,TRANSFORM> & z, STRING const &__name = "")
+		    zpattern<DIM,CREAL,TRANSFORM> & z, STRING const &__name = "")
       {
 	at1 = _at1;
 	at2 = _at2;
@@ -532,7 +540,7 @@ namespace qpp{
 	match_points();
       }
 
-      virtual VALTYPE value()
+      virtual CREAL value()
       {
 	if (!is_defined())
 	  return -1;
@@ -542,7 +550,7 @@ namespace qpp{
 	      i1 = owner->point(point(0)).bound,	      
 	      i2 = owner->point(point(1)).bound,
 	      i3 = owner->point(point(2)).bound;
-	    lace::vector3d<VALTYPE> n1, n2;
+	    lace::vector3d<CREAL> n1, n2;
 	    n1 = owner->geom->position(i1) - owner->geom->position(i2);
 	    n2 = owner->geom->position(i3) - owner->geom->position(i2);
 	    n1 /= norm(n1);
@@ -568,10 +576,11 @@ namespace qpp{
       {
 	return "angle";
       }
-
       
       virtual qppobject_type gettype() const
-      { return data_zpt_angle; }
+      { 
+	return qtype_zpt_angle | qtype_data<CREAL>::type; 
+      }
 
       virtual int n_next() const
       { return 0;}
@@ -617,8 +626,8 @@ namespace qpp{
     public:
 
       surfangle_relation(STRING const & _at1, STRING const &_at2, STRING const &_at3,
-			 VALTYPE _amin, VALTYPE _amax, 
-			 zpattern<DIM,VALTYPE,TRANSFORM> & z, STRING const &__name = "")
+			 CREAL _amin, CREAL _amax, 
+			 zpattern<DIM,CREAL,TRANSFORM> & z, STRING const &__name = "")
       {
 	at1 = _at1;
 	at2 = _at2;
@@ -634,7 +643,7 @@ namespace qpp{
 
       surfangle_relation(STRING const & _at1, STRING const &_at2, STRING const &_at3, 
 			 linear_dependence &__formula,
-			 zpattern<DIM,VALTYPE,TRANSFORM> & z, STRING const &__name = "")
+			 zpattern<DIM,CREAL,TRANSFORM> & z, STRING const &__name = "")
       {
 	at1 = _at1;
 	at2 = _at2;
@@ -646,7 +655,7 @@ namespace qpp{
 	match_points();
       }
 
-      virtual VALTYPE value()
+      virtual CREAL value()
       {
 	if (!is_defined())
 	  return -1;
@@ -656,7 +665,7 @@ namespace qpp{
 	      i1 = owner->point(point(0)).bound,	      
 	      i2 = owner->point(point(1)).bound,
 	      i3 = owner->point(point(2)).bound;
-	    /*	    lace::vector3d<VALTYPE> n1, n2, nperp;
+	    /*	    lace::vector3d<CREAL> n1, n2, nperp;
 	    n1 = owner->geom->full_coord(i1) - owner->geom->full_coord(i2);
 	    n2 = owner->geom->full_coord(i3) - owner->geom->full_coord(i2);
 	    nperp = owner -> mfold -> normal( (*(owner -> parm))[i2] );
@@ -691,7 +700,9 @@ namespace qpp{
 
       
       virtual qppobject_type gettype() const
-      { return data_zpt_surfangle; }
+      { 
+	return qtype_zpt_surfangle | qtype_data<CREAL>::type; 
+      }
       
       virtual int n_next() const
       { return 0;}
@@ -737,8 +748,8 @@ namespace qpp{
     public:
 
       dyhedral_relation(STRING const & _at1, STRING const &_at2, STRING const &_at3, STRING const &_at4,
-			VALTYPE _dmin, VALTYPE _dmax, 
-			zpattern<DIM,VALTYPE,TRANSFORM> & z, STRING const &__name = "")
+			CREAL _dmin, CREAL _dmax, 
+			zpattern<DIM,CREAL,TRANSFORM> & z, STRING const &__name = "")
       {
 	at1 = _at1;
 	at2 = _at2;
@@ -755,7 +766,7 @@ namespace qpp{
 
       dyhedral_relation(STRING const & _at1, STRING const &_at2, STRING const &_at3, STRING const &_at4, 
 			linear_dependence &__formula,
-			zpattern<DIM,VALTYPE,TRANSFORM> & z, STRING const &__name = "")
+			zpattern<DIM,CREAL,TRANSFORM> & z, STRING const &__name = "")
       {
 	at1 = _at1;
 	at2 = _at2;
@@ -768,7 +779,7 @@ namespace qpp{
 	match_points();
       }
 
-      virtual VALTYPE value()
+      virtual CREAL value()
       {
 	if (!is_defined())
 	  return -9000;
@@ -806,7 +817,9 @@ namespace qpp{
 
       
       virtual qppobject_type gettype() const
-      {	return data_zpt_dihedral; }
+      {
+	return qtype_zpt_dihedral | qtype_data<CREAL>::type; 
+      }
       
       virtual int n_next() const
       { return 0;}
@@ -842,18 +855,18 @@ namespace qpp{
       int j = relation_registry.size()-1;
       
       //debug
-      //std::cout << j << " ";
-      //rel.write(std::cout);
-      //std::cout << "\n";
+      //std::cerr << j << " ";
+      //rel.write(std::cerr);
+      //std::cerr << "\n";
       
       if ( _rel_of_point.size() != n_points() )
 	{
 	  _rel_of_point.resize(n_points());
-	  //std::cout << "haha\n";
+	  //std::cerr << "haha\n";
 	}
       for (int i=0; i<rel.n_points(); i++)
 	{
-	  //std::cout << "adding " << j << " to " << rel.point(i) << "\n";
+	  //std::cerr << "adding " << j << " to " << rel.point(i) << "\n";
 	  _rel_of_point[rel.point(i)].push_back(j);
 	}
     }
@@ -887,7 +900,8 @@ namespace qpp{
 
     inline void unbind(int i)
     {
-      occupied[point(i).bound] = false;
+      if (point(i).is_bound)
+	occupied[point(i).bound] = false;
       point(i).is_bound = false;
     }
 
@@ -913,7 +927,9 @@ namespace qpp{
     { _name = __name; }
 
     virtual qppobject_type gettype() const
-    { return data_zpattern;}
+    { 
+      return qtype_zpattern | qtype_data<CREAL>::type;
+    }
       
     virtual int n_next() const
     { 
@@ -928,7 +944,7 @@ namespace qpp{
     virtual void error(STRING const & what)
     { 
       _error = what;
-      throw new qpp_exception(this);
+      throw qpp_exception(this);
     }
     
     virtual STRING error()
@@ -957,7 +973,7 @@ namespace qpp{
 
       //debug
       //for (int i=0; i<points_registry.size(); i++)
-      //	std::cout << points_registry[i]->nickname << " " << i << "\n";
+      //	std::cerr << points_registry[i]->nickname << " " << i << "\n";
 
       for (int i=0; i<n_rel(); i++)
 	{
@@ -971,41 +987,97 @@ namespace qpp{
     {     
       for (int p=zsearch; p<=zinsert; p++)
 	{
-	  std::cout << boost::format("%-8s") % ptype_name[p];
+	  std::cerr << boost::format("%-8s") % ptype_name[p];
 	  for (int i=0; i<n_points(p); i++)
-	    std::cout << boost::format("%3i") % points_idx[p][i];
-	  std::cout << "\n";
+	    std::cerr << boost::format("%3i") % points_idx[p][i];
+	  std::cerr << "\n";
 	}
 	    
 
       for (int i=0; i<n_rel(); i++)
 	{
-	  std::cout << boost::format("%3i ") % i;
+	  std::cerr << boost::format("%3i ") % i;
 	  int t = rel(i).gettype();
-	  if (t==data_zpt_bond)
-	    std::cout << "b";
-	  else if (t==data_zpt_angle)
-	    std::cout << "a"; 
-	  else if (t==data_zpt_dihedral)
-	    std::cout << "d";
+	  if (t & qtype_zpt_bond)
+	    std::cerr << "b";
+	  else if (t & qtype_zpt_angle)
+	    std::cerr << "a"; 
+	  else if (t & qtype_zpt_dihedral)
+	    std::cerr << "d";
 
 	  for (int j=0; j<rel(i).n_points(); j++)
-	    std::cout << boost::format("%3i")%rel(i).point(j);
+	    std::cerr << boost::format("%3i")%rel(i).point(j);
 
 	  if (rel(i).is_exact())
-	    std::cout << " exact";
-	  std::cout << "\n";	    
+	    std::cerr << " exact";
+	  std::cerr << "\n";	    
 	    
 	}
       for (int i=0; i<n_points(); i++)
 	{
-	  std::cout << boost::format("%3i %-10s %-5s %-8s") % i % point(i).nickname % point(i).atom % 
+	  std::cerr << boost::format("%3i %-10s %-5s %-8s") % i % point(i).nickname % point(i).atom % 
 	    ptype_name[points_types[i]];
 	  for (int j=0; j < n_rel_of_point(i); j++)
-	    std::cout << boost::format("%4i ") % rel_of_point(i,j);
-	  std::cout << "\n";
+	    std::cerr << boost::format("%4i ") % rel_of_point(i,j);
+	  std::cerr << "\n";
 	}
     }
+
+    // ------------------------------------------------------------------
+    //                       Pattern "depth"
+    int depth(int *mask=NULL)
+    {
+      //debug
+      // std::cerr << "depth\n";
+
+      if (mask==NULL)
+	{
+	  mask = new int[n_points()];
+	  mask[0] = 1;
+	  for (int i=1; i<n_points(); i++)
+	    if (point_type(i)==zsearch || point_type(i)==zdelete)
+	      mask[i] = 0;
+	    else
+	      mask[i] = -1;
+	  return depth(mask);
+	}
+      else
+	{
+	  //debug
+	  /*
+	  for (int i=0; i<n_points(); i++)
+	    std::cerr << i << " " << point(i).nickname << " " << mask[i] << "\n";
+	  std::cerr << "\n";
+	  */
+
+	  bool found=false;
+	  for (int i=0; i<n_points(); i++)
+	    if (mask[i]==1)
+	      for (int j=0; j<n_rel_of_point(i); j++)
+		{
+		  int k = rel_of_point(i,j);
+		  if (rel(k).is_bond())
+		    {
+		      int other_pt = rel(k).point(0);
+		      if (other_pt==i)
+			other_pt = rel(k).point(1);
+		      if (mask[other_pt]==0)
+			{
+			  found = true;
+			  mask[other_pt]=2;
+			}
+		    }
+		}
+	  for (int i=0; i<n_points(); i++)
+	    if (mask[i]==2) 
+	      mask[i] = 1;
+	  if (!found)
+	    return 0;
+	  else
+	    return depth(mask)+1;
+	}
+    }
+
 
     // ------------------------------------------------------------------
     //                Matching and applying the pattern
@@ -1042,17 +1114,23 @@ namespace qpp{
       for (int j=0; j<n_rel_of_point(i); j++)
 	{
 	  int k =  rel_of_point(i,j);
-	  //std::cout << j << " " << k << " ";
-	  //rel(k).write(std::cout);
-	  //std::cout << "\n";
+	  // debug
+	  /*
+	  std::cerr << j << " " << k << " ";
+	  rel(k).write(std::cerr);	  
+	  std::cerr << " type: " << rel(k).gettype() << " exact: " << rel(k).is_exact() 
+		    << " val_defined: " 
+		    << rel(k).formula().is_defined() << " pt_undef: " 
+		    << rel(k).n_undefined() << "\n";
+	  */
 	  
 	  if ( rel(k).is_exact() && rel(k).formula().is_defined() && rel(k).n_undefined()==1 )
 	    {
-	      if (rel(k).gettype() == data_zpt_bond)
+	      if (rel(k).gettype() & qtype_zpt_bond)
 		ibnd.push_back(k);
-	      else  if (rel(k).gettype() == data_zpt_angle || rel(k).gettype() == data_zpt_surfangle)
+	      else  if (rel(k).gettype() & (qtype_zpt_angle | qtype_zpt_surfangle))
 		iang.push_back(k);
-	      else if (rel(k).gettype() == data_zpt_dihedral)
+	      else if (rel(k).gettype() & qtype_zpt_dihedral)
 		idhd.push_back(k);
 	    }
 	}
@@ -1064,8 +1142,16 @@ namespace qpp{
     {
       occupied.clear();
       occupied.resize(geom->nat(),false);
-      noapply.clear();
-      noapply.resize(geom->nat(),false);
+      
+      // noapply.clear();
+      // noapply.resize(geom->nat(),false);
+      // if (geom->gettype() & qtype_xgeometry)
+      // 	{
+      // 	  qpp::xtr_geometry<DIM,CREAL> * xgeom = 
+      // 	    (qpp::xtr_geometry<DIM,CREAL> *)geom;
+      // 	  if ()
+      // 	}
+      
       for (int i=0; i<n_points(); i++)
 	unbind(i);
     }
@@ -1077,8 +1163,8 @@ namespace qpp{
       bool res = true;
       for (int j=0; j<n_rel_of_point(i); j++)
 	{//debug
-	  //rel(rel_of_point(i,j)).write(std::cout);
-	  //std::cout << " " << rel(rel_of_point(i,j)).value() << "\n";
+	  //rel(rel_of_point(i,j)).write(std::cerr);
+	  //std::cerr << " " << rel(rel_of_point(i,j)).value() << "\n";
 	  
 	if ( rel(rel_of_point(i,j)).is_defined() && !rel(rel_of_point(i,j)).satisfy() )
 	  {
@@ -1091,9 +1177,9 @@ namespace qpp{
 
     // ---------------------------------------------------------------------
 
-    void symmtrap(lace::vector2d<VALTYPE> & p)
+    void symmtrap(lace::vector2d<CREAL> & p)
     {
-      lace::vector3d<VALTYPE> r(p.x,p.y,0e0);
+      lace::vector3d<CREAL> r(p.x,p.y,0e0);
       geom -> symm().symmtrap(r,symmtrap_radius);
       p.x = r.x();
       p.y = r.y();
@@ -1107,7 +1193,7 @@ namespace qpp{
     
     // ------------------------------------------------------------------
 
-    bool apply( geometry<DIM, VALTYPE, ATLABEL, charT, traits> &g, integer_lister &lst)
+    bool apply( geometry<DIM, CREAL, ATLABEL, charT, traits> &g, integer_lister &lst)
     {
       //prepare
       geom = &g;
@@ -1139,7 +1225,7 @@ namespace qpp{
     bool avoid()
     {
       // Check that all matched points safisfy all conditions
-      //std::cout << "ENtering avoid\n";
+      //std::cerr << "ENtering avoid\n";
 
       bool res = true;
       for (int i=0; i<n_rel(); i++)
@@ -1154,32 +1240,34 @@ namespace qpp{
 	{
 	  int iavd = point_idx(i,zavoid);
 
-	  //std::cout << "Avoiding: " << iavd << " " << point(iavd).nickname << "\n";
+	  //std::cerr << "Avoiding: " << iavd << " " << point(iavd).nickname << "\n";
 
 	  int jbnd = search_condition(iavd);
 	  if (jbnd == -1)
-	    error("Point " + point(iavd).nickname + " has no bonding condition to be searched for");
+	    error("Point " + point(iavd).nickname + 
+		  " has no bonding condition to be searched for in zpattern " + name());
 
 	  int k = rel_of_point(iavd,jbnd);
 	  int ibnd = rel(k).point_defined(0) ? 
 	    rel(k).point(0) : rel(k).point(1);
 	  index<DIM> at_bnd = bound(ibnd);
 
-	  //std::cout << "bonding to "<< ibnd << " " << point(ibnd).nickname << " = " << at_bnd << "\n";
+	  //std::cerr << "bonding to "<< ibnd << " " << point(ibnd).nickname << " = " << at_bnd << "\n";
 
-	  for (int javd = 0; javd < geom->ngbr.n(at_bnd); javd++)
+	  for (int javd = 0; javd < ngbr->n(at_bnd); javd++)
 	    {
-	      index<DIM> at_avd = geom -> ngbr(at_bnd,javd);
+	      index<DIM> at_avd = (*ngbr)(at_bnd,javd);
 
-	      //std::cout << "try match to " << at_avd << " r= " 
+	      //std::cerr << "try match to " << at_avd << " r= " 
 	      //<< norm(geom->coord(at_avd)-geom->coord(at_bnd)) << "\n";
 
-	      if ( occupied[at_avd] || point(iavd).atom != geom -> atom(at_avd) )
+	      if ( occupied[at_avd] || !(point(iavd).atom == "*" || 
+					 point(iavd).atom == geom -> atom(at_avd) ))
 		continue;
 	      
 	      bind(iavd,at_avd);
 	      
-	      //std::cout << "___checking if avoided\n";
+	      //std::cerr << "___checking if avoided\n";
 
 	      if (point_satisfy(iavd))
 		{
@@ -1193,15 +1281,15 @@ namespace qpp{
 	  if (!res) break;
 	}
 
-      
-      //std::cout << "avoid result= " << res << "\n";
+      //debug
+      //      std::cerr << "avoid result= " << res << "\n";
       return res;
       
     }
 
     // ------------------------------------------------------------------
 
-    bool extract_bond(int r, VALTYPE &b, int &at)
+    bool extract_bond(int r, CREAL &b, int &at)
     {
       b = rel(r).formula().value();
       if (rel(r).point_defined(0))
@@ -1211,7 +1299,7 @@ namespace qpp{
       return true;
     }
 
-    bool extract_angle(int r, VALTYPE &a, int &at1, int &at2)
+    bool extract_angle(int r, CREAL &a, int &at1, int &at2)
     {
       bool res = true;
       a = rel(r).formula().value();
@@ -1229,13 +1317,35 @@ namespace qpp{
       return res;
     }
 
+    bool extract_dihedral(int r, CREAL & d, int & at1, int & at2, int & at3)
+    {
+      bool res = true;
+      d = rel(r).formula().value();
+      if ( !rel(r).point_defined(0))
+	{
+	  at1 = point(rel(r).point(3)).bound;
+	  at2 = point(rel(r).point(2)).bound;
+	  at3 = point(rel(r).point(1)).bound;	  
+	}
+      else if ( !rel(r).point_defined(3))
+	{
+	  at1 = point(rel(r).point(0)).bound;
+	  at2 = point(rel(r).point(1)).bound;
+	  at3 = point(rel(r).point(2)).bound;	  
+	}
+      else
+	res = false;
+      return res;
+    }
+
     // ------------------------------------------------------------------
 
-    bool insert_next( integer_lister &lst)
+    // New point insertion on parametric surface
+    bool insert_next_surf( integer_lister &lst)
     {
-      //std::cout << "Insert_next called\n";
+      //std::cerr << "Insert_next called\n";
       //for (int i=0; i<n_points(); i++)
-      //std::cout << point(i).nickname << " " <<  point(i).bound << " " << point(i).is_bound << "\n";
+      //std::cerr << point(i).nickname << " " <<  point(i).bound << " " << point(i).is_bound << "\n";
 
       bool unfinished_insert = false, insert_found = false;
       int i;
@@ -1243,16 +1353,16 @@ namespace qpp{
       for (i=0; i<n_points(zinsert); i++)
 	if ( !point(i,zinsert).is_bound )
 	  {
-	    //std::cout << "check insert conditions for point " << point_idx(i,zinsert) << "\n";
+	    //std::cerr << "check insert conditions for point " << point_idx(i,zinsert) << "\n";
 	    unfinished_insert = true;
 	    insert_condition(point_idx(i,zinsert),ibnd,iang,idhd);
 
-	    //std::cout << "Insert conditions:\n";
+	    //std::cerr << "Insert conditions:\n";
 	    //for (int j=0; j<ibnd.size(); j++)
-	    //  rel(ibnd[j]).write(std::cout);
+	    //  rel(ibnd[j]).write(std::cerr);
 	    //for (int j=0; j<iang.size(); j++)
-	    //  rel(iang[j]).write(std::cout);
-	    //std::cout << "\n";
+	    //  rel(iang[j]).write(std::cerr);
+	    //std::cerr << "\n";
 	      
 
 	    if ( ibnd.size() + iang.size() >= 2)
@@ -1266,28 +1376,28 @@ namespace qpp{
       
       if (insert_found)
 	{
-	  //std::cout << "Insert found\n";
+	  //std::cerr << "Insert found\n";
 
 	  int insrt = point_idx(i,zinsert);
-	  std::vector<lace::vector2d<VALTYPE> > new_pt;
+	  std::vector<lace::vector2d<CREAL> > new_pt;
 	  if (ibnd.size()==2)
 	  // Two bonds
 	    {
-	      VALTYPE b1,b2;
+	      CREAL b1,b2;
 	      int at1,at2;
 	      extract_bond(ibnd[0],b1,at1);
 	      extract_bond(ibnd[1],b2,at2);
 	      
-	      //std::cout << "Two bonds: " << at1 << " " << b1 << " " << at2 << " " << b2 << "\n";
+	      //std::cerr << "Two bonds: " << at1 << " " << b1 << " " << at2 << " " << b2 << "\n";
 
 	      new_pt = mfold->triangul2b(parm(at1),b1,parm(at2),b2);
 
-	      //std::cout << "new points: " << new_pt.size() << "\n"; 
+	      //std::cerr << "new points: " << new_pt.size() << "\n"; 
 	    }
 	  // Bond & angle
 	  else if (ibnd.size()==1 && iang.size()==1)
 	    {
-	      VALTYPE b,a;
+	      CREAL b,a;
 	      int at1,at2,at22;
 	      extract_bond(ibnd[0],b,at2);
 	      bool valid = extract_angle(iang[0],a,at1,at22);
@@ -1296,17 +1406,17 @@ namespace qpp{
 	      if (!valid)
 		error("Given parameters do not allow to locate new point");
 
-	      //std::cout << "Inserting " << at1  << " " << at2 << " bond= " 
+	      //std::cerr << "Inserting " << at1  << " " << at2 << " bond= " 
 	      //<< b << " angle= " << a << "\n";
-	      if (rel(iang[0]).gettype() == data_zpt_angle)
+	      if (rel(iang[0]).gettype() & qtype_zpt_angle)
 		{
-		  //std::cout << "triangul generated points\n";
+		  //std::cerr << "triangul generated points\n";
 		  new_pt.push_back(mfold->triangul(parm(at1),parm(at2),b,pi*a/180));
 		  new_pt.push_back(mfold->triangul(parm(at1),parm(at2),b,-pi*a/180));
 		}
-	      else if (rel(iang[0]).gettype() == data_zpt_surfangle)
+	      else if (rel(iang[0]).gettype() & qtype_zpt_surfangle)
 		{
-		  //std::cout << "protract generated points\n";
+		  //std::cerr << "protract generated points\n";
 		  new_pt.push_back(mfold->protract(parm(at1),parm(at2),b, pi*a/180));
 		  new_pt.push_back(mfold->protract(parm(at1),parm(at2),b,-pi*a/180));
 		}
@@ -1327,27 +1437,27 @@ namespace qpp{
 	      geom -> add(point(insrt).atom, new_pt[j].x, new_pt[j].y, 0e0);
 	      //geom -> add(point(insrt).atom, mfold->map(new_pt[j]));
 	      occupied.push_back(true);
-	      noapply.push_back(false);
+	      //noapply.push_back(false);
 
-	      geom->build_type_table();
-	      geom->ngbr.build_disttable();
-	      geom->ngbr.build();	      
+	      //geom->build_type_table();
+	      //ngbr->build_disttable();
+	      //ngbr->build();	      
 	      bind(insrt,inew);
 	      
-	      //std::cout << "point inserted i= " << insrt << " r= " << geom->coord(inew)<<"\n";
+	      //std::cerr << "point inserted i= " << insrt << " r= " << geom->coord(inew)<<"\n";
 	      //for (int ii=0; ii<n_points(); ii++)
-	      //std::cout << point(ii).nickname << " = "  << bound(ii) << " " 
+	      //std::cerr << point(ii).nickname << " = "  << bound(ii) << " " 
 	      //<< point(ii).is_bound <<  "\n";
 
 	      if (point_satisfy(insrt))
-		res = insert_next(*lst.copy());
-	      //std::cout << "satisfy= " << res << "\n";
+		res = insert_next_surf(*lst.copy());
+	      //std::cerr << "satisfy= " << res << "\n";
 	      //res = true;
 	      if (res)
 		{
-		  //std::cout  << "alive1\n";
+		  //std::cerr  << "alive1\n";
 		  delete &lst;
-		  //std::cout << "alive2\n";
+		  //std::cerr << "alive2\n";
 		  return true;
 		}
 	      else
@@ -1356,10 +1466,218 @@ namespace qpp{
 		  geom -> erase(inew);
 		  //parm->pop_back();
 		  occupied.pop_back();
-		  noapply.pop_back();
-		  geom->build_type_table();
-		  geom->ngbr.build_disttable();
-		  geom->ngbr.build();	      
+		  //noapply.pop_back();
+		  //geom->build_type_table();
+		  //ngbr->build_disttable();
+		  //ngbr->build();	      
+		}
+	    }
+	  delete &lst;
+	  return false;
+	}
+      else
+	return avoid();
+    }
+
+    // ------------------------------------------------------------------
+
+    // New point insertion in volume
+    bool insert_next( integer_lister &lst)
+    {
+      //debug
+      /*
+      std::cerr << "Insert_next called\n";
+      for (int i=0; i<n_points(); i++)
+	{
+	  std::cerr << point(i).nickname << " " <<  point(i).bound << " "; 
+	  if (point(i).is_bound)
+	    std::cerr << geom -> atom(point(i).bound) << geom -> position(point(i).bound);
+	  std::cerr << "\n";
+	}
+      */
+
+      bool unfinished_insert = false, insert_found = false;
+      int i;
+      std::vector<int> ibnd, iang, idhd;
+      for (i=0; i<n_points(zinsert); i++)
+	if ( !point(i,zinsert).is_bound )
+	  {
+	    //std::cerr << "check insert conditions for point " << point_idx(i,zinsert) << "\n";
+	    unfinished_insert = true;
+	    insert_condition(point_idx(i,zinsert),ibnd,iang,idhd);
+
+	    //debug
+	    /*
+	    std::cerr << "Insert conditions:\n";
+	    for (int j=0; j<ibnd.size(); j++)
+	      rel(ibnd[j]).write(std::cerr);
+	    for (int j=0; j<iang.size(); j++)
+	      rel(iang[j]).write(std::cerr);
+	    for (int j=0; j<idhd.size(); j++)
+	      rel(idhd[j]).write(std::cerr);
+	    std::cerr << "\n";
+	    */
+	    if ( ibnd.size() + iang.size() + idhd.size() >= 3)
+	      {
+		insert_found = true;
+		break;
+	      }
+
+	    // Special case 180 degree
+	    CREAL alp;
+	    int a1,a2;
+	    if (ibnd.size()==1 && iang.size()==1)
+	      if (extract_angle(iang[0],alp,a1,a2))
+		if ( std::abs(alp-180e0)<1e-5 )
+		  {
+		    //debug
+		    //std::cerr << "linear case\n";
+		    insert_found = true;
+		    break;
+		  }
+	    
+	  }
+      if (unfinished_insert && !insert_found)
+	error("Not all new points are inserted, but no other insertion can be done");
+      
+      if (insert_found)
+	{
+	  //debug
+	  //std::cerr << "Insert found\n";
+
+	  int insrt = point_idx(i,zinsert);
+	  std::vector<lace::vector3d<CREAL> > new_pt;
+	  
+	  // Three bonds
+	  if (ibnd.size()==3)
+	    {
+	      CREAL b1,b2,b3;
+	      int at1,at2,at3;
+	      extract_bond(ibnd[0],b1,at1);
+	      extract_bond(ibnd[1],b2,at2);
+	      extract_bond(ibnd[2],b3,at3);
+	      
+
+	      new_pt = triangul3b(geom->coord(at1),b1,geom->coord(at2),b2,
+				  geom->coord(at3),b3);
+
+	      //debug
+	      /*
+		std::cerr << "Three bonds: " << at1 << " " << b1 << " " << at2 << " " << b2 
+			<<  at3 << " " << b3 << "\n";
+	      std::cerr << "new points: " << new_pt.size() << "\n"; 
+	      */
+	    }
+	  // Bond, angle & dihedral
+	  else if (ibnd.size()==1 && iang.size()==1 && idhd.size()==1 )
+	    {
+	      CREAL b,alpha,gamma;
+	      int at1,at2,at3, at22, at33;
+	      extract_bond(ibnd[0],b,at3);
+	      bool valid = extract_angle(iang[0],alpha,at2,at33);
+	      
+	      //debug
+	      //std::cerr << at3 << " = " << at33 << "\n";
+
+	      if (valid)
+		valid = (at3 == at33);
+	      if (valid)
+		valid = extract_dihedral(idhd[0],gamma,at1,at22,at33);
+	      if (valid)
+		valid = (at3==at33) && (at2==at22);
+
+	      //debug
+	      //std::cerr << "Inserting " << at1  << " " << at2 << " " << at3 << " bond= " 
+	      //<< b << " angle= " << alpha << " dhd= " << gamma << "\n";
+
+	      if (!valid)
+		error("Given parameters do not allow to locate new point");
+	      
+	      new_pt.push_back( zpoint( geom->coord(at3), geom->coord(at2), geom->coord(at1),
+					b, alpha*pi/180, gamma*pi/180) );
+	    }
+	  else if (ibnd.size()==1 && iang.size()==1)
+	    {
+	      CREAL b,alpha;
+	      int at1, at2, at22;
+	      extract_bond(ibnd[0],b,at2);
+	      bool valid = extract_angle(iang[0],alpha,at1,at22);
+	      if (valid)
+		valid = (at2==at22 && std::abs(alpha-180e0)<1e-5 );
+	      if (!valid)
+		error("Given parameters do not allow to locate new point");
+
+	      lace::vector3d<CREAL> ndir = geom->coord(at2) - geom->coord(at1);
+	      ndir /= norm(ndir);
+	      new_pt.push_back( geom->coord(at2) + b*ndir);
+
+	      // debug
+	      //std::cerr << at1 << geom->coord(at1) << " " << at2 << geom->coord(at2) 
+	      //		<< new_pt[0] << "\n";
+	    }
+	  else 
+	    // fixme - implement later
+	    error("Inserting new point implemented only if 1)bond, angle, dihedral; 2) three bonds are given; 3) bond and angle=180 deg;");
+	  
+	  //for (int j=0; j<new_pt.size(); j++)
+	  //  symmtrap(new_pt[j]);
+
+	  lst.set(0,new_pt.size()-1);
+	  bool res = false;
+	  for (int j=lst.begin(); !lst.end(); j=lst.next())
+	    {
+	      int inew = geom->nat();
+	      //	      parm->push_back(new_pt[j]);
+	      geom -> add(point(insrt).atom, new_pt[j]);
+	      //geom -> add(point(insrt).atom, mfold->map(new_pt[j]));
+	      occupied.push_back(true);
+	      //noapply.push_back(false);
+
+	      //geom->build_type_table();
+	      //ngbr->build_disttable();
+	      //ngbr->build();	      
+	      bind(insrt,inew);
+
+	      //debug	      
+	      /*
+	      std::cerr << "point inserted i= " << insrt << " r= " << geom->coord(inew)<<"\n";
+	      for (int ii=0; ii<n_points(); ii++)
+		std::cerr << point(ii).nickname << " = "  << bound(ii) << " " 
+			  << point(ii).is_bound <<  "\n";
+	      */
+	      
+	      if (point_satisfy(insrt))
+		res = insert_next(*lst.copy());
+
+	      //debug
+	      //std::cerr << "satisfy= " << res << "\n";
+	      //res = true;
+	      if (res)
+		{
+		  //std::cerr  << "alive1\n";
+		  delete &lst;
+		  //std::cerr << "alive2\n";
+		  return true;
+		}
+	      else
+		{
+		  //std::cerr << " after not satisfy 0\n";
+
+		  unbind(insrt);
+		  //		  std::cerr << " after not satisfy 1\n";
+		  geom -> erase(inew);
+		  //std::cerr << " after not satisfy 2\n";
+		  //parm->pop_back();
+		  occupied.pop_back();
+
+		  //std::cerr << " after not satisfy 5\n";
+		  //noapply.pop_back();
+		  //geom->build_type_table();
+		  //ngbr->build_disttable();
+		  //ngbr->build();	      
+
+		  //debug
+		  //std::cerr << " after not satisfy 10\n";
 		}
 	    }
 	  delete &lst;
@@ -1374,7 +1692,7 @@ namespace qpp{
     bool match_next( integer_lister &lst)
     {
       //debug
-      //std::cout << "entering match_next\n";
+      //std::cerr << "entering match_next\n";
 
       // Check if we have remainig search | delete points
       // If so, find the next point to search
@@ -1393,7 +1711,7 @@ namespace qpp{
 	  } 
 
       //debug
-      //      std::cout << "isrch= " << isrch << "\n";
+      //std::cerr << "isrch= " << isrch << "\n";
 
       if ( unfinished_search && isrch == -1 )
 	error("Search is not complete, but no other point can be matched");
@@ -1406,33 +1724,34 @@ namespace qpp{
 	  index<DIM> at_bnd = bound(ibnd);
 
 	  //debug
-	  /*std::cout << " ibnd= " << ibnd << " at_bnd= " << at_bnd << "\n";
-	  rel(k).write(std::cout);
-	  std::cout << "\n";
-	  */
-	  lst.set(0,geom->ngbr.n(at_bnd)-1);
+	  //std::cerr << " ibnd= " << ibnd << " at_bnd= " << at_bnd << "\n";
+	  //rel(k).write(std::cerr);
+	  //std::cerr << "\n";
+	  
+	  lst.set(0,ngbr->n(at_bnd)-1);
 
-	  //std::cout << "haha1\n";
+	  //std::cerr << "haha1\n";
 
 	  for (int jsrch = lst.begin(); !lst.end(); jsrch = lst.next())
 	    {
-	      //std::cout << "haha2\n";
-	      index<DIM> at_srch = geom -> ngbr(at_bnd,jsrch);
+	      //std::cerr << "haha2\n";
+	      index<DIM> at_srch = (*ngbr)(at_bnd,jsrch);
 
 	      //debug
-	      //std::cout << "isrch= " << isrch << " jsrch= " << jsrch << " at_srch= " << at_srch 
-	      //<< " r= " << norm(geom->full_coord(at_bnd)-geom->full_coord(at_srch)) << "\n";
+	      //std::cerr << "isrch= " << isrch << " jsrch= " << jsrch << " at_srch= " << at_srch 
+	      //<< " r= " << norm(geom->coord(at_bnd)-geom->coord(at_srch)) << "\n";
 
-	      if ( !occupied[at_srch] && point(isrch).atom == geom -> atom(at_srch) )
+	      if ( !occupied[at_srch] && 
+		   ( point(isrch).atom == "*" || point(isrch).atom == geom -> atom(at_srch) ))
 		bind(isrch,at_srch);
 	      else continue;
 
-	      //std::cout << "after continue\n";
+	      //std::cerr << "after continue\n";
 	      
 	      bool satisfy = point_satisfy(isrch);
 
-	      //std::cout << "after point_satisfy: " << satisfy <<"\n";
-	      /*
+	      //debug
+	      //std::cerr << "after point_satisfy: " << satisfy <<"\n";	      
 	      for (int jrel = 0; jrel < n_rel_of_point(isrch); jrel++)
 		{
 		  int kk = rel_of_point(isrch,jrel);
@@ -1441,11 +1760,12 @@ namespace qpp{
 		      satisfy = false;
 		      break;
 		    }
-		    }*/
+		}
+
 	      if (satisfy)
 		satisfy = match_next(*lst.copy());
 
-	      //std::cout << "after match_next: " << satisfy <<"\n";
+	      //std::cerr << "after match_next: " << satisfy <<"\n";
 
 	      if (satisfy)
 		{
@@ -1465,10 +1785,14 @@ namespace qpp{
 	    geom->shadow(point(i,zdelete).bound) = true;
 
 	  // insert atoms to be inserted
-	  bool res = insert_next(*lst.copy());
-	  //std::cout << "alive3\n";
+	  bool res;
+	  if ( mfold == NULL)
+	    res = insert_next(*lst.copy());
+	  else
+	    res = insert_next_surf(*lst.copy());	    
+	  //std::cerr << "alive3\n";
 	  delete &lst;
-	  //std::cout << "alive4\n";
+	  //std::cerr << "alive4\n";
 	  return res;
 	}
     }
@@ -1477,8 +1801,8 @@ namespace qpp{
 
     void setngbrdist()
     {
-      geom->ngbr.default_distance = 0;
-      geom->ngbr.clear_distance();
+      ngbr->default_distance = 0;
+      ngbr->clear_distance();
 
       for (int i = 0; i<n_rel(); i++)
 	if (rel(i).is_bond() && !rel(i).is_exact())
@@ -1486,45 +1810,196 @@ namespace qpp{
 	    STRING at1, at2;
 	    at1 = point(rel(i).point(0)).atom;
 	    at2 = point(rel(i).point(1)).atom;
-	    if ( geom->ngbr.distance(at1,at2) < rel(i).vmax)
-	      geom->ngbr.set_distance(at1,at2,rel(i).vmax);
+
+	    if (at2=="*")
+	      {
+		STRING at = at2; 
+		at2 = at1;
+		at1 = at;
+	      }
+
+	    if (at1 == "*" && at2 == "*")
+	      {
+		for (int i=0; i<geom->n_atom_types(); i++)
+		  for (int j=0; j<=i; j++)
+		    ngbr->set_distance(geom->atom_of_type(i),geom->atom_of_type(j),rel(i).vmax);
+	      }
+	    else if (at1 == "*")
+	      {
+		for (int i=0; i<geom->n_atom_types(); i++)
+		  ngbr->set_distance(geom->atom_of_type(i),at2,rel(i).vmax);
+	      }
+	    else if ( ngbr->distance(at1,at2) < rel(i).vmax)
+	      ngbr->set_distance(at1,at2,rel(i).vmax);
 	  }
+    }
+
+    // -----------------------------------------------------------------
+
+    void search_next(std::vector<std::vector<int> > & matches,
+		     std::vector<std::vector<CREAL> > & vals,
+		     std::vector<CREAL> & cost)
+    {
+      //debug
+      //std::cerr << "entering match_next\n";
+
+      // Check if we have remainig search | delete points
+      // If so, find the next point to search
+      bool unfinished_search = false;
+      int isrch=-1, jbnd=-1;
+      for (int i=0; i<n_points(); i++)
+	//	if ( !is_bound(i) && ( point_type(i)==zsearch || point_type(i)==zdelete ))
+	// Here all points are considered as search points
+	if ( !is_bound(i) )
+	  {
+	    unfinished_search = true;
+	    jbnd = search_condition(i);
+	    if (jbnd != -1)
+	      {
+		isrch = i;
+		break;
+	      }
+	  } 
+
+      //debug
+      //std::cerr << "isrch= " << isrch << "\n";
+
+      if ( unfinished_search && isrch == -1 )
+	error("Search is not complete, but no other point can be matched");
+      // Perform the search
+      if (unfinished_search)
+	{
+	  int k = rel_of_point(isrch,jbnd);
+	  int ibnd = rel(k).point_defined(0) ? 
+	    rel(k).point(0) : rel(k).point(1);
+	  index<DIM> at_bnd = bound(ibnd);
+
+	  //debug
+	  //std::cerr << " ibnd= " << ibnd << " at_bnd= " << at_bnd << "\n";
+	  //rel(k).write(std::cerr);
+	  //std::cerr << "\n";
+	  
+	  for (int jsrch = 0; jsrch < ngbr->n(at_bnd); jsrch++)
+	    {
+	      //std::cerr << "haha2\n";
+	      index<DIM> at_srch = (*ngbr)(at_bnd,jsrch);
+
+	      //debug
+	      //std::cerr << "isrch= " << isrch << " jsrch= " << jsrch << " at_srch= " << at_srch 
+	      //<< " r= " << norm(geom->coord(at_bnd)-geom->coord(at_srch)) << "\n";
+
+	      if ( !occupied[at_srch] && 
+		   ( point(isrch).atom == "*" || point(isrch).atom == geom -> atom(at_srch) ))
+		bind(isrch,at_srch);
+	      else continue;
+
+	      //std::cerr << "after continue\n";
+	      
+	      bool satisfy = point_satisfy(isrch);
+
+	      //debug
+	      //std::cerr << "after point_satisfy: " << satisfy <<"\n";	      
+	      for (int jrel = 0; jrel < n_rel_of_point(isrch); jrel++)
+		{
+		  int kk = rel_of_point(isrch,jrel);
+		  if ( rel(kk).is_defined() && ! rel(kk).satisfy() )
+		    {
+		      satisfy = false;
+		      break;
+		    }
+		}
+
+	      if (satisfy)
+		search_next(matches,vals,cost);
+
+	      //std::cerr << "after match_next: " << satisfy <<"\n";
+	      
+	      unbind(isrch);
+
+	    }
+	}
+      else
+	{
+	  // Everything is found
+	  
+	  matches.push_back(std::vector<int>());
+	  for (int i=0; i<n_points(); i++)
+	    matches[matches.size()-1].push_back(point(i).bound);
+
+	  vals.push_back(std::vector<CREAL>());
+	  for (int i=0; i<n_rel(); i++)
+	    vals[vals.size()-1].push_back(rel(i).value());
+
+	  //Calculate cost
+	  CREAL S=0e0;
+	  if (geom->gettype() & qtype_xgeometry)
+	    {
+	      xtr_geometry<DIM,CREAL> * xgeom = (xtr_geometry<DIM,CREAL> *)geom;
+	      if ( xgeom -> n_xreal()>0 )
+		for (int i=0; i<n_points(); i++)
+		  if ( point_type(i)==zsearch || point_type(i)==zinsert)
+		    S += xgeom -> xtr_real(0,point(i).bound);
+	    }
+	  cost.push_back(S);
+	    
+	}
     }
 
     // ------------------------------------------------------------------
 
-    bool apply_surf(integer_lister &lst)
+    void search(std::vector<std::vector<int> > & matches,
+		std::vector<std::vector<CREAL> > & vals,
+		std::vector<CREAL> & cost)
+    {
+      unbind_all();
 
+      for (int i=0; i<geom->nat(); i++)
+	if ( point(0).atom == "*" || point(0).atom == geom -> atom(i) )
+	  {
+	    bind(0,i);
+	    search_next(matches,vals,cost);
+	    unbind(0);
+	  }
+    }
+
+    bool apply(integer_lister &lst)
     {
       //prepare
       unbind_all();
 
-      geom -> build_type_table();
-      setngbrdist();
-      geom -> ngbr.build_disttable();
-      geom -> ngbr.build();
+      //ngbr->build_disttable();
+      //ngbr->build();
 
+      /*
       for (int i=0; i<geom->nat(); i++)
-	std::cout << (occupied[i] ? "1" : "0");
-      std::cout << "\n";
-      for (int i=0; i<geom->nat(); i++)
-	std::cout << (noapply[i] ? "1" : "0");
-      std::cout << "\n\n";
+	std::cerr << (occupied[i] ? "1" : "0");
+      std::cerr << "\n";
+      */
       
-      // Match first point
+      for (int i=0; i<noapply.size(); i++)
+	std::cerr << (noapply[i] ? "1" : "0");
+      std::cerr << "\n\n";
+      
       bool res = false;
+            
+      // Match first point
+
       lst.set(0,geom->nat()-1 );
       for (int i=lst.begin(); !lst.end(); i=lst.next())
-	{
-	  //std::cout << " matching 0 to " << i << "\n";
-	  bind(0,i);
-	  if ( match_next(*lst.copy()) )
-	    {
-	      res = true;
-	      break;
-	    }
-	  unbind(0);
-	}
+	// fixme - temporary commented
+	//if (!noapply[i])
+	  {
+	    //std::cerr << " matching 0 to " << i << "\n";
+	    bind(0,i);
+	    if ( match_next(*lst.copy()) )
+	      {
+		res = true;
+		break;
+	      }
+	    else
+	      noapply[i] = true;
+	    unbind(0);
+	  }
       if (res)
 	{
 	  // delete marked atoms
@@ -1539,9 +2014,9 @@ namespace qpp{
     }
 
     /*
-    bool init( parametric_surface<VALTYPE,charT,traits> &m, 
-	       std::vector<lace::vector2d<VALTYPE> > &p, 
-	       geometry<DIM, VALTYPE, ATLABEL, charT, traits> &g)
+    bool init( parametric_surface<CREAL,charT,traits> &m, 
+	       std::vector<lace::vector2d<CREAL> > &p, 
+	       geometry<DIM, CREAL, ATLABEL, charT, traits> &g)
     {
       //prepare
       geom = &g;
@@ -1549,16 +2024,390 @@ namespace qpp{
       parm = &p;
     }
     */
-    bool init_surf( gen_geometry<DIM, VALTYPE,TRANSFORM> &g, VALTYPE st_rad = 0e0)
+    
+    void init_noapply()
+    {
+      noapply.resize(geom->nat());
+      for (int i=0; i<geom->nat(); i++)
+	noapply[i] = false;
+
+      //debug
+      /*
+      std::cout << geom->gettype() << " " << qtype_xgeometry << " " 
+		<< qtype_geometry << " " << qtype_data<double>::type << " "
+		<< qtype_dim3 << "\n";
+      */
+
+      if (geom->gettype() & qtype_xgeometry)
+	{
+	  //std::cout << "xgeom\n";
+	  xtr_geometry<DIM,CREAL> * xgeom = (xtr_geometry<DIM,CREAL> *)geom;
+
+	  // fixme - implement proper field handling!
+	  if ( xgeom->n_xbool()>0)
+	    for (int i=0; i<geom->nat(); i++)
+	      noapply[i] = xgeom->xtr_bool(0,i);
+	}
+    }
+
+    //debug
+    typename geometry<DIM, CREAL,TRANSFORM>::neighbours_table *ngbr1;
+
+    void init_surf( geometry<DIM, CREAL,TRANSFORM> &g, CREAL st_rad = 0e0)
     {
       //prepare
       geom = &g;
+      geom -> add_dependent(this);
+      ngbr = new typename geometry<DIM, CREAL,TRANSFORM>::neighbours_table(g);
       mfold = & g.symm().mfold();
       //      parm = &p;
       symmtrap_radius = st_rad;
+
+      geom -> build_type_table();
+      geom -> update_types = true;
+      
+      setngbrdist();
+      ngbr->build_disttable();
+      ngbr->build();
+      init_noapply();
+
+    }
+
+    // ----------------------------------------------------------
+
+    void init( geometry<DIM, CREAL,TRANSFORM> &g, CREAL st_rad = 0e0)
+    {
+      //prepare
+      geom = &g;
+      geom -> add_dependent(this);
+
+      ngbr = new typename geometry<DIM, CREAL,TRANSFORM>::neighbours_table(g);
+     
+      //std::cerr << "ngbr created\n";
+
+      mfold = NULL;
+      symmtrap_radius = st_rad;
+
+      geom -> build_type_table();
+      geom -> update_types = true;
+
+      //std::cerr << "alive1\n";
+      setngbrdist();
+      ngbr->build_disttable();
+      ngbr->build();
+
+      init_noapply();
+
+      //std::cerr << "init done\n";
+      //debug
+      // ngbr1 = new typename geometry<DIM, CREAL,TRANSFORM>::neighbours_table(g);
+      // typename geometry<DIM, CREAL,TRANSFORM>::neighbours_table *ngbr2=ngbr;
+      // ngbr=ngbr1;
+      // setngbrdist();
+      // ngbr = ngbr2;
+      // ngbr1->build_disttable();
+      // 	  //debug
+      // ngbr1 -> reference_build();
+      // std::ofstream f1("ngbr1"),f2("ngbr2");
+      // f1 << name() << "\n";
+      // f2 << name() << "\n";
+      // write_ngbr<DIM, CREAL,TRANSFORM>(f1,*ngbr);
+      // write_ngbr<DIM, CREAL,TRANSFORM>(f2,*ngbr1);
+      // f1.close();
+      // f2.close();
+      // std::cout << name() << " init\n";
+      // system("diff ngbr1 ngbr2");
+      // if (! (*ngbr==*ngbr1))
+      // 	exit(1);
+      //end debug
+
+    }
+    
+    // ----------------------------------------
+    
+    void unmark(std::vector<int> & touched, int d)
+    {
+      if (d==0)
+	{
+	  for (int i=0; i<touched.size(); i++)
+	    noapply[touched[i]]=false;
+	  return;
+	}
+
+      for (int i=0; i<touched.size(); i++)
+	for (int j=0; j<ngbr->n(i); j++)
+	  {
+	    int k = (*ngbr)(i,j);
+	    bool already=false;
+	    for (int l=0; l<touched.size(); l++)
+	      if (touched[l]==k)
+		{
+		  already=true;
+		  break;
+		}
+	    if (!already)
+	      touched.push_back(k);
+	  }
+      unmark(touched,d-1);
+    }
+
+    // ----------------------------------------
+
+    virtual void added(bool done)
+    {
+      //std::cerr << "added\n";
+      if (done)
+	{
+	  ngbr -> added(true);
+
+	  // //debug
+	  // ngbr1 -> reference_build();
+	  // std::ofstream f1("ngbr1"),f2("ngbr2"),f3("geom");
+	  // write_ngbr<DIM, CREAL,TRANSFORM>(f1,*ngbr);
+	  // write_ngbr<DIM, CREAL,TRANSFORM>(f2,*ngbr1);
+	  // write_xyz(f3,*geom);
+	  // f1.close();
+	  // f2.close();
+	  // f3.close();
+	  // std::cout << name() << " added " << geom->nat()-1 << "\n";
+	  // system("diff ngbr1 ngbr2");
+	  // if (! (*ngbr==*ngbr1))
+	  //   exit(1);
+	  // //end debug
+
+	  noapply.push_back(false);
+	  std::vector<int> touched;
+	  touched.push_back( geom->nat()-1 );
+	  unmark(touched,depth());
+	}
+    }
+
+    virtual void inserted(int i, bool done)
+    {
+      //std::cerr << "ins\n";
+      if (done)
+	{
+	  ngbr -> inserted(i,true);
+
+	  // //debug
+	  // ngbr1 -> reference_build();
+	  // std::ofstream f1("ngbr1"),f2("ngbr2");
+	  // write_ngbr<DIM, CREAL,TRANSFORM>(f1,*ngbr);
+	  // write_ngbr<DIM, CREAL,TRANSFORM>(f2,*ngbr1);
+	  // f1.close();
+	  // f2.close();
+	  // std::cout << name() << " inserted " << i << "\n";
+	  // system("diff ngbr1 ngbr2");
+	  // if (! (*ngbr==*ngbr1))
+	  //   exit(1);
+	  // //end debug
+
+	  noapply.insert(noapply.begin()+i,false);
+	  std::vector<int> touched;
+	  touched.push_back( i );
+	  unmark(touched,depth());
+	}
+    }
+
+    virtual void erased(int i, bool done)
+    {
+      if (!done)
+	{
+	  std::vector<int> touched;
+	  touched.push_back( i );
+	  unmark(touched,depth());
+	  noapply.erase(noapply.begin()+i);
+	  ngbr -> erased(i,false);
+	}
+      else
+	{
+	  //debug
+	  // ngbr1 -> reference_build();
+	  // std::ofstream f1("ngbr1"),f2("ngbr2"),f3("geom");
+	  // write_ngbr<DIM, CREAL,TRANSFORM>(f1,*ngbr);
+	  // write_ngbr<DIM, CREAL,TRANSFORM>(f2,*ngbr1);
+	  // write_xyz(f3,*geom);
+	  // f1.close();
+	  // f2.close();
+	  // f3.close();
+	  // std::cout << name() << " deleted " << i << "\n";
+	  // system("diff ngbr1 ngbr2");
+	  // if (! (*ngbr==*ngbr1))
+	  //   exit(1);
+	  //end debug
+	}
+      //std::cerr << "del\n";
     }
 
   };
+
+  template <int DIM,class CREAL=double, class TRANSFORM = periodic_cell<DIM,CREAL> >   
+  zpattern<DIM,CREAL,TRANSFORM> * decl2zpt(qpp_declaration * decl)
+  {
+    if (decl -> category() != "zpattern")
+      decl -> error("This declaration does not define z-pattern");
+    zpattern<DIM,CREAL,TRANSFORM> * res = new zpattern<DIM,CREAL,TRANSFORM>(decl -> name());
+
+    for (int i=0; i<decl->n_decl(); i++)
+      if (decl->nested_decl(i).gettype() & qtype_declaration)
+	{
+	  STRING cat = decl->nested_decl(i).category();
+
+	  //debug
+	  //std::cerr << "cat: " << cat << "\n";
+
+	  qpp_declaration * d1 = (qpp_declaration *)(&decl->nested_decl(i));
+	  if (cat=="search" || cat=="insert" || cat=="delete" || cat=="avoid")
+	    {
+	      typename zpattern<DIM,CREAL,TRANSFORM>::ptype zop;
+	      if (cat=="search") 
+		zop = zpattern<DIM,CREAL,TRANSFORM>::zsearch;
+	      else if (cat=="insert") 
+		zop = zpattern<DIM,CREAL,TRANSFORM>::zinsert;
+	      else if (cat=="delete") 
+		zop = zpattern<DIM,CREAL,TRANSFORM>::zdelete;
+	      else if (cat=="avoid")
+		zop = zpattern<DIM,CREAL,TRANSFORM>::zavoid;
+
+	      for (int j=0; j<d1->n_parm(); j++)
+		{
+		  qpp_parameter<STRING> * pt = (qpp_parameter<STRING> *)(&d1->nested_parm(j));
+		  res -> add_point(
+		    typename zpattern<DIM,CREAL,TRANSFORM>::zpt_point(pt->name(),pt->value()),zop);
+		}
+	    }
+	  if (cat=="bond" || cat=="angle" || cat=="dihedral" || cat=="surfangle")
+	    {
+	      STRING newvar = decl->nested_decl(i).name();
+
+	      int npt;
+	      if (cat=="bond")
+		npt=2;
+	      else if ( cat=="angle"|| cat=="surfangle")
+		npt=3;
+	      else if ( cat=="dihedral" )
+		npt=4;
+
+	      //debug
+	      //std::cerr << "pt def " << " cat= " << cat << " npt= " << npt << "\n";
+	      
+	      STRING at[4], sval1, sval2;
+	      bool exact = (d1 -> n_parm() == npt+1);
+	      if (!exact && (d1 -> n_parm() != npt+2))
+		d1 -> error("Bond declaration in z-pattern must have 3 or 4 parameters");
+
+	      if (exact && newvar!="")
+		d1 -> error("Only range relations can be used to define new variable");
+
+	      CREAL val1, val2;
+	      typename zpattern<DIM,CREAL,TRANSFORM>::linear_dependence * ld = NULL;
+
+	      for (int pt=0; pt<npt; pt++)
+		at[pt] = ((qpp_parameter<STRING>*)&(d1->nested_parm(pt)))->value();
+	      
+	      qpp::qpp_parameter<STRING> * pval1 = (qpp_parameter<STRING>*)&(d1->nested_parm(npt));
+	      if (pval1->n_parm() > 0)
+		{
+		  // compile lindep instruction
+		  if (pval1->name()!="lindep" && pval1->name()!="linear")
+		    d1->error("lindep statement expected");
+
+		  CREAL val0, coeff;
+		  STRING var, sval0, scoeff;
+
+		  sval0 = ((qpp_parameter<STRING>*)&(pval1->nested_parm(0)))->value();
+		  if (!s2t<CREAL>(sval0, val0))
+		    if (!s2t<CREAL>(decl->env(sval0,i),val0) )
+		      d1->error("Real number or previously defined constant expected");
+
+		  ld = new typename zpattern<DIM,CREAL,TRANSFORM>::linear_dependence(val0,*res);
+		  int nf=1;
+		  while( nf < pval1->n_parm() )
+		    {
+		      if (nf+1==pval1->n_parm())
+			d1->error("Wrong number of parameters in lindep");
+		      var    = ((qpp_parameter<STRING>*)&(pval1->nested_parm(nf)))->value();
+		      scoeff = ((qpp_parameter<STRING>*)&(pval1->nested_parm(nf+1)))->value();
+
+		      if (!s2t<CREAL>(scoeff, coeff))
+			if (!s2t<CREAL>(decl->env(scoeff,i),coeff) )
+			  d1->error("Real number or previously defined constant expected");
+		      
+		      ld = & ld->term(var,coeff);
+
+		      nf += 2;
+		    }
+		}
+	      else
+		{
+		  sval1 = ((qpp_parameter<STRING>*)&(d1->nested_parm(npt)))->value();
+		  if (!s2t<CREAL>(sval1, val1))
+		    if (!s2t<CREAL>(decl->env(sval1,i),val1) )
+		      //fixme
+		      d1->error("3th parameter of bond declaration must be real number or previously defined constanct");
+
+		  if (exact)
+		    ld = new typename zpattern<DIM,CREAL,TRANSFORM>::linear_dependence(val1,*res);
+		}
+
+	      if (!exact)
+		{
+		  sval2 = ((qpp_parameter<STRING>*)&(d1->nested_parm(npt+1)))->value();
+		  if (!s2t<CREAL>(sval2,val2))
+		    if (!s2t<CREAL>(decl->env(sval2,i),val2) )
+		      d1->error("4th parameter of bond declaration must be real number or previously defined constanct");
+		}
+
+	      typename zpattern<DIM,CREAL,TRANSFORM>::geometry_relation * rel;
+
+	      if (cat=="bond")
+		{
+		  if (exact)
+		    rel = new typename zpattern<DIM,CREAL,TRANSFORM>::
+		      bond_relation(at[0],at[1],*ld,*res);
+		  else
+		    rel = new typename zpattern<DIM,CREAL,TRANSFORM>::
+		      bond_relation(at[0],at[1],val1,val2,*res,newvar);
+		}
+	      else if (cat=="angle")
+		{
+		  if (exact)
+		    rel = new typename zpattern<DIM,CREAL,TRANSFORM>::
+		      angle_relation(at[0],at[1],at[2],*ld,*res);
+		  else
+		    rel = new typename zpattern<DIM,CREAL,TRANSFORM>::
+		      angle_relation(at[0],at[1],at[2],val1,val2,*res,newvar);
+		}
+	      else if (cat=="surfangle")
+		{
+		  //debug
+		  //std::cerr << "surfangle\n";
+
+		  if (exact)
+		    rel = new typename zpattern<DIM,CREAL,TRANSFORM>::
+		      surfangle_relation(at[0],at[1],at[2],*ld,*res);
+		  else
+		    rel = new typename zpattern<DIM,CREAL,TRANSFORM>::
+		      surfangle_relation(at[0],at[1],at[2],val1,val2,*res,newvar);
+		}
+	      else if (cat=="dihedral")
+		{
+		  if (exact)
+		    rel = new typename zpattern<DIM,CREAL,TRANSFORM>::
+		      dyhedral_relation(at[0],at[1],at[2],at[3],*ld,*res);
+		  else
+		    rel = new typename zpattern<DIM,CREAL,TRANSFORM>::
+		      dyhedral_relation(at[0],at[1],at[2],at[3],val1,val2,*res,newvar);
+		}
+
+	      res -> add_relation(*rel);
+
+	    }
+	}
+
+    return res;
+  }
+  
 
 };
 
