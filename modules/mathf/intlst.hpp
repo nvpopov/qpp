@@ -1,11 +1,9 @@
 #ifndef _QPP_INTLST
 #define _QPP_INTLST
 
+#include <vector>
+
 // fixme - this file contains auxillary simple data structures and should be placed properly
-
-
-#include <stdlib.h>
-#include <time.h>
 
 namespace qpp{
 
@@ -17,11 +15,7 @@ namespace qpp{
     int n1, n2;
   public:
 
-    virtual void set(int _n1, int _n2)
-    {
-      n1 = _n1;
-      n2 = _n2;
-    }
+    virtual void set(int _n1, int _n2);
 
     virtual int begin() =0;
 
@@ -35,34 +29,26 @@ namespace qpp{
 
   };
 
+  // ----------------------- Sequential lister -----------------------------------
+
   class trivial_integer_lister : public integer_lister{
 
     int i;
   public:
 
-    virtual int begin()
-    {
-      return i=n1;
-    }
+    virtual int begin();
 
-    virtual int next()
-    {
-      return ++i;
-    }
+    virtual int next();
 
-    virtual bool end()
-    {
-      return i>n2;
-    }
+    virtual bool end();
 
-    virtual integer_lister* copy()
-    {
-      return new trivial_integer_lister;
-    }
+    virtual integer_lister* copy();
 
-    virtual void free(){delete this;}
+    virtual void free();
 
   };
+
+  // ------------------------ Lister producing integers in random order -------------------
 
   class random_integer_lister : public integer_lister{
 
@@ -70,48 +56,21 @@ namespace qpp{
     int i;
   public:
 
-    virtual void set(int _n1, int _n2)
-    {
-      n1 = _n1;
-      n2 = _n2;
+    virtual void set(int _n1, int _n2);
 
-      lst.clear();
-      for (int j = n1; j<=n2; j++)
-	lst.push_back(j);
+    virtual int begin();
 
-      for (int j=0; j<lst.size(); j++)
-	{
-	  int k = rand() % lst.size();
-	  int x = lst[k];
-	  lst[k] = lst[j];
-	  lst[j] = x;
-	}
-    }
+    virtual int next();
 
-    virtual int begin()
-    {
-      i=0;
-      return lst.size()>0 ? lst[0] : n1; 
-    }
+    virtual bool end();
 
-    virtual int next()
-    {
-      return lst[++i];
-    }
+    virtual integer_lister* copy();
 
-    virtual bool end()
-    {
-      return i>=lst.size();
-    }
-
-    virtual integer_lister* copy()
-    {
-      return new random_integer_lister;
-    }
-
-    virtual void free(){delete this;}
+    virtual void free();
 
   };
+
+  // --------------------- This lister produces only one random integer from a given range -------------------
 
   class random_integer_selector : public integer_lister{
 
@@ -119,47 +78,28 @@ namespace qpp{
 
   public:
 
-    virtual void set(int _n1, int _n2)
-    {
-      n1 = _n1;
-      n2 = _n2;
-      done = false;
-    }
+    virtual void set(int _n1, int _n2);
 
-    virtual int begin()
-    {
-      done = false;
-      return n1 + rand() % (n2-n1+1);
-    }
+    virtual int begin();
 
-    virtual int next()
-    {
-      done = true;
-    }
+    virtual int next();
 
-    virtual bool end()
-    {
-      return done;
-    }
+    virtual bool end();
 
-    virtual integer_lister* copy()
-    {
-      return new random_integer_selector;
-    }
+    virtual integer_lister* copy();
 
-    virtual void free(){delete this;}
+    virtual void free();
     
   };
-  
-  void init_rand()
-  {
-    srand(time(NULL));
-  }
+
+
+  // Simple way to initialize random generator  
+  void init_rand();
 
   //  ------------------------------------------------------------------------
   //                           Simple array of references
   //  ------------------------------------------------------------------------
-
+  /*
   template<class T>
   class refarray{
     
@@ -212,7 +152,7 @@ namespace qpp{
     { return p;}
     
   };
-
+  */
 };
 
 #endif

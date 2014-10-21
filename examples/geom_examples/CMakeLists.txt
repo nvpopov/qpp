@@ -1,35 +1,34 @@
 #add_executable(geom1 geom1.cpp)
 
 add_executable(geom2 geom2.cpp)
+target_link_libraries(geom2 qpp)
 
 add_executable(geom3 geom3.cpp)
+target_link_libraries(geom3 qpp)
 
 add_executable(geom31 geom31.cpp)
-
-#add_executable(geom4 geom4.cpp)
-
-#add_executable(geom41 geom41.cpp)
-
-#add_executable(geom5 geom5.cpp)
-#target_link_libraries(geom5 lace)
+target_link_libraries(geom31 qpp)
 
 add_executable(geom6 geom6.cpp)
+target_link_libraries(geom6 qpp)
+
+add_executable(triangul triangul.cpp)
+target_link_libraries(triangul qpp)
 
 add_executable(geomstat geomstat.cpp)
-#target_link_libraries(geom6 lace)
-
-#add_executable(zmt zmt.cpp)
-#target_link_libraries(zmt lace)
-
-#add_executable(geom7 geom7.cpp)
-#target_link_libraries(geom7 lace)
+target_link_libraries(geomstat qpp)
 
 add_executable(geom-xtr geom-xtr.cpp)
-#target_link_libraries(geom8 lace)
+target_link_libraries(geom-xtr qpp)
 
 add_executable(molvec molvec.cpp)
+target_link_libraries(molvec qpp)
 
 add_executable(symplicator symplicator.cpp)
+target_link_libraries(symplicator qpp)
 
 add_executable(surfplicator surfplicator.cpp)
 target_link_libraries(surfplicator qpp)
+
+add_executable(shape shape.cpp)
+target_link_libraries(shape qpp)

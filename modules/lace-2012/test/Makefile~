@@ -1,7 +1,0 @@
-CC=g++
-MKL_INCLUDE=-I /opt/intel/mkl/10.1.1.019/include/
-
-blas-mkl.o : blas-mkl.cpp
-	g++ -Wall -fPIC  -I .. -I /home/asm/include/ -I /opt/intel/mkl/10.1.1.019/include/ -c blas-mkl.cpp 
-lapack-mkl.o : lapack-mkl.cpp
-	lapack-mkl.cpp

@@ -2,12 +2,35 @@
 #define _LACE3D_H
 
 #include <cmath>
+#include <complex>
 #include <ostream>
 #include <sstream>
 #include <boost/format.hpp>
 #include <lace/complex.hpp>
 
 namespace lace{
+
+  template<class VALTYPE>
+  struct norm_type{
+    typedef VALTYPE type;
+  };
+
+  template<>
+  struct norm_type<int>{
+    typedef double type;
+  };
+
+  template<>
+  struct norm_type<std::complex<float> >{
+    typedef float type;
+  };
+
+  template<>
+  struct norm_type<std::complex<double> >{
+    typedef double type;
+  };
+
+  // -----------------------------------------------------------------------
 
   template<class VALTYPE = double>
   class vector3d{
@@ -38,7 +61,7 @@ namespace lace{
     {
       r[0] = v.r[0]; r[1] = v.r[1]; r[2] = v.r[2];
     }
-
+    
     inline VALTYPE& operator()(int i)
     {
       return r[i];
@@ -61,10 +84,10 @@ namespace lace{
 
     inline VALTYPE z() const {return r[2];}
 
-    inline VALTYPE norm2() const
+    inline typename norm_type<VALTYPE>::type norm2() const
     {return r[0]*r[0]+r[1]*r[1]+r[2]*r[2];}
 
-    inline VALTYPE norm() const
+    inline typename norm_type<VALTYPE>::type norm() const
     {return std::sqrt(norm2());}
 
     inline vector3d<VALTYPE> operator+(const vector3d<VALTYPE> & v) const
@@ -91,7 +114,7 @@ namespace lace{
       return res;
     }
 
-    inline vector3d<VALTYPE> operator%(const vector3d<VALTYPE> & v)
+    inline vector3d<VALTYPE> operator%(const vector3d<VALTYPE> & v) const
     {
       vector3d<VALTYPE> res( y()*v.z() - z()*v.y(), 
 			     z()*v.x() - x()*v.z(), 
@@ -149,6 +172,13 @@ namespace lace{
       return (*this - b).norm() <=  tolerance_for_equiv;
     }
 
+    /*
+    template<class VALTYPE2>
+    inline operator VALTYPE2()
+    {
+      return vector3d<VALTYPE2>(VALTYPE2(x()),VALTYPE2(y()),VALTYPE2(z()));
+    }
+    */
   };
 
   template<class VALTYPE>
@@ -176,7 +206,7 @@ namespace lace{
   }
 
   template<class VALTYPE>
-  inline VALTYPE norm(const vector3d<VALTYPE> & v)
+  inline typename norm_type<VALTYPE>::type norm(const vector3d<VALTYPE> & v)
   {
     return std::sqrt(norm2(v));
   }
@@ -411,6 +441,18 @@ namespace lace{
   //-------------------------------------------------
 
   template<class VALTYPE>
+  matrix3d<VALTYPE> outer(const vector3d<VALTYPE> & a,const vector3d<VALTYPE> & b)
+  {
+    matrix3d<VALTYPE> res;
+    for (int i=0; i<3; i++)
+      for (int j=0; j<3; j++)
+	res(i,j) = a(i)*b(j);
+    return res;
+  }
+
+  //-------------------------------------------------
+
+  template<class VALTYPE>
   matrix3d<VALTYPE> RotMtrx(const vector3d<VALTYPE> & nn, VALTYPE phi)
   {
     vector3d<VALTYPE> n = nn/norm(nn);
@@ -498,8 +540,48 @@ namespace lace{
 
   //-------------------------------------------------
 
+  template<class VALTYPE>
+  vector3d<VALTYPE> diagon3d(const matrix3d<VALTYPE> & A)
+  {
+    VALTYPE b = A(0,0) + A(1,1) + A(2,2);
+    VALTYPE c = A(0,1)*A(1,0) + A(1,2)*A(2,1) + A(2,0)*A(0,2) -
+      A(0,0)*A(1,1) - A(1,1)*A(2,2) - A(2,2)*A(0,0);
+    VALTYPE d = det(A);
+
+    vector3d<typename lace::numeric_type<VALTYPE>::complex> lbd = solve_cubeq(-1e0,b,c,d);
+    vector3d<VALTYPE> lbd_re;
+    for (int i=0; i<3; i++)
+      lbd_re(i) = lbd(i).re();
+    return lbd_re;
+  }
+
+  //-------------------------------------------------
+
   //template<class VALTYPE>
-  //void diagon
+  // bool diagon3d(const matrix3d<VALTYPE> & A, 
+  // 		matrix3d<VALTYPE> & Q, vector3d<VALTYPE> &lambda)
+  // {
+  //   const VALTYPE tol = 1e-10;
+  //   const int N = 100;
+
+  //   matrix3d<VALTYPE> AA = A;
+    
+  //   n=0;
+  //   while (n<3)
+  //     {
+  // 	vector3d<VALTYPE> x(1,0,0), x1;
+
+  // 	x1 = AA*x;
+  // 	if (norm(x1)<tol)
+  // 	  {
+  // 	    lambda(n) = 0e0;
+  // 	    Q(n) = x;
+  // 	    continue;
+  // 	  }
+
+  // 	n++;
+  //     }
+  // }
 
   //-------------------------------------------------
 

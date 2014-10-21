@@ -22,39 +22,47 @@ namespace qpp{
   typedef std::char_traits<CHAR> TRAITS;
 
   enum{
-    data_parameter     = 0x000200,
-    data_declaration   = 0x000400,
-    data_geometry      = 0x000800,
-    data_xgeometry     = 0x001000,
-    data_vectors       = 0x002000,
-    data_basis         = 0x004000,
-    data_manyfold      = 0x008000,
-    data_zmatrix       = 0x010000,
-    data_zpattern      = 0x020000,
-    data_zpt_bond      = 0x040000,
-    data_zpt_angle     = 0x080000,
-    data_zpt_dihedral  = 0x100000,
-    data_zpt_surfangle = 0x200000,
-    data_geom_modifier = 0x400000,
-    data_region        = 0x800000,
+    qtype_parameter     = 0x00002000,
+    qtype_declaration   = 0x00004000,
+    qtype_geometry      = 0x00008000,
+    qtype_xgeometry     = 0x00010000,
+    qtype_vectors       = 0x00020000,
+    qtype_basis         = 0x00040000,
+    qtype_manyfold      = 0x00080000,
+    qtype_zmatrix       = 0x00100000,
+    qtype_zpattern      = 0x00200000,
+    qtype_zpt_bond      = 0x00400000,
+    qtype_zpt_angle     = 0x00800000,
+    qtype_zpt_dihedral  = 0x01000000,
+    qtype_zpt_surfangle = 0x02000000,
+    qtype_zpt_lindep    = 0x04000000,
+    qtype_geom_builder  = 0x08000000,
+    qtype_region        = 0x10000000,
+    qtype_atom          = 0x20000000,
+    qtype_molecule      = 0x40000000,
+    qtype_shape         = 0x80000000,
 
     // additional bits for some of these types
-    data_dim0        = 0x001,
-    data_dim1        = 0x002,
-    data_dim2        = 0x004,
-    data_dim3        = 0x008,
-    data_type_int    = 0x010,
-    data_type_bool   = 0x020,
-    data_type_double = 0x040,
-    data_type_float  = 0x080,
-    data_type_string = 0x100,
+    qtype_dim0         = 0x0001,
+    qtype_dim1         = 0x0002,
+    qtype_dim2         = 0x0004,
+    qtype_dim3         = 0x0008,
+    qtype_data_int     = 0x0010,
+    qtype_data_bool    = 0x0020,
+    qtype_data_double  = 0x0040,
+    qtype_data_float   = 0x0080,
+    qtype_data_string  = 0x0100,
+    qtype_basis_pw     = 0x0200,
+    qtype_basis_gauss  = 0x0400,
+    qtype_basis_slater = 0x0800,
+    qtype_basis_siesta = 0x1000
   };
 
   typedef long int qppobject_type;
 
   /*FIXME: Using structs in c++ */
   template<class T>
-  struct data_type
+  struct qtype_data
   {
     static const qppobject_type type;
   };
@@ -87,12 +95,11 @@ namespace qpp{
     qpp_object * _who;
 
   public:
-    qpp_exception(qpp_object * __who)
-    { _who = __who;}
+    qpp_exception(qpp_object * __who);
 
-    qpp_object & who(){return * _who;}
+    qpp_object & who();
 
-    typename STRING what(){return _who->error();}
+    STRING what();
   };
   
   // --------------------------------------------------------------------------------------
@@ -101,7 +108,7 @@ namespace qpp{
   class qpp_parameter : public qpp_object
   {
   protected:
-    STRING _name;
+    STRING _name, _error;
     T _value;
 
     // fixme - this actually should be array of parameters
@@ -173,16 +180,17 @@ namespace qpp{
     { return _line;}
 
     virtual qppobject_type gettype() const
-    {return data_parameter | data_type<T>::type;} 
+    {return qtype_parameter | qtype_data<T>::type;} 
     
     virtual void error(STRING const & what)
     {
-      //fixme
+      _error = what;
+      throw qpp_exception(this);
     }
 
     virtual STRING error()
     {
-      //fixme
+      return _error;
     }
 
     virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const
@@ -227,102 +235,31 @@ namespace qpp{
 
   public:
 
-    qpp_declaration(const STRING & __cat, const STRING & __name, int __line = 0) : 
-      qpp_parameter<STRING>(__name,"",__line)
-    {
-      _cat = __cat;
-    }
+    qpp_declaration(const STRING & __cat, const STRING & __name, int __line = 0);
 
-    virtual STRING category() const
-    { return _cat; }
+    virtual STRING category() const;
 
-    virtual qppobject_type gettype() const
-    {return data_declaration;}
+    virtual qppobject_type gettype() const;
 
-    int n_decl() const
-    {
-      _nested_decl.size();
-    }
+    int n_decl() const;
 
-    qpp_object & nested_decl(int i) const
-    {
-      return * _nested_decl[i];
-    }
+    qpp_object & nested_decl(int i) const;
 
-    std::vector<qpp_object* > & nested_decl() 
-    {
-      return _nested_decl;
-    }
+    std::vector<qpp_object* > & nested_decl();
 
-    void add_decl(qpp_object & p)
-    {
-      _nested_decl.push_back(&p);
-    }
+    void add_decl(qpp_object & p);
       
-    void ins_decl(int i, qpp_object & p)
-    {
-      _nested_decl.insert(_nested_decl.begin(),&p);
-    }    
+    void ins_decl(int i, qpp_object & p);
 
-    void del_decl(int i)
-    {
-      _nested_decl.erase(_nested_decl.begin()+i);
-    }
+    void del_decl(int i);
 
-    virtual int n_next() const
-    {
-      return n_parm()+n_decl();
-    }
+    virtual int n_next() const;
 
-    virtual qpp_object* next(int i)
-    {
-      if (0<=i && i<n_parm())
-	return &nested_parm(i);
-      else if (n_parm()<=i && i<n_parm()+n_decl())
-	return &nested_decl(i-n_parm());
-      //      else error();
-    }
+    virtual qpp_object* next(int i);
 
-    virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const
-    {
-      //debug
-      //os << "declaration_tree write " << n_parm() << " " << n_decl() << "\n";
-      
-      for (int i=0; i<offset; i++)
-	os << " ";
-      if ( _cat != "" && name() != "")
-	os << _cat << " " << name();
-      else
-	os << _cat << name();
+    virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const;
 
-      if (n_parm()>0)
-	{
-	  os << "(";
-	  for (int i=0; i<n_parm(); i++)
-	    {
-	      //	      _nested_parm[i]->write(os);
-	      //os << nested_parm(i).category() << "\n";
-	      nested_parm(i).write(os);
-	      if (i<n_parm()-1)
-		os << ", ";
-	    }
-	  os << ")";
-	}
-      if (n_decl()>0)
-	{
-	  os << "\n";
-	  for (int i=0; i<offset+2; i++)
-	    os << " ";
-	  os << "{\n";
-	  for (int i=0; i<n_decl(); i++)
-	    nested_decl(i).write(os,offset+4);
-	  for (int i=0; i<offset+2; i++)
-	    os << " ";
-	  os << "}\n";
-	}
-      else
-	os << ";\n";
-    }
+    STRING env(const STRING & prm, int i=-1);
 
   };
 

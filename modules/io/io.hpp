@@ -12,7 +12,7 @@ namespace qpp{
     qpp_data_reader(std::string fname)
     {}
 
-    qpp_data_reader(std::basic_istream<charT,traits> is)
+    qpp_data_reader(std::basic_istream<charT,traits> & is)
     {}
 
     virtual qpp_data_array<charT,traits> * get_data(qppdata_type t) =0;
@@ -47,7 +47,7 @@ namespace qpp{
     qpp_data_writer(std::string fname)
     {}
 
-    qpp_data_writer(std::basic_ostream<charT,traits> is)
+    qpp_data_writer(std::basic_ostream<charT,traits> & os)
     {}
 
     virtual void put_data(const qpp_data_array<charT,traits> & q) =0;

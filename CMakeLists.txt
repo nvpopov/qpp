@@ -51,6 +51,8 @@ endif(QPP_BUILD_TOOLS)
 #if (QPP_BUILD_TOOLS)
 add_subdirectory(examples)
 
+add_subdirectory(utils)
+
 option(QPP_BUILD_TESTS "build tests executable")
 if (QPP_BUILD_TESTS)
         add_subdirectory(tests)
