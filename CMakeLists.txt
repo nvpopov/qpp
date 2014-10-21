@@ -40,13 +40,6 @@ endif()
  
 include_directories(modules/)
 
-#Create system-depend build directories
-#file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/build/${CMAKE_SYSTEM_NAME}${bitness}/bin)
-#file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/build/${CMAKE_SYSTEM_NAME}${bitness}/lib)
-
-#Set output directories
-#set( EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/build/${CMAKE_SYSTEM_NAME}${bitness}/bin)
-#set( LIBRARY_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/build/${CMAKE_SYSTEM_NAME}${bitness}/lib)
 add_subdirectory(modules)
 
 option(QPP_BUILD_TOOLS "Build third-part tools")
