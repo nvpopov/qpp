@@ -56,8 +56,8 @@ namespace qpp{
   // -------------------------------------------------------------------//
   //     function for reading simple xyz format into geometry object    //
   // -------------------------------------------------------------------//
-  
-  template< int DIM, class VALTYPE=double>
+
+  template< int DIM, class VALTYPE>
   void read_xyz(std::basic_istream<CHAR,TRAITS> & inp, geometry<DIM,VALTYPE> & geom)
   {
     STRING s;
@@ -103,7 +103,7 @@ namespace qpp{
   // -------------------------------------------------------------------//  
   //                writing geometry into simple xyz                    //
   // -------------------------------------------------------------------//
-  template< int DIM, class VALTYPE=double, class TRANSFORM >
+  template< int DIM, class VALTYPE, class TRANSFORM >
   void write_xyz(std::basic_ostream<CHAR,TRAITS>  & out, 
 		 const qpp::geometry<DIM,VALTYPE,TRANSFORM> & geom)
   {
@@ -125,7 +125,7 @@ namespace qpp{
   // -------------------------------------------------------------------//
   //        writing geometry into xyz file together with displacements       //
   // -------------------------------------------------------------------//
-  template< int DIM, class VALTYPE=double, class TRANSFORM  >
+  template< int DIM, class VALTYPE, class TRANSFORM  >
   void write_xyz(std::basic_ostream<CHAR,TRAITS>  & out, 
 		 const qpp::geometry<DIM,VALTYPE,TRANSFORM> & geom,
 		 const qpp::molecule_vector<DIM,VALTYPE,TRANSFORM> & v)
@@ -150,7 +150,7 @@ namespace qpp{
     return at1.atom() > at2.atom();
   }
 
-  template< int DIM, class VALTYPE=double, class TRANSFORM  >
+  template< int DIM, class VALTYPE, class TRANSFORM  >
   void write_ngbr(std::basic_ostream<CHAR,TRAITS>  & out, 
 		  typename geometry<DIM,VALTYPE,TRANSFORM>::neighbours_table & ngbr)
   {

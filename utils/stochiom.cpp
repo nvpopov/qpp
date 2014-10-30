@@ -1,7 +1,11 @@
 #include<geom/geom.hpp>
 #include<io/geomio.hpp>
 #include<io/qpparser.hpp>
+
+#ifdef __GXX_EXPERIMENTAL_CXX0X__
 #include <initializer_list>
+#endif
+
 #include <geom/shape.hpp>
 #include <algorithm>
 

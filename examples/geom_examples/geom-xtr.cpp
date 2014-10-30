@@ -14,7 +14,9 @@ using namespace qpp;
 
 int main()
 {
- 
+
+#ifdef __GXX_EXPERIMENTAL_CXX0X__ 
+
   qpp::xtr_geometry<3,double> G(4,1,1);
 
   G.xreal_name(0)="charge";
@@ -31,6 +33,10 @@ int main()
 
 
   G.write(std::cout);
-  
+
+#else 
+#warning You need to enable -std=c++11 or -std=gnu++11 to compile "geom-xtr.cpp"
+#endif  
+
 }
 

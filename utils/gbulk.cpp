@@ -32,7 +32,7 @@ int main(int argc, char **argv)
   if (fname == "")
     f = &std::cin;
   else
-    f = new std::ifstream(fname);
+    f = new std::ifstream(fname.c_str());
   
   std::vector<qpp::qpp_object*> decls;
   qpp::qpp_read(*f,decls);

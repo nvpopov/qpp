@@ -2252,7 +2252,12 @@ namespace qpp{
 
   };
 
+#ifdef __GXX_EXPERIMENTAL_CXX0X__ 
   template <int DIM,class CREAL=double, class TRANSFORM = periodic_cell<DIM,CREAL> >   
+#else
+  template <int DIM,class CREAL, class TRANSFORM>   
+#endif
+
   zpattern<DIM,CREAL,TRANSFORM> * decl2zpt(qpp_declaration * decl)
   {
     if (decl -> category() != "zpattern")

@@ -3,6 +3,7 @@
 
 
 #define DIM 0
+#define REAL double
 
 double good   = -6.8;
 double bad    = -6.0;
@@ -38,7 +39,7 @@ int main(int argc, char **argv)
       else if (decls[i]->gettype() & qpp::qtype_vectors)
 	cell.push_back((qpp::periodic_cell<DIM>*)decls[i]);
       else if (decls[i]-> category() == "zpattern")
-	zpt.push_back(qpp::decl2zpt<DIM>((qpp::qpp_declaration*)decls[i]));
+	zpt.push_back(qpp::decl2zpt<DIM,REAL,qpp::periodic_cell<DIM,REAL> >((qpp::qpp_declaration*)decls[i]));
 
     for (int i=0; i<geom.size(); i++)
       if (geom[i]->gettype() & qpp::qtype_xgeometry)
@@ -57,7 +58,9 @@ int main(int argc, char **argv)
       {
 
 	zpt[i] -> write(std::cout);
-	std::ofstream xyz(zpt[i]->name() + ".xyz");
+
+	STRING pizda = zpt[i]->name() + ".xyz";
+	std::ofstream xyz(pizda.c_str());
 
 	for (int j=0; j<geom.size(); j++)
 	  {

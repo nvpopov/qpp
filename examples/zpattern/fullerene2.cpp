@@ -65,7 +65,7 @@ void g2G(surfgeom & g, qpp::geometry<DIM2,REAL> &G)
 
 // -----------------------------------------------------------------------------------------
 
-template< int DIM2, class VALTYPE=REAL>
+template< int DIM2, class VALTYPE>
 VALTYPE gulp_energy(qpp::geometry<DIM2,VALTYPE> & geom, std::vector< lace::vector3d<VALTYPE> > & grad)
 {
   std::ofstream f("coord.xyz");

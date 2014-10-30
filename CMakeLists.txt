@@ -4,7 +4,8 @@ project(qpp)
 set (qpp_VERSION_MAJOR 0)
 set (qpp_VERSION_MINOR 1)
 
-set(CMAKE_CXX_FLAGS "-std=\"c++11\" -pg")
+#set(CMAKE_CXX_FLAGS "-std=\"c++11\" -pg")
+set(CMAKE_CXX_FLAGS "-pg")
 set(CMAKE_BUILD_TYPE "Debug")
 #Detect system bitness
 set(bitness 32)

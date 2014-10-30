@@ -1,7 +1,11 @@
 #include<geom/geom.hpp>
 #include<io/geomio.hpp>
 #include<io/qpparser.hpp>
+
+#ifdef __GXX_EXPERIMENTAL_CXX0X__
 #include <initializer_list>
+#endif
+
 #include <geom/shape.hpp>
 #include <mathf/intlst.hpp>
 //#include <dsyevj3.h>
@@ -224,6 +228,8 @@ int denom(int n, int m)
 
 // ---------------------------------------------------------------
 
+#ifdef __GXX_EXPERIMENTAL_CXX0X__
+
 int denom(std::initializer_list<int> n)
 {
   int d = *n.begin();
@@ -236,6 +242,18 @@ int denom(std::initializer_list<int> n)
   return d;
 }
 
+#else
+
+int denom(int n1, int n2, int n3)
+{
+  int d = denom(n1,n2);
+  if (d>1)
+    d = denom(d,n3);
+  return d;
+}
+
+#endif
+
 // --------------------------------------------------------------
 
 int commult(int n, int m)
@@ -247,12 +265,14 @@ int commult(int n, int m)
 
 void reduce(i3d & i)
 {
-  int d = denom({i(0),i(1),i(2)});
+  //  int d = denom({i(0),i(1),i(2)});
+  int d = denom(i(0),i(1));
+  d = denom(d,i(2));
   i /= d;
 }
 
 // --------------------------------------------------------------
-
+#ifdef __GXX_EXPERIMENTAL_CXX0X__
 int commult(std::initializer_list<int> n)
 {
   int m = *n.begin();
@@ -262,7 +282,7 @@ int commult(std::initializer_list<int> n)
     }
   return m;
 }
-
+#endif
 // --------------------------------------------------------------
 
 void miller2pair(const i3d & nml, i3d & a, i3d & b)
@@ -355,7 +375,7 @@ void match_latt(const qpp::periodic_cell<3> & cell1, const qpp::periodic_cell<3>
 	if (n1*n1+n2*n2<=n*n)
 	  for (int n3 = (n1==0 && n2==0)? 1 : -n; n3<=n; n3++)
 	    if ( n1*n1+n2*n2+n3*n3<=n*n &&  n1*n1+n2*n2+n3*n3>(n-1)*(n-1)
-		 && denom({n1,n2,n3})==1 )
+		 && denom(n1,n2,n3)==1 )
 	      {
 		i3d ia1,ia2,ib1,ib2;
 		miller2pair(i3d(n1,n2,n3),ia1,ib1);
@@ -410,7 +430,7 @@ int main(int argc, char **argv)
   if (fname == "")
     f = &std::cin;
   else
-    f = new std::ifstream(fname);
+    f = new std::ifstream(fname.c_str());
   
   std::vector<qpp::qpp_object*> decls;
   qpp::qpp_read(*f,decls);

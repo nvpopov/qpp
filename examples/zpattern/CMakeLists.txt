@@ -6,11 +6,11 @@
 
 #add_executable(zsrch zsrch.cpp)
 
-add_executable(zdebug zdebug.cpp)
-target_link_libraries(zdebug qpp)
+#add_executable(zdebug zdebug.cpp)
+#target_link_libraries(zdebug qpp)
 
-add_executable(zread zread.cpp)
-target_link_libraries(zread qpp)
+#add_executable(zread zread.cpp)
+#target_link_libraries(zread qpp)
 
 #add_executable(graphene graphene.cpp)
 #target_link_libraries(graphene lace)
@@ -18,8 +18,8 @@ target_link_libraries(zread qpp)
 add_executable(fullerene2 fullerene2.cpp)
 target_link_libraries(fullerene2 lbfgs qpp)
 
-add_executable(tor tor.cpp)
-target_link_libraries(tor lbfgs qpp)
+#add_executable(tor tor.cpp)
+#target_link_libraries(tor lbfgs qpp)
 
 add_executable(tor2 tor2.cpp)
 target_link_libraries(tor2 lbfgs qpp)

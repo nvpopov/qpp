@@ -1,7 +1,11 @@
 #include<geom/geom.hpp>
 #include<io/geomio.hpp>
 #include<io/qpparser.hpp>
+
+#ifdef __GXX_EXPERIMENTAL_CXX0X__
 #include <initializer_list>
+#endif
+
 #include <geom/shape.hpp>
 
 #define DIM 3
@@ -241,7 +245,9 @@ qpp::xtr_geometry<DIM> & grain(const qpp::geometry<3> & uc1,
 	    {
 	      v3d r = uc.position(qpp::index<3>(at,i,j,k));
 	      bool srf = r(2)>z1+h && r(2)<z2-h;
-	      G->add(uc.atom(at),r+displ, {}, {}, {srf});
+	      //G->add(uc.atom(at),r+displ, {}, {}, {srf});
+	      G->add(uc.atom(at),r+displ);
+	      G->xtr_bool(0,G->nat()-1) = srf;
 	      /*
 	      if (box.within(r))
 		G->add(uc.atom(at),r);
@@ -305,7 +311,7 @@ int main(int argc, char **argv)
 	}
     } 
 
-  std::ifstream f(fname);
+  std::ifstream f(fname.c_str());
   
   std::vector<qpp::qpp_object*> decls;
   qpp::qpp_read(f,decls);
@@ -469,9 +475,15 @@ int main(int argc, char **argv)
   G.xbool_name(0) = "boundary";
 
   for (int i=0; i<g1->nat(); i++)
-    G.add(g1->atom(i), g1->coord(i), {}, {}, {g1->xtr_bool(0,i)});
+    {
+      G.add(g1->atom(i), g1->coord(i));
+      G.xtr_bool(0,G.nat()-1) = g1->xtr_bool(0,i);
+    }
   for (int i=0; i<g2->nat(); i++)
-    G.add(g2->atom(i), g2->coord(i), {}, {}, {g2->xtr_bool(0,i)});
+    {
+      G.add(g2->atom(i), g2->coord(i));
+      G.xtr_bool(0,G.nat()-1) = g2->xtr_bool(0,i);
+    }
 
   G.cell(0) = g1->cell(0);
   G.cell(1) = g1->cell(1);

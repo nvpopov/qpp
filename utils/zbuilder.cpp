@@ -1,10 +1,15 @@
 #include<geom/geom.hpp>
 #include<io/geomio.hpp>
+
+#ifdef __GXX_EXPERIMENTAL_CXX0X__
 #include <initializer_list>
+#endif
+
 #include <geom/shape.hpp>
 #include <geom/zpt.hpp>
 
 #define DIM 3
+#define REAL double
 
 int main(int argc, char **argv)
 {
@@ -37,7 +42,7 @@ int main(int argc, char **argv)
       else if (decls[i]->gettype() & qpp::qtype_vectors)
 	cell = (qpp::periodic_cell<DIM>*)decls[i];
       else if (decls[i]-> category() == "zpattern")
-	zpt.push_back(qpp::decl2zpt<DIM>((qpp::qpp_declaration*)decls[i]));
+	zpt.push_back(qpp::decl2zpt<DIM,REAL,qpp::periodic_cell<DIM,REAL> >((qpp::qpp_declaration*)decls[i]));
 
     if (geom->gettype()& qpp::qtype_xgeometry)
       xgeom = (qpp::xtr_geometry<DIM>*)geom;
