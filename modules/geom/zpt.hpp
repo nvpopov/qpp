@@ -31,11 +31,13 @@ namespace qpp{
   public:
 
     CREAL geomtol, symmtrap_radius;
+    int priority;
 
     zpattern(const STRING & __name = "")
     {
       _name = __name; 
       geomtol = default_geomtol;      
+      priority = 0;
     }
 
     zpattern(geometry<DIM,CREAL,TRANSFORM> & g, const STRING & __name = "")
@@ -43,6 +45,7 @@ namespace qpp{
       geom = &g;
       _name = __name;
       geomtol = geom->geomtol;
+      priority = 0;
     }
 
     // kostyl for commented "parm"
@@ -958,6 +961,13 @@ namespace qpp{
       os << "zpattern";
       if (_name != "")
 	os << " " << _name;
+
+      //if (priority!=0)
+	{
+	  os << "(priority=" << priority << ")\n";
+	  for (int k=0; k<offset; k++) os << " ";
+	}
+
       os << "{\n";
       for (int ptp = zsearch; ptp <= zinsert; ptp++)
 	if (n_points(ptp)>0)
@@ -1976,6 +1986,7 @@ namespace qpp{
       std::cerr << "\n";
       */
       
+      std::cerr << " pri= " << priority << "\n";
       for (int i=0; i<noapply.size(); i++)
 	std::cerr << (noapply[i] ? "1" : "0");
       std::cerr << "\n\n";
@@ -2247,6 +2258,14 @@ namespace qpp{
     if (decl -> category() != "zpattern")
       decl -> error("This declaration does not define z-pattern");
     zpattern<DIM,CREAL,TRANSFORM> * res = new zpattern<DIM,CREAL,TRANSFORM>(decl -> name());
+
+    for (int i=0; i<decl->n_parm(); i++)
+      {
+	STRING pname = decl->nested_parm(i).name();
+	STRING pval  = ((qpp::qpp_parameter<STRING>*)(&decl->nested_parm(i))) -> value();
+	if (pname=="priority")
+	  s2t<int>(pval,res -> priority);
+      }
 
     for (int i=0; i<decl->n_decl(); i++)
       if (decl->nested_decl(i).gettype() & qtype_declaration)
