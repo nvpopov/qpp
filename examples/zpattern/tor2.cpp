@@ -499,7 +499,8 @@ int main(int argc, char* argv[])
 	  qpp::write_xyz(std::cout,G); 
 	}
 
-      if ( G.nat() - natopt > 7 || (!contin && !opted))
+      //if ( G.nat() - natopt > 7 || (!contin && !opted))
+      if ( contin || (!contin && !opted))
 	{
 	  optimize_surf(*g);
 	  natopt = G.nat();
