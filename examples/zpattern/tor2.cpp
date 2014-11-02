@@ -497,16 +497,20 @@ int main(int argc, char* argv[])
 	  
 	  G.setname(s.str());
 	  qpp::write_xyz(std::cout,G); 
+
+
+	  natopt++;
 	}
 
       //if ( G.nat() - natopt > 7 || (!contin && !opted))
-      if ( contin || (!contin && !opted))
+      if ( (contin && natopt > 5) || (!contin && !opted))
 	{
 	  optimize_surf(*g);
 	  natopt = G.nat();
 	  opted = true;
 	  contin = true;
 	  zz.reset();
+	  natopt = 0;
 	} 
      
       /*      lst1.set(0,zz.size()-1);
