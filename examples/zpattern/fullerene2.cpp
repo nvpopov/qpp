@@ -309,7 +309,7 @@ void conf0(surfgeom & g)
 {
   v2d p0(0.3,0);
   v2d p1 = mfold->ruler(p0,v2d(.3,1),rcc);  
-  v2d p2 = mfold->triangul(p0,p1,rcc,2*qpp::pi/3);
+  v2d p2 = mfold->triangul(p0,p1,rcc,3*qpp::pi/5);
   g.add("C",p0.x,p0.y,0e0);
   g.add("C",p1.x,p1.y,0e0);
   g.add("C",p2.x,p2.y,0e0);
@@ -325,6 +325,112 @@ void conf2(surfgeom & g)
 
 //-------------------------------------------------------------------------------------------
 
+template <int DIMM,class CREAL=double, class TRANSFORM = qpp::periodic_cell<DIMM,CREAL> >   
+class zpt_array{
+  
+  std::vector<qpp::zpattern<DIMM,CREAL,TRANSFORM>*> zz;
+  int _max_pri;
+  std::vector<std::vector<int> > _pri;
+  int _curr_pri, _last;
+
+public:
+
+  zpt_array()
+  {
+    _max_pri = 0;
+  }
+  
+  void add(qpp::zpattern<DIMM,CREAL,TRANSFORM> & z)
+  {
+    zz.push_back(&z);
+
+    std::cerr << z.name() << " " << z.priority << "\n";
+
+    if (z.priority > _max_pri )
+      _max_pri = z.priority;
+    
+    if (_pri.size()<_max_pri+1)
+      _pri.resize(_max_pri+1);
+    
+    _pri[z.priority].push_back(zz.size()-1);
+  }
+
+  int nzpt()
+  {
+    return zz.size();
+  }
+
+  int maxpri()
+  {
+    return _max_pri;
+  }
+
+  int npri(int p)
+  {
+    return _pri[p].size();
+  }
+
+  int last()
+  {
+    return _last;
+  }
+
+  qpp::zpattern<DIMM,CREAL,TRANSFORM> & operator()(int i)
+  {
+    return *zz[i];
+  }
+
+  qpp::zpattern<DIMM,CREAL,TRANSFORM> & operator()(int p, int i)
+  {
+    return *zz[_pri[p][i]];
+  }
+
+  void init( qpp::geometry<DIMM, CREAL,TRANSFORM> &g, CREAL st_rad = 0e0)
+  {
+    for (int i=0; i<zz.size(); i++)
+      zz[i]->init(g,st_rad);
+    _curr_pri = 0;
+  }
+
+  void init_surf( qpp::geometry<DIMM, CREAL,TRANSFORM> &g, CREAL st_rad = 0e0)
+  {
+    for (int i=0; i<zz.size(); i++)
+      zz[i]->init_surf(g,st_rad);
+    _curr_pri = 0;
+  }
+
+  void reset()
+  {
+    _curr_pri=0;
+  }
+
+  bool apply(qpp::integer_lister &lst)
+  {
+    qpp::integer_lister * lst1 = lst.copy();
+    bool res = false;
+
+    while (_curr_pri <= _max_pri)
+      {
+	lst1->set(0,npri(_curr_pri)-1);
+	for (int i=lst1->begin(); !lst1->end(); i=lst1->next())
+	  if ( (*this)(_curr_pri,i).apply(lst) )
+	    {
+	      res = true;
+	      _last = _pri[_curr_pri][i];
+	      reset();
+	      break;
+	    }
+	if (res)
+	  break;
+
+	_curr_pri++;
+      }
+
+    delete lst1;
+    return res;
+  }
+
+};
 
 //-------------------------------------------------------------------------------------------
 
@@ -332,10 +438,11 @@ int main(int argc, char* argv[])
 {
   try{  
   R = atof(argv[1]);
+  //r = atof(argv[2]);
   std::ifstream zinp(argv[2]);
   
+  //  mfold = new qpp::parametric_torus<REAL>(R,r);
   mfold = new qpp::parametric_sphere<REAL>(R);
-  //mfold = new qpp::parametric_sphere<REAL>(R);
 
   qpp::surf_symplicator<DIM,REAL> symm(*mfold);  
   g = new surfgeom(symm);
@@ -344,24 +451,29 @@ int main(int argc, char* argv[])
   conf0(*g);
   g2G(*g,G);
 
-  std::vector<zpt*> zz;
+  //  std::vector<zpt*> zz;
 
   std::vector<qpp::qpp_object*> decls;
   qpp::qpp_read(zinp,decls);
 
+  zpt_array<DIM,REAL,qpp::surf_symplicator<DIM,REAL> > zz;
+
+  std::cerr << "alive\n";
+
   for (int i=0; i<decls.size(); i++)
     if (decls[i]-> category() == "zpattern")
-      zz.push_back(qpp::decl2zpt<DIM, REAL, qpp::surf_symplicator<DIM,REAL> >
-		    ((qpp::qpp_declaration*)decls[i]));
+      zz.add(*qpp::decl2zpt<DIM, REAL, qpp::surf_symplicator<DIM,REAL> >
+	     ((qpp::qpp_declaration*)decls[i]));
 
+  std::cerr << "alive1\n";
 
   qpp::init_rand();
-  qpp::random_integer_lister lst,lst1;
+  qpp::random_integer_lister lst;
      
   qpp::write_xyz(std::cout, G);
   
-  for (int i=0; i<zz.size();i++)
-    zz[i]->init_surf(*g, 0.8);
+  //  for (int i=0; i<zz.size();i++)
+  zz.init_surf(*g, 0.8);
 
   bool contin=true, opted=false;
   
@@ -370,7 +482,38 @@ int main(int argc, char* argv[])
   while(contin)
     {	
       contin = false;
-      lst1.set(0,zz.size()-1);
+      if (zz.apply(lst))
+	{
+	  contin = true;
+	  opted = false;
+	  
+	  g2G(*g,G);
+	  std::stringstream s;
+	  int i = zz.last();
+
+	  s << "pattern " << i << " pri= " << zz(i).priority << " "  << zz(i).name() << " = ";
+	  for (int k=0; k<zz(i).n_points(); k++)
+	    s << " " << zz(i).bound(k)+1;
+	  
+	  G.setname(s.str());
+	  qpp::write_xyz(std::cout,G); 
+
+
+	  natopt++;
+	}
+
+      //if ( G.nat() - natopt > 7 || (!contin && !opted))
+      if ( (contin && natopt > 5) || (!contin && !opted))
+	{
+	  optimize_surf(*g);
+	  natopt = G.nat();
+	  opted = true;
+	  contin = true;
+	  zz.reset();
+	  natopt = 0;
+	} 
+     
+      /*      lst1.set(0,zz.size()-1);
       for (int i=lst1.begin(); !lst1.end(); i=lst1.next())
 	{
 	  if ( zz[i]->apply( lst) )
@@ -388,15 +531,9 @@ int main(int argc, char* argv[])
 	      qpp::write_xyz(std::cout,G);
 	    }
 	}
-      
+      */
       //if ( G.nat() - natopt > 10)
-      if ( G.nat() -natopt > 8 || (!contin && !opted))
-	{
-	  optimize_surf(*g);
-	  natopt = G.nat();
-	  opted = true;
-	  contin = true;
-	}      
+
 
     }    
   }
