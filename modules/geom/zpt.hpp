@@ -1800,6 +1800,11 @@ namespace qpp{
 	    res = insert_next(*lst.copy());
 	  else
 	    res = insert_next_surf(*lst.copy());	    
+
+	  if (!res)
+	    // unmark atoms to delete
+	    for (int i=0; i<n_points(zdelete); i++)
+	      geom->shadow(point(i,zdelete).bound) = false;
 	  //std::cerr << "alive3\n";
 	  delete &lst;
 	  //std::cerr << "alive4\n";
