@@ -3,6 +3,6 @@
 #add_subdirectory(lace_examples)
 add_subdirectory(geom_examples)
 add_subdirectory(io_examples)
-add_subdirectory(basis_examples)
+#add_subdirectory(basis_examples)
 #add_subdirectory(symm_examples)
 add_subdirectory(zpattern)
