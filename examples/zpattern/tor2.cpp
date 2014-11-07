@@ -11,11 +11,14 @@
 #include <geom/geom_extras.hpp>
 #include <io/geomio.hpp>
 #include <stdlib.h>  
+
+//#define LBFGS_FLOAT  32
 #include <lbfgs.h>
 
 using qpp::pi;
 
 typedef double REAL;
+//typedef float REAL;
 
 typedef lace::vector2d<REAL> v2d;
 typedef lace::vector3d<REAL> v3d;
@@ -50,7 +53,7 @@ void g2G(surfgeom & g, qpp::geometry<DIM2,REAL> &G)
   for ( I=I.begin(); I!=I.end(); I++ )
     if ( I != qpp::index<DIM>(I.atom()) )
       {
-	lace::vector3d<double> r = g.position(I);
+	lace::vector3d<REAL> r = g.position(I);
 	bool found = false;
 	for (int j=0; j<G.nat(); j++)
 	  if ( G.atom(j)==g.atom(I) && norm(G.coord(j)-r) < g.geomtol)
@@ -503,7 +506,7 @@ int main(int argc, char* argv[])
 	}
 
       //if ( G.nat() - natopt > 7 || (!contin && !opted))
-      if ( (contin && natopt > 5) || (!contin && !opted))
+      if ( (contin && G.nat()>50) || (contin && natopt > 5) || (!contin && !opted))
 	{
 	  optimize_surf(*g);
 	  natopt = G.nat();

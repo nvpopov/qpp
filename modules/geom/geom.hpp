@@ -888,12 +888,14 @@ namespace qpp{
 
       CREAL default_distance;
       bool autoupdate;
+      bool reference_mode;
 
       neighbours_table( geometry<DIM, CREAL, TRANSFORM> & g)
       {
 	_disttable = NULL;
 	default_distance = CREAL(0);
 	geom = & g;
+	reference_mode = geom->nat() < 100;
       }
 
       // Number of neighbours of i-th atom
@@ -980,6 +982,12 @@ namespace qpp{
 
       void build()
       {
+	if (reference_mode)
+	  {
+	    reference_build();
+	    return;
+	  }
+
 	_grain_setup();
 	_graining();
 	for (int i=0; i<_table.size(); i++)
@@ -1089,6 +1097,46 @@ namespace qpp{
 	    }
       }
       
+      void ref_inserted(int at, bool done)
+      {
+	if (done)
+	  {
+	    _table.insert(_table.begin()+at, std::vector<index<DIM> >());
+	    geometry<DIM, CREAL, TRANSFORM>::iterator j(*geom);	
+	    for (j=j.begin(); j!=j.end(); j++)
+	      if ( ! geom->shadow(j) && j!=index<DIM>(at) && norm(geom->position(at) - geom->position(j)) < 
+		     distance(geom->type_table(at), geom->type_table(j)) )
+		{
+		  _table[at].push_back(j);
+		  index<DIM> iat(at);
+		  for (int d=0; d<DIM; d++)
+		    iat.setcell(d,-j.cell(d));
+		  _table[j].push_back(iat);
+		}
+	  }
+      }
+
+      virtual void ref_erased(int at, bool done)
+      {
+	if (!done)
+	  {
+	    _table.erase(_table.begin()+at);
+	    
+	    for (int i=geom->nat()-2; i>=0; i--)
+	      for (int j=n(i)-1; j>=0; j--)
+		if (_table[i][j].atom()==at)
+		  {
+		    //std::cerr << "erase " << i << " " << _table[i][j] << "\n";
+		    _table[i].erase(_table[i].begin()+j);
+		  }
+		else if (_table[i][j].atom()>at)
+		  {
+		    //std::cerr << _table[i][j] << "->";
+		    _table[i][j].atom()--; 
+		    //std::cerr << _table[i][j] << "\n";
+		  }
+	  }
+      }
 
       /*
       void build()
@@ -1140,6 +1188,11 @@ namespace qpp{
 
       virtual void inserted(int at, bool done)
       {
+	if (reference_mode)
+	  {
+	    ref_inserted(at,done);
+	    return;
+	  }
 	if (done)
 	  {
 	    lace::vector3d<CREAL> r = geom->position(at);
@@ -1209,6 +1262,11 @@ namespace qpp{
 
       virtual void erased(int at, bool done)
       {
+	if (reference_mode)
+	  {
+	    ref_erased(at,done);
+	    return;
+	  }
 	if (!done)
 	  {
 	    for (int i=0; i<_grains.size(); i++)

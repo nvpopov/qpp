@@ -1604,7 +1604,7 @@ namespace qpp{
 		error("Given parameters do not allow to locate new point");
 	      
 	      new_pt.push_back( zpoint( geom->coord(at3), geom->coord(at2), geom->coord(at1),
-					b, alpha*pi/180, gamma*pi/180) );
+					b, CREAL(alpha*pi/180), CREAL(gamma*pi/180)) );
 	    }
 	  else if (ibnd.size()==1 && iang.size()==1)
 	    {
