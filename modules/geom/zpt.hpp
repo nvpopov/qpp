@@ -172,7 +172,8 @@ namespace qpp{
     std::vector<geometry_relation*> relation_registry;
     std::vector< std::vector<int> > _rel_of_point;
     // instead of vector<bool>
-    std::vector<char> occupied, noapply;
+    //    std::vector<char> occupied, noapply;
+    std::vector<char> noapply;
   public:
 
     class linear_dependence : public qpp_object{
@@ -892,19 +893,30 @@ namespace qpp{
     inline int point_of_rel(int i, int j) const
     { return rel(i).point(j);}
 
+    inline bool occupied(index<DIM> at)
+    {
+      bool res = false;
+      for (int i=0; i<n_points(); i++)
+	if ( point(i).is_bound && point(i).bound == at)
+	  {
+	    res = true;
+	    break;
+	  }
+    }
+
     inline void bind(int i, index<DIM> j)
     {
       point(i).is_bound = true;
       point(i).bound = j;
       // fixme - potential bug here, since j is index<DIM> and not int
       // however, if z-pattern is smaller then unit cell size, it should not cause any problems
-      occupied[j] = true;
+      //occupied[j] = true;
     }
 
     inline void unbind(int i)
     {
-      if (point(i).is_bound)
-	occupied[point(i).bound] = false;
+      //if (point(i).is_bound)
+      //occupied[point(i).bound] = false;
       point(i).is_bound = false;
     }
 
@@ -1150,8 +1162,8 @@ namespace qpp{
 
     void unbind_all()
     {
-      occupied.clear();
-      occupied.resize(geom->nat(),false);
+      //      occupied.clear();
+      //occupied.resize(geom->nat(),false);
       
       // noapply.clear();
       // noapply.resize(geom->nat(),false);
@@ -1271,7 +1283,7 @@ namespace qpp{
 	      //std::cerr << "try match to " << at_avd << " r= " 
 	      //<< norm(geom->coord(at_avd)-geom->coord(at_bnd)) << "\n";
 
-	      if ( occupied[at_avd] || !(point(iavd).atom == "*" || 
+	      if ( occupied(at_avd) || !(point(iavd).atom == "*" || 
 					 point(iavd).atom == geom -> atom(at_avd) ))
 		continue;
 	      
@@ -1446,7 +1458,7 @@ namespace qpp{
 	      //	      parm->push_back(new_pt[j]);
 	      geom -> add(point(insrt).atom, new_pt[j].x, new_pt[j].y, 0e0);
 	      //geom -> add(point(insrt).atom, mfold->map(new_pt[j]));
-	      occupied.push_back(true);
+	      //occupied.push_back(true);
 	      //noapply.push_back(false);
 
 	      //geom->build_type_table();
@@ -1475,7 +1487,7 @@ namespace qpp{
 		  unbind(insrt);
 		  geom -> erase(inew);
 		  //parm->pop_back();
-		  occupied.pop_back();
+		  //occupied.pop_back();
 		  //noapply.pop_back();
 		  //geom->build_type_table();
 		  //ngbr->build_disttable();
@@ -1640,7 +1652,7 @@ namespace qpp{
 	      //	      parm->push_back(new_pt[j]);
 	      geom -> add(point(insrt).atom, new_pt[j]);
 	      //geom -> add(point(insrt).atom, mfold->map(new_pt[j]));
-	      occupied.push_back(true);
+	      //occupied.push_back(true);
 	      //noapply.push_back(false);
 
 	      //geom->build_type_table();
@@ -1678,7 +1690,7 @@ namespace qpp{
 		  geom -> erase(inew);
 		  //std::cerr << " after not satisfy 2\n";
 		  //parm->pop_back();
-		  occupied.pop_back();
+		  //occupied.pop_back();
 
 		  //std::cerr << " after not satisfy 5\n";
 		  //noapply.pop_back();
@@ -1751,7 +1763,7 @@ namespace qpp{
 	      //std::cerr << "isrch= " << isrch << " jsrch= " << jsrch << " at_srch= " << at_srch 
 	      //<< " r= " << norm(geom->coord(at_bnd)-geom->coord(at_srch)) << "\n";
 
-	      if ( !occupied[at_srch] && 
+	      if ( !occupied(at_srch) && 
 		   ( point(isrch).atom == "*" || point(isrch).atom == geom -> atom(at_srch) ))
 		bind(isrch,at_srch);
 	      else continue;
@@ -1903,7 +1915,7 @@ namespace qpp{
 	      //std::cerr << "isrch= " << isrch << " jsrch= " << jsrch << " at_srch= " << at_srch 
 	      //<< " r= " << norm(geom->coord(at_bnd)-geom->coord(at_srch)) << "\n";
 
-	      if ( !occupied[at_srch] && 
+	      if ( !occupied(at_srch) && 
 		   ( point(isrch).atom == "*" || point(isrch).atom == geom -> atom(at_srch) ))
 		bind(isrch,at_srch);
 	      else continue;

@@ -410,7 +410,7 @@ namespace qpp{
 
       index<DIM> I=a;
 
-      lace::vector2d<CREAL> p = mfold().project(r), p0=p;	  
+      lace::vector2d<CREAL> p(r.x(),r.y()), p0=p;	  
       std::vector<lace::vector3d<CREAL> > rr;
       rr.push_back( transform(r,0) );
       
@@ -446,10 +446,10 @@ namespace qpp{
 	  for (int i=0; i<rr.size(); i++)
 	    r += rr[i];
 	  r /= rr.size();
-	  std::cout << "symmtrap: ";
+	  std::cerr << "symmtrap: ";
 	  for (int i=0; i<rr.size(); i++) 
-	    std::cout << " " << rr[i];
-	  std::cout << "\n" << p0 << " => " << p << "\n";
+	    std::cerr << " " << rr[i];
+	  std::cerr << "\n" << p0 << " => " << p << "\n";
 	  r.x() = p.x;
 	  r.y() = p.y;
 	  r.z() = 0e0;

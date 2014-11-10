@@ -24,6 +24,9 @@ target_link_libraries(fullerene2 lbfgs qpp)
 add_executable(tor2 tor2.cpp)
 target_link_libraries(tor2 lbfgs qpp)
 
+add_executable(tor-symm tor-symm.cpp)
+target_link_libraries(tor-symm lbfgs qpp)
+
 add_executable(silicon silicon.cpp)
 target_link_libraries(silicon qpp)
 
