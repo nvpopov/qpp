@@ -481,6 +481,26 @@ int main(int argc, char* argv[])
   symm.order[2]=2;
   */
 
+  // C4v
+
+  symm(0) = lace::vector3d<double>(0e0, pi/3, 0e0);
+  symm.order[0]=6;
+
+
+  // C5
+  /*  
+  symm(0) = lace::vector3d<double>(0e0, 2*pi/5, 0e0);
+  symm(1) = Sigma(lace::vector3d<double>(0,1,0));
+  symm.order[0]=5;
+  symm.order[1]=2;
+  */
+
+  // C4v
+  /*
+  symm(0) = lace::vector3d<double>(0e0, pi/2, 0e0);
+  symm.order[0]=4;
+  */
+
   // C3v
   /*
   symm(0) = lace::vector3d<double>(0e0, 2*pi/3, 0e0);
@@ -488,16 +508,23 @@ int main(int argc, char* argv[])
   */
 
   // C2v
-  
+  /*  
   symm(0) = lace::vector3d<double>(0e0, pi, 0e0);
   symm.order[0]=2;
-  
+  */
 
   // S6
   /*
   symm(0) = lace::vector3d<double>(0e0, pi/3, 0e0);
   symm(0) = symm(0)*Sigma(lace::vector3d<double>(1,0,0));
   symm.order[0]=6;
+  */
+
+  // S4
+  /*
+  symm(0) = lace::vector3d<double>(0e0, pi/2, 0e0);
+  symm(0) = symm(0)*Sigma(lace::vector3d<double>(1,0,0));
+  symm.order[0]=4;
   */
   std::cerr << "alive0\n";
 

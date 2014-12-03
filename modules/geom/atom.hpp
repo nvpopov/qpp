@@ -32,7 +32,8 @@ namespace qpp{
     aprop_slater_basis       = 0x0400,
     aprop_tabulated_basis    = 0x1000,
     aprop_ecp                = 0x2000,
-    aprop_mcp                = 0x4000
+    aprop_mcp                = 0x4000,
+    aprop_visible            = 0x8000
   };
 
   // --------------------------------------------------
@@ -201,8 +202,8 @@ namespace qpp{
     using classical_atom<REAL>::gettype;
     using classical_atom<REAL>::name;
     using classical_atom<REAL>::number;
-   using classical_atom<REAL>::mass;
-   using classical_atom<REAL>::charge;
+    using classical_atom<REAL>::mass;
+    using classical_atom<REAL>::charge;
 
     polarizible_atom(std::string __name, int __number=0, float __charge = 0e0, float __mass = 0e0, 
 		     REAL __alpha=0e0) :
@@ -258,6 +259,79 @@ namespace qpp{
     {
       return new polarizible_atom(*this);
     }    
+
+  };
+
+  // -------------------------------------------------
+  // Classical atoms
+  class visible_atom : public qpp_atom{
+
+  public:
+
+    float cov_rad;
+    float vdw_rad;
+    float ionic_rad;
+    float color[3];
+
+    visible_atom(std::string __name, int __number, float _cov_rad, float _vdw_rad, 
+		 float _ionic_rad) : qpp_atom(__name,__number)
+    {
+      cov_rad	= _cov_rad;	
+      vdw_rad   = _vdw_rad;	
+      ionic_rad = _ionic_rad; 
+    }
+    
+    visible_atom(const visible_atom & a) :
+    qpp_atom( a.name(), a.number() )
+    {
+      cov_rad	= a.cov_rad;	
+      vdw_rad   = a.vdw_rad;	
+      ionic_rad = a.ionic_rad; 
+    }
+
+    virtual qppobject_type gettype() const
+    { return qtype_atom; }
+
+    virtual int atype() const
+    {return aprop_mendeleev_number | aprop_visible;}
+
+    virtual bool operator==(const qpp_atom &a) const
+    {
+      bool res = (gettype() == a.gettype()) && (atype() == a.atype());
+      if (res)
+	{ const visible_atom *aa = (const visible_atom*)(&a);
+	  res = name() == aa->name() && number() == aa->number() && 
+	    cov_rad == aa->cov_rad && 
+	    vdw_rad == aa->vdw_rad && 
+	    ionic_rad == aa->ionic_rad;
+	  // compare colors
+	}
+      return res;
+    }
+
+    virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const 
+    {
+      for (int i=0; i<offset; i++)
+	os << " ";
+      os << "atom " << name() << "{\n";
+      for (int i=0; i<offset+2; i++) os << " ";
+      os << "number = " << number() << ";\n";
+      for (int i=0; i<offset+2; i++) os << " ";
+      os << "cov_rad = " << cov_rad << ";\n";
+      for (int i=0; i<offset+2; i++) os << " ";
+      os << "vdw_rad = " << vdw_rad << ";\n";
+      for (int i=0; i<offset+2; i++) os << " ";
+      os << "ionic_rad = " << ionic_rad << ";\n";
+      //      for (int i=0; i<offset+2; i++) os << " ";
+      //      os << "color = " << cov_rad << ";\n";
+      for (int i=0; i<offset; i++) os << " ";
+      os << "}\n";
+    }
+
+    virtual qpp_atom* copy() const
+    {
+      return new visible_atom(*this);
+    }
 
   };
 
