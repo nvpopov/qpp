@@ -74,7 +74,8 @@ VALTYPE gulp_energy(qpp::geometry<DIM2,VALTYPE> & geom, std::vector< lace::vecto
   std::ofstream f("coord.xyz");
   qpp::write_xyz(f,geom);
   f.close();
-  system("gulp_script");
+  //  system("gulp_script");
+  system("ff_script");
 
   std::ifstream dat("tor.dat");
   VALTYPE E;

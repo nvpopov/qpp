@@ -1,0 +1,9 @@
+ $CONTRL SCFTYP=RHF RUNTYP=GRADIENT MAXIT=200
+ $END
+ $scf diis=.t. shift=.t. 
+ $end
+ $basis gbasis=pm3 $end
+ $guess guess=huckel $end
+ $data
+C20 fullerene
+C1 
