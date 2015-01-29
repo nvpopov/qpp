@@ -2,8 +2,8 @@
 #define _QPP_MANYFOLD
 
 #include <lace/lace3d.hpp>
-#include <constants.hpp>
-#include <io/qppdata.hpp>
+#include <data/qppdata.hpp>
+#include <mathf/constants.hpp>
 #include <mathf/specfunc.hpp>
 #include <geom/geom.hpp>
 #include <cmath>
@@ -19,10 +19,6 @@ namespace qpp{
 
   template <class VALTYPE>
   class parametric_surface : public qpp_object{
-
-  protected:
-    
-    STRING _name, _error;
 
   public:
 
@@ -78,32 +74,18 @@ namespace qpp{
 
     virtual VALTYPE surface_angle(v2d p1, v2d p2, v2d p3) =0;
 
-    virtual STRING name() const
-    {
-      return _name;
-    }
+    // from qpp_object
 
     virtual qppobject_type gettype() const
     {
       return qtype_manyfold;
     }
 
-    virtual int n_next() const
+    virtual int n_nested() const
     { return 0; }
 
-    virtual qpp_object* next(int i)
+    virtual qpp_object* nested(int i) const
     { return NULL; }
-
-    virtual void error(STRING const & what)
-    { 
-      _error = what;
-      throw qpp_exception(this);
-    }
-    
-    virtual STRING error()
-    {
-      return _error;
-    }
     
   };
 

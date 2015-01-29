@@ -1,8 +1,8 @@
 #ifndef _QPP_SHAPE_H
 #define _QPP_SHAPE_H
 
-#include <constants.hpp>
-#include <io/qppdata.hpp>
+#include <mathf/constants.hpp>
+#include <data/qppdata.hpp>
 #include <geom/geom.hpp>
 #include <lace/lace3d.hpp>
 
@@ -16,9 +16,11 @@ namespace qpp{
   template <class VALTYPE>
   class qpp_shape : public qpp_object{
 
-    STRING _error;
-
   public:
+
+    qpp_shape(const STRING & __name = "", qpp_object * __owner = NULL):
+      qpp_object(__name,__owner)
+    {}
 
     virtual bool within(const v3d & r) const =0;
     // Answers the question whether the r point is situated within the shape
@@ -38,25 +40,14 @@ namespace qpp{
 
     // -------------------------------------
 
-    virtual int n_next() const
+    virtual int n_nested() const
     { return 0;}
 
-    virtual qpp_object* next(int i)
+    virtual qpp_object* nested(int i) const
     { return NULL;}
 
     virtual qppobject_type gettype() const
     { return qtype_shape;}
-
-    virtual void error(STRING const & what)
-    {
-      _error = what;
-      throw qpp_exception(this);
-    }
-    
-    virtual STRING error()
-    {
-      return _error;
-    }
     
   };
 
@@ -64,8 +55,7 @@ namespace qpp{
 
   template <class VALTYPE>
   class qpp_shape_parallel : public qpp_shape<VALTYPE>{
-    STRING _name;
-    
+
     v3d crn, a[3];
 
     void fill_corners(v3d *corners) const
@@ -82,10 +72,12 @@ namespace qpp{
 
   public:
 
+    using qpp_shape<VALTYPE>::name;
+
     qpp_shape_parallel(const v3d & a1, const v3d & a2, const v3d & a3, const v3d & r0, 
-		       const STRING & __name = "")
+		       const STRING & __name = "", qpp_object * __owner = NULL) :
+      qpp_shape<VALTYPE>(__name, __owner)
     {
-      _name = __name;
       crn = r0;
       a[0] = a1;
       a[1] = a2;
@@ -93,18 +85,19 @@ namespace qpp{
     }
 
     qpp_shape_parallel(const v3d & a1, const v3d & a2, const v3d & a3, 
-		       const STRING & __name = "")
+		       const STRING & __name = "", qpp_object * __owner = NULL):
+      qpp_shape<VALTYPE>(__name, __owner)
     {
-      _name = __name;
-      crn = 0e0;
+       crn = 0e0;
       a[0] = a1;
       a[1] = a2;
       a[2] = a3;
     }
     
-    qpp_shape_parallel(VALTYPE a1, VALTYPE a2, VALTYPE a3, const STRING & __name = "")
+    qpp_shape_parallel(VALTYPE a1, VALTYPE a2, VALTYPE a3, 
+		       const STRING & __name = "", qpp_object * __owner = NULL):
+      qpp_shape<VALTYPE>(__name, __owner)
     {
-      _name = __name;
       crn = 0e0;
       a[0] = v3d(a1,  0e0, 0e0);
       a[0] = v3d(0e0, a2,  0e0);
@@ -114,16 +107,13 @@ namespace qpp{
     virtual STRING category() const
     { return "parallel";}
 
-    virtual STRING name() const
-    { return _name;}
-
     virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const
     {
       for (int i=0; i<offset; i++)
 	os << " ";
       os << "parallel";
-      if (_name != "")
-	os << " " << _name;
+      if (name() != "")
+	os << " " << name();
       os << "( a=" << a[0] << ", b=" << a[1] << ", c=" << a[2] << ", corner=" << crn << ");\n";
     }
 
@@ -228,22 +218,24 @@ namespace qpp{
   template <class VALTYPE>
   class qpp_shape_sphere : public qpp_shape<VALTYPE>{
 
-    STRING _name;
     VALTYPE R;
     v3d r0;
 
   public:
 
-    qpp_shape_sphere(VALTYPE _R, const STRING & __name = "")
+    using qpp_shape<VALTYPE>::name;
+
+    qpp_shape_sphere(VALTYPE _R, const STRING & __name = "", qpp_object * __owner = NULL):
+      qpp_shape<VALTYPE>(__name, __owner)
     {
-      _name = __name;
       R = _R;
       r0 = 0e0;
     }
 
-    qpp_shape_sphere(VALTYPE _R, const v3d & _r0, const STRING & __name = "")
+    qpp_shape_sphere(VALTYPE _R, const v3d & _r0, 
+		     const STRING & __name = "", qpp_object * __owner = NULL):
+      qpp_shape<VALTYPE>(__name, __owner)
     {
-      _name = __name;
       R = _R;
       r0 = _r0;
     }
@@ -251,16 +243,13 @@ namespace qpp{
     virtual STRING category() const
     { return "sphere";}
 
-    virtual STRING name() const
-    { return _name;}
-
     virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const
     {
       for (int i=0; i<offset; i++)
 	os << " ";
       os << "sphere";
-      if (_name != "")
-	os << " " << _name;
+      if (name() != "")
+	os << " " << name();
       os << "( R=" << R << ", center" << r0 << ");\n";
     }
 

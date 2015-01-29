@@ -3,7 +3,7 @@
 
 #include <geom/geom.hpp>
 #include <geom/zmt.hpp>
-#include <io/qppdata.hpp>
+#include <data/qppdata.hpp>
 #include <io/qpparser.hpp>
 #include <mathf/intlst.hpp>
 #include <string>

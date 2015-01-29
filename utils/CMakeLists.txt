@@ -1,8 +1,8 @@
-add_executable(zbuilder zbuilder.cpp)
-target_link_libraries(zbuilder qpp)
+#add_executable(zbuilder zbuilder.cpp)
+#target_link_libraries(zbuilder qpp)
 
-add_executable(ztrainer ztrainer.cpp)
-target_link_libraries(ztrainer qpp)
+#add_executable(ztrainer ztrainer.cpp)
+#target_link_libraries(ztrainer qpp)
 
 add_executable(gboundary gboundary.cpp)
 target_link_libraries(gboundary qpp)

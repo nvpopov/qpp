@@ -24,11 +24,11 @@ target_link_libraries(geom-xtr qpp)
 add_executable(molvec molvec.cpp)
 target_link_libraries(molvec qpp)
 
-add_executable(symplicator symplicator.cpp)
-target_link_libraries(symplicator qpp)
+#add_executable(symplicator symplicator.cpp)
+#target_link_libraries(symplicator qpp)
 
-add_executable(surfplicator surfplicator.cpp)
-target_link_libraries(surfplicator qpp)
+#add_executable(surfplicator surfplicator.cpp)
+#target_link_libraries(surfplicator qpp)
 
 add_executable(shape shape.cpp)
 target_link_libraries(shape qpp)

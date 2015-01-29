@@ -1,7 +1,7 @@
 #ifndef _QPP_BASIS_H
 #define _QPP_BASIS_H
 
-#include <io/qppdata.hpp>
+#include <data/qppdata.hpp>
 #include <geom/geom.hpp>
 #include <lace/lace3d.hpp>
 #include <boost/format.hpp>
@@ -194,7 +194,6 @@ namespace qpp{
 
   private:
     std::vector<atom_record> _rcrd;
-    STRING _name;
 
   public:
 
@@ -251,30 +250,17 @@ namespace qpp{
       add_shell(_rcrd.size()-1,sh);
     }
 
-    virtual int n_next() const
+    virtual int n_nested() const
     { return 0;}
 
-    virtual qpp_object* next(int i)
+    virtual qpp_object* nested(int i) const
     { return NULL;}
 
     virtual STRING category() const
     { return "basis";}
 
-    virtual STRING name() const
-    { return _name;}
-
     virtual qppobject_type gettype() const
     { return qtype_basis | qtype_basis_gauss | qtype_data<FREAL>::type; }
-
-    virtual void error(STRING const & what)
-    {
-      //fixme
-    }
-
-    virtual STRING error()
-    {
-      //fixme
-    }
 
     virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const
     {

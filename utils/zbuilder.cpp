@@ -6,7 +6,7 @@
 #endif
 
 #include <geom/shape.hpp>
-#include <geom/zpt.hpp>
+#include <zpt/zpt.hpp>
 
 #define DIM 3
 #define REAL double

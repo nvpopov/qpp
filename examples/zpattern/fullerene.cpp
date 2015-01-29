@@ -4,10 +4,10 @@
 #include <iomanip>
 #include <fstream>
 #include <boost/format.hpp>
-#include<geom/atom.hpp>
-#include<geom/geom.hpp>
-#include<geom/manyfold.hpp>
-#include <geom/zpt.hpp>
+#include <geom/atom.hpp>
+#include <geom/geom.hpp>
+#include <geom/manyfold.hpp>
+#include <zpt/zpt.hpp>
 #include <io/geomio.hpp>
 #include <stdlib.h>  
 #include <lbfgs.h>

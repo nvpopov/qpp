@@ -4,10 +4,10 @@
 #include <string>
 #include <vector>
 #include <algorithm>
-#include <io/qppdata.hpp>
+#include <data/qppdata.hpp>
 #include <geom/geom.hpp>
 #include <geom/manyfold.hpp>
-#include <constants.hpp>
+#include <mathf/constants.hpp>
 #include <lace/lace3d.hpp>
 
 namespace qpp{

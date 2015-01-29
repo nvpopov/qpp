@@ -7,7 +7,7 @@
 #include<geom/atom.hpp>
 #include<geom/geom.hpp>
 #include<geom/manyfold.hpp>
-#include <geom/zpt.hpp>
+#include <zpt/zpt.hpp>
 #include <geom/geom_extras.hpp>
 #include <io/geomio.hpp>
 #include <stdlib.h>  

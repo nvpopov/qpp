@@ -6,8 +6,8 @@
 #include <lace/lace3d.hpp>
 //#include <lace/lace.hpp>
 //#include <symm/symm.hpp>
-#include <io/qppdata.hpp>
-#include <constants.hpp>
+#include <data/qppdata.hpp>
+#include <mathf/constants.hpp>
 
 namespace qpp{
 
@@ -128,22 +128,18 @@ namespace qpp{
   struct periodic_cell :  public qpp_object{
     lace::vector3d<CREAL> v[DIM];
 
-    STRING _name;
+    periodic_cell(const STRING & __name = "", qpp_object * __owner = NULL) : qpp_object(__name,_owner)
+    {}
 
-    periodic_cell(const STRING &__name = "")
+    periodic_cell(const periodic_cell<DIM,CREAL> & cl) : qpp_object(cl.name(), cl.owner())
     {
-      _name = __name;
-    }
-
-    periodic_cell(const periodic_cell<DIM,CREAL> & cl)
-    {
-      _name = cl._name;
       for(int i=0; i<DIM; i++)
 	v[i] = cl.v[i];
     }
 
     periodic_cell(CREAL a, CREAL b, CREAL c,
-		  CREAL alpha, CREAL beta, CREAL gamma, STRING __name = "")
+		  CREAL alpha, CREAL beta, CREAL gamma, 
+		  const STRING & __name = "", qpp_object * __owner = NULL) : qpp_object(__name,_owner)
     // for DIM==3
     {
       v[0] = lace::vector3d<CREAL>(a,CREAL(0),CREAL(0));
@@ -157,9 +153,9 @@ namespace qpp{
       _name = __name;
     }
 
-    periodic_cell(lace::vector3d<CREAL > a, lace::vector3d<CREAL > b=0, lace::vector3d<CREAL > c=0)
+    periodic_cell(lace::vector3d<CREAL > a, lace::vector3d<CREAL > b=0, lace::vector3d<CREAL > c=0,
+		  const STRING & __name = "", qpp_object * __owner = NULL) : qpp_object(__name,_owner)
     {
-      _name = "";
       if (DIM>0)
 	v[0] = a;
       if (DIM>1)
@@ -297,11 +293,6 @@ namespace qpp{
       return "vectors";
     }
 
-    virtual STRING name() const
-    {
-      return _name;
-    }
-
     virtual qppobject_type gettype() const
     {
       int d;
@@ -316,14 +307,10 @@ namespace qpp{
       return qtype_vectors | d | qtype_data<CREAL>::type;
     }
 
-    virtual void error(STRING const &){}
-
-    virtual STRING error(){return "";}
-
-    virtual int n_next() const
+    virtual int n_nested() const
     { return 0; }
 
-    virtual qpp_object* next(int i)
+    virtual qpp_object* nested(int i) const
     { return NULL; }
 
     virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const
@@ -368,19 +355,10 @@ namespace qpp{
   //--------------------------------------------------------------//
 
   // The geometry class stores atoms together with their
-  // coordinates. As ATOM is a template parameter, you can
-  // use almost everything as POINT, even emply class.
-  //
-  // In this latter case you get just points with coordinates
-  // Such object can be used to store, say, displacement
-  // vectors or vibrational mode vectors.
-  //
-  // If ATOM is something more substatial, you can store any information
-  // about atoms as well
+  // coordinates. 
 
-  // geometry is an ancestor for molecule
   template< int DIM, class CREAL=double, class TRANSFORM = periodic_cell<DIM,CREAL> >
-  class geometry : public qpp_object{
+  class geometry : public qpp_array{
 
   protected:
 
@@ -395,13 +373,15 @@ namespace qpp{
 
     std::vector<char> _shadow;
 
-    STRING _name, _error;
-
     TRANSFORM * trnf;
 
     std::vector<geometry_dependent*> dependents;
 
+    int _nparm;
+
   public:
+
+    using qpp_array::add;
     //    periodic_cell<DIM,CREAL,charT,traits> cell;
     //    bool update_types, update_neighbours;
     bool update_types;
@@ -546,32 +526,9 @@ namespace qpp{
     // ---------------------------------------------------------
   public:
 
-    virtual int n_next() const
-    {
-      return DIM==0? 0 : 1;
-    }
-
-    virtual qpp_object* next(int i)
-    {
-      if (DIM>0 && i==1)
-	return trnf;
-      else
-	return NULL;
-    }
-
     virtual STRING category() const
     {
       return "geometry";
-    }
-
-    virtual STRING name() const
-    {
-      return _name;
-    }
-
-    void setname(STRING __name)
-    {
-      _name = __name;
     }
 
     virtual qppobject_type gettype() const
@@ -588,6 +545,15 @@ namespace qpp{
       return qtype_geometry | d | qtype_data<CREAL>::type;
     }
 
+    int n_param() const
+    {
+      return _nparm;
+    }
+
+    qpp_object * param(int i) const
+    {
+      return nested(i);
+    }
     inline int size() const
     {return crd.size();}
 
@@ -615,24 +581,21 @@ namespace qpp{
       return trnf -> transform(crd[i.atom()],i);
     }
 
-    virtual void error(STRING const & what)
-    {
-      _error = what;
-      throw qpp_exception(this);
-    }
-
-    virtual STRING error()
-    {
-      return _error;
-    }
-
     virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const
     {
       for (int k=0; k<offset; k++) os << " ";
       os << "geometry";
       if (_name != "")
 	os << " " << _name;
-      os << "(" << DIM << "d,atom,x,y,z){\n";
+      //      os << "(" << DIM << "d,atom,x,y,z){\n";
+      os << "(";
+      for (int i=0; i<n_param(); i++)
+	{
+	  param(i)->write(os);
+	  if (i<n_param()-1)
+	    os << ",";
+	}
+      os << "){\n";
 
       for (int i=0; i<size(); i++)
 	{
@@ -1321,23 +1284,47 @@ namespace qpp{
 	
     };
       
+  protected:
+    qpp_param_array * _makeparam()
+    {
+      qpp_param_array * _parm = new qpp_param_array("parameters",this);
+      _parm->add(*new qpp_parameter<int>("dim",DIM,_parm));
+
+      return _parm;
+    }
+
+    void _addparam(qpp_param_array * __parm)
+    {
+       if (__parm == NULL)
+	 __parm = _makeparam();
+	
+       for (int i=0; i<__parm->n_nested(); i++)
+	 add(*__parm->nested(i));
+       _nparm =__parm->n_nested(); 
+    }
+    
+  public:
     // --------------- Constructors & destructors --------------------
 
-    geometry(TRANSFORM & _trnf, const STRING & __name = "") : trnf(&_trnf), cell(_trnf), ngbr(*this)
+    geometry(TRANSFORM & _trnf, const STRING & __name = "", 
+	     qpp_object * __owner = NULL, qpp_param_array * __parm = NULL) : 
+      qpp_array(__name,__owner), trnf(&_trnf), cell(_trnf), ngbr(*this)
     {
-      _name = __name;
       //      trnf = & _trnf;
       update_types = false;
       geomtol = default_geomtol;
+      _addparam(__parm);
       //update_neighbours = false;
     }
 
-    geometry(const STRING & __name = "") : trnf(new TRANSFORM), cell(*trnf), ngbr(*this)
+    geometry(const STRING & __name = "", 
+	     qpp_object * __owner = NULL, qpp_param_array * __parm = NULL) : 
+      qpp_array(__name,__owner), trnf(new TRANSFORM), cell(*trnf), ngbr(*this)
     {
-      _name = __name;
       update_types = false;
       geomtol = default_geomtol;
-      //update_neighbours = false;
+      //update_neighbours = false; 
+      _addparam(__parm);
     }
 
     ~geometry()
@@ -1348,6 +1335,7 @@ namespace qpp{
 
     void copy(const geometry<DIM, CREAL, TRANSFORM> &G)
     {
+      // fixme - what is necessary to copy?
       clear();
       atm = G.atm;
       crd = G.crd;

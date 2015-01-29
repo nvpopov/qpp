@@ -4,7 +4,7 @@
 #include <iomanip>
 #include <fstream>
 #include <boost/format.hpp>
-#include<geom/atom.hpp>
+#include<data/atom.hpp>
 #include<geom/geom.hpp>
 #include<geom/geom_extras.hpp>
 //#include<geom/molecule.hpp>

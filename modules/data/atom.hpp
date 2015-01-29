@@ -3,7 +3,7 @@
 
 #include <string>
 #include <sstream>
-#include <io/qppdata.hpp>
+#include <data/qppdata.hpp>
 
 namespace qpp{
 
@@ -38,40 +38,34 @@ namespace qpp{
 
   // --------------------------------------------------
   // basic class for all other types of atoms
-  class qpp_atom : qpp_object{
+  class qpp_atom : public qpp_object{
 
     // Atom always has a name
     // It is supposed to be unique for each type of atoms
-    STRING _name, _error;
     int _number; // Number in periodic table
 
   public:
 
-    qpp_atom(std::string __name, int __number=0)
+    qpp_atom(STRING __name, qpp_object * __owner = NULL, int __number=0) : 
+      qpp_object(__name, __owner)
     {
-      _name=__name;
       _number=__number;
     }
 
-    qpp_atom(const qpp_atom & a)
+    qpp_atom(const qpp_atom & a) :
+      qpp_object(a.name(),a.owner())
     {
-      _name = a._name;
-      _number = a._number;
-    }
+      _number=a._number;
+    } 
 
-    virtual int n_next() const
+    virtual int n_nested() const
     { return 0;}
 
-    virtual qpp_object* next(int i)
+    virtual qpp_object* nested(int i) const
     { return NULL;}
 
     virtual STRING category() const
     { return "atom";}
-
-    virtual STRING name() const
-    {
-      return _name;
-    }
 
     int number() const
     { return _number;}
@@ -82,18 +76,7 @@ namespace qpp{
     virtual int atype() const
     {return aprop_mendeleev_number;}
 
-    virtual void error(STRING const & what)
-    {
-      _error = what;
-      throw qpp_exception(this);
-    }
-
-    virtual STRING error()
-    {
-      return _error;
-    }
-
-    virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const 
+    virtual void write(OSTREAM &os, int offset=0) const 
     {
       for (int i=0; i<offset; i++)
 	os << " ";
@@ -133,15 +116,16 @@ namespace qpp{
     REAL _mass;   // Atomic mass
   public:
 
-    classical_atom(std::string __name, int __number=0, float __charge = 0e0, float __mass = 0e0) : 
-      qpp_atom(__name,__number)
+    classical_atom(STRING __name, qpp_object * __owner = NULL, 
+		   int __number=0, float __charge = 0e0, float __mass = 0e0) : 
+      qpp_atom(__name,__owner,__number)
     {
       _charge = __charge;
       _mass   = __mass;
     }
 
     classical_atom(const classical_atom & a) :
-      qpp_atom(a.name,a.number)
+      qpp_atom(a.name(),a.owner(),a.number())
     {
       _charge = a._charge;
       _mass   = a._mass;
@@ -205,15 +189,16 @@ namespace qpp{
     using classical_atom<REAL>::mass;
     using classical_atom<REAL>::charge;
 
-    polarizible_atom(std::string __name, int __number=0, float __charge = 0e0, float __mass = 0e0, 
+    polarizible_atom(STRING __name, qpp_object * __owner = NULL, 
+		     int __number=0, float __charge = 0e0, float __mass = 0e0, 
 		     REAL __alpha=0e0) :
-      classical_atom<REAL>(__name,__number,__charge,__mass)
+      classical_atom<REAL>(__name,__owner,__number,__charge,__mass)
     {
       _alpha  = __alpha;
     }
 
     polarizible_atom(const polarizible_atom<REAL> & a) :
-      classical_atom<REAL>(a.name(),a.number(),a.charge(),a.mass())
+      classical_atom<REAL>(a.name(),a.owner(),a.number(),a.charge(),a.mass())
     {
       _alpha  = a.alpha();
     }
@@ -273,8 +258,16 @@ namespace qpp{
     float ionic_rad;
     float color[3];
 
-    visible_atom(std::string __name, int __number, float _cov_rad, float _vdw_rad, 
-		 float _ionic_rad) : qpp_atom(__name,__number)
+    /*
+    polarizible_atom(STRING __name, qpp_object * __owner = NULL, 
+		     int __number=0, float __charge = 0e0, float __mass = 0e0, 
+		     REAL __alpha=0e0) :
+      classical_atom<REAL>(__name,__owner,__number,__charge,__mass)
+    */
+    visible_atom(STRING __name, qpp_object * __owner = NULL, 
+		 int __number=0, float _cov_rad=0, float _vdw_rad=0, 
+		 float _ionic_rad=0) : 
+      qpp_atom(__name,__owner,__number)
     {
       cov_rad	= _cov_rad;	
       vdw_rad   = _vdw_rad;	
@@ -282,7 +275,7 @@ namespace qpp{
     }
     
     visible_atom(const visible_atom & a) :
-    qpp_atom( a.name(), a.number() )
+      qpp_atom( a.name(), a.owner(),a.number() )
     {
       cov_rad	= a.cov_rad;	
       vdw_rad   = a.vdw_rad;	

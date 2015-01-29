@@ -4,10 +4,10 @@
 #include <iomanip>
 #include <fstream>
 #include <boost/format.hpp>
-#include<geom/atom.hpp>
-#include<geom/geom.hpp>
-#include<geom/manyfold.hpp>
-#include <geom/zpt.hpp>
+#include <geom/atom.hpp>
+#include <geom/geom.hpp>
+#include <geom/manyfold.hpp>
+#include <zpt/zpt.hpp>
 #include <geom/geom_extras.hpp>
 #include <io/geomio.hpp>
 #include <stdlib.h>  
@@ -33,6 +33,9 @@ typedef qpp::geometry<DIM,REAL,qpp::surf_symplicator<DIM,REAL> > surfgeom;
 typedef qpp::zpattern<DIM,REAL,qpp::surf_symplicator<DIM,REAL> > zpt;
 
 surfgeom * g;
+
+std::ofstream fxyz;
+
 
 // -----------------------------------------------------------------------------------------
 
@@ -74,7 +77,7 @@ VALTYPE gulp_energy(qpp::geometry<DIM2,VALTYPE> & geom, std::vector< lace::vecto
   std::ofstream f("coord.xyz");
   qpp::write_xyz(f,geom);
   f.close();
-  //  system("gulp_script");
+  //system("gulp_script");
   system("ff_script");
 
   std::ifstream dat("tor.dat");
@@ -148,7 +151,7 @@ int progress( void *instance, const REAL *x, const REAL *g, REAL fx, REAL xnorm,
 	      REAL step, int n, int k, int ls)
 {
   if (iter==0)
-    qpp::write_xyz(std::cout,G);
+    qpp::write_xyz(fxyz,G);
   iter++;
   iter = iter%10;
   std::cerr<<boost::format("Iteration %d:\n")% k;
@@ -313,7 +316,7 @@ void conf0(surfgeom & g)
 {
   v2d p0(0.3,0);
   v2d p1 = mfold->ruler(p0,v2d(.3,1),rcc);  
-  v2d p2 = mfold->triangul(p0,p1,rcc,3*qpp::pi/5);
+  v2d p2 = mfold->triangul(p0,p1,rcc,2*qpp::pi/3);
   g.add("C",p0.x,p0.y,0e0);
   g.add("C",p1.x,p1.y,0e0);
   g.add("C",p2.x,p2.y,0e0);
@@ -325,6 +328,18 @@ void conf2(surfgeom & g)
   v2d p1 = mfold->ruler(p0,v2d(.3,1),rcc);  
   v2d p2 = mfold->triangul(p0,p1,rcc, 3*qpp::pi/5);
   g.add("C",p0.x,p0.y,0e0);
+}
+
+void conf_ch3(surfgeom & g)
+{
+  v2d p0(pi/2,0);
+  v2d p1 = mfold->ruler(p0,v2d(-1,0),1.);
+  v2d p2 = mfold->ruler(p0,v2d(.5,  std::sqrt(3.)/2), 1.);
+  v2d p3 = mfold->ruler(p0,v2d(.5, -std::sqrt(3.)/2), 1.);
+  g.add("C",p0.x,p0.y,0e0);
+  g.add("H",p1.x,p1.y,0e0);
+  g.add("H",p2.x,p2.y,0e0);
+  g.add("H",p3.x,p3.y,0e0);
 }
 
 //-------------------------------------------------------------------------------------------
@@ -444,6 +459,8 @@ int main(int argc, char* argv[])
   R = atof(argv[1]);
   r = atof(argv[2]);
   std::ifstream zinp(argv[3]);
+
+  fxyz.open("new.xyz");
   
   mfold = new qpp::parametric_torus<REAL>(R,r);
   //mfold = new qpp::parametric_sphere<REAL>(R);
@@ -452,7 +469,8 @@ int main(int argc, char* argv[])
   g = new surfgeom(symm);
   g->geomtol = 1e-5;
 
-  conf0(*g);
+  //  conf0(*g);
+  conf_ch3(*g);
   g2G(*g,G);
 
   //  std::vector<zpt*> zz;
@@ -474,7 +492,7 @@ int main(int argc, char* argv[])
   qpp::init_rand();
   qpp::random_integer_lister lst;
      
-  qpp::write_xyz(std::cout, G);
+  qpp::write_xyz(fxyz, G);
   
   //  for (int i=0; i<zz.size();i++)
   zz.init_surf(*g, 0.8);
@@ -500,7 +518,7 @@ int main(int argc, char* argv[])
 	    s << " " << zz(i).bound(k)+1;
 	  
 	  G.setname(s.str());
-	  qpp::write_xyz(std::cout,G); 
+	  qpp::write_xyz(fxyz,G); 
 
 
 	  natopt++;
@@ -540,6 +558,7 @@ int main(int argc, char* argv[])
 
 
     }    
+  fxyz.close();
   }
   catch (qpp::qpp_exception & e)
     {

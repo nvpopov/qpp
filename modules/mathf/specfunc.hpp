@@ -1,8 +1,7 @@
 #ifndef _QPP_SPECFUNC_H
 #define _QPP_SPECFUNC_H
 
-#include <constants.hpp>
-//#include <lace/lace.hpp>
+#include <mathf/constants.hpp>
 #include <lace/lace3d.hpp>
 
 namespace qpp{
