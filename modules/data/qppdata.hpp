@@ -486,7 +486,7 @@ namespace qpp{
     STRING _category;
     int _line;
     STRING _file;
-    int _nparm;
+    qpp_param_array * _parm;
 
   public:
 
@@ -499,14 +499,12 @@ namespace qpp{
       _line = __line;
       _file = __file;
 
-      if (__parm != NULL)
-	{
-	  for (int i=0; i<__parm->n_nested(); i++)
-	    add(*__parm->nested(i));
-	  _nparm =__parm->n_nested(); 
-	}
-      else
-	_nparm = 0;
+      _parm = __parm;
+      if (_parm == NULL)
+	_parm = new qpp_param_array;
+
+      for (int i=0; i<_parm->n_nested(); i++)
+	add(*_parm->nested(i));
     }
 
     virtual STRING category() const
@@ -521,35 +519,41 @@ namespace qpp{
 
     int n_param() const
     {
-      return _nparm;
+      return _parm->n_nested();;
     }
 
     qpp_object * param(int i) const
     {
-      return nested(i);
+      return _parm->nested(i);
+    }
+
+    qpp_param_array * parameters()
+    {
+      return _parm;
     }
 
     void insert_param(int i, qpp_object & q)
     {
+      _parm -> insert(i,q);
       insert(i,q);
-      _nparm++;
     }
 
     void add_param(qpp_object & q)
     {
-      insert(_nparm,q);
-      _nparm++;
+      int nparm = _parm->n_nested();
+      _parm -> insert(nparm,q);
+      insert(nparm,q);
     }
 
     void erase_param(int i)
     {
+      _parm->erase(i);
       erase(i);
-      _nparm--;
     }
 
     void insert_decl(int i, qpp_object & q)
     {
-      insert(_nparm+i,q);
+      insert(_parm->n_nested()+i,q);
     }
 
     void add_decl(qpp_object & q)
@@ -559,17 +563,17 @@ namespace qpp{
 
     void erase_decl(int i)
     {
-      erase(_nparm+i);
+      erase(_parm->n_nested()+i);
     }
 
     int n_decl() const
     {
-      return n_nested()-_nparm;
+      return n_nested()-_parm->n_nested();
     }
 
     qpp_object * decl(int i) const
     {
-      return nested(_nparm+i);
+      return nested(_parm->n_nested()+i);
     }
 
     void write(OSTREAM &os, int offset =0) const
@@ -613,6 +617,16 @@ namespace qpp{
 	}
       else
 	os << ";\n";
+    }
+
+    int line() const
+    {
+      return _line;
+    }
+
+    STRING file() const
+    {
+      return _file;
     }
 
   };
