@@ -46,6 +46,13 @@ else()
      message("Configuring molcad not enabled..")
 endif()
 
+if (DEFINED QPP_NVP_TOOLS)
+     message("Configuring additional nvpopov tools...")
+     add_subdirectory(tools/mparser)
+else()
+     message("Configuring additional nvpopov tools not enabled..")
+endif()
+
 
 
 if (DEFINED QPP_C11)
