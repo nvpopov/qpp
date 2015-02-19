@@ -64,6 +64,9 @@ class CIWaveFuncConf
 {
 public:
 	std::vector<int> conf_space;
+	int _f;
+	int _d;
+	int _s;
 	int    conf_space_size;
 	int    conf_num;
 	float  conf_weight;
@@ -226,9 +229,9 @@ std::vector<NatOrbOcc*> ParseNatOrbOcc(std::ifstream& mfile)
 					noc->occ[i+q]=atof(occ_line2.at(i).c_str());
 				}
 
-//				for(int i=0; i<noc->occ.size(); i++)
-//					std::cout<<noc->occ.at(i)<< " ";
-//				std::cout<<std::endl;
+				//				for(int i=0; i<noc->occ.size(); i++)
+				//					std::cout<<noc->occ.at(i)<< " ";
+				//				std::cout<<std::endl;
 			}
 
 		}
@@ -255,6 +258,74 @@ void AnalyzeOcc(std::vector<NatOrbOcc*> natorbocc, int state_num)
 	std::cout<<std::endl;
 }
 
+void AnalyzeFDStates(std::vector<CIWaveFunc*>  roots, int state_num)
+{
+	CIWaveFunc* root=roots.at(state_num);
+	//Print state
+	int __ff =0;
+	int __dd =0;
+	int __s =0;
+	int __fs =0;
+	int __ds =0;
+	int __fd =0;
+
+	for(int i=0; i<root->conf.size();i++)
+	{
+		int c_f=0;
+		int c_d=0;
+		int c_s=0;
+		std::cout<<(i+1)<<":" ;
+		for(int q=0; q<root->conf.at(i)->conf_space.size();q++)
+		{
+			int state_val = root->conf.at(i)->conf_space.at(q);
+			switch(state_val)
+			{
+			case(SPIN_UP):
+				std::cout<<"u";
+				break;
+			case(SPIN_DOWN):
+				std::cout<<"d";
+				break;
+			case(SPIN_FULL):
+				std::cout<<"2";
+				break;
+			case(SPIN_HOLE):
+				std::cout<<"0";
+				break;
+			default:
+				break;
+			}
+
+			//f state
+			if((q>=0)&&(q<7)&&((state_val==SPIN_DOWN)or(state_val==SPIN_UP))) c_f+=1;
+			if((q>=0)&&(q<7)&&(state_val==SPIN_FULL)) c_f+=2;
+
+			//d state
+			if((q>=7)&&(q<12)&&((state_val==SPIN_DOWN)or(state_val==SPIN_UP))) c_d+=1;
+			if((q>=7)&&(q<12)&&(state_val==SPIN_FULL)) c_d+=2;
+
+			//s state
+			if((q==12)&&((state_val==SPIN_DOWN)or(state_val==SPIN_UP))) c_s+=1;
+			if((q==12)&&(state_val==SPIN_FULL)) c_s+=2;
+			
+			root->conf.at(i)->_f=c_f;
+			root->conf.at(i)->_d=c_d;
+			root->conf.at(i)->_s=c_s;
+
+		}
+
+		if((c_f>0)and(c_d>0))__fd+=1;
+		if((c_f>0)and(c_d>0))__fd+=1;
+
+		std::cout<<"  f("<<c_f<<"),d("<<c_d<<"),s("<<c_s<<")";
+
+		std::cout<<std::endl;
+	}
+//
+	std::cout<<std::endl;
+
+}
+
 int main(int argc, char *argv[])
 {
 	std::string line;
@@ -264,26 +335,27 @@ int main(int argc, char *argv[])
 	std::ifstream mf2("inp.log");
 	std::vector<NatOrbOcc*> occs = ParseNatOrbOcc(mf2);
 
-	//std::cout<<roots.size()<<std::endl;
-	//std::cout<<GetCIMaxmimumWeight(roots)<<std::endl;
-//	for(int q=0; q<roots.size(); q++)
-//	{
-//		float avr = GetConfAverageWeight(roots.at(q));
-//		float max = GetConfMaximumWeight(roots.at(q));
+	//	//std::cout<<roots.size()<<std::endl;
+	//	//std::cout<<GetCIMaxmimumWeight(roots)<<std::endl;
+	////	for(int q=0; q<roots.size(); q++)
+	////	{
+	////		float avr = GetConfAverageWeight(roots.at(q));
+	////		float max = GetConfMaximumWeight(roots.at(q));
 
-//		CIWaveFunc* root = roots.at(q);
-//		float enr = root->energy - roots.at(0)->energy;
-//		for(int i=0; i<root->conf.size();i++)
-//		{
-//			CIWaveFuncConf* conf = root->conf.at(i);
-//			if(conf->conf_weight>max*0.75)
-//			{
-//				std::cout<<GetConfSpaceType(conf->conf_space)<<"("<<conf->conf_weight<<")";
-//			}
+	////		CIWaveFunc* root = roots.at(q);
+	////		float enr = root->energy - roots.at(0)->energy;
+	////		for(int i=0; i<root->conf.size();i++)
+	////		{
+	////			CIWaveFuncConf* conf = root->conf.at(i);
+	////			if(conf->conf_weight>max*0.75)
+	////			{
+	////				std::cout<<GetConfSpaceType(conf->conf_space)<<"("<<conf->conf_weight<<")";
+	////			}
 
-//		}
-//		std::cout<<" "<<enr*220000<<std::endl;
-//	}
-	for(int i=0; i<occs.size(); i++)
-		AnalyzeOcc(occs,i);
+	////		}
+	////		std::cout<<" "<<enr*220000<<std::endl;
+	////	}
+//		for(int i=0; i<occs.size(); i++)
+//			AnalyzeOcc(occs,i);
+	AnalyzeFDStates(roots,0);
 }
