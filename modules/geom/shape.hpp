@@ -104,8 +104,23 @@ namespace qpp{
       a[0] = v3d(0e0, 0e0, a3);
     }
 
+    qpp_shape_parallel(const qpp_shape_parallel<VALTYPE> & s)
+    {
+      crn = s.crn;
+      a[0] = s.a[0];
+      a[1] = s.a[1];
+      a[2] = s.a[2];
+    }
+
     virtual STRING category() const
     { return "parallel";}
+
+    
+
+    virtual qpp_object * copy() const
+    {
+      return new qpp_shape_parallel<VALTYPE>(*this);
+    }
 
     virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const
     {

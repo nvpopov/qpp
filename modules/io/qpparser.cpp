@@ -185,7 +185,12 @@ qpp::qpp_object *parse_any_geom(qpp::qpp_param_array& parm, STRING name,
 	}
 	}
   if (!defined)
-	defined = owner -> parameter(dim,"dim",qpp::qscope_global);
+    {
+      qpp::qpp_parameter<int> * pdim = owner -> parameter<int>("dim",qpp::qscope_global);
+      defined = (pdim != NULL);
+      if (defined)
+	dim = pdim->value();
+    }
 
   if (!defined)
 	owner->error("Dimension of the geometry not defined",tok.line(),tok.file());
@@ -366,4 +371,11 @@ qpp::qpp_object * parse_declaration(qpp::tokenizer & tok, qpp::qpp_object * owne
 
 }
 
+  qpp::qpp_object * qpp_compile( qpp::qpp_object * q)
+  {
+    if (q->gettype() == qpp::qtype_declaration)
+      {}
+  }
+
 };
+

@@ -1,7 +1,7 @@
-molecule Ca4F8_embed
+molecule Ca4F8_embed(0d)
 {
 
-  fragment CaF2_UC(3d,atom,x,y,z,real)
+  fragment CaF2_UC(3d,atom,x,y,z,charge=real)
   {
     Ca  0.00  0.00  0.00   2.00
     F   1.38  1.38  1.38  -0.25
@@ -20,11 +20,11 @@ molecule Ca4F8_embed
     0.00 2.76 2.76
   }
 
-  replicate(CaF2_UC,sphere(R=25.0),center(1.38,1.38,1.38));
+  replicate(CaF2_UC,sphere(R(25.0)),center(1.38,1.38,1.38));
   replace( Ca, Ca_cls, sphere(R=15.0));
   replace(  F,  F_cls, sphere(R=15.0));
 
-  fragment QM_cluster{
+  fragment QM_cluster(dim=0){
     F_QM   0.00  0.00  0.00
     F_QM   2.76  0.00  0.00
     F_QM  -2.76  0.00  0.00
@@ -60,5 +60,10 @@ molecule Ca4F8_embed
     charge = -1.0;
     alpha = 0.5;
   }
+
+  guess(huckel);
+  
+  scf(method(diis(1)));
+  scf(diis);
 
 }

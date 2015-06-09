@@ -313,6 +313,11 @@ struct periodic_cell :  public qpp_object{
 	virtual qpp_object* nested(int i) const
 	{ return NULL; }
 
+        virtual qpp_object * copy() const
+        {
+	  return new periodic_cell<DIM,CREAL>(*this);
+	}
+
 	virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const
 	{
 		for (int k=0; k<offset; k++) os << " ";
@@ -608,6 +613,11 @@ public:
 		os << "}\n";
 	}
 
+  virtual qpp_object * copy() const
+  {
+    return new geometry<DIM,CREAL,TRANSFORM>(*this);
+  }
+
 	//------------------- Type table operations -------------------------
 
 private:
@@ -776,7 +786,7 @@ public:
 
 		inline void to_grain(const index<DIM> & at)
 		{
-			lace::vector3d<CREAL> r = geom->position(at);
+		  //lace::vector3d<CREAL> r = geom->position(at);
 			int i,j,k;
 			ijk_grain(at,i,j,k);
 			if ( i>=0 && i<grain_nx && j>=0 && j<grain_ny && k>=0 && k<grain_nz)

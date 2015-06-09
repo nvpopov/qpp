@@ -190,6 +190,13 @@ namespace qpp{
       std::vector<STRING> labels;
       std::vector<int> numbers;
 
+      atom_record(const atom_record & a) : 
+	shells(a.shells), labels(a.labels), numbers(a.numbers)
+      {}
+
+      atom_record()
+      {}
+
     };
 
   private:
@@ -199,6 +206,10 @@ namespace qpp{
 
     gencon_basis_data(const STRING & __name = "")
     { _name = __name; }    
+
+    gencon_basis_data(const gencon_basis_data<FREAL> & q) :
+    _rcrd(q._rcrd)
+    {}
 
     inline int nrcrd() const
     { return _rcrd.size();}
@@ -261,6 +272,11 @@ namespace qpp{
 
     virtual qppobject_type gettype() const
     { return qtype_basis | qtype_basis_gauss | qtype_data<FREAL>::type; }
+
+    virtual qpp_object * copy() const
+    {
+      return new gencon_basis_data(*this);
+    }
 
     virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const
     {

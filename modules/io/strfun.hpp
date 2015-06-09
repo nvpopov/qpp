@@ -1,7 +1,8 @@
 #ifndef _QPP_STRFUN
 #define _QPP_STRFUN
 
-#include <data/qppdata.hpp>
+#include <data/types.hpp>
+#include <vector>
 #include <fstream>
 #include <algorithm>
 #include <iostream>

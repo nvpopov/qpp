@@ -456,6 +456,10 @@ namespace _qpp_internal{
   qpp::qpp_object * parse_declaration(qpp::tokenizer & tok, qpp::qpp_object * owner );
 
   void qpp_read(qpp::ISTREAM & is, std::vector<qpp::qpp_object*> & decls);
+
+  qpp::qpp_object * qpp_compile( qpp::qpp_object * q);
+
+
   // ---------------------------------------------------------
 
   //  qpp::qpp_object *parse_any_geom(int dim, std::vector<qpp::qpp_object*>& parm, STRING name, tokenizer & tok);
@@ -476,6 +480,7 @@ namespace _qpp_internal{
 namespace qpp{
 
   using _qpp_internal::qpp_read;
+  using _qpp_internal::qpp_compile;
 
 };
 

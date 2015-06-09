@@ -57,7 +57,7 @@ int main(int argc, char **argv)
       else if (ff[0]=="int")
 	{
 	  int i;
-	  bool s = current->parameter<int>(i,ff[1],qpp::qscope_global);
+	  bool s = current->getparamvalue<int>(i,ff[1],qpp::qscope_global);
 	  if (s)
 	    std::cout << i << "\n";
 	  else 
@@ -66,7 +66,7 @@ int main(int argc, char **argv)
       else if (ff[0]=="real")
 	{
 	  double d;
-	  bool s = current->parameter<double>(d,ff[1],qpp::qscope_global);
+	  bool s = current->getparamvalue<double>(d,ff[1],qpp::qscope_global);
 	  if (s)
 	    std::cout << d << "\n";
 	  else 
@@ -75,7 +75,7 @@ int main(int argc, char **argv)
       else if (ff[0]=="bool")
 	{
 	  bool b;
-	  bool s = current->parameter<bool>(b,ff[1],qpp::qscope_global);
+	  bool s = current->getparamvalue<bool>(b,ff[1],qpp::qscope_global);
 	  if (s)
 	    std::cout << b << "\n";
 	  else 

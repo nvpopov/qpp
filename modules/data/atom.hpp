@@ -4,6 +4,7 @@
 #include <string>
 #include <sstream>
 #include <data/qppdata.hpp>
+#include <basis/basis.hpp>
 
 namespace qpp{
 
@@ -25,8 +26,8 @@ namespace qpp{
     aprop_4body_potential     = 0x0020,
     aprop_many_body_potential = 0x0040,
 
-    aprop_classic_potentials  = aprop_pair_potential  | aprop_3body_potential | 
-                                aprop_4body_potential | aprop_many_body_potential,   
+    aprop_classical_potentials  = aprop_pair_potential  | aprop_3body_potential | 
+                                  aprop_4body_potential | aprop_many_body_potential,   
     aprop_dipole_polarizible = 0x0100,
     aprop_gaussian_basis     = 0x0200,
     aprop_slater_basis       = 0x0400,
@@ -38,295 +39,192 @@ namespace qpp{
 
   // --------------------------------------------------
   // basic class for all other types of atoms
-  class qpp_atom : public qpp_object{
-
-    // Atom always has a name
-    // It is supposed to be unique for each type of atoms
-    int _number; // Number in periodic table
+  template<class REAL>
+  class qpp_atom : public qpp_declaration{
 
   public:
 
+    // Atom always has a name
+    // It is supposed to be unique for each type of atoms
+    int *number; // Number in periodic table
+
+    struct classical_block{
+      REAL *charge; // Effective charge
+      REAL *mass;   // Atomic mass
+    };
+
+    struct polarizible_block{
+      REAL *alpha; // polarisibility
+    };
+
+    struct quantum_block{
+      STRING * basis_name;
+
+      // fixme - make more general basis shell data structure
+      std::vector<gencon_shell<REAL> > basis_shells;
+    };
+
+    struct visible_block{
+      REAL *cov_rad;
+      REAL *vdw_rad;
+      REAL *ionic_rad;
+      REAL * red, * green, * blue, *alpha;
+    };
+
+    classical_block   * classical;
+    polarizible_block * polarizible;
+    quantum_block     * quantum;
+    visible_block     * visible;
+
     qpp_atom(STRING __name, qpp_object * __owner = NULL, int __number=0) : 
-      qpp_object(__name, __owner)
+      qpp_declaration("atom",__name, __owner)
     {
-      _number=__number;
+      qpp_parameter<int> * p = new qpp_parameter<int>("number",__number,this);
+      add(*p);
+      number = &p->value();
+      classical   = NULL;
+      polarizible = NULL;
+      quantum     = NULL;
+      visible     = NULL;
     }
 
-    qpp_atom(const qpp_atom & a) :
-      qpp_object(a.name(),a.owner())
+    qpp_atom(qpp_declaration * decl, qpp_object * __owner = NULL) :
+      qpp_declaration("atom", decl->name(), __owner, NULL, decl->line(), decl->file())
     {
-      _number=a._number;
-    } 
+      std::cout << "entering atom constructor\n-----------------------------\n";
+      decl -> write(std::cout);
+      std::cout << "--------------------------------------\n";
 
-    virtual int n_nested() const
-    { return 0;}
+      qpp_parameter<int> *pnumber;
 
-    virtual qpp_object* nested(int i) const
-    { return NULL;}
+      pnumber = decl -> parameter<int>("number");
+
+      std::cout << "atom constr: after parameter<int>(number)\n";
+
+      if (pnumber == NULL)
+	pnumber = new qpp_parameter<int>("number",0);
+      add(*pnumber);
+      number = &(pnumber->value());
+
+      std::cout << "atom constr alive 1\n";
+
+      // Classical properties
+      qpp_parameter<REAL> * pcharge, * pmass;
+      pcharge = decl -> parameter<REAL>("charge");
+      pmass   = decl -> parameter<REAL>("mass");
+
+      if (pcharge != NULL || pmass != NULL)
+	{
+	  classical = new classical_block;
+	  if (pcharge == NULL)
+	    pcharge = new qpp_parameter<REAL>("charge",0e0);
+	  if (pmass == NULL)
+	    pmass = new qpp_parameter<REAL>("mass",0e0);
+	  add(*pcharge);
+	  add(*pmass);
+	  classical = new classical_block;
+	  classical -> charge = &(pcharge->value());
+	  classical -> mass = &(pmass->value());
+	}
+
+      std::cout << "atom constr alive 2\n";
+
+      // Polarizible properties
+      qpp_parameter<REAL> * palpha = decl -> parameter<REAL>("alpha");
+      if (palpha != NULL)
+	{
+	  polarizible = new polarizible_block;
+	  add(*palpha);
+	  polarizible -> alpha = &(palpha->value());
+	}
+
+      std::cout << "atom constr alive 3\n";
+
+      // Quantum properties 
+      qpp_parameter<STRING> * pbasis = decl -> parameter<STRING>("basis");
+      if (pbasis != NULL)
+	{
+	  quantum = new quantum_block;
+	  add(*pbasis);
+	  quantum -> basis_name = &(pbasis->value());
+	}
+
+      std::cout << "atom constr alive 4\n";
+
+      // Visible properties
+      qpp_parameter<REAL> *pcov_rad   = decl -> parameter<REAL>("cov_rad");
+      qpp_parameter<REAL> *pvdw_rad   = decl -> parameter<REAL>("vdw_rad");
+      qpp_parameter<REAL> *pionic_rad = decl -> parameter<REAL>("ionic_rad");
+      qpp_parameter<REAL> *pred    = decl -> parameter<REAL>("red");
+      qpp_parameter<REAL> *pgreen  = decl -> parameter<REAL>("green");
+      qpp_parameter<REAL> *pblue   = decl -> parameter<REAL>("blue");
+      qpp_parameter<REAL> *pvalpha = decl -> parameter<REAL>("transparancy");
+
+      if (pcov_rad != NULL || pvdw_rad != NULL || pionic_rad != NULL || pred != NULL ||
+	  pgreen   != NULL || pblue    != NULL || pvalpha    != NULL)
+	{
+	  visible = new visible_block;
+	  if (pcov_rad == NULL)
+	    pcov_rad = new qpp_parameter<REAL>("cov_rad",0e0);
+	  if (pvdw_rad == NULL)
+	    pvdw_rad = new qpp_parameter<REAL>("vdw_rad",0e0);
+	  if (pionic_rad == NULL)
+	    pionic_rad = new qpp_parameter<REAL>("ionic_rad",0e0);
+	  if (pred == NULL)
+	    pred = new qpp_parameter<REAL>("red",0e0);
+	  if (pgreen == NULL)
+	    pgreen = new qpp_parameter<REAL>("green",0e0);
+	  if (pblue == NULL)
+	    pblue = new qpp_parameter<REAL>("blue",0e0);
+	  if (pvalpha == NULL)
+	    pvalpha = new qpp_parameter<REAL>("transparency",0e0);
+
+	  add(*pcov_rad);
+	  add(*pvdw_rad);
+	  add(*pionic_rad);
+	  add(*pred);
+	  add(*pgreen);
+	  add(*pblue);
+	  add(*pvalpha);
+	  visible -> cov_rad   = &(pcov_rad->value());
+	  visible -> vdw_rad   = &(pvdw_rad->value());
+	  visible -> ionic_rad = &(pionic_rad->value());
+	  visible -> red    = &(pred->value());
+	  visible -> green = &(pgreen->value());
+	  visible -> blue   = &(pblue->value());
+	  visible -> alpha = &(pvalpha->value());
+	}
+      
+  }
+
+    qpp_atom(const qpp_atom & a) :
+      qpp_declaration("atom",a.name(),a.owner(),NULL,a.line(),a.file())
+    {
+    }
+
 
     virtual STRING category() const
     { return "atom";}
 
-    int number() const
-    { return _number;}
-
     virtual qppobject_type gettype() const
-    { return qtype_atom; }
+    { return qtype_atom + qtype_data<REAL>::type; }
 
     virtual int atype() const
-    {return aprop_mendeleev_number;}
-
-    virtual void write(OSTREAM &os, int offset=0) const 
     {
-      for (int i=0; i<offset; i++)
-	os << " ";
-      os << "atom " << _name << "{ number = " << _number << ";}";
     }
 
     virtual bool operator==(const qpp_atom &a) const
     {
-      return (atype() == a.atype()) && (name() == a.name()) && (number() == a.number());
     }
 
     virtual qpp_atom* copy() const
     {
-      return new qpp_atom(*this);
+      return new qpp_atom<REAL>(*this);
     }
 
   };
 
   // -------------------------------------------------
-  /*
-  std::string nameofatom(std::string at)
-  {
-    return at;
-  }
-
-  std::string nameofatom(qpp_atom * at)
-  {
-    return at -> name;
-  }
-  */
-  // -------------------------------------------------
-  // Classical atoms
-  template<class REAL>
-  class classical_atom : public qpp_atom{
-    //fixme - should it be float?
-    REAL _charge; // Effective charge
-    REAL _mass;   // Atomic mass
-  public:
-
-    classical_atom(STRING __name, qpp_object * __owner = NULL, 
-		   int __number=0, float __charge = 0e0, float __mass = 0e0) : 
-      qpp_atom(__name,__owner,__number)
-    {
-      _charge = __charge;
-      _mass   = __mass;
-    }
-
-    classical_atom(const classical_atom & a) :
-      qpp_atom(a.name(),a.owner(),a.number())
-    {
-      _charge = a._charge;
-      _mass   = a._mass;
-    }
-
-    REAL charge() const
-    { return _charge;}
-
-    REAL mass() const
-    { return _mass;}
-
-    virtual qppobject_type gettype() const
-    { return qtype_atom | qtype_data<REAL>::type; }
-
-    virtual int atype() const
-    {return aprop_mendeleev_number | aprop_effective_charge | aprop_atomic_mass;}
-
-    virtual bool operator==(const qpp_atom &a) const
-    {
-      bool res = (gettype() == a.gettype()) && (atype() == a.atype());
-      if (res)
-	{ const classical_atom *aa = (const classical_atom*)(&a);
-	  res = name() == aa->name() && number() == aa->number() && 
-	    charge() == aa->charge() && mass() == aa->mass();
-	}
-      return res;
-    }
-
-    virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const 
-    {
-      for (int i=0; i<offset; i++)
-	os << " ";
-      os << "atom " << _name << "{\n";
-      for (int i=0; i<offset+2; i++) os << " ";
-      os << "number = " << number() << ";\n";
-      for (int i=0; i<offset+2; i++) os << " ";
-      os << "charge = " << charge() << ";\n";
-      for (int i=0; i<offset+2; i++) os << " ";
-      os << "mass = " << mass() << ";\n";
-      for (int i=0; i<offset; i++) os << " ";
-      os << "}\n";
-    }
-
-    virtual qpp_atom* copy() const
-    {
-      return new classical_atom(*this);
-    }
-
-  };
-
-  // ---------------------------------------------------------------------
-
-  template <class REAL>
-  class polarizible_atom : public classical_atom<REAL>{
-    REAL _alpha; // polarisibility
-  public:
-
-    using classical_atom<REAL>::gettype;
-    using classical_atom<REAL>::name;
-    using classical_atom<REAL>::number;
-    using classical_atom<REAL>::mass;
-    using classical_atom<REAL>::charge;
-
-    polarizible_atom(STRING __name, qpp_object * __owner = NULL, 
-		     int __number=0, float __charge = 0e0, float __mass = 0e0, 
-		     REAL __alpha=0e0) :
-      classical_atom<REAL>(__name,__owner,__number,__charge,__mass)
-    {
-      _alpha  = __alpha;
-    }
-
-    polarizible_atom(const polarizible_atom<REAL> & a) :
-      classical_atom<REAL>(a.name(),a.owner(),a.number(),a.charge(),a.mass())
-    {
-      _alpha  = a.alpha();
-    }
-
-    virtual int atype() const
-    {return aprop_mendeleev_number | aprop_effective_charge | 
-	aprop_atomic_mass | aprop_dipole_polarizible;
-    }
-
-    REAL alpha() const
-    { return _alpha;}
-
-    virtual bool operator==(const qpp_atom &a) const
-    {
-      bool res = gettype() == a.gettype();
-      if (res)
-	{
-	  const polarizible_atom<REAL> * aa = (const polarizible_atom<REAL> *)(&a);
-	  res = name() == aa->name() && number() == aa->number() && charge() == aa->charge() && 
-	    mass() == aa->mass() && alpha() == aa->alpha();
-	}
-      return res;
-    }
-
-    virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const 
-    {
-      for (int i=0; i<offset; i++)
-	os << " ";
-      os << "atom " << name() << "{\n";
-      for (int i=0; i<offset+2; i++) os << " ";
-      os << "number = " << number() << ";\n";
-      for (int i=0; i<offset+2; i++) os << " ";
-      os << "charge = " << charge() << ";\n";
-      for (int i=0; i<offset+2; i++) os << " ";
-      os << "mass = " << mass() << ";\n";
-      for (int i=0; i<offset+2; i++) os << " ";
-      os << "alpha = " << alpha() << ";\n";
-      for (int i=0; i<offset; i++) os << " ";
-      os << "}\n";
-    }
-
-    virtual qpp_atom* copy() const
-    {
-      return new polarizible_atom(*this);
-    }    
-
-  };
-
-  // -------------------------------------------------
-  // Classical atoms
-  class visible_atom : public qpp_atom{
-
-  public:
-
-    float cov_rad;
-    float vdw_rad;
-    float ionic_rad;
-    float color[3];
-
-    /*
-    polarizible_atom(STRING __name, qpp_object * __owner = NULL, 
-		     int __number=0, float __charge = 0e0, float __mass = 0e0, 
-		     REAL __alpha=0e0) :
-      classical_atom<REAL>(__name,__owner,__number,__charge,__mass)
-    */
-    visible_atom(STRING __name, qpp_object * __owner = NULL, 
-		 int __number=0, float _cov_rad=0, float _vdw_rad=0, 
-		 float _ionic_rad=0) : 
-      qpp_atom(__name,__owner,__number)
-    {
-      cov_rad	= _cov_rad;	
-      vdw_rad   = _vdw_rad;	
-      ionic_rad = _ionic_rad; 
-    }
-    
-    visible_atom(const visible_atom & a) :
-      qpp_atom( a.name(), a.owner(),a.number() )
-    {
-      cov_rad	= a.cov_rad;	
-      vdw_rad   = a.vdw_rad;	
-      ionic_rad = a.ionic_rad; 
-    }
-
-    virtual qppobject_type gettype() const
-    { return qtype_atom; }
-
-    virtual int atype() const
-    {return aprop_mendeleev_number | aprop_visible;}
-
-    virtual bool operator==(const qpp_atom &a) const
-    {
-      bool res = (gettype() == a.gettype()) && (atype() == a.atype());
-      if (res)
-	{ const visible_atom *aa = (const visible_atom*)(&a);
-	  res = name() == aa->name() && number() == aa->number() && 
-	    cov_rad == aa->cov_rad && 
-	    vdw_rad == aa->vdw_rad && 
-	    ionic_rad == aa->ionic_rad;
-	  // compare colors
-	}
-      return res;
-    }
-
-    virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const 
-    {
-      for (int i=0; i<offset; i++)
-	os << " ";
-      os << "atom " << name() << "{\n";
-      for (int i=0; i<offset+2; i++) os << " ";
-      os << "number = " << number() << ";\n";
-      for (int i=0; i<offset+2; i++) os << " ";
-      os << "cov_rad = " << cov_rad << ";\n";
-      for (int i=0; i<offset+2; i++) os << " ";
-      os << "vdw_rad = " << vdw_rad << ";\n";
-      for (int i=0; i<offset+2; i++) os << " ";
-      os << "ionic_rad = " << ionic_rad << ";\n";
-      //      for (int i=0; i<offset+2; i++) os << " ";
-      //      os << "color = " << cov_rad << ";\n";
-      for (int i=0; i<offset; i++) os << " ";
-      os << "}\n";
-    }
-
-    virtual qpp_atom* copy() const
-    {
-      return new visible_atom(*this);
-    }
-
-  };
 
 };
 
