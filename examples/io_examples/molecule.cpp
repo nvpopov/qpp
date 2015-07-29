@@ -20,11 +20,13 @@ int main(int argc, char **argv)
 
     qpp::qpp_declaration global("decl","global");
 
+    /*
     std::cout << "writing global\n";
 
     global.write(std::cout);
   
     std::cout << "reading decl\n";
+    */
 
     qpp::qpp_object *q = _qpp_internal::parse_declaration(t, &global);
     global.add(*q);

@@ -6,6 +6,7 @@
 #include <geom/geom.hpp>
 #include <data/atom.hpp>
 #include <basis/basis.hpp>
+#include <io/compile.hpp>
 
 namespace qpp{
 
@@ -31,22 +32,41 @@ namespace qpp{
 		      raw->parameters(), raw->line(), raw->file())
     {
 
-      for (int i=0; i<raw->n_decl(); i++)
-	//	add_decl( qpp_compile(*raw->decl(i)) );      
-	add_decl( *raw->decl(i) );
+      //debug
+      //      std::cerr << "Molecule constructor\n";
+
+      for (int i=0; i<raw->n_decl(); i++) 
+	add_decl( *qpp_compile(raw->decl(i)) );      
+      /*
+	{
+	  // debug
+	  std::cerr << "Molecule constructor: before compiled " << i << "\n";
+
+	  qpp_object *rd = raw->decl(i);
+	  rd->write(std::cerr);
+	  std::cerr << "-------------sdfsdf---------------\n";
+
+	  qpp_object * d = qpp_compile(rd);
+
+	  add_decl( *d );      
+	  
+	  //debug
+	  std::cerr << "Molecule constructor: compiled " << i << "\n";
+	}
+      */
 
       // Find geometry
       int i=0;
       bool found = false;
-      for (i=0; i<raw->n_decl(); i++)
-	if ((raw->decl(i)->gettype() & qtype_vectors) &&
-	    (raw->decl(i)->name() == ""))
+      for (i=0; i<n_decl(); i++)
+	if ((decl(i)->gettype() & qtype_vectors) &&
+	    (decl(i)->name() == ""))
 	  {
 	    found = true;
 	    break;
 	  }
       if (found)
-	cell = (TRANSFORM*)raw->decl(i);
+	cell = (TRANSFORM*)decl(i);
       else
 	{
 	  cell = new TRANSFORM;
@@ -55,29 +75,31 @@ namespace qpp{
 
       i=0; 
       found = false;
-      for (i=0; i<raw->n_decl(); i++)
-	if ((raw->decl(i)->gettype() & (qtype_geometry | qtype_xgeometry)) &&
-	    (raw->decl(i)->name() == ""))
+      for (i=0; i<n_decl(); i++)
+	if ((decl(i)->gettype() & (qtype_geometry | qtype_xgeometry)) &&
+	    (decl(i)->name() == ""))
 	  {
 	    found = true;
 	    break;
 	  }
       if (found)
-	geom = (geometry<DIM,CREAL,TRANSFORM>*)raw->decl(i);
+	geom = (geometry<DIM,CREAL,TRANSFORM>*)decl(i);
       else
 	{
 	  geom = new geometry<DIM,CREAL,TRANSFORM>();
 	  add_decl(*geom);
 	}
-      for (i=0; i<raw->n_decl(); i++)
-	if (raw -> decl(i) -> category() == "atom")
-	  {
-	    //debug
-	    //std::cout << "atom decl " << i << "\n";
-	    atoms.push_back(new qpp_atom<FREAL>((qpp_declaration*)raw->decl(i), this));
-	  }
+      for (i=0; i<n_decl(); i++)
+	if (decl(i) -> gettype() & qtype_atom )
+	  atoms.push_back( (qpp_atom<FREAL>*)decl(i) );
       
     }
+
+    molecule(const molecule<DIM,CREAL,FREAL,TRANSFORM> & m)
+    {
+      //fixme - implement this
+    }
+
 
   };
 

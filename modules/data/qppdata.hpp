@@ -29,6 +29,7 @@ namespace qpp{
     qtype_molecule      = 0x80000000,
     qtype_shape         = 0x100000000,
     qtype_meta          = 0x200000000,
+    qtype_shell         = 0x400000000,
 
     // additional bits for some of these types
     qtype_dim0         = 0x0001,
@@ -80,6 +81,9 @@ namespace qpp{
 
     qpp_object* _owner;
 
+    int _line;
+    STRING _file;
+
   public:
 
     virtual STRING category() const=0;
@@ -96,10 +100,13 @@ namespace qpp{
 
     // --------------------------------------
     
-    qpp_object(const STRING & __name = "", qpp_object * __owner = NULL)
+    qpp_object(const STRING & __name = "", qpp_object * __owner = NULL,
+	       int __line = -1, const STRING & __file = "")
     {
       _name = __name;
       _owner = __owner;
+      _line = __line;
+      _file = __file;
     }
 
     virtual STRING name() const
@@ -135,6 +142,18 @@ namespace qpp{
       _owner = __owner;
     }
 
+    int line() const
+    { return _line;}
+
+    void setline(int __line)
+    { _line = __line;}
+
+    STRING file() const
+    { return _file; }
+
+    void setfile(const STRING & __file)
+    { _file = __file; }
+
     virtual qpp_object* getobject_lcl(const STRING & obj) const
     {
       int i=obj.find('.');
@@ -145,7 +164,9 @@ namespace qpp{
       int j=0;
       while (j<n_nested())
 	{
-	  std::cerr << nested(j)->name() << "\n";
+
+	  //debug
+	  //std::cerr << nested(j)->name() << "\n";
 	  if (nested(j)->name() == s)
 	    {
 	      found = true;
@@ -160,7 +181,8 @@ namespace qpp{
 	  j=0;
 	  while (j<n_nested())
 	    {
-	      std::cerr << nested(j)->category() << " " << nested(j)->name() << "\n";
+	      //debug
+	      //std::cerr << nested(j)->category() << " " << nested(j)->name() << "\n";
 	      if (nested(j)->name() == "" && nested(j)->category() == s)
 		{
 		  found = true;
@@ -183,7 +205,8 @@ namespace qpp{
       qpp_object * p = getobject_lcl(obj);
       if ( p == NULL && owner() != NULL)
 	{
-	  std::cerr << "LVL UP\n";
+	  //debug
+	  //std::cerr << "LVL UP\n";
 	  p = owner()->getobject_glbl(obj);
 	}
       return p;
@@ -433,8 +456,6 @@ namespace qpp{
   {
   protected:
     T _value;
-    int _line;
-    STRING _file;
 
   public:
 
@@ -443,16 +464,16 @@ namespace qpp{
       qpp_param_array(__name, __owner)
     {
       _value = __value;
-      _line = __line;
-      _file = __file;
+      setline(__line);
+      setfile(__file);
     }
 
     qpp_parameter(const qpp_parameter<T> & q) :
       qpp_param_array(q)
     {
       _value = q._value;
-      _line = q._line;
-      _file = q._file;
+      setline(q.line());
+      setfile(q.file());
     }
 
     virtual STRING category() const
@@ -463,12 +484,6 @@ namespace qpp{
 
     T & value()
     { return _value; }
-
-    int line() const
-    { return _line;}
-
-    STRING file() const
-    { return _file; }
 
     virtual qppobject_type gettype() const
     {return qtype_parameter | qtype_data<T>::type;} 
@@ -512,8 +527,6 @@ namespace qpp{
   protected:
 
     STRING _category;
-    int _line;
-    STRING _file;
     qpp_param_array * _parm;
 
   public:
@@ -524,8 +537,8 @@ namespace qpp{
       qpp_array(__name,__owner)
     {
       _category = __category;
-      _line = __line;
-      _file = __file;
+      setline(__line);
+      setfile(__file);
 
       _parm = __parm;
       if (_parm == NULL)
@@ -539,8 +552,8 @@ namespace qpp{
       qpp_array(q.name(),q.owner())
     {
       _category = q._category;
-      _line = q._line;
-      _file = q._file;
+      setline(q.line());
+      setfile(q.file());
       _parm = new qpp_param_array(*q._parm);
       for (int i=0; i<q._parm->n_nested(); i++)
 	add(*q._parm->nested(i));
@@ -660,16 +673,6 @@ namespace qpp{
 	os << ";\n";
     }
 
-    int line() const
-    {
-      return _line;
-    }
-
-    STRING file() const
-    {
-      return _file;
-    }
-
     virtual qpp_object * copy() const
     {
       return new qpp_declaration(*this);
@@ -693,12 +696,12 @@ namespace qpp{
     qpp_object * p = getobject(parm,scp);
 
     //debug
-    if (p!=NULL)
+    /*if (p!=NULL)
       {
 	std::cout << "------ parameter " << parm << " -----------\n";
 	p->write(std::cout);
       }
-    
+    */
 
     if (p!=NULL && p->gettype()==(qtype_parameter | qtype_data<T>::type) )
       return (qpp_parameter<T>*)p;

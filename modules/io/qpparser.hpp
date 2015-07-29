@@ -45,7 +45,7 @@ namespace _qpp_internal{
 					    qpp::qpp_object * owner)
   {
     //debug
-    std::cerr << "parse_geom\n";
+    //std::cerr << "parse_geom\n";
 
     tok.separate("}");
     tok.dump("");
@@ -204,7 +204,7 @@ namespace _qpp_internal{
 	else
 	  {
 	    //debug
-	    std::cerr << format << "\n";
+	    //std::cerr << format << "\n";
 	    geom -> add( "", VALTYPE(0), VALTYPE(0), VALTYPE(0));	 
 
 	    STRING aname = "";
@@ -311,18 +311,19 @@ namespace _qpp_internal{
 
   // ---------------------------------------------------------
 
-  qpp::qpp_object * parse_any_vectors(int dim, qpp::qpp_param_array  parm, 
+  qpp::qpp_object * parse_any_vectors(int dim, qpp::qpp_param_array & parm, 
 				      STRING name, qpp::tokenizer & tok,
 					  qpp::qpp_object * owner);
 
   // ---------------------------------------------------------
 
   template<class FREAL>
-  qpp::qpp_object * parse_g98_basis(qpp::qpp_param_array& parm, 
+  qpp::qpp_object * parse_g98_basis(qpp::qpp_param_array & parm, 
 				    STRING name, qpp::tokenizer & tok,
 				    qpp::qpp_object * owner)
   {
-    qpp::gencon_basis_data<FREAL> *bas = new qpp::gencon_basis_data<FREAL>(name);
+    qpp::qpp_basis_data<qpp::qbas_gauss,FREAL> *bas = 
+      new qpp::qpp_basis_data<qpp::qbas_gauss,FREAL>(name);
     bas -> setowner(owner);
 
     tok.separate("}");
@@ -349,7 +350,7 @@ namespace _qpp_internal{
 	    bas -> add_label(lbls[i]);
 	}
 
-      int nr = bas->nrcrd()-1;
+      int nr = bas->n_rcrd()-1;
       //debug
       /*
       std::cout << "labels:";
@@ -393,7 +394,7 @@ namespace _qpp_internal{
 	if ( !s2t<int>(lbls[1],np) )
 	  bas->error("Number of primitive gaussians expected",tok.line(), tok.file());
 	
-	qpp::gencon_shell<FREAL> sh(np,l2-l1+1);
+	qpp::qpp_shell<qpp::qbas_gauss,FREAL> sh(np,l2-l1+1);
 	for (int i=0; i<=l2-l1; i++)
 	  sh.l(i) = l1+i;
 
@@ -424,7 +425,7 @@ namespace _qpp_internal{
 	bas -> add_shell(sh);
 	
 	//debug
-	bas -> rcrd(nr).shells[bas -> rcrd(nr).shells.size()-1].write_g98(std::cout);
+	//bas -> rcrd(nr).shells[bas -> rcrd(nr).shells.size()-1].write_g98(std::cout);
 	    
 	line = tok.get();
       } while(true);
@@ -446,19 +447,146 @@ namespace _qpp_internal{
 
   // -------------------------------------------------------------------------------
 
-  qpp::qpp_object * parse_any_basis(qpp::qpp_param_array & parm, 
-				    STRING name, qpp::tokenizer & tok,
-					qpp::qpp_object * owner );
+  qpp::qpp_object * parse_non_native_basis(qpp::qpp_param_array & parm, 
+					   STRING name, qpp::tokenizer & tok,
+					   qpp::qpp_object * owner );
 
+
+  // -------------------------------------------------------------------------------
+
+  template<qpp::qpp_bastype ST, class FREAL>
+  qpp::qpp_object * parse_shell(qpp::qpp_param_array& parm, 
+				STRING name, qpp::tokenizer & tok,
+				qpp::qpp_object * owner)
+
+  /* -------------------------------------------------------------------------------
+
+  template<class FREAL>
+  qpp::qpp_object * parse_shell<qpp::qbas_gauss,FREAL>(qpp::qpp_param_array& parm, 
+						       STRING name, qpp::tokenizer & tok,
+						       qpp::qpp_object * owner)*/
+  {
+
+    if (ST==qpp::qbas_gauss || ST==qpp::qbas_slater)
+      {
+
+	tok.separate("}");
+	tok.dump("");
+
+	qpp::qpp_angtype angtype=qpp::qang_spherical;
+    
+	qpp::qpp_parameter<STRING> * pang = parm.parameter<STRING>("angtype");
+	if (pang==NULL)
+	  pang = owner -> parameter<STRING>("angtype");
+
+	if (pang!=NULL)
+	  if (pang->value()=="cartesian")
+	    angtype = qpp::qang_cartesian;
+
+	std::vector<FREAL> exps;
+	std::vector<std::vector<FREAL> > coeffs;
+	std::vector<int> l;
+	std::vector<STRING> lbl;
+
+	for (int i = 0; i < parm.n_nested(); i++)
+	  if (parm.nested(i)->gettype() & qpp::qtype_data_int)
+	    {
+	      lbl.push_back(parm.nested(i)->name());
+	      l.push_back(((qpp::qpp_parameter<int>*)parm.nested(i))->value());
+	    }
+
+	int nl = l.size(), np=0;
+	coeffs.resize(nl);
+
+	while(true)
+	  {
+	    STRING line = tok.get();
+	
+	    if (line == "}")
+	      break;
+	    if (line.find_first_not_of(" \t") == std::string::npos && tok.get() == "}")
+	      break;
+
+	    std::vector<STRING> fields = qpp::split(line);
+
+	    if (fields.size() != nl+1)
+	      owner->error("Wrong number of fields",tok.line(),tok.file());
+
+	    FREAL r;
+	    bool OK = s2t<FREAL>(fields[0],r);
+	    if (!OK) owner->error("Real number expected",tok.line(),tok.file());
+	    exps.push_back(r);
+
+	    for (int i=0; i<nl; i++)
+	      {
+		OK = s2t<FREAL>(fields[i+1],r);
+		if (!OK) owner->error("Real number expected",tok.line(),tok.file());
+		coeffs[i].push_back(r);
+	      }
+
+	    np++;
+	
+	  }
+
+
+	if (ST == qpp::qbas_gauss)
+	  {
+	    qpp::qpp_shell<qpp::qbas_gauss,FREAL> * sh = 
+	      new qpp::qpp_shell<qpp::qbas_gauss,FREAL>(np,nl,angtype);
+	
+	    for (int j=0; j<np; j++)
+	      {
+		sh->alpha(j) = exps[j];
+		for (int i=0; i<nl; i++)
+		  sh->coeff(i,j) = coeffs[i][j];
+	      }
+	    for (int i=0; i<nl; i++)
+	      {
+		sh->l(i) = l[i];
+		sh->label(i) = lbl[i];
+	      }
+
+	    tok.dump(" \t");
+	    tok.separate(",;{}()=");
+	
+	    return sh;
+	  }
+
+	else 
+	  {
+	    /*
+	    qpp::qpp_shell<qpp::qbas_slater,FREAL> * sh = 
+	      new qpp::qpp_shell<qpp::qbas_slater,FREAL>(np,nl,angtype);
+	
+	    for (int j=0; j<np; j++)
+	      {
+		sh->alpha(j) = exps[j];
+		for (int i=0; i<nl; i++)
+		  sh->coeff(i,j) = coeffs[i][j];
+	      }
+	    for (int i=0; i<nl; i++)
+	      sh->l(i) = l[i];
+
+	    tok.dump(" \t");
+	    tok.separate(",;{}()=");
+	
+	    return sh;
+	    */
+	  }
+      }
+  }
+
+  // -------------------------------------------------------------------------------
+
+  qpp::qpp_object * parse_any_shell(qpp::qpp_param_array & parm, 
+				    STRING name, qpp::tokenizer & tok,
+				    qpp::qpp_object * owner );
 
   // -------------------------------------------------------------------------------
 
   qpp::qpp_object * parse_declaration(qpp::tokenizer & tok, qpp::qpp_object * owner );
 
   void qpp_read(qpp::ISTREAM & is, std::vector<qpp::qpp_object*> & decls);
-
-  qpp::qpp_object * qpp_compile( qpp::qpp_object * q);
-
 
   // ---------------------------------------------------------
 
@@ -480,7 +608,7 @@ namespace _qpp_internal{
 namespace qpp{
 
   using _qpp_internal::qpp_read;
-  using _qpp_internal::qpp_compile;
+  //  using _qpp_internal::qpp_compile;
 
 };
 

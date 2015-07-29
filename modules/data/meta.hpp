@@ -115,6 +115,12 @@ namespace qpp{
 
     virtual void * string2val(const STRING & s) =0;
 
+    virtual STRING val2string(void *val) =0;
+
+    virtual bool has_value_list() const =0;
+
+    virtual void value_list(std::vector<STRING> & vals) =0;
+
     metaparam_block(const STRING & __name = "", qpp_object * __owner = NULL, bool __required = false) :
       qpp_object(__name,__owner)
     {
@@ -139,6 +145,9 @@ namespace qpp{
   class metaparam_array : public metaparam_block
   {
   public:
+
+    bool ordered;
+
     std::vector<metaparam_block*> array;
 
     metaparam_array(const STRING & __name = "", qpp_object * __owner = NULL, bool __required = false):
@@ -148,20 +157,20 @@ namespace qpp{
     metaparam_array(qpp_declaration & decl, qpp_object * __owner = NULL) :
       metaparam_block(decl.name(),__owner)
     {
-      required = false;
+      required = true;
       for (int i=0; i<decl.n_nested(); i++)
 	if (decl.nested(i)->gettype() & (qtype_parameter | qtype_data_bool))
 	  {
-	    qpp_parameter<bool> * rq = (qpp_parameter<bool> *)(decl.nested(i));
-	    if (rq->name() == "required")
-	      required = rq -> value();
+	    qpp_parameter<bool> * od = (qpp_parameter<bool> *)(decl.nested(i));
+	    if (od->name() == "ordered")
+	      ordered = od -> value();
 	    else 
 	      decl.error("unexpected option", decl.line(),decl.file());
 	  }
 	else if (decl.nested(i)->gettype() & qtype_declaration)
 	  array.push_back(create_metaparam(*((qpp_declaration*)decl.nested(i)), this));
 	else
-	  decl.error("Only metaparameters declaration or \"required\" option are allowed here", 
+	  decl.error("Only metaparameters declaration or \"ordered\" option are allowed here", 
 		     decl.line(),decl.file());
     }
 
@@ -170,7 +179,7 @@ namespace qpp{
 
     virtual int min_repetitions() const
     {
-      return required? 1:0;
+      return 1;
     }
 
     virtual int max_repetitions() const
@@ -200,6 +209,19 @@ namespace qpp{
     {
       return NULL;
     }
+
+    virtual STRING val2string(void *val)
+    {
+      return "";
+    }
+
+    virtual bool has_value_list() const
+    {
+      return false;
+    }
+
+    virtual void value_list(std::vector<STRING> & vals)
+    {}
 
     virtual qmetatypes metatype() const
     {
@@ -521,9 +543,16 @@ namespace qpp{
     bool val_list;
 
     struct val_record{
-      T* value;
+      T value;
       std::vector<STRING> synonyms;      
       metaparam_block * _nested;
+
+      val_record( const T & _value)
+      { 
+	value = _value; 
+	_nested = NULL;
+      }
+
     };
     
     std::vector<val_record> values; 
@@ -570,6 +599,26 @@ namespace qpp{
 	}
     }
 
+    virtual STRING val2string(void *val)
+    {
+      SSTREAM ss;
+      ss << * ((T*)(val));
+      return ss.str();
+    }
+
+    virtual bool has_value_list() const
+    {
+      return val_list;
+    }
+
+    virtual void value_list(std::vector<STRING> & vals)
+    {
+      vals.clear();
+      if (val_list)
+	for (int i=0; i<values.size(); i++)
+	  vals.push_back(val2string(&(values[i].value)));
+    }
+
     virtual bool identify(qpp_array & q)
     {}
 
@@ -592,6 +641,9 @@ namespace qpp{
     {
       int n=0;
       if (_nested != NULL) n++;
+      if (val_list)
+	for (int i = 0; i<values.size(); i++)
+	  if (values[i]._nested != NULL) n++;
       return n;
     }
 
@@ -660,7 +712,7 @@ namespace qpp{
 	for (int i=0; i<values.size(); i++)
 	  {
 	    for (int k=0; k<offset+4; k++) os << " ";
-	    os << "value(" << *(values[i].value) << ")\n";
+	    os << "value(" << values[i].value << ")\n";
 	    for (int k=0; k<offset+6; k++) os << " ";
 	    os << "{\n";
 	    if (values[i].synonyms.size()>0)
@@ -765,6 +817,49 @@ namespace qpp{
 	  val_default = NULL;
 	}
 
+      p = decl.getobject("values", qscope_local);
+      if (p!=NULL)
+	{
+	  bool success =  (p->gettype() == qtype_declaration) && 
+	    (((qpp_declaration*)p)->n_decl() == 0);
+
+	  //debug
+	  //std::cerr << "metaparam constructor:values alive1 success = " << success << "\n";
+	  p->write(std::cerr);
+
+	  if (success)
+	    for (int i=0; i<((qpp_declaration*)p)->n_param(); i++)
+	      if (((qpp_declaration*)p)->param(i)->gettype() == 
+		  qtype_parameter | qtype_data<T>::type )
+		{
+		  qpp_parameter<T> * v = (qpp_parameter<T>*) (((qpp_declaration*)p)->param(i));
+		  if (v->name()=="")
+		      values.push_back(*new val_record(v->value()));
+		  else
+		    {
+		      success = false;
+		      //debug
+		      //std::cerr << "metaparam constructor:values break1 i= " << i << "\n";
+		      break;
+		    }
+		}
+	      else
+		{
+		  success = false;
+		  //debug
+		  //std::cerr << "metaparam constructor:values break2 i= " << i << "\n";
+		  break;
+		}
+
+	  if (!success)
+	    p->error("Illegal \"values\" declaration", decl.line(), decl.file());
+	  
+	  used[decl.obj_index(p)] = true;
+	  val_list = true;
+	}
+      else
+	val_list = false;
+	
       int j;
       bool found = false;
       for(j=0; j<n; j++)
@@ -795,8 +890,7 @@ namespace qpp{
 	    if (vdecl->n_param() != 1 || 
 		!(vdecl->param(0)->gettype() & qtype_data<T>::type) )
 	      vdecl -> error("Invalid value definition",vdecl->line(),vdecl->file());
-	    val_record vrec;
-	    vrec.value = new T(((qpp_parameter<T>*)vdecl->param(0))->value());
+	    val_record vrec(((qpp_parameter<T>*)(vdecl->param(0)))->value());
 
 	    p = vdecl->getobject("synonyms",qscope_local);
 	    if (p!=NULL)
@@ -814,7 +908,27 @@ namespace qpp{
 		else
 		  p->error("Illegal synonyms declaration");
 	      }
-	    
+
+	    int k;
+	    bool found1 = false;
+	    for(k=0; k<vdecl->n_decl(); k++)
+	      if (vdecl->decl(k)->category() == "metaparam_array" ||
+		  vdecl->decl(k)->category() == "metaparam_repeat" ||
+		  vdecl->decl(k)->category() == "metaparam_select" ||
+		  vdecl->decl(k)->category() == "metaparameter" )
+		{
+		  found = true;
+		  break;
+		}
+	    if (found)
+	      {
+		if (vdecl->gettype() == qtype_declaration)
+		  vrec._nested =create_metaparam( *((qpp_declaration*)(vdecl->decl(k))));
+		else
+		  decl.error("Illegal nested declaration", decl.line(), decl.file());
+	      }
+	    else
+	      vrec._nested = NULL;
 	    
 	    values.push_back(vrec);
 	  }

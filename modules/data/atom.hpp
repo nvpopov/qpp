@@ -8,6 +8,7 @@
 
 namespace qpp{
 
+  /*
   enum basis_set_types{
     gaussian,
     slater,
@@ -15,6 +16,7 @@ namespace qpp{
     plane_waves,
     nobasis
   };
+  */
 
   //-------------- Atomic types ----------------------
   enum{
@@ -57,11 +59,17 @@ namespace qpp{
       REAL *alpha; // polarisibility
     };
 
-    struct quantum_block{
-      STRING * basis_name;
+    struct basis_block{
+      STRING * bas_name;
+      qpp_bastype * bas_type;
+      // only one of the following arrays can be not empty
+      std::vector<qpp_shell<qbas_gauss,REAL>*>  gauss_shells;
+      std::vector<qpp_shell<qbas_slater,REAL>*> slater_shells;
+      std::vector<qpp_shell<qbas_siesta,REAL>*> siesta_shells;
+    };
 
-      // fixme - make more general basis shell data structure
-      std::vector<gencon_shell<REAL> > basis_shells;
+    struct pseudo_block{
+      STRING * pseudo_name;
     };
 
     struct visible_block{
@@ -73,7 +81,8 @@ namespace qpp{
 
     classical_block   * classical;
     polarizible_block * polarizible;
-    quantum_block     * quantum;
+    basis_block       * basis;
+    pseudo_block      * pseudo;
     visible_block     * visible;
 
     qpp_atom(STRING __name, qpp_object * __owner = NULL, int __number=0) : 
@@ -84,29 +93,33 @@ namespace qpp{
       number = &p->value();
       classical   = NULL;
       polarizible = NULL;
-      quantum     = NULL;
+      basis       = NULL;
+      pseudo      = NULL;
       visible     = NULL;
     }
 
     qpp_atom(qpp_declaration * decl, qpp_object * __owner = NULL) :
       qpp_declaration("atom", decl->name(), __owner, NULL, decl->line(), decl->file())
     {
-      std::cout << "entering atom constructor\n-----------------------------\n";
-      decl -> write(std::cout);
-      std::cout << "--------------------------------------\n";
-
+      //debug
+      /*      std::cerr << "entering atom constructor\n-----------------------------\n";
+      decl -> write(std::cerr);
+      std::cerr << "--------------------------------------\n";
+      */
       qpp_parameter<int> *pnumber;
 
       pnumber = decl -> parameter<int>("number");
 
-      std::cout << "atom constr: after parameter<int>(number)\n";
+      //debug
+      //std::cerr << "atom constr: after parameter<int>(number)\n";
 
       if (pnumber == NULL)
 	pnumber = new qpp_parameter<int>("number",0);
       add(*pnumber);
       number = &(pnumber->value());
 
-      std::cout << "atom constr alive 1\n";
+      //debug
+      //std::cerr << "atom constr alive 1\n";
 
       // Classical properties
       qpp_parameter<REAL> * pcharge, * pmass;
@@ -126,8 +139,8 @@ namespace qpp{
 	  classical -> charge = &(pcharge->value());
 	  classical -> mass = &(pmass->value());
 	}
-
-      std::cout << "atom constr alive 2\n";
+      //debug
+      //std::cerr << "atom constr alive 2\n";
 
       // Polarizible properties
       qpp_parameter<REAL> * palpha = decl -> parameter<REAL>("alpha");
@@ -137,19 +150,19 @@ namespace qpp{
 	  add(*palpha);
 	  polarizible -> alpha = &(palpha->value());
 	}
+      //debug
+      //std::cerr << "atom constr alive 3\n";
 
-      std::cout << "atom constr alive 3\n";
-
-      // Quantum properties 
+      // Basis data
       qpp_parameter<STRING> * pbasis = decl -> parameter<STRING>("basis");
       if (pbasis != NULL)
 	{
-	  quantum = new quantum_block;
+	  basis = new basis_block;
 	  add(*pbasis);
-	  quantum -> basis_name = &(pbasis->value());
+	  basis -> bas_name = &(pbasis->value());
 	}
-
-      std::cout << "atom constr alive 4\n";
+      //debug
+      //std::cerr << "atom constr alive 4\n";
 
       // Visible properties
       qpp_parameter<REAL> *pcov_rad   = decl -> parameter<REAL>("cov_rad");
@@ -200,6 +213,7 @@ namespace qpp{
     qpp_atom(const qpp_atom & a) :
       qpp_declaration("atom",a.name(),a.owner(),NULL,a.line(),a.file())
     {
+      //fixme - implement this
     }
 
 

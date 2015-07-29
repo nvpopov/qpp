@@ -49,7 +49,10 @@ int main(int argc, char **argv)
 	    p = current->getobject(ff[1],qpp::qscope_global);
 	  
 	  if (p!=NULL)
-	    p -> write(std::cout);
+	    {
+	      std::cout << "type = " << std::hex << p->gettype() << std::dec << "\n";
+	      p -> write(std::cout);
+	    }
 	  else
 	    std::cout << "not defined\n";
 	  

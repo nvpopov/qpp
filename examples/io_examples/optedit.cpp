@@ -46,6 +46,8 @@ int main(int argc, char **argv)
     std::vector<int> irep, idx;
     qpp::metaparam_structure * current = &str;
 
+    meta->write(std::cout);
+
     while(true)
       {
 	str.debug(0,current);
@@ -128,7 +130,21 @@ int main(int argc, char **argv)
 	  }
 	else if (cmd=="e" && tp==qpp::qmetparam)
 	  {
-	    std::cout << "Enter new parameter value:\n";
+	    STRING dtp;	    
+	    if (current->producer->gettype() & qpp::qtype_data_int)
+	      dtp = "int";
+	    else if (current->producer->gettype() & qpp::qtype_data_string)
+	      dtp = "string";
+	    else if (current->producer->gettype() & qpp::qtype_data_double)
+	      dtp = "double";
+	    else if (current->producer->gettype() & qpp::qtype_data_float)
+	      dtp = "float";
+	    else if (current->producer->gettype() & qpp::qtype_data_bool)
+	      dtp = "bool";
+	    else current->producer->error("Unknown parameter data type",
+					  current->producer->line(), current->producer->file());
+
+	    std::cout << "Enter new parameter value (" << dtp << "):\n";
 	    STRING s;
 	    std::cin >> s;
 

@@ -6,6 +6,8 @@
 #include <lace/lace3d.hpp>
 #include <boost/format.hpp>
 #include <boost/numeric/ublas/vector.hpp>
+//debug
+#include <iomanip>
 
 namespace qpp{
   //fixme - this drags the whole namespace into qpp::
@@ -14,7 +16,8 @@ namespace qpp{
   template<class FREAL, class CREAL>
   // FREAL - real number type for wavefunctions
   // CREAL - real number type for coordinates
-  class basis : public qpp_object{
+  class basis //: public qpp_object{
+  {
 
   public:
 
@@ -31,195 +34,178 @@ namespace qpp{
 
   // -----------------------------------------------------------------
 
-  template <class FREAL>
-  class gencon_shell{
-    int _nprim, _nl;
-    int * _l;
-    FREAL * _alpha, * _coeff;
-    
-    const static FREAL eps;
-
-  public:
-
-    gencon_shell(int __nprim, int __nl)
-    {
-      _nprim = __nprim;
-      _nl = __nl;
-      _l = new int[_nl];
-      _alpha = new FREAL[_nprim];
-      _coeff = new FREAL[_nprim*_nl];
-    }
-
-    gencon_shell(const gencon_shell<FREAL> & sh)
-    {
-      _nprim = sh._nprim;
-      _nl = sh._nl;
-      _l = new int[_nl];
-      _alpha = new FREAL[_nprim];
-      _coeff = new FREAL[_nprim*_nl];
-      for (int i=0; i<_nl; i++)
-	_l[i] = sh._l[i];
-      for (int i=0; i<_nprim; i++)
-	_alpha[i] = sh._alpha[i];
-      for (int i=0; i<_nprim*_nl; i++)
-	_coeff[i] = sh._coeff[i];
-    }
-
-    ~gencon_shell()
-    {
-      delete _l;
-      delete _alpha;
-      delete _coeff;
-    }
-
-    inline int nprim() const
-    { return _nprim; }
-
-    inline int nshells() const
-    { return _nl; }
-
-    inline int & l(int i)
-    { return _l[i]; }
-
-    inline int l(int i) const
-    { return _l[i]; }
-
-    inline FREAL & alpha(int i)
-    { return _alpha[i]; }
-
-    inline FREAL alpha(int i) const
-    { return _alpha[i]; }
-
-    inline FREAL & coeff(int i, int j)
-    { return _coeff[i*_nprim+j]; }
-
-    inline FREAL coeff(int i, int j) const
-    { return _coeff[i*_nprim+j]; }
-
-    inline bool operator==(const gencon_shell<FREAL> & sh) const
-    {
-      if (_nl != sh._nl || _nprim != sh._nprim)
-	return false;
-      for (int i=0; i<_nl; i++)
-	if (_l[i] != sh._l[i])
-	  return false;
-      for (int i=0; i<_nprim; i++)
-	if ( std::abs(_alpha[i] - sh._alpha[i]) > eps )
-	  return false;
-      for (int i=0; i<_nprim*_nl; i++)
-	if ( std::abs(_coeff[i] - sh._coeff[i]) > eps )
-	  return false;
-
-      return true;
-    }
-
-    bool same_alpha(const gencon_shell<FREAL> & sh) const
-    {
-      if (_nprim != sh._nprim)
-	return false;
-      for (int i=0; i<_nprim; i++)
-	if ( std::abs(_alpha[i] - sh._alpha[i]) > eps )
-	  return false;
-
-      return true;
-    }
-
-    void merge(const gencon_shell<FREAL> & sh)
-    {
-      int * new_l = new int[nshells()+sh.nshells()];
-      for (int i=0; i<nshells(); i++)
-	new_l[i] = _l[i];
-      for (int i=0; i<sh.nshells(); i++)
-	new_l[i+nshells()] = sh._l[i];
-
-      FREAL * new_coeff = new FREAL[nprim()*(nshells()+sh.nshells())];
-      for (int p=0; p<nprim(); p++)
-	{
-	  for (int i=0; i<nshells(); i++)
-	    new_coeff[i*nprim()+p] = _coeff[i*nprim()+p];
-	  for (int i=0; i<sh.nshells(); i++)
-	    new_coeff[(i+nshells())*nprim()+p] = sh._coeff[i*nprim()+p];
-	}
-      
-      delete _coeff;
-      delete _l;
-      _coeff = new_coeff;
-      _l = new_l;
-
-      _nl = nshells() + sh.nshells();
-    }
-
-    virtual void write_g98(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const
-    {
-      for (int i=0; i<nshells(); i++)
-	{
-	  for (int f=0; f<offset; f++) os << " ";
-	  if (l(i)==0)
-	    os << "S";
-	  else if (l(i)==1)
-	    os << "P";
-	  else if (l(i)==2)
-	    os << "D";
-	  else if (l(i)==3)
-	    os << "F";
-	  else if (l(i)==4)
-	    os << "G";	  
-	  os << "  " << nprim() << "  1.00\n";
-	  for (int p=0; p<nprim(); p++)
-	    {
-	      for (int f=0; f<offset; f++) os << " ";
-	      os << boost::format("%15.6f %15.6f\n") % alpha(p) % coeff(i,p);
-	    }
-	}      
-    }
-
+  enum qpp_bastype{
+    qbas_gauss,
+    qbas_slater,
+    qbas_siesta,
+    qbas_pw,
+    qbas_none
   };
 
-  template <class FREAL>
-  const FREAL gencon_shell<FREAL>::eps = 1e-7;
+  qppobject_type qtype_bastype(qpp_bastype t);
+
+  // -----------------------------------------------------------------
+
+  enum qpp_angtype{
+    qang_spherical,
+    qang_cartesian
+  };
+
+  // ----------------------------------------------------------------
+
+  template <qpp_bastype ST, class FREAL>
+  class qpp_shell;
+  // ----------------------------------------------------------------
+
+#define QBAS qbas_gauss
+#include <basis/shell.hpp>
+#undef QBAS
+
+#define QBAS qbas_slater
+#include <basis/shell.hpp>
+#undef QBAS
+
 
   // ----------------------------------------------------------------------
   
-  template <class FREAL=double>
-  class gencon_basis_data : public qpp_object{
+  template <qpp_bastype ST, class FREAL=double>
+  class qpp_basis_data : public qpp_declaration{
+    
+    struct basis_record{
 
-  public:
-    struct atom_record{
+    public:
 
-      std::vector<gencon_shell<FREAL> > shells;
+      std::vector<qpp_shell<ST,FREAL> > shells;
       std::vector<STRING> labels;
       std::vector<int> numbers;
-
-      atom_record(const atom_record & a) : 
-	shells(a.shells), labels(a.labels), numbers(a.numbers)
-      {}
-
-      atom_record()
-      {}
+      STRING import;
+    
+      bool empty()
+      {
+	return shells.size() == 0 && labels.size() == 0 &&
+	  numbers.size() == 0 && import == "";
+      }
 
     };
 
-  private:
-    std::vector<atom_record> _rcrd;
+    std::vector<basis_record> _rcrd;
 
   public:
 
-    gencon_basis_data(const STRING & __name = "")
-    { _name = __name; }    
+    qpp_basis_data(const STRING & __name = "", qpp_object * __owner = NULL,
+		   qpp_param_array * __parm = NULL, 
+		   int __line=-1, const STRING & __file="") : 
+      qpp_declaration("basis",__name,__owner,__parm,__line,__file)
+    {}    
 
-    gencon_basis_data(const gencon_basis_data<FREAL> & q) :
-    _rcrd(q._rcrd)
+    qpp_basis_data(const qpp_basis_data<ST,FREAL> & bas) :
+      qpp_declaration(bas), _rcrd(bas._rcrd)
     {}
 
-    inline int nrcrd() const
+    qpp_basis_data(qpp_declaration * q) :
+      qpp_declaration(*q)
+    { 
+      // debug
+      //std::cerr << "Basis constructor from declaration called\n";
+
+      for (int i=0; i<n_decl(); i++)
+	if (decl(i)->category()=="center" && (decl(i)->gettype() & qtype_declaration ))
+	  {
+	    qpp_declaration * center = (qpp_declaration*)decl(i);
+	    for (int j=0; j<center->n_decl(); j++)
+	      insert_decl(i+j+1,*center->decl(j));
+	    while (center->n_decl()>0)
+	      center->erase_decl(0);
+	  }
+      /*
+      for (int i=0; i<n_decl(); i++)
+	if (decl(i)->category()=="center" && (decl(i)->gettype() & qtype_parameter ) )
+	  {
+	    if (decl(i)->gettype & qtype_data_int)
+	      qpp_declaration * dcl = new qpp_declaration("center","",this,);
+	      }*/
+      //debug
+      /*
+      std::cerr << "After moving up alive\n=====================================\n";
+      qpp_declaration::write(std::cerr);
+
+      for (int i=0; i<n_decl(); i++)
+	{
+	  std::cerr << "=== type = " << std::hex << decl(i)->gettype() << " ===\n";
+	  decl(i)->write(std::cerr);
+	  std::cerr << "\n\n";
+	}
+      std::cerr << "=====================================\n";
+      */
+
+      new_rcrd();
+
+      //debug
+      //std::cerr << "alive0.1\n";
+
+      for (int i=0; i<n_decl(); i++)
+	{
+	  //debug
+	  //std::cerr << "alive1\n";
+	  
+	  if (decl(i)->category()=="shell")
+	    {
+	      //debug
+	      //std::cerr << "alive2\n";
+
+	      if (decl(i)->gettype() == qtype_shell + 
+		  qtype_data<FREAL>::type + qtype_bastype(ST))
+		add_shell(*((qpp_shell<ST,FREAL>*)decl(i)) );
+	      else 
+		owner()->error("Wrong basis shell type", decl(i)->line(), decl(i)->file());
+	    }
+	  else if (decl(i)->category()=="center")
+	    {
+	      //debug
+	      //std::cerr << "alive4\n";
+
+	      qpp_declaration * dcl = (qpp_declaration*)decl(i);
+	      new_rcrd();
+	      for (int j=0; j<dcl->n_param(); j++)
+		if (dcl->param(j)->gettype()==qtype_parameter+qtype_data_int)
+		  add_number( ((qpp_parameter<int>*)(dcl->param(j))) -> value());
+		else if (dcl->param(j)->gettype()==qtype_parameter+qtype_data_string)
+		  add_label( ((qpp_parameter<STRING>*)(dcl->param(j))) -> value());
+	    }
+	  else if (decl(i)->category()=="parameter")
+	    {
+	      //debug
+	      //std::cerr << "alive3\n";
+
+	      if (decl(i)->name() == "basis" && 
+		  decl(i)->gettype() == qtype_parameter + qtype_data_string)
+		add_import( ((qpp_parameter<STRING>*)decl(i))->value() );
+	      else
+		owner()->error("Wrong external basis request", decl(i)->line(), decl(i)->file());
+	    }
+	  else
+	    owner()->error("Only declaration of shell, external basis and \"center\" are allowed inside basis definition", 
+		  decl(i)->line(), decl(i)->file());
+	
+	  //debug
+	  // std::cerr << "alive5\n";
+
+	}
+
+      if (rcrd(0).empty())
+      	_rcrd.erase(_rcrd.begin());
+	
+    }
+
+    inline int n_rcrd() const
     { return _rcrd.size();}
 
-    inline atom_record & rcrd(int i)
+    inline basis_record & rcrd(int i)
     { return _rcrd[i];}
 
     void new_rcrd()
     {
-      _rcrd.push_back( atom_record() );
+      _rcrd.push_back( basis_record() );
     }
 
     void add_number(int r, int num)
@@ -232,7 +218,7 @@ namespace qpp{
       _rcrd[r].labels.push_back(lbl);
     }
 
-    void add_shell(int r, const gencon_shell<FREAL> & sh)
+    void add_shell(int r, const qpp_shell<ST,FREAL> & sh)
     {
       bool found = false;
       for (int i=0; i<_rcrd[r].shells.size(); i++)
@@ -246,6 +232,11 @@ namespace qpp{
 	_rcrd[r].shells.push_back(sh);
     }
 
+    void add_import(int r, const STRING & imp)
+    {
+      _rcrd[r].import = imp;
+    }
+
     void add_number(int num)
     {
       add_number(_rcrd.size()-1,num);
@@ -256,29 +247,29 @@ namespace qpp{
       add_label(_rcrd.size()-1,lbl);
     }
 
-    void add_shell(const gencon_shell<FREAL> & sh)
+    void add_shell(const qpp_shell<ST,FREAL> & sh)
     {
       add_shell(_rcrd.size()-1,sh);
     }
 
-    virtual int n_nested() const
-    { return 0;}
-
-    virtual qpp_object* nested(int i) const
-    { return NULL;}
+    void add_import(const STRING & imp)
+    {
+      _rcrd[_rcrd.size()-1].import = imp;
+    }
 
     virtual STRING category() const
     { return "basis";}
 
     virtual qppobject_type gettype() const
+    //fixme
     { return qtype_basis | qtype_basis_gauss | qtype_data<FREAL>::type; }
 
     virtual qpp_object * copy() const
     {
-      return new gencon_basis_data(*this);
+      return new qpp_basis_data<ST,FREAL>(*this);
     }
 
-    virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const
+    virtual void write_g98(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const
     {
       for (int i=0; i<offset; i++)
 	os << " ";
@@ -292,7 +283,7 @@ namespace qpp{
 	os << " ";
       os << "{\n";
 
-      for (int j=0; j<nrcrd(); j++)
+      for (int j=0; j<n_rcrd(); j++)
 	{
 	  for (int i=0; i<offset+4; i++) os << " ";
 	  for (int k=0; k<_rcrd[j].labels.size(); k++)
@@ -313,6 +304,61 @@ namespace qpp{
       for (int i=0; i<offset+2; i++)
 	os << " ";
       os << "}\n";
+    }
+
+    virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const
+    {
+      for (int k=0; k<offset; k++) os << " ";
+      os << "basis";
+      if (name()!="")
+	os << " " << name() << "(";
+      os << "( real=";
+      if (qtype_data<FREAL>::type == qtype_data_double)
+	os << "double";
+      else
+	os << "float";
+      os << ", bastype=";
+      if (ST==qbas_gauss)
+	os << "gaussian";
+      else if (ST==qbas_slater)
+	os << "slater";
+      else if (ST==qbas_siesta)
+	os << "siesta";
+      else if (ST==qbas_pw)
+	os << "plane_waves";
+      os << ")\n";
+      for (int k=0; k<offset+2; k++) os << " ";
+      os << "{\n";
+      for (int i=0; i<n_rcrd(); i++)
+	{
+
+	  //debug
+	  //os << "--- record " << i << "----\n";
+
+	  if (_rcrd[i].labels.size()>0 || _rcrd[i].numbers.size()>0)
+	    {
+	      for (int k=0; k<offset+4; k++) os << " ";
+	      os << "center(";
+	      int p=0;
+	      for (int k=0; k<_rcrd[i].labels.size(); k++)
+		os << (p++>0? ", " : "") << _rcrd[i].labels[k];
+	      for (int k=0; k<_rcrd[i].numbers.size(); k++)
+		os << (p++>0? ", " : "") << _rcrd[i].numbers[k];
+	      os << ");\n";
+	    }
+	  if (_rcrd[i].import!="")
+	    {
+	      for (int k=0; k<offset+4; k++) os << " ";
+	      os << "basis = " << _rcrd[i].import << ";\n";
+	    }
+	  for (int j=0; j<_rcrd[i].shells.size(); j++)
+	    _rcrd[i].shells[j].write(os,offset+4);
+	}
+      for (int k=0; k<offset+2; k++) os << " ";
+      os << "}\n";
+
+      //debug
+      //os << "nrcrd = " << _rcrd.size() << "\n";
     }
   
   };
@@ -338,7 +384,7 @@ namespace qpp{
 		       {"FXXX","FYYY","FZZZ","FXYY","FXXY","FXZZ","FXXZ","FYZZ","FYYZ","FXYZ"}};
   
   // ----------------------------------------------------------------------
-
+  /*
   template <class FREAL=double, int DIM=0 , class CREAL=double, 
 	    class TRANSFORM = periodic_cell<DIM,CREAL> >
   class gauss_cart_basis{
@@ -387,9 +433,9 @@ namespace qpp{
     virtual STRING error() =0;
 
     virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const =0;    
-    */
 
   };
+    */
 
   // -----------------------------------------------------------------
 

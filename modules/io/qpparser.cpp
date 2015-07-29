@@ -2,20 +2,43 @@
 
 namespace _qpp_internal
 {
-qpp::qpp_object * parse_any_vectors(int dim, qpp::qpp_param_array  parm,
+qpp::qpp_object * parse_any_vectors(int dim, qpp::qpp_param_array & parm,
 					STRING name, qpp::tokenizer & tok,
 					qpp::qpp_object * owner)
 {
+  STRING real = "double";
+  qpp::qpp_parameter<STRING> * rl = parm.parameter<STRING>("real");
+  if (rl == NULL)
+    rl = owner -> parameter<STRING>("creal",qpp::qscope_global);
+  if (rl == NULL)
+    rl = owner -> parameter<STRING>("real",qpp::qscope_global);
+  if (rl != NULL)
+    real = rl->value();
 
-  if (dim == 0)
+  if (real == "double")
+    {
+      if (dim == 0)
 	return parse_vectors<0,double>(parm,name,tok,owner);
-  else if (dim == 1)
+      else if (dim == 1)
 	return parse_vectors<1,double>(parm,name,tok,owner);
-  else if (dim == 2)
+      else if (dim == 2)
 	return parse_vectors<2,double>(parm,name,tok,owner);
-  else if (dim == 3)
+      else if (dim == 3)
 	return parse_vectors<3,double>(parm,name,tok,owner);
-
+    }
+  else if (real == "float")
+   {
+      if (dim == 0)
+	return parse_vectors<0,float>(parm,name,tok,owner);
+      else if (dim == 1)
+	return parse_vectors<1,float>(parm,name,tok,owner);
+      else if (dim == 2)
+	return parse_vectors<2,float>(parm,name,tok,owner);
+      else if (dim == 3)
+	return parse_vectors<3,float>(parm,name,tok,owner);
+    }
+  else
+    owner->error("Bad real",tok.line(),tok.file());
 }
 qpp::qpp_param_array * create_parameter(const STRING & name, const STRING & value,
 					qpp::qpp_object *owner, int line, const STRING & file)
@@ -129,14 +152,17 @@ void parse_parameters(qpp::qpp_param_array & lst, qpp::tokenizer & tok)
 	} while(true);
 
 	//debug
+	/*
 	std::cout << "paramlist:";
 	for (int i=0; i<lst.n_nested(); i++)
 		lst.nested(i)->write(std::cerr);
 	lst.write(std::cerr);
 	std::cerr << "\n";
+	*/
 
 	//    return lst;
 }
+
 qpp::qpp_object *parse_any_geom(qpp::qpp_param_array& parm, STRING name,
 				qpp::tokenizer & tok, qpp::qpp_object * owner)
 {
@@ -146,9 +172,13 @@ qpp::qpp_object *parse_any_geom(qpp::qpp_param_array& parm, STRING name,
   if (parm.n_nested() > 0)
 	{
   qpp::qpp_param_array * p0 = (qpp::qpp_param_array*)parm[0];
+
+  //debug
+  /*
   std::cerr << "defining dimension: " << qpp::tolower(p0->name()) << " " <<
 	p0->gettype() << " " << qpp::qtype_parameter << " " <<
 	qpp::qtype_data_int << " " << qpp::qtype_data_string << "\n";
+  */
 
   if ( (p0->name() == "" || qpp::tolower(p0->name())=="dim") &&
 	   (p0->gettype() == qpp::qtype_parameter + qpp::qtype_data_int ) )
@@ -195,7 +225,7 @@ qpp::qpp_object *parse_any_geom(qpp::qpp_param_array& parm, STRING name,
   if (!defined)
 	owner->error("Dimension of the geometry not defined",tok.line(),tok.file());
   // debug
-  std::cerr << "=============== dimension = " << dim << "\n";
+  //std::cerr << "=============== dimension = " << dim << "\n";
 
   if (dim == 0)
 	return parse_geom<0,double>(parm,name,tok,owner);
@@ -207,6 +237,7 @@ qpp::qpp_object *parse_any_geom(qpp::qpp_param_array& parm, STRING name,
 	return parse_geom<3,double>(parm,name,tok,owner);
 
 }
+
 void qpp_read(qpp::ISTREAM & is, std::vector<qpp::qpp_object*> & decls)
 {
 	qpp::tokenizer t(is);
@@ -214,9 +245,10 @@ void qpp_read(qpp::ISTREAM & is, std::vector<qpp::qpp_object*> & decls)
 	while ( (decl=parse_declaration(t,NULL)) != NULL)
 		decls.push_back(decl);
 }
-qpp::qpp_object * parse_any_basis(qpp::qpp_param_array & parm,
-				  STRING name, qpp::tokenizer & tok,
-				  qpp::qpp_object * owner )
+
+qpp::qpp_object * parse_non_native_basis(qpp::qpp_param_array & parm,
+					 STRING name, qpp::tokenizer & tok,
+					 qpp::qpp_object * owner )
 {
   // fixme - parameters treating
   if (parm.n_nested()>0)
@@ -228,6 +260,52 @@ qpp::qpp_object * parse_any_basis(qpp::qpp_param_array & parm,
 	}
 }
 
+  qpp::qpp_object * parse_any_shell(qpp::qpp_param_array & parm,
+				    STRING name, qpp::tokenizer & tok,
+				    qpp::qpp_object * owner )
+  {
+    // Get basis type
+    qpp::qpp_bastype bastype = qpp::qbas_gauss;
+    // Get real type
+    STRING real = "double";
+
+    // fixme - implement this    
+
+    if (bastype==qpp::qbas_gauss)
+      {
+	if (real=="double")
+	  return parse_shell<qpp::qbas_gauss,double>(parm,name,tok,owner);
+	else if (real=="float")
+	  return parse_shell<qpp::qbas_gauss,float>(parm,name,tok,owner);
+      }
+    else if (bastype==qpp::qbas_slater)
+      {
+	if (real=="double")
+	  return parse_shell<qpp::qbas_slater,double>(parm,name,tok,owner);
+	else if (real=="float")
+	  return parse_shell<qpp::qbas_slater,float>(parm,name,tok,owner);
+      }
+    else if (bastype==qpp::qbas_siesta)
+      {
+	if (real=="double")
+	  return parse_shell<qpp::qbas_siesta,double>(parm,name,tok,owner);
+	else if (real=="float")
+	  return parse_shell<qpp::qbas_siesta,float>(parm,name,tok,owner);
+      }
+  }
+
+
+  bool non_native_basis(const  qpp::qpp_param_array & parm)
+  {
+    qpp::qpp_parameter<STRING> *fmt = parm.parameter<STRING>(0);
+    if (fmt!=NULL)
+      {
+	STRING format = fmt->value();
+	if (format == "g98" )
+	  return true;
+      }
+    return false;
+  }
 
 qpp::qpp_object * parse_declaration(qpp::tokenizer & tok, qpp::qpp_object * owner )
 {
@@ -257,7 +335,7 @@ qpp::qpp_object * parse_declaration(qpp::tokenizer & tok, qpp::qpp_object * owne
 
 		// fixme - not necessarily STRING
 		qpp::qpp_param_array * pn = create_parameter(field1,field2,owner,
-													 tok.line(), tok.file());
+							     tok.line(), tok.file());
 		smb = tok.get();
 
 		if (smb=="(")
@@ -284,7 +362,7 @@ qpp::qpp_object * parse_declaration(qpp::tokenizer & tok, qpp::qpp_object * owne
 
 	//std::cout << "debug1: f1= " << field1 << " f2= " << field2 << " smb= " << smb << "\n";
 
-	qpp::qpp_param_array  * parm = new qpp::qpp_param_array;
+	qpp::qpp_param_array  * parm = new qpp::qpp_param_array("",owner);
 	bool must_have_nested = true;
 
 	if (smb == "(")
@@ -306,6 +384,7 @@ qpp::qpp_object * parse_declaration(qpp::tokenizer & tok, qpp::qpp_object * owne
 	if ( field1 == "vectors")
 	{
 		// determine the dimension first
+	        // fixme - rewrite this
 		int dim = 3;
 		if ( parm->n_nested() > 0)
 		{
@@ -320,8 +399,12 @@ qpp::qpp_object * parse_declaration(qpp::tokenizer & tok, qpp::qpp_object * owne
 		return parse_any_vectors(dim, *parm, field2, tok, owner);
 	}
 
-	if ( field1 == "basis" && smb == "{" )
-		return parse_any_basis(*parm, field2, tok, owner);
+	if ( field1 == "basis" && smb == "{" && non_native_basis(*parm))
+	  // fixme - this should be done only for non-native basis formats (g98,gms)
+	  return parse_non_native_basis(*parm, field2, tok, owner);
+	
+	if (field1 == "shell" )
+	  return parse_any_shell(*parm, field2, tok, owner);
 
 	/*
 	for (int i=0; i<parm.size(); i++)
@@ -338,15 +421,18 @@ qpp::qpp_object * parse_declaration(qpp::tokenizer & tok, qpp::qpp_object * owne
 
 	//std::cout << "debug2.1: " << smb  << " bool " << (smb == "{") << "\n";
 
-	// consider obj(val) case separately
+	// convert obj(val) case into obj = val 
 	if ( smb != "{" && parm->n_nested()==1 && parm->nested(0)->name()=="" )
-	{
-		qpp::qpp_object *pval = parm->nested(0);
-		delete parm;
-		pval->setname(field1);
-		pval->setowner(owner);
-		return pval;
-	}
+	  // exceptions which should not be converted
+	  if (field1 != "center" && field1 != "replicate" && field1 != "replace" &&
+	      field1 != "values")
+	    {
+	      qpp::qpp_object *pval = parm->nested(0);
+	      delete parm;
+	      pval->setname(field1);
+	      pval->setowner(owner);
+	      return pval;
+	    }
 
 	qpp::qpp_declaration * decl = new qpp::qpp_declaration(field1,field2,owner,parm,
 														   tok.line(), tok.file());
@@ -371,11 +457,12 @@ qpp::qpp_object * parse_declaration(qpp::tokenizer & tok, qpp::qpp_object * owne
 
 }
 
+  /*
   qpp::qpp_object * qpp_compile( qpp::qpp_object * q)
   {
     if (q->gettype() == qpp::qtype_declaration)
       {}
   }
-
+  */
 };
 
