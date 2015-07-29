@@ -1,0 +1,95 @@
+metaparam_array geometry{
+
+  metaparameter dim(type=int){
+    required = no;
+    synonyms(DIM,Dim,dimension,DIMENSION,Dimension,'');
+    range(0,3);
+
+    value(0){
+      synonyms(0d,0D);
+    }
+
+    value(1){
+      synonyms(1d,1D);
+    }
+
+    value(2){
+      synonyms(2d,2D);
+    }
+
+    value(3){
+      synonyms(3d,3D);
+    }
+  }
+
+  metaparameter chto(type=string)
+  {
+    required = no;
+    value(abc)
+    {
+      synonyms(ABC);
+      metaparam_array{
+        metaparameter a(type=double, required = yes);
+        metaparameter b(type=double, required = yes);
+        metaparameter c(type=double, required = yes);
+      }
+    }
+    value(rgb)
+    {
+      synonyms(RGB);
+      metaparam_array{
+        metaparameter r(type=float, required = yes);
+        metaparameter g(type=float, required = yes);
+        metaparameter b(type=float, required = yes);
+      }
+    }
+    value(color)
+    {
+      synonyms(colour,COLOR,COLOUR);
+      metaparameter color(type=string, required = yes);
+    }
+  }
+
+
+  metaparameter cell(type=string){
+    required = no;
+    synonyms(vectors);
+    
+    metaparam_repeat{
+      required=yes;
+      repeat_min=6;
+      repeat_max=9;
+      metaparameter(type=float){
+	required=yes;
+      }
+    }
+  }
+
+  metaparam_repeat{
+    repeat_min = 0;
+    repeat_max=10;
+    metaparam_select{
+      required = yes;
+      metaparameter(type=string){
+        required = yes;
+        values(atom);
+      }
+      metaparam_array{        
+        metaparameter{
+          required = yes;
+	  values(x,y,z);
+        }
+	metaparameter opt_flag(type=bool)
+	{ 
+	  required = yes;
+        }
+      }
+      metaparameter *(type=string)
+      {
+        required = yes;
+        values(int,real,bool);
+      }
+    }
+  }
+
+}
