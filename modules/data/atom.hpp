@@ -5,6 +5,7 @@
 #include <sstream>
 #include <data/qppdata.hpp>
 #include <basis/basis.hpp>
+#include <io/compile.hpp>
 
 namespace qpp{
 
@@ -40,6 +41,26 @@ namespace qpp{
   };
 
   // --------------------------------------------------
+  template<class REAL, qpp_bastype BT>
+  void _list_shells(qpp_object * bas, std::vector<qpp_shell<BT,REAL>*>  & shells)
+  {
+    qpp_basis_data<BT,REAL> * basis = (qpp_basis_data<BT,REAL> *)bas;
+    // Check there is no "center" declarations in basis
+    bool OK = true;
+    if (basis -> n_rcrd() != 1)
+      OK = false;
+    if (OK)
+      if (basis->rcrd(0).labels.size()!=0 || basis->rcrd(0).numbers.size()!=0)
+	OK = false;
+
+    if (!OK)
+      bas -> error("Basis declaration inside atom declaration cannot contain \"center\" specification",
+		   bas ->line(), bas->file());
+    for (int i=0; i<basis->rcrd(0).shells.size(); i++)
+      shells.push_back( &(basis->rcrd(0).shells[i]) );
+  }
+
+  // --------------------------------------------------
   // basic class for all other types of atoms
   template<class REAL>
   class qpp_atom : public qpp_declaration{
@@ -48,35 +69,37 @@ namespace qpp{
 
     // Atom always has a name
     // It is supposed to be unique for each type of atoms
-    int *number; // Number in periodic table
+    int number; // Number in periodic table
 
     struct classical_block{
-      REAL *charge; // Effective charge
-      REAL *mass;   // Atomic mass
+      REAL charge; // Effective charge
+      REAL mass;   // Atomic mass
     };
 
     struct polarizible_block{
-      REAL *alpha; // polarisibility
+      REAL alpha; // polarisibility
     };
 
     struct basis_block{
-      STRING * bas_name;
-      qpp_bastype * bas_type;
+      STRING bas_name;
+      qpp_object * basis;
+      qpp_bastype bastype;
       // only one of the following arrays can be not empty
       std::vector<qpp_shell<qbas_gauss,REAL>*>  gauss_shells;
       std::vector<qpp_shell<qbas_slater,REAL>*> slater_shells;
       std::vector<qpp_shell<qbas_siesta,REAL>*> siesta_shells;
+      std::vector<qpp_shell<qbas_pw,REAL>*>     pw_shells;
     };
 
     struct pseudo_block{
-      STRING * pseudo_name;
+      STRING pseudo_name;
     };
 
     struct visible_block{
-      REAL *cov_rad;
-      REAL *vdw_rad;
-      REAL *ionic_rad;
-      REAL * red, * green, * blue, *alpha;
+      REAL cov_rad;
+      REAL vdw_rad;
+      REAL ionic_rad;
+      REAL red, green, blue, alpha;
     };
 
     classical_block   * classical;
@@ -88,9 +111,9 @@ namespace qpp{
     qpp_atom(STRING __name, qpp_object * __owner = NULL, int __number=0) : 
       qpp_declaration("atom",__name, __owner)
     {
-      qpp_parameter<int> * p = new qpp_parameter<int>("number",__number,this);
-      add(*p);
-      number = &p->value();
+      number = __number;      
+      add( * new qpp_parameter<int>("number",&number,this) );
+
       classical   = NULL;
       polarizible = NULL;
       basis       = NULL;
@@ -98,8 +121,8 @@ namespace qpp{
       visible     = NULL;
     }
 
-    qpp_atom(qpp_declaration * decl, qpp_object * __owner = NULL) :
-      qpp_declaration("atom", decl->name(), __owner, NULL, decl->line(), decl->file())
+    qpp_atom(qpp_declaration * d) :
+      qpp_declaration("atom", d->name(), d->owner(), NULL, d->line(), d->file())
     {
       //debug
       /*      std::cerr << "entering atom constructor\n-----------------------------\n";
@@ -107,105 +130,167 @@ namespace qpp{
       std::cerr << "--------------------------------------\n";
       */
       qpp_parameter<int> *pnumber;
+      pnumber = d -> parameter<int>("number");
+      if (pnumber != NULL)
+	number = pnumber -> value();
+      else 
+	number = 0;
 
-      pnumber = decl -> parameter<int>("number");
+      add( * new qpp_parameter<int>("number",&number,this) );
 
       //debug
       //std::cerr << "atom constr: after parameter<int>(number)\n";
-
-      if (pnumber == NULL)
-	pnumber = new qpp_parameter<int>("number",0);
-      add(*pnumber);
-      number = &(pnumber->value());
 
       //debug
       //std::cerr << "atom constr alive 1\n";
 
       // Classical properties
-      qpp_parameter<REAL> * pcharge, * pmass;
-      pcharge = decl -> parameter<REAL>("charge");
-      pmass   = decl -> parameter<REAL>("mass");
+      qpp_parameter<double> * pcharge, * pmass;
+      pcharge = d -> parameter<double>("charge");
+      pmass   = d -> parameter<double>("mass");
 
       if (pcharge != NULL || pmass != NULL)
 	{
 	  classical = new classical_block;
-	  if (pcharge == NULL)
-	    pcharge = new qpp_parameter<REAL>("charge",0e0);
-	  if (pmass == NULL)
-	    pmass = new qpp_parameter<REAL>("mass",0e0);
-	  add(*pcharge);
-	  add(*pmass);
-	  classical = new classical_block;
-	  classical -> charge = &(pcharge->value());
-	  classical -> mass = &(pmass->value());
+
+	  if (pcharge != NULL)
+	    classical -> charge = pcharge -> value();
+	  else
+	    classical -> charge = 0e0;
+
+	  if (pmass != NULL)
+	    classical -> mass = pmass -> value();
+	  else
+	    classical -> mass = 0e0;
+
+	  add(* new qpp_parameter<REAL>("charge", &(classical->charge), this));
+	  add(* new qpp_parameter<REAL>("mass", &(classical->mass), this));
 	}
       //debug
       //std::cerr << "atom constr alive 2\n";
 
       // Polarizible properties
-      qpp_parameter<REAL> * palpha = decl -> parameter<REAL>("alpha");
+      qpp_parameter<double> * palpha = d -> parameter<double>("alpha");
       if (palpha != NULL)
 	{
 	  polarizible = new polarizible_block;
-	  add(*palpha);
-	  polarizible -> alpha = &(palpha->value());
+	  polarizible -> alpha = palpha -> value();
+	  add(* new qpp_parameter<REAL>("alpha", &(polarizible->alpha), this));
 	}
       //debug
       //std::cerr << "atom constr alive 3\n";
 
       // Basis data
-      qpp_parameter<STRING> * pbasis = decl -> parameter<STRING>("basis");
+      qpp_object * pbasis = d -> getobject("basis", qscope_local);
+      bool bas_name_found = false, basis_found = false;
+
       if (pbasis != NULL)
 	{
+	  pbasis = qpp_compile(pbasis);
+
+	  //debug
+	  std::cerr << "--- atom: basis found ------\n";
+	  pbasis ->write(std::cerr);	  
+
+	  bas_name_found = pbasis -> gettype() == ( qtype_parameter | qtype_data_string );
+	  basis_found = pbasis -> gettype() & ( qtype_basis | qtype_data<REAL>::type);
+
+	  std::cerr << "basname= " << bas_name_found << " basis found= " << basis_found << "\n";
+	  std::cerr << std::hex << pbasis -> gettype() << std::dec << "\n";
+	}
+
+      if (bas_name_found)
+	{
 	  basis = new basis_block;
-	  add(*pbasis);
-	  basis -> bas_name = &(pbasis->value());
+	  basis -> bas_name = ((qpp_parameter<STRING>*)pbasis) -> value();
+	  add(* new qpp_parameter<STRING>("basis", &(basis->bas_name), this));
+	  basis -> basis = NULL;
+	}
+      else if (basis_found)
+	{
+	  basis = new basis_block;
+	  basis -> basis = pbasis -> copy();
+	  add(*basis->basis);
+	  if ( pbasis-> gettype() & qtype_basis_gauss)
+	    {
+	      basis -> bastype = qbas_gauss;
+	      _list_shells<REAL,qbas_gauss>(basis->basis, basis->gauss_shells);
+	    }
+	  else if (pbasis->gettype() & qtype_basis_slater)
+	    {
+	      basis -> bastype = qbas_slater;
+	      _list_shells<REAL,qbas_slater>(basis->basis, basis->slater_shells);
+	    }
+	  else if (pbasis->gettype() & qtype_basis_siesta)
+	    {
+	      basis -> bastype = qbas_siesta;
+	      //_list_shells<REAL,qbas_siesta>(basis->basis, basis->siesta_shells);
+	    }
+	  else if (pbasis->gettype() & qtype_basis_pw)
+	    {
+	      basis -> bastype = qbas_pw;
+	      //_list_shells<REAL,qbas_pw>(basis->basis, basis->pw_shells);
+	    }
 	}
       //debug
       //std::cerr << "atom constr alive 4\n";
 
       // Visible properties
-      qpp_parameter<REAL> *pcov_rad   = decl -> parameter<REAL>("cov_rad");
-      qpp_parameter<REAL> *pvdw_rad   = decl -> parameter<REAL>("vdw_rad");
-      qpp_parameter<REAL> *pionic_rad = decl -> parameter<REAL>("ionic_rad");
-      qpp_parameter<REAL> *pred    = decl -> parameter<REAL>("red");
-      qpp_parameter<REAL> *pgreen  = decl -> parameter<REAL>("green");
-      qpp_parameter<REAL> *pblue   = decl -> parameter<REAL>("blue");
-      qpp_parameter<REAL> *pvalpha = decl -> parameter<REAL>("transparancy");
+      qpp_parameter<double> *pcov_rad   = d -> parameter<double>("cov_rad");
+      qpp_parameter<double> *pvdw_rad   = d -> parameter<double>("vdw_rad");
+      qpp_parameter<double> *pionic_rad = d -> parameter<double>("ionic_rad");
+      qpp_parameter<double> *pred       = d -> parameter<double>("red");
+      qpp_parameter<double> *pgreen     = d -> parameter<double>("green");
+      qpp_parameter<double> *pblue      = d -> parameter<double>("blue");
+      qpp_parameter<double> *pvalpha    = d -> parameter<double>("transparancy");
 
       if (pcov_rad != NULL || pvdw_rad != NULL || pionic_rad != NULL || pred != NULL ||
 	  pgreen   != NULL || pblue    != NULL || pvalpha    != NULL)
 	{
 	  visible = new visible_block;
-	  if (pcov_rad == NULL)
-	    pcov_rad = new qpp_parameter<REAL>("cov_rad",0e0);
-	  if (pvdw_rad == NULL)
-	    pvdw_rad = new qpp_parameter<REAL>("vdw_rad",0e0);
-	  if (pionic_rad == NULL)
-	    pionic_rad = new qpp_parameter<REAL>("ionic_rad",0e0);
-	  if (pred == NULL)
-	    pred = new qpp_parameter<REAL>("red",0e0);
-	  if (pgreen == NULL)
-	    pgreen = new qpp_parameter<REAL>("green",0e0);
-	  if (pblue == NULL)
-	    pblue = new qpp_parameter<REAL>("blue",0e0);
-	  if (pvalpha == NULL)
-	    pvalpha = new qpp_parameter<REAL>("transparency",0e0);
 
-	  add(*pcov_rad);
-	  add(*pvdw_rad);
-	  add(*pionic_rad);
-	  add(*pred);
-	  add(*pgreen);
-	  add(*pblue);
-	  add(*pvalpha);
-	  visible -> cov_rad   = &(pcov_rad->value());
-	  visible -> vdw_rad   = &(pvdw_rad->value());
-	  visible -> ionic_rad = &(pionic_rad->value());
-	  visible -> red    = &(pred->value());
-	  visible -> green = &(pgreen->value());
-	  visible -> blue   = &(pblue->value());
-	  visible -> alpha = &(pvalpha->value());
+	  if (pcov_rad != NULL)
+	    visible -> cov_rad = pcov_rad ->value();
+	  else
+	    visible -> cov_rad = 0e0;
+
+	  if (pvdw_rad != NULL)
+	    visible -> vdw_rad = pvdw_rad -> value();
+	  else
+	    visible -> vdw_rad = 0e0;
+
+	  if (pionic_rad != NULL)
+	    visible -> ionic_rad = pionic_rad -> value();
+	  else
+	    visible -> ionic_rad = 0e0;
+	    
+	  if (pred != NULL)
+	    visible -> red = pred ->value();
+	  else
+	    visible -> red = 0e0;
+
+	  if (pgreen != NULL)
+	    visible -> green = pgreen ->value();
+	  else
+	    visible -> green = 0e0;
+
+	  if (pblue != NULL)
+	    visible -> blue = pblue ->value();
+	  else
+	    visible -> blue = 0e0;
+
+	  if (pvalpha != NULL)
+	    visible -> alpha = pvalpha ->value();
+	  else
+	    visible -> alpha = 0e0;
+
+	  add(* new qpp_parameter<REAL>("cov_rad", & (visible -> cov_rad), this));
+	  add(* new qpp_parameter<REAL>("vdw_rad", &(visible -> vdw_rad), this));
+	  add(* new qpp_parameter<REAL>("ionic_rad", &(visible -> ionic_rad), this));
+	  add(* new qpp_parameter<REAL>("red", &(visible -> red), this));
+	  add(* new qpp_parameter<REAL>("green", &(visible -> green), this));
+	  add(* new qpp_parameter<REAL>("blue", &(visible -> blue), this));
+	  add(* new qpp_parameter<REAL>("transparency", &(visible -> alpha), this));
 	}
       
   }

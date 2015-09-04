@@ -1,0 +1,197 @@
+metaparam_array sphere{
+  ordered = yes;
+  metaparameter r(type=double, required=yes)
+  {
+    synonyms(R);
+  }
+  metaparameter center(type=string,required=no)
+  {
+    default = "";
+    metaparam_array{
+      ordered=yes;
+      metaparameter x(type=double, required=no, default=0.);
+      metaparameter y(type=double, required=no, default=0.);
+      metaparameter z(type=double, required=no, default=0.);
+    }
+  }
+}
+
+metaparam_array shell
+{
+  ordered=yes;
+  metaparam_array
+  {
+   ordered=yes;
+    metaparameter freal(type=string)
+    {
+      required=no;
+      synonyms(real);
+      values(float,double);
+    }
+    metaparameter bastype(type=string)
+    {
+      required=no;
+      default=gauss;
+      values(gauss,slater,siesta,pw);
+    }
+    metaparameter angtype(type=string)
+    {
+      required=no;
+      values(spherical,cartesian);
+    }
+  }
+  metaparam_repeat
+  {
+    repeat_min=1;
+    metaparameter *(type=int)
+    {
+      required = yes;
+      value(0) {  synonyms(s); }
+      value(1) {  synonyms(p); }
+      value(2) {  synonyms(d); }
+      value(3) {  synonyms("f"); }
+    }
+  }
+}
+
+metaparam_array molecule
+{
+  ordered = yes;
+  metaparameter dim(type=int, required = no)
+  {
+    synonyms(DIM,Dim,dimension,DIMENSION,Dimension);
+
+    value(0){
+      synonyms(0d,0D);
+    }
+
+    value(1){
+      synonyms(1d,1D);
+    }
+
+    value(2){
+      synonyms(2d,2D);
+    }
+
+    value(3){
+      synonyms(3d,3D);
+    }
+
+    value(4);
+    value(5);    
+  }
+
+  metaparam_select{
+
+    metaparameter real(type=string, required=no)
+    {
+      synonyms(REAL);
+      values(double,float);
+    }
+
+    metaparam_array{
+      metaparameter creal(type=string, required=no)
+      {
+        synonyms(CREAL);
+        values(double,float);
+      }
+      metaparameter freal(type=string, required=no)
+      {
+        synonyms(FREAL);
+        values(double,float);
+      }
+    }
+
+  }
+
+}
+
+
+metaparam_array geometry
+{
+  ordered = yes;
+  metaparameter dim(type=int, required = no)
+  {
+    synonyms(DIM,Dim,dimension,DIMENSION,Dimension);
+
+    value(0){
+      synonyms(0d,0D);
+    }
+
+    value(1){
+      synonyms(1d,1D);
+    }
+
+    value(2){
+      synonyms(2d,2D);
+    }
+
+    value(3){
+      synonyms(3d,3D);
+    }
+
+    value(4);
+    value(5);    
+  }
+
+  metaparameter creal(type=string, required=no)
+  {
+    synonyms(real,REAL,CREAL);
+    values(double,float);
+  }
+
+  metaparam_repeat
+  {
+    metaparam_select(required=yes)
+    {
+      metaparameter(type=string,required=yes)
+      {values(atom);}
+      metaparameter(type=string,required=yes)
+      {values(x);}
+      metaparameter(type=string,required=yes)
+      {values(y);}
+      metaparameter(type=string,required=yes)
+      {values(z);}
+      metaparameter *(type=string,required=yes)
+      {
+        values(int,bool,real);
+      }
+    }
+  }  
+}
+
+metaparam_array vectors
+{
+  ordered = yes;
+  metaparameter dim(type=int, required = no)
+  {
+    synonyms(DIM,Dim,dimension,DIMENSION,Dimension);
+
+    value(0){
+      synonyms(0d,0D);
+    }
+
+    value(1){
+      synonyms(1d,1D);
+    }
+
+    value(2){
+      synonyms(2d,2D);
+    }
+
+    value(3){
+      synonyms(3d,3D);
+    }
+
+    value(4);
+    value(5);    
+  }
+
+  metaparameter creal(type=string, required=no)
+  {
+    synonyms(real,REAL,CREAL);
+    values(double,float);
+  }
+
+}
+

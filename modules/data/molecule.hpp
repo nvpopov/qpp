@@ -27,16 +27,17 @@ namespace qpp{
       
     }
 
-    molecule(qpp_declaration * raw) :
-      qpp_declaration("molecule", raw->name(), raw->owner(),
-		      raw->parameters(), raw->line(), raw->file())
+    molecule(qpp_declaration * d) :
+      qpp_declaration("molecule", d->name(), d->owner(),
+		      d->parameters(), d->line(), d->file())
     {
 
       //debug
       //      std::cerr << "Molecule constructor\n";
 
-      for (int i=0; i<raw->n_decl(); i++) 
-	add_decl( *qpp_compile(raw->decl(i)) );      
+      for (int i=0; i<d->n_decl(); i++) 
+	//	add_decl( *qpp_compile(d->decl(i)) );      
+	add_decl( *(d->decl(i)) );      
       /*
 	{
 	  // debug
@@ -58,6 +59,14 @@ namespace qpp{
       // Find geometry
       int i=0;
       bool found = false;
+
+      //debug
+      /*
+      std::cerr << " ------------ Molecule: nested objects ----------------------\n";
+      for (i=0; i<n_decl(); i++)
+	std::cerr << "nested type = " << std::hex << decl(i)->gettype() << std::dec << "\n";
+      */
+
       for (i=0; i<n_decl(); i++)
 	if ((decl(i)->gettype() & qtype_vectors) &&
 	    (decl(i)->name() == ""))

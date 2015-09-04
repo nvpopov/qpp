@@ -46,6 +46,16 @@ namespace qpp{
     virtual qpp_object* nested(int i) const
     { return NULL;}
 
+    virtual int n_param() const
+    { 
+      //fixme - implement this for different shapes
+      return 0; 
+    }
+    
+    virtual void set_n_param(int n)
+    {}
+
+
     virtual qppobject_type gettype() const
     { return qtype_shape;}
     
@@ -255,6 +265,19 @@ namespace qpp{
       r0 = _r0;
     }
 
+    qpp_shape_sphere(const qpp_shape_sphere<VALTYPE> & s):
+      qpp_shape<VALTYPE>(s)
+    {
+      R = s.R;
+      r0 = s.r0;
+    }
+    /*
+    qpp_shape_sphere(qpp_param_array & parm, 
+		     const STRING & __name = "", qpp_object * __owner = NULL): 
+      qpp_shape<VALTYPE>(__name, __owner)
+    {      
+    }
+    */
     virtual STRING category() const
     { return "sphere";}
 
@@ -287,7 +310,7 @@ namespace qpp{
 
     virtual v3d fmin(const periodic_cell<3,VALTYPE> &v) const
     {
-      lace::matrix3d<VALTYPE> A(v[0],v[1],v[2]);
+      lace::matrix3d<VALTYPE> A(v(0),v(1),v(2));
       lace::matrix3d<VALTYPE> B = invert(A);
 
       v3d res = 0e0;
@@ -301,7 +324,7 @@ namespace qpp{
 
     virtual v3d fmax(const periodic_cell<3,VALTYPE> &v) const
     {      
-      lace::matrix3d<VALTYPE> A(v[0],v[1],v[2]);
+      lace::matrix3d<VALTYPE> A(v(0),v(1),v(2));
       lace::matrix3d<VALTYPE> B = invert(A);
 
       v3d res = 0e0;
@@ -328,6 +351,11 @@ namespace qpp{
     virtual void move(const v3d & v)
     {
       r0 += v;
+    }
+
+    virtual qpp_object * copy() const
+    {
+      return new qpp_shape_sphere<VALTYPE>(*this);
     }
 
   };

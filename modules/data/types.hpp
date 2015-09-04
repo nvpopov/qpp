@@ -27,6 +27,8 @@ namespace qpp{
 
   typedef std::basic_istream<CHAR,TRAITS> ISTREAM;
 
+  typedef std::basic_ifstream<CHAR,TRAITS> IFSTREAM;
+
   typedef std::basic_stringstream<CHAR,TRAITS> SSTREAM;
 
 };

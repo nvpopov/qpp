@@ -1,0 +1,60 @@
+metaparam_array replicate{
+  metaparameter uc(type=int){
+    synonyms(UC,'');
+    required=no;
+  }
+
+  metaparam_repeat{
+    repeat_min=2;
+    repeat_max=4;
+    required = yes;
+    metaparameter *(type=int){
+      required = yes;
+      range(0,100);
+    }
+  }
+
+  metaparameter shape(type=string){
+    default = 'sphere';
+    synonyms(SHAPE,'');
+    required=no;
+    metaparam_array{
+      metaparameter R(type = double){
+        required = yes;	
+      }
+      metaparameter( type = string ){
+        required = yes;
+	value('center'){
+	  metaparam_array{
+	    metaparameter x(type=double){
+	      required = yes;
+	      synonyms('',X);
+	    }
+	    metaparameter y(type=double){
+	      required = yes;
+	      synonyms('',Y);
+	    }
+	    metaparameter z(type=double){
+	      required = yes;
+	      synonyms('',Z);
+	    }
+	  }
+	}
+      }
+    }
+  }
+  metaparameter nx(type=int){
+    synonyms(NX);
+    required=yes;
+    default=0;
+  }
+  metaparam_repeat{
+    repeat_min=1;
+    required = yes;
+    metaparam_array{
+      metaparameter nif_nif(type=int);
+      metaparameter naf_naf(type=int);
+      metaparameter nuf_nuf(type=int);
+    }
+  }
+}

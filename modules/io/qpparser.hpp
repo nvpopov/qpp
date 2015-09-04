@@ -12,6 +12,7 @@
 #include <geom/geom_extras.hpp>
 #include <basis/basis.hpp>
 #include <stdlib.h>
+#include <data/globals.hpp>
 
 namespace _qpp_internal{ 
 
@@ -475,7 +476,7 @@ namespace _qpp_internal{
 
 	qpp::qpp_angtype angtype=qpp::qang_spherical;
     
-	qpp::qpp_parameter<STRING> * pang = parm.parameter<STRING>("angtype");
+	qpp::qpp_parameter<STRING> * pang = parm.parameter<STRING>("angtype",qpp::qscope_global);
 	if (pang==NULL)
 	  pang = owner -> parameter<STRING>("angtype");
 
@@ -495,6 +496,16 @@ namespace _qpp_internal{
 	      l.push_back(((qpp::qpp_parameter<int>*)parm.nested(i))->value());
 	    }
 
+	//debug
+	/*
+	std::cerr << "--- parse_shell params -----\n";
+	parm.write(std::cerr);
+	std::cerr << "\n";
+	for (int i=0; i<l.size(); i++)
+	  std::cerr << lbl[i] << " == " << l[i] << "\n";
+	std::cerr << "--- parse_shell -----\n";
+	*/
+
 	int nl = l.size(), np=0;
 	coeffs.resize(nl);
 
@@ -508,6 +519,12 @@ namespace _qpp_internal{
 	      break;
 
 	    std::vector<STRING> fields = qpp::split(line);
+
+	    //debug
+	    /*
+	    for (int i=0; i<fields.size(); i++)
+	      std::cerr << "\"" << fields[i] << "\"\n";
+	    */
 
 	    if (fields.size() != nl+1)
 	      owner->error("Wrong number of fields",tok.line(),tok.file());
@@ -528,6 +545,8 @@ namespace _qpp_internal{
 	
 	  }
 
+	if (np==0)
+	  owner->error("Empty shell",tok.line(),tok.file());
 
 	if (ST == qpp::qbas_gauss)
 	  {

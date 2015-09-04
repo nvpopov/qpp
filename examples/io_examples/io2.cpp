@@ -4,6 +4,8 @@
 #include <iostream>
 #include <fstream>
 #include <io/qpparser.hpp>
+#include <data/globals.hpp>
+#include <io/compile.hpp>
 int main(int argc, char **argv)
 {
   try{
@@ -13,26 +15,16 @@ int main(int argc, char **argv)
     else
       inp = & std::cin;
 
-    qpp::tokenizer t(*inp);
+    std::vector<qpp::qpp_object*> decls;
 
-    qpp::qpp_declaration global("decl","global");
+    qpp::qpp_read(*inp,decls);
 
-    std::cout << "writing global\n";
+    for (int i=0; i<decls.size(); i++)
+      qpp::global::root.add(*qpp::qpp_compile(decls[i]));
 
-    global.write(std::cout);
+    qpp::global::root.write(std::cout);
   
-    std::cout << "reading decl\n";
-
-    qpp::qpp_object *q = _qpp_internal::parse_declaration(t, &global);
-    global.add(*q);
-  
-    std::cout << "done reading\n";
-
-    q -> write(std::cout);
-  
-    qpp::qpp_declaration * d =  (qpp::qpp_declaration*)q;
-
-    qpp::qpp_object * current=d;
+    qpp::qpp_object * current=&qpp::global::root;
   
     do{
       std::string env;

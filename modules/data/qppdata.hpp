@@ -41,6 +41,8 @@ namespace qpp{
     qtype_data_double  = 0x0040,
     qtype_data_float   = 0x0080,
     qtype_data_string  = 0x0100,
+    qtype_data_all     = qtype_data_int   | qtype_data_bool   | qtype_data_double | 
+                         qtype_data_float | qtype_data_string,
     qtype_basis_pw     = 0x0200,
     qtype_basis_gauss  = 0x0400,
     qtype_basis_slater = 0x0800,
@@ -52,20 +54,29 @@ namespace qpp{
     qscope_global = 0x02, 
     qscope_above  = 0x04,
     qscope_below  = 0x08,
-    qscope_all    = qscope_above | qscope_below
+    qscope_all    = qscope_below | qscope_above
   };
 
   typedef long int qppobject_type;
 
   typedef unsigned char qscope;
 
-  /*FIXME: Using structs in c++ */
   template<class T>
   struct qtype_data
   {
     static const qppobject_type type;
+    static const STRING name;
   };
 
+  // -------------------------------------------------------------------------------------
+  /*
+  template<class T>
+  bool qtype_convertable(qppobject_type t2)
+  {}
+
+  template<class T1,T2>
+  T qtype_convert()
+  */
   // -------------------------------------------------------------------------------------
 
   class qpp_exception;
@@ -94,9 +105,17 @@ namespace qpp{
 
     virtual qpp_object* nested(int i) const =0;
 
+    virtual int n_param() const =0;
+    
+    virtual void set_n_param(int n) =0;
+
     virtual void write(OSTREAM &os, int offset=0) const =0;    
     
     virtual qpp_object * copy() const =0;
+
+    virtual int run()
+    // By default does nothing
+    { return 0; }
 
     // --------------------------------------
     
@@ -154,15 +173,30 @@ namespace qpp{
     void setfile(const STRING & __file)
     { _file = __file; }
 
-    virtual qpp_object* getobject_lcl(const STRING & obj) const
+    virtual qpp_object* getobject_lcl(const STRING & obj, qscope scp,
+				      qpp_object * where) const
     {
       int i=obj.find('.');
       bool cmplx = (i != STRING::npos);
       STRING s = obj.substr(0,i);
 
       bool found = false;
-      int j=0;
-      while (j<n_nested())
+      int iw = obj_index(where), n = n_nested(), j1=0, j2=n;
+
+      bool above = true, below = true;
+      if ( (scp & qscope_above) && ! (scp & qscope_below) )
+	below = false;
+      if ( !(scp & qscope_above) &&  (scp & qscope_below) )
+	above = false;
+
+      if ( !below && iw!=-1)
+	j2 = iw;
+
+      if ( !above && iw!=-1)
+	j1 = iw;
+
+      int j=j1;
+      while (j<j2)
 	{
 
 	  //debug
@@ -178,8 +212,8 @@ namespace qpp{
       // try to find the first nameless object with category == obj
       if (!found)
 	{
-	  j=0;
-	  while (j<n_nested())
+	  j=j1;
+	  while (j<j2)
 	    {
 	      //debug
 	      //std::cerr << nested(j)->category() << " " << nested(j)->name() << "\n";
@@ -195,29 +229,32 @@ namespace qpp{
       if ( !found)
 	return NULL;
       else if (cmplx)
-	return nested(j) -> getobject_lcl(obj.substr(i+1));
+	return nested(j) -> getobject_lcl(obj.substr(i+1), scp, where);
       else
 	return nested(j);
     }
 
-    virtual qpp_object* getobject_glbl(const STRING & obj) const
+    virtual qpp_object* getobject_glbl(const STRING & obj, qscope scp,
+				       qpp_object * where) const
     {
-      qpp_object * p = getobject_lcl(obj);
+      qpp_object * p = getobject_lcl(obj,scp,where);
       if ( p == NULL && owner() != NULL)
 	{
 	  //debug
 	  //std::cerr << "LVL UP\n";
-	  p = owner()->getobject_glbl(obj);
+	  p = owner()->getobject_glbl(obj,scp,where);
 	}
       return p;
     }
 
-    virtual qpp_object* getobject(const STRING & obj, qscope scp) const
+    virtual qpp_object* getobject(const STRING & obj, 
+				  qscope scp = qscope_global | qscope_all,
+				  qpp_object * where = NULL) const
     {
       if (scp & qscope_local)
-	return getobject_lcl(obj);
+	return getobject_lcl(obj, scp, where);
       else if (scp & qscope_global)
-	return getobject_glbl(obj);
+	return getobject_glbl(obj, scp, where);
       else
 	return NULL;
     }
@@ -315,7 +352,20 @@ namespace qpp{
       return _array[i];
     }
 
+    virtual int n_param() const
+    { return 0; }
+    
+    virtual void set_n_param(int n)
+    {
+      //fixme - generate exception
+    }
+
     qpp_object * operator[](int i) const
+    {
+      return _array[i];
+    }
+    
+    qpp_object *& operator[](int i)
     {
       return _array[i];
     }
@@ -415,6 +465,14 @@ namespace qpp{
     }
     */
 
+    virtual int n_param() const
+    { return n_nested(); }
+    
+    virtual void set_n_param(int n)
+    {
+      //fixme - generate exception
+    }
+
     virtual void write(OSTREAM &os, int offset=0) const
     {
       //      if (offset==0)
@@ -455,11 +513,20 @@ namespace qpp{
   class qpp_parameter : public qpp_param_array
   {
   protected:
-    T _value;
+    T *_value;
 
   public:
 
     qpp_parameter(const STRING & __name, const T & __value, qpp_object *__owner=NULL, 
+		  int __line=-1, const STRING & __file="") :
+      qpp_param_array(__name, __owner)
+    {
+      _value = new T(__value);
+      setline(__line);
+      setfile(__file);
+    }
+
+    qpp_parameter(const STRING & __name, T * __value, qpp_object *__owner=NULL, 
 		  int __line=-1, const STRING & __file="") :
       qpp_param_array(__name, __owner)
     {
@@ -471,7 +538,7 @@ namespace qpp{
     qpp_parameter(const qpp_parameter<T> & q) :
       qpp_param_array(q)
     {
-      _value = q._value;
+      _value = new T(*q._value);
       setline(q.line());
       setfile(q.file());
     }
@@ -480,10 +547,18 @@ namespace qpp{
     { return "parameter"; }
 
     T value() const
-    { return _value; }
+    { return *_value; }
 
     T & value()
+    { return *_value; }
+
+    T * pointer()
     { return _value; }
+
+    void setpointer(T * __value)
+    {
+      _value = __value;
+    }
 
     virtual qppobject_type gettype() const
     {return qtype_parameter | qtype_data<T>::type;} 
@@ -503,7 +578,15 @@ namespace qpp{
       STRING sval;
       sval = t2s<T>(value());
 
-      if ( name() != "" && sval != "")
+      bool valquote = false;
+      if (split(sval).size()>1)
+	valquote = true;
+      if (sval=="" && n_nested()==0)
+	valquote = true;
+
+      if (valquote)
+	os << name() << " = \"" << sval << "\"";
+      else if ( name() != "" && sval != "")
 	os << name() << " = " << sval;
       else
 	os << name() << value();
@@ -543,6 +626,7 @@ namespace qpp{
       _parm = __parm;
       if (_parm == NULL)
 	_parm = new qpp_param_array;
+      _parm->setowner(this);
 
       for (int i=0; i<_parm->n_nested(); i++)
 	add(*_parm->nested(i));
@@ -571,9 +655,17 @@ namespace qpp{
       return qtype_declaration;
     }
 
-    int n_param() const
+    virtual int n_param() const
     {
-      return _parm->n_nested();;
+      return _parm->n_nested();
+    }
+    
+    virtual void set_n_param(int n)
+    {
+      delete _parm;
+      _parm = new qpp_param_array("",this);
+      for (int i=0; i<n; i++)
+	_parm -> add( *nested(i) );
     }
 
     qpp_object * param(int i) const
@@ -605,6 +697,12 @@ namespace qpp{
       erase(i);
     }
 
+    void set_param(int i, qpp_object & q)
+    {
+      (*_parm)[i] = &q;
+      (*this)[i] = &q;
+    }
+
     void insert_decl(int i, qpp_object & q)
     {
       insert(_parm->n_nested()+i,q);
@@ -618,6 +716,11 @@ namespace qpp{
     void erase_decl(int i)
     {
       erase(_parm->n_nested()+i);
+    }
+
+    void set_decl(int i, qpp_object & q)
+    {
+      (*this)[_parm->n_nested()+i] = &q;
     }
 
     int n_decl() const
@@ -696,9 +799,15 @@ namespace qpp{
     qpp_object * p = getobject(parm,scp);
 
     //debug
-    /*if (p!=NULL)
+    /*
+    std::cerr << "looking for " << parm << " in ";
+    write(std::cerr);
+    std::cerr << "owner = " <<  owner() << "\n";
+    if (owner()!=NULL) owner()->write(std::cerr);
+    std::cerr << "\n";
+    if (p!=NULL)
       {
-	std::cout << "------ parameter " << parm << " -----------\n";
+	std::cerr << "------ parameter " << parm << " -----------\n";
 	p->write(std::cout);
       }
     */

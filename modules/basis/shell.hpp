@@ -8,6 +8,8 @@
 
     qpp_angtype _angtype;
 
+    qpp_param_array *_parm;
+
     const static FREAL eps;
 
   public:
@@ -25,6 +27,8 @@
       _angtype = __angtype;
       setline(__line);
       setfile(__file);
+
+      _parm = new qpp_param_array("",this);
     }
 
     qpp_shell(const qpp_shell<QBAS,FREAL> & sh) :
@@ -49,6 +53,9 @@
 
       setline(sh.line());
       setfile(sh.file());
+
+      _parm = new qpp_param_array(*sh._parm);
+      _parm -> setowner(this);
     }
 
     ~qpp_shell()
@@ -183,12 +190,22 @@
 
     virtual int n_nested() const
     {
-      return 0;
+      return _parm->n_nested();
+    }
+
+    virtual int n_param() const
+    {
+      return _parm->n_nested();
+    }
+
+    virtual void set_n_param(int n)
+    {
+      // fixme - generate exception
     }
 
     virtual qpp_object* nested(int i) const
     {
-      return NULL;
+      return _parm->nested(i);
     }
 
     virtual void write(OSTREAM &os, int offset=0) const

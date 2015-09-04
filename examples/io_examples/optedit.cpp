@@ -11,6 +11,50 @@ STRING red(const STRING & s)
  return  "\033[1;31m" + s + "\033[0m";
 }
 
+
+template <class T> 
+void editval(qpp::metaparam_structure * parm)
+{
+  T val;
+
+  if (parm -> producer -> has_value_list())
+    {
+      std::cout << "Select value from the list:\n";
+      std::vector<STRING> svals;
+      parm -> producer -> value_list(svals);
+
+      int i;
+      for (i=0; i<svals.size(); i++)
+	std::cout << i << ") " << svals[i] << "\n";
+      std::cin >> i;
+      if (i<0 || i>=svals.size() )
+	{
+	  std::cout << "Bad selection\n";
+	  return;
+	}
+      
+      parm -> choice = i;
+      val = ((qpp::metaparameter<T>*)(parm -> producer)) -> values[i].value;
+    }
+  else
+    {
+      std::cout << "Enter new parameter value (" << qpp::qtype_data<T>::name << "):\n";
+      STRING s;
+      std::cin >> s;
+      if (!qpp::s2t<T>(s,val))
+	{
+	  std::cout << "Wrong " << qpp::qtype_data<T>::name << " value\n";
+	  return;
+	}  
+    }
+
+  if (parm -> instance == NULL)
+    parm -> instance = new qpp::qpp_parameter<T>(parm -> producer -> name(), val);
+  else
+    ((qpp::qpp_parameter<T>*)(parm -> instance)) -> value() = val;
+}
+
+
 int main(int argc, char **argv)
 {
   try{
@@ -27,19 +71,15 @@ int main(int argc, char **argv)
     qpp::qpp_object *q = _qpp_internal::parse_declaration(t, &global);
     global.add(*q);
     
-    qpp::metaparam_block * meta = create_metaparam(*(qpp::qpp_declaration*)q, &global);
-
-    /*
     std::cout << "\n---------------------------------------------\n";      
-
     q->write(std::cout);
 
+    qpp::metaparam_block * meta = create_metaparam(*(qpp::qpp_declaration*)q, &global);
+
     std::cout << "\n---------------------------------------------\n";      
-
     meta->write(std::cout);
-
     std::cout << "----structure----\n";
-    */
+
     qpp::metaparam_structure str(meta);
     str.create_all();
 
@@ -121,7 +161,8 @@ int main(int argc, char **argv)
 	      i=0;
 	    std::cout << "element= ";
 	    std::cin >> j;
-	    if (current->element_exist(j,i))
+	    if (current->element_exist(j,i) &&
+		current -> element(j,i) != NULL)
 	      {
 		current = current->element(j,i);
 		irep.push_back(i);
@@ -130,28 +171,18 @@ int main(int argc, char **argv)
 	  }
 	else if (cmd=="e" && tp==qpp::qmetparam)
 	  {
-	    STRING dtp;	    
 	    if (current->producer->gettype() & qpp::qtype_data_int)
-	      dtp = "int";
+	      editval<int>(current);
 	    else if (current->producer->gettype() & qpp::qtype_data_string)
-	      dtp = "string";
+	      editval<STRING>(current);
 	    else if (current->producer->gettype() & qpp::qtype_data_double)
-	      dtp = "double";
+	      editval<double>(current);
 	    else if (current->producer->gettype() & qpp::qtype_data_float)
-	      dtp = "float";
+	      editval<float>(current);
 	    else if (current->producer->gettype() & qpp::qtype_data_bool)
-	      dtp = "bool";
+	      editval<bool>(current);
 	    else current->producer->error("Unknown parameter data type",
 					  current->producer->line(), current->producer->file());
-
-	    std::cout << "Enter new parameter value (" << dtp << "):\n";
-	    STRING s;
-	    std::cin >> s;
-
-	    if (current->instance == NULL)
-	      current -> create_instance(s);
-	    else
-	      current -> set_value(s);
 
 	  }
 	else if (cmd=="n" && tp==qpp::qmetparam && current->producer->name() == "*")
@@ -166,9 +197,9 @@ int main(int argc, char **argv)
 		else if (current->producer->gettype() & qpp::qtype_data_int)
 		  current->instance = new qpp::qpp_parameter<int>(s,0);
 		else if (current->producer->gettype() & qpp::qtype_data_float)
-		  current->instance = new qpp::qpp_parameter<float>(s,0);
+		  current->instance = new qpp::qpp_parameter<float>(s,0e0);
 		else if (current->producer->gettype() & qpp::qtype_data_double)
-		  current->instance = new qpp::qpp_parameter<double>(s,0);
+		  current->instance = new qpp::qpp_parameter<double>(s,0e0);
 		else if (current->producer->gettype() & qpp::qtype_data_string)
 		  current->instance = new qpp::qpp_parameter<std::string>(s,"");
 	      }
@@ -215,6 +246,9 @@ int main(int argc, char **argv)
 	    current -> erase_repetition(n);
 	  }
       }
+    std::cout << "resulting parameters:\n";
+    str.get_params() -> write(std::cout);
+    std::cout << "\n";
   }
   catch (qpp::qpp_exception & e)
     {

@@ -170,6 +170,8 @@ void split(const STRING &s, std::vector<STRING> &elems, const STRING & delims = 
 
 std::vector<STRING> split(const STRING &s, const STRING & delims=" \t");
 
+  bool is_identifier(const STRING &s);
+
 // -------------------------------- string to type T convertor ----------------------------
 
 template<typename T>
@@ -185,8 +187,6 @@ bool s2t(const STRING & s, T & val)
 /*  template<>
   bool s2t<bool>(const STRING & s, bool & val);
   */
-// -----------------------------------------------------------
-
 
 
 // -------------------------------------------------------------

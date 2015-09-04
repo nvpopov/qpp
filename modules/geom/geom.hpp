@@ -310,6 +310,12 @@ struct periodic_cell :  public qpp_object{
 	virtual int n_nested() const
 	{ return 0; }
 
+  virtual int n_param() const
+  { return 0; }
+  
+  virtual void set_n_param(int n)
+  {}
+
 	virtual qpp_object* nested(int i) const
 	{ return NULL; }
 
@@ -550,10 +556,15 @@ public:
 		return qtype_geometry | d | qtype_data<CREAL>::type;
 	}
 
-	int n_param() const
-	{
-		return _nparm;
-	}
+  virtual int n_param() const
+  {
+    return _nparm;
+  }
+
+  virtual void set_n_param(int n)
+  {
+    // fixme - generate exception
+  }
 
 	qpp_object * param(int i) const
 	{
