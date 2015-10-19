@@ -1,129 +1,104 @@
 #include <io/qpparser.hpp>
 #include <geom/geom.hpp>
-#include <geom/geom.hpp>
+#include <data/globals.hpp>
 #include <iostream>
 #include <fstream>
 #include <io/qpparser.hpp>
+#include <io/compile.hpp>
+
+using namespace qpp;
+
+void calc_dist(std::vector<double> & dist, geometry<3,double> * geom, int N, int M, int L)
+{
+  for (int n=0; n<N; n++)
+    for (int m=0; m<M; m++)
+      for (int l=0; l<L; l++)
+	{
+	  geometry<3,double> shifted;
+	  shifted.copy(*geom);
+
+	  lace::vector3d<double> shift(1.*n/N, 1.*m/M, 1.*l/L);
+	  for (int n=0; n<shifted.nat(); n++)
+	    {
+	      shifted.coord(n) += shift;
+	      for (int i=0; i<3; i++)
+		if (shifted.coord(n)(i) > 1)
+		  shifted.coord(n)(i) -= 1;
+	    }
+	  //	  shifted.write(std::cout);
+
+	  for (int i=0; i<shifted.nat(); i++)
+	    for (int j=0; j<i; j++)
+	      dist.push_back( lace::norm(shifted.position(i) - shifted.position(j) ) );
+	}
+}
+
 int main(int argc, char **argv)
 {
-  try{
+  //try{
     std::istream * inp;
     if (argc > 1)
       inp = new std::ifstream(argv[1]);
     else
       inp = & std::cin;
 
-    qpp::tokenizer t(*inp);
+    std::vector<qpp::qpp_object*> decls;
+    qpp_read_compile(*inp, decls, global::root);
 
-    qpp::qpp_declaration global("decl","global");
+    std::vector< geometry<3,double>*> geoms;
 
-    std::cout << "writing global\n";
+    for (int i=0; i<decls.size(); i++)
+      if ( decls[i]->gettype() & qtype_geometry )
+	geoms.push_back( (geometry<3,double>*)(decls[i]) );
 
-    global.write(std::cout);
-  
-    std::cout << "reading decl\n";
-
-    qpp::qpp_object *q = _qpp_internal::parse_declaration(t, &global);
-    global.add(*q);
-  
-    std::cout << "done reading\n";
-
-    q -> write(std::cout);
-  
-    qpp::qpp_declaration * d =  (qpp::qpp_declaration*)q;
-
-    qpp::qpp_object * current=d;
-  
-    do{
-      std::string env;
-      std::cout << current->name() << "? ";
-      std::getline(std::cin, env);
-      std::vector<std::string> ff = qpp::split(env);
-      if (ff.size()==0) continue;
-      if (ff[0]=="cd")
-	current = current -> find1(ff[1],qpp::qtype_any, qpp::qscope_global);
-      else if (ff[0]=="print")
-	{
-	  qpp::qpp_object * p = current;
-	  if (ff.size()>1)
-	    p = current->find1(ff[1],qpp::qtype_any, qpp::qscope_global);
-	  
-	  if (p!=NULL)
-	    {
-	      std::cout << "type = " << std::hex << p->gettype() << std::dec << "\n";
-	      p -> write(std::cout);
-	    }
-	  else
-	    std::cout << "not defined\n";
-	   
-	}
-      else if (ff[0]=="int")
-	{
-	  int i;
-	  bool s = current->getparamvalue<int>(i,ff[1],qpp::qscope_global);
-	  if (s)
-	    std::cout << i << "\n";
-	  else 
-	    std::cout << "not defined\n";
-	} 
-      else if (ff[0]=="real")
-	{
-	  double d;
-	  bool s = current->getparamvalue<double>(d,ff[1],qpp::qscope_global);
-	  if (s)
-	    std::cout << d << "\n";
-	  else 
-	    std::cout << "not defined\n";
-	}
-      else if (ff[0]=="bool")
-	{
-	  bool b;
-	  bool s = current->getparamvalue<bool>(b,ff[1],qpp::qscope_global);
-	  if (s)
-	    std::cout << b << "\n";
-	  else 
-	    std::cout << "not defined\n";
-	}
-      else if (ff[0]=="list")
-	{
-	  for (int i=0; i<current->n_nested(); i++)
-	    std::cout << i << " " << current->nested(i)->category() << " " 
-		      << current->nested(i)->name() << "\n";
-	}
-      else if (ff[0]=="exit")
-	break;
-      std::cout << "\n\n";
-    } while(true);
-
-
-    /*  
-    std::cout << " -------------------------- Types ---------------------------\n";
-
-    for (int i=0; i < d->n_decl(); i++)
+    std::cout << "=============================================\n";
+    /*
+    for (int i=0; i<geoms.size(); i++)
       {
-	std::cout << "nested " << i << " type= " << d->decl(i)->gettype() << "\n";
-	std::cout << "line " << d->decl(i)->line() << " filename " 
-		  << d->decl(i)->fname() << "\n";
-	d->decl(i)->write(std::cout);
-	std::cout << "\n";
+	//geoms[i]->write(std::cout);
+	std::cout << geoms[i]->nat() << "\n\n";
+	for (int j=0; j<geoms[i]->nat(); j++)
+	  std::cout << geoms[i]->atom(j) << " " << geoms[i]->position(j) << "\n";
       }
-  
-    std::cout << " -------------------------- Geometries ---------------------------\n";
-  
-    for (int i=0; i < d->n_decl(); i++)
-      if ( (d->decl(i)->gettype() & qpp::qtype_geometry) || 
-	   (d->decl(i)->gettype() & qpp::qtype_xgeometry))
-	d->decl(i)->write(std::cout);
-    std::cout << " -------------------------- Basis sets ---------------------------\n";
-    for (int i=0; i < d->n_decl(); i++)
-      if ( (d->decl(i)->gettype() & qpp::qtype_basis) )
-	d->decl(i)->write(std::cout);
     */
-  }
-  catch (qpp::qpp_exception & e)
-    {
-      std::cerr << "QPP exception:\n";
-      std::cerr << e.what() << "\n";
-    }
-}
 
+    int N,M,L;
+    qpp_parameter<int> *p = global::root.parameter<int>("N");
+    N = p->value();
+
+    p = global::root.parameter<int>("M");
+    M = p->value();
+
+    p = global::root.parameter<int>("L");
+    L = p->value();
+
+    std::cout  << "N= " << N << " M= " << M << " L= " << L << "\n";
+
+    qpp_parameter<double> *pr = global::root.parameter<double>("delta");
+    double delta = pr->value();
+
+    pr = global::root.parameter<double>("R");
+    double R = pr->value();
+
+    pr = global::root.parameter<double>("w");
+    double w = pr->value();
+
+    for (int n=0; n<geoms.size(); n++)
+      {
+	std::vector<double> r12;
+	calc_dist(r12,geoms[n],N,M,L);
+
+	double x = 0e0;
+	std::string s = geoms[n]->name()+".dat";
+	std::ofstream rdf(s.c_str());
+	while(x<=R)
+	  {
+	    double y=0e0;
+	    for (int i=0; i<r12.size(); i++)
+	      y += exp(-(x-r12[i])*(x-r12[i])/(2*w*w))/(r12[i]*r12[i]);
+	    
+	    rdf << x << " " << y << std::endl;
+	    x += delta;
+	  }
+      }
+}

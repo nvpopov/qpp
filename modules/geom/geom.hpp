@@ -1387,10 +1387,12 @@ namespace qpp{
     {
       // fixme - what is necessary to copy?
       clear();
+      trnf = G.trnf;
       atm = G.atm;
       crd = G.crd;
       _shadow = G._shadow;
       geomtol = G.geomtol;
+      frac = G.frac;
     }
 
     // ----------------------- Managing dependents -----------------------
