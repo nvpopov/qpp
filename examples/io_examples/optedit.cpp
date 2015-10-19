@@ -4,6 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <io/qpparser.hpp>
+#include <io/compile.hpp>
 #include <data/meta.hpp>
 
 STRING red(const STRING & s)
@@ -119,6 +120,8 @@ int main(int argc, char **argv)
 	  case qpp::qmetselect:
 	    std::cout << "| " + red("S") + "elect";
 	    break;
+	  case qpp::qmetobject: std::cout << "| " + red("E") + "dit";
+	    break;
 	  }
 	
 	bool can_add = current -> possible_to_add();
@@ -168,6 +171,20 @@ int main(int argc, char **argv)
 		irep.push_back(i);
 		idx.push_back(j);
 	      }
+	  }
+	else if (cmd=="e" && tp==qpp::qmetobject)
+	  {
+	    qpp::qpp_object * dcl, * obj;
+	    qpp::qpp_read(std::cin, dcl);
+	    dcl -> setowner(&qpp::global::root);
+
+	    std::cerr << dcl->gettype() << "\n";
+	    dcl -> write(std::cerr);
+	    obj = qpp::qpp_compile(dcl);
+
+	    std::cerr << "alive\n";
+	    obj->write(std::cerr);
+	    current->instance = obj;
 	  }
 	else if (cmd=="e" && tp==qpp::qmetparam)
 	  {

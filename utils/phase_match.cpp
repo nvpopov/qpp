@@ -6,7 +6,7 @@
 #include <initializer_list>
 #endif
 
-#include <geom/shape.hpp>
+#include <instr/shape.hpp>
 #include <mathf/intlst.hpp>
 //#include <dsyevj3.h>
 

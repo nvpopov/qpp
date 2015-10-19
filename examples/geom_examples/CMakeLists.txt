@@ -12,6 +12,9 @@ target_link_libraries(geom31 qpp)
 add_executable(geom6 geom6.cpp)
 target_link_libraries(geom6 qpp)
 
+add_executable(repl repl.cpp)
+target_link_libraries(repl qpp)
+
 add_executable(triangul triangul.cpp)
 target_link_libraries(triangul qpp)
 

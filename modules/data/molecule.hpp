@@ -4,6 +4,7 @@
 #include <vector>
 #include <data/qppdata.hpp>
 #include <geom/geom.hpp>
+#include <geom/geom_extras.hpp>
 #include <data/atom.hpp>
 #include <basis/basis.hpp>
 #include <io/compile.hpp>
@@ -18,6 +19,7 @@ namespace qpp{
     TRANSFORM * cell;
     geometry<DIM,CREAL,TRANSFORM> * geom;
     std::vector<qpp_atom<FREAL>*> atoms;
+    std::vector<int> type_idx;
 
     molecule(const STRING & __name, qpp_object *__owner = NULL, 
 	     qpp_param_array * __parm = NULL, 
@@ -104,11 +106,58 @@ namespace qpp{
       
     }
 
-    molecule(const molecule<DIM,CREAL,FREAL,TRANSFORM> & m)
+    molecule(const molecule<DIM,CREAL,FREAL,TRANSFORM> & m) :
+      qpp_declaration(m)
     {
       //fixme - implement this
     }
 
+    virtual STRING category() const
+    { return "molecule";}
+
+    virtual qppobject_type gettype() const
+    // fixme - what about FREAL representation?
+    { return qtype_molecule | qtype_dim<DIM>::type | qtype_data<CREAL>::type; }
+    
+    virtual qpp_object * copy() const
+    {  return new molecule<DIM,CREAL,FREAL,TRANSFORM>(*this); }
+
+    virtual void markup()
+    // make neccessary preparations after geometry, atoms and basis are 
+    // formed and before other operations
+    {
+      // Create geometry typetable
+      geom -> build_type_table();
+
+      // Create atom indexation
+      for (int t=0; t<geom->n_atom_types(); t++)
+	{
+	  STRING at = geom->atom_of_type(t);
+	  int i;
+	  bool found = false;
+	  for (i=0; i<atoms.size(); i++)
+	    if (atoms[i]->name() == at)
+	      {
+		found = true;
+		break;
+	      }
+	  if (found)
+	    type_idx[t] = i;
+	  else
+	    error("Atomic type " + at + " not defined");
+	}
+
+      // Set the charges for xgeometry
+      if (geom->gettype() & qtype_xgeometry)
+	{
+	  xtr_geometry<DIM,CREAL,TRANSFORM> * xgeom = 
+	    (xtr_geometry<DIM,CREAL,TRANSFORM>*)geom;
+	  if (xgeom->has_charges())
+	    for (int i=0; i<xgeom->nat(); i++)
+	      if (atoms[type_idx[xgeom->type(i)]]->classical != NULL)
+		xgeom->charge(i) = atoms[type_idx[xgeom->type(i)]]->classical->charge;
+	}
+    }
 
   };
 

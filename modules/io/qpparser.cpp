@@ -252,26 +252,30 @@ namespace _qpp_internal
       {
 	switch(dim)
 	  {
-	  case 0:	return parse_geom<0,double>(parm,name,tok,owner); break;
-	  case 1: return parse_geom<1,double>(parm,name,tok,owner); break;
-	  case 2:	return parse_geom<2,double>(parm,name,tok,owner); break;
-	  case 3: return parse_geom<3,double>(parm,name,tok,owner); break;
-	  case 4: return parse_geom<4,double>(parm,name,tok,owner); break;
-	  case 5: return parse_geom<5,double>(parm,name,tok,owner); break;
-	  default: owner->error("dim must be before 0 and 5",tok.line(),tok.file());
+	  case 0: return parse_geom<0,double,
+		         qpp::periodic_cell<0,double> >( parm,name,tok,owner); break;
+	  case 1: return parse_geom<1,double,
+		         qpp::periodic_cell<1,double> >( parm,name,tok,owner); break;
+	  case 2: return parse_geom<2,double,
+		         qpp::periodic_cell<2,double> >( parm,name,tok,owner); break;
+	  case 3: return parse_geom<3,double,
+		         qpp::periodic_cell<3,double> >( parm,name,tok,owner); break;
+	  default: owner->error("dim must be before 0 and 3",tok.line(),tok.file());
 	  }
       }
     else if (real == "float")
       {
 	switch(dim)
 	  {
-	  case 0:	return parse_geom<0,float>(parm,name,tok,owner); break;
-	  case 1: return parse_geom<1,float>(parm,name,tok,owner); break;
-	  case 2:	return parse_geom<2,float>(parm,name,tok,owner); break;
-	  case 3: return parse_geom<3,float>(parm,name,tok,owner); break;
-	  case 4: return parse_geom<4,float>(parm,name,tok,owner); break;
-	  case 5: return parse_geom<5,float>(parm,name,tok,owner); break;
-	  default: owner->error("dim must be before 0 and 5",tok.line(),tok.file());
+	  case 0: return parse_geom<0,float,
+		         qpp::periodic_cell<0,float> >( parm,name,tok,owner); break;
+	  case 1: return parse_geom<1,float,
+		         qpp::periodic_cell<1,float> >( parm,name,tok,owner); break;
+	  case 2: return parse_geom<2,float,
+		         qpp::periodic_cell<2,float> >( parm,name,tok,owner); break;
+	  case 3: return parse_geom<3,float,
+		         qpp::periodic_cell<3,float> >( parm,name,tok,owner); break;
+	  default: owner->error("dim must be before 0 and 3",tok.line(),tok.file());
 	  }
       }
     else
@@ -279,12 +283,20 @@ namespace _qpp_internal
 
   }
 
-  void qpp_read(qpp::ISTREAM & is, std::vector<qpp::qpp_object*> & decls)
+  void qpp_read(qpp::ISTREAM & is, std::vector<qpp::qpp_object*> & decls, 
+		qpp::qpp_object * __owner)
   {
     qpp::tokenizer t(is);
     qpp::qpp_object * decl;
-    while ( (decl=parse_declaration(t,NULL)) != NULL)
+    while ( (decl=parse_declaration(t,__owner)) != NULL)
       decls.push_back(decl);
+  }
+
+  void qpp_read(qpp::ISTREAM & is, qpp::qpp_object* & decl,
+		qpp::qpp_object * __owner)
+  {
+    qpp::tokenizer t(is);
+    decl=parse_declaration(t,__owner);
   }
 
   qpp::qpp_object * parse_non_native_basis(qpp::qpp_param_array & parm,
@@ -464,7 +476,10 @@ namespace _qpp_internal
 	qpp::metaparam_structure str(meta);
 	int code = meta -> identify(*parm,str);
 	if (code > 0)
-	  owner -> error(qpp::metaparam_idf_error(code),tok.line(), tok.file());
+	  {
+	    std::cerr << "Parsing " << field1 << " " << field2 << "\n";
+	    owner -> error(qpp::metaparam_idf_error(code),tok.line(), tok.file());
+	  }
 	parm = str.get_params();
 	parm -> setowner(owner);
 	    

@@ -106,7 +106,7 @@ namespace qpp{
 
     bool required;
  
-    virtual int identify(const qpp_param_array & q, 
+    virtual int identify(const qpp_array & q, 
 			 metaparam_structure & s, int & i1, int & i2) =0;
 
     virtual qmetatypes metatype() const =0;
@@ -147,7 +147,7 @@ namespace qpp{
     
     virtual void set_n_param(int n);
 
-    int identify(const qpp_param_array & q, metaparam_structure & s);
+    int identify(const qpp_array & q, metaparam_structure & s);
 
     //std::vector<metaparam_structure*> instances;
 
@@ -171,7 +171,7 @@ namespace qpp{
 
     metaparam_array(qpp_declaration & decl, qpp_object * __owner = NULL);
 
-    virtual int  identify(const qpp_param_array & q, 
+    virtual int  identify(const qpp_array & q, 
 			  metaparam_structure & s, int & i1, int & i2);
 
     virtual int min_repetitions() const;
@@ -221,7 +221,7 @@ namespace qpp{
 
     metaparam_repeat(qpp_declaration & decl, qpp_object * __owner = NULL);
 
-    virtual int identify(const qpp_param_array & q, 
+    virtual int identify(const qpp_array & q, 
 			 metaparam_structure & s, int & i1, int & i2);
 
     virtual int min_repetitions() const;
@@ -253,7 +253,7 @@ namespace qpp{
 
     metaparam_select(qpp_declaration & decl, qpp_object * __owner = NULL);
 
-    virtual int identify(const qpp_param_array & q, 
+    virtual int identify(const qpp_array & q, 
 			 metaparam_structure & s, int & i1, int & i2);
 
     virtual qmetatypes metatype() const;
@@ -412,7 +412,7 @@ namespace qpp{
 	return -1;
     }
 
-    virtual int identify(const qpp_param_array & q, 
+    virtual int identify(const qpp_array & q, 
 			 metaparam_structure & s, int & i1, int & i2);
 
     virtual qmetatypes metatype() const
@@ -567,29 +567,26 @@ namespace qpp{
       for (int i=0; i<n; i++)
 	used[i] = false;
 
-      qpp_object *p = decl.getobject("synonyms", qscope_local);
+      qpp_object *p = decl.find1("synonyms", qtype_declaration | 
+				qtype_parameter | qtype_data_string, 
+				qscope_local);
 
       //std::cerr << "p= \n";
       //p->write(std::cerr);
 
       if (p!=NULL)
 	{
-	  if ( p->gettype() == qtype_parameter | qtype_data_string)
-	    {
-	      qpp_parameter<STRING> * s = (qpp_parameter<STRING>*)p;
-	      if (s->n_nested()==0)
-		synonyms.push_back( s->value() );
-	      else
-		for (int i=0; i<s->n_nested(); i++)
-		  synonyms.push_back( ((qpp_parameter<STRING>*)s->nested(i))->value() );
-	    }
+	  qpp_parameter<STRING> * s = (qpp_parameter<STRING>*)p;
+	  if (s->n_nested()==0)
+	    synonyms.push_back( s->value() );
 	  else
-	    p->error("Illegal synonyms declaration");
+	    for (int i=0; i<s->n_nested(); i++)
+	      synonyms.push_back( ((qpp_parameter<STRING>*)s->nested(i))->value() );
 	  
 	  used[decl.obj_index(p)] = true;
 	}
 
-      p = decl.getobject("required", qscope_local);
+      p = decl.find_exactly("required", qtype_parameter | qtype_data_bool, qscope_local);
 
       /*
       std::cerr << boost::format("type(p) = %X %X\n") % p->gettype() %
@@ -599,22 +596,23 @@ namespace qpp{
 
       if (p!=NULL)
 	{
-	  if ( p->gettype() == (qtype_parameter | qtype_data_bool))
-	    required = ((qpp_parameter<bool>*)p) -> value();
-	  else
-	    p->error("Illegal \"required\" declaration", decl.line(), decl.file());
-
+	  required = ((qpp_parameter<bool>*)p) -> value();
 	  used[decl.obj_index(p)] = true;
 	}
       else
 	required = false;
-
-      p = decl.getobject("default", qscope_local);
-      if (p!=NULL)
+      
+      p = decl.find1("default", qtype_parameter | qtype_data<T>::input_type , 
+		     qscope_local);
+      if (p!=NULL )
 	{
+	  //if ( !(p->gettype() & qtype_data<T>::input_type) )
+	  /*
 	  std::cerr << "==== debug ===\n";
 	  p->write(std::cerr);
 	  std::cerr << " type= " << std::hex << p->gettype() << std::dec << "\n";
+	  */
+
 	  if ( p->gettype() == (qtype_parameter | qtype_data<T>::type))
 	    {
 	      is_default = true;
@@ -627,6 +625,14 @@ namespace qpp{
 	      float * v = new float(((qpp_parameter<double>*)p) -> value());
 	      val_default = (T*)v;
 	    }
+	  else if ( (qtype_data<T>::type & (qtype_data_double | qtype_data_float)) &&
+		    p->gettype() == (qtype_parameter | qtype_data_int))
+	    {
+	      is_default = true;
+	      T v;
+	      v = ((qpp_parameter<int>*)p) -> value();
+	      val_default = new T(v);
+	    }
 	  else
 	    p->error("Illegal \"default\" declaration", decl.line(), decl.file());
 	 
@@ -638,11 +644,10 @@ namespace qpp{
 	  val_default = NULL;
 	}
 
-      p = decl.getobject("values", qscope_local);
+      p = decl.find_exactly("values", qtype_declaration, qscope_local);
       if (p!=NULL)
 	{
-	  bool success =  (p->gettype() == qtype_declaration) && 
-	    (((qpp_declaration*)p)->n_decl() == 0);
+	  bool success =  ((qpp_declaration*)p)->n_decl() == 0;
 
 	  //debug
 	  //std::cerr << "metaparam constructor:values alive1 success = " << success << "\n";
@@ -710,21 +715,22 @@ namespace qpp{
 	      vdecl -> error("Invalid value definition",vdecl->line(),vdecl->file());
 	    val_record vrec(((qpp_parameter<T>*)(vdecl->param(0)))->value());
 
-	    p = vdecl->getobject("synonyms",qscope_local);
+	    p = vdecl->find1("synonyms", qtype_declaration |
+			     qtype_parameter | qtype_data_string, qscope_local);
+	    // fixme - possible type error here
+	    //	    if (p==NULL)
+	    //  p = vdecl->find("synonyms", , qscope_local);
+
 	    if (p!=NULL)
 	      {
-		if ( p->gettype() == qtype_parameter | qtype_data_string)
-		  {
-		    qpp_parameter<STRING> * s = (qpp_parameter<STRING>*)p;
-		    if (s->n_nested()==0)
-		      vrec.synonyms.push_back( s->value() );
-		    else
-		      for (int i=0; i<s->n_nested(); i++)
-			vrec.synonyms.push_back( 
-			  ((qpp_parameter<STRING>*)s->nested(i))->value() );
-		  }
+		qpp_parameter<STRING> * s = (qpp_parameter<STRING>*)p;
+		if (s->n_nested()==0)
+		  vrec.synonyms.push_back( s->value() );
 		else
-		  p->error("Illegal synonyms declaration");
+		  for (int i=0; i<s->n_nested(); i++)
+		    vrec.synonyms.push_back( 
+		      ((qpp_parameter<STRING>*)s->nested(i))->value() );
+
 	      }
 
 	    int k;
@@ -772,7 +778,7 @@ namespace qpp{
 
     metaparam_object(qpp_declaration & decl, qpp_object * __owner = NULL);
 
-    virtual int identify(const qpp_param_array & q, 
+    virtual int identify(const qpp_array & q, 
 			 metaparam_structure & s, int & i1, int & i2);
 
     virtual qmetatypes metatype() const;
@@ -797,7 +803,7 @@ namespace qpp{
 
     virtual int default_choice() const;
 
-    int identify(const qpp_param_array & q, metaparam_structure & s);
+    int identify(const qpp_array & q, metaparam_structure & s);
 
     virtual STRING category() const;
 
@@ -829,18 +835,18 @@ namespace qpp{
   // -----------------------------------------------------------------------
 
   template<class T>
-  int metaparameter<T>::identify(const qpp_param_array & q, 
+  int metaparameter<T>::identify(const qpp_array & q, 
 				 metaparam_structure & s, int & i1, int & i2)
   { 
     //debug
-    /*
+    
     std::cerr << "metaparameter::identify\n";
     write(std::cerr);
     std::cerr << " i1= " << i1 << " i2= " << i2 << " q= ";
     q.write(std::cerr);
     std::cerr << "\n";
     s.debug();
-    */
+    
 
     if (i1<0 || i1>=q.n_nested() || q.nested(i1)==NULL)
       return mtprm_idf_OUTRNG;
@@ -916,12 +922,12 @@ namespace qpp{
     bool checksynonyms;
 
     if (qtype_data<T>::type != qtype_data_string)
-      checksynonyms = !typematch && q.nested(i1)->gettype() == qtype_parameter + qtype_data_string;
+      checksynonyms = !typematch && q.nested(i1)->gettype() == qtype_parameter | qtype_data_string;
     else
       checksynonyms = typematch;
 
     //debug
-    //std::cerr << "identify chk0.1  checksynonyms= " << checksynonyms <<  "\n";
+    std::cerr << "identify chk0.1  checksynonyms= " << checksynonyms <<  "\n";
 
     if (!res && checksynonyms)
       // Check value synonyms
@@ -942,11 +948,11 @@ namespace qpp{
 		valfound = true;
 
 	    //debug
-	    //std::cerr << "identify chk0.2 ival= " << ival << " val= " << values[ival].value << " p= ";
-	    //p-> write(std::cerr);
-	    //std::cerr << " type= " << std::hex << p->gettype() << std::dec << " p->value= " 
-	    //<< p->value() << " valfound= " << valfound <<  "\n";
-
+	    std::cerr << "identify chk0.2 ival= " << ival << " val= " << values[ival].value << " p= ";
+	    p-> write(std::cerr);
+	    std::cerr << " type= " << std::hex << p->gettype() << std::dec << " p->value= " 
+		      << p->value() << " valfound= " << valfound <<  "\n";
+	    
 	    if (valfound) break;
 	  }
 
@@ -962,7 +968,7 @@ namespace qpp{
       }
 
     //debug
-    //std::cerr << "identify chk1 code= " << code << " i1= " << i1 << " i2= " << i2 << "\n";
+    std::cerr << "identify chk1 code= " << code << " i1= " << i1 << " i2= " << i2 << "\n";
 
     if (res)
       {
@@ -972,14 +978,14 @@ namespace qpp{
 	// Check nested
 
 	metaparam_block * nest = NULL;
-	qpp_param_array * np = (qpp_param_array*)q.nested(i1);
+	qpp_array * np = (qpp_array*)q.nested(i1);
 
 	//debug
-	/*
+	
 	std::cerr << "metaparam::identify chk2 ";
 	s.instance->write(std::cerr);
 	std::cerr << "\n";
-	*/
+	
 
 
 	if (_nested!=NULL)
@@ -991,14 +997,14 @@ namespace qpp{
 	  nest = values[ival]._nested;
 
 	//debug
-	/*
+	
 	std::cerr << "metaparam::identify chk2.5 nested = ";
 	if (nest==NULL)
 	  std::cerr << "NULL";
 	else
 	  nest->write(std::cerr);
 	std::cerr << "\n";
-	*/
+	
 	if (nest != NULL)
 	  {
 	    int j1=0, j2 = -1;
@@ -1028,7 +1034,7 @@ namespace qpp{
       }
 
     //debug
-    //std::cerr << "identify chk3 res= " << res << " i1= " << i1 << " i2= " << i2 << "\n";
+    std::cerr << "identify chk3 res= " << res << " i1= " << i1 << " i2= " << i2 << "\n";
 
     return code;
 

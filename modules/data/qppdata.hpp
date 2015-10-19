@@ -30,6 +30,7 @@ namespace qpp{
     qtype_shape         = 0x100000000,
     qtype_meta          = 0x200000000,
     qtype_shell         = 0x400000000,
+    qtype_param_array   = 0x800000000,
 
     // additional bits for some of these types
     qtype_dim0         = 0x0001,
@@ -41,12 +42,22 @@ namespace qpp{
     qtype_data_double  = 0x0040,
     qtype_data_float   = 0x0080,
     qtype_data_string  = 0x0100,
-    qtype_data_all     = qtype_data_int   | qtype_data_bool   | qtype_data_double | 
-                         qtype_data_float | qtype_data_string,
     qtype_basis_pw     = 0x0200,
     qtype_basis_gauss  = 0x0400,
     qtype_basis_slater = 0x0800,
-    qtype_basis_siesta = 0x1000
+    qtype_basis_siesta = 0x1000,
+
+    // aggregated types
+    qtype_all          = ~0x0,
+    qtype_any          = qtype_all,
+    qtype_data_real    = qtype_data_double | qtype_data_float,
+    qtype_data_all     = qtype_data_int   | qtype_data_bool   | qtype_data_double | 
+                         qtype_data_float | qtype_data_string,
+    qtype_any_data     = qtype_data_all,
+    qtype_any_dim      = qtype_dim0 | qtype_dim1 | qtype_dim2 | qtype_dim3,
+    qtype_any_geom     = qtype_geometry | qtype_xgeometry | qtype_any_dim | qtype_data_real,
+    qtype_any_vectors  = qtype_vectors  | qtype_any_dim | qtype_data_real,
+    qtype_any_shape    = qtype_shape | qtype_data_real
   };
 
   enum{
@@ -54,7 +65,7 @@ namespace qpp{
     qscope_global = 0x02, 
     qscope_above  = 0x04,
     qscope_below  = 0x08,
-    qscope_all    = qscope_below | qscope_above
+    qscope_both   = qscope_below | qscope_above
   };
 
   typedef long int qppobject_type;
@@ -65,8 +76,19 @@ namespace qpp{
   struct qtype_data
   {
     static const qppobject_type type;
+    static const qppobject_type input_type;
     static const STRING name;
   };
+
+  template<int DIM>
+  struct qtype_dim
+  {
+    static const qppobject_type type;
+  };
+
+  int getdim(const qppobject_type & t);
+
+  bool typematch(const qppobject_type & tp, const qppobject_type & ptrn, int tpmode);
 
   // -------------------------------------------------------------------------------------
   /*
@@ -173,8 +195,8 @@ namespace qpp{
     void setfile(const STRING & __file)
     { _file = __file; }
 
-    virtual qpp_object* getobject_lcl(const STRING & obj, qscope scp,
-				      qpp_object * where) const
+    virtual qpp_object* find_lcl(const STRING & obj, qppobject_type tp, int tpmode,
+				 qscope scp, qpp_object * where) const
     {
       int i=obj.find('.');
       bool cmplx = (i != STRING::npos);
@@ -201,14 +223,14 @@ namespace qpp{
 
 	  //debug
 	  //std::cerr << nested(j)->name() << "\n";
-	  if (nested(j)->name() == s)
+	  if (nested(j)->name() == s && typematch(nested(j)->gettype(), tp, tpmode))
 	    {
 	      found = true;
 	      break;
 	    }
 	  j++;
 	}
-
+      
       // try to find the first nameless object with category == obj
       if (!found)
 	{
@@ -217,7 +239,8 @@ namespace qpp{
 	    {
 	      //debug
 	      //std::cerr << nested(j)->category() << " " << nested(j)->name() << "\n";
-	      if (nested(j)->name() == "" && nested(j)->category() == s)
+	      if ( nested(j)->name() == "" && nested(j)->category() == s && 
+		   typematch(nested(j)->gettype(), tp, tpmode))
 		{
 		  found = true;
 		  break;
@@ -229,32 +252,43 @@ namespace qpp{
       if ( !found)
 	return NULL;
       else if (cmplx)
-	return nested(j) -> getobject_lcl(obj.substr(i+1), scp, where);
+	return nested(j) -> find_lcl(obj.substr(i+1), tp, tpmode, scp, where);
       else
 	return nested(j);
     }
 
-    virtual qpp_object* getobject_glbl(const STRING & obj, qscope scp,
-				       qpp_object * where) const
+    virtual qpp_object* find_glbl(const STRING & obj, qppobject_type tp, int tpmode,
+				  qscope scp, qpp_object * where) const
     {
-      qpp_object * p = getobject_lcl(obj,scp,where);
+      qpp_object * p = find_lcl(obj,tp, tpmode, scp,where);
       if ( p == NULL && owner() != NULL)
-	{
-	  //debug
-	  //std::cerr << "LVL UP\n";
-	  p = owner()->getobject_glbl(obj,scp,where);
-	}
+	p = owner()->find_glbl(obj,tp, tpmode, scp,where);
       return p;
     }
 
-    virtual qpp_object* getobject(const STRING & obj, 
-				  qscope scp = qscope_global | qscope_all,
-				  qpp_object * where = NULL) const
+    virtual qpp_object* find1(const STRING & objname, qppobject_type tp,
+			      qscope scp = qscope_global | qscope_both,
+			      qpp_object * where = NULL) const
+    // Find a nested object with name objname and of type tp
     {
       if (scp & qscope_local)
-	return getobject_lcl(obj, scp, where);
+	return find_lcl(objname, tp, 0, scp, where);
       else if (scp & qscope_global)
-	return getobject_glbl(obj, scp, where);
+	return find_glbl(objname, tp, 0, scp, where);
+      else
+	return NULL;
+    }
+
+    virtual qpp_object* find_exactly(const STRING & objname, qppobject_type tp,
+				     qscope scp = qscope_global | qscope_both,
+				     qpp_object * where = NULL) const
+    // Find a nested object with name objname and of type, 
+    // having at least one common bit with tp
+    {
+      if (scp & qscope_local)
+	return find_lcl(objname, tp, 1, scp, where);
+      else if (scp & qscope_global)
+	return find_glbl(objname, tp, 1, scp, where);
       else
 	return NULL;
     }
@@ -264,21 +298,21 @@ namespace qpp{
 
     template <class T>
     qpp_parameter<T> * parameter(const STRING & parm, 
-				 qscope scp = qscope_local | qscope_all) const;
+				 qscope scp = qscope_local | qscope_both) const;
 
     template <class T>
     bool getparamvalue(T & val, int i) const;
 
     template <class T>
     bool getparamvalue(T & val, const STRING & parm, 
-		  qscope scp = qscope_local | qscope_all) const;
+		  qscope scp = qscope_local | qscope_both) const;
 
     template <class T>
     bool setparamvalue(const T & val, int i);
     
     template <class T>
     bool setparamvalue(const T & val, const STRING & parm, 
-		     qscope scp = qscope_local | qscope_all);
+		     qscope scp = qscope_local | qscope_both);
 
     int obj_index(qpp_object * p) const
     {
@@ -385,6 +419,17 @@ namespace qpp{
       return qtype_body;
     }
 
+    virtual int run()
+    { 
+      for (int i=0; i<_array.size(); i++)
+	{
+	  int code = _array[i]->run();
+	  if (code>0)
+	    return code;
+	}
+      return 0;
+    }
+
     void allow(qppobject_type __mask)
     {
       _mask = __mask;
@@ -452,6 +497,9 @@ namespace qpp{
     qpp_param_array(const qpp_param_array & q) :
       qpp_array(q)
     {}
+
+    virtual qppobject_type gettype() const
+    { return qtype_param_array;}    
 
     /*
     STRING param_name(int i) const
@@ -776,6 +824,17 @@ namespace qpp{
 	os << ";\n";
     }
 
+    virtual int run()
+    { 
+      for (int i=0; i<n_decl(); i++)
+	{
+	  int code = decl(i)->run();
+	  if (code>0)
+	    return code;
+	}
+      return 0;
+    }
+
     virtual qpp_object * copy() const
     {
       return new qpp_declaration(*this);
@@ -796,26 +855,8 @@ namespace qpp{
   template <class T>
   qpp_parameter<T> * qpp_object::parameter(const STRING & parm, qscope scp) const
   {
-    qpp_object * p = getobject(parm,scp);
-
-    //debug
-    /*
-    std::cerr << "looking for " << parm << " in ";
-    write(std::cerr);
-    std::cerr << "owner = " <<  owner() << "\n";
-    if (owner()!=NULL) owner()->write(std::cerr);
-    std::cerr << "\n";
-    if (p!=NULL)
-      {
-	std::cerr << "------ parameter " << parm << " -----------\n";
-	p->write(std::cout);
-      }
-    */
-
-    if (p!=NULL && p->gettype()==(qtype_parameter | qtype_data<T>::type) )
-      return (qpp_parameter<T>*)p;
-    else
-      return NULL;
+    qpp_object * p = find_exactly(parm, qtype_parameter | qtype_data<T>::type, scp);
+    return (qpp_parameter<T>*)p;
   }
 
 

@@ -5,7 +5,7 @@ set (qpp_VERSION_MAJOR 0)
 set (qpp_VERSION_MINOR 1)
 include(CheckCXXCompilerFlag)
 
-set(CMAKE_CXX_FLAGS "-pg")
+set(CMAKE_CXX_FLAGS "-pg -ggdb")
 set(CMAKE_BUILD_TYPE "Debug")
 
 set(bitness 32)

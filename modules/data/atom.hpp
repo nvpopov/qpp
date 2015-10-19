@@ -70,6 +70,7 @@ namespace qpp{
     // Atom always has a name
     // It is supposed to be unique for each type of atoms
     int number; // Number in periodic table
+    bool freeze; // If the atom is just frozen point charge
 
     struct classical_block{
       REAL charge; // Effective charge
@@ -138,6 +139,14 @@ namespace qpp{
 
       add( * new qpp_parameter<int>("number",&number,this) );
 
+      qpp_parameter<bool> * pfreeze = d -> parameter<bool>("freeze");
+      if (pfreeze != NULL)
+	freeze = pfreeze -> value();
+      else
+	freeze = false;
+
+      // fixme - freeze is mutually exclusive with the most of other properties
+
       //debug
       //std::cerr << "atom constr: after parameter<int>(number)\n";
 
@@ -181,12 +190,13 @@ namespace qpp{
       //std::cerr << "atom constr alive 3\n";
 
       // Basis data
-      qpp_object * pbasis = d -> getobject("basis", qscope_local);
+      qpp_object * pbasis = d -> find1("basis", qtype_all, qscope_local);
+      // fixme - compilation sequence and possible types here
       bool bas_name_found = false, basis_found = false;
 
       if (pbasis != NULL)
 	{
-	  pbasis = qpp_compile(pbasis);
+	  //pbasis = qpp_compile(pbasis);
 
 	  //debug
 	  std::cerr << "--- atom: basis found ------\n";

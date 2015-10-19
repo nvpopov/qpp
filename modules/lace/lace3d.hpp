@@ -32,20 +32,149 @@ namespace lace{
 
   // -----------------------------------------------------------------------
 
-  template<class VALTYPE = double>
-  class vector3d{
-    VALTYPE r[3];
+  template <class VALTYPE, int DIM>
+  class simple_vector{
+  protected:
+    VALTYPE r[DIM];
 
   public:
 
     static double tolerance_for_equiv;
 
+    simple_vector(){};
+
+    simple_vector(VALTYPE s)
+    {
+      for(int i=0; i<DIM; i++)
+	r[i] = s;
+    }
+
+    simple_vector(const simple_vector<VALTYPE,DIM> & v)
+    {
+      for(int i=0; i<DIM; i++)
+	r[i] = v.r[i];
+    }
+
+    inline VALTYPE& operator()(int i)
+    {
+      return r[i];
+    }
+
+    inline VALTYPE operator()(int i) const
+    {
+      return r[i];
+    }
+
+    inline typename norm_type<VALTYPE>::type norm2() const
+    {
+      VALTYPE s=0e0;
+      for (int i=0; i<DIM; i++)
+	s+=r[i]*r[i];
+      return s;
+    }
+
+    inline typename norm_type<VALTYPE>::type norm() const
+    {return std::sqrt(norm2());}
+
+    inline simple_vector<VALTYPE,DIM> operator+(const simple_vector<VALTYPE,DIM> & v) const
+    {
+      simple_vector<VALTYPE,DIM> res(0e0);
+      for (int i=0; i<DIM; i++)
+	res.r[i] = r[i] + v.r[i];
+      return res;
+    }
+
+    inline simple_vector<VALTYPE,DIM> operator-(const simple_vector<VALTYPE,DIM> & v) const
+    {
+      simple_vector<VALTYPE,DIM> res(0e0);
+      for (int i=0; i<DIM; i++)
+	res.r[i] = r[i] - v.r[i];
+      return res;
+    }
+
+    inline simple_vector<VALTYPE,DIM> operator*(VALTYPE s) const
+    {
+      simple_vector<VALTYPE,DIM> res(0e0);
+      for (int i=0; i<DIM; i++)
+	res.r[i] = s*r[i];
+      return res;
+    }
+
+    inline simple_vector<VALTYPE,DIM> operator/(VALTYPE s) const
+    {
+      simple_vector<VALTYPE,DIM> res(0e0);
+      for (int i=0; i<DIM; i++)
+	res.r[i] = r[i]/s;
+      return res;
+    }
+
+    inline simple_vector<VALTYPE,DIM>& operator=(const simple_vector<VALTYPE,DIM> & v)
+    {
+      for (int i=0; i<DIM; i++)
+	r[i] = v.r[i];
+      return *this;
+    }
+
+    inline simple_vector<VALTYPE,DIM>& operator+=(const simple_vector<VALTYPE,DIM> & v)
+    {
+      simple_vector<VALTYPE,DIM> res(0e0);
+      for (int i=0; i<DIM; i++)
+	r[i] += v.r[i];
+      return *this;
+    }
+
+    inline simple_vector<VALTYPE,DIM>& operator-=(const simple_vector<VALTYPE,DIM> & v)
+    {
+      simple_vector<VALTYPE,DIM> res(0e0);
+      for (int i=0; i<DIM; i++)
+	r[i] -= v.r[i];
+      return *this;
+    }
+
+    inline simple_vector<VALTYPE,DIM>& operator*=(VALTYPE s)
+    {
+      simple_vector<VALTYPE,DIM> res(0e0);
+      for (int i=0; i<DIM; i++)
+	r[i] *= s;
+      return *this;
+    }
+
+    inline simple_vector<VALTYPE,DIM>& operator/=(VALTYPE s)
+    {
+      simple_vector<VALTYPE,DIM> res(0e0);
+      for (int i=0; i<DIM; i++)
+	r[i] /= s;
+      return *this;
+    }
+
+    inline simple_vector<VALTYPE,DIM> operator-() const
+    {
+      simple_vector<VALTYPE,DIM> res;
+      for (int i=0; i<DIM; i++)
+	res.r[i] = -r[i];
+      return res;
+    }
+
+    inline bool operator==(const simple_vector<VALTYPE,DIM> & b)
+    {
+      return (*this - b).norm() <=  tolerance_for_equiv;
+    }
+
+  };
+
+  // -----------------------------------------------------------------------
+
+  template<class VALTYPE = double>
+  class vector3d : public simple_vector<VALTYPE,3>{
+  protected:
+    using simple_vector<VALTYPE,3>::r;
+
+  public:
+
     vector3d(){}
 
-    vector3d(VALTYPE s)
-    {
-      r[0] = s; r[1] = s; r[2] = s;
-    }
+    vector3d(VALTYPE s) :
+      simple_vector<VALTYPE,3>(s){}
     
     inline void set(VALTYPE x, VALTYPE y, VALTYPE z)
     {
@@ -57,21 +186,12 @@ namespace lace{
       set(x,y,z);
     }
 
-    vector3d(const vector3d<VALTYPE>& v)
-    {
-      r[0] = v.r[0]; r[1] = v.r[1]; r[2] = v.r[2];
-    }
+    vector3d(const vector3d<VALTYPE>& v) :
+      simple_vector<VALTYPE,3>(v){}
+
+    vector3d(const simple_vector<VALTYPE,3>& v) :
+      simple_vector<VALTYPE,3>(v){}
     
-    inline VALTYPE& operator()(int i)
-    {
-      return r[i];
-    }
-
-    inline VALTYPE operator()(int i) const
-    {
-      return r[i];
-    }
-
     inline VALTYPE& x(){return r[0];}
 
     inline VALTYPE& y(){return r[1];}
@@ -84,36 +204,6 @@ namespace lace{
 
     inline VALTYPE z() const {return r[2];}
 
-    inline typename norm_type<VALTYPE>::type norm2() const
-    {return r[0]*r[0]+r[1]*r[1]+r[2]*r[2];}
-
-    inline typename norm_type<VALTYPE>::type norm() const
-    {return std::sqrt(norm2());}
-
-    inline vector3d<VALTYPE> operator+(const vector3d<VALTYPE> & v) const
-    {
-      vector3d<VALTYPE> res( x()+v.x(), y()+v.y(), z()+v.z() );
-      return res;
-    }
-
-    inline vector3d<VALTYPE> operator-(const vector3d<VALTYPE> & v) const
-    {
-      vector3d<VALTYPE> res( x()-v.x(), y()-v.y(), z()-v.z() );
-      return res;
-    }
-
-    inline vector3d<VALTYPE> operator*(VALTYPE s) const
-    {
-      vector3d<VALTYPE> res( x()*s, y()*s, z()*s );
-      return res;
-    }
-
-    inline vector3d<VALTYPE> operator/(VALTYPE s) const
-    {
-      vector3d<VALTYPE> res( x()/s, y()/s, z()/s );
-      return res;
-    }
-
     inline vector3d<VALTYPE> operator%(const vector3d<VALTYPE> & v) const
     {
       vector3d<VALTYPE> res( y()*v.z() - z()*v.y(), 
@@ -122,55 +212,6 @@ namespace lace{
       return res;
     }
 
-    inline vector3d<VALTYPE>& operator=(const vector3d<VALTYPE> & v)
-    {
-      x() = v.x();
-      y() = v.y();
-      z() = v.z();
-      return *this;
-    }
-
-    inline vector3d<VALTYPE>& operator+=(const vector3d<VALTYPE> & v)
-    {
-      x() += v.x();
-      y() += v.y();
-      z() += v.z();
-      return *this;
-    }
-
-    inline vector3d<VALTYPE>& operator-=(const vector3d<VALTYPE> & v)
-    {
-      x() -= v.x();
-      y() -= v.y();
-      z() -= v.z();
-      return *this;
-    }
-
-    inline vector3d<VALTYPE>& operator*=(VALTYPE s)
-    {
-      x() *= s;
-      y() *= s;
-      z() *= s;
-      return *this;
-    }
-
-    inline vector3d<VALTYPE>& operator/=(VALTYPE s)
-    {
-      x() /= s;
-      y() /= s;
-      z() /= s;
-      return *this;
-    }
-
-    inline vector3d<VALTYPE> operator-() const
-    {
-      return vector3d<VALTYPE>(-x(), -y(), -z());
-    }
-
-    inline bool operator==(const vector3d<VALTYPE> & b)
-    {
-      return (*this - b).norm() <=  tolerance_for_equiv;
-    }
 
     /*
     template<class VALTYPE2>
@@ -181,32 +222,39 @@ namespace lace{
     */
   };
 
-  template<class VALTYPE>
-  inline vector3d<VALTYPE> operator*(VALTYPE s, const vector3d<VALTYPE> &v)
+  template<class VALTYPE,int DIM>
+  inline simple_vector<VALTYPE,DIM> operator*(VALTYPE s, const simple_vector<VALTYPE,DIM> &v)
   {
     return v.operator*(s);
   }
 
-  template<class VALTYPE>
-  inline vector3d<VALTYPE> operator*(int s, const vector3d<VALTYPE> &v)
+  template<class VALTYPE,int DIM>
+  inline simple_vector<VALTYPE,DIM> operator*(int s, const simple_vector<VALTYPE,DIM> &v)
   {
     return v.operator*((VALTYPE)s);
   }
 
-  template<class VALTYPE>
-  inline VALTYPE scal(const vector3d<VALTYPE> & v1, const vector3d<VALTYPE> & v2)
+  template<class VALTYPE,int DIM>
+  inline VALTYPE scal(const simple_vector<VALTYPE,DIM> & v1, 
+		      const simple_vector<VALTYPE,DIM> & v2)
   {
-    return v1(0)*v2(0) + v1(1)*v2(1) + v1(2)*v2(2);
+    VALTYPE res=0e0;
+    for (int i=0; i<DIM; i++)
+      res += v1(i)*v2(i);
+    return res;
   }
  
-  template<class VALTYPE>
-  inline VALTYPE norm2(const vector3d<VALTYPE> & v)
-  {
-    return v(0)*v(0) + v(1)*v(1) + v(2)*v(2);
+  template<class VALTYPE,int DIM>
+  inline typename norm_type<VALTYPE>::type norm2(const simple_vector<VALTYPE,DIM> & v)
+  { 
+    VALTYPE res=0e0;
+    for (int i=0; i<DIM; i++)
+      res += v(i)*v(i);
+    return res;
   }
 
-  template<class VALTYPE>
-  inline typename norm_type<VALTYPE>::type norm(const vector3d<VALTYPE> & v)
+  template<class VALTYPE,int DIM>
+  inline typename norm_type<VALTYPE>::type norm(const simple_vector<VALTYPE,DIM> & v)
   {
     return std::sqrt(norm2(v));
   }
@@ -435,8 +483,8 @@ namespace lace{
   template<class VALTYPE>
   double matrix3d<VALTYPE>::tolerance_for_equiv = 1e-6;
 
-  template<class VALTYPE>
-  double vector3d<VALTYPE>::tolerance_for_equiv = 1e-6;
+  template<class VALTYPE, int DIM>
+  double simple_vector<VALTYPE,DIM>::tolerance_for_equiv = 1e-6;
 
   //-------------------------------------------------
 
@@ -587,18 +635,6 @@ namespace lace{
 
   template<typename _CharT, class _Traits, class VALTYPE>
   std::basic_ostream<_CharT, _Traits>&
-  operator<<(std::basic_ostream<_CharT, _Traits>& __os, vector3d<VALTYPE> v)
-  {
-    std::basic_ostringstream<_CharT, _Traits> __s;
-    __s.flags(__os.flags());
-    __s.imbue(__os.getloc());
-    __s.precision(__os.precision());
-    __s << "(" << v(0) << "," << v(1) << "," << v(2) << ")";
-    return __os << __s.str();
-  }
-
-  template<typename _CharT, class _Traits, class VALTYPE>
-  std::basic_ostream<_CharT, _Traits>&
   operator<<(std::basic_ostream<_CharT, _Traits>& __os, matrix3d<VALTYPE> a)
   {
     std::basic_ostringstream<_CharT, _Traits> __s;
@@ -614,98 +650,27 @@ namespace lace{
   // -------------------------- 2d vectors ---------------------------
 
   template <class VALTYPE>
-  struct vector2d{
-    VALTYPE x,y;
+  class vector2d : public simple_vector<VALTYPE,2>{
+  protected:
+    using simple_vector<VALTYPE,2>::r;
 
+  public:
     vector2d()
-    {
-      x = VALTYPE(0);
-      y = VALTYPE(0);
-    }
+    {}
 
     vector2d(VALTYPE _x, VALTYPE _y)
     {
-      x = _x;
-      y = _y;
+      r[0] = _x;
+      r[1] = _y;
     }
 
-    inline VALTYPE & operator()(int i)
-    {
-      if (i==0)
-	return x;
-      else if (i==1)
-	return y;
-    }
+    vector2d(const simple_vector<VALTYPE,2>& v) :
+      simple_vector<VALTYPE,2>(v){}
 
-    inline VALTYPE operator()(int i) const
-    {
-      if (i==0)
-	return x;
-      else if (i==1)
-	return y;
-    }
-
-    inline vector2d<VALTYPE> operator+(const vector2d<VALTYPE> & b) const
-    {
-      return vector2d<VALTYPE>(x+b.x,y+b.y);
-    }
-
-    inline vector2d<VALTYPE> operator-(const vector2d<VALTYPE> &b) const
-    {
-      return vector2d<VALTYPE>(x-b.x,y-b.y);
-    }
-
-    inline vector2d<VALTYPE> operator*(VALTYPE s) const
-    {
-      return vector2d<VALTYPE>(x*s,y*s);
-    }
-
-    inline vector2d<VALTYPE> operator/(VALTYPE s) const
-    {
-      return vector2d<VALTYPE>(x/s,y/s);
-    }
-
-    inline vector2d<VALTYPE> & operator+=(const vector2d<VALTYPE> & b) 
-    {
-      x+=b.x;
-      y+=b.y;
-      return *this;
-    }
-
-    inline vector2d<VALTYPE> & operator-=(const vector2d<VALTYPE> & b) 
-    {
-      x-=b.x;
-      y-=b.y;
-      return *this;
-    }
-
-    inline vector2d<VALTYPE> & operator*=(VALTYPE s)
-    {
-      x*=s;
-      y*=s;
-      return *this;
-    }
-
-    inline vector2d<VALTYPE> & operator/=(VALTYPE s)
-    {
-      x/=s;
-      y/=s;
-      return *this;
-    }
+    vector2d(const vector2d & v) :
+      simple_vector<VALTYPE,2>(v){}
 
   };
-
-  template<class VALTYPE>
-  inline vector2d<VALTYPE> operator*(VALTYPE s, const vector2d<VALTYPE> &a)
-  {
-    return vector2d<VALTYPE>(a.x*s,a.y*s);
-  }
-
-  template<class VALTYPE>
-  inline VALTYPE norm(const vector2d<VALTYPE> & a)
-  {
-    return std::sqrt(a.x*a.x+a.y*a.y);
-  }
 
   // ------------------------------------------------------------------
   //                          2d matrix
@@ -747,15 +712,20 @@ namespace lace{
 
   };
 
-  template<typename _CharT, class _Traits, class VALTYPE>
+  template<typename _CharT, class _Traits, class VALTYPE, int DIM>
   std::basic_ostream<_CharT, _Traits>&
-  operator<<(std::basic_ostream<_CharT, _Traits>& __os, vector2d<VALTYPE> v)
+  operator<<(std::basic_ostream<_CharT, _Traits>& __os, const simple_vector<VALTYPE, DIM> &v)
   {
     std::basic_ostringstream<_CharT, _Traits> __s;
     __s.flags(__os.flags());
     __s.imbue(__os.getloc());
     __s.precision(__os.precision());
-    __s << "(" << v(0) << "," << v(1) <<  ")";
+    __s << "(";
+    if (DIM>0)
+      __s << v(0);
+    for (int i=1; i<DIM; i++)
+      __s << "," << v(i);
+    __s <<  ")";
     return __os << __s.str();
   }
 

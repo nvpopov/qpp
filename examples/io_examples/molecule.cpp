@@ -4,6 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <data/molecule.hpp>
+#include <io/gms_io.hpp>
 
 using namespace qpp;
 
@@ -49,6 +50,15 @@ int main(int argc, char **argv)
     std::cout << "---------------------mol.atoms:------------------------\n";
     for (int i=0; i< mol->atoms.size(); i++)
       mol->atoms[i]->write(std::cout);
+
+    molwriter_gms_input<0> w(std::cout);
+    
+    for (int i=0; i< mol->atoms.size(); i++)
+      if (mol->atoms[i]->basis != NULL)
+	{
+	  for (int s=0; s<mol->atoms[i]->basis->gauss_shells.size(); s++)
+	    w.write_shell(*(mol->atoms[i]->basis->gauss_shells[s]));
+	}
    
   } 
   catch (qpp::qpp_exception & e)

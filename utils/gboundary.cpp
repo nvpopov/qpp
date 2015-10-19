@@ -6,7 +6,7 @@
 #include <initializer_list>
 #endif
 
-#include <geom/shape.hpp>
+#include <instr/shape.hpp>
 
 #define DIM 3
 typedef lace::vector3d<double> v3d;
@@ -210,7 +210,7 @@ qpp::xtr_geometry<DIM> & grain(const qpp::geometry<3> & uc1,
       box0 = v3d(0,0,z1-eps);
     }
         
-  qpp::qpp_shape_parallel<double> box(R*a, R*b, box2, box0);
+  qpp::shape_box<double> box(R*a, R*b, box2, box0);
   box.scale(1e0+1e-5);
 
   /*

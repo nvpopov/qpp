@@ -308,6 +308,11 @@ namespace qpp{
 
     virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const
     {
+      //debug
+      for (int k=0; k<offset; k++) os << " ";
+      os << "type= " << std::hex << gettype() << std::dec << std::endl;
+
+
       for (int k=0; k<offset; k++) os << " ";
       os << "basis";
       if (name()!="")

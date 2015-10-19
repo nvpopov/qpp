@@ -16,5 +16,11 @@ target_link_libraries(stochiom qpp)
 add_executable(phase_match phase_match.cpp)
 target_link_libraries(phase_match qpp)
 
+add_executable(qrun qrun.cpp)
+target_link_libraries(qrun qpp)
+
+add_executable(mpole multipole.cpp)
+target_link_libraries(mpole qpp)
+
 #add_executable(tmp1 tmp1.cpp)
 #target_link_libraries(tmp1 qpp)

@@ -40,10 +40,10 @@ namespace _qpp_internal{
 
   // ----------------------------------------------------------------
 
-  template <int DIM, class VALTYPE> 
-  qpp::geometry<DIM, VALTYPE> *  parse_geom(qpp::qpp_param_array & parm, 
-					    STRING name, qpp::tokenizer & tok,
-					    qpp::qpp_object * owner)
+  template <int DIM, class CREAL, class TRANSFORM> 
+  qpp::geometry<DIM, CREAL, TRANSFORM> *  
+  parse_geom(qpp::qpp_param_array & parm, STRING name, qpp::tokenizer & tok,
+	     qpp::qpp_object * owner)
   {
     //debug
     //std::cerr << "parse_geom\n";
@@ -55,66 +55,84 @@ namespace _qpp_internal{
     int nxr=0, nxi=0, nxb=0;
     STRING format;
     std::vector<STRING> rnames, inames, bnames;
+    TRANSFORM * psymm = NULL;
+    bool frac = false;
 
-    if (parm.n_nested()==0)
-      format = "axyz";
-    else
-      {
-	int i=0;
-	qpp::qpp_param_array * p0 = (qpp::qpp_param_array*)parm[0];
-	if ( (p0->name() == "" || qpp::tolower(p0->name())=="dim") && 
-	     (p0->gettype() & (qpp::qtype_parameter | qpp::qtype_data_int) ) )
-	  i=1;
-	while (i < parm.n_nested())
+    qpp::qpp_parameter<STRING> * pstr = parm.parameter<STRING>("symm");
+    if (pstr != NULL)
+      psymm = (TRANSFORM*)(owner -> find1(pstr->value(), 
+					  qpp::qtype_vectors  | qpp::qtype_dim<DIM>::type | 
+					  qpp::qtype_data<CREAL>::type, qpp::qscope_local));
+
+    pstr = parm.parameter<STRING>("coord");
+    if (pstr != NULL && pstr->value() == "frac")
+      frac = true;
+    
+    qpp::qpp_parameter<STRING> * pform = parm.parameter<STRING>("format");
+
+    /*
+	if (parm[i]->name() == "dim") i++;
+	if (parm[i]->name() == "creal") i++;
+	if (parm[i]->name() == "symm")
 	  {
-	    STRING v = qpp::tolower(((qpp::qpp_parameter<STRING>*)parm[i]) -> value());
-	    STRING pname = ((qpp::qpp_parameter<STRING>*)parm[i]) -> name();
-	    if (v == "atom")
-	      format += "a";
-	    else if ( v == "x" || v == "y" || v == "z")
-	      format += v;
-	    /*
-	    else if ( v == "charge")
-	      {
-		format += "q";
-		xchrg = true;
-	      }
-	    */
-	    else if ( v == "real")
-	      {
-		format += "r";
-		nxr++;
-		rnames.push_back(pname);
-	      }
-	    else if ( v == "int")
-	      {
-		format += "i";
-		nxi++;
-		inames.push_back(pname);
-	      }
-	    else if ( v == "bool")
-	      {
-		format += "b";
-		nxb++;
-		bnames.push_back(pname);
-	      }
-	    /*
-	    else if ( v == "mass")
-	      {
-		format += "m";
-		xmass = true;
-	      }
-	    else if ( v == "number" || v == "num" || v == "mendeleev" )
-	      format += "n";
-	    */
-	    else
-	      owner->error("Bad geometry format: unrecognized field "+v,tok.line(), tok.file());
+	    STRING sname = ((qpp::qpp_parameter<STRING>*)parm[i])->value();
+	    psymm = (TRANSFORM*)owner->find1(sname,
+		    qpp::qtype_vectors | qpp::qtype_data<CREAL>::type | 
+		    qpp::qtype_dim<DIM>::type, qpp::qscope_global);
 	    i++;
 	  }
-	if (format=="")
-	  format = "axyz";
+	if (parm[i]->name() == "coord") i++;
+    */
 
-	// debug
+    if (pform==NULL || pform->n_nested()==0)
+      format = "axyz";
+    else
+      for (int i=0; i < pform->n_nested(); i++)
+	{
+	  STRING v = ((qpp::qpp_parameter<STRING>*)(*pform)[i]) -> value();
+	  STRING pname = ((qpp::qpp_parameter<STRING>*)(*pform)[i]) -> name();
+	  if (v == "atom")
+	    format += "a";
+	  else if ( v == "x" || v == "y" || v == "z")
+	    format += v;
+	  /*
+	    else if ( v == "charge")
+	    {
+	    format += "q";
+	    xchrg = true;
+	    }
+	  */
+	  else if ( v == "real")
+	    {
+	      format += "r";
+	      nxr++;
+	      rnames.push_back(pname);
+	    }
+	  else if ( v == "int")
+	    {
+	      format += "i";
+	      nxi++;
+	      inames.push_back(pname);
+	    }
+	  else if ( v == "bool")
+	    {
+	      format += "b";
+	      nxb++;
+	      bnames.push_back(pname);
+	    }
+	  /*
+	    else if ( v == "mass")
+	    {
+	    format += "m";
+	    xmass = true;
+	    }
+	    else if ( v == "number" || v == "num" || v == "mendeleev" )
+	    format += "n";
+	  */
+	  else
+	    owner->error("Bad geometry format: unrecognized field "+v,tok.line(), tok.file());
+
+	  // debug
 	//std::cout << format << "\n";
 	if ( std::count(format.begin(),format.end(),'a') > 1)
 	  owner->error("Bad geometry format: atoms requested more then once",
@@ -138,12 +156,12 @@ namespace _qpp_internal{
     //std::cerr << "parse_geom: xgeom= " << xgeom << "n r i b = " << nxr << " " 
     //	      << nxi << " " << nxb << "\n";
 
-    qpp::geometry<DIM, VALTYPE> * geom;
-    qpp::xtr_geometry<DIM, VALTYPE> * xtr_geom = NULL;
+    qpp::geometry<DIM, CREAL> * geom;
+    qpp::xtr_geometry<DIM, CREAL> * xtr_geom = NULL;
 
     if (xgeom)
       {
-	xtr_geom = new qpp::xtr_geometry<DIM, VALTYPE>(nxr,nxi,nxb,name);
+	xtr_geom = new qpp::xtr_geometry<DIM, CREAL>(nxr,nxi,nxb,name);
 	geom = xtr_geom;
 	for (int i=0; i<nxr; i++)
 	  xtr_geom -> xreal_name(i) = rnames[i];
@@ -153,9 +171,11 @@ namespace _qpp_internal{
 	  xtr_geom -> xbool_name(i) = bnames[i];
       }
     else
-      geom = new qpp::geometry<DIM, VALTYPE>(name);
+      geom = new qpp::geometry<DIM, CREAL>(name);
 
     geom -> setowner(owner);
+    geom -> setsymm(*psymm);
+    geom -> frac = frac;
 
     int nat = 0;
 
@@ -195,9 +215,9 @@ namespace _qpp_internal{
 
 	if (format == "axyz")
 	  {
-	    lace::vector3d<VALTYPE> r;
-	    if ( (!s2t<VALTYPE>(fields[1], r(0))) || (!s2t<VALTYPE>(fields[2], r(1))) || 
-		 (!s2t<VALTYPE>(fields[3], r(2))) )
+	    lace::vector3d<CREAL> r;
+	    if ( (!s2t<CREAL>(fields[1], r(0))) || (!s2t<CREAL>(fields[2], r(1))) || 
+		 (!s2t<CREAL>(fields[3], r(2))) )
 	      owner->error("Error: coordinate (real number) expected",tok.line(), tok.file());
 	    
 	    geom -> add( fields[0], r);
@@ -206,11 +226,11 @@ namespace _qpp_internal{
 	  {
 	    //debug
 	    //std::cerr << format << "\n";
-	    geom -> add( "", VALTYPE(0), VALTYPE(0), VALTYPE(0));	 
+	    geom -> add( "", CREAL(0), CREAL(0), CREAL(0));	 
 
 	    STRING aname = "";
 	    int anum = 0, ixr = 0, ixi = 0, ixb = 0;
-	    VALTYPE ax = 0, ay = 0, az = 0, amass = 0, achrg = 0;
+	    CREAL ax = 0, ay = 0, az = 0, amass = 0, achrg = 0;
 	    for (int i=0; i < fields.size(); i++)
 	      {
 		switch( format[i] )
@@ -219,18 +239,18 @@ namespace _qpp_internal{
 		    break;
 		    //case 'n': anum = s2t<int>(fields[i]);
 		    // break;
-		  case 'x': s2t<VALTYPE>(fields[i], ax);
+		  case 'x': s2t<CREAL>(fields[i], ax);
 		    break;
-		  case 'y': s2t<VALTYPE>(fields[i], ay);
+		  case 'y': s2t<CREAL>(fields[i], ay);
 		    break;
-		  case 'z': s2t<VALTYPE>(fields[i], az);
+		  case 'z': s2t<CREAL>(fields[i], az);
 		    break;
-		    //case 'q': achrg = s2t<VALTYPE>(fields[i]);
+		    //case 'q': achrg = s2t<CREAL>(fields[i]);
 		    //  xtr_geom -> charge(nat) = achrg;		   
 		    //  break;
-		    //case 'm': amass = s2t<VALTYPE>(fields[i]);
+		    //case 'm': amass = s2t<CREAL>(fields[i]);
 		    //break;
-		  case 'r': s2t<VALTYPE>(fields[i], xtr_geom -> xtr_real(ixr,nat));
+		  case 'r': s2t<CREAL>(fields[i], xtr_geom -> xtr_real(ixr,nat));
 		    ixr++; break;
 		  case 'i': s2t<int>(fields[i], xtr_geom -> xtr_int(ixi,nat) );
 		    ixi++; break;
@@ -242,7 +262,7 @@ namespace _qpp_internal{
 	      geom -> atom(nat) = aname;
 	    else
 	      geom -> atom(nat) = aname;
-	    geom -> coord(nat) = lace::vector3d<VALTYPE>(ax,ay,az);
+	    geom -> coord(nat) = lace::vector3d<CREAL>(ax,ay,az);
 	  }
 	nat++;
       }
@@ -263,16 +283,16 @@ namespace _qpp_internal{
 
   // ---------------------------------------------------------
 
-  template <int DIM, class VALTYPE>
-  qpp::periodic_cell<DIM, VALTYPE> * parse_vectors(qpp::qpp_param_array  & parm, 
+  template <int DIM, class CREAL>
+  qpp::periodic_cell<DIM, CREAL> * parse_vectors(qpp::qpp_param_array  & parm, 
 						   STRING name, qpp::tokenizer & tok, 
 						   qpp::qpp_object * owner )
   {
     tok.separate("}");
     tok.dump("");
 
-    qpp::periodic_cell<DIM, VALTYPE>  
-      * cl = new qpp::periodic_cell<DIM, VALTYPE>(name);
+    qpp::periodic_cell<DIM, CREAL>  
+      * cl = new qpp::periodic_cell<DIM, CREAL>(name);
 
     cl -> setowner(owner);
     int i = 0;
@@ -296,7 +316,7 @@ namespace _qpp_internal{
 	  cl->error("Number of vectors is not equal to cell dimension",tok.line(),tok.file());
 
 	for (int j=0; j<3; j++)
-	  s2t<VALTYPE>( fields[j], (*cl)(i,j) );
+	  s2t<CREAL>( fields[j], (*cl)(i,j) );
 
 	i++;
       }
@@ -605,7 +625,11 @@ namespace _qpp_internal{
 
   qpp::qpp_object * parse_declaration(qpp::tokenizer & tok, qpp::qpp_object * owner );
 
-  void qpp_read(qpp::ISTREAM & is, std::vector<qpp::qpp_object*> & decls);
+  void qpp_read(qpp::ISTREAM & is, std::vector<qpp::qpp_object*> & decls, 
+		qpp::qpp_object * __owner= NULL);
+
+  void qpp_read(qpp::ISTREAM & is, qpp::qpp_object* & decl,
+		qpp::qpp_object * __owner= NULL);
 
   // ---------------------------------------------------------
 

@@ -1,7 +1,7 @@
 molecule Ca4F8_embed(0d)
 {
 
-  fragment CaF2_UC(3d,atom,x,y,z,charge=real)
+  fragment CaF2_UC(3d,format(atom,x,y,z,charge=real))
   {
     Ca  0.00  0.00  0.00   2.00
     F   1.38  1.38  1.38  -0.25
@@ -14,13 +14,14 @@ molecule Ca4F8_embed(0d)
     F  -1.38 -1.38 -1.38  -0.25
   }
 
-  vectors{
+  vectors CaF2_UC{
     2.76 2.76 0.00
     2.76 0.00 2.76
     0.00 2.76 2.76
   }
 
-  replicate(CaF2_UC,sphere(R(25.0)),center(1.38,1.38,1.38));
+  replicate(uc = CaF2_UC, shape = sphere(R(25.0)),center(1.38,1.38,1.38), vectors = CaF2_UC, 
+            mode(join,cellwise));
   replace( Ca, Ca_cls, sphere(R=15.0));
   replace(  F,  F_cls, sphere(R=15.0));
 
@@ -40,10 +41,7 @@ molecule Ca4F8_embed(0d)
 
   replace(QM_cluster);
 
-  atom Ca_QM{
-    number = 20;
-    basis = 6-31G;
-  }
+  atom Ca_QM( number = 20, basis = 6-31G);
 
   atom F_QM{
     number(9);

@@ -17,7 +17,7 @@ int main(int argc, char **argv)
 
     std::vector<qpp::qpp_object*> decls;
 
-    qpp::qpp_read(*inp,decls);
+    qpp::qpp_read(*inp,decls,&qpp::global::root);
 
     for (int i=0; i<decls.size(); i++)
       qpp::global::root.add(*qpp::qpp_compile(decls[i]));
@@ -33,12 +33,12 @@ int main(int argc, char **argv)
       std::vector<std::string> ff = qpp::split(env);
       if (ff.size()==0) continue;
       if (ff[0]=="cd")
-	current = current -> getobject(ff[1],qpp::qscope_global);
+	current = current -> find1(ff[1],qpp::qtype_any, qpp::qscope_global);
       else if (ff[0]=="print")
 	{
 	  qpp::qpp_object * p = current;
 	  if (ff.size()>1)
-	    p = current->getobject(ff[1],qpp::qscope_global);
+	    p = current->find1(ff[1], qpp::qtype_any, qpp::qscope_global);
 	  
 	  if (p!=NULL)
 	    {

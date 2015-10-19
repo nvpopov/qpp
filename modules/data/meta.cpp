@@ -165,37 +165,26 @@ namespace qpp{
     required = false;
     min_rep = 0;
     max_rep = -1;
-      
-    qpp_object *p = decl.getobject("required",qscope_local);
+    
+    qpp_object *p = decl.find_exactly("required",qtype_parameter | 
+				      qtype_data_bool, qscope_local);
     if (p!=NULL)
       {
-	if ( p->gettype() == (qtype_parameter | qtype_data_bool))
-	  required = ((qpp_parameter<bool>*)p) -> value();
-	else
-	  p->error("Illegal \"required\" declaration", decl.line(), decl.file());
-	  
+	required = ((qpp_parameter<bool>*)p) -> value();
 	used[decl.obj_index(p)] = true;
       }
-      
-    p = decl.getobject("repeat_min",qscope_local);      
+    
+    p = decl.find_exactly("repeat_min", qtype_parameter | qtype_data_int, qscope_local);      
     if (p!=NULL)
       {
-	if ( p->gettype() == (qtype_parameter | qtype_data_int))
-	  min_rep = ((qpp_parameter<int>*)p) -> value();
-	else
-	  p->error("Illegal \"repeat_min\" declaration", decl.line(), decl.file());
-	  
+	min_rep = ((qpp_parameter<int>*)p) -> value();
 	used[decl.obj_index(p)] = true;
       }
 
-    p = decl.getobject("repeat_max",qscope_local);      
+    p = decl.find_exactly("repeat_max", qtype_parameter | qtype_data_int, qscope_local);      
     if (p!=NULL)
       {
-	if ( p->gettype() == (qtype_parameter | qtype_data_int))
-	  max_rep = ((qpp_parameter<int>*)p) -> value();
-	else
-	  p->error("Illegal \"repeat_max\" declaration", decl.line(), decl.file());
-	  
+	max_rep = ((qpp_parameter<int>*)p) -> value();
 	used[decl.obj_index(p)] = true;
       }
       
@@ -299,25 +288,17 @@ namespace qpp{
     required = false;
     dflt = 0;
       
-    qpp_object *p = decl.getobject("required",qscope_local);
+    qpp_object *p = decl.find_exactly("required",qtype_parameter | qtype_data_bool, qscope_local);
     if (p!=NULL)
       {
-	if ( p->gettype() == (qtype_parameter | qtype_data_bool))
-	  required = ((qpp_parameter<bool>*)p) -> value();
-	else
-	  p->error("Illegal \"required\" declaration", decl.line(), decl.file());
-	  
+	required = ((qpp_parameter<bool>*)p) -> value();
 	used[decl.obj_index(p)] = true;
       }
       
-    p = decl.getobject("default",qscope_local);      
+    p = decl.find_exactly("default", qtype_parameter | qtype_data_int, qscope_local);
     if (p!=NULL)
       {
-	if ( p->gettype() == (qtype_parameter | qtype_data_int))
-	  dflt = ((qpp_parameter<int>*)p) -> value();
-	else
-	  p->error("Illegal \"repeat_min\" declaration", decl.line(), decl.file());
-	  
+	dflt = ((qpp_parameter<int>*)p) -> value();
 	used[decl.obj_index(p)] = true;
       }
       
@@ -798,17 +779,23 @@ namespace qpp{
     //debug(0,this);
 
     qpp_param_array * res;
-    if (producer->metatype()==qmetparam)
+    if (producer->metatype()==qmetparam || producer->metatype()==qmetobject)
       res = (qpp_param_array*)instance;
     else
-      res = new qpp_param_array;
+      {
+	res = new qpp_param_array;
+	res -> allow(~0x0); 
+      }
+
     bool has_choice = producer -> has_choice();
     //(producer->metatype() == qmetselect) ||
     //(producer->metatype()==qmetparam && producer->n_nested()>0);
     
     if (has_choice)
       {
-	qpp_param_array * sub = rptns[0][choice]->get_params();
+	qpp_param_array * sub = NULL;
+	if (rptns[0][choice]!=NULL)
+	  sub = rptns[0][choice]->get_params();
 	if (sub == NULL)
 	  {
 	    // Check for required parameters
@@ -827,7 +814,7 @@ namespace qpp{
 	    //debug
 	    //std::cerr << "alive\n";
 	  }
-	else
+	else if (sub->gettype() & qtype_param_array)
 	  {
 	    for (int k=0; k<sub->n_nested(); k++)
 	      {
@@ -847,12 +834,22 @@ namespace qpp{
 	    delete sub;
 	    
 	  }
+	else
+	  {
+	    //debug
+	    std::cerr << "here1 mask= " << std::hex << res->allowed() << " type= "
+		      << sub->gettype() << " &= " 
+		      << (res->allowed() & sub->gettype()) << std::dec << " \n";
+	    res->add(*sub);
+	  }
       }
     else
       for (int i=0; i<rptns.size(); i++)
 	for (int j=0; j<rptns[i].size(); j++)
-	  {
-	    qpp_param_array * sub = rptns[i][j]->get_params();
+	  {	    
+	    qpp_param_array * sub = NULL;
+	    if (rptns[i][j]!=NULL) 
+	      sub = rptns[i][j]->get_params();
 	    if (sub == NULL)
 	      {
 		//check for required parameters
@@ -871,7 +868,7 @@ namespace qpp{
 		//debug
 		//std::cerr << "\nalive\n";
 	      }
-	    else
+	    else if (sub->gettype() & qtype_param_array)
 	      {
 		for (int k=0; k<sub->n_nested(); k++)
 		  {
@@ -890,6 +887,13 @@ namespace qpp{
 		  }
 		delete sub;
 	      }
+	    else
+	      {
+		//debug
+		std::cerr << "here2\n";
+		res->add(*sub);
+	      }
+
 	  }
 
     return res;
@@ -934,6 +938,19 @@ namespace qpp{
 	  }
 	std::cout << "\n";
 	  
+      }
+    else if (producer->metatype()==qmetobject)
+      {
+	std::cout << "object mask = 0x" << std::hex << 
+	  ((metaparam_object*)producer)->mask << std::dec << "\n";
+	for (int k=0; k<offset; k++) std::cout << " ";
+	if (instance==NULL)
+	  std::cout << "undefined\n";
+	else
+	  {
+	    instance -> write(std::cout);
+	    std::cout << " type= " << std::hex << instance->gettype()  << std::dec << "\n";
+	  }
       }
     else if (producer->metatype()==qmetselect)
       {
@@ -981,18 +998,9 @@ namespace qpp{
 
   // ---------------------------------------------------------------
   
-  int metaparam_array::identify(const qpp_param_array & q, 
+  int metaparam_array::identify(const qpp_array & q, 
 				metaparam_structure & s, int & i1, int & i2)
   { 
-    //debug
-    /*
-    std::cerr << "metaparam_array::identify\n";
-    write(std::cerr);
-    std::cerr << " i1= " << i1 << " i2= " << i2 << " q= ";
-    q.write(std::cerr);
-    std::cerr << "\n";
-    s.debug();
-    */
     // 1. ordered case
     if (ordered)
       {
@@ -1002,22 +1010,11 @@ namespace qpp{
 	  {
 	    s.create_structure(k);
 
-	    //debug
-	    /*
-	    std::cerr << "metaparam_array idf chk0 k= " << k << "\n";
-	    array[k]->write(std::cerr);
-	    q.nested(i1)->write(std::cerr);
-	    std::cerr << "\n";
-	    */
-
 	    int code = array[k]->identify(q,*(s.rptns[0][k]),j1,j2);
 	    bool success = (code==0);
 
 	    if (!success && array[k]->required)
 	      return mtprm_idf_RQNF;
-
-	    //debug
-	    //std::cerr << "metaparam_array idf chk1 k= " << k << " code= " << code << "\n";
 
 	    if (!success && array[k]->has_default_value())
 	    s.rptns[0][k]->instance = array[k]->default_param();
@@ -1030,27 +1027,55 @@ namespace qpp{
 	  }
 	i2 = j2-1;
 
-	//debug
-	/*
-	std::cerr << "metaparam_array idf return OK i1= " << i1 << " i2=" << i2  << " q= ";
-	q.write(std::cerr);
-	std::cerr << "\n";
-	s.debug();
-	*/
-
 	return mtprm_idf_OK;
 	
       }
     // 2. non-ordered case
     else
       {
-	//fixme - implement
+	int j1=i1, j2=i1;
+	std::vector<bool> idfed(array.size(),false);
+	bool contin = true;
+	for (int k=0; k<array.size(); k++)
+	  s.create_structure(k);
+	do
+	  {
+	    int k;
+	    contin = false;
+	    for (k=0; k<array.size(); k++)
+	      if (!idfed[k])
+		{
+		  int code = array[k]->identify(q,*(s.rptns[0][k]),j1,j2);
+		  if (code == 0)
+		    {
+		      contin = true;
+		      break;
+		    }
+		}
+	    if (contin)
+	      {
+		j1 = j2+1;
+		j2 = j1;
+		idfed[k] = true;
+	      }
+	  } while (contin);
+
+	for (int k = 0; k < array.size(); k++)
+	  if (!idfed[k])
+	    {
+	      if (array[k]->required)
+		return mtprm_idf_RQNF;
+	      if (array[k]->has_default_value())
+		s.rptns[0][k]->instance = array[k]->default_param();
+	    }
+	i2 = j2-1;
+	return mtprm_idf_OK;
       }
   }
 
   // -----------------------------------------------------------------------
 
-  int metaparam_repeat::identify(const qpp_param_array & q, 
+  int metaparam_repeat::identify(const qpp_array & q, 
 				 metaparam_structure & s, int & i1, int & i2)
   { 
     //debug
@@ -1139,7 +1164,7 @@ namespace qpp{
 
   // -----------------------------------------------------------------------
 
-  int metaparam_select::identify(const qpp_param_array & q, 
+  int metaparam_select::identify(const qpp_array & q, 
 				 metaparam_structure & s, int & i1, int & i2)
   { 
 
@@ -1164,16 +1189,21 @@ namespace qpp{
       return required ? mtprm_idf_RQNF : mtprm_idf_URQNF;
   }
 
-  int  metaparam_object::identify(const qpp_param_array & q, 
+  int  metaparam_object::identify(const qpp_array & q, 
 				  metaparam_structure & s, int & i1, int & i2)
   { 
     if (i1<0 || i1>=q.n_nested() || q.nested(i1)==NULL)
       return mtprm_idf_OUTRNG;
     
-    if ( q.nested(i1)->gettype() & mask )
+    bool res = typematch(q.nested(i1)->gettype(), mask, 0);
+    if (res)
+      res = (name() == q.nested(i1)->name()) || (q.nested(i1)->name() == "");
+
+    if ( res )
       {
 	i2 = i1;
 	s.instance = q.nested(i1);
+	s.instance -> setname(name());
 	return mtprm_idf_OK;
       }
     else
@@ -1181,7 +1211,7 @@ namespace qpp{
 	
   }
 
-  int metaparam_block::identify(const qpp_param_array & q, metaparam_structure & s)
+  int metaparam_block::identify(const qpp_array & q, metaparam_structure & s)
   {
     int i1=0, i2=-1;
     int code = identify(q,s,i1,i2);

@@ -476,12 +476,14 @@ namespace qpp{
     std::vector<STRING> _field_name;
 
     int nxreal, nxint, nxbool;
-    //bool xchrg;
+    bool xchrg;
+    int ichrg;
 
-    using geometry<DIM,CREAL>::atm;
-    using geometry<DIM,CREAL>::crd;
-    using geometry<DIM,CREAL>::size;
-    using geometry<DIM,CREAL>::_name;
+    using geometry<DIM,CREAL,TRANSFORM>::atm;
+    using geometry<DIM,CREAL,TRANSFORM>::crd;
+    using geometry<DIM,CREAL,TRANSFORM>::size;
+    using geometry<DIM,CREAL,TRANSFORM>::_name;
+    using geometry<DIM,CREAL,TRANSFORM>::error;
 
   public:
 
@@ -565,6 +567,35 @@ namespace qpp{
 
     bool & xtr_bool(int i, int j)
     { return * ((bool*) & _xtr_bool[i][j]); }
+
+    bool has_charges()
+    {
+      xchrg = false;
+      ichrg = 0;
+      for (ichrg = 0; ichrg<nxreal; ichrg++)
+	if (_field_name[ichrg]=="charge")
+	  {
+	    xchrg = true;
+	    break;
+	  }
+      return xchrg;
+    }
+
+    CREAL charge(int i) const
+    {
+      if (xchrg)
+	return _xtr_real[ichrg][i]; 
+      else
+	error("\"charge\" field is requested for the geometry which does not have charges");
+    }
+
+    CREAL & charge(int i)
+    {
+      if (xchrg)
+	return _xtr_real[ichrg][i]; 
+      else
+	error("\"charge\" field is requested for the geometry which does not have charges");
+    }
     /*
     CREAL charge(int i) const
     { return chrg[i]; }

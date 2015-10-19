@@ -6,6 +6,14 @@
 
 namespace qpp{
 
+  template<class REAL>
+  int iround(REAL x)
+  {
+    int s = x<0 ? -1 : 1;
+    x *= s;
+    return s*int(x+5e-1);
+  }
+
 double logfact(int n);
 
 double atanxy(double x, double y);

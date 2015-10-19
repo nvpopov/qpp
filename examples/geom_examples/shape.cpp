@@ -1,10 +1,10 @@
-#include <geom/shape.hpp>
+#include <instr/shape.hpp>
 
 typedef lace::vector3d<double> v3d;
 
 int main()
 {
-  qpp::qpp_shape_parallel<double> p(v3d(2,0,0),v3d(1,1,0),v3d(0,0,1),"abc");
+  qpp::shape_box<double> p(v3d(2,0,0),v3d(1,1,0),v3d(0,0,1),"abc");
   
   p.write(std::cout);
 
