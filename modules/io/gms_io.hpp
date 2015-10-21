@@ -57,7 +57,26 @@ namespace qpp{
 
     void write_data(molecule<DIM,CREAL,FREAL,TRANSFORM> & mol)
     {
-      
+      xtr_geometry<DIM,CREAL,TRANSFORM> * xgeom = NULL;
+      bool haschrg = false;
+      if (mol.geom->gettype() & qtype_xgeometry)
+	{
+	  xgeom = (xtr_geometry<DIM,CREAL,TRANSFORM>*)mol.geom;
+	  haschrg = xgeom->has_charges();
+	}
+
+      *_output << " $data" << std::endl << mol.name()  << std::endl << "c1"  << std::endl;
+      for (int n=0; n<mol.geom->nat(); n++)
+	{
+	  CREAL q=0e0;
+	  if (haschrg)
+	    q = xgeom->charge(n);
+	  else if (mol.atoms[mol.type_idx[mol.geom->type(n)]]->classical != NULL)
+	    q = mol.atoms[mol.type_idx[mol.geom->type(n)]]->classical->charge;
+	  lace::vector3d<CREAL> r = mol.geom->position(n);
+	  *_output << boost::format("%-10s %8.5f %13.8f %13.8f %13.8f") % mol.geom->atom(n) % 
+	    q % r.x() % r.y() % r.z() << std::endl;
+	}
     }
 
     virtual void write(molecule<DIM,CREAL,FREAL,TRANSFORM> & mol)

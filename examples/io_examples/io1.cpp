@@ -8,7 +8,8 @@
 
 using namespace qpp;
 
-void calc_dist(std::vector<double> & dist, geometry<3,double> * geom, int N, int M, int L)
+void calc_dist(std::vector<double> & dist, std::vector<int> & deg, std::vector<double> & rm,
+	       geometry<3,double> * geom, int N, int M, int L)
 {
   for (int n=0; n<N; n++)
     for (int m=0; m<M; m++)
@@ -29,7 +30,23 @@ void calc_dist(std::vector<double> & dist, geometry<3,double> * geom, int N, int
 
 	  for (int i=0; i<shifted.nat(); i++)
 	    for (int j=0; j<i; j++)
-	      dist.push_back( lace::norm(shifted.position(i) - shifted.position(j) ) );
+	      {
+		lace::vector3d<double> r1,r2;
+		r1 = shifted.coord(i);
+		r2 = shifted.coord(j);
+		dist.push_back( lace::norm( shifted.position(i) - shifted.position(j) ) );
+		deg.push_back((N - (int)(N*std::abs(r2.x()-r1.x())))*
+			      (M - (int)(M*std::abs(r2.y()-r1.y())))*
+			      (L - (int)(L*std::abs(r2.z()-r1.z()))) );
+
+		qpp_object * pat = global::root.find1(shifted.atom(i),qtype_atom | qtype_data_double);
+		//pat->write(std::cout);
+		double m1 = pat->parameter<double>("mass")->value();
+
+		pat = global::root.find1(shifted.atom(j),qtype_atom | qtype_data_double);
+		double m2 = pat->parameter<double>("mass")->value();
+		rm.push_back(m1*m2/(m1+m2));
+	      }
 	}
 }
 
@@ -74,6 +91,8 @@ int main(int argc, char **argv)
 
     std::cout  << "N= " << N << " M= " << M << " L= " << L << "\n";
 
+    global::root.write(std::cout);
+
     qpp_parameter<double> *pr = global::root.parameter<double>("delta");
     double delta = pr->value();
 
@@ -85,8 +104,9 @@ int main(int argc, char **argv)
 
     for (int n=0; n<geoms.size(); n++)
       {
-	std::vector<double> r12;
-	calc_dist(r12,geoms[n],N,M,L);
+	std::vector<double> r12, rm;
+	std::vector<int> deg;
+	calc_dist(r12,deg,rm,geoms[n],N,M,L);
 
 	double x = 0e0;
 	std::string s = geoms[n]->name()+".dat";
@@ -95,7 +115,8 @@ int main(int argc, char **argv)
 	  {
 	    double y=0e0;
 	    for (int i=0; i<r12.size(); i++)
-	      y += exp(-(x-r12[i])*(x-r12[i])/(2*w*w))/(r12[i]*r12[i]);
+	      y += std::sqrt(rm[i])*exp(-(x-r12[i])*(x-r12[i])*rm[i]/(2*w*w))/
+		(sqrt(2*pi)*deg[i]*r12[i]*r12[i]);
 	    
 	    rdf << x << " " << y << std::endl;
 	    x += delta;

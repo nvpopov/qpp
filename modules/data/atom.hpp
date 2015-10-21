@@ -126,10 +126,10 @@ namespace qpp{
       qpp_declaration("atom", d->name(), d->owner(), NULL, d->line(), d->file())
     {
       //debug
-      /*      std::cerr << "entering atom constructor\n-----------------------------\n";
-      decl -> write(std::cerr);
+      std::cerr << "entering atom constructor\n-----------------------------\n";
+      d -> write(std::cerr);
       std::cerr << "--------------------------------------\n";
-      */
+      
       qpp_parameter<int> *pnumber;
       pnumber = d -> parameter<int>("number");
       if (pnumber != NULL)
@@ -161,6 +161,8 @@ namespace qpp{
       if (pcharge != NULL || pmass != NULL)
 	{
 	  classical = new classical_block;
+
+	  std::cout << "cl found &&&&&&&&\n";
 
 	  if (pcharge != NULL)
 	    classical -> charge = pcharge -> value();
