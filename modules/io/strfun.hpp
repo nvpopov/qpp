@@ -184,10 +184,8 @@ bool s2t(const STRING & s, T & val)
 	return (!ss.fail()) && ss.eof();
 }
 
-/*  template<>
-  bool s2t<bool>(const STRING & s, bool & val);
-  */
-
+template<>
+bool s2t<bool>(const STRING & s, bool & val);
 
 // -------------------------------------------------------------
 
@@ -198,6 +196,9 @@ STRING t2s(const T & val)
 	ss << val;
 	return ss.str();
 }
+
+template<>
+STRING t2s<bool>(const bool & val);
 
 // -------------------------------------------------------------
 };

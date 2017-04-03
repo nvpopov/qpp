@@ -1,1 +1,0 @@
-g++ multab.c++ -I .. -I /home/asm/include/ ../lace/liblace.a -L /opt/intel/mkl/10.1.1.019/lib/32/ -lmkl_intel -Wl,--start-group -lmkl_intel_thread -lmkl_core -Wl,--end-group -lguide -lpthread

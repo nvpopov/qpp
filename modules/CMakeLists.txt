@@ -1,5 +1,9 @@
-#set(M_IO_SRC io/qpparser.cpp data/qppdata.cpp)
-set(M_IO_SRC io/qpparser.cpp io/strfun.cpp data/qppdata.cpp data/globals.cpp data/meta.cpp io/compile.cpp basis/basis.cpp)
-set(M_MATHF_SRC mathf/specfunc.cpp mathf/intlst.cpp)
-set(M_SRC ${M_IO_SRC} ${M_MATHF_SRC})
+set(M_IO_SRC  io/strfun.cpp)
+set(M_DATA_SRC data/types.cpp)
+set(M_SRC ${M_IO_SRC} ${M_DATA_SRC})
 add_library(qpp ${M_SRC})
+
+add_library(qpp_cpp SHARED python/qppython.cpp)
+target_link_libraries(qpp_cpp boost_python)
+set_target_properties(qpp_cpp PROPERTIES PREFIX "")
+

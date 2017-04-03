@@ -6,12 +6,12 @@ namespace qpp{
   bool s2t<bool>(const STRING & s, bool & val)
   {
     STRING s1 = tolower(s);
-    if ( (s1 == "yes") || (s1 == "true") || (s1 == "1"))
+    if ( (s1 == "y") || (s1 == "yes") || (s1 == "true") || (s1 == "1"))
       {
 	val = true;
 	return true;
       }
-    else if ( (s1 == "no") || (s1 == "false") || (s1 == "0"))
+    else if ( (s1 == "n") || (s1 == "no") || (s1 == "false") || (s1 == "0"))
       {
 	val = false;
 	return true;

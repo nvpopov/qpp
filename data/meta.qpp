@@ -24,7 +24,10 @@ metaparam_array atom{
   
   metaparameter number(type=int, required = yes);
   metaparameter charge(type=double, required = no);
-  metaparameter freeze(type=bool, required = no);
+  metaparameter freeze(type=bool, required = no)
+  {
+    synonyms(frozen);
+  }
   metaparameter mass(type=double, required = no);
   metaparameter alpha(type=double, required = no);
   metaparam_select{
@@ -131,6 +134,11 @@ metaparam_array molecule
       }
     }
 
+  }
+
+  metaparameter bastype(type=string, required=no)
+  {
+    values(gauss,slater,siesta,pw);
   }
 
 }

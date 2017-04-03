@@ -7,6 +7,7 @@ include(CheckCXXCompilerFlag)
 
 set(CMAKE_CXX_FLAGS "-pg -ggdb")
 set(CMAKE_BUILD_TYPE "Debug")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 set(bitness 32)
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
@@ -27,6 +28,10 @@ if (LA_TYPE EQUAL "MKL")
 	include_directories(${BLAS_INCLUDE})
 	message(STATUS "MKL!")
 endif()
+
+include_directories("/usr/include/eigen3")
+include_directories("/usr/include/python2.7")
+target_link_libraries(boost_python)
 
 find_package(Boost)
 IF (Boost_FOUND)

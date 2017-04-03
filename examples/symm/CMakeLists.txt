@@ -1,0 +1,7 @@
+add_executable(index index.cpp)
+add_executable(index1 index1.cpp)
+add_executable(symm symm.cpp)
+add_executable(cell cell.cpp)
+add_executable(rotrans rotrans.cpp)
+add_executable(chartab chartab.cpp)
+add_executable(permut permut.cpp)
