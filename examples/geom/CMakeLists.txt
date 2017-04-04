@@ -4,9 +4,9 @@ add_executable(geom2 geom2.cpp)
 add_executable(geom6 geom6.cpp)
 add_executable(geom_oh geom_oh.cpp)
 add_executable(ngbr ngbr.cpp)
-add_executable(si-ngbr si-ngbr.cpp)
+#add_executable(si-ngbr si-ngbr.cpp)
 
 add_executable(shape shape.cpp)
 
-add_executable(xgeom xgeom.cpp)
-target_link_libraries(xgeom qpp)
+#add_executable(xgeom xgeom.cpp)
+#target_link_libraries(xgeom qpp)

@@ -51,13 +51,6 @@ else()
      message("Configuring molcad not enabled..")
 endif()
 
-if (DEFINED QPP_NVP_TOOLS)
-     message("Configuring additional nvpopov tools...")
-     add_subdirectory(tools/mparser)
-else()
-     message("Configuring additional nvpopov tools not enabled..")
-endif()
-
 
 
 if (DEFINED QPP_C11)
@@ -80,3 +73,31 @@ option(QPP_BUILD_TESTS "build tests executable")
 if (QPP_BUILD_TESTS)
         add_subdirectory(tests)
 endif(QPP_BUILD_TESTS)
+
+option(QPP_BUILD_DOCS "build documentation")
+if (QPP_BUILD_DOCS)
+
+FIND_PACKAGE(Doxygen)
+
+IF (DOXYGEN_FOUND)
+
+SET(DOXYGEN_INPUT docs/doxyfile_qpp)
+SET(DOXYGEN_OUTPUT docs/render)
+ADD_CUSTOM_COMMAND(
+  OUTPUT ${DOXYGEN_OUTPUT}
+  COMMAND ${CMAKE_COMMAND} -E echo_append "Building API Documentation..."
+  COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_INPUT}
+  COMMAND ${CMAKE_COMMAND} -E echo "Done."
+  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+  DEPENDS ${DOXYGEN_INPUT}
+  )
+
+ADD_CUSTOM_TARGET(apidoc ALL DEPENDS ${DOXYGEN_OUTPUT})
+
+ADD_CUSTOM_TARGET(apidoc_forced
+  COMMAND ${CMAKE_COMMAND} -E echo_append "Building API Documentation..."
+  COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_INPUT}
+  COMMAND ${CMAKE_COMMAND} -E echo "Done."
+  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+ENDIF (DOXYGEN_FOUND)
+endif(QPP_BUILD_DOCS)
