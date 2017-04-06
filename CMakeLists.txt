@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 3.1)
 
 project(qpp CXX)
 set (qpp_VERSION_MAJOR 0)
@@ -7,7 +7,7 @@ include(CheckCXXCompilerFlag)
 
 set(CMAKE_CXX_FLAGS "-pg -ggdb")
 set(CMAKE_BUILD_TYPE "Debug")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+set(CMAKE_CXX_STANDARD 11)
 
 set(bitness 32)
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
