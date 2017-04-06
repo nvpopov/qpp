@@ -32,7 +32,6 @@ endif()
 
 include_directories("/usr/include/eigen3")
 include_directories("/usr/include/python2.7")
-target_link_libraries(boost_python)
 
 find_package(Boost)
 IF (Boost_FOUND)
@@ -44,29 +43,6 @@ endif()
 include_directories(modules/)
 
 add_subdirectory(modules)
-
-if (DEFINED QPP_MOLCAD)
-     message("Configuring molcad...")
-     add_subdirectory(tools/molcad)
-else()
-     message("Configuring molcad not enabled..")
-endif()
-
-
-
-if (DEFINED QPP_C11)
-    CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
-    CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
-    if(COMPILER_SUPPORTS_CXX11)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-    elseif(COMPILER_SUPPORTS_CXX0X)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
-    else()
-        message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
-    endif()
-    message("Forcing c++11...")
-endif()
-
 add_subdirectory(examples)
 add_subdirectory(utils)
 
