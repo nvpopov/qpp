@@ -1,12 +1,18 @@
-[![Build Status](https://travis-ci.org/nvpopov/qpp.svg?branch=master)](https://travis-ci.org/nvpopov/qpp)
+QPP Libraries for Computational Chemistry
+======
+You compiler must support C++11 standard(g++>6.X).
 
-Q++ Libraries for Computational Chemistry
+We recommend to use out-of-source build as follows:
+* Create temporary directory 
+> mkdir ./build
 
-1.How to build (out of source build version)
+* And run cmake
+> cd ./build; cmake ../
 
-	Create temporary directory 
-	> mkdir ./build
-	> cd ./build; cmake ../
-	
-NOTE: We use some features of the c++11 standart, so use for g++:
-	> cmake ../ -DCMAKE_CXX_FLAGS="-std=c++11"
+CI
+--
+* Travis CI OSX/Linux: [![Build Status](https://travis-ci.org/nvpopov/qpp.svg?branch=master)](https://travis-ci.org/nvpopov/qpp)
+
+Docs
+--
+QPP C++ api : https://nvpopov.github.io/qppdoc/
