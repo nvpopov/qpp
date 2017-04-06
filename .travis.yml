@@ -2,4 +2,4 @@ language: cpp
 install: 
  - sudo apt-get install libeigen3-dev
 script:
-  - mkdir build && cd build && cmake ../ && cmake --build .
+ - mkdir build && cd build && cmake ../ && cmake --build .
