@@ -25,47 +25,30 @@ namespace qpp{
 
   //--------------------------------------------------------------//
 
-  /*
-    The supercell concept generalization for the geometry class looks like:
-
-  template< int DIM, class REAL>
-  class CELL{
-  public:
-
-    // 
-
+  /*! \class geometry 
+      \brief Test brief
+The supercell concept generalization for the geometry class looks like:
+    template< int DIM, class REAL>
+    class CELL{
+    public:
     index<DIM> begin();
-
     index<DIM> end();
-
     vector3d<REAL> transform(const vector3d<REAL> & r, const index<DIM> & I);
-
     bool within(const vector3d<REAL> & r);
-
     vector3d<REAL> reduce(const vector3d<REAL> & r);
-
     // find high symmetry point within "radius" distance from given point "r"
     // makes sence for rotational symmetries
     vector3d<REAL> symmetrize(const vector3d<REAL> & r, REAL radius);
-
     // fractional to cartesian and vice versa transformation
     // makes sence only for periodic translational cells
     vector3d<REAL> frac2cart(const vector3d<REAL> & r);
-
     vector3d<REAL> cart2frac(const vector3d<REAL> & r);
-
   };
 
-  Any class having these methods - can be used as a "supercell"
-  for some geometry
+	Any class having these methods - can be used as a "supercell" for some geometry
 
-  */
-
-  //--------------------------------------------------------------//
-  /*
-  template <int DIM>
-  struct atom_index {
-
+    template <int DIM> 
+    struct atom_index {
     int atom;
     index<DIM> cell;
 
@@ -87,13 +70,11 @@ namespace qpp{
       return atom != ai.atom || cell != ai.cell;
     }
     
-  };
-  */
-  //--------------------------------------------------------------//
-  /* Geometry updated objects
-     One geometry can maintain arbitrary number of "observers", i.e.
-     objects which need to know about the changes made to geometry.
-     Geometry will inform them all when atoms are added, inserted or removed
+    };
+Geometry updated objects
+One geometry can maintain arbitrary number of "observers", i.e.
+objects which need to know about the changes made to geometry.
+Geometry will inform them all when atoms are added, inserted or removed
   */
 
   enum before_after {before = 0, after = 1};
@@ -121,7 +102,7 @@ namespace qpp{
     // Storage of coordinates
     std::vector<vector3d<REAL> > _crd;
 
-    // Special logical array allows to "hide" or "shadow" some atoms
+    //! Special logical array allows to "hide" or "shadow" some atoms
     std::vector<char> _shadow;
 
   protected: 
@@ -139,59 +120,61 @@ namespace qpp{
 
     int DIM;
 
-    // cell for periodic boundary conditions and on-the-fly transformations
+    //! cell for periodic boundary conditions and on-the-fly transformations
     CELL * cell;
 
-    // whether to update typetable on-the-fly
+    //! whether to update typetable on-the-fly
     bool auto_update_types;
 
-    // whether fractional coordinates are used
+    //! whether fractional coordinates are used
     bool frac;
 
     STRING name;
 
-    // Number of atoms
+    //! Number of atoms
     inline int size() const
     {return _crd.size();}
 
-    // Synonim
+    //! Synonim
     inline int nat() const
     {return _crd.size();}
 
-    // The name of i-th atom
+    //! The name of i-th atom
     inline STRING & atom(int at)
     {return _atm[at];}
 
     inline STRING atom(int at) const
     {return _atm[at];}
 
-     // coord gives the coordinates of i-th atom in the cell
+     /*! coord gives the coordinates of i-th atom in the cell
+	@param at id of atom in cell	
+	*/		
     inline vector3d<REAL> coord(int at) const{return _crd[at];}
 
     inline vector3d<REAL>& coord(int at){return _crd[at];}
     
-    // real-space position of i-th atom, including i[0] as atom number and
-    // other i components as symmetry indicies
+    /*! real-space position of i-th atom, including i[0] as atom number and
+     other i components as symmetry indicies*/
     inline vector3d<REAL> r(int at) const
     { return cell -> transform(_crd[at], index::D(DIM).all(0)); }
 
     inline vector3d<REAL> r(int at, const index & I) const
     { return cell -> transform(_crd[at], I); }
 
-    // The synonym
+    //! The synonym
     inline vector3d<REAL> pos(int at) const
     { return r(at); }
 
     inline vector3d<REAL> pos(int at, const index & I ) const
     { return r(at,I); }
 
-    // Another synonym with atom_index    
+    //! Another synonym with atom_index    
     inline vector3d<REAL> r(const index & ai) const
     {
       return cell -> transform(_crd[ai(0)], ai.sub(1) );
     }
 
-    // The synonym
+    //! The synonym
     inline vector3d<REAL> pos(const index & ai) const
     {
       return cell -> transform(_crd[ai(0)], ai.sub(1) );
@@ -211,7 +194,7 @@ namespace qpp{
     
   public:
 
-    // Number of atomic types in molecule
+    //! Number of atomic types in molecule
     inline int n_atom_types() const
     {
       return _atm_types.size();
@@ -220,13 +203,13 @@ namespace qpp{
     inline int n_types() const
     { return n_atom_types();}
 
-    // Reference to atom of type number t (not the atom number t in atomic list!)
+    //! Reference to atom of type number t (not the atom number t in atomic list!)
     inline STRING atom_of_type(int t) const
     {
       return _atm_types[t];
     }
 
-    // Number of type of certain ATOM at
+    //! Number of type of certain ATOM at
     inline int type_of_atom(const STRING & at) const
     {
       int t;
@@ -239,19 +222,19 @@ namespace qpp{
 	return t;
     }
 
-    // synonym
+    //! synonym
     inline int type(const STRING & at) const
     { return type_of_atom(at); }
 
-    // type of i-th atom in the geometry
+    //! type of i-th atom in the geometry
     inline int type_table(int i) const
     {return _type_table[i];}
 
-    // synonym
+    //! synonym
     inline int type(int i) const
     { return type_table(i); }
 
-    // synonym
+    //! synonym
     inline int type_of_atom(int i) const
     { return type_table(i); }
 
