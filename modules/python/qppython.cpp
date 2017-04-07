@@ -139,24 +139,39 @@ void py_matrix3d_export(const char * pyname)
   def("solve_cubeq",   qpp::solve_cubeq<VALTYPE>);
 }
 
-template<class REAL>
+template<class REAL, bool BOUND>
 void py_rotrans_export(const char * pyname)
 {
-  class_<qpp::rotrans<REAL> >(pyname, init<>())
-    .def(init<const qpp::rotrans<REAL> >())
-    .def(init<const qpp::vector3d<REAL> >())
-    .def(init<const qpp::matrix3d<REAL> >())
-    .def(init<const qpp::vector3d<REAL>, const qpp::matrix3d<REAL> >())
-    .def("__mul__", & qpp::rotrans<REAL>::py_mulr)
-    .def("__mul__", & qpp::rotrans<REAL>::py_mulv)
-    .def(sn::str(sn::self))
-    .def(sn::repr(sn::self))
-    .def(sn::self==sn::self)
-    .def(sn::self!=sn::self)
-    .def_readwrite("unity", & qpp::rotrans<REAL>::unity)
-    ;
-  def("invert", qpp::py_invert_rt<REAL>);
-  def("pow",    qpp::py_pow_rt<REAL>);
+  if (BOUND)
+    class_<qpp::rotrans<REAL,BOUND> >(pyname, init<>())
+      .def(init<const qpp::rotrans<REAL,BOUND> >())
+      .def(init<const qpp::vector3d<REAL>, qpp::periodic_cell<REAL>* >())
+      .def(init<const qpp::matrix3d<REAL>, qpp::periodic_cell<REAL>*  >())
+      .def(init<const qpp::vector3d<REAL>, const qpp::matrix3d<REAL>, qpp::periodic_cell<REAL>* >())
+      .def("__mul__", & qpp::rotrans<REAL,BOUND>::py_mulr)
+      .def("__mul__", & qpp::rotrans<REAL,BOUND>::py_mulv)
+      .def(sn::str(sn::self))
+      .def(sn::repr(sn::self))
+      .def(sn::self==sn::self)
+      .def(sn::self!=sn::self)
+      .def_readwrite("unity", & qpp::rotrans<REAL,BOUND>::unity)
+      ;
+  else
+    class_<qpp::rotrans<REAL,BOUND> >(pyname, init<>())
+      .def(init<const qpp::rotrans<REAL,BOUND> >())
+      .def(init<const qpp::vector3d<REAL> >())
+      .def(init<const qpp::matrix3d<REAL> >())
+      .def(init<const qpp::vector3d<REAL>, const qpp::matrix3d<REAL> >())
+      .def("__mul__", & qpp::rotrans<REAL,BOUND>::py_mulr)
+      .def("__mul__", & qpp::rotrans<REAL,BOUND>::py_mulv)
+      .def(sn::str(sn::self))
+      .def(sn::repr(sn::self))
+      .def(sn::self==sn::self)
+      .def(sn::self!=sn::self)
+      .def_readwrite("unity", & qpp::rotrans<REAL,BOUND>::unity)
+      ;
+  def("invert", qpp::py_invert_rt<REAL,BOUND>);
+  def("pow",    qpp::py_pow_rt<REAL,BOUND>);
 }
 
 template<class REAL>
@@ -290,8 +305,10 @@ BOOST_PYTHON_MODULE(qpp_cpp)
   py_matrix3d_export<float>("matrix3f");
   py_matrix3d_export<double>("matrix3d");
 
-  py_rotrans_export<float>("rotrans_f");
-  py_rotrans_export<double>("rotrans_d");
+  py_rotrans_export<float,false>("rotrans_f");
+  py_rotrans_export<double,false>("rotrans_d");
+  py_rotrans_export<float,true>("bound_rotrans_f");
+  py_rotrans_export<double,true>("bound_rotrans_d");
 
   py_cell_export<float>("periodic_cell_f");
   py_cell_export<double>("periodic_cell_d");
@@ -299,9 +316,19 @@ BOOST_PYTHON_MODULE(qpp_cpp)
   qpp::generalized_cell<float,  qpp::matrix3d<float> >::py_export("point_group_f");
   qpp::generalized_cell<double, qpp::matrix3d<double> >::py_export("point_group_d");
 
+  qpp::generalized_cell<float,  qpp::rotrans<float,false> >::py_export("crystal_group_f");
+  qpp::generalized_cell<double, qpp::rotrans<double,false> >::py_export("crystal_group_d");
+
+  qpp::generalized_cell<float,  qpp::rotrans<float,true> >::py_export("finite_crystal_group_f");
+  qpp::generalized_cell<double, qpp::rotrans<double,true> >::py_export("finite_crystal_group_d");
+
   py_geom_export<float,qpp::periodic_cell<float> >("geometry_f");
   py_geom_export<double,qpp::periodic_cell<double> >("geometry_d");
 
+  py_geom_export<float, qpp::generalized_cell<float,  qpp::matrix3d<float>  > >("geometry_pgf");
+  py_geom_export<double,qpp::generalized_cell<double, qpp::matrix3d<double> > >("geometry_pgd");
+  py_geom_export<float, qpp::generalized_cell<float,  qpp::rotrans<float>   > >("geometry_cgf");
+  py_geom_export<double,qpp::generalized_cell<double, qpp::rotrans<double>  > >("geometry_cgd");
   
   enum_<qpp::before_after>("geom_change_state")
     .value("before", qpp::before)

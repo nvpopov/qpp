@@ -109,11 +109,11 @@ int main()
   P.generator({3,1,2,0,4});
   P.generator({4,1,2,3,0});
   */
-  P.generator({1,0,2,3,4,5});
-  P.generator({2,0,1,3,4,5});
-  P.generator({3,1,2,0,4,5});
-  P.generator({4,1,2,3,0,5});
-  P.generator({5,1,2,3,4,0});
+  P.add({1,0,2,3,4,5});
+  P.add({2,0,1,3,4,5});
+  P.add({3,1,2,0,4,5});
+  P.add({4,1,2,3,0,5});
+  P.add({5,1,2,3,4,0});
 
   for (int i=0; i<P.size(); i++)
     {

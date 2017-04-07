@@ -60,6 +60,7 @@ namespace qpp{
     using generators_pack<TRANSFORM>::end;
     using generators_pack<TRANSFORM>::DIM;
     using generators_pack<TRANSFORM>::generators;
+    using generators_pack<TRANSFORM>::generate;
 
     typedef generalized_cell<REAL,TRANSFORM> SELF;
 
@@ -70,7 +71,7 @@ namespace qpp{
 #endif
     }
 
-    generalized_cell() : generators_pack<TRANSFORM>()
+    generalized_cell(int dim=0) : generators_pack<TRANSFORM>(dim)
     { init_default(); }
 
     generalized_cell(const std::vector<TRANSFORM> & g,const index & __begin, const index & __end) :
@@ -119,12 +120,11 @@ namespace qpp{
       points.push_back(r);
       for (iterator I(begin,end); !I.end(); I++)
 	{
-	  vector3d<REAL> r1 = (*this)(I)*r;
+	  if (I==index::D(DIM).all(0)) continue;
 
-	  //std::cerr << r1 << "\n";
-
+	  vector3d<REAL> r1 = transform(r,I);
 	  for (const vector3d<REAL> & pt : points)
-	    if (norm(r1-pt)<radius && I != index::D(DIM).all(0) )
+	    if (norm(r1-pt)<radius )
 	      {
 
 		//std::cerr << "close\n";
@@ -182,6 +182,21 @@ namespace qpp{
       end   = __end;
     }
         
+    generalized_cell(const bp::list & G):
+      generators_pack<TRANSFORM>()
+    {
+      init_default();
+      
+      DIM = bp::len(G);
+      for (int i=0; i<DIM; i++)
+	{
+	  if (!bp::extract<TRANSFORM>(G[i]).check())
+	    TypeError("generalized_cell constructor: expected symmetry operation");
+	  generators.push_back(bp::extract<TRANSFORM>(G[i]));
+	}
+      begin = end = index::D(DIM).all(0);
+    }
+        
     TRANSFORM py_getgen(int i) 
     {
       if (i<0) i+=DIM;
@@ -198,21 +213,47 @@ namespace qpp{
 
     py_indexed_property<SELF, TRANSFORM, int, &SELF::py_getgen, &SELF::py_setgen> py_gen;
 
+    TRANSFORM py_call(index I)
+    {
+      return (*this)(I);
+    }
+
+    TRANSFORM py_call1(bp::tuple I)
+    {
+      //std::cout << "() from tuple called\n";
+      return (*this)(index(I));
+    }
+
+    bp::list py_generate()
+    {
+      std::vector<TRANSFORM> v;
+      generate(v);
+      bp::list l;
+      for (const auto & g : v)
+	l.append(g);
+      return l;
+    }
+
     static void py_export(const char * pyname)
     {
       py_indexed_property<SELF, TRANSFORM, int, & SELF::py_getgen, &SELF::py_setgen>::py_export("noname");
       bp::class_<generalized_cell<REAL,TRANSFORM> >(pyname)
 	.def(bp::init<const generalized_cell<REAL,TRANSFORM> >())
 	.def(bp::init<const bp::list &, const index &, const index&>())
+	.def(bp::init<const bp::list &>())
 	.def_readwrite("begin",  & SELF::begin )
 	.def_readwrite("end",    & SELF::end )
 	.def_readwrite("generator", &SELF::py_gen)
-	.def("transform", &SELF::transform)
-	.def("within", &SELF::within)
-	.def("cart2frac", &SELF::cart2frac)
-	.def("frac2cart", &SELF::frac2cart)
-	.def("auto_order", &SELF::auto_order)
+	.add_property("dim", &SELF::get_dim, &SELF::set_dim)
+	.def("transform",   &SELF::transform)
+	.def("within",      &SELF::within)
+	.def("cart2frac",   &SELF::cart2frac)
+	.def("frac2cart",   &SELF::frac2cart)
+	.def("auto_order",  &SELF::auto_order)
 	.def("auto_orders", &SELF::auto_orders)
+	.def("generate",    &SELF::py_generate)
+	.def("__call__",    &SELF::py_call)
+	.def("__call__",    &SELF::py_call1)
 	;
     }
 

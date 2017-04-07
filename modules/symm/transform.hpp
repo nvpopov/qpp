@@ -2,6 +2,7 @@
 #define _QPP_TRANSFORM_H
 
 #include <geom/lace3d.hpp>
+#include <symm/cell.hpp>
 //#include <geom/cell.hpp>
 #include <consts.hpp>
 #include <vector>
@@ -17,68 +18,80 @@ namespace qpp{
 
   // ----------------------------------------------------------------
 
-  template<class REAL>
+  template<class REAL, bool BOUND = false>
   struct rotrans
   {
-    //typedef typename BOUNDARY::real real;
+    typedef periodic_cell<REAL>  BOUNDARY;
     
     static REAL translation_tolerance,rotation_tolerance;
-    static rotrans<REAL> unity;
+    static rotrans<REAL,BOUND> unity;
     
     vector3d<REAL> T;
     matrix3d<REAL> R;
 
-    //BOUNDARY * cell;
+    BOUNDARY * cell;
     
     rotrans()
     {
       T = REAL(0);
       R = REAL(1);
+      cell = NULL;
     }
 
-    rotrans(const rotrans<REAL> & a)
+    rotrans(const rotrans<REAL,BOUND> & a)
     {
       T = a.T;
       R = a.R;
-
-      //      cell = a.cell;
+      if (BOUND)
+	cell = a.cell;
+      else
+	cell = NULL;
     }
     
-    rotrans(const vector3d<REAL> &_T)
+    rotrans(const vector3d<REAL> &_T, BOUNDARY * _cell = NULL)
     {
       T=_T;
       R = REAL(1);
-      //      cell = NULL;
+      if (BOUND)
+	cell = _cell;
+      else
+	cell = NULL;
     }
     
-    rotrans(const matrix3d<REAL> & _R)
+    rotrans(const matrix3d<REAL> & _R, BOUNDARY * _cell = NULL)
     {
       T = REAL(0);
       R = _R;
-      //cell = NULL;
+      if (BOUND)
+	cell = _cell;
+      else
+	cell = NULL;
     }
     
-    rotrans(const vector3d<REAL> &_T, const matrix3d<REAL> &_R)//, BOUNDARY * _cell = NULL)
+    rotrans(const vector3d<REAL> &_T, const matrix3d<REAL> &_R, BOUNDARY * _cell = NULL)
     {
       T = _T;
       R = _R;
-      //cell = _cell;
+      if (BOUND)
+	cell = _cell;
+      else
+	cell = NULL;
     }
     
-    inline rotrans<REAL> operator*(const rotrans<REAL> & b) const
+    inline rotrans<REAL,BOUND> operator*(const rotrans<REAL,BOUND> & b) const
     {
       vector3d<REAL> t = T + R*b.T;
-      //if (cell!=NULL)
-      //t = cell->reduce(t);
-      return rotrans<REAL>(t, R*b.R);
+      if (BOUND)
+	t = cell->reduce(t);
+      return rotrans<REAL,BOUND>(t, R*b.R,cell);
     }
 
-    inline bool operator==(const rotrans<REAL> & b) const
+    inline bool operator==(const rotrans<REAL,BOUND> & b) const
     {
       return norm(T - b.T) <= translation_tolerance && norm(R - b.R) <= rotation_tolerance;
     }
 
-    inline bool operator!=(const rotrans<REAL> & b) const
+    inline bool operator!=(const rotrans<REAL,BOUND> & b) const
     {
       return norm(T - b.T) > translation_tolerance || norm(R - b.R) > rotation_tolerance;
     }
@@ -86,58 +99,63 @@ namespace qpp{
     inline vector3d<REAL> operator*(const vector3d<REAL> & v) const
     {						
       vector3d<REAL> res = T+R*v; 
-      //if (cell!=NULL)
-      //res = cell -> reduce(res);
+      if (BOUND)
+	res = cell -> reduce(res);
       return res;
     }
 
     virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const
     {
       for (int k=0; k<offset; k++) os << " ";
-      os << "rotrans(" << T << "," << R << ")";
+      if (BOUND)
+	os << "bound_rotrans(";
+      else
+	os << "rotrans(";
+      os << T << "," << R << ")";
     }
 
 
 #ifdef PY_EXPORT
 
     inline vector3d<REAL> py_mulv(const vector3d<REAL> & v) const {return (*this)*v; }
-    inline rotrans<REAL> py_mulr(const rotrans<REAL> & b) const {return (*this)*b; }
+    inline rotrans<REAL,BOUND> py_mulr(const rotrans<REAL,BOUND> & b) const {return (*this)*b; }
 
 #endif
 
   };
 
-  template<typename _CharT, class _Traits, class VALTYPE>
+  template<typename _CharT, class _Traits, class VALTYPE, bool BOUND>
   std::basic_ostream<_CharT, _Traits>&
-  operator<<(std::basic_ostream<_CharT, _Traits>& __os, const rotrans<VALTYPE> & r)
+  operator<<(std::basic_ostream<_CharT, _Traits>& __os, const rotrans<VALTYPE,BOUND> & r)
   {
     r.write(__os);
     return __os;
   }
 
 
-  template<class REAL>
-  REAL rotrans<REAL>::translation_tolerance = 1e-10;
+  template<class REAL, bool BOUND>
+  REAL rotrans<REAL,BOUND>::translation_tolerance = 1e-10;
   
-  template<class REAL>
-  REAL rotrans<REAL>::rotation_tolerance = 1e-10;
+  template<class REAL, bool BOUND>
+  REAL rotrans<REAL,BOUND>::rotation_tolerance = 1e-10;
   
-  template<class REAL>
-  rotrans<REAL> rotrans<REAL>::unity(vector3d<REAL>(0e0),matrix3d<REAL>(1e0));
+  template<class REAL, bool BOUND>
+  rotrans<REAL,BOUND> rotrans<REAL,BOUND>::unity(vector3d<REAL>(0e0),matrix3d<REAL>(1e0));
 				      
-  template<class REAL>
-  rotrans<REAL> invert(const rotrans<REAL> & R)
+  template<class REAL, bool BOUND>
+  rotrans<REAL,BOUND> invert(const rotrans<REAL,BOUND> & R)
   {
     matrix3d<REAL> A = invert(R.R);
     vector3d<REAL> t = - A*R.T;
-    return rotrans<REAL>(t, A);
+    return rotrans<REAL,BOUND>(t, A, R.cell);
   }
   
-  template<class REAL>
-  rotrans<REAL> pow(const rotrans<REAL> & R, int n)
+  template<class REAL, bool BOUND>
+  rotrans<REAL,BOUND> pow(const rotrans<REAL,BOUND> & R, int n)
   {
-    // fixme - very inefficient
-    rotrans<REAL> A =  rotrans<REAL>::unity;
+    // fixme - inefficient
+    rotrans<REAL,BOUND> A =  rotrans<REAL,BOUND>::unity;
+    A.cell = R.cell;
     if (n>0)
       {
 	while (n-- > 0)
@@ -145,7 +163,7 @@ namespace qpp{
       }
     else if (n<0)
       {
-	rotrans<REAL>  B = invert(R);
+	rotrans<REAL,BOUND>  B = invert(R);
 	while (n++ < 0)
 	  A = B*A;
       }
@@ -155,16 +173,18 @@ namespace qpp{
   // ----------------------------------------------------------------
 #ifdef PY_EXPORT
 
-  template<class REAL>
-  inline rotrans<REAL> py_invert_rt(const rotrans<REAL> & R) {return invert(R);}
+  template<class REAL,bool BOUND>
+  inline rotrans<REAL,BOUND> py_invert_rt(const rotrans<REAL,BOUND> & R) {return invert(R);}
   
-  template<class REAL>
-  inline rotrans<REAL> py_pow_rt(const rotrans<REAL> & R, int n) {return pow(R,n);}
+  template<class REAL,bool BOUND>
+  inline rotrans<REAL,BOUND> py_pow_rt(const rotrans<REAL,BOUND> & R, int n) {return pow(R,n);}
 
 #endif
 
+
+
   // ----------------------------------------------------------------
-  
+  /*  
   template<class REAL>
   struct translation
   {
@@ -234,6 +254,7 @@ namespace qpp{
   {
     return translation<REAL>(R.T*n);
   }
+  */
 
 };
 

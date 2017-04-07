@@ -22,8 +22,8 @@ int main()
   auto C3 = RotMtrx({1,1,1},2*pi/3);
   auto C31 = RotMtrx({1,-1,-1},2*pi/3);
   generated_group<matrix3d<double> > T;
-  T.generator(C4);
-  T.generator(C3);
+  T.add(C4);
+  T.add(C3);
   // T.generator(C31);
 
   std::cout << "Group size = " << T.size() << std::endl;

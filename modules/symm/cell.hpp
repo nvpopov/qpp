@@ -53,11 +53,14 @@ namespace qpp{
   // Purely translational periodic cell with DIM=1,2,3 periodicity
   template<class REAL = double>
   struct periodic_cell {
+
     
     int DIM;
+
     vector3d<REAL> *v;
     STRING name;
 
+    //@brief Create periodic cell of dimension dim with zero translation vectors
     periodic_cell(int dim)
     {
       DIM = dim;

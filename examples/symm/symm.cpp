@@ -35,9 +35,9 @@ int main()
 
   generated_group<matrix3d<double> > T;
 
-  T.generator( RotMtrx({1,1,1}, 2*pi/3) );
-  T.generator( RotMtrx({1,-1,-1}, 2*pi/3) );
-  T.generator( RotMtrx({1,1,0}, pi) );
+  T.add( RotMtrx({1,1,1}, 2*pi/3) );
+  T.add( RotMtrx({1,-1,-1}, 2*pi/3) );
+  T.add( RotMtrx({1,1,0}, pi) );
 
   for (int i=0; i<T.size(); i++)
     {

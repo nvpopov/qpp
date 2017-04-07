@@ -14,9 +14,9 @@ namespace qpp{
     index begin, end;
     int DIM;
     
-    generators_pack()
+    generators_pack(int dim=0)
     {
-      DIM=0;
+      DIM=dim;
     }
 
     generators_pack(const std::vector<TRANSFORM> & g, 
@@ -47,6 +47,8 @@ namespace qpp{
     generators_pack(const generators_pack<TRANSFORM> & G) :
       DIM(G.DIM), generators(G.generators), begin(G.begin), end(G.end)
     {}
+
+    int get_dim(){return DIM;}
 
     void set_dim(int D)
     {
@@ -133,7 +135,7 @@ namespace qpp{
     inline int size() const
     { return group.size(); }
 
-    void generator(const TRANSFORM & g)
+    void add(const TRANSFORM & g)
     {
       if ( idx(g) == -1 )
 	{
