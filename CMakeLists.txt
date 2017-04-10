@@ -1,13 +1,14 @@
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 2.7)
 
 project(qpp CXX)
 set (qpp_VERSION_MAJOR 0)
 set (qpp_VERSION_MINOR 1)
-include(CheckCXXCompilerFlag)
-
+add_definitions(
+	-std=c++11
+)
 set(CMAKE_CXX_FLAGS "-pg -ggdb")
 set(CMAKE_BUILD_TYPE "Debug")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+set(CMAKE_CXX_STANDARD 11)
 
 set(bitness 32)
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
@@ -31,7 +32,6 @@ endif()
 
 include_directories("/usr/include/eigen3")
 include_directories("/usr/include/python2.7")
-target_link_libraries(boost_python)
 
 find_package(Boost)
 IF (Boost_FOUND)
@@ -43,36 +43,6 @@ endif()
 include_directories(modules/)
 
 add_subdirectory(modules)
-
-if (DEFINED QPP_MOLCAD)
-     message("Configuring molcad...")
-     add_subdirectory(tools/molcad)
-else()
-     message("Configuring molcad not enabled..")
-endif()
-
-if (DEFINED QPP_NVP_TOOLS)
-     message("Configuring additional nvpopov tools...")
-     add_subdirectory(tools/mparser)
-else()
-     message("Configuring additional nvpopov tools not enabled..")
-endif()
-
-
-
-if (DEFINED QPP_C11)
-    CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
-    CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
-    if(COMPILER_SUPPORTS_CXX11)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-    elseif(COMPILER_SUPPORTS_CXX0X)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
-    else()
-        message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
-    endif()
-    message("Forcing c++11...")
-endif()
-
 add_subdirectory(examples)
 add_subdirectory(utils)
 
@@ -80,3 +50,31 @@ option(QPP_BUILD_TESTS "build tests executable")
 if (QPP_BUILD_TESTS)
         add_subdirectory(tests)
 endif(QPP_BUILD_TESTS)
+
+option(QPP_BUILD_DOCS "build documentation")
+if (QPP_BUILD_DOCS)
+
+FIND_PACKAGE(Doxygen)
+
+IF (DOXYGEN_FOUND)
+
+SET(DOXYGEN_INPUT docs/doxyfile_qpp)
+SET(DOXYGEN_OUTPUT docs/render)
+ADD_CUSTOM_COMMAND(
+  OUTPUT ${DOXYGEN_OUTPUT}
+  COMMAND ${CMAKE_COMMAND} -E echo_append "Building API Documentation..."
+  COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_INPUT}
+  COMMAND ${CMAKE_COMMAND} -E echo "Done."
+  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+  DEPENDS ${DOXYGEN_INPUT}
+  )
+
+ADD_CUSTOM_TARGET(apidoc ALL DEPENDS ${DOXYGEN_OUTPUT})
+
+ADD_CUSTOM_TARGET(apidoc_forced
+  COMMAND ${CMAKE_COMMAND} -E echo_append "Building API Documentation..."
+  COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_INPUT}
+  COMMAND ${CMAKE_COMMAND} -E echo "Done."
+  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+ENDIF (DOXYGEN_FOUND)
+endif(QPP_BUILD_DOCS)
