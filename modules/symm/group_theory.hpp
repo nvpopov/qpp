@@ -237,19 +237,6 @@ namespace qpp{
       ordr = NULL;
       build_multab();
       build_orders();
-      
-      /*
-      std::cout << "Multiplication table:\n";
-      
-      for (int i=0; i<G.size(); i++)
-	{
-	  std::cout << boost::format("%3i |") % i;
-	  for (int j=0; j<G.size(); j++)
-	    std::cout << boost::format("%3i ") % multab(i,j);
-	  std::cout << std::endl;
-	}
-      */
-
       build_classes();
     }
 
