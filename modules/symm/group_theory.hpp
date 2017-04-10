@@ -199,6 +199,7 @@ namespace qpp{
       return res;      
     }
 
+    /*
     std::vector<TRANSFORM> find_generators(const std::vector<int> & H)
     {
       int N = G.size();
@@ -221,9 +222,12 @@ namespace qpp{
 	  H1.clear();
 	  H1 = mul_subs(H, abelian_sub(g) );
 	  if (H1.size() == H.size()*order(g))
-	    
+	    {
+	      std::vector<int> = find_generators(H1);
+	    }
+	}
     }
-
+    */
     //-------------------------------------------------------------------------------------
 
     // Constructors
