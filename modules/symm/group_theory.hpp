@@ -2,6 +2,7 @@
 #define _QPP_GROUP_THEORY_H
 
 #include <vector>
+#include <algorithm>
 #include <complex>
 #include <data/types.hpp>
 #include <Eigen/Dense>
@@ -17,11 +18,21 @@ namespace qpp{
     // Multiplication table
     int * mtab;
 
+    // Orders
+    int * ordr;
+
     // The elements of the classes
     // cltab[i][j] is the j-th element of i-th class
     std::vector<std::vector<int> > cltab;
     std::vector<int> classof;
     
+    // where in mtab is the record for i-th times j-th element
+    inline int mtidx(int i, int j) const
+    {
+      return i*G.size()+j;
+    }
+
+  public:
     // --------------------------------------------
     // Finds element g of the group and returns its index
     int index(const TRANSFORM & g) const
@@ -37,19 +48,32 @@ namespace qpp{
       return result? i : -1;
     }
 
-    // where in mtab is the record for i-th times j-th element
-    inline int mtidx(int i, int j) const
-    {
-      return i*G.size()+j;
-    }
-
     // Construction of the group multiplication table
     void build_multab()
     {
+      if (mtab!=NULL)
+	delete mtab;
       mtab = new int[G.size()*G.size()];
       for (int i = 0; i<G.size(); i++)
 	for (int j = 0; j<G.size(); j++)
 	  mtab[mtidx(i,j)] = index(G[i]*G[j]);
+    }
+
+    // Find orders of all elements
+    void build_orders()
+    {
+      if (ordr!=NULL)
+	delete ordr;
+      for (int g=0; g<G.size(); g++)
+	{
+	  int n=0, h=g;
+	  while (h!=0)
+	    {
+	      n++;
+	      h = multab(h,g);
+	    }
+	  ordr[g] = n + 1;
+	}
     }
 
     // Find the classes
@@ -102,12 +126,16 @@ namespace qpp{
       //std::cout << "Nclasses= " << cltab.size() << "\n";
     }
 
-  public:
-
     // multiplication table
     inline int multab(int i, int j) const
     {
       return mtab[mtidx(i,j)];
+    }
+
+    // order of the element
+    inline int order(int i) const
+    {
+      return ordr[i];
     }
 
     // inverse of i-th element
@@ -142,11 +170,71 @@ namespace qpp{
       return classof[i];
     }
 
+    // --------------------------------------------------------
+
+    // Construct abelian subgroup with g-th element
+    std::vector<int> abelian_sub(int g)
+    {
+      std::vector<int> sub = {0};
+      int h = g;
+      while (h!=0)
+	{
+	  sub.push_back(h);
+	  h = multab(g,h);
+	}
+      return sub;
+    }
+
+    std::vector<int> mul_subs(const std::vector<int> & G1, const std::vector<int> &G2)
+    {
+      std::vector<int> res;
+      res.resize(G1.size()*G2.size());
+      int i=0;
+      for (int g1 : G1)
+	for (int g2 : G2)
+	  res[i++] = multab(g1,g2);
+
+      std::sort(res.begin(), res.end());
+      res.erase( std::unique( res.begin(), res.end() ), res.end() );
+      return res;      
+    }
+
+    std::vector<TRANSFORM> find_generators(const std::vector<int> & H)
+    {
+      int N = G.size();
+      if (H.size() == N)
+	return std::vector<int>();
+
+      std::vector<int> H1(H), F;
+      std::sort(H1);
+      int i1=0;
+      for (int i=0; i<N; i++)
+	{
+	  while (H1[i1]<i && i1 < H1.size()-1) i1++;
+	  if ( N % (H.size()*order(i))==0 &&  i!=H1[i1] )
+	    F.push_back(i);
+	}
+      std::sort(F.begin(),F.end(), [] (const int & a, const int & b) -> bool {return order(a)<order(b);} );
+      
+      for (int g : F)
+	{
+	  H1.clear();
+	  H1 = mul_subs(H, abelian_sub(g) );
+	  if (H1.size() == H.size()*order(g))
+	    
+    }
+
+    //-------------------------------------------------------------------------------------
+
     // Constructors
     group_analyzer(const ARRAY & _G) : G(_G)
     {
+      mtab = NULL;
+      ordr = NULL;
       build_multab();
+      build_orders();
       
+      /*
       std::cout << "Multiplication table:\n";
       
       for (int i=0; i<G.size(); i++)
@@ -156,6 +244,7 @@ namespace qpp{
 	    std::cout << boost::format("%3i ") % multab(i,j);
 	  std::cout << std::endl;
 	}
+      */
 
       build_classes();
     }

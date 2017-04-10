@@ -61,8 +61,11 @@ namespace qpp{
 
     TRANSFORM operator()(const index & n) const
     {
-      TRANSFORM A = TRANSFORM::unity;
-      for (int d = 0; d<DIM; d++)
+      if (DIM==0)
+	return TRANSFORM::unity;
+
+      TRANSFORM A = pow(generators[0],n(0));
+      for (int d = 1; d<DIM; d++)
 	A = A*pow(generators[d],n(d));
       return A;
     }
@@ -104,7 +107,7 @@ namespace qpp{
     
     std::vector<TRANSFORM> group;
 
-    int idx(const TRANSFORM & g)
+    int index(const TRANSFORM & g)
     {
       int i;
       bool result=false;
@@ -137,7 +140,7 @@ namespace qpp{
 
     void add(const TRANSFORM & g)
     {
-      if ( idx(g) == -1 )
+      if ( index(g) == -1 )
 	{
 	  group.push_back(g);
 	  bool contin = true;
@@ -148,7 +151,7 @@ namespace qpp{
 		for (int j=0; j<group.size(); j++)
 		  {
 		    TRANSFORM h = group[i]*group[j];
-		    if (idx(h)==-1)
+		    if (index(h)==-1)
 		      {
 			contin = true;
 			group.push_back(h);

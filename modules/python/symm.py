@@ -3,22 +3,23 @@ from nice import overloader
 #---------------------------------------------------------
 
 def symm_add(group,op):
-    
     if op in group:
         return
-
-    group.append(op)
-    contin = True
-
-    while contin:
-        contin = False
-        for g1 in group:
+    newelems = [op]
+    while newelems != []:
+        newnewelems = []
+        #print "new ", newelems
+        for g1 in newelems:
             for g2 in group:
                 h = g1*g2
-                if not h in group:
-                    contin = True
-                    group.append(h)
-
+                if (not h in group) and (not h in newelems) and (not h in newnewelems):
+                    newnewelems.append(h)
+                h = g2*g1
+                if (not h in group) and (not h in newelems) and (not h in newnewelems):
+                    newnewelems.append(h)
+        #print "newnew ", newnewelems
+        group.extend(newelems)
+        newelems = newnewelems
 
 #---------------------------------------------------------
 
@@ -46,7 +47,7 @@ def symm_order_by_multab(multab,i):
         return n + 1
     else:
         #print "by multab TE"
-        TypeError()
+        raise TypeError()
 
 def symm_order_by_element(A):
     #print "by element"
@@ -57,8 +58,11 @@ def symm_order_by_element(A):
         n = n + 1
     return n + 1
 
+def symm_order_by_index(group,i):
+    return symm_order_by_element(group[i])
+
 def symm_order(*args,**kwds):
-    return overloader([symm_order_by_multab,symm_order_by_element],args,kwds, \
+    return overloader([symm_order_by_multab,symm_order_by_element,symm_order_by_index],args,kwds, \
                       "qpp: invalid arguments in symm_order call"+str(args)+str(kwds))
 
 #---------------------------------------------------------
@@ -69,18 +73,27 @@ def symm_invert_by_multab(multab,i):
             if (multab[i][j]==0):
                 return j
     else:
-        TypeError()
+        raise TypeError()
 
 def symm_invert_by_element(A):
-    # inefficient
     n=symm_order(A)   
     B = A
     for i in xrange(n-2):
         B = B*A
     return B
 
+def symm_invert_by_index(group,i):
+    e = group[0]
+    g = group[i]
+    a=g
+    b=g*g
+    while b!=e:
+        a=b
+        b=b*g
+    return e
+
 def symm_invert(*args,**kwds):
-    return overloader([symm_invert_by_multab, symm_invert_by_element],args,kwds, \
+    return overloader([symm_invert_by_multab, symm_invert_by_element, symm_invert_by_index],args,kwds, \
                       "qpp: invalid arguments in symm_invert call"+str(args)+str(kwds))
 
 #---------------------------------------------------------
@@ -88,6 +101,7 @@ def symm_invert(*args,**kwds):
 def is_symm_group(G):
     for a in G:
         for b in G:
+            #print G.index(a),G.index(b)
             if not a*b in G: return False
     return True
 
@@ -95,9 +109,9 @@ def is_symm_group(G):
 
 def is_normal_subgroup_by_multab(multab,H):
     if (not type(multab) is list) or (not type(multab[0]) is list) or (not type(multab[0][0]) is int):
-        TypeError()
+        raise TypeError()
     if (not type(H) is list) or (not type(H[0]) is int):
-        TypeError()
+        raise TypeError()
     for g in xrange(len(multab)):
         for h in H:
             gh = multab[g][h]
@@ -120,13 +134,27 @@ def is_normal_subgroup(*args,**kwds):
 
 #---------------------------------------------------------
 
-def mul_groups(G,H):
+def mul_groups_groups(G,H):
     res=[]
     for g in G:
         for h in H:
             if not g*h in res:
                 res.append(g*h)
     return res
+
+def mul_groups_multab(multab,G,H):
+    res=[]
+    for g in G:
+        for h in H:
+            c = multab[g][h]
+            if not c in res:
+                res.append(c)
+    return res
+
+def mul_groups(*args,**kwds):
+    return overloader([mul_groups_groups,mul_groups_multab],args,kwds, \
+                      "qpp: invalid arguments in mul_groups call"+str(args)+str(kwds))
+
 
 #---------------------------------------------------------
 
@@ -145,7 +173,7 @@ def abelian_sub_by_multab(multab,i):
     #print multab[0], type(multab[0])
     #print multab[0][0],type(multab[0][0])
     if (not type(multab) is list) or (not type(multab[0]) is list) or (not type(multab[0][0]) is int):
-        TypeError()
+        raise TypeError()
     sub=[0]
     j=i
     while j!=0:
@@ -162,6 +190,9 @@ def abelian_sub_by_element(A):
     sub.insert(0,sub[-1])
     del sub[-1]
     return sub
+    
+def abelian_sub_by_index(group,i):
+    return abelian_sub_by_element(group[i])
 
 def abelian_sub(*args,**kwds):
     return overloader([abelian_sub_by_multab,abelian_sub_by_element],args,kwds, \
@@ -171,21 +202,25 @@ def abelian_sub(*args,**kwds):
 
 def find_generators_by_multab(multab,H):
     if (type(multab) is list) and (type(multab[0]) is list) and (type(multab[0][0]) is int):
-        pass
+        N = len(multab)
+        if len(H) == N:
+            return []
+        #print 'fg by multab'
+        for g in sorted(range(N), key = lambda x: -symm_order(multab,x)):
+            if (not g in H) and N % (len(H)*symm_order(multab,g)) == 0:
+                #print 'trying ',g
+                H1 = mul_groups(multab, H, abelian_sub(multab,g))
+                if len(H1) == len(H)*symm_order(multab,g):
+                    gg = find_generators_by_multab(multab,H1)
+                    if type(gg) is list:
+                        return [g]+gg
     else:
-        TypeError()
-    N = len(multab)
-    for g in sorted(range(N), key = lambda x: -symm_order(multab,x)):
-        if (not g in H) and N % (len(H)*symm_order(multab,g)) == 0:
-            H1 = mul_groups(H,abelian_sub(multab,g))
-            if len(H1) == len(H)*symm_order(multab,g):
-                gg = find_generators_by_multab(multab,H1)
-                if type(gg) is list:
-                    return [g]+gg
+        raise TypeError()
 
 def find_generators_by_groups(G,H):
     if len(G)==len(H):
-        return []    
+        return []
+    print len(H)
     for g in sorted(G, key=lambda x: -symm_order(x)):
         if (not g in H) and len(G) % (len(H)*symm_order(g))==0:
             H1=mul_groups(H, abelian_sub(g))

@@ -82,7 +82,16 @@ namespace qpp{
     {
       vector3d<REAL> t = T + R*b.T;
       if (BOUND)
-	t = cell->reduce(t);
+	{
+	  vector3d<REAL> f =  cell -> cart2frac(t);
+	  for (int d=0; d<cell->DIM; d++)
+	    {
+	      f(d) -= floor(f(d));
+	      if (std::abs(f(d)-REAL(1))<translation_tolerance)
+		f(d)=REAL(0);
+	    }
+	  t = cell -> frac2cart(f);
+	}
       return rotrans<REAL,BOUND>(t, R*b.R,cell);
     }
 
