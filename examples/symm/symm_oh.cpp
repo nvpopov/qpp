@@ -50,4 +50,11 @@ int main()
     std::cout << g << " ";
   std::cout << "\n";
   
+  std::vector<int> ee = {0}, gg = AOH.find_generators(ee);
+
+  std::cout << "generators ";
+  for (int g : gg)
+    std::cout << g << " ";
+  std::cout << "\n";
+
 }

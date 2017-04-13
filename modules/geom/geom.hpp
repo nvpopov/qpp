@@ -156,10 +156,20 @@ Geometry will inform them all when atoms are added, inserted or removed
     /*! real-space position of i-th atom, including i[0] as atom number and
      other i components as symmetry indicies*/
     inline vector3d<REAL> r(int at) const
-    { return cell -> transform(_crd[at], index::D(DIM).all(0)); }
+    { 
+      vector3d<REAL> r1 = _crd[at];
+      if (frac)
+	r1 = cell -> frac2cart(r1);
+      return cell -> transform(r1, index::D(DIM).all(0)); 
+    }
 
     inline vector3d<REAL> r(int at, const index & I) const
-    { return cell -> transform(_crd[at], I); }
+    { 
+      vector3d<REAL> r1 = _crd[at];
+      if (frac)
+	r1 = cell -> frac2cart(r1);
+      return cell -> transform(r1, I); 
+    }
 
     //! The synonym
     inline vector3d<REAL> pos(int at) const

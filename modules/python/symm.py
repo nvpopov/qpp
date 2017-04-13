@@ -10,14 +10,14 @@ def symm_add(group,op):
         newnewelems = []
         #print "new ", newelems
         for g1 in newelems:
-            for g2 in group:
+            for g2 in group+newelems:
                 h = g1*g2
                 if (not h in group) and (not h in newelems) and (not h in newnewelems):
                     newnewelems.append(h)
                 h = g2*g1
                 if (not h in group) and (not h in newelems) and (not h in newnewelems):
                     newnewelems.append(h)
-        #print "newnew ", newnewelems
+        #print group, newelems, newnewelems
         group.extend(newelems)
         newelems = newnewelems
 
@@ -208,7 +208,7 @@ def find_generators_by_multab(multab,H):
         #print 'fg by multab'
         for g in sorted(range(N), key = lambda x: -symm_order(multab,x)):
             if (not g in H) and N % (len(H)*symm_order(multab,g)) == 0:
-                #print 'trying ',g
+                print 'trying ',g
                 H1 = mul_groups(multab, H, abelian_sub(multab,g))
                 if len(H1) == len(H)*symm_order(multab,g):
                     gg = find_generators_by_multab(multab,H1)

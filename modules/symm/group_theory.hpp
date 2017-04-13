@@ -64,6 +64,8 @@ namespace qpp{
     {
       if (ordr!=NULL)
 	delete ordr;
+      ordr = new int [G.size()];
+
       for (int g=0; g<G.size(); g++)
 	{
 	  int n=0, h=g;
@@ -198,16 +200,15 @@ namespace qpp{
       res.erase( std::unique( res.begin(), res.end() ), res.end() );
       return res;      
     }
-
-    /*
-    std::vector<TRANSFORM> find_generators(const std::vector<int> & H)
+    
+    std::vector<int> find_generators(const std::vector<int> & H)
     {
       int N = G.size();
       if (H.size() == N)
 	return std::vector<int>();
 
       std::vector<int> H1(H), F;
-      std::sort(H1);
+      std::sort(H1.begin(),H1.end());
       int i1=0;
       for (int i=0; i<N; i++)
 	{
@@ -215,19 +216,39 @@ namespace qpp{
 	  if ( N % (H.size()*order(i))==0 &&  i!=H1[i1] )
 	    F.push_back(i);
 	}
-      std::sort(F.begin(),F.end(), [] (const int & a, const int & b) -> bool {return order(a)<order(b);} );
-      
+      std::sort(F.begin(),F.end(), 
+		[this] (const int & a, const int & b) -> bool 
+		{
+		  return order(a) > order(b) ? true : order(a)==order(b) && a<b;
+		} );
+
+      /*
+      std::cout << "F sorted:\n";
+      for (int i : F)
+	std::cout << " " << i << "(" << order(i) << ")";
+      std::cout << "\n";
+      */      
+
       for (int g : F)
 	{
+	  //std::cout << "trying " << g << "\n";
+
 	  H1.clear();
 	  H1 = mul_subs(H, abelian_sub(g) );
 	  if (H1.size() == H.size()*order(g))
 	    {
-	      std::vector<int> = find_generators(H1);
+	      std::vector<int> gg = find_generators(H1);
+	      bool success = !(gg.size()==1 && gg[0]==-1);
+	      if (success)
+		{
+		  gg.insert(gg.begin(),g);
+		  return gg;
+		}
 	    }
 	}
+      return std::vector<int>({-1});
     }
-    */
+
     //-------------------------------------------------------------------------------------
 
     // Constructors
@@ -235,9 +256,17 @@ namespace qpp{
     {
       mtab = NULL;
       ordr = NULL;
+
+      //std::cout << "alive1\n";
       build_multab();
+
+      //std::cout << "alive2\n";
       build_orders();
+
+      //std::cout << "alive3\n";
       build_classes();
+
+      //std::cout << "alive4\n";
     }
 
   };
@@ -267,6 +296,7 @@ namespace qpp{
     group_characters(const ARRAY & _G, const group_analyzer<TRANSFORM,ARRAY> & _A) :
       G(_G), A(_A)
     {
+      //std::cout << "before characters\n";
       build_chi();
     }
 
@@ -306,6 +336,8 @@ namespace qpp{
 	throw  std::range_error("group_characters::subspace_decompose : only regular representaion subspaces!");
 
       // Step 1. Form the matrix commuting the regular representation
+      //std::cout << "step1\n";
+
       matrix R = matrix::Random(N,N);
       R = R + R.adjoint().eval();
 
@@ -324,6 +356,7 @@ namespace qpp{
 
 
       // Step 3. Diagonalize it
+      //std::cout << "step3\n";
       Eigen::SelfAdjointEigenSolver<matrix> es;
 
       es.compute(S,Eigen::ComputeEigenvectors);
@@ -331,15 +364,16 @@ namespace qpp{
       auto  eig = es.eigenvalues();
       auto  vecs = es.eigenvectors();
 
-      std::cout << "Eigval\n";      
+      //      std::cout << "Eigval\n";      
       eig /= eig(N-1);
-      std::cout <<  eig << std::endl;
+      //std::cout <<  eig << std::endl;
 
-      std::cout << "Eigvec\n";
-      std::cout <<  vecs << std::endl;
+      //std::cout << "Eigvec\n";
+      //std::cout <<  vecs << std::endl;
 
       // Step 4. Count invariant subspaces
       // fixme! - check the constant, move its definition
+      //std::cout << "step4\n";
       dims.clear();
       int d = 1;
       for (int i=1; i<N; i++)		  
@@ -356,6 +390,7 @@ namespace qpp{
       // Step 5. Transform basis vectors n so that they are
       // basis vector for invariant subspaces just found
       
+      //std::cout << "step5\n";
       n = n*vecs;      
     }
 
@@ -374,10 +409,10 @@ namespace qpp{
 
       subspace_decompose(n,dims);
 
-      std::cout << "subspaces found with dims:\n";
-      for (int i=0; i<dims.size(); i++)
-	std::cout << dims[i] << " ";
-      std::cout << "\n";
+      //std::cout << "subspaces found with dims:\n";
+      //for (int i=0; i<dims.size(); i++)
+      //std::cout << dims[i] << " ";
+      //std::cout << "\n";
 
       // Find character
       int i0=0, i1;

@@ -4,6 +4,11 @@
 #include <symm/index.hpp>
 #include <vector>
 
+#ifdef PY_EXPORT
+#include <boost/python.hpp>
+namespace bp = boost::python;
+#endif
+
 namespace qpp{
   
   template <class TRANSFORM>
@@ -101,6 +106,20 @@ namespace qpp{
 
   // ------------------------------------------------------------------------
 
+#ifdef PY_EXPORT
+
+  template<class TRANSFORM> class generated_group;
+
+  template <class TRANSFORM>
+  int py_group_len(const generated_group<TRANSFORM> & G)
+  {
+    return G.size();
+  }
+
+#endif
+
+  // ------------------------------------------------------------------------
+
   template<class TRANSFORM>
   class generated_group{
   public:
@@ -120,9 +139,9 @@ namespace qpp{
       return result? i : -1;
     }
 
-    generated_group()
+    generated_group(TRANSFORM E = TRANSFORM::unity)
     {
-      group.push_back(TRANSFORM::unity);
+      group.push_back(E);
     }
 
     generated_group(const generated_group<TRANSFORM> & G):
@@ -140,24 +159,37 @@ namespace qpp{
 
     void add(const TRANSFORM & g)
     {
-      if ( index(g) == -1 )
+      if ( index(g) >= 0 )
+	return;
+      int inew = size();
+      group.push_back(g);
+
+      while (inew < size())
 	{
-	  group.push_back(g);
-	  bool contin = true;
-	  while (contin)
-	    {
-	      contin = false;
-	      for (int i=0; i<group.size(); i++)
-		for (int j=0; j<group.size(); j++)
-		  {
-		    TRANSFORM h = group[i]*group[j];
-		    if (index(h)==-1)
-		      {
-			contin = true;
-			group.push_back(h);
-		      }
-		  }
-	    }
+	  //std::cout << size() << "\n";
+
+	  int inewest = size();
+	  for (int ig1 = 0; ig1 < inewest; ig1++)
+	    for (int ig2 = inew; ig2 < inewest; ig2++)
+	      {
+		//std::cout << "ig1= " << ig1 << " ig2= " << ig2 << "\n";
+
+		TRANSFORM h1 = group[ig1]*group[ig2];
+		
+		//std::cout << "h1= " << h1 << "\n";
+
+		if (index(h1)==-1)
+		  group.push_back(h1);
+		TRANSFORM h2 = group[ig2]*group[ig1];
+
+		//std::cout << "h2= " << h2 << "\n";
+
+		if (h2 != h1 && index(h2)==-1)
+		  group.push_back(h2);
+	      } 
+	  //std::cout << inew << " " << inewest << "\n";
+
+	  inew = inewest;
 	}
     }
 
@@ -165,6 +197,40 @@ namespace qpp{
     {
       // fixme
     }
+
+#ifdef PY_EXPORT
+
+    inline TRANSFORM py_getitem(int i)
+    {
+      if (i<0) 
+	i += size();
+      if (i<0 || i>=size())
+	IndexError("cell: index out of range");
+      return group[i]; 
+    }
+
+    inline void py_setitem(int i, const TRANSFORM & t)
+    {
+      if (i<0) 
+	i += size();
+      if (i<0 || i>=size())
+	IndexError("cell: index out of range"); 
+      group[i] = t;
+    }
+
+    static void py_export(const char * pyname)
+    {
+      bp::class_<generated_group<TRANSFORM> >(pyname,bp::init< bp::optional<TRANSFORM> >())
+      .def(bp::init<const generated_group<TRANSFORM> &>())
+      .def("index", & generated_group<TRANSFORM>::index )
+      .def("add",   & generated_group<TRANSFORM>::add )
+      .def("__getitem__",  & generated_group<TRANSFORM>::py_getitem)
+      .def("__setitem__",  & generated_group<TRANSFORM>::py_setitem)
+      ;
+  bp::def("len", py_group_len<TRANSFORM>);
+}
+
+#endif
     
   };
   

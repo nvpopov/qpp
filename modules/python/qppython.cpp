@@ -17,6 +17,7 @@
 using namespace boost::python;
 namespace sn = boost::python::self_ns;
 
+
 namespace qpp{
 
   void IndexError(const char * msg)
@@ -44,6 +45,7 @@ namespace qpp{
   }
 
 };
+
 
 template<class VALTYPE>
 inline VALTYPE py_scal(const qpp::vector3d<VALTYPE> & x, const qpp::vector3d<VALTYPE> & y)
@@ -154,8 +156,11 @@ void py_rotrans_export(const char * pyname)
       .def(sn::repr(sn::self))
       .def(sn::self==sn::self)
       .def(sn::self!=sn::self)
-      .def_readwrite("unity", & qpp::rotrans<REAL,BOUND>::unity)
-      ;
+      .def_readwrite("unity", & qpp::rotrans<REAL,BOUND>::unity) 
+      .def_readwrite("T", & qpp::rotrans<REAL,BOUND>::T)
+      .def_readwrite("R", & qpp::rotrans<REAL,BOUND>::R)
+      .add_property("cell", make_getter(& qpp::rotrans<REAL,BOUND>::cell, return_value_policy<reference_existing_object>()))
+     ;
   else
     class_<qpp::rotrans<REAL,BOUND> >(pyname, init<>())
       .def(init<const qpp::rotrans<REAL,BOUND> >())
@@ -169,10 +174,13 @@ void py_rotrans_export(const char * pyname)
       .def(sn::self==sn::self)
       .def(sn::self!=sn::self)
       .def_readwrite("unity", & qpp::rotrans<REAL,BOUND>::unity)
+      .def_readwrite("T", & qpp::rotrans<REAL,BOUND>::T)
+      .def_readwrite("R", & qpp::rotrans<REAL,BOUND>::R)
       ;
   def("invert", qpp::py_invert_rt<REAL,BOUND>);
   def("pow",    qpp::py_pow_rt<REAL,BOUND>);
 }
+
 
 template<class REAL>
 void py_cell_export(const char * pyname)
@@ -293,10 +301,6 @@ void py_shape_export(const char * pyname)
 BOOST_PYTHON_MODULE(qpp_cpp)
 {
   
-  qpp::index::py_export("index");
-  qpp::iterator::py_export("iterator");
-  qpp::index_range::py_export("index_range");
-
   py_vector3d_export<float>("vector3f");
   py_vector3d_export<double>("vector3d");
   py_vector3d_export<std::complex<float> >("vector3c");
@@ -310,6 +314,11 @@ BOOST_PYTHON_MODULE(qpp_cpp)
   py_rotrans_export<float,true>("bound_rotrans_f");
   py_rotrans_export<double,true>("bound_rotrans_d");
 
+
+  qpp::index::py_export("index");
+  qpp::iterator::py_export("iterator");
+  qpp::index_range::py_export("index_range");
+
   py_cell_export<float>("periodic_cell_f");
   py_cell_export<double>("periodic_cell_d");
 
@@ -321,6 +330,11 @@ BOOST_PYTHON_MODULE(qpp_cpp)
 
   qpp::generalized_cell<float,  qpp::rotrans<float,true> >::py_export("finite_crystal_group_f");
   qpp::generalized_cell<double, qpp::rotrans<double,true> >::py_export("finite_crystal_group_d");
+
+  qpp::generated_group<qpp::matrix3d<float> >::py_export("array_point_group_f");
+  qpp::generated_group<qpp::matrix3d<double> >::py_export("array_point_group_d");
+  qpp::generated_group<qpp::rotrans<float,true> >::py_export("array_fincryst_group_f");
+  qpp::generated_group<qpp::rotrans<double,true> >::py_export("array_fincryst_group_d");
 
   py_geom_export<float,qpp::periodic_cell<float> >("geometry_f");
   py_geom_export<double,qpp::periodic_cell<double> >("geometry_d");

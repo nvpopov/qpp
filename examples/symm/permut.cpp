@@ -86,6 +86,11 @@ public:
     return res;
   }
 
+  inline bool operator!=(const permutation & b)
+  {
+    return ! ((*this)==b);
+  }
+
   void print() const
   {
     std::cout << "(";
