@@ -898,6 +898,10 @@ namespace qpp{
 
     bp::list py_getitem(int i) const
     {
+      if (i<0) 
+	i += geom -> nat();
+      if (i<0 || i>= geom->nat())
+	IndexError("Index out of range in ngbr_table::getitem");
       bp::list l;
       for(int j=0; j<n(i); j++)
 	l.append(table(i,j));
@@ -912,6 +916,17 @@ namespace qpp{
 	TypeError("neigbour_table::getitem. Expected 2 integers");
 
       int i=bp::extract<int>(I[0]), j=bp::extract<int>(I[1]);
+
+      if (i<0) 
+	i += geom -> nat();
+      if (i<0 || i>= geom->nat())
+	IndexError("Index out of range in ngbr_table::getitem");
+
+      if (j<0)
+	j += n(i);
+      if (j<0 || j>= n(i))
+	IndexError("Index out of range in ngbr_table::getitem");
+
       return table(i,j);
     }
     

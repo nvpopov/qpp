@@ -27,7 +27,7 @@ namespace qpp{
   template<>
   STRING t2s(const bool & val)
   {
-    return val ? "yes" : "no";
+    return val ? "y" : "n";
   }
 
   // -----------------------------------------------------------

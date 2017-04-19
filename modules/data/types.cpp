@@ -44,13 +44,36 @@ namespace qpp{
   
   int numeric_type<int>::I(){return 0;}
   // ------------------------------------------------------------------------
-  
-  STRING attributes<bool>::name   = "bool";
 
-  STRING attributes<int>::name    = "int";
+  std::string convert<std::string, const char*>::get(const char* t)
+  { return std::string(t); }
 
-  STRING attributes<float>::name  = "float";
+  bool convert<bool,short>::get(short t)
+  { return (bool)t; }
 
-  STRING attributes<double>::name = "double";
+  bool & convert<bool&,short&>::get(short & t)
+  { return *(bool*)(&t); }
+
+  double    convert<double,float>::get(float t){return (double)t;}
+  double      convert<double,int>::get(int t){return (double)t;}
+  float     convert<float,double>::get(double t){return (float)t;}
+  float        convert<float,int>::get(int t){return (float)t;}
+
+  // ------------------------------------------------------------------------
+
+  STRING attributes<bool>::name        = "bool";
+  basic_types attributes<bool>::type   = type_bool;
+
+  STRING attributes<int>::name         = "int";
+  basic_types attributes<int>::type    = type_int;
+
+  STRING attributes<float>::name       = "float";
+  basic_types attributes<float>::type  = type_float;
+
+  STRING attributes<double>::name      = "double";
+  basic_types attributes<double>::type = type_double;
+
+  STRING attributes<STRING>::name      = "string";
+  basic_types attributes<STRING>::type = type_string;
 
 };

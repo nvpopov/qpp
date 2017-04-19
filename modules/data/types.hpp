@@ -7,6 +7,8 @@
 #include <fstream>
 #include <complex>
 
+#include <stdexcept>
+
 namespace qpp{
 
 #ifdef WCHAR
@@ -123,6 +125,33 @@ namespace qpp{
 
   // --------------------------------------------------------
 
+  template <class T1, class T2>
+  struct convert
+  {
+    static T1 get(T2 t)
+    { 
+      // fixme - error handling 
+      throw std::invalid_argument("Type error in type cast");
+    }
+  };
+
+  template<class T>
+  struct convert<T,T>
+  {
+    static T get(T t)
+    { return t; }
+  };
+
+  template<> struct convert<std::string, const char*>{ static std::string get(const char* t);};
+  template<> struct convert<bool,short>{ static bool get(short t);};
+  template<> struct convert<bool&,short&>{ static bool & get(short & t);};
+  template<> struct convert<double,float>{ static double get(float t);};
+  template<> struct convert<double,int>{ static double get(int t);};
+  template<> struct convert<float,double>{ static float get(double t);};
+  template<> struct convert<float,int>{ static float get(int t);};
+
+  // --------------------------------------------------------
+
   template <class T>
   struct attributes;
 
@@ -130,24 +159,35 @@ namespace qpp{
   struct attributes<bool>
   {
     static STRING name;
+    static basic_types type;
   };
 
   template <>
   struct attributes<int>
   {
     static STRING name;
+    static basic_types type;
   };
 
   template <>
   struct attributes<float>
   {
     static STRING name;
+    static basic_types type;
   };
 
   template <>
   struct attributes<double>
   {
     static STRING name;
+    static basic_types type;
+  };
+
+  template <>
+  struct attributes<STRING>
+  {
+    static STRING name;
+    static basic_types type;
   };
 
 
