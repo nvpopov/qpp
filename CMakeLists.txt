@@ -6,8 +6,8 @@ set (qpp_VERSION_MINOR 1)
 add_definitions(
 	-std=c++11
 )
-set(CMAKE_CXX_FLAGS "-pg -ggdb")
-set(CMAKE_BUILD_TYPE "Debug")
+set(CMAKE_CXX_FLAGS "")
+set(CMAKE_BUILD_TYPE "Release")
 set(CMAKE_CXX_STANDARD 11)
 
 set(bitness 32)
@@ -31,7 +31,7 @@ if (LA_TYPE EQUAL "MKL")
 endif()
 
 include_directories("/usr/include/eigen3")
-include_directories("/usr/include/python2.7")
+include_directories("/usr/include/python3.4m")
 
 find_package(Boost)
 IF (Boost_FOUND)
