@@ -7,3 +7,8 @@ add_executable(cell cell.cpp)
 add_executable(rotrans rotrans.cpp)
 add_executable(chartab chartab.cpp)
 add_executable(permut permut.cpp)
+
+if(QPP_USE_SPGLIB)
+    add_executable(spgtest spgtest.cpp)
+    target_link_libraries(spgtest spglib-imp qpp)
+endif(QPP_USE_SPGLIB)

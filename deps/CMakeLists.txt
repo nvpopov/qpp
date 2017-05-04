@@ -23,8 +23,10 @@ if(QPP_USE_SPGLIB)
       GIT_REPOSITORY    https://github.com/atztogo/spglib.git
       GIT_TAG "master"
       SOURCE_DIR "${CMAKE_SOURCE_DIR}/deps/spglib"
-      INSTALL_COMMAND true
-      CMAKE_ARGS true
+      INSTALL_COMMAND ""
+      UPDATE_COMMAND ""
+      CMAKE_ARGS ""
     )
+
 endif(QPP_USE_SPGLIB)
 
