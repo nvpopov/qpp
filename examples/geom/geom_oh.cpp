@@ -1,8 +1,11 @@
+#include <fmt/format.h>
 #include <iostream>
 #include <symm/gcell.hpp>
 #include <geom/lace3d.hpp>
 #include <geom/geom.hpp>
 #include <geom/builders.hpp>
+#include <string>
+
 
 using namespace qpp;
 
@@ -34,8 +37,9 @@ int main()
 
   std::cout << geom2.nat() << "\n\n";
   for (int at=0; at<geom2.nat(); at++)
-    std::cout << boost::format("%-2s %10.6f %10.6f %10.6f\n") % geom2.atom(at) % 
-      geom2.coord(at).x() % geom2.coord(at).y()  % geom2.coord(at).z(); 
+      std::cout<<fmt::format("{} {:3.5f} {:3.4f}", geom2.atom(at), geom2.coord(at).x(), geom2.coord(at).y())<<std::endl;
+   /* std::cout << boost::format("%-2s %10.6f %10.6f %10.6f\n") % geom2.atom(at) %
+      geom2.coord(at).x() % geom2.coord(at).y()  % geom2.coord(at).z(); */
 }
 
 

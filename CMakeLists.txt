@@ -6,14 +6,9 @@ set (qpp_VERSION_MINOR 1)
 add_definitions(
 	-std=c++11
 )
-set(CMAKE_CXX_FLAGS "-pg -ggdb")
-set(CMAKE_BUILD_TYPE "Debug")
+#set(CMAKE_CXX_FLAGS "-pg -ggdb")
+#set(CMAKE_BUILD_TYPE "Debug")
 set(CMAKE_CXX_STANDARD 11)
-
-set(bitness 32)
-if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-  set(bitness 64)  
-endif()
 
 set(BLAS_INCLUDE "-" CACHE STRING "Blas include dir")
 set(BLAS_LIB "-" CACHE STRING "Blas library dir")
@@ -30,51 +25,72 @@ if (LA_TYPE EQUAL "MKL")
 	message(STATUS "MKL!")
 endif()
 
-include_directories("/usr/include/eigen3")
-include_directories("/usr/include/python2.7")
-
-find_package(Boost)
+#Use system boost
+find_package(Boost COMPONENTS python REQUIRED)
 IF (Boost_FOUND)
     include_directories(${Boost_INCLUDE_DIR})
     add_definitions( "-DHAS_BOOST" )
 endif()
- 
- 
-include_directories(modules/)
 
+#Use system python
+find_package(PythonLibs)
+if(PYTHONLIBS_FOUND)
+    include_directories(${PYTHON_INCLUDE_DIRS})
+endif(PYTHONLIBS_FOUND)
+ 
+#Add all src and headers to qtcreator ide
+file(GLOB_RECURSE ide_headers "modules/*/*.hpp")
+file(GLOB_RECURSE ide_src "modules/*/*.cpp")
+file(GLOB_RECURSE ide_exm "examples/*/*.cpp")
+add_custom_target(ideheaders SOURCES ${ide_headers})
+add_custom_target(idesrc SOURCES ${ide_src})
+add_custom_target(ideexm SOURCES ${ide_exm})
+
+#Global includes
+include_directories(modules/)
+include_directories(${CMAKE_SOURCE_DIR}/deps/eigen3)
+include_directories(${CMAKE_SOURCE_DIR}/deps/fmtlib)
+
+add_library(fmtlib-imp STATIC IMPORTED)
+set_target_properties(fmtlib-imp PROPERTIES IMPORTED_LOCATION "${PROJECT_BINARY_DIR}/deps/fmtlib-prefix/src/fmtlib-build/fmt/libfmt.a")
+
+add_subdirectory(deps)
 add_subdirectory(modules)
 add_subdirectory(examples)
 add_subdirectory(utils)
 
+
+#Build tests
 option(QPP_BUILD_TESTS "build tests executable")
 if (QPP_BUILD_TESTS)
         add_subdirectory(tests)
 endif(QPP_BUILD_TESTS)
 
+#Documentation
 option(QPP_BUILD_DOCS "build documentation")
-if (QPP_BUILD_DOCS)
+if (QPP_BUILD_DOCS)  
+    find_package(Doxygen)
+    IF (DOXYGEN_FOUND)
+        SET(DOXYGEN_INPUT docs/doxyfile_qpp)
+        SET(DOXYGEN_OUTPUT docs/render)
+        ADD_CUSTOM_COMMAND(
+          OUTPUT ${DOXYGEN_OUTPUT}
+          COMMAND ${CMAKE_COMMAND} -E echo_append "Building API Documentation..."
+          COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_INPUT}
+          COMMAND ${CMAKE_COMMAND} -E echo "Done."
+          WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+          DEPENDS ${DOXYGEN_INPUT}
+          )
 
-FIND_PACKAGE(Doxygen)
+        ADD_CUSTOM_TARGET(apidoc ALL DEPENDS ${DOXYGEN_OUTPUT})
 
-IF (DOXYGEN_FOUND)
-
-SET(DOXYGEN_INPUT docs/doxyfile_qpp)
-SET(DOXYGEN_OUTPUT docs/render)
-ADD_CUSTOM_COMMAND(
-  OUTPUT ${DOXYGEN_OUTPUT}
-  COMMAND ${CMAKE_COMMAND} -E echo_append "Building API Documentation..."
-  COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_INPUT}
-  COMMAND ${CMAKE_COMMAND} -E echo "Done."
-  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-  DEPENDS ${DOXYGEN_INPUT}
-  )
-
-ADD_CUSTOM_TARGET(apidoc ALL DEPENDS ${DOXYGEN_OUTPUT})
-
-ADD_CUSTOM_TARGET(apidoc_forced
-  COMMAND ${CMAKE_COMMAND} -E echo_append "Building API Documentation..."
-  COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_INPUT}
-  COMMAND ${CMAKE_COMMAND} -E echo "Done."
-  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
-ENDIF (DOXYGEN_FOUND)
+        ADD_CUSTOM_TARGET(apidoc_forced
+          COMMAND ${CMAKE_COMMAND} -E echo_append "Building API Documentation..."
+          COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_INPUT}
+          COMMAND ${CMAKE_COMMAND} -E echo "Done."
+          WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+    ENDIF (DOXYGEN_FOUND)
 endif(QPP_BUILD_DOCS)
+
+#extensions
+option(QPP_USE_SPGLIB "use spglib")
