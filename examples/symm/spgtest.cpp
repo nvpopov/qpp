@@ -52,4 +52,19 @@ int main()
                            spgw_get_international(CaF2_g),
                            spgw_get_schoenflies(CaF2_g));
 
+    //Test NaCl symmetry
+    qpp::periodic_cell<double> NaCl_cell({0.00000000,2.82028000,2.82028000},
+                                         {2.82028000,0.00000000,2.82028000},
+                                         {2.82028000,2.82028000,0.00000000});
+    qpp::geometry<double,qpp::periodic_cell<double>> NaCl_g(NaCl_cell);
+    NaCl_g.add("Na", 0.0, 0.0, 0.0);
+    NaCl_g.add("Cl", 0.5, 0.5, 0.5);
+    NaCl_g.build_type_table();
+
+    std::cout<<fmt::format("NaCl international symmetry = {}\n" \
+                           "NaCl schoenflies symmetry = {} \n",
+                           spgw_get_international(NaCl_g),
+                           spgw_get_schoenflies(NaCl_g));
+
+
 }
