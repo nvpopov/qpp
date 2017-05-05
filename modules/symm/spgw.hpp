@@ -20,9 +20,9 @@ void get_spgdata_from_geom(qpp::geometry<VALTYPE,CELL> &inGeom,
     }
 
     for(int i=0; i<3; i++){
-        _lattice[i][0] = inGeom.cell->v[i].x();
-        _lattice[i][1] = inGeom.cell->v[i].y();
-        _lattice[i][2] = inGeom.cell->v[i].z();
+        _lattice[i][0] = inGeom.cell.v[i].x();
+        _lattice[i][1] = inGeom.cell.v[i].y();
+        _lattice[i][2] = inGeom.cell.v[i].z();
     }
 
 }
@@ -43,9 +43,9 @@ int spgw_standartize_cell(qpp::geometry<VALTYPE,CELL> &inGeom,qpp::geometry<VALT
 
     //Get standartized cell back to user
     for(int i=0; i<3; i++){
-         outGeom.cell->v[i].x() = latticev[i][0];
-         outGeom.cell->v[i].y() = latticev[i][1];
-         outGeom.cell->v[i].z() = latticev[i][2];
+         outGeom.cell.v[i].x() = latticev[i][0];
+         outGeom.cell.v[i].y() = latticev[i][1];
+         outGeom.cell.v[i].z() = latticev[i][2];
     }
 
     for(int i=0; i<num_atoms; i++){

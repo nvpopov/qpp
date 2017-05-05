@@ -490,7 +490,7 @@ namespace qpp{
 
       for (int i=1; i<geom->size(); i++)
 	if (!geom->shadow(i))
-	  for (iterator I(geom->cell->begin(), geom->cell->end()); !I.end(); I++)
+	  for (iterator I(geom->cell.begin(), geom->cell.end()); !I.end(); I++)
 	    {
 	      vector3d<REAL> r = geom->r(i,I);
 	      if (ndef)
@@ -560,7 +560,7 @@ namespace qpp{
       
       for (int at=0; at<geom->nat(); at++)
 	if (! geom->shadow(at) ) 
-	  for ( iterator I(geom->cell->begin(),geom->cell->end()); !I.end(); I++)
+	  for ( iterator I(geom->cell.begin(),geom->cell.end()); !I.end(); I++)
 	    to_grain(atom_index(at,I));
 
       //      debug
@@ -625,7 +625,7 @@ namespace qpp{
 	if (!geom->shadow(i))
 	  for (int k=0; k<geom->nat(); k++)
 	    if (!geom->shadow(k))
-	      for (iterator I(geom->cell->begin(), geom->cell->end()); !I.end(); I++)
+	      for (iterator I(geom->cell.begin(), geom->cell.end()); !I.end(); I++)
 		if ( norm(geom->pos(i) - geom->pos(k,I)) <
 		     distance(geom->type_table(i), geom->type_table(k))
 		     && !( i==k && I==index::D(DIM).all(0)) )

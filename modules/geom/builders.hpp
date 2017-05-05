@@ -79,14 +79,14 @@ namespace qpp{
   template<class REALDST, class CELLDST, class REALSRC, class CELLSRC>
   void replicate(geometry<REALDST,CELLDST> & dst,  const geometry<REALSRC,CELLSRC> & src)
   {
-    replicate(dst,src,*src.cell);
+    replicate(dst,src,src.cell);
   }
 
   template<class REALDST, class CELLDST, class REALSRC, class CELLSRC>
   void replicate(geometry<REALDST,CELLDST> & dst,  const geometry<REALSRC,CELLSRC> & src, 
 		 const index & begin, const index& end)
   {
-    replicate(dst,src,*src.cell, begin, end);
+    replicate(dst,src,src.cell, begin, end);
   }
 
 };

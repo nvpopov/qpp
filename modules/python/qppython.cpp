@@ -7,6 +7,7 @@
 #include <symm/gcell.hpp>
 #include <symm/transform.hpp>
 #include <geom/geom.hpp>
+#include <geom/xgeom.hpp>
 #include <geom/ngbr.hpp>
 #include <geom/shape.hpp>
 #include <boost/python.hpp>
@@ -48,8 +49,12 @@ namespace qpp{
 
 
 template<class VALTYPE>
-inline VALTYPE py_scal(const qpp::vector3d<VALTYPE> & x, const qpp::vector3d<VALTYPE> & y)
+inline VALTYPE py_vec_scal(const qpp::vector3d<VALTYPE> & x, const qpp::vector3d<VALTYPE> & y)
 { return qpp::scal(x,y); }
+
+template<class VALTYPE>
+inline typename qpp::numeric_type<VALTYPE>::norm py_vec_norm(const qpp::vector3d<VALTYPE> & x)
+{ return x.norm(); }
 
 template<class VALTYPE>
 void py_vector3d_export(const char * pyname)
@@ -62,10 +67,11 @@ void py_vector3d_export(const char * pyname)
     .def(init<const qpp::vector3d<VALTYPE>&>())
     .def(sn::str(sn::self))
     .def(sn::repr(sn::self))
-    .def(sn::self - sn::self)
     .def(sn::self == sn::self)
     .def(sn::self != sn::self)
     .def(sn::self % sn::self)	
+    .def("__add__",     & qpp::vector3d<VALTYPE>::py_add)
+    .def("__sub__",     & qpp::vector3d<VALTYPE>::py_sub)
     .def("__getitem__", & qpp::vector3d<VALTYPE>::py_getitem)
     .def("__setitem__", & qpp::vector3d<VALTYPE>::py_setitem)
     .def("__mul__",     & qpp::vector3d<VALTYPE>::py_mul)
@@ -80,7 +86,8 @@ void py_vector3d_export(const char * pyname)
     //.def("y",           & qpp::vector3d<VALTYPE>::y)
     //.def("z",           & qpp::vector3d<VALTYPE>::z)
     ;
-  def("scal", py_scal<VALTYPE>);
+  def("scal", py_vec_scal<VALTYPE>);
+  //def("norm", py_vec_norm<VALTYPE>);
 }
 
 template<class VALTYPE>
@@ -237,9 +244,11 @@ void py_geom_export(const char * pyname)
     .def("nat",              & qpp::geometry<REAL,CELL>::nat)
     .def("__getitem__",      & qpp::geometry<REAL,CELL>::py_getitem)
     .def("__setitem__",      & qpp::geometry<REAL,CELL>::py_setitem)
-    .add_property("cell",   
-		  make_getter(& qpp::geometry<REAL,CELL>::cell, return_value_policy<reference_existing_object>()), 
-		  & qpp::geometry<REAL,CELL>::py_setcell)
+    //.add_property("cell",   
+    //make_getter(& qpp::geometry<REAL,CELL>::cell, return_value_policy<reference_existing_object>()), 
+    //make_getter(& qpp::geometry<REAL,CELL>::cell, return_self<>()), 
+    //& qpp::geometry<REAL,CELL>::py_setcell)
+    .def_readwrite("cell",   & qpp::geometry<REAL,CELL>::cell)
     .def_readonly("dim",     & qpp::geometry<REAL,CELL>::DIM)
     .def_readwrite("atom",   & qpp::geometry<REAL,CELL>::py_atoms)
     .def_readwrite("coord",  & qpp::geometry<REAL,CELL>::py_coords)
@@ -343,7 +352,15 @@ BOOST_PYTHON_MODULE(qpp_cpp)
   py_geom_export<double,qpp::generalized_cell<double, qpp::matrix3d<double> > >("geometry_pgd");
   py_geom_export<float, qpp::generalized_cell<float,  qpp::rotrans<float>   > >("geometry_cgf");
   py_geom_export<double,qpp::generalized_cell<double, qpp::rotrans<double>  > >("geometry_cgd");
-  
+
+  qpp::xgeometry<float, qpp::periodic_cell<float>  >::py_export("xgeometry_f");
+  qpp::xgeometry<double,qpp::periodic_cell<double> >::py_export("xgeometry_d");
+  qpp::xgeometry<float, qpp::generalized_cell<float,  qpp::matrix3d<float>  > >::py_export("xgeometry_pgf");
+  qpp::xgeometry<double,qpp::generalized_cell<double, qpp::matrix3d<double> > >::py_export("xgeometry_pgd");
+  qpp::xgeometry<float, qpp::generalized_cell<float,  qpp::rotrans<float>   > >::py_export("xgeometry_cgf");
+  qpp::xgeometry<double,qpp::generalized_cell<double, qpp::rotrans<double>  > >::py_export("xgeometry_cgd");
+
+
   enum_<qpp::before_after>("geom_change_state")
     .value("before", qpp::before)
     .value("after",  qpp::after)

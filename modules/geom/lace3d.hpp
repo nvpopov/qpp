@@ -242,6 +242,12 @@ namespace qpp{
     inline vector3d<VALTYPE> py_div(VALTYPE s) const
     { return (*this)/s;}
 
+    inline vector3d<VALTYPE> py_add(const vector3d<VALTYPE> & x)
+    { return (*this)+x; }
+
+    inline vector3d<VALTYPE> py_sub(const vector3d<VALTYPE> & x)
+    { return (*this)-x; }
+
     /*
     inline  vector3d<VALTYPE> py_add(const  vector3d<VALTYPE> & b) const
     { return (*this)+b;}

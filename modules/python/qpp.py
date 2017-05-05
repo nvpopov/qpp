@@ -1,4 +1,5 @@
 from qpp_cpp import *
+from nice import overloader
 from symm import symm_add, build_multab, symm_order, symm_invert, is_symm_group, \
     is_normal_subgroup, mul_groups, idx2grp, grp2idx, abelian_sub, find_generators
 
@@ -94,3 +95,44 @@ def periodic_cell(*args,**kwds):
                       args, kwds, \
                       "qpp: invalid arguments of qpp.cell call"+str(args)+str(kwds))
 
+#---------------------------------------------------------
+
+class xgeometry_field_attr(object):
+    
+    def __init__(self,geom1,f1):
+        self.geom = geom1
+        self.f=f1
+
+    def __getitem__(self,i):
+        return self.geom.field[self.f, i]
+
+    def __setitem__(self,i,val):
+        self.geom.field[self.f,i] = val
+
+def xgeometry_from_list(real,cell,fields,name=''):
+    rt = real_type(real)
+    ctypes = [periodic_cell_f, point_group_f, crystal_group_f, periodic_cell_d, point_group_d, crystal_group_d]
+    gtypes=[xgeometry_f, xgeometry_pgf, xgeometry_cgf, xgeometry_d, xgeometry_pgd, xgeometry_cgd]
+    rtypes = [0,0,0,1,1,1]
+    
+    t = ctypes.index(type(cell))
+    if rtypes[t]!=rt:
+        raise ValueError("Real type in xgeometry.__init__ does not much the supercell type")
+
+    xgeom = gtypes[t](cell,fields,name)
+
+    for f in xrange(xgeom.nfields()):
+        fname = xgeom.field_name(f)
+        if not fname in ['atom','x','y','z']:
+            setattr(xgeom,fname, xgeometry_field_attr(xgeom,f))
+
+    return xgeom
+
+def xgeometry_from_dict(real,cell,**kwds):    
+    name = kwds.pop('name','')    
+    return xgeometry_from_list(real,cell,kwds.items(),name)
+    
+def xgeometry(*args,**kwds):
+    return overloader([xgeometry_from_list,xgeometry_from_dict], \
+                      args, kwds, \
+                      "qpp: invalid arguments of qpp.xgeometry call"+str(args)+str(kwds))

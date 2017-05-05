@@ -11,9 +11,9 @@ set(QPP_LINK_LIB fmtlib-imp m)
 if(QPP_USE_SPGLIB)
     list(APPEND QPP_LINK_LIB spglib-imp)
 endif(QPP_USE_SPGLIB)
-
 target_link_libraries(qpp ${QPP_LINK_LIB})
-add_library(qpp_cpp SHARED python/qppython.cpp)
+
+add_library(qpp_cpp SHARED python/qppython.cpp data/types.cpp io/strfun.cpp)
 target_link_libraries(qpp_cpp ${Boost_LIBRARIES})
 set_target_properties(qpp_cpp PROPERTIES PREFIX "")
 
