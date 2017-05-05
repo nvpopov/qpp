@@ -7,7 +7,7 @@ add_library(qpp ${M_SRC})
 #target_link_libraries(qpp_basic boost_python)
 #set_target_properties(qpp_basic PROPERTIES PREFIX "")
 
-add_library(qpp_cpp SHARED python/qppython.cpp)
+add_library(qpp_cpp SHARED python/qppython.cpp data/types.cpp io/strfun.cpp)
 target_link_libraries(qpp_cpp boost_python)
 set_target_properties(qpp_cpp PROPERTIES PREFIX "")
 

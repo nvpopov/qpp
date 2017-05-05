@@ -108,6 +108,7 @@ Geometry will inform them all when atoms are added, inserted or removed
   protected: 
     // The dependent objects array
     std::vector<geometry_observer<REAL>*> observers;
+    bool has_observers;
 
   public:
     
@@ -121,7 +122,8 @@ Geometry will inform them all when atoms are added, inserted or removed
     int DIM;
 
     //! cell for periodic boundary conditions and on-the-fly transformations
-    CELL * cell;
+    //CELL * cell;    
+    CELL cell;
 
     //! whether to update typetable on-the-fly
     bool auto_update_types;
@@ -159,16 +161,16 @@ Geometry will inform them all when atoms are added, inserted or removed
     { 
       vector3d<REAL> r1 = _crd[at];
       if (frac)
-	r1 = cell -> frac2cart(r1);
-      return cell -> transform(r1, index::D(DIM).all(0)); 
+	r1 = cell.frac2cart(r1);
+      return cell.transform(r1, index::D(DIM).all(0)); 
     }
 
     inline vector3d<REAL> r(int at, const index & I) const
     { 
       vector3d<REAL> r1 = _crd[at];
       if (frac)
-	r1 = cell -> frac2cart(r1);
-      return cell -> transform(r1, I); 
+	r1 = cell.frac2cart(r1);
+      return cell.transform(r1, I); 
     }
 
     //! The synonym
@@ -181,13 +183,13 @@ Geometry will inform them all when atoms are added, inserted or removed
     //! Another synonym with atom_index    
     inline vector3d<REAL> r(const index & ai) const
     {
-      return cell -> transform(_crd[ai(0)], ai.sub(1) );
+      return cell.transform(_crd[ai(0)], ai.sub(1) );
     }
 
     //! The synonym
     inline vector3d<REAL> pos(const index & ai) const
     {
-      return cell -> transform(_crd[ai(0)], ai.sub(1) );
+      return cell.transform(_crd[ai(0)], ai.sub(1) );
     }
     
     inline bool shadow(int at) const
@@ -330,6 +332,7 @@ Geometry will inform them all when atoms are added, inserted or removed
       auto_update_types = true;
       frac = false;
       auto_symmetrize = false;
+      has_observers = false;
       default_symmetrize_radius = 0e0;  
       tol_geom = tol_geom_default;
 
@@ -347,23 +350,21 @@ Geometry will inform them all when atoms are added, inserted or removed
     
   public:
 
-    geometry(CELL & __cell, const STRING & __name = "") 
+    geometry(const CELL & __cell, const STRING & __name = "") : cell(__cell)
     {
       init_default();
-      cell = & __cell;
-      DIM = cell -> DIM;
+      DIM = cell.DIM;
       name = __name;
     }
 
-    geometry(int dim, const STRING & __name = "") 
+    geometry(int dim, const STRING & __name = "") : cell(dim)
     {
       init_default();
       DIM = dim;
-      cell = new CELL(DIM);
       name = __name;
     }
 
-    geometry(const geometry<REAL, CELL> & g)
+    geometry(const geometry<REAL, CELL> & g) : cell(g.cell)
     {
       init_default();
       //fixme
@@ -392,6 +393,7 @@ Geometry will inform them all when atoms are added, inserted or removed
     void add_observer(DEP & d)
     {
       observers.push_back(&d);
+      has_observers = true;
     }
 
     void remove_observer(DEP & d)
@@ -406,27 +408,33 @@ Geometry will inform them all when atoms are added, inserted or removed
 	    }
 	  i++;
 	}
+      if (observers.size()==0)
+	has_observers = false;
     }
 
     // ----------------------- Manipulations with atoms -----------------------
 
-    virtual void add(const STRING & a, const vector3d<REAL> & r1)
+  protected:
+
+    inline void _add(const STRING & a, const vector3d<REAL> & r1)
     {
       //std::cerr << "geometry::add entry\n";
 
       vector3d<REAL> r2 = r1;
-      if (auto_symmetrize)\
+      if (auto_symmetrize)
 	{
 	  REAL rad = symmetrize_radius(a);
-	  r2 = cell->symmetrize(r1,rad);
+	  r2 = cell.symmetrize(r1,rad);
 	}
 
-      for (int i=0; i<observers.size(); i++)
-	observers[i]->added(before, a, r2);
+      if (has_observers)
+	for (int i=0; i<observers.size(); i++)
+	  observers[i]->added(before, a, r2);
 
       _atm.push_back(a);
       _crd.push_back(r2);
       _shadow.push_back((char)false);
+
       if (auto_update_types)
 	{
 	  int t = type_of_atom(a);
@@ -438,19 +446,17 @@ Geometry will inform them all when atoms are added, inserted or removed
 	    }
 	  _type_table.push_back(t);
 	}
-      for (int i=0; i<observers.size(); i++)
-	observers[i]->added(after, a, r2);
+
+      if (has_observers)
+	for (int i=0; i<observers.size(); i++)
+	  observers[i]->added(after, a, r2);
     }
 
-    virtual void add(STRING a, const REAL _x, const REAL _y, const REAL _z)
+    inline void _erase(int at)
     {
-      add(a,{_x,_y,_z});
-    }
-
-    virtual void erase(int at)
-    {
-      for (int j=0; j<observers.size(); j++)
-	observers[j]->erased(at,before);
+      if (has_observers)
+	for (int j=0; j<observers.size(); j++)
+	  observers[j]->erased(at,before);
 
       _atm.erase(_atm.begin()+at);
       _crd.erase(_crd.begin()+at);
@@ -458,18 +464,20 @@ Geometry will inform them all when atoms are added, inserted or removed
       if (auto_update_types)
 	_type_table.erase(_type_table.begin()+at);
 
-      for (int j=0; j<observers.size(); j++)
-	observers[j]->erased(at,after);
+      if (has_observers)
+	for (int j=0; j<observers.size(); j++)
+	  observers[j]->erased(at,after);
     }
 
-    virtual void insert(int at, const STRING & a, const vector3d<REAL> & r1)
+    inline void _insert(int at, const STRING & a, const vector3d<REAL> & r1)
     {
       vector3d<REAL> r2 = r1;
       if (auto_symmetrize)
-	r2 = cell->symmetrize(r1,symmetrize_radius(a));
+	r2 = cell.symmetrize(r1,symmetrize_radius(a));
       
-      for (int j=0; j<observers.size(); j++)
-	observers[j]->inserted(at,before, a, r2);
+      if (has_observers)
+	for (int j=0; j<observers.size(); j++)
+	  observers[j]->inserted(at,before, a, r2);
 
       _atm.insert(_atm.begin()+at,a);
       _crd.insert(_crd.begin()+at,r2);
@@ -482,23 +490,43 @@ Geometry will inform them all when atoms are added, inserted or removed
 	      t = _atm_types.size();
 	      _atm_types.push_back(a);
 	      _symm_rad.push_back(default_symmetrize_radius);
-	      /*if (update_neighbours)
-		{
-		ngbr.resize_disttable();
-		ngbr.build_disttable();
-		}
-	      */
 	    }
 	  _type_table.insert(_type_table.begin()+at,t);
 	}
-      for (int j=0; j<observers.size(); j++)
-	observers[j]->inserted(at,after, a, r2);
+
+      if (has_observers)
+	for (int j=0; j<observers.size(); j++)
+	  observers[j]->inserted(at,after, a, r2);
     }
 
-    virtual void insert(int at, const STRING & a, const REAL _x, const REAL _y, const REAL _z)
+    inline void _change(int at, const STRING & a1, const vector3d<REAL> & r1)
     {
-      insert(at,a,{_x,_y,_z});
+      if (has_observers)
+	for (int i=0; i<observers.size(); i++)
+	  observers[i]->changed(at, before, a1, r1);
+      _crd[at] = r1;
+      _atm[at] = a1;
+
+      if (has_observers)
+	for (int i=0; i<observers.size(); i++)
+	  observers[i]->changed(at, after, a1, r1);
     }
+
+  public:
+    virtual void add(const STRING & a, const vector3d<REAL> & r1)
+    { _add(a,r1); }
+
+    void add(STRING a, const REAL _x, const REAL _y, const REAL _z)
+    {  add(a,{_x,_y,_z}); }
+
+    virtual void insert(int at, const STRING & a, const vector3d<REAL> & r1)
+    { _insert(at,a,r1); }
+
+    void insert(int at, const STRING & a, const REAL _x, const REAL _y, const REAL _z)
+    { insert(at,a,{_x,_y,_z}); }
+
+    virtual void erase(int at)
+    {  _erase(at); }
 
     inline void shadow(int at, bool sh)
     {
@@ -510,14 +538,7 @@ Geometry will inform them all when atoms are added, inserted or removed
     }
 
     virtual void change(int at, const STRING & a1, const vector3d<REAL> & r1)
-    {
-      for (int i=0; i<observers.size(); i++)
-	observers[i]->changed(at, before, a1, r1);
-      _crd[at] = r1;
-      _atm[at] = a1;
-      for (int i=0; i<observers.size(); i++)
-	observers[i]->changed(at, after, a1, r1);
-    }
+    { _change(at,a1,r1); }
 
     void clear()
     {
@@ -546,7 +567,7 @@ Geometry will inform them all when atoms are added, inserted or removed
       os << "){\n";
       */
 
-      cell->write(os,offset+4);
+      cell.write(os,offset+4);
 
       for (int i=0; i<size(); i++)
 	{
@@ -561,6 +582,7 @@ Geometry will inform them all when atoms are added, inserted or removed
 
 #ifdef PY_EXPORT
 
+    /*
     inline CELL & py_getcell()
     { return *cell; }
 
@@ -569,7 +591,7 @@ Geometry will inform them all when atoms are added, inserted or removed
       cell = & cl;  
       DIM = cell -> DIM;
     }
-
+    */
     // --------------------------------------------------------
 
     inline vector3d<REAL> py_pos1(int at) const
@@ -738,7 +760,7 @@ Geometry will inform them all when atoms are added, inserted or removed
 	bp::extract<REAL>(l[3]).check();	
     }
 
-    void py_add_list(const bp::list & l)
+    virtual void py_add_list(const bp::list & l)
     {
       if (!py_check_axyz(l))
 	TypeError("geometry::Invalid list. List must be [atom,x,y,z]");
@@ -773,7 +795,7 @@ Geometry will inform them all when atoms are added, inserted or removed
       insert(i,a,_x,_y,_z); 
     }
 
-    void py_insert_list(int i, const bp::list & l)
+    virtual void py_insert_list(int i, const bp::list & l)
     {
       if (!py_check_axyz(l))
 	TypeError("geometry::Invalid list. List must be [atom,x,y,z]");
@@ -804,7 +826,7 @@ Geometry will inform them all when atoms are added, inserted or removed
       erase(at);
     }
 
-    bp::list py_getitem(int i) const
+    virtual bp::list py_getitem(int i) const
     {      
       if (i<0)
 	i+=nat();
@@ -820,7 +842,7 @@ Geometry will inform them all when atoms are added, inserted or removed
       return l;
     }
     
-    void py_setitem(int i, const bp::list & l)
+    virtual void py_setitem(int i, const bp::list & l)
     {           
       if (i<0)
 	i+=nat();

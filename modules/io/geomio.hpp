@@ -78,12 +78,12 @@ namespace qpp{
 	    for (int i=0; i<nf; i++) ss >> vv[i];
 	    if (nf==9)
 	      {
-		(*geom.cell)(0) = {vv[0],vv[1],vv[2]};
-		(*geom.cell)(1) = {vv[3],vv[4],vv[5]};
-		(*geom.cell)(2) = {vv[6],vv[7],vv[8]};
+		geom.cell(0) = {vv[0],vv[1],vv[2]};
+		geom.cell(1) = {vv[3],vv[4],vv[5]};
+		geom.cell(2) = {vv[6],vv[7],vv[8]};
 	      }
 	    else
-	      geom.cell = new periodic_cell<VALTYPE>(vv[0],vv[1],vv[2],vv[3],vv[4],vv[5]);
+	      geom.cell = periodic_cell<VALTYPE>(vv[0],vv[1],vv[2],vv[3],vv[4],vv[5]);
 	  }
       }
     for (int i = 0; i<nat; i++)

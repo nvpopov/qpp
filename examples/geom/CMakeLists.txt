@@ -9,3 +9,6 @@ add_executable(ngbr ngbr.cpp)
 add_executable(shape shape.cpp)
 add_executable(xgeom xgeom.cpp)
 target_link_libraries(xgeom qpp)
+
+add_executable(xgeom1 xgeom1.cpp)
+target_link_libraries(xgeom1 qpp)
