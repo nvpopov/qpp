@@ -1,13 +1,14 @@
 set(M_IO_SRC  io/strfun.cpp)
 set(M_DATA_SRC data/types.cpp)
-set(M_SRC ${M_IO_SRC} ${M_DATA_SRC})
+set(M_SYMM_SRC symm/index.cpp)
+set(M_SRC ${M_IO_SRC} ${M_DATA_SRC} ${M_SYMM_SRC})
 add_library(qpp ${M_SRC})
 
 #add_library(qpp_basic SHARED python/python_basic.cpp)
 #target_link_libraries(qpp_basic boost_python)
 #set_target_properties(qpp_basic PROPERTIES PREFIX "")
 
-add_library(qpp_cpp SHARED python/qppython.cpp data/types.cpp io/strfun.cpp)
+add_library(qpp_cpp SHARED python/qppcpp1.cpp python/qppcpp2.cpp python/qppcpp3.cpp python/qppcpp4.cpp python/qppcpp5.cpp python/qppcpp6.cpp python/qppython.cpp data/types.cpp io/strfun.cpp symm/index.cpp)
 target_link_libraries(qpp_cpp boost_python)
 set_target_properties(qpp_cpp PROPERTIES PREFIX "")
 

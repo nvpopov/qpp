@@ -1,5 +1,7 @@
 add_executable(index index.cpp)
 add_executable(index1 index1.cpp)
+target_link_libraries(index1 qpp)
+
 add_executable(symm symm.cpp)
 add_executable(symm_oh symm_oh.cpp)
 add_executable(cbc_crystal cbc_crystal.cpp)

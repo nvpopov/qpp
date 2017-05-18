@@ -11,6 +11,7 @@
 #include <boost/python/list.hpp>
 #include <boost/python/tuple.hpp>
 #include <boost/python.hpp>
+#include <python/qppython.hpp>
 
 namespace bp = boost::python;
 namespace sn = boost::python::self_ns;
@@ -260,8 +261,8 @@ namespace qpp{
     static void py_export(const char * pyname)
     {
       bp::class_<index >(pyname,bp::init<>())
-	.def(init<bp::list&>())
-	.def(init<bp::tuple&>())
+	.def(bp::init<bp::list&>())
+	.def(bp::init<bp::tuple&>())
 	.def(bp::init<index const&>())
 	.def(bp::init<index const&, int, bp::optional<int> >())
 	//.def(bp::init<int>())	
@@ -305,14 +306,7 @@ namespace qpp{
     return __os << __s.str();
   }
 
-  index atom_index(int at, const index & I)
-  {
-    index res = index::D(I.DIM+1);
-    res(0) = at;
-    for (int d=0; d<I.DIM; d++)
-      res(d+1) = I(d);
-    return res;
-  }
+  index atom_index(int at, const index & I);
     
   // ------------------- iterator class --------------------
   // Iterator allows you run through all (or some) atoms of this cell
