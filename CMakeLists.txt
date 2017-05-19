@@ -74,6 +74,16 @@ if(QPP_BUILD_TESTS)
     add_subdirectory(tests)
 endif(QPP_BUILD_TESTS)
 
+#qc stuff
+option(QPP_BUILD_QC "build qc stuff")
+if(QPP_BUILD_QC)
+    add_subdirectory(${CMAKE_SOURCE_DIR}/examples/qc)
+    #find_package(OpenMP)
+    #if(OPENMP_FOUND)
+    #    add_definitions(${OpenMP_CXX_FLAGS})
+    #endif(OPENMP_FOUND)
+endif(QPP_BUILD_QC)
+
 #Documentation
 option(QPP_BUILD_DOCS "build documentation")
 if(QPP_BUILD_DOCS)
