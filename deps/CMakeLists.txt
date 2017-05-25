@@ -7,7 +7,10 @@ ExternalProject_Add(fmtlib
   SOURCE_DIR "${CMAKE_SOURCE_DIR}/deps/fmtlib"
   INSTALL_COMMAND ""
   UPDATE_COMMAND ""
-  CMAKE_ARGS -DFMT_DOC:bool=off -DFMT_INSTALL:bool=off -DFMT_TEST:bool=off -DFMT_USE_CPP11:bool=on
+  CMAKE_ARGS -DFMT_DOC:bool=off
+                -DFMT_INSTALL:bool=off
+                -DFMT_TEST:bool=off
+                -DFMT_USE_CPP11:bool=on
 )
 
 #eigen3 library for linear algebra
@@ -42,7 +45,21 @@ if(QPP_BUILD_QC)
       --enable-static
       --enable-cxx
       --enable-silent-rules
-      --prefix=${CMAKE_SOURCE_DIR}/build/virtenv
+      INSTALL_COMMAND ""
+      UPDATE_COMMAND ""
+      CMAKE_ARGS ""
+    )
+
+    set(GMP_LIB_DIR "${CMAKE_SOURCE_DIR}/build/deps/gmp-prefix/src/gmp-build/.libs")
+
+    set(ENV{CXX} ${CMAKE_CXX_COMPILER})
+    #libint
+    ExternalProject_Add(libint
+      GIT_REPOSITORY https://github.com/evaleev/libint.git
+      CONFIGURE_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/libint/autogen.sh
+        COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/libint/./configure
+            LDFLAGS="-L${GMP_LIB_DIR}"
+      BINARY_DIR  "${CMAKE_CURRENT_SOURCE_DIR}/libint"
       INSTALL_COMMAND ""
       UPDATE_COMMAND ""
       CMAKE_ARGS ""
