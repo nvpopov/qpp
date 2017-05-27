@@ -37,29 +37,16 @@ if(QPP_USE_SPGLIB)
 endif(QPP_USE_SPGLIB)
 
 if(QPP_BUILD_QC)
-    #gmplib for libint
-    ExternalProject_Add(gmp
-      URL "https://gmplib.org/download/gmp/gmp-6.1.2.tar.xz"
-      SOURCE_DIR "${CMAKE_SOURCE_DIR}/deps/gmplib"
-      CONFIGURE_COMMAND "${CMAKE_SOURCE_DIR}/deps/gmplib/configure"
-      --enable-static
-      --enable-cxx
-      --enable-silent-rules
-      INSTALL_COMMAND ""
-      UPDATE_COMMAND ""
-      CMAKE_ARGS ""
-    )
-
-    set(GMP_LIB_DIR "${CMAKE_SOURCE_DIR}/build/deps/gmp-prefix/src/gmp-build/.libs")
-
-    set(ENV{CXX} ${CMAKE_CXX_COMPILER})
     #libint
-    ExternalProject_Add(libint
-      GIT_REPOSITORY https://github.com/evaleev/libint.git
-      CONFIGURE_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/libint/autogen.sh
-        COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/libint/./configure
-            LDFLAGS="-L${GMP_LIB_DIR}"
-      BINARY_DIR  "${CMAKE_CURRENT_SOURCE_DIR}/libint"
+    ExternalProject_Add(libint-m
+     # DOWNLOAD_COMMAND wget "https://www.dropbox.com/s/sp6kyb7p2u0304b/libint.tgz?dl=0"
+    #  DOWNLOAD_NAME libint.tgz
+    #  DOWNLOAD_DIR "${CMAKE_SOURCE_DIR}/deps/"
+      URL "https://www.dropbox.com/s/sp6kyb7p2u0304b/libint.tgz"
+      SOURCE_DIR "${CMAKE_SOURCE_DIR}/deps/libint"
+      CONFIGURE_COMMAND "${CMAKE_SOURCE_DIR}/deps/libint/./configure"
+      "--with-cxx=${CMAKE_CXX_COMPILER}"
+      BUILD_IN_SOURCE 1
       INSTALL_COMMAND ""
       UPDATE_COMMAND ""
       CMAKE_ARGS ""

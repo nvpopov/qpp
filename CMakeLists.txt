@@ -53,13 +53,15 @@ include_directories(${CMAKE_SOURCE_DIR}/deps/eigen3)
 include_directories(${CMAKE_SOURCE_DIR}/deps/fmtlib)
 
 add_library(fmtlib-imp STATIC IMPORTED)
-set_target_properties(fmtlib-imp PROPERTIES IMPORTED_LOCATION "${PROJECT_BINARY_DIR}/deps/fmtlib-prefix/src/fmtlib-build/fmt/libfmt.a")
+set_target_properties(fmtlib-imp PROPERTIES IMPORTED_LOCATION
+    "${PROJECT_BINARY_DIR}/deps/fmtlib-prefix/src/fmtlib-build/fmt/libfmt.a")
 
 option(QPP_USE_SPGLIB "use spglib")
 if(QPP_USE_SPGLIB)
     include_directories(${CMAKE_SOURCE_DIR}/deps/spglib/src)
     add_library(spglib-imp STATIC IMPORTED)
-    set_target_properties(spglib-imp PROPERTIES IMPORTED_LOCATION "${PROJECT_BINARY_DIR}/deps/spglib-prefix/src/spglib-build/libsymspg.a")
+    set_target_properties(spglib-imp PROPERTIES IMPORTED_LOCATION
+        "${PROJECT_BINARY_DIR}/deps/spglib-prefix/src/spglib-build/libsymspg.a")
 endif()
 
 #Only data fetching here
@@ -93,14 +95,16 @@ if(QPP_BUILD_DOCS)
         set(DOXYGEN_OUTPUT docs/render)
         add_custom_command(
           OUTPUT ${DOXYGEN_OUTPUT}
-          COMMAND ${CMAKE_COMMAND} -E echo_append "Building API Documentation..."
+          COMMAND ${CMAKE_COMMAND}
+          -E echo_append "Building API Documentation..."
           COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_INPUT}
           COMMAND ${CMAKE_COMMAND} -E echo "Done."
           WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
           DEPENDS ${DOXYGEN_INPUT})
         add_custom_target(apidoc ALL DEPENDS ${DOXYGEN_OUTPUT})
         add_custom_target(apidoc_forced
-          COMMAND ${CMAKE_COMMAND} -E echo_append "Building API Documentation..."
+          COMMAND ${CMAKE_COMMAND}
+          -E echo_append "Building API Documentation..."
           COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_INPUT}
           COMMAND ${CMAKE_COMMAND} -E echo "Done."
           WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
