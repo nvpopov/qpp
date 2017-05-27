@@ -3,6 +3,7 @@
 
 #include <typeinfo>
 #include <utility>
+#include <set>
 #include <algorithm>
 #include <geom/geom.hpp>
 
@@ -426,15 +427,6 @@ namespace qpp{
       // find largest neighbourung distance
       //std::cout << "trnsl grain setup\n";
 
-      if (auto_grainsize)
-	{
-	  grainsize = REAL(0);
-	  int ntp = geom->n_atom_types();
-	  for (int i=0; i<ntp*ntp; i++)
-	    if (_disttable[i] > grainsize )
-	      grainsize = _disttable[i];
-	}
-
       bool ndef = true;
 
       for (int i=0; i<geom->size(); i++)
@@ -471,11 +463,6 @@ namespace qpp{
 
     void grain_setup()
     {
-      if (transl_mode && typeid(CELL).hash_code() == typeid(periodic_cell<REAL>).hash_code())
-	{
-	  translational_grain_setup();
-	  return;
-	}
       
       if (auto_grainsize)
 	{
@@ -486,9 +473,19 @@ namespace qpp{
 	      grainsize = _disttable[i];
 	}
 
+      translational_grain_setup();
+      
+      /*
+      if (transl_mode && typeid(CELL) == typeid(periodic_cell<REAL>))
+	{
+	  translational_grain_setup();
+	  return;
+	}
+      */
+      /*
       bool ndef = true;
 
-      for (int i=1; i<geom->size(); i++)
+      for (int i=0; i<geom->size(); i++)
 	if (!geom->shadow(i))
 	  for (iterator I(geom->cell.begin(), geom->cell.end()); !I.end(); I++)
 	    {
@@ -512,6 +509,7 @@ namespace qpp{
       ngrain = index::D(3);
       for (int i=0; i<3; i++)
 	ngrain(i) = int( (Rmax(i)-Rmin(i))/grainsize ) + 1;
+      */
     }
 
     inline int gidx(int i, int j, int k)
@@ -563,14 +561,13 @@ namespace qpp{
 	  for ( iterator I(geom->cell.begin(),geom->cell.end()); !I.end(); I++)
 	    to_grain(atom_index(at,I));
 
-      //      debug
-      
+      //      debug      
       /*
       std::cout << "graining finished\n";
 
       for (iterator I({0,0,0}, ngrain-index({1,1,1})); !I.end(); I++)
 	{
-	  std::cout << I << " " << gidx(I) << "\n";
+	  std::cout << "grain" <<  I << " " << gidx(I) << "\n";
 	  
 	  for (int l=0; l<grain(I).size(); l++)
 	    std::cout << " " << grain(I)[l] << " ";
@@ -578,7 +575,6 @@ namespace qpp{
 	  
 	}
       */
-	
 
     }
 
@@ -643,18 +639,25 @@ namespace qpp{
 	  for (int k=-1; k<=-i || k<=-j; k++)
 	    dirray[n++] = {i,j,k};
 
+      
+      // debug
       /*
       std::cout << "after dirray alive\n";
       for (const index & DI : dirray)
 	std::cout << DI;
       std::cout << "\n";
       */
+      
 
-      index shift1 = {1,1,1}, shift2={2,2,2};
+      //index shift1 = {1,1,1}, shift2={2,2,2};
+      //index shift1 = {1,1,1}, shift2={1,1,1};
+      index shift1 = {0,0,0}, shift2={1,1,1};
       if (geom->DIM==0)
 	{
-	  shift1 = {0,0,0};
-	  shift2 = {1,1,1};
+	  //shift1 = {0,0,0};
+	  //shift2 = {1,1,1};
+	  shift1 = {1,1,1};
+	  shift2 = {0,0,0};
 	}
 
       for (iterator I(shift1, ngrain-shift2); !I.end(); I++)
@@ -677,8 +680,14 @@ namespace qpp{
 		      index at1 = grains[g1][c1];
 		      index at2 = grains[g2][c2];
 		      REAL r = norm(geom->pos(at1) - geom->pos(at2));
-		      
-		      //std::cout << "at1 = " << at1 << " grain " << I << " at2= "<< at2 << " grain " << J <<  " DI =" << DI <<"\n"; 
+	
+		      /*
+		      if (at1==31|| at2==31)
+			{
+			  std::cout << "at1 = " << at1 << " grain " << I << " at2= "<< at2 << " grain " << J <<  " DI =" << DI <<"\n"; 
+			  std::cout << "type1= " << geom->type(at1) <<  " type2= " << geom->type(at2) << " d= " << distance(geom->type(at1), geom->type(at2)) << " r= " << r << "\n";
+			}
+		      */
 
 		      if ( r <= distance(geom->type(at1), geom->type(at2)))
 			{
@@ -691,12 +700,23 @@ namespace qpp{
 			      for (int dd=0; dd<DIM; dd++)
 				at.setcell(dd,-at2.cell(dd));
 			      */
-			      _add_ngbr(at2,at);
+			      _add_ngbr(at2,at);			   
+
+			      /*
+			      if (at1==31 || at1==41)
+				std:: cout << "added:" << int(at1) << at2 << " added " << int(at2) << at << "\n";
+			      */
+			      
+			    }			  
+			  else if ( at2.sub(1) == index::D(DIM).all(0) )
+			    {
+			      _add_ngbr(at2,at1);
+			      index at= at2;
+			      at.sub(1) -= at1.sub(1);
+			      _add_ngbr(at1,at);
+			     
 			    }
-			  /*
-			  if ( at2.cell == index<DIM>::all(0) )
-			    _add_ngbr(at2,at1);
-			  */
+			  
 			}
 		    }
 	      }
@@ -725,19 +745,32 @@ namespace qpp{
       std::cout <<typeid(periodic_cell<DIM,REAL>).hash_code() << "\n";
       */
 
-      if (transl_mode && typeid(CELL).hash_code() == typeid(periodic_cell<REAL>).hash_code())
+      if (transl_mode && typeid(CELL) == typeid(periodic_cell<REAL>))
 	{
 	  translational_build();
 	  return;
 	}
       
-      std::vector<std::pair<int,int> > gpairs;
+      std::set<std::pair<int,int> > gpairs;
+      std::vector<char> marked(ngrain(0)*ngrain(1)*ngrain(2), false);
+
+      /*
+      std::cout << "alive1 " << marked.size()<< "\n";
+      std::cout << "ngrain= " << ngrain << " Rmin= " << Rmin << " Rmax= " << Rmax << " gs= " << grainsize << "\n";
+      */
 
       for (int at=0; at<geom->nat(); at++)
 	if (!geom->shadow(at))
 	  {
-	    auto I = igrain(index::D(DIM).atom(at));
+	    index I = igrain(index::D(DIM+1).atom(at));
 	    int g1 = gidx(I);
+
+	    if (marked[g1])
+	      continue;
+	    else
+	      marked[g1] = true;
+
+	    //std::cout << "g1= " << g1 << " I= " << I << "\n";
 
 	    for (iterator DI({-1,-1,-1},{1,1,1}); !DI.end(); DI++)
 	      {
@@ -749,17 +782,18 @@ namespace qpp{
 		    //std::cout << g1 << I << g2 << J << "\n";
 		    
 		    if (g1>=g2)
-		      gpairs.push_back(std::pair<int,int>(g1,g2));
+		      gpairs.insert(std::pair<int,int>(g1,g2));
 		    else
-		      gpairs.push_back(std::pair<int,int>(g2,g1)); 
+		      gpairs.insert(std::pair<int,int>(g2,g1)); 
 		  }
 	      }
 	  }
 
+      /*
       std::sort(gpairs.begin(),gpairs.end());
       auto last = std::unique(gpairs.begin(),gpairs.end());
       gpairs.resize( std::distance(gpairs.begin(),last) );
-
+      */
       
       for (const auto & gp : gpairs)
 	{
@@ -941,6 +975,7 @@ namespace qpp{
 		      "real grain_size (default: auto). Building and updating neighbour_table is done by dividing the\nmolecule space into cubic grains of grain_size. The value of grain_size\nis normally selected automatically, however, you can set it manually")
 	.def_readwrite("auto_grainsize", &SELF::auto_grainsize, 
 		       "bool auto_grainsize (default: True). Whether to choose grain_size value automatically")
+	.def_readwrite("transl_mode", &SELF::transl_mode)
 	.def("build", &SELF::build, "Build the neighbours_table")
 	.def(sn::self == sn::self)
 	.def(sn::self != sn::self)

@@ -256,7 +256,7 @@ namespace qpp{
     }
 
     template<class T>
-    T xfield(int i, int j) const
+    inline T xfield(int i, int j) const
     {
 
       basic_types ft = field_type(i);
@@ -292,7 +292,7 @@ namespace qpp{
     }
    
     template<class T>
-    T & xfield(const STRING & f, int j)
+    inline T & xfield(const STRING & f, int j)
     {
       int i = 0;
       while (_field_name[i]!=f && i<nfields()) i++;
@@ -320,6 +320,7 @@ namespace qpp{
     }
     
     // ----------------------------------------------------
+
 
     virtual void erase(int j)
     {     
