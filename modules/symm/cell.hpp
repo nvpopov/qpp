@@ -270,7 +270,9 @@ namespace qpp{
       for (int i=0; i<DIM; i++)
 	{
 	  for (int k=0; k<offset+2; k++) os << " ";
-	  os << boost::format(" %11.6f %11.6f %11.6f\n") % v[i](0) % v[i](1) % v[i](2);
+	  //TODO Migrate to fmt
+//	  os << boost::format(" %11.6f %11.6f %11.6f\n")
+//	  % v[i](0) % v[i](1) % v[i](2);
 	}
       
       for (int k=0; k<offset; k++) os << " ";

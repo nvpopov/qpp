@@ -25,9 +25,11 @@ int main()
   geometry<double> geom2(0);
   replicate(geom2,geom);
 
-  for (int at=0; at<geom2.nat(); at++)
-    std::cout << boost::format("%-2s %10.6f %10.6f %10.6f\n") % geom2.atom(at) % 
-      geom2.coord(at).x() % geom2.coord(at).y()  % geom2.coord(at).z(); 
+  //TODO Migrate to fmt
+ /* for (int at=0; at<geom2.nat(); at++)
+    std::cout << boost::format("%-2s %10.6f %10.6f %10.6f\n") %
+                 geom2.atom(at) % geom2.coord(at).x() %
+                 geom2.coord(at).y()  % geom2.coord(at).z(); */
 }
 
 

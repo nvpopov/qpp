@@ -572,7 +572,9 @@ Geometry will inform them all when atoms are added, inserted or removed
       for (int i=0; i<size(); i++)
 	{
 	  for (int k=0; k<offset+2; k++) os << " ";
-	  os << _atm[i] << boost::format(" %11.6f %11.6f %11.6f\n") % _crd[i].x() % _crd[i].y() % _crd[i].z();
+	 //TODO Migrate to fmt
+	 // os << _atm[i] << boost::format(" %11.6f %11.6f %11.6f\n") %
+	 //_crd[i].x() % _crd[i].y() % _crd[i].z();
 
 	}
 

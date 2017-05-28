@@ -9,7 +9,8 @@ void prnmtr(const matrix3d<double> & M)
   for (int i=0; i<3; i++)
     {
       for (int j=0; j<3; j++)
-	std::cout << boost::format("%10.6f ") % M(i,j);
+        //Migrate to fmt
+        //std::cout << boost::format("%10.6f ") % M(i,j);
       std::cout << std::endl;
     }
 }

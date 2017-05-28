@@ -6,7 +6,7 @@
 #include <ostream>
 #include <sstream>
 #include <initializer_list>
-#include <boost/format.hpp>
+
 #include <data/types.hpp>
 #include <consts.hpp>
 //#include <lace/complex.hpp>
