@@ -79,6 +79,11 @@ endif(QPP_BUILD_TESTS)
 #qc stuff
 option(QPP_BUILD_QC "build qc stuff")
 if(QPP_BUILD_QC)
+    message("-- @ Building of quantum chemistry programs enabled")
+    add_library(int-imp STATIC IMPORTED)
+    set_target_properties(int-imp PROPERTIES IMPORTED_LOCATION
+      "${CMAKE_SOURCE_DIR}/deps/libint/lib/.libs/libint2.a")
+    include_directories(${CMAKE_SOURCE_DIR}/deps/libint/include)
     add_subdirectory(${CMAKE_SOURCE_DIR}/examples/qc)
     #find_package(OpenMP)
     #if(OPENMP_FOUND)
