@@ -38,6 +38,7 @@ endif(QPP_USE_SPGLIB)
 
 if(QPP_BUILD_QC)
     #libint
+    #TODO Add cxx optimization
     ExternalProject_Add(libint-m
         # DOWNLOAD_COMMAND wget "https://www.dropbox.com/s/sp6kyb7p2u0304b/libint.tgz?dl=0"
         #  DOWNLOAD_NAME libint.tgz
