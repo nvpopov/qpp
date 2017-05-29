@@ -23,7 +23,11 @@ add_library(qpp_cpp SHARED
     python/qppcpp3.cpp python/qppcpp4.cpp python/qppcpp5.cpp
     python/qppcpp6.cpp python/qppython.cpp data/types.cpp
     io/strfun.cpp symm/index.cpp)
-target_link_libraries(qpp_cpp ${Boost_LIBRARIES})
-set_property(TARGET qpp_cpp PROPERTY POSITION_INDEPENDENT_CODE TRUE)
+
+target_link_libraries(qpp_cpp
+    ${Boost_LIBRARIES}
+    ${PYTHON_LIBRARIES}
+)
+set_target_properties(qpp_cpp PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 set_target_properties(qpp_cpp PROPERTIES PREFIX "")
 

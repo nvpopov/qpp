@@ -28,10 +28,12 @@ option(QPP_USE_STATIC_BOOST "use static boost library for python bindings" ON)
 if(QPP_USE_STATIC_BOOST)
     message("-- Using static boost python libs for linking")
     set(Boost_USE_STATIC_LIBS   ON)
+    set(Boost_USE_STATIC_RUNTIME  ON)
     add_definitions(-DBOOST_PYTHON_STATIC_LIB)
 else()
     message("-- Use dynamic boost python libs for linking")
     set(Boost_USE_STATIC_LIBS   OFF)
+    set(Boost_USE_STATIC_RUNTIME  OFF)
 endif()
 
 #Python related stuff
