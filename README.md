@@ -24,16 +24,15 @@ cmake .. -D<Build Flag Name>=<Flag value>
 
 |Build flag               |Description   				| Value Type(Default) |
 |---			  |---           				|---		      |
-|QPP_BUILD_EXAMPLES     |Build examples		             	|Bool(ON)	      |
-|QPP_BUILD_DOC          |Build HTML documentation             	|Bool(OFF)	      |
+|QPP_BUILD_EXAMPLES       |Build examples		             	|Bool(ON)	      |
+|QPP_BUILD_DOC            |Build HTML documentation             	|Bool(OFF)	      |
 |QPP_BUILD_QC     	  |Build quantum chemistry code   		|Bool(OFF)            |
 |QPP_BUILD_TESTS     	  |Build tests executable	   		|Bool(OFF)            |
 |QPP_USE_SPGLIB   	  |Use spglib for handling crystal symmetry     |Bool(OFF)            |
-|QPP_USE_STATIC_BOOST   |Linking with static boost   			|Bool(OFF)            |
-|QPP_USE_SYSTEM_EIGEN3  |Use system Eigen3, instead download it   	|Bool(ON)             |
-|QPP_PYTHON_BINDINGS    |Build python bindings		   	|Bool(ON)             |
-|QPP_FORCE_PYTHON3      |Force to Build python 3.x bindings		|Bool(OFF)            |
-|QPP_PYTHON3_LIBNAME    |Determine boost python library suffix (libboost_python-py**.a{so})	|String(35)           |
+|QPP_USE_STATIC_BOOST     |Linking with static boost   			|Bool(OFF)            |
+|QPP_USE_SYSTEM_EIGEN3    |Use system Eigen3, instead download it   	|Bool(ON)             |
+|QPP_PYTHON_BINDINGS      |Build python bindings		   	|Bool(ON)             |
+|QPP_PYTHON_VERSION       |Determine  python version			|String(2.7)          |
 
 CI
 --
