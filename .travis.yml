@@ -4,8 +4,7 @@ sudo: required
 compiler:
  - gcc
 install: 
- - sudo apt-get install libeigen3-dev
  - sudo apt-get install libboost-all-dev
  - sudo apt-get install libboost-python-dev
 script:
- - mkdir build && cd build && cmake -DQPP_USE_STATIC_BOOST=OFF -DQPP_USE_SYSTEM_EIGEN3=OFF .. && cmake --build .
+ - mkdir build && cd build && cmake -DQPP_USE_STATIC_BOOST=ON -DQPP_USE_SYSTEM_EIGEN3=OFF .. && cmake --build .
