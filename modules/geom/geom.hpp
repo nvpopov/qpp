@@ -867,7 +867,7 @@ Geometry will inform them all when atoms are added, inserted or removed
   };
 
   template< class REAL, class CELL>
-  REAL geometry<REAL,CELL>::tol_geom_default = 1e-10;
+  REAL geometry<REAL,CELL>::tol_geom_default = 1e-5;
 
 #ifdef PY_EXPORT
 

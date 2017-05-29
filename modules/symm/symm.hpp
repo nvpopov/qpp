@@ -105,7 +105,7 @@ namespace qpp{
   };
 
   // ------------------------------------------------------------------------
-
+  /*
 #ifdef PY_EXPORT
 
   template<class TRANSFORM> class generated_group;
@@ -117,7 +117,7 @@ namespace qpp{
   }
 
 #endif
-
+  */
   // ------------------------------------------------------------------------
 
   template<class TRANSFORM>
@@ -221,14 +221,15 @@ namespace qpp{
     static void py_export(const char * pyname)
     {
       bp::class_<generated_group<TRANSFORM> >(pyname,bp::init< bp::optional<TRANSFORM> >())
-      .def(bp::init<const generated_group<TRANSFORM> &>())
-      .def("index", & generated_group<TRANSFORM>::index )
-      .def("add",   & generated_group<TRANSFORM>::add )
-      .def("__getitem__",  & generated_group<TRANSFORM>::py_getitem)
-      .def("__setitem__",  & generated_group<TRANSFORM>::py_setitem)
-      ;
-  bp::def("len", py_group_len<TRANSFORM>);
-}
+	.def(bp::init<const generated_group<TRANSFORM> &>())
+	.def("index", & generated_group<TRANSFORM>::index )
+	.def("add",   & generated_group<TRANSFORM>::add )
+	.def("__getitem__",  & generated_group<TRANSFORM>::py_getitem)
+	.def("__setitem__",  & generated_group<TRANSFORM>::py_setitem)
+	.def("__len__", & generated_group<TRANSFORM>::size)
+	;
+      // bp::def("len", py_group_len<TRANSFORM>);
+    }
 
 #endif
     

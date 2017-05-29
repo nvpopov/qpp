@@ -32,7 +32,7 @@ namespace qpp{
   // ------------------ 3D primitives prototype ------------------------
 
   template <class VALTYPE>
-  class shape{ // : public qpp_object{
+  class shape{ 
 
   public:
 
@@ -339,6 +339,8 @@ namespace qpp{
 
     using shape<VALTYPE>::name;
 
+    shape_sphere(){}
+
     shape_sphere(VALTYPE _R, const STRING & __name = "") : shape<VALTYPE>(__name)
     {
       R = _R;
@@ -434,6 +436,18 @@ namespace qpp{
     {
       r0 = Rot*r0;
     }
+
+#ifdef PY_EXPORT
+
+    static void py_export(const char * pyname)
+    {
+      bp::class_<shape_sphere<VALTYPE>, bp::bases<shape<VALTYPE> > >(pyname)
+	.def(bp::init<VALTYPE, bp::optional<const STRING &> >())
+	.def(bp::init<VALTYPE, const v3d&, bp::optional<const STRING &> >())
+	;
+    }
+
+#endif
 
   };
 

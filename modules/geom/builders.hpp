@@ -30,12 +30,20 @@ namespace qpp{
     fill_cells    = 0x00010
   };
 
+  template<class REAL, class CELL>
+  void treat_crowd(geometry<REAL,CELL> & geom, int mode)
+  {
+    if (mode == crowd_ignore)
+      return;
+  }
+
   template<class REALDST, class CELLDST, class REALSRC, class CELLSRC>
   void replicate(geometry<REALDST,CELLDST> & dst, 
 		 const geometry<REALSRC,CELLSRC> & src,
 		 const CELLSRC & cell,
 		 const index & begin,
-		 const index & end)
+		 const index & end,
+		 int mode = crowd_ignore)
   {
     for (int at = 0; at<src.nat(); at++)
       if (!src.shadow(at))
