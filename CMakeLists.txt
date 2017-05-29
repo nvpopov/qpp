@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.3)
+cmake_minimum_required (VERSION 3.2)
 
 project(qpp CXX)
 set (qpp_VERSION_MAJOR 0)
@@ -44,9 +44,10 @@ if(QPP_PYTHON_BINDINGS)
         include_directories(${PYTHON_INCLUDE_DIRS})
         if(NOT QPP_USE_STATIC_BOOST)
             set(QPP_PYTHON_VERSION_ ${QPP_PYTHON_VERSION})
-            STRING(REPLACE "." "" QPP_PYTHON_VERSION_ ${QPP_PYTHON_VERSION})
+            string(REPLACE "." "" QPP_PYTHON_VERSION_ ${QPP_PYTHON_VERSION})
             if(${QPP_PYTHON_VERSION_} GREATER 30)
-                find_package(Boost COMPONENTS python-py${QPP_PYTHON_VERSION_} REQUIRED)
+                find_package(Boost COMPONENTS
+                    python-py${QPP_PYTHON_VERSION_} REQUIRED)
             else()
                 find_package(Boost COMPONENTS python REQUIRED)
             endif()
@@ -83,14 +84,16 @@ include_directories(modules/)
 include_directories(${CMAKE_SOURCE_DIR}/deps/fmtlib)
 
 add_library(fmtlib-imp STATIC IMPORTED)
-set_target_properties(fmtlib-imp PROPERTIES IMPORTED_LOCATION "${PROJECT_BINARY_DIR}/deps/fmtlib-prefix/src/fmtlib-build/fmt/libfmt.a")
+set_target_properties(fmtlib-imp PROPERTIES IMPORTED_LOCATION
+    "${PROJECT_BINARY_DIR}/deps/fmtlib-prefix/src/fmtlib-build/fmt/libfmt.a")
 
 option(QPP_USE_SPGLIB "use spglib")
 if(QPP_USE_SPGLIB)
     message("-- spglib bindings is enabled")
     include_directories(${CMAKE_SOURCE_DIR}/deps/spglib/src)
     add_library(spglib-imp STATIC IMPORTED)
-    set_target_properties(spglib-imp PROPERTIES IMPORTED_LOCATION "${PROJECT_BINARY_DIR}/deps/spglib-prefix/src/spglib-build/libsymspg.a")
+    set_target_properties(spglib-imp PROPERTIES IMPORTED_LOCATION
+        "${PROJECT_BINARY_DIR}/deps/spglib-prefix/src/spglib-build/libsymspg.a")
 endif()
 
 #Only data fetching here
@@ -125,16 +128,22 @@ if(QPP_BUILD_DOCS)
         set(DOXYGEN_OUTPUT docs/render)
         add_custom_command(
           OUTPUT ${DOXYGEN_OUTPUT}
-          COMMAND ${CMAKE_COMMAND} -E echo_append "Building API Documentation..."
+          COMMAND ${CMAKE_COMMAND}
+          -E echo_append "Building API Documentation..."
+
           COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_INPUT}
           COMMAND ${CMAKE_COMMAND} -E echo "Done."
           WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
           DEPENDS ${DOXYGEN_INPUT})
         add_custom_target(apidoc ALL DEPENDS ${DOXYGEN_OUTPUT})
         add_custom_target(apidoc_forced
-          COMMAND ${CMAKE_COMMAND} -E echo_append "Building API Documentation..."
+          COMMAND ${CMAKE_COMMAND}
+          -E echo_append "Building API Documentation..."
+
           COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_INPUT}
-          COMMAND ${CMAKE_COMMAND} -E echo "Done."
+
+          COMMAND ${CMAKE_COMMAND}
+          -E echo "Done."
           WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
     endif(DOXYGEN_FOUND)
 else()
