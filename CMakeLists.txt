@@ -1,15 +1,12 @@
-cmake_minimum_required (VERSION 2.7)
+cmake_minimum_required (VERSION 3.2)
 
 project(qpp CXX)
-set (qpp_VERSION_MAJOR 0)
-set (qpp_VERSION_MINOR 1)
-add_definitions(-std=c++11)
+set (QPP_VERSION_MAJOR 0)
+set (QPP_VERSION_MINOR 1)
+add_definitions(-std=c++11 -fPIC -DFMT_HEADER_ONLY)
 #set(CMAKE_CXX_FLAGS "-pg -ggdb")
 #set(CMAKE_BUILD_TYPE "Debug")
 set(CMAKE_CXX_STANDARD 11)
-
-#options
-
 
 set(BLAS_INCLUDE "-" CACHE STRING "Blas include dir")
 set(BLAS_LIB "-" CACHE STRING "Blas library dir")
@@ -26,18 +23,60 @@ if (LA_TYPE EQUAL "MKL")
 	message(STATUS "MKL!")
 endif()
 
-#Use system boost
-find_package(Boost COMPONENTS python REQUIRED)
-if(Boost_FOUND)
-    include_directories(${Boost_INCLUDE_DIR})
-    add_definitions( "-DHAS_BOOST" )
+
+add_subdirectory(deps)
+include_directories(${CMAKE_SOURCE_DIR}/deps/fmtlib)
+#add_subdirectory(${CMAKE_SOURCE_DIR}/deps/fmtlib)
+
+#boost related stuff
+option(QPP_USE_STATIC_BOOST "use static boost library for python bindings" OFF)
+
+#Python related stuff
+option(QPP_PYTHON_BINDINGS "build qpp python bindings" ON)
+
+set(QPP_PYTHON_VERSION "2.7" CACHE STRING "Python version")
+
+if(QPP_PYTHON_BINDINGS)
+    message("-- Compilation of python bindings is enabled")
+    message("-- Use Python ${QPP_PYTHON_VERSION} for bindings")
+    if(QPP_USE_STATIC_BOOST)
+        message("-- Using static boost python libs for linking")
+        add_definitions(-DBOOST_PYTHON_STATIC_LIB)
+    else()
+        message("-- Use dynamic boost python libs for linking")
+    endif()
+
+    find_package(PythonLibs ${QPP_PYTHON_VERSION} REQUIRED)
+    if(PYTHONLIBS_FOUND)
+        include_directories(${PYTHON_INCLUDE_DIRS})
+        if(NOT QPP_USE_STATIC_BOOST)
+            set(QPP_PYTHON_VERSION_ ${QPP_PYTHON_VERSION})
+            string(REPLACE "." "" QPP_PYTHON_VERSION_ ${QPP_PYTHON_VERSION})
+            if(${QPP_PYTHON_VERSION_} GREATER 30)
+                find_package(Boost COMPONENTS
+                    python-py${QPP_PYTHON_VERSION_} REQUIRED)
+            else()
+                find_package(Boost COMPONENTS python REQUIRED)
+            endif()
+            include_directories(${Boost_INCLUDE_DIRS})
+        endif()
+    endif()
+
 endif()
 
-#Use system python
-find_package(PythonLibs 2.7 REQUIRED)
-if(PYTHONLIBS_FOUND)
-    include_directories(${PYTHON_INCLUDE_DIRS})
-endif(PYTHONLIBS_FOUND)
+#eigen3
+option(QPP_USE_SYSTEM_EIGEN3
+    "use system avaiable eigen3 or download as deps" ON)
+if(QPP_USE_SYSTEM_EIGEN3)
+    find_package(Eigen3)
+    if(Eigen3_FOUND)
+        message("-- Use system Eigen3 from ${EIGEN3_INCLUDE_DIR}")
+        include_directories(${EIGEN3_INCLUDE_DIR})
+    endif()
+else()
+    message("-- Eigen3 will be downloaded as dependency")
+    include_directories(${CMAKE_SOURCE_DIR}/deps/eigen3)
+endif()
  
 #Add all src and headers to qtcreator ide
 file(GLOB_RECURSE ide_headers "modules/*/*.hpp")
@@ -49,15 +88,10 @@ add_custom_target(ideexm SOURCES ${ide_exm})
 
 #Global includes
 include_directories(modules/)
-include_directories(${CMAKE_SOURCE_DIR}/deps/eigen3)
-include_directories(${CMAKE_SOURCE_DIR}/deps/fmtlib)
-
-add_library(fmtlib-imp STATIC IMPORTED)
-set_target_properties(fmtlib-imp PROPERTIES IMPORTED_LOCATION
-    "${PROJECT_BINARY_DIR}/deps/fmtlib-prefix/src/fmtlib-build/fmt/libfmt.a")
 
 option(QPP_USE_SPGLIB "use spglib")
 if(QPP_USE_SPGLIB)
+    message("-- spglib bindings is enabled")
     include_directories(${CMAKE_SOURCE_DIR}/deps/spglib/src)
     add_library(spglib-imp STATIC IMPORTED)
     set_target_properties(spglib-imp PROPERTIES IMPORTED_LOCATION
@@ -65,16 +99,25 @@ if(QPP_USE_SPGLIB)
 endif()
 
 #Only data fetching here
-add_subdirectory(deps)
 add_subdirectory(modules)
-add_subdirectory(examples)
 add_subdirectory(utils)
+
+option(QPP_BUILD_EXAMPLES "build examples" ON)
+if(QPP_BUILD_EXAMPLES)
+    message("-- Building examples is enabled")
+    add_subdirectory(examples)
+else()
+    message("-- Building examples is disabled")
+endif()
 
 #Build tests
 option(QPP_BUILD_TESTS "build tests executable")
 if(QPP_BUILD_TESTS)
+    message("-- Testing are enabled")
     add_subdirectory(tests)
-endif(QPP_BUILD_TESTS)
+else()
+    message("-- Tests are disabled")
+endif()
 
 #qc stuff
 option(QPP_BUILD_QC "build qc stuff")
@@ -94,6 +137,7 @@ endif(QPP_BUILD_QC)
 #Documentation
 option(QPP_BUILD_DOCS "build documentation")
 if(QPP_BUILD_DOCS)
+    message("-- HTML Documentation is enabled")
     find_package(Doxygen)
     if(DOXYGEN_FOUND)
         set(DOXYGEN_INPUT docs/doxyfile_qpp)
@@ -111,9 +155,12 @@ if(QPP_BUILD_DOCS)
           COMMAND ${CMAKE_COMMAND}
           -E echo_append "Building API Documentation..."
           COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_INPUT}
-          COMMAND ${CMAKE_COMMAND} -E echo "Done."
+          COMMAND ${CMAKE_COMMAND}
+          -E echo "Done."
           WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
     endif(DOXYGEN_FOUND)
-endif(QPP_BUILD_DOCS)
+else()
+    message("-- HTML Documentation is disabled")
+endif()
 
 
