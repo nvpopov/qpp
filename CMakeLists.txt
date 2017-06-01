@@ -1,9 +1,9 @@
 cmake_minimum_required (VERSION 3.2)
 
 project(qpp CXX)
-set (qpp_VERSION_MAJOR 0)
-set (qpp_VERSION_MINOR 1)
-add_definitions(-std=c++11 -fPIC)
+set (QPP_VERSION_MAJOR 0)
+set (QPP_VERSION_MINOR 1)
+add_definitions(-std=c++11 -fPIC -DFMT_HEADER_ONLY)
 #set(CMAKE_CXX_FLAGS "-pg -ggdb")
 #set(CMAKE_BUILD_TYPE "Debug")
 set(CMAKE_CXX_STANDARD 11)
@@ -23,21 +23,28 @@ if (LA_TYPE EQUAL "MKL")
 	message(STATUS "MKL!")
 endif()
 
+
+add_subdirectory(deps)
+include_directories(${CMAKE_SOURCE_DIR}/deps/fmtlib)
+#add_subdirectory(${CMAKE_SOURCE_DIR}/deps/fmtlib)
+
 #boost related stuff
 option(QPP_USE_STATIC_BOOST "use static boost library for python bindings" OFF)
-if(QPP_USE_STATIC_BOOST)
-    message("-- Using static boost python libs for linking")
-    add_definitions(-DBOOST_PYTHON_STATIC_LIB)
-else()
-    message("-- Use dynamic boost python libs for linking")
-endif()
 
 #Python related stuff
 option(QPP_PYTHON_BINDINGS "build qpp python bindings" ON)
-set(QPP_PYTHON_VERSION "2.7")
+
+set(QPP_PYTHON_VERSION "2.7" CACHE STRING "Python version")
+
 if(QPP_PYTHON_BINDINGS)
     message("-- Compilation of python bindings is enabled")
     message("-- Use Python ${QPP_PYTHON_VERSION} for bindings")
+    if(QPP_USE_STATIC_BOOST)
+        message("-- Using static boost python libs for linking")
+        add_definitions(-DBOOST_PYTHON_STATIC_LIB)
+    else()
+        message("-- Use dynamic boost python libs for linking")
+    endif()
 
     find_package(PythonLibs ${QPP_PYTHON_VERSION} REQUIRED)
     if(PYTHONLIBS_FOUND)
@@ -81,11 +88,6 @@ add_custom_target(ideexm SOURCES ${ide_exm})
 
 #Global includes
 include_directories(modules/)
-include_directories(${CMAKE_SOURCE_DIR}/deps/fmtlib)
-
-add_library(fmtlib-imp STATIC IMPORTED)
-set_target_properties(fmtlib-imp PROPERTIES IMPORTED_LOCATION
-    "${PROJECT_BINARY_DIR}/deps/fmtlib-prefix/src/fmtlib-build/fmt/libfmt.a")
 
 option(QPP_USE_SPGLIB "use spglib")
 if(QPP_USE_SPGLIB)
@@ -97,7 +99,6 @@ if(QPP_USE_SPGLIB)
 endif()
 
 #Only data fetching here
-add_subdirectory(deps)
 add_subdirectory(modules)
 add_subdirectory(utils)
 
