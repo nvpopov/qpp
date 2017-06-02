@@ -3,6 +3,8 @@
 #include <string>
 #include <vector>
 
+namespace qpp {
+
 const int MTABLE_NUM_ELEMENTS = 118;
 
 class MTableAtomInfo
@@ -154,4 +156,5 @@ std::string get_atom_name_by_number(int _iIndex)
   return "";
 }
 
+}
 #endif

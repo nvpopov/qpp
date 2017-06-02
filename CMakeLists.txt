@@ -8,6 +8,13 @@ add_definitions(-std=c++11 -fPIC -DFMT_HEADER_ONLY)
 #set(CMAKE_BUILD_TYPE "Debug")
 set(CMAKE_CXX_STANDARD 11)
 
+include(FindOpenMP)
+if(OPENMP_FOUND)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
+endif()
+
 set(BLAS_INCLUDE "-" CACHE STRING "Blas include dir")
 set(BLAS_LIB "-" CACHE STRING "Blas library dir")
 set(LAPACK_INCLUDE "-" CACHE STRING "Lapack include dir")
@@ -22,6 +29,7 @@ if (LA_TYPE EQUAL "MKL")
 	include_directories(${BLAS_INCLUDE})
 	message(STATUS "MKL!")
 endif()
+
 
 
 add_subdirectory(deps)
@@ -80,11 +88,12 @@ endif()
  
 #Add all src and headers to qtcreator ide
 file(GLOB_RECURSE ide_headers "modules/*/*.hpp")
+file(GLOB_RECURSE ide_headersc "modules/*.hpp")
 file(GLOB_RECURSE ide_src "modules/*/*.cpp")
 file(GLOB_RECURSE ide_exm "examples/*/*.cpp")
-add_custom_target(ideheaders SOURCES ${ide_headers})
-add_custom_target(idesrc SOURCES ${ide_src})
-add_custom_target(ideexm SOURCES ${ide_exm})
+add_custom_target(ideheaders SOURCES ${ide_headers} ${ide_headersc}
+    ${ide_src} ${ide_exm})
+
 
 #Global includes
 include_directories(modules/)
