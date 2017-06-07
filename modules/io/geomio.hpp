@@ -1,6 +1,9 @@
 #ifndef _QPP_GEOMIO_H
 #define _QPP_GEOMIO_H
 
+#include <iostream>
+#include <fmt/format.h>
+
 //#include <lace/lace3d.hpp>
 //#include <lace/lace.hpp>
 //#include <symm/symm.hpp>
@@ -9,19 +12,20 @@
 #include <geom/ngbr.hpp>
 //#include <geom/geom_extras.hpp>
 //#include <geom/molecule.hpp>
+
 #include <vector>
 #include <cmath>
-#include <iostream>
 #include <sstream>
 #include <string>
 #include <iomanip>
 #include <fstream>
 #include <ios>
 #include <algorithm>
-#include <boost/format.hpp>
-#include <boost/algorithm/string/split.hpp>
-#include <boost/algorithm/string/trim.hpp>
-#include <boost/algorithm/string.hpp>
+
+//TODO add splitting utils to strfun
+//#include <boost/algorithm/string/split.hpp>
+//#include <boost/algorithm/string/trim.hpp>
+//#include <boost/algorithm/string.hpp>
 
 namespace qpp{
 
@@ -157,15 +161,16 @@ namespace qpp{
 		 const qpp::geometry<VALTYPE,TRANSFORM> & geom)
   {
     out << geom.nat() << "\n";
-    
+
     if (geom.DIM>0)
       for (int d = 0; d<geom.DIM; d++)
 	for (int i=0; i<3; i++)
-	  out << boost::format("%12.6f ") % (*geom.cell)(d)(i);
+	  out << fmt::format("{12.6f} ", (*geom.cell)(d)(i));
     //out << geom.name();
     out << std::endl;
     for (int i=0; i<geom.size(); i++)
-      out << boost::format("%-4s %12.6f %12.6f %12.6f\n") % geom.atom(i) % geom.coord(i)(0) 
+      out << fmt::format("{-4s} {12.6} {12.6} {12.6f}\n", geom.atom(i) % geom.coord(i)(0))
+
 	% geom.coord(i)(1) % geom.coord(i)(2);
   }
 
@@ -199,7 +204,8 @@ namespace qpp{
   }
 
   template< class VALTYPE, class CELL>
-  void write_ngbr(std::basic_ostream<CHAR,TRAITS>  & out, neighbours_table<VALTYPE,CELL> & ngbr)
+  void write_ngbr(std::basic_ostream<CHAR,TRAITS>  & out,
+                  neighbours_table<VALTYPE,CELL> & ngbr)
   {
     for (int i=0; i<ngbr.geom->nat(); i++)
       {
@@ -209,7 +215,8 @@ namespace qpp{
 	  nn.push_back(ngbr(i,j));
 	std::sort(nn.begin(),nn.end(),compare_atindex);
 	for (int j=0; j<nn.size(); j++)
-	  out << " " << nn[j] << " " << norm(ngbr.geom->position(i)-ngbr.geom->position(nn[j]));
+	  out << " " << nn[j] << " "
+	      << norm(ngbr.geom->position(i)-ngbr.geom->position(nn[j]));
 	out << "\n";
       }
   }

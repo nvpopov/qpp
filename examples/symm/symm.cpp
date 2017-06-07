@@ -1,8 +1,9 @@
+#include <fmt/format.h>
+#include <iostream>
 #include <geom/lace3d.hpp>
 #include <symm/symm.hpp>
 #include <symm/group_theory.hpp>
-#include <iostream>
-#include <boost/format.hpp>
+//#include <boost/format.hpp>
 
 using namespace qpp;
 
@@ -11,7 +12,7 @@ void prnmtr(const matrix3d<double> & M)
   for (int i=0; i<3; i++)
     {
       for (int j=0; j<3; j++)
-	std::cout << boost::format("%10.6f ") % M(i,j);
+        std::cout << fmt::format("{10.6f }", M(i,j));
       std::cout << std::endl;
     }
 }
@@ -55,9 +56,9 @@ int main()
 
   for (int i=0; i<g.size(); i++)
     {
-      std::cout << boost::format("%3i |") % i;
+      std::cout << fmt::format("{3i} |", i);
       for (int j=0; j<g.size(); j++)
-	std::cout << boost::format("%3i ") % A.multab(i,j);
+        std::cout << fmt::format("{3i}  ", A.multab(i,j));
       std::cout << std::endl;
     }
 

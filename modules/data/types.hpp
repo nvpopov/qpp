@@ -6,6 +6,7 @@
 #include <sstream>
 #include <fstream>
 #include <complex>
+#include <fmt/format.h>
 
 #include <stdexcept>
 

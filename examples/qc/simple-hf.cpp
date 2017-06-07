@@ -24,6 +24,6 @@ int main(){
   ComputeInstance<double,geometry<double>> cinst(&water);
 
 
-  //std::cout<<fmt::format("Epotnuc = {}\n", qpp::epotnuc(water));
+  std::cout<<fmt::format("Epotnuc = {}\n", qpp::epotnuc(water));
 
 }

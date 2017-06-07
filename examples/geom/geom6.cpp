@@ -1,8 +1,9 @@
+#include <fmt/format.h>
 #include <iostream>
 #include <fstream>
 #include <geom/geom.hpp>
 #include <io/geomio.hpp>
-#include <boost/format.hpp>
+
 
 // -------------- Type table & neighbours table for simple molecule ---------------------
 

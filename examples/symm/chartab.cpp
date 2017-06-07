@@ -2,7 +2,7 @@
 #include <symm/symm.hpp>
 #include <symm/group_theory.hpp>
 #include <iostream>
-#include <boost/format.hpp>
+//#include <boost/format.hpp>
 #include <iomanip> 
 
 using namespace qpp;
