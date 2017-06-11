@@ -14,7 +14,7 @@ class ComputeInstance
 {
 public:
   GEOM *molecule;
-  std::vector<std::string> vMapAtomBasis;
+  std::vector<std::string> MapAtomBasis;
 
   ComputeInstance(GEOM *_inGeom){
     molecule = _inGeom;

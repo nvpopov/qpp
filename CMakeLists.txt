@@ -91,8 +91,10 @@ file(GLOB_RECURSE ide_headers "modules/*/*.hpp")
 file(GLOB_RECURSE ide_headersc "modules/*.hpp")
 file(GLOB_RECURSE ide_src "modules/*/*.cpp")
 file(GLOB_RECURSE ide_exm "examples/*/*.cpp")
+file(GLOB_RECURSE ide_t1 "tests/*/*.*pp")
+file(GLOB_RECURSE ide_t2 "tests/*.*pp")
 add_custom_target(ideheaders SOURCES ${ide_headers} ${ide_headersc}
-    ${ide_src} ${ide_exm})
+    ${ide_src} ${ide_exm} ${ide_t1} ${ide_t2})
 
 
 #Global includes
@@ -120,9 +122,12 @@ else()
 endif()
 
 #Build tests
-option(QPP_BUILD_TESTS "build tests executable")
+option(QPP_BUILD_TESTS "build tests executable" OFF)
 if(QPP_BUILD_TESTS)
     message("-- Testing are enabled")
+    enable_testing()
+
+    include_directories(tests/src)
     add_subdirectory(tests)
 else()
     message("-- Tests are disabled")
@@ -171,5 +176,4 @@ if(QPP_BUILD_DOCS)
 else()
     message("-- HTML Documentation is disabled")
 endif()
-
 
