@@ -55,6 +55,11 @@ namespace qpp{
       return r[i];
     }
 
+    inline VALTYPE& operator[](int i)
+    {
+      return r[i];
+    }
+
     inline VALTYPE operator()(int i) const
     {
       return r[i];
@@ -224,6 +229,12 @@ namespace qpp{
     inline bool operator!=(const vector3d<VALTYPE> & b)
     {
       return ! ((*this)==b);
+    }
+
+    template<class VALTYPE2>
+    explicit operator vector3d<VALTYPE2>() const
+    {
+      return vector3d<VALTYPE2>(r[0],r[1],r[2]);
     }
 
 #ifdef PY_EXPORT

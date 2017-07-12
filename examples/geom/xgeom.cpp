@@ -14,7 +14,7 @@ int main()
 
   qpp::xgeometry<double, qpp::periodic_cell<double> > 
     g(cl, 
-      {"charge","number","number","hren","mass","mult","word"},
+      {"charge","number","hren","mass","mult","word"},
       {qpp::type_real,qpp::type_int,qpp::type_bool,qpp::type_real,qpp::type_int,qpp::type_string},
       "g1");
 
@@ -64,7 +64,28 @@ int main()
   g2.charge(0) = 0.55555;
   g2.xfield<STRING>(8,2) = "coronium";
 
+  xgeometry<double, periodic_cell<double> > *pg2 = &g2;
+
+  pg2->xfield<STRING>(8,2) = "cococoronium";
+  pg2->xfield<int>(1,2) = 333;
+
   g2.write(std::cout);
+
+  std::vector<qpp::datum> s = {qpp::datum("Hru"), qpp::datum(555), qpp::datum(-1.11), qpp::datum(2.22), 
+			       qpp::datum(3.33), qpp::datum(-1.11), qpp::datum(2.22), qpp::datum(3.33), 
+			       qpp::datum("piggy-piggy")};
+
+  g2.add("", qpp::vector3d<double>(0e0));
+  g2.set_fields(-1,s);
+
+  for (int i=0; i<g2.nat(); i++)
+    {
+      std::vector<qpp::datum> v;
+      g2.get_fields(i,v);
+      for (int j=0; j<v.size(); j++)
+	std::cout << v[j] << " ";
+      std::cout << "\n";
+    }
 
 }
 

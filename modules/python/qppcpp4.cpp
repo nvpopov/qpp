@@ -1,5 +1,3 @@
-#define PY_EXPORT
-
 #include "qppcpp.hpp"
 #include <symm/gcell.hpp>
 #include <geom/xgeom.hpp>

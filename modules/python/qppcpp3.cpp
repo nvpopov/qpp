@@ -1,5 +1,3 @@
-#define PY_EXPORT
-
 #include "qppcpp.hpp"
 #include <geom/geom.hpp>
 #include <symm/gcell.hpp>
@@ -59,6 +57,7 @@ void py_geom_export(const char * pyname)
 		   "Usage: symmrad[at] with string at. Symmetrization radius for atom at")
     .def("symmrad_to_dict", & qpp::geometry<REAL,CELL>::py_symmrad2dict,
 	 "Outputs the symmrad values in dictionary form")
+    .def_readwrite("tol_geom",  & qpp::geometry<REAL,CELL>::tol_geom, "real tol_geom. The distance at which atoms are considered to be at the same point")
     ;
 }
 
