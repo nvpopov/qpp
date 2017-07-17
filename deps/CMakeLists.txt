@@ -81,11 +81,6 @@ if(QPP_BUILD_QC)
         UPDATE_COMMAND ""
         )
 
-    ExternalProject_Add_Step(
-        libint-m copyboost
-        COMMAND tar -xzf ${CMAKE_SOURCE_DIR}/deps/libint/external/boost.tar.gz
-        -C ${CMAKE_SOURCE_DIR}/deps/libint/include/libint2/
-        DEPENDEES build
-        )
+
 
 endif(QPP_BUILD_QC)
