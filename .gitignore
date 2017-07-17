@@ -14,7 +14,6 @@
 
 deps/libint/config.log
 CMakeCache*
-*.cmake
 CMakeFiles
 Makefile
 *.c++~
