@@ -54,8 +54,8 @@ endif
 CXXDEPENDSUF = none
 CXXDEPENDFLAGS = -M
 
-CXX = /usr/bin/g++
-CXXDEPEND = /usr/bin/g++
+CXX = /usr/bin/c++
+CXXDEPEND = /usr/bin/c++
 
 AR = ar
 ARFLAGS = r

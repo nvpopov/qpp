@@ -73,12 +73,12 @@ if(QPP_BUILD_QC)
         #  DOWNLOAD_DIR "${CMAKE_SOURCE_DIR}/deps/"
 
         SOURCE_DIR "${CMAKE_SOURCE_DIR}/deps/libint"
+        BUILD_IN_SOURCE 1
         CONFIGURE_COMMAND "${CMAKE_SOURCE_DIR}/deps/libint/./configure"
         "--with-cxx=${CMAKE_CXX_COMPILER}"
-        BUILD_IN_SOURCE 1
+
         INSTALL_COMMAND ""
         UPDATE_COMMAND ""
-        CMAKE_ARGS ""
         )
 
     ExternalProject_Add_Step(

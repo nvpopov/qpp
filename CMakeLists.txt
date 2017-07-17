@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.1)
+cmake_minimum_required (VERSION 3.2)
 
 project(qpp CXX)
 set (QPP_VERSION_MAJOR 0)
@@ -40,7 +40,7 @@ include_directories(${CMAKE_SOURCE_DIR}/deps/fmtlib)
 option(QPP_USE_STATIC_BOOST "use static boost library for python bindings" OFF)
 
 #Python related stuff
-option(QPP_PYTHON_BINDINGS "build qpp python bindings" ON)
+option(QPP_PYTHON_BINDINGS "build qpp python bindings" OFF)
 
 set(QPP_PYTHON_VERSION "2.7" CACHE STRING "Python version")
 
@@ -63,10 +63,12 @@ if(QPP_PYTHON_BINDINGS)
             if(${QPP_PYTHON_VERSION_} GREATER 30)
                 find_package(Boost COMPONENTS
                     python-py${QPP_PYTHON_VERSION_} REQUIRED)
+                include_directories(${Boost_INCLUDE_DIR})
             else()
                 find_package(Boost COMPONENTS python REQUIRED)
+                include_directories(${Boost_INCLUDE_DIR})
             endif()
-            include_directories(${Boost_INCLUDE_DIRS})
+
         endif()
     endif()
 
