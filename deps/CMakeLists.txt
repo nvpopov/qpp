@@ -45,7 +45,8 @@ ExternalProject_Add(eigen3
   SOURCE_DIR "${CMAKE_SOURCE_DIR}/deps/eigen3"
   INSTALL_COMMAND ""
   UPDATE_COMMAND ""
-  CMAKE_ARGS ""
+  CONFIGURE_COMMAND ""
+  BUILD_COMMAND ""
 )
 endif()
 

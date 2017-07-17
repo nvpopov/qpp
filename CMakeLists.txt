@@ -82,7 +82,7 @@ if(QPP_USE_SYSTEM_EIGEN3)
         include_directories(${EIGEN3_INCLUDE_DIR})
     endif()
 else()
-    message("-- Eigen3 will be downloaded as dependency")
+    message("-- Internal Eigen3 will be used")
     include_directories(${CMAKE_SOURCE_DIR}/deps/eigen3)
 endif()
  
