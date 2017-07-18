@@ -6,6 +6,7 @@
 #include <initializer_list>
 #include <stdexcept>
 #include <geom/lace3d.hpp>
+#include <data/errors.hpp>
 
 #ifdef PY_EXPORT
 #include <boost/python/list.hpp>

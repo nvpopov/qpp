@@ -35,5 +35,18 @@ int main()
     for (int at=0; at<g.nat(); at++)
       std::cout << g.atom(at) << " " << at << " " << I << " " << g.r(at,I) << "\n";
 
+  std::cout << "--- Source geom: ---\n";
+  std::vector<qpp::datum> v = {"Chugunium",11.,12.,13.};
+  g.set_fields(-1,v);
+
+  for (int at=0; at<g.nat(); at++)
+    {
+      g.get_fields(at,v);
+      for (int j=0; j<v.size(); j++)
+	std::cout << v[j] << " ";
+      std::cout << "\n";
+    }
+  
+
 }
 

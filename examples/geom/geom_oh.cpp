@@ -22,6 +22,9 @@ int main()
   geometry<4,double,decltype(G)> geom(G);
   */
   generalized_cell<double,decltype(C4)> G({C4,S6});
+  G.auto_orders();
+
+
   geometry<double,decltype(G)> geom(G);
 
   geom.auto_symmetrize = true;
@@ -33,7 +36,7 @@ int main()
   geom.add("H",1,2,3);
 
   geometry<double> geom2(0);
-  replicate(geom2,geom);
+  replicate(geom2, geom, G, G.begin(), G.end(), crowd_exclude );
 
   std::cout << geom2.nat() << "\n\n";
   for (int at=0; at<geom2.nat(); at++)

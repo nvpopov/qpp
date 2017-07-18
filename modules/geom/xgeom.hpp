@@ -2,6 +2,8 @@
 #define _QPP_GEOM_EXTRAS_H
 
 #include <data/types.hpp>
+#include <data/errors.hpp>
+#include <data/data.hpp>
 #include <geom/geom.hpp>
 #include <io/strfun.hpp>
 #include <vector>
@@ -36,7 +38,7 @@ namespace qpp{
     std::vector<basic_types>  _field_type;
 
     std::vector<int>          _field_idx;
-    std::vector<bool>         _field_additive;
+    std::vector<char>         _field_additive;
 
     int _nxreal, _nxint, _nxbool, _nxstring, _nfields;
     int ix_charge, ix_x, ix_y, ix_z, ix_atom, ix_mass, ix_number;
@@ -44,6 +46,8 @@ namespace qpp{
     using geometry<REAL,CELL>::_atm;
     using geometry<REAL,CELL>::_crd;
     using geometry<REAL,CELL>::size;
+    using geometry<REAL,CELL>::has_observers;
+    using geometry<REAL,CELL>::observers;
     //using geometry<DIM,REAL,CELL>::error;
 
     void init_xdefault()
@@ -51,6 +55,7 @@ namespace qpp{
       _nxreal = _nxstring = _nxint = _nxbool = 0;
 #ifdef PY_EXPORT
       py_fields.bind(this);
+      py_add.bind(this);
 #endif
     }
 
@@ -62,6 +67,9 @@ namespace qpp{
     using geometry<REAL,CELL>::name;
     using geometry<REAL,CELL>::cell;
     using geometry<REAL,CELL>::nat;
+
+    virtual bool is_xgeometry() const
+    {return true;}
 
     inline int nfields() const
     { return _nfields; }
@@ -101,8 +109,13 @@ namespace qpp{
       init_xdefault();
     }
 
+    void get_format(std::vector<STRING> & fn, std::vector<basic_types> & ft)
+    {
+      fn = _field_name;
+      ft = _field_type;
+    }
 
-    void format(const std::vector<STRING> & fn, const std::vector<basic_types> & ft)
+    void set_format(const std::vector<STRING> & fn, const std::vector<basic_types> & ft)
     {
       _field_name = fn;
       _field_type = ft;
@@ -113,13 +126,11 @@ namespace qpp{
 
       if (fn.size() != ft.size() || fn.size() != _nxstring + _nxreal + _nxint + _nxbool)
 	{
-	  // make error
+	  IndexError("xgeometry::format: field names or types mismatch");
 	}
 
       _nfields = ft.size();
       _field_idx.resize(_nfields);
-      _field_additive.resize(_nfields);
-      std::fill(_field_additive.begin(),_field_additive.end(),false);
 
       int is=0, ib=0, ir=0, ii=0;
 
@@ -140,7 +151,7 @@ namespace qpp{
 	      _field_idx[j] = ir++;
 	      if ( field_name(j) == "x" )      ix_x = j;
 	      else if ( field_name(j) == "y" ) ix_y = j;
-	      else if ( field_name(j) == "z" ) ix_x = j;
+	      else if ( field_name(j) == "z" ) ix_z = j;
 	      else if ( field_name(j) == "charge" ) ix_charge = j;
 	      else if ( field_name(j) == "mass" )   ix_mass   = j;
 	    }
@@ -153,9 +164,15 @@ namespace qpp{
 	    _field_idx[j] = ib++;
 	  else
 	    {
-	    //make error
+	      TypeError("xgeometry::format: invalid type");
 	    }
 	}
+
+      /*
+      for (int i=0; i<_nfields; i++)
+	std::cout << field_name(i) << " " << field_type(i) << " " << _field_idx[i] << "\n";    
+      std::cout << ix_atom << " " << ix_x << " " << ix_y << " " << ix_z << "\n";
+      */
 
       if (ix_atom == -1 && ix_x == -1 && ix_y==-1 && ix_z==-1)
 	{
@@ -188,9 +205,15 @@ namespace qpp{
 
 	}
 
+      _field_additive.resize(_nfields);
+      for (int i=0; i<_nfields; i++)
+	_field_additive[i] = false;
+      if (ix_charge>=0)
+	_field_additive[ix_charge] = true;
+
       if (ix_atom == -1 || ix_x == -1 || ix_y == -1 || ix_z == -1)
 	{
-	  // make error
+	  KeyError("xgeometry::format: the geometry does not have either atom names, x, y, or z coordinates");
 	}
 
       _xstring.resize(_nxstring);
@@ -205,7 +228,7 @@ namespace qpp{
 	      const STRING & __name = "") : geometry<REAL,CELL>(__cell, __name)
     {
       init_xdefault();
-      format(fn,ft);
+      set_format(fn,ft);
     }
 
     int nfields_string() const
@@ -219,6 +242,12 @@ namespace qpp{
 
     int nfields_bool() const
     { return _nxbool;}
+
+    bool additive(int i) const
+    { return (bool)_field_additive[i]; }
+    
+    bool & additive(int i)
+    { return *((bool*)(&_field_additive[i])); }
     
     template<class T>
     T & xfield(int i, int j) 
@@ -301,7 +330,7 @@ namespace qpp{
 	return xfield<T>(i,j);
       else
 	{
-	  // Make error
+	  KeyError("Field not found in xgeometry");
 	}
     }
 
@@ -315,12 +344,62 @@ namespace qpp{
 	return xfield<T>(i,j);
       else
 	{
-	  // Make error
+	  KeyError("Field not found in xgeometry");
 	}
     }
     
     // ----------------------------------------------------
 
+    virtual void get_fields(int j, std::vector<datum> & v) const
+    {
+      if (j<0) j+=nat();
+      if (j<0 || j>= nat()) IndexError("xgeometry::py_getitem: index out of range");
+
+      v.resize(nfields());
+      for (int i=0; i<nfields(); i++)
+	{
+	  if (field_type(i)==type_string)
+	    v[i] = xfield<STRING>(i,j);
+	  else if (field_type(i)==type_real)
+	    v[i] = xfield<REAL>(i,j);
+	  else if (field_type(i)==type_int)
+	    v[i] = xfield<int>(i,j);
+	  else if (field_type(i)==type_bool)
+	    v[i] = xfield<bool>(i,j);
+	}
+    }
+
+    virtual void set_fields(int j, const std::vector<datum> & v)
+    {
+      if (j<0) j+=nat();
+      if (j<0 || j>= nat()) IndexError("xgeometry::set_fields: index out of range");
+      if (v.size()!=nfields())
+	IndexError("xgeometry::set_fields: wrong number of fields");
+
+      STRING a1 = v[ix_atom].get<STRING>();
+      vector3d<REAL> r1(v[ix_x].get<REAL>(),v[ix_y].get<REAL>(),v[ix_z].get<REAL>());
+      if (has_observers)
+	for (int i=0; i<observers.size(); i++)
+	  observers[i]->changed(j, before, a1, r1);
+
+      for (int i=0; i<nfields(); i++)
+	{
+	  if (field_type(i)==type_string)
+	    xfield<STRING>(i,j) = v[i].get<STRING>();
+	  else if (field_type(i)==type_real)
+	    xfield<REAL>(i,j) = v[i].get<REAL>();
+	  else if (field_type(i)==type_int)
+	    xfield<int>(i,j) = v[i].get<int>();
+	  else if (field_type(i)==type_bool)
+	    xfield<bool>(i,j) = v[i].get<bool>();
+	}
+
+      if (has_observers)
+	for (int i=0; i<observers.size(); i++)
+	  observers[i]->changed(j, after, a1, r1);
+    }
+    
+    // ----------------------------------------------------
 
     virtual void erase(int j)
     {     
@@ -618,13 +697,13 @@ namespace qpp{
 	  else
 	    KeyError("In xgeometry constructor - bad field type");
 	}
-      format(fn,ft);
+      set_format(fn,ft);
     }
 
     virtual bp::list py_getitem(int j) const
     {
       if (j<0) j+=nat();
-      if (j<0 || j>= nat()) IndexError("xgeometry:: index out of range");
+      if (j<0 || j>= nat()) IndexError("xgeometry::py_getitem: index out of range");
       bp::list l;
       for (int i=0; i<nfields(); i++)
 	{
@@ -746,6 +825,24 @@ namespace qpp{
     py_2indexed_property<SELF, object, object, int, &SELF::py_getfield1, &SELF::py_setfield1, 
 			 &SELF::py_getfield, &SELF::py_setfield > py_fields;
 
+    bool py_getadd(int i)
+    { 
+      if (i<0) i += nfields();
+      if (i<0 || i >= nfields())
+	IndexError("xgeometry: field index out of range");
+      return additive(i); 
+    }
+    
+    void py_setadd(int i, const bool &a)
+    {
+      if (i<0) i += nfields();
+      if (i<0 || i >= nfields())
+	IndexError("xgeometry: field index out of range"); 
+      additive(i) = a; 
+    }
+
+    py_indexed_property<SELF, bool, int, &SELF::py_getadd, &SELF::py_setadd > py_add;
+
     virtual void py_add_list(const bp::list & l)
     {
       geometry<REAL,CELL>::add("",0,0,0);
@@ -756,11 +853,13 @@ namespace qpp{
     {
       py_2indexed_property<SELF, object, object, int, &SELF::py_getfield1, &SELF::py_setfield1, 
 			   &SELF::py_getfield, &SELF::py_setfield >::py_2export("noname");
+      py_indexed_property<SELF, bool, int, &SELF::py_getadd, &SELF::py_setadd >::py_export("noname");
 
       class_<xgeometry<REAL,CELL>, bases<geometry<REAL,CELL> > >
 	(pyname, init<CELL&, optional<const STRING&> >() )
 	.def(init<CELL&,const list &, optional<const STRING &> >())
 	.def_readwrite("field", & SELF::py_fields)
+	.def_readwrite("additive", & SELF::py_add)
 	.def("nfields", & SELF::nfields)
 	.def("field_name", & SELF::field_name)
       ;

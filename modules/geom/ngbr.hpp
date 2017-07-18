@@ -5,6 +5,7 @@
 #include <utility>
 #include <set>
 #include <algorithm>
+#include <cmath>
 #include <geom/geom.hpp>
 
 #ifdef PY_EXPORT
@@ -461,6 +462,14 @@ namespace qpp{
       //std::cout << "grain setup finished\n" << "Rmin = " << Rmin << " Rmax= " << Rmax << " gs= " << grainsize << " ngrain = " << ngrain << "\n";
     }
 
+    REAL optimal_grainsize()
+    {
+      const REAL alpha = 1, beta = 1;
+      REAL Vol = (Rmax(0)-Rmin(0))*(Rmax(1)-Rmin(1))*(Rmax(2)-Rmin(2));
+      return std::pow(Vol,1./3)*std::pow(alpha/geom->nat(), 1./(3*(beta+1)));
+      
+    }
+
     void grain_setup()
     {
       
@@ -471,45 +480,21 @@ namespace qpp{
 	  for (int i=0; i<ntp*ntp; i++)
 	    if (_disttable[i] > grainsize )
 	      grainsize = _disttable[i];
-	}
+	}      
 
       translational_grain_setup();
-      
-      /*
-      if (transl_mode && typeid(CELL) == typeid(periodic_cell<REAL>))
+
+      REAL opt_gs = optimal_grainsize();
+
+      std::cout << "gs= " << grainsize << " opt_gs= " << opt_gs << "\n";
+
+      if (auto_grainsize && grainsize < opt_gs )
 	{
-	  translational_grain_setup();
-	  return;
+	  grainsize = opt_gs;
+	  for (int i=0; i<3; i++)
+	    ngrain(i) = int( (Rmax(i)-Rmin(i))/grainsize ) + 1;	  
 	}
-      */
-      /*
-      bool ndef = true;
-
-      for (int i=0; i<geom->size(); i++)
-	if (!geom->shadow(i))
-	  for (iterator I(geom->cell.begin(), geom->cell.end()); !I.end(); I++)
-	    {
-	      vector3d<REAL> r = geom->r(i,I);
-	      if (ndef)
-		{
-		  Rmin = Rmax = r;
-		  ndef = false;
-		}
-	      for (int j=0; j<3; j++)
-		{
-		  if ( Rmin(j) > r(j) )
-		    Rmin(j) = r(j);
-		  if ( Rmax(j) < r(j) )
-		    Rmax(j) = r(j);
-		}
-	    } 
-      Rmin -= vector3d<REAL>(1,1,1)*1e-5;
-      Rmax += vector3d<REAL>(1,1,1)*1e-5;
-
-      ngrain = index::D(3);
-      for (int i=0; i<3; i++)
-	ngrain(i) = int( (Rmax(i)-Rmin(i))/grainsize ) + 1;
-      */
+      
     }
 
     inline int gidx(int i, int j, int k)
@@ -652,26 +637,27 @@ namespace qpp{
       //index shift1 = {1,1,1}, shift2={2,2,2};
       //index shift1 = {1,1,1}, shift2={1,1,1};
       index shift1 = {0,0,0}, shift2={1,1,1};
+      /*
       if (geom->DIM==0)
 	{
 	  //shift1 = {0,0,0};
 	  //shift2 = {1,1,1};
 	  shift1 = {1,1,1};
-	  shift2 = {0,0,0};
+	  shift2 = {1,1,1};
 	}
-
+      */
       for (iterator I(shift1, ngrain-shift2); !I.end(); I++)
 	{
 	  int g1 = gidx(I);
 	  if (grains[g1].size()>0)
 	    for (const index & DI : dirray)
 	      {
-		//std::cout << I << " = " << g1 << " + " << DI << "\n";
-		
 		index J = I + DI;
 		if ( J(0)<0 || J(0)>=ngrain(0) || J(1)<0 || J(1)>=ngrain(1) || J(2)<0 || J(2)>=ngrain(2))
 		  continue;
 		int g2 = gidx(J);
+
+		//std::cout << I << " = " << g1 << " + " << DI << " = " << J << " = " << g2 << " grains.size= " << grains.size() << "\n";
 
 		for (int c2 = 0; c2 < grains[g2].size(); c2++)
 		  for (int c1 = 0; c1 < ( g1==g2? c2 : grains[g1].size()); c1++)

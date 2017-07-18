@@ -16,7 +16,7 @@ namespace qpp{
   public:
     
     std::vector<TRANSFORM> generators;
-    index begin, end;
+    index _begin, _end;
     int DIM;
     
     generators_pack(int dim=0)
@@ -32,8 +32,8 @@ namespace qpp{
       int d=0;
       for (const TRANSFORM & t : g)
 	generators[d++]=t; 
-      begin = __begin;
-      end   = __end;
+      _begin = __begin;
+      _end   = __end;
     }
 
     generators_pack(const std::vector<TRANSFORM> & g)
@@ -45,12 +45,12 @@ namespace qpp{
       for (const TRANSFORM & t : g)
 	generators[d++]=t; 
 
-      begin = index::D(DIM);
-      end   = index::D(DIM);
+      _begin = index::D(DIM);
+      _end   = index::D(DIM);
     }
     
     generators_pack(const generators_pack<TRANSFORM> & G) :
-      DIM(G.DIM), generators(G.generators), begin(G.begin), end(G.end)
+      DIM(G.DIM), generators(G.generators), _begin(G._begin), _end(G._end)
     {}
 
     int get_dim(){return DIM;}
@@ -60,8 +60,8 @@ namespace qpp{
       DIM = D;
       generators.resize(DIM);
       
-      begin = index::D(DIM);
-      end   = index::D(DIM);
+      _begin = index::D(DIM);
+      _end   = index::D(DIM);
     }
 
     TRANSFORM operator()(const index & n) const
@@ -78,13 +78,13 @@ namespace qpp{
     template <class ARRAY>
     void generate(ARRAY & group)
     {
-      for (iterator n(begin, end); !n.end(); n++)
+      for (iterator n(_begin, _end); !n.end(); n++)
 	group.push_back((*this)(n));
     }
 
     void auto_order(int d)
     {
-      begin(d) = 0;
+      _begin(d) = 0;
       const TRANSFORM & g = generators[d];
       TRANSFORM a = g;
       int n=1;
@@ -93,7 +93,7 @@ namespace qpp{
 	  a = a*g;
 	  n++;
 	}
-      end(d) = n-1;
+      _end(d) = n-1;
     }
 
     void auto_orders()
@@ -101,6 +101,12 @@ namespace qpp{
       for (int d=0; d<DIM; d++)
 	auto_order(d);
     }
+
+    inline index begin() const
+    { return _begin;}
+
+    inline index end() const
+    { return _end;}
     
   };
 

@@ -11,11 +11,6 @@ namespace sn = boost::python::self_ns;
 
 namespace qpp{
 
-  void IndexError(const char *);
-  void TypeError(const char *);
-  void KeyError(const char *);
-  void StopIter();
-
   // ----------------------------------------------
 
   template<class OWNER, class ELEM, class IDX,

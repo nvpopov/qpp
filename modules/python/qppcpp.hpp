@@ -9,5 +9,6 @@ void qpp_export3();
 void qpp_export4();
 void qpp_export5();
 void qpp_export6();
+void qpp_export7();
 
 #endif

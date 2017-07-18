@@ -37,32 +37,32 @@ include_directories(${CMAKE_SOURCE_DIR}/deps/fmtlib)
 #add_subdirectory(${CMAKE_SOURCE_DIR}/deps/fmtlib)
 
 #boost related stuff
-option(QPP_USE_STATIC_BOOST "use static boost library for python bindings" OFF)
+option(USE_STATIC_BOOST "use static boost library for python bindings" OFF)
 
 #Python related stuff
-option(QPP_PYTHON_BINDINGS "build qpp python bindings" OFF)
+option(PYTHON_BINDINGS "build qpp python bindings" OFF)
 
-set(QPP_PYTHON_VERSION "2.7" CACHE STRING "Python version")
+set(PYTHON_VERSION "2.7" CACHE STRING "Python version")
 
-if(QPP_PYTHON_BINDINGS)
+if(PYTHON_BINDINGS)
     message("-- Compilation of python bindings is enabled")
-    message("-- Use Python ${QPP_PYTHON_VERSION} for bindings")
-    if(QPP_USE_STATIC_BOOST)
+    message("-- Use Python ${PYTHON_VERSION} for bindings")
+    if(USE_STATIC_BOOST)
         message("-- Using static boost python libs for linking")
         add_definitions(-DBOOST_PYTHON_STATIC_LIB)
     else()
         message("-- Use dynamic boost python libs for linking")
     endif()
 
-    find_package(PythonLibs ${QPP_PYTHON_VERSION} REQUIRED)
+    find_package(PythonLibs ${PYTHON_VERSION} REQUIRED)
     if(PYTHONLIBS_FOUND)
         include_directories(${PYTHON_INCLUDE_DIRS})
-        if(NOT QPP_USE_STATIC_BOOST)
-            set(QPP_PYTHON_VERSION_ ${QPP_PYTHON_VERSION})
-            string(REPLACE "." "" QPP_PYTHON_VERSION_ ${QPP_PYTHON_VERSION})
-            if(${QPP_PYTHON_VERSION_} GREATER 30)
+        if(NOT USE_STATIC_BOOST)
+            set(PYTHON_VERSION_ ${PYTHON_VERSION})
+            string(REPLACE "." "" PYTHON_VERSION_ ${PYTHON_VERSION})
+            if(${PYTHON_VERSION_} GREATER 30)
                 find_package(Boost COMPONENTS
-                    python-py${QPP_PYTHON_VERSION_} REQUIRED)
+                    python-py${PYTHON_VERSION_} REQUIRED)
                 include_directories(${Boost_INCLUDE_DIR})
             else()
                 find_package(Boost COMPONENTS python REQUIRED)
@@ -75,9 +75,9 @@ if(QPP_PYTHON_BINDINGS)
 endif()
 
 #eigen3
-option(QPP_USE_SYSTEM_EIGEN3
+option(USE_SYSTEM_EIGEN3
     "use system avaiable eigen3 or download as deps" ON)
-if(QPP_USE_SYSTEM_EIGEN3)
+if(USE_SYSTEM_EIGEN3)
     find_package(Eigen3)
     if(Eigen3_FOUND)
         message("-- Use system Eigen3 from ${EIGEN3_INCLUDE_DIR}")
@@ -102,8 +102,8 @@ add_custom_target(ideheaders SOURCES ${ide_headers} ${ide_headersc}
 #Global includes
 include_directories(modules/)
 
-option(QPP_USE_SPGLIB "use spglib")
-if(QPP_USE_SPGLIB)
+option(USE_SPGLIB "use spglib")
+if(USE_SPGLIB)
     message("-- spglib bindings is enabled")
     include_directories(${CMAKE_SOURCE_DIR}/deps/spglib/src)
     add_library(spglib-imp STATIC IMPORTED)
@@ -115,8 +115,8 @@ endif()
 add_subdirectory(modules)
 add_subdirectory(utils)
 
-option(QPP_BUILD_EXAMPLES "build examples" ON)
-if(QPP_BUILD_EXAMPLES)
+option(BUILD_EXAMPLES "build examples" ON)
+if(BUILD_EXAMPLES)
     message("-- Building examples is enabled")
     add_subdirectory(examples)
 else()
@@ -124,8 +124,8 @@ else()
 endif()
 
 #Build tests
-option(QPP_BUILD_TESTS "build tests executable" OFF)
-if(QPP_BUILD_TESTS)
+option(BUILD_TESTS "build tests executable" OFF)
+if(BUILD_TESTS)
     message("-- Testing are enabled")
     enable_testing()
 
@@ -136,8 +136,8 @@ else()
 endif()
 
 #qc stuff
-option(QPP_BUILD_QC "build qc stuff")
-if(QPP_BUILD_QC)
+option(BUILD_QC "build qc stuff")
+if(BUILD_QC)
     message("-- @ Building of quantum chemistry programs enabled")
     add_library(int-imp STATIC IMPORTED)
     set_target_properties(int-imp PROPERTIES IMPORTED_LOCATION
@@ -148,11 +148,11 @@ if(QPP_BUILD_QC)
     #if(OPENMP_FOUND)
     #    add_definitions(${OpenMP_CXX_FLAGS})
     #endif(OPENMP_FOUND)
-endif(QPP_BUILD_QC)
+endif(BUILD_QC)
 
 #Documentation
-option(QPP_BUILD_DOCS "build documentation")
-if(QPP_BUILD_DOCS)
+option(BUILD_DOCS "build documentation")
+if(BUILD_DOCS)
     message("-- HTML Documentation is enabled")
     find_package(Doxygen)
     if(DOXYGEN_FOUND)

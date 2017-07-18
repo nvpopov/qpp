@@ -23,7 +23,7 @@ int main()
   geom.add("H",1,2,3);
 
   geometry<double> geom2(0);
-  replicate(geom2,geom);
+  replicate(geom2, geom, G, G.begin(), G.end());
 
   //TODO Migrate to fmt
  /* for (int at=0; at<geom2.nat(); at++)
