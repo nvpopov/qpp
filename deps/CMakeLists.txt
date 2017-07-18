@@ -1,5 +1,5 @@
 include(ExternalProject)
-if(QPP_USE_STATIC_BOOST)
+if(USE_STATIC_BOOST)
 ##    set( boost_URL
 #        "http://sourceforge.net/projects/boost/files/boost/1.63.0/boost_1_63_0.tar.bz2" )
 #    set( boost_SHA1 "9f1dd4fa364a3e3156a77dc17aa562ef06404ff6" )
@@ -39,7 +39,7 @@ ExternalProject_Add(fmtlib
   #CMAKE_ARGS -DFMT_DOC:bool=off -DFMT_INSTALL:bool=off -DFMT_TEST:bool=off -DFMT_USE_CPP11:bool=on
 )
 
-if(NOT QPP_USE_SYSTEM_EIGEN3)
+if(NOT USE_SYSTEM_EIGEN3)
 ExternalProject_Add(eigen3
 
   SOURCE_DIR "${CMAKE_SOURCE_DIR}/deps/eigen3"
@@ -52,7 +52,7 @@ endif()
 
 
 #spglib for crystal symmetry handling
-if(QPP_USE_SPGLIB)
+if(USE_SPGLIB)
     ExternalProject_Add(spglib
         GIT_REPOSITORY    https://github.com/atztogo/spglib.git
         GIT_TAG "master"
@@ -62,9 +62,9 @@ if(QPP_USE_SPGLIB)
         CMAKE_ARGS ""
         )
 
-endif(QPP_USE_SPGLIB)
+endif(USE_SPGLIB)
 
-if(QPP_BUILD_QC)
+if(BUILD_QC)
     #libint
     #TODO Add cxx optimization
     ExternalProject_Add(libint-m
@@ -83,4 +83,4 @@ if(QPP_BUILD_QC)
 
 
 
-endif(QPP_BUILD_QC)
+endif(BUILD_QC)
