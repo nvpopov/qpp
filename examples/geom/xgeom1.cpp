@@ -6,9 +6,9 @@ using namespace qpp;
 int main()
 {
   
-  periodic_cell<double> cl(0);
+  periodic_cell<float> cl(0);
 
-  xgeometry<double, periodic_cell<double> > 
+  xgeometry<float, periodic_cell<float> > 
     G(cl,
       {"atom",      "number","charge",   "x","y","z",                    "optx","opty","optz",            "fullname"},
       {type_string, type_int, type_real, type_real, type_real, type_real,type_bool, type_bool, type_bool, type_string },
@@ -37,8 +37,27 @@ int main()
 
   G.write(std::cout);
 
+  for (int i=0; i<G.nfields(); i++)
+    std::cout << "add(" << i << ")=" << G.additive(i) << " ";
+  std::cout << "\n";
+
   std::cout << "1st atom charge= " << G.charge(0) << std::endl;
   std::cout << "2nd atom charge= " << G.number(1) << std::endl;
 
   std::cout << G.xfield<std::string>("fullname",3) << "\n";
+
+  for (int i=0; i<G.nat(); i++)
+    {
+      auto x = G[i];
+      for (int j=0; j<x.size(); j++)
+	switch(x[j].type())
+	  {
+	  case type_int: std::cout << "(int)" << x[j].get<int>(); break;
+	  case type_float: std::cout << "(flt)" << x[j].get<float>(); break;
+	  case type_double: std::cout << "(dbl)" << x[j].get<double>(); break;
+	  case type_bool: std::cout << "(bool)" << x[j].get<bool>(); break;
+	  case type_string: std::cout << "(str)" << x[j].get<STRING>(); break;
+	  }
+      std::cout << "\n";
+    }
 }

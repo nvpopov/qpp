@@ -3,8 +3,8 @@
 
 #include <vector>
 #include <cmath>
+#include <data/data.hpp>
 #include <symm/index.hpp>
-//#include <symm/symm.hpp>
 #include <symm/cell.hpp>
 
 #ifdef PY_EXPORT
@@ -132,6 +132,9 @@ Geometry will inform them all when atoms are added, inserted or removed
     bool frac;
 
     STRING name;
+
+    virtual bool is_xgeometry() const
+    {return false;}
 
     //! Number of atoms
     inline int size() const
@@ -546,6 +549,37 @@ Geometry will inform them all when atoms are added, inserted or removed
       _atm.clear();
       _shadow.clear();
       clear_type_table();
+    }
+
+    virtual void get_fields(int j, std::vector<datum> & v) const
+    {
+      if (j<0) j+=nat();
+      if (j<0 || j>= nat()) IndexError("xgeometry::py_getitem: index out of range");
+
+      v.clear();
+      v.push_back(atom(j));
+      vector3d<REAL> r = coord(j);
+      v.push_back(r(0));
+      v.push_back(r(1));
+      v.push_back(r(2));
+    }
+
+    virtual void set_fields(int j, const std::vector<datum> & v)
+    {
+      if (j<0) j+=nat();
+      if (j<0 || j>= nat()) IndexError("xgeometry::py_getitem: index out of range");
+      if (v.size()!=4)
+	IndexError("geometry::set_fields: wrong number of fields, must be 4");
+
+      change(j, v[0].get<STRING>(), qpp::vector3d<REAL>(v[1].get<REAL>(), v[2].get<REAL>(), v[3].get<REAL>()));
+    }
+
+
+    std::vector<datum> operator[](int j)
+    {
+      std::vector<datum> v;
+      get_fields(j,v);
+      return v;   
     }
 
     virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const

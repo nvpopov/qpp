@@ -56,8 +56,8 @@ namespace qpp{
   template<class REAL, class TRANSFORM>
   struct generalized_cell : public generators_pack<TRANSFORM>{
 
-    using generators_pack<TRANSFORM>::begin;
-    using generators_pack<TRANSFORM>::end;
+    using generators_pack<TRANSFORM>::_begin;
+    using generators_pack<TRANSFORM>::_end;
     using generators_pack<TRANSFORM>::DIM;
     using generators_pack<TRANSFORM>::generators;
     using generators_pack<TRANSFORM>::generate;
@@ -118,7 +118,7 @@ namespace qpp{
       //std::cerr << "symmetrize for " << r << "\n";
 
       points.push_back(r);
-      for (iterator I(begin,end); !I.end(); I++)
+      for (iterator I(_begin,_end); !I.end(); I++)
 	{
 	  if (I==index::D(DIM).all(0)) continue;
 
@@ -178,8 +178,8 @@ namespace qpp{
 	    TypeError("generalized_cell constructor: expected symmetry operation");
 	  generators.push_back(bp::extract<TRANSFORM>(G[i]));
 	}
-      begin = __begin;
-      end   = __end;
+      _begin = __begin;
+      _end   = __end;
     }
         
     generalized_cell(const bp::list & G):
@@ -194,7 +194,7 @@ namespace qpp{
 	    TypeError("generalized_cell constructor: expected symmetry operation");
 	  generators.push_back(bp::extract<TRANSFORM>(G[i]));
 	}
-      begin = end = index::D(DIM).all(0);
+      _begin = _end = index::D(DIM).all(0);
     }
         
     TRANSFORM py_getgen(int i) 
