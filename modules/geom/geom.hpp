@@ -87,6 +87,7 @@ Geometry will inform them all when atoms are added, inserted or removed
     virtual void changed( int at, before_after, const STRING &, const vector3d<REAL> &) =0;
     virtual void erased(  int at, before_after) =0;
     virtual void shaded(  int at, before_after, bool) =0;
+    virtual void reordered( const std::vector<int> &, before_after) =0;
   };
 
   //--------------------------------------------------------------//
@@ -367,10 +368,26 @@ Geometry will inform them all when atoms are added, inserted or removed
       name = __name;
     }
 
-    geometry(const geometry<REAL, CELL> & g) : cell(g.cell)
+    geometry(const geometry<REAL, CELL> & g) : 
+      cell(g.cell), _atm(g._atm), _crd(g._crd), _shadow(g._shadow),
+      _type_table(g._type_table), _symm_rad(g._symm_rad), _atm_types(g._atm_types),      
+      observers(g.observers)
     {
       init_default();
-      //fixme
+
+      DIM = g.DIM;
+
+      // options
+      auto_update_types = g.auto_update_types;
+      frac = g.frac;
+      auto_symmetrize = g.auto_symmetrize;
+      default_symmetrize_radius = g.default_symmetrize_radius;
+      tol_geom = g.tol_geom;
+
+      // observers
+      has_observers = g.has_observers;
+
+
     }
 
     ~geometry()
@@ -543,7 +560,45 @@ Geometry will inform them all when atoms are added, inserted or removed
     virtual void change(int at, const STRING & a1, const vector3d<REAL> & r1)
     { _change(at,a1,r1); }
 
-    void clear()
+    virtual void reorder(const std::vector<int> & ord)
+    {
+      for (int i=0; i<observers.size(); i++)
+	observers[i]->reordered(ord, before);
+      // fixme - might be inefficient for large molecules
+      
+      std::vector<STRING> __atm(_atm);
+      std::vector<vector3d<REAL> > __crd(_crd);
+      std::vector<char> __shadow(_shadow);
+      std::vector<int> __type_table(_type_table);
+      bool reorder_types = (_type_table.size() == size());
+
+      for (int i=0; i<size(); i++)
+	{
+	  _atm[i] = __atm[ord[i]];
+	  _crd[i] = __crd[ord[i]];
+	  _shadow[i] = __shadow[ord[i]];
+	  if (reorder_types)
+	    _type_table[i] = __type_table[ord[i]];
+	}
+
+      for (int i=0; i<observers.size(); i++)
+	observers[i]->reordered(ord, after);
+    }
+
+    void sort(REAL (*key)(const geometry<REAL,CELL> &, int i) )
+    {
+      std::vector<int> ord(size());
+      for (int i=0; i<size(); i++)
+	ord[i]=i;
+      std::sort(ord.begin(), ord.end(), 
+		[&](const int& a, const int& b) 
+		{
+		  return ((*key)(*this,a) < (*key)(*this,b));
+		});
+      reorder(ord);
+    }
+
+    virtual void clear()
     {
       _crd.clear();
       _atm.clear();
@@ -923,6 +978,9 @@ Geometry will inform them all when atoms are added, inserted or removed
 
     void shaded(  int at, before_after s, bool h)
     { this->get_override("shaded")(at,s,h);}
+
+    void reordered( const std::vector<int> & ord, before_after s)
+    { this->get_override("reordered")(ord,s);}
 
   };
 

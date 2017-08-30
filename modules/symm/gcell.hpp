@@ -81,6 +81,9 @@ namespace qpp{
     generalized_cell(const std::vector<TRANSFORM> & g) :
       generators_pack<TRANSFORM>(g)
     { init_default();}
+
+    generalized_cell(const generators_pack<TRANSFORM> & G) : generators_pack<TRANSFORM>(G)
+    { init_default(); }
     
     generalized_cell(const generalized_cell<REAL,TRANSFORM> & G) :
       generators_pack<TRANSFORM>(G)

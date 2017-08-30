@@ -9,3 +9,9 @@ add_executable(cell cell.cpp)
 add_executable(rotrans rotrans.cpp)
 add_executable(chartab chartab.cpp)
 add_executable(permut permut.cpp)
+
+add_executable(autosymm1 autosymm1.cpp)
+target_link_libraries(autosymm1 qpp)
+
+add_executable(autosymm2 autosymm2.cpp)
+target_link_libraries(autosymm2 qpp)

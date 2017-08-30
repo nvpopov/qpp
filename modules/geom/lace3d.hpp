@@ -317,7 +317,7 @@ namespace qpp{
   {
     VALTYPE res=0e0;
     for (int i=0; i<DIM; i++)
-      res += v1(i)*v2(i);
+      res += std::conj(v1(i))*v2(i);
     return res;
   }
  
@@ -358,9 +358,9 @@ namespace qpp{
 	a[i] = m.a[i];
     }
 
-    matrix3d(double axx, double axy, double axz,
-	     double ayx, double ayy, double ayz,
-	     double azx, double azy, double azz)
+    matrix3d(VALTYPE axx, VALTYPE axy, VALTYPE axz,
+	     VALTYPE ayx, VALTYPE ayy, VALTYPE ayz,
+	     VALTYPE azx, VALTYPE azy, VALTYPE azz)
     {
       a[0] = axx; a[1] = axy; a[2] = axz;
       a[3] = ayx; a[4] = ayy; a[5] = ayz;
@@ -649,13 +649,13 @@ namespace qpp{
   }
 
   template<class VALTYPE>
-  typename numeric_type<VALTYPE>::norm matrix3d<VALTYPE>::tol_equiv = 1e-10;
+  typename numeric_type<VALTYPE>::norm matrix3d<VALTYPE>::tol_equiv = 1e-8;
 
   template<class VALTYPE>
   matrix3d<VALTYPE> matrix3d<VALTYPE>::unity(1e0);
 
   template<class VALTYPE>
-  typename numeric_type<VALTYPE>::norm vector3d<VALTYPE>::tol_equiv = 1e-10;
+  typename numeric_type<VALTYPE>::norm vector3d<VALTYPE>::tol_equiv = 1e-8;
 
   //-------------------------------------------------
 
@@ -717,7 +717,7 @@ namespace qpp{
   matrix3d<VALTYPE> pow(const matrix3d<VALTYPE> & A, int n)
   {
     // fixme - very inefficient
-    matrix3d<VALTYPE> R=1e0;
+    matrix3d<VALTYPE> R=VALTYPE(1);
     if (n>0)
       {
 	while (n-- > 0)
@@ -754,32 +754,46 @@ namespace qpp{
 
   template<class VALTYPE>
   vector3d<typename numeric_type<VALTYPE>::complex> solve_cubeq(VALTYPE a, VALTYPE b, VALTYPE c, VALTYPE d)
-  // Solves ax^3 + bx^2 + cx + d = 0
+  // Solves ax^3 + bx^2 + cx + d = 0, a is assumed to be nonzero
   {
+    typename numeric_type<VALTYPE>::complex I(0,1);
+    VALTYPE s32 = .5*std::sqrt(3.);
+    VALTYPE eps = vector3d<VALTYPE>::tol_equiv;
+    vector3d<typename numeric_type<VALTYPE>::complex> res(0);
+
     b /= a;
     c /= a;
     d /= a;
-    typename numeric_type<VALTYPE>::complex I(VALTYPE(0),VALTYPE(1));
-    VALTYPE aa = c/3 - b*b/9, bb = d/2 - b*c/6 + b*b*b/27;
-    VALTYPE discr1 = aa*aa*aa + bb*bb;
-    typename numeric_type<VALTYPE>::complex discr2;
-    if (discr1 > VALTYPE(0))
+    VALTYPE Q = (b*b-3*c)/9, R = d/2 - b*c/6 + b*b*b/27;
+    int sgnr = (R>0) ? 1 : -1;
+
+    if ( std::abs(Q) < eps )
       {
-	VALTYPE discr23 = std::sqrt(discr1) - bb;
-	int sgn = (discr23>0)? 1 : -1;
-	discr23 *= sgn;
-	discr2 = sgn*std::exp(std::log(discr23)/3);
+	VALTYPE R13 = std::pow(2*std::abs(R),1./3)*sgnr;
+	res = {-1, VALTYPE(.5) + s32*I, VALTYPE(.5) - s32*I };
+	res *= R13;
+	for (int i=0; i<3; i++)
+	  res(i) -= b/3;
       }
+
+    else if (R*R<Q*Q*Q)
+      // three real roots
+      {
+	VALTYPE SQ = std::sqrt(Q);
+	VALTYPE theta = std::acos(R/(Q*SQ));
+	res = {-2*SQ*std::cos(theta/3)-b/3, -2*SQ*std::cos((theta+2*pi)/3)-b/3, -2*SQ*std::cos((theta+4*pi)/3)-b/3};
+      }
+
     else
       {
-	discr2 = -bb + std::sqrt(-discr1)*I;
-	VALTYPE dabs = std::abs(discr2), darg = std::arg(discr2);
-	discr2 = std::polar(std::exp(std::log(dabs)/3),darg/3);
+	VALTYPE A = -std::pow(std::abs(R)+std::sqrt(R*R-Q*Q*Q), 1./3)*sgnr;
+	VALTYPE B=0;
+	if ( std::abs(A)>eps)
+	  B = Q/A;
+	res = { -b/3 + A + B, -b/3 - (A + B)/2 + I*s32*(A - B), -b/3 - (A + B)/2 - I*s32*(A - B)};
       }
-    typename numeric_type<VALTYPE>::complex r1 = discr2 - aa/discr2, r2 = discr2 + aa/discr2;
-    return vector3d<typename numeric_type<VALTYPE>::complex>( r1 - b/3, 
-							      -r1/2 + VALTYPE(std::sqrt(3.0))*r2*I/2 - b/3, 
-							      -r1/2 - VALTYPE(std::sqrt(3.0))*r2*I/2 - b/3);
+
+    return res;
   }
 
   //-------------------------------------------------
@@ -799,7 +813,239 @@ namespace qpp{
     return lbd_re;
   }
 
+  template<class VALTYPE>
+  void diagon3d(vector3d<typename numeric_type<VALTYPE>::complex> & eigvals, 
+		matrix3d<typename numeric_type<VALTYPE>::complex> & eigvecs,
+		const matrix3d<VALTYPE> & A)
+  {
+    typename numeric_type<VALTYPE>::real eps = vector3d<VALTYPE>::tol_equiv;
+    
+    VALTYPE offd = A(0,1)*A(0,1) + A(1,0)*A(1,0) + A(1,2)*A(1,2) +
+      A(2,1)*A(2,1) + A(2,0)*A(2,0) + A(0,2)*A(0,2);
+
+    if ( offd < eps*eps )
+      // Already diagonal
+      {
+	eigvals = { A(0,0), A(1,1), A(2,2)};
+	eigvecs = { {1,0,0}, {0,1,0}, {0,0,1} };
+	return;
+      }
+
+
+    VALTYPE b = A(0,0) + A(1,1) + A(2,2);
+    VALTYPE c = A(0,1)*A(1,0) + A(1,2)*A(2,1) + A(2,0)*A(0,2) -
+      A(0,0)*A(1,1) - A(1,1)*A(2,2) - A(2,2)*A(0,0);
+    VALTYPE d = det(A);
+
+    eigvals = solve_cubeq(-VALTYPE(1),b,c,d);
+    typename numeric_type<VALTYPE>::complex e0 = eigvals(0),
+      e1 = eigvals(1), e2=eigvals(2), e;
+
+    int ndiff;
+    
+    /*
+    std::cout << "eigvals= " << eigvals << "\n";
+    std::cout << " diffs: " << std::abs(e0-e1) << " "  << std::abs(e1-e2) << " " << std::abs(e2-e0) << 
+      " eps= " << eps << "\n";
+    */
+
+    if ( std::abs(e0-e1)>eps &&  std::abs(e1-e2)>eps &&  std::abs(e2-e0)>eps)
+      ndiff = 3;
+    else if ( std::abs(e0-e1) <= eps &&  std::abs(e1-e2) <= eps &&  std::abs(e2-e0) <= eps)
+      ndiff = 1;
+    else
+      {
+	ndiff = 2;
+	if ( std::abs(e1-e2) <= eps )
+	  {
+	    e=e2; e2=e0; e0=e;
+	  }
+	else if ( std::abs(e2-e0) <= eps )
+	  {
+	    e=e2; e2=e1; e1=e;
+	  }
+	eigvals = {e0,e1,e2};
+      }
+
+    //std::cout << "eigvals after sorting = " << eigvals << "\n";
+
+    matrix3d<typename numeric_type<VALTYPE>::complex> AA, B, E;
+    vector3d<typename numeric_type<VALTYPE>::complex> n0,n1,n2;
+
+    for (int i=0; i<3; i++)
+      for (int j=0; j<3; j++)
+	AA(i,j)=A(i,j);
+    E = 0;
+    E(0,0) = E(1,1) = E(2,2) = 1;
+
+    if (ndiff==1)
+      {
+	// e0, e1 and e2 
+	//std::cout << "e0==e1==e2\n";
+	n0 = {1,0,0};
+	n1 = {0,1,0};
+	n2 = {0,0,1};
+      }
+    else if (ndiff==2)
+      // e0 == e1 != e2
+      {
+	//std::cout << "e0==e1!=e2\n";
+	B = AA - e2*E;
+	B /= B.norm();
+	//B = B.T();
+
+	int i=0;
+	if ( norm(B(1))>norm(B(0)) )
+	  i=1;
+	if (norm(B(2))>norm(B(i)))
+	  i=2;
+	n0 = B(i)/norm(B(i));
+	
+	i=0;
+	if ( norm(B(1)-n0*scal(n0,B(1))) > norm(B(0)-n0*scal(n0,B(0))))
+	  i=1;
+	if ( norm(B(2)-n0*scal(n0,B(2))) > norm(B(i)-n0*scal(n0,B(i))))
+	  i=2;
+	n1 = B(i)-n0*scal(n0,B(i));
+	n1 /= norm(n1);
+	
+	/*
+	B = (AA - e0*E);
+	B /= B.norm();
+	B = B*(AA - e0*E);
+	B /= B.norm();
+	//B = B.T();
+
+	i=0;
+	if ( norm(B(1))>norm(B(0)) )
+	  i=1;
+	if (norm(B(2))>norm(B(i)))
+	  i=2;
+	n2 = B(i)/norm(B(i));
+	*/
+
+	n2 = n0%n1;
+	
+      }
+    else
+      // e0 != e1 != e2
+      {
+	//std::cout << "e0!=e1!=e2\n";
+
+	B = (AA - e1*E);
+	B /= B.norm();
+	B = B*(AA - e2*E);
+	B /= B.norm();
+	//B = B.T();
+
+	int i=0;
+	if ( norm(B(1))>norm(B(0)) )
+	  i=1;
+	if (norm(B(2))>norm(B(i)))
+	  i=2;
+	n0 = B(i)/norm(B(i));
+
+	B = (AA - e0*E);
+	B /= B.norm();
+	B = B*(AA - e2*E);
+	B /= B.norm();
+	//B = B.T();
+
+	i=0;
+	if ( norm(B(1)-n0*scal(n0,B(1)))>norm(B(0)-n0*scal(n0,B(1))) )
+	  i=1;
+	if ( norm(B(2)-n0*scal(n0,B(2)))>norm(B(i)-n0*scal(n0,B(i))) )
+	  i=2;
+
+	n1 = B(i) - n0*scal(n0,B(i));
+	n1 /= norm(n1);
+	
+	//n1 = B(i)/norm(B(i));
+
+	B = (AA - e0*E);
+	B /= B.norm();
+	B = B*(AA - e1*E);
+	B /= B.norm();
+	//B = B.T();
+
+	i=0;
+	if ( norm(B(1)-n0*scal(n0,B(1))-n1*scal(n1,B(1)))>norm(B(0)-n0*scal(n0,B(0))-n1*scal(n1,B(0))) )
+	  i=1;
+	if ( norm(B(2)-n0*scal(n0,B(2))-n1*scal(n1,B(2)))>norm(B(i)-n0*scal(n0,B(i))-n1*scal(n1,B(i))) )
+	  i=2;
+	
+	n2 = B(i)-n0*scal(n0,B(i))-n1*scal(n1,B(i));
+	n2 /= norm(n2);	
+	//n2 = B(i)/norm(B(i));
+      }
+
+    int i=0;
+    if (std::abs(n0(i))<std::abs(n0(1))) i=1;
+    if (std::abs(n0(i))<std::abs(n0(2))) i=2;
+    n0 *= std::abs(n0(i))/n0(i);
+
+    i=0;
+    if (std::abs(n1(i))<std::abs(n1(1))) i=1;
+    if (std::abs(n1(i))<std::abs(n1(2))) i=2;
+    n1 *= std::abs(n1(i))/n1(i);
+
+    i=0;
+    if (std::abs(n2(i))<std::abs(n2(1))) i=1;
+    if (std::abs(n2(i))<std::abs(n2(2))) i=2;
+    n2 *= std::abs(n2(i))/n2(i);
+
+    for (int i=0; i<3; i++)
+      {
+	eigvecs(i,0) = n0(i);
+	eigvecs(i,1) = n1(i);
+	eigvecs(i,2) = n2(i);
+      }    
+  }
+
+  template<class VALTYPE>
+  bool diagon3d(vector3d<VALTYPE> & eigvals, matrix3d<VALTYPE> & eigvecs,
+		const matrix3d<VALTYPE> & A)
+  {
+    vector3d<typename numeric_type<VALTYPE>::complex> ceigvals; 
+    matrix3d<typename numeric_type<VALTYPE>::complex> ceigvecs;
+    VALTYPE eps = vector3d<VALTYPE>::tol_equiv;
+
+    bool res = true;
+    diagon3d(ceigvals,ceigvecs,A);
+
+    for (int i=0; i<3; i++)
+      {
+	eigvals(i) = ceigvals(i).real();
+	if ( std::abs(ceigvals(i).imag()) > eps )
+	  res = false;
+      }
+
+    for (int i=0; i<3; i++)
+      for (int j=0; j<3; j++)
+	{
+	  eigvecs(i,j) = ceigvecs(i,j).real();
+	  if ( std::abs(ceigvecs(i,j).imag()) > eps )
+	    res = false;
+	}
+    return res;
+  }
+
 #ifdef PY_EXPORT
+  
+  template<class VALTYPE>
+  inline vector3d<VALTYPE> py_diagon3dv(const matrix3d<VALTYPE> & A)
+  { return diagon3d(A); }
+
+  template<class VALTYPE>
+  inline void py_diagon3dm(vector3d<typename numeric_type<VALTYPE>::complex> & eigvals, 
+			   matrix3d<typename numeric_type<VALTYPE>::complex> & eigvecs,
+			   const matrix3d<VALTYPE> & A)
+  { diagon3d(eigvals,eigvecs,A); }
+
+  template<class VALTYPE>
+  inline bool py_diagon3dreal(vector3d<VALTYPE> & eigvals, matrix3d<VALTYPE> & eigvecs,
+			      const matrix3d<VALTYPE> & A)
+  { return diagon3d(eigvals,eigvecs,A); }
 
   template<class VALTYPE>
   inline VALTYPE py_detm(const matrix3d<VALTYPE> & a)

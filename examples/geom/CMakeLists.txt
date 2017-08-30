@@ -25,3 +25,6 @@ target_link_libraries(xgeom qpp)
 
 add_executable(xgeom1 xgeom1.cpp)
 target_link_libraries(xgeom1 qpp)
+
+add_executable(reorder reorder.cpp)
+target_link_libraries(reorder qpp)

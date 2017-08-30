@@ -5,7 +5,7 @@
 //#include <lace/lace.hpp>
 //#include <symm/symm.hpp>
 #include <geom/geom.hpp>
-//#include <geom/xgeom.hpp>
+#include <geom/xgeom.hpp>
 #include <geom/ngbr.hpp>
 //#include <geom/geom_extras.hpp>
 //#include <geom/molecule.hpp>
@@ -104,6 +104,53 @@ namespace qpp{
   // -------------------------------------------------------------------//
   //     function for reading xyz with charges format into geometry object    //
   // -------------------------------------------------------------------//
+
+  template<class VALTYPE, class CELL>
+  void read_xyzq(std::basic_istream<CHAR,TRAITS> & inp, xgeometry<VALTYPE,CELL> & geom)
+  {
+    STRING s;
+    std::getline(inp,s);
+    int nat;
+    std::basic_stringstream<CHAR,TRAITS>(s) >> nat;
+    std::getline(inp,s);
+    // fixme - check these are numbers!
+    if (geom.DIM==3)
+      {
+	int nf = strnf(s);
+	if ( nf==9 || nf == 6 )
+	  {
+	    VALTYPE vv[nf];
+	    std::basic_stringstream<CHAR,TRAITS> ss(s);
+	    for (int i=0; i<nf; i++) ss >> vv[i];
+	    if (nf==9)
+	      {
+		geom.cell(0) = {vv[0],vv[1],vv[2]};
+		geom.cell(1) = {vv[3],vv[4],vv[5]};
+		geom.cell(2) = {vv[6],vv[7],vv[8]};
+	      }
+	    else
+	      geom.cell = periodic_cell<VALTYPE>(vv[0],vv[1],vv[2],vv[3],vv[4],vv[5]);
+	  }
+      }
+
+    geom.clear();
+    geom.set_format({"charge"},{type_real});
+
+    for (int i = 0; i<nat; i++)
+      {
+	std::getline(inp,s);
+	if (i==0)
+	  {
+	    // Analise the line, recognize .xyz type
+	  }
+	//	char s1[max_atomic_name_length];
+	STRING s1;
+	VALTYPE x,y,z,q;
+	std::basic_stringstream<CHAR,TRAITS> tmps(s);
+	tmps >> s1 >> x >> y >> z >> q;
+	geom.xadd(s1,x,y,z,q);
+      } 
+  }
   /*
   template< class VALTYPE, class CELL>
   void read_xyzq(std::basic_istream<CHAR,TRAITS> & inp, xgeometry<VALTYPE,CELL> & geom)
@@ -161,7 +208,7 @@ namespace qpp{
     if (geom.DIM>0)
       for (int d = 0; d<geom.DIM; d++)
 	for (int i=0; i<3; i++)
-	  out << boost::format("%12.6f ") % (*geom.cell)(d)(i);
+	  out << boost::format("%12.6f ") % geom.cell(d)(i);
     //out << geom.name();
     out << std::endl;
     for (int i=0; i<geom.size(); i++)
@@ -169,6 +216,25 @@ namespace qpp{
 	% geom.coord(i)(1) % geom.coord(i)(2);
   }
 
+  // -------------------------------------------------------------------//  
+  //                writing geometry into simple xyz                    //
+  // -------------------------------------------------------------------//
+  template< class VALTYPE, class TRANSFORM >
+  void write_xyzq(std::basic_ostream<CHAR,TRAITS>  & out, 
+		  const qpp::xgeometry<VALTYPE,TRANSFORM> & geom)
+  {
+    out << geom.nat() << "\n";
+    
+    if (geom.DIM>0)
+      for (int d = 0; d<geom.DIM; d++)
+	for (int i=0; i<3; i++)
+	  out << boost::format("%12.6f ") % geom.cell(d)(i);
+    //out << geom.name();
+    out << std::endl;
+    for (int i=0; i<geom.nat(); i++)
+      out << boost::format("%-4s %12.6f %12.6f %12.6f %12.6f\n") % geom.atom(i) % geom.coord(i)(0) 
+	% geom.coord(i)(1) % geom.coord(i)(2) % geom.charge(i);
+  }
   // -------------------------------------------------------------------//
   //        writing geometry into xyz file together with displacements       //
   // -------------------------------------------------------------------//

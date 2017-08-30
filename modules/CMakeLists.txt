@@ -8,7 +8,7 @@ add_library(qpp ${M_SRC})
 #target_link_libraries(qpp_basic boost_python)
 #set_target_properties(qpp_basic PROPERTIES PREFIX "")
 
-add_library(qpp_cpp SHARED python/qppython.cpp data/errors.cpp data/types.cpp data/data.cpp io/strfun.cpp symm/index.cpp python/qppcpp1.cpp python/qppcpp2.cpp python/qppcpp3.cpp python/qppcpp4.cpp python/qppcpp5.cpp python/qppcpp6.cpp python/qppcpp7.cpp)
+add_library(qpp_cpp SHARED python/qppython.cpp data/errors.cpp data/types.cpp data/data.cpp io/strfun.cpp symm/index.cpp python/qppcpp1.cpp python/qppcpp2.cpp python/qppcpp3.cpp python/qppcpp4.cpp python/qppcpp5.cpp python/qppcpp6.cpp python/qppcpp7.cpp python/qppcpp8.cpp)
 target_link_libraries(qpp_cpp boost_python)
 #target_compile_options(qpp_cpp "-DPY_EXPORT")
 set_target_properties(qpp_cpp PROPERTIES PREFIX "")

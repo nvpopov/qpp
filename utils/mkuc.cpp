@@ -7,8 +7,10 @@
 #include <io/geomio.hpp>
 #include <io/strfun.hpp>
 
+using namespace qpp;
+
 template <class REAL>
-void user_console_group(qpp::generated_group<qpp::matrix3d<REAL> > & G)
+void user_console_group(generated_group<matrix3d<REAL> > & G)
 {
   std::string reply;
   int ichoice;
@@ -20,9 +22,9 @@ void user_console_group(qpp::generated_group<qpp::matrix3d<REAL> > & G)
 
     do {
       std::cin >> reply;
-    } while (!qpp::s2t(reply,ichoice) );
+    } while (!s2t(reply,ichoice) );
 
-    qpp::vector3d<REAL> v;
+    vector3d<REAL> v;
     int n;
 
     switch(ichoice)
@@ -31,26 +33,29 @@ void user_console_group(qpp::generated_group<qpp::matrix3d<REAL> > & G)
 	std::cin >> v.x() >> v.y() >> v.z();
 	std::cout << "Enter axis order:" << std::endl;
 	std::cin >> n; 
-	G.generator(qpp::RotMtrx(v/norm(v), 2*qpp::pi/n));
+	G.add(RotMtrx(v/norm(v), 2*pi/n));
 	break;
       case 2: std::cout << "Enter vector normal to plane" << std::endl;	
 	std::cin >> v.x() >> v.y() >> v.z();
-	G.generator(qpp::Sigma(v/norm(v)));
+	G.add(Sigma(v/norm(v)));
 	break;
-      case 3: G.generator(qpp::matrix3d<REAL>(-1,0,0,0,-1,0,0,0,-1));
+      case 3: G.add(matrix3d<REAL>(-1,0,0,0,-1,0,0,0,-1));
 	break;
       case 4: std::cout << "Enter axis vector:" << std::endl;
 	std::cin >> v.x() >> v.y() >> v.z();
 	std::cout << "Enter axis order:" << std::endl;
 	std::cin >> n;
 	if (2*(n/2)==n)
-	  G.generator(qpp::RotMtrx(v/norm(v), 2*qpp::pi/n)*qpp::Sigma(v/norm(v)));
+	  G.add(RotMtrx(v/norm(v), 2*pi/n)*Sigma(v/norm(v)));
 	else
 	  std::cout << "Must be even number" << std::endl;
 	break;
       }
 
   } while(ichoice!=5);
+
+  std::cout << "Finished group selection\n";
+
 }
 
 int main(int argc, char **argv)
@@ -65,31 +70,31 @@ int main(int argc, char **argv)
   else
     f = new std::ifstream(fname.c_str());
 
-  qpp::xgeometry<3,double,qpp::periodic_cell<3,double> > orig(1,0,0);
-  qpp::read_xyzq(*f,orig);
+  xgeometry<double,periodic_cell<double> > orig(3);
+  read_xyzq(*f,orig);
   
   std::string reply;
   std::cout << "Should I transform fractional coordinates to cartesian?" << std::endl;
   std::cin >> reply;
   
   bool y_n;
-  qpp::s2t<bool>(reply,y_n);
+  s2t<bool>(reply,y_n);
 
   if (y_n)
     for (int i=0; i<orig.nat(); i++)
-      orig.coord(i) = orig.cell->frac2cart( orig.coord(i));
+      orig.coord(i) = orig.cell.frac2cart( orig.coord(i));
 
   std::cout << "Center the unit cell at:" << std::endl << "1) point (provide x,y,z coordinates)" << std::endl 
 	    << "2) atom" << std::endl << "3) between two atoms" << std::endl << "4) between three atoms" 
 	    << std::endl;
 
   int ichoice;
-  qpp::vector3d<double> rcntr;
+  vector3d<double> rcntr;
   int at1,at2,at3;
   
   do {
     std::cin >> reply;
-  } while (!qpp::s2t(reply,ichoice) );
+  } while (!s2t(reply,ichoice) );
 
   switch (ichoice)
     {
@@ -113,23 +118,54 @@ int main(int argc, char **argv)
   for (int i=0; i<orig.nat(); i++)
     orig.coord(i) -= rcntr;
 
-  qpp::write_xyz(std::cout,orig);  
+  write_xyz(std::cout,orig);  
 
   //orig.write(std::cout);
 
-  qpp::generated_group<qpp::matrix3d<double> > G;
+  generated_group<matrix3d<double> > G;
 
   user_console_group(G);
 
   G.write(std::cout);
 
-  qpp::xgeometry<3,double,qpp::periodic_cell<3,double> > res(1,0,0);
+  xgeometry<double,periodic_cell<double> > res(0);
+  res.set_format({"charge"},{type_real});
+
 
   for (int i=0; i<orig.nat(); i++)
     for (int j=0; j<G.size(); j++)
-      res.add(orig.atom(i), G[j]*orig.coord(i), {orig.xreal(0,i)/G.size()},{},{});
+      {
+	vector3d<double> r = G[j]*orig.coord(i);
+	res.xadd(orig.atom(i), r[0], r[1], r[2], orig.charge(i)/G.size() );
+      }
 
-  qpp::write_xyz(std::cout,res);  
+  treat_crowd(res,crowd_merge);
+  res.cell = orig.cell;
+
+  std::ofstream uc("uc");
+  write_xyzq(uc,res);  
+  uc.close();
+
+  std::cout << "Multipole moments:\n";
+
+  double C(0e0);
+  vector3d<double> D(0e0);
+  matrix3d<double> Q(0e0);
+
+  for (int i=0; i<res.nat(); i++)
+    {
+      double q = res.charge(i);
+      vector3d<double> r = res.pos(i);
+      C += q;
+      D += q*r;
+      for (int j=0; j<3; j++)
+	for (int k=0; k<3; k++)
+	  Q(j,k) += q*r(j)*r(k);
+    }
+
+  std::cout << "Charge= " << C << " Dipole= " << D << " Quadruple= " << Q << "\n";
+
+  //res.write(std::cout);
 
 }
 
