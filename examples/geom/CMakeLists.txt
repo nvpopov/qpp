@@ -25,3 +25,6 @@ target_link_libraries(xgeom qpp)
 
 add_executable(xgeom1 xgeom1.cpp)
 target_link_libraries(xgeom1 qpp)
+
+add_executable(oexmp1 oexmp1.cpp)
+target_link_libraries(oexmp1 qpp)
