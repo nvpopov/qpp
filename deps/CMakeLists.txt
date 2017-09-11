@@ -54,8 +54,6 @@ endif()
 #spglib for crystal symmetry handling
 if(USE_SPGLIB)
     ExternalProject_Add(spglib
-        GIT_REPOSITORY    https://github.com/atztogo/spglib.git
-        GIT_TAG "master"
         SOURCE_DIR "${CMAKE_SOURCE_DIR}/deps/spglib"
         INSTALL_COMMAND ""
         UPDATE_COMMAND ""

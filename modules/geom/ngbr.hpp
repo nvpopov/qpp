@@ -464,7 +464,7 @@ namespace qpp{
 
     REAL optimal_grainsize()
     {
-      const REAL alpha = 1, beta = 1;
+      const REAL alpha = 1, beta = 0;
       REAL Vol = (Rmax(0)-Rmin(0))*(Rmax(1)-Rmin(1))*(Rmax(2)-Rmin(2));
       return std::pow(Vol,1./3)*std::pow(alpha/geom->nat(), 1./(3*(beta+1)));
       
@@ -646,6 +646,9 @@ namespace qpp{
 	  shift2 = {1,1,1};
 	}
       */
+      int Nprint=200;
+      int nprint=0;
+
       for (iterator I(shift1, ngrain-shift2); !I.end(); I++)
 	{
 	  int g1 = gidx(I);
@@ -657,7 +660,11 @@ namespace qpp{
 		  continue;
 		int g2 = gidx(J);
 
-		//std::cout << I << " = " << g1 << " + " << DI << " = " << J << " = " << g2 << " grains.size= " << grains.size() << "\n";
+		if (++nprint == Nprint)
+		  {
+		    nprint =0;
+		    //std::cout << I << " = " << g1 << " + " << DI << " = " << J << " = " << g2 << " grains.size= " << grains.size() << "\n";
+		  }
 
 		for (int c2 = 0; c2 < grains[g2].size(); c2++)
 		  for (int c1 = 0; c1 < ( g1==g2? c2 : grains[g1].size()); c1++)
@@ -774,7 +781,6 @@ namespace qpp{
 		  }
 	      }
 	  }
-
       /*
       std::sort(gpairs.begin(),gpairs.end());
       auto last = std::unique(gpairs.begin(),gpairs.end());
@@ -882,6 +888,9 @@ namespace qpp{
     {}
 
     virtual void shaded(  int at, before_after st, bool sh)
+    {}
+
+    virtual void reordered( const std::vector<int> &, before_after)
     {}
 
     //------------------------------------------------------------

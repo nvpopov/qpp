@@ -19,6 +19,7 @@ BOOST_PYTHON_MODULE(qpp_cpp)
   qpp_export4();
   qpp_export5();
   qpp_export6();
-//  qpp_export7();
+  qpp_export7();
+  qpp_export8();
   
 }

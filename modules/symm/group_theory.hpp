@@ -272,6 +272,24 @@ namespace qpp{
   };
 
   // -------------------------------------------------------------------------------
+
+  template <class TRANSFORM, class ARRAY = std::vector<TRANSFORM> >
+  generators_pack<TRANSFORM>  generator_form( ARRAY & G)
+  {
+    group_analyzer<TRANSFORM,ARRAY> A(G);
+    std::vector<int> ee = {0}, gg = A.find_generators(ee);
+    int DIM = gg.size();
+    
+    generators_pack<TRANSFORM> R(DIM);
+    for (int d = 0; d<DIM; d++)
+      R.generators[d] = G[gg[d]];
+      
+    R.auto_orders();
+    
+    return R;
+  }
+
+  // -------------------------------------------------------------------------------
   
   template <class VALTYPE, class TRANSFORM, class ARRAY = std::vector<TRANSFORM> >
   class group_characters{

@@ -489,6 +489,19 @@ namespace qpp{
       geometry<REAL,CELL>::insert(j,a,r);
     }
     
+    virtual void clear()
+    {
+      geometry<REAL,CELL>::clear();
+      for (int i=0; i<_nxstring; i++)
+	_xstring[i].clear();
+      for (int i=0; i<_nxreal; i++)
+	_xreal[i].clear();
+      for (int i=0; i<_nxint; i++)
+	_xint[i].clear();
+      for (int i=0; i<_nxbool; i++)
+	_xbool[i].clear();
+    }
+
     /*
     virtual void add(STRING a, REAL _x, REAL _y, REAL _z)
     {
@@ -607,6 +620,9 @@ namespace qpp{
 
     REAL charge(int i) const
     {
+      if (i<0) i+=nat();
+      if (i<0 || i>= nat()) IndexError("xgeometry::py_getitem: index out of range");
+
       if (ix_charge >= 0)
 	return _xreal[_field_idx[ix_charge]][i]; 
       else
@@ -615,6 +631,9 @@ namespace qpp{
 
     REAL & charge(int i)
     {
+      if (i<0) i+=nat();
+      if (i<0 || i>= nat()) IndexError("xgeometry::py_getitem: index out of range");
+
       if (ix_charge >= 0)
 	return _xreal[_field_idx[ix_charge]][i]; 
       else
@@ -628,6 +647,9 @@ namespace qpp{
 
     int number(int i) const
     {
+      if (i<0) i+=nat();
+      if (i<0 || i>= nat()) IndexError("xgeometry::py_getitem: index out of range");
+      
       if (ix_number >= 0)
 	return _xint[_field_idx[ix_number]][i]; 
       else
@@ -636,6 +658,9 @@ namespace qpp{
 
     int & number(int i)
     {
+      if (i<0) i+=nat();
+      if (i<0 || i>= nat()) IndexError("xgeometry::py_getitem: index out of range");
+
       if (ix_number >= 0)
 	return _xint[_field_idx[ix_number]][i]; 
       else
@@ -649,6 +674,9 @@ namespace qpp{
 
     REAL mass(int i) const
     {
+      if (i<0) i+=nat();
+      if (i<0 || i>= nat()) IndexError("xgeometry::py_getitem: index out of range");
+      
       if (ix_mass >= 0)
 	return _xreal[_field_idx[ix_mass]][i]; 
       else
@@ -657,6 +685,9 @@ namespace qpp{
 
     REAL & mass(int i)
     {
+      if (i<0) i+=nat();
+      if (i<0 || i>= nat()) IndexError("xgeometry::py_getitem: index out of range");
+      
       if (ix_mass >= 0)
 	return _xreal[_field_idx[ix_mass]][i]; 
       else

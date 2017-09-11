@@ -50,7 +50,8 @@ namespace qpp{
     for (int i=0; i<geom.nat(); i++)
       if ( todel[i]==-1 && n.n(i)>0)
 	for (int j=0; j<n.n(i); j++)
-	  todel[n(i,j)] = i;
+	  if (geom.atom(i)==geom.atom(j))
+	    todel[n(i,j)] = i;
     
     xgeometry<REAL,CELL> *xgeom = dynamic_cast<xgeometry<REAL,CELL>*>(&geom); 
     bool merge = (mode & crowd_merge) && xgeom!=NULL;
@@ -80,14 +81,9 @@ namespace qpp{
   // ----------------------------------------------------------------------------
 
   template<class REALDST, class CELLDST, class REALSRC, class CELLSRC>
-  void replicate(geometry<REALDST,CELLDST> & dst, 
-		 const geometry<REALSRC,CELLSRC> & src,
-		 const CELLSRC & cell,
-		 const index & begin,
-		 const index & end,
-		 int mode = crowd_ignore)
+  void copy_header(geometry<REALDST,CELLDST> & dst, const geometry<REALSRC,CELLSRC> & src)
   {
-    bool xcopy = dst.is_xgeometry() && src.is_xgeometry();
+
     xgeometry<REALDST,CELLDST> *xdst = NULL;
     xgeometry<REALSRC,CELLSRC> *xsrc = NULL;
 
@@ -108,16 +104,37 @@ namespace qpp{
 	else
 	  xdst->set_format({"atom","x","y","z"},{type_string,type_real,type_real,type_real});
       }
+  }
+  
+
+  // ----------------------------------------------------------------------------
+
+  template<class REALDST, class CELLDST, class REALSRC, class CELLSRC>
+  void replicate(geometry<REALDST,CELLDST> & dst, 
+		 const geometry<REALSRC,CELLSRC> & src,
+		 const CELLSRC & cell,
+		 const index & begin,
+		 const index & end,
+		 int mode = crowd_ignore)
+  {
+    bool xcopy = dst.is_xgeometry() && src.is_xgeometry();
+
+    copy_header(dst,src);
+
+    xgeometry<REALSRC,CELLSRC> *xsrc = NULL;
+    if (src.is_xgeometry())
+      xsrc = (xgeometry<REALSRC,CELLSRC>*)(&src);
 
     int ix,iy,iz;
     if (xsrc!=NULL)
       for (int i=0; i<xsrc->nfields(); i++)
 	{
-	  if (fn[i]=="x")
+	  STRING fn = xsrc -> field_name(i);
+	  if (fn=="x")
 	    ix = i;
-	  else if (fn[i]=="y")
+	  else if (fn=="y")
 	    iy = i;
-	  else if (fn[i]=="z")
+	  else if (fn=="z")
 	    iz = i;
 	}
     else
@@ -125,39 +142,24 @@ namespace qpp{
 	ix = 1; iy=2; iz=3;
       }
 
-    if (xcopy)
-      for (int at = 0; at<src.nat(); at++)
+    for (int at = 0; at<src.nat(); at++)
+      if (!src.shadow(at))
 	{
-	  if (!src.shadow(at))
+	  std::vector<datum> v;
+	  src.get_fields(at,v);
+	  const vector3d<REALSRC> & r = src.coord(at);
+	  vector3d<REALSRC> r1;
+	  v[ix].set(&r1(0));
+	  v[iy].set(&r1(1));
+	  v[iz].set(&r1(2));
+	  for (iterator I(begin,end); !I.end(); I++)
 	    {
-	      std::vector<datum> v;
-	      src.get_fields(at,v);
-	      const vector3d<REALSRC> & r = src.coord(at);
-	      vector3d<REALSRC> r1;
-	      v[ix].set(&r1(0));
-	      v[iy].set(&r1(1));
-	      v[iz].set(&r1(2));
-	      for (iterator I(begin,end); !I.end(); I++)
-		{
-		  // fixme - to be replaced with dst.add_fields(v)
-		  dst.add("",vector3d<REALDST>(0));
-		  r1 = cell.transform(r,I);
-		  dst.set_fields(dst.nat()-1,v);
-		}
-	    }    
-	}
-    else
-      for (int at = 0; at<src.nat(); at++)
-	if (!src.shadow(at))
-	  {
-	    const STRING & a = src.atom(at);
-	    const vector3d<REALSRC> & r = src.coord(at);
-	    for (iterator I(begin,end); !I.end(); I++)
-	      {
-		vector3d<REALSRC> r1 = cell.transform(r,I);
-		dst.add(a,(vector3d<REALDST>)r1);
-	      }
-	  }
+	      // fixme - to be replaced with dst.add_fields(v)
+	      dst.add("",vector3d<REALDST>(0));
+	      r1 = cell.transform(r,I);
+	      dst.set_fields(dst.nat()-1,v);
+	    }
+	}    
 
     treat_crowd(dst,mode);
   }
@@ -173,42 +175,30 @@ namespace qpp{
 	     int mode = crowd_ignore | fill_atoms)
   {
     bool xcopy = dst.is_xgeometry() && src.is_xgeometry();
-    xgeometry<REALDST,CELLDST> *xdst = NULL;
+
+    copy_header(dst,src);
     xgeometry<REALSRC,CELLSRC> *xsrc = NULL;
-
-    std::vector<STRING> fn;
-    std::vector<basic_types> ft;
-
     if (src.is_xgeometry())
       xsrc = (xgeometry<REALSRC,CELLSRC>*)(&src);
-
-    if (dst.is_xgeometry())
-      {
-	xdst = (xgeometry<REALDST,CELLDST>*)(&dst);
-	if (src.is_xgeometry())
-	  {
-	    xsrc->get_format(fn,ft);
-	    xdst->set_format(fn,ft);
-	  }
-	else
-	  xdst->set_format({"atom","x","y","z"},{type_string,type_real,type_real,type_real});
-      }
 
     int ix,iy,iz;
     if (xsrc!=NULL)
       for (int i=0; i<xsrc->nfields(); i++)
 	{
-	  if (fn[i]=="x")
+	  STRING fn = xsrc -> field_name(i);
+	  if (fn=="x")
 	    ix = i;
-	  else if (fn[i]=="y")
+	  else if (fn=="y")
 	    iy = i;
-	  else if (fn[i]=="z")
+	  else if (fn=="z")
 	    iz = i;
 	}
     else
       {
 	ix = 1; iy=2; iz=3;
       }
+
+    std::cout << "fill alive 1\n";
 
     std::vector<std::vector<datum> > v(src.nat());
     std::vector<vector3d<REALSRC> > r1(src.nat());
@@ -219,6 +209,8 @@ namespace qpp{
 	v[at][iy].set(&r1[at][1]);
 	v[at][iz].set(&r1[at][2]);
       }
+
+    std::cout << "fill alive 2\n";
 
     bool fillcells = mode & fill_cells;
 
@@ -255,10 +247,16 @@ namespace qpp{
     index begin, end;
     if (typeid(CELLSRC)==typeid(periodic_cell<REALSRC>))
       {
+
+	std::cout << "fillf:: alive1\n";
+
 	// Minimal and maximal fractional coordinates of the shape
 	periodic_cell<REALSRC> * cell = (periodic_cell<REALSRC>*)(&src.cell);
 	vector3d<REALSRC> Smin = shp.fmin(*cell),
 	  Smax = shp.fmax(*cell);
+
+	std::cout << "Smin= " << Smin << " Smax= " << Smax << "\n";
+
 	// Minimal and maximal fractional coordinates of atoms
 	vector3d<REALSRC> fmin,fmax;
 	for (int at=0; at<src.nat(); at++)
@@ -276,17 +274,51 @@ namespace qpp{
 		    fmax[i] = f[i];
 		}
 	  }
+
+	std::cout << "fmin= " << fmin << " fmax= " << fmax << "\n";
+
 	begin = {floor(Smin[0]-fmax[0]),     floor(Smin[1]-fmax[1]),     floor(Smin[2]-fmax[2])};
 	end   = {floor(Smax[0]-fmin[0]) + 1, floor(Smax[1]-fmin[1]) + 1, floor(Smax[2]-fmin[2]) + 1};
+
+	std::cout << "begin= " << begin << " end= " << end << "\n";
       }
     else
       {
 	begin = src.cell.begin();
 	end   = src.cell.end();
       }
-    fill(dst, src, shp, src.cell, src.cell.begin(), src.cell.end() );
+    fill(dst, src, shp, src.cell, begin, end, mode );
   }
-	   
+
+  // -----------------------------------------------------------------------------------
+
+  template<class REAL, class CELL>
+  std::set<int> select( const geometry<REAL,CELL> & geom, const shape<REAL> & shp)
+  {
+
+  }
+
+  template<class REAL, class CELL, class REAL1, class CELL1>
+  std::set<int> select( const geometry<REAL,CELL> & geom, const geometry<REAL1,CELL1> & frag, 
+			const bonding_table<REAL> & b)
+  {}
+
+  template<class REAL, class CELL, class REAL1, class CELL1>
+  std::set<int> select( const geometry<REAL,CELL> & geom, const geometry<REAL1,CELL1> & frag, REAL R)
+  {
+    bonding_table<REAL> b;
+    b.default_distance = R;
+    select(geom,frag,b);
+  }
+
+  template<class REAL, class CELL>
+  void extend( std::set<int> & selection, const neighbours_table<REAL,CELL> & ngbr)
+  {}
+
+  template<class REAL, class CELL>
+  void shrink( std::set<int> & selection, const neighbours_table<REAL,CELL> & ngbr)
+  {}
+    	   
   /*
   template<class REALDST, class CELLDST, class REALSRC, class CELLSRC>
   void replicate(geometry<REALDST,CELLDST> & dst, 

@@ -90,17 +90,24 @@ void py_matrix3d_export(const char * pyname)
   def("det",       qpp::py_detm<VALTYPE>);
   def("det",       qpp::py_detv<VALTYPE>);
   def("outer",     qpp::outer<VALTYPE>);
+  def("solve3",    qpp::py_solve3m<VALTYPE>);
+  def("solve3",    qpp::py_solve3v<VALTYPE>);
+  def("invert3",   qpp::py_invert_mtr<VALTYPE>);
+  def("pow",       qpp::py_pow_mtr<VALTYPE>);
+}
+
+template<class VALTYPE>
+void py_eigen3_export()
+{
   def("RotMtrx",   qpp::py_rotmtrx_v<VALTYPE>);
   def("RotMtrx",   qpp::py_rotmtrx_t<VALTYPE>);
   def("RotMtrx",   qpp::py_rotmtrx_l<VALTYPE>);
   def("Sigma",     qpp::py_sigma_v<VALTYPE>);
   def("Sigma",     qpp::py_sigma_t<VALTYPE>);
   def("Sigma",     qpp::py_sigma_l<VALTYPE>);
-  def("solve3",    qpp::py_solve3m<VALTYPE>);
-  def("solve3",    qpp::py_solve3v<VALTYPE>);
-  def("invert3",   qpp::py_invert_mtr<VALTYPE>);
-  def("pow",       qpp::py_pow_mtr<VALTYPE>);
-  def("diagon3",   qpp::diagon3d<VALTYPE>);
+  def("diagon3",   qpp::py_diagon3dv<VALTYPE>);
+  def("diagon3",   qpp::py_diagon3dm<VALTYPE>);
+  def("diagon3",   qpp::py_diagon3dreal<VALTYPE>);
   def("solve_cubeq",   qpp::solve_cubeq<VALTYPE>);
 }
 
@@ -154,12 +161,16 @@ void qpp_export1()
   
   py_matrix3d_export<float>("matrix3f");
   py_matrix3d_export<double>("matrix3d");
+  py_matrix3d_export<std::complex<float> >("matrix3c");
+  py_matrix3d_export<std::complex<double> >("matrix3z");
+
+  py_eigen3_export<float>();
+  py_eigen3_export<double>();
   
   py_rotrans_export<float,false>("rotrans_f");
   py_rotrans_export<double,false>("rotrans_d");
   py_rotrans_export<float,true>("bound_rotrans_f");
   py_rotrans_export<double,true>("bound_rotrans_d");
-
   
   qpp::index::py_export("index");
   qpp::iterator::py_export("iterator");

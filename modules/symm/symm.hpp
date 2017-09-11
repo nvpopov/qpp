@@ -22,6 +22,9 @@ namespace qpp{
     generators_pack(int dim=0)
     {
       DIM=dim;
+      generators.resize(DIM);
+      _begin = index::D(DIM);
+      _end   = index::D(DIM);
     }
 
     generators_pack(const std::vector<TRANSFORM> & g, 
