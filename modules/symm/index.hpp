@@ -308,6 +308,10 @@ namespace qpp{
   }
 
   index atom_index(int at, const index & I);
+
+  // -------------------------------------------------------------
+
+  bool compare_atindex(const index & at1, const index & at2);
     
   // ------------------- iterator class --------------------
   // Iterator allows you run through all (or some) atoms of this cell

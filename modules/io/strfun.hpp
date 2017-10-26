@@ -156,21 +156,25 @@ public:
 
 // -----------------------------------------------------------
 
-STRING tolower(const STRING & s);
-// Make lowercase
-
-// -----------------------------------------------------------
-
-bool icompare(const STRING & s1, const STRING s2);
-// Case insensitive comparison of two strings
-// -----------------------------------------------------------
-
-void split(const STRING &s, std::vector<STRING> &elems, const STRING & delims = " \t");
-// fixme - not efficient!
-
-std::vector<STRING> split(const STRING &s, const STRING & delims=" \t");
-
+  STRING tolower(const STRING & s);
+  // Make lowercase
+  
+  // -----------------------------------------------------------
+  
+  bool icompare(const STRING & s1, const STRING s2);
+  // Case insensitive comparison of two strings
+  // -----------------------------------------------------------
+  
+  void split(const STRING &s, std::vector<STRING> &elems, const STRING & delims = " \t");
+  // fixme - not efficient!
+  
+  std::vector<STRING> split(const STRING &s, const STRING & delims=" \t");
+  
   bool is_identifier(const STRING &s);
+  
+  // --------------------------------------------------------------------//
+  
+  int strnf(const STRING & s);
 
 // -------------------------------- string to type T convertor ----------------------------
 

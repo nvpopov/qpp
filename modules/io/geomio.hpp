@@ -48,23 +48,12 @@ namespace qpp{
     return __os << __s.str();
   }
   */
-  // --------------------------------------------------------------------//
-
-  int strnf(const STRING & s)
-  {
-    std::basic_stringstream<CHAR,TRAITS> ss(s);
-    STRING a;
-    int nf = 0;
-    for (nf=0; ss >> a; a!="") nf++;
-    return nf;
-  }
-
   // -------------------------------------------------------------------//
   //     function for reading simple xyz format into geometry object    //
   // -------------------------------------------------------------------//
 
-  template<class VALTYPE, class CELL>
-  void read_xyz(std::basic_istream<CHAR,TRAITS> & inp, geometry<VALTYPE,CELL> & geom)
+  template<class REAL, class CELL>
+  void read_xyz(std::basic_istream<CHAR,TRAITS> & inp, geometry<REAL,CELL> & geom)
   {
     STRING s;
     std::getline(inp,s);
@@ -77,7 +66,7 @@ namespace qpp{
 	int nf = strnf(s);
 	if ( nf==9 || nf == 6 )
 	  {
-	    VALTYPE vv[nf];
+	    REAL vv[nf];
 	    std::basic_stringstream<CHAR,TRAITS> ss(s);
 	    for (int i=0; i<nf; i++) ss >> vv[i];
 	    if (nf==9)
@@ -87,7 +76,7 @@ namespace qpp{
 		geom.cell(2) = {vv[6],vv[7],vv[8]};
 	      }
 	    else
-	      geom.cell = periodic_cell<VALTYPE>(vv[0],vv[1],vv[2],vv[3],vv[4],vv[5]);
+	      geom.cell = periodic_cell<REAL>(vv[0],vv[1],vv[2],vv[3],vv[4],vv[5]);
 	  }
       }
     for (int i = 0; i<nat; i++)
@@ -99,7 +88,7 @@ namespace qpp{
 	  }
 	//	char s1[max_atomic_name_length];
 	STRING s1;
-	VALTYPE x,y,z;
+	REAL x,y,z;
 	std::basic_stringstream<CHAR,TRAITS> tmps(s);
 	tmps >> s1 >> x >> y >> z;
 	geom.add(s1,x,y,z);
@@ -109,8 +98,8 @@ namespace qpp{
   //     function for reading xyz with charges format into geometry object    //
   // -------------------------------------------------------------------//
 
-  template<class VALTYPE, class CELL>
-  void read_xyzq(std::basic_istream<CHAR,TRAITS> & inp, xgeometry<VALTYPE,CELL> & geom)
+  template<class REAL, class CELL>
+  void read_xyzq(std::basic_istream<CHAR,TRAITS> & inp, xgeometry<REAL,CELL> & geom)
   {
     STRING s;
     std::getline(inp,s);
@@ -123,7 +112,7 @@ namespace qpp{
 	int nf = strnf(s);
 	if ( nf==9 || nf == 6 )
 	  {
-	    VALTYPE vv[nf];
+	    REAL vv[nf];
 	    std::basic_stringstream<CHAR,TRAITS> ss(s);
 	    for (int i=0; i<nf; i++) ss >> vv[i];
 	    if (nf==9)
@@ -133,7 +122,7 @@ namespace qpp{
 		geom.cell(2) = {vv[6],vv[7],vv[8]};
 	      }
 	    else
-	      geom.cell = periodic_cell<VALTYPE>(vv[0],vv[1],vv[2],vv[3],vv[4],vv[5]);
+	      geom.cell = periodic_cell<REAL>(vv[0],vv[1],vv[2],vv[3],vv[4],vv[5]);
 	  }
       }
 
@@ -149,15 +138,15 @@ namespace qpp{
 	  }
 	//	char s1[max_atomic_name_length];
 	STRING s1;
-	VALTYPE x,y,z,q;
+	REAL x,y,z,q;
 	std::basic_stringstream<CHAR,TRAITS> tmps(s);
 	tmps >> s1 >> x >> y >> z >> q;
 	geom.xadd(s1,x,y,z,q);
       } 
   }
   /*
-  template< class VALTYPE, class CELL>
-  void read_xyzq(std::basic_istream<CHAR,TRAITS> & inp, xgeometry<VALTYPE,CELL> & geom)
+  template< class REAL, class CELL>
+  void read_xyzq(std::basic_istream<CHAR,TRAITS> & inp, xgeometry<REAL,CELL> & geom)
   {
     STRING s;
     std::getline(inp,s);
@@ -170,7 +159,7 @@ namespace qpp{
 	int nf = strnf(s);
 	if ( nf==9 || nf == 6 )
 	  {
-	    VALTYPE vv[nf];
+	    REAL vv[nf];
 	    std::basic_stringstream<CHAR,TRAITS> ss(s);
 	    for (int i=0; i<nf; i++) ss >> vv[i];
 	    if (nf==9)
@@ -180,7 +169,7 @@ namespace qpp{
 		(*geom.cell)(2) = {vv[6],vv[7],vv[8]};
 	      }
 	    else
-	      geom.cell = new periodic_cell<DIM,VALTYPE>(vv[0],vv[1],vv[2],vv[3],vv[4],vv[5]);
+	      geom.cell = new periodic_cell<DIM,REAL>(vv[0],vv[1],vv[2],vv[3],vv[4],vv[5]);
 	  }
       }
     for (int i = 0; i<nat; i++)
@@ -192,7 +181,7 @@ namespace qpp{
 	  }
 	//	char s1[max_atomic_name_length];
 	STRING s1;
-	VALTYPE x,y,z,q;
+	REAL x,y,z,q;
 	std::basic_stringstream<CHAR,TRAITS> tmps(s);
 	tmps >> s1 >> x >> y >> z >> q;
 	geom.add(s1,{x,y,z},{q},{},{});
@@ -203,9 +192,9 @@ namespace qpp{
   // -------------------------------------------------------------------//  
   //                writing geometry into simple xyz                    //
   // -------------------------------------------------------------------//
-  template< class VALTYPE, class TRANSFORM >
+  template< class REAL, class TRANSFORM >
   void write_xyz(std::basic_ostream<CHAR,TRAITS>  & out, 
-		 const qpp::geometry<VALTYPE,TRANSFORM> & geom)
+		 const qpp::geometry<REAL,TRANSFORM> & geom)
   {
     out << geom.nat() << "\n";
 
@@ -223,9 +212,9 @@ namespace qpp{
   // -------------------------------------------------------------------//  
   //                writing geometry into simple xyz                    //
   // -------------------------------------------------------------------//
-  template< class VALTYPE, class TRANSFORM >
+  template< class REAL, class TRANSFORM >
   void write_xyzq(std::basic_ostream<CHAR,TRAITS>  & out, 
-		  const qpp::xgeometry<VALTYPE,TRANSFORM> & geom)
+		  const qpp::xgeometry<REAL,TRANSFORM> & geom)
   {
     out << geom.nat() << "\n";
     
@@ -244,10 +233,10 @@ namespace qpp{
   // -------------------------------------------------------------------//
 
   /*
-  template< int DIM, class VALTYPE, class TRANSFORM  >
+  template< int DIM, class REAL, class TRANSFORM  >
   void write_xyz(std::basic_ostream<CHAR,TRAITS>  & out, 
-		 const qpp::geometry<DIM,VALTYPE,TRANSFORM> & geom,
-		 const qpp::molecule_vector<DIM,VALTYPE,TRANSFORM> & v)
+		 const qpp::geometry<DIM,REAL,TRANSFORM> & geom,
+		 const qpp::molecule_vector<DIM,REAL,TRANSFORM> & v)
   {
     out << geom.nat() << "\n";
     /*
@@ -262,15 +251,10 @@ namespace qpp{
 	% geom.coord(i)(0) % geom.coord(i)(1) % geom.coord(i)(2) % v(i,0) % v(i,1) % v(i,2);
   }
   */
-  // -------------------------------------------------------------
-  bool compare_atindex(const index & at1, const index & at2)
-  {
-    return at1(0) > at2(0);
-  }
 
-  template< class VALTYPE, class CELL>
+  template< class REAL, class CELL>
   void write_ngbr(std::basic_ostream<CHAR,TRAITS>  & out,
-                  neighbours_table<VALTYPE,CELL> & ngbr)
+                  neighbours_table<REAL,CELL> & ngbr)
   {
     for (int i=0; i<ngbr.geom->nat(); i++)
       {
@@ -285,6 +269,12 @@ namespace qpp{
 	out << "\n";
       }
   }
+
+#ifdef PY_EXPORT
+
+  void qpp_export_ioxyz();
+
+#endif
 
 };
 

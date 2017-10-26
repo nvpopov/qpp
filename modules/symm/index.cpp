@@ -10,5 +10,12 @@ namespace qpp{
       res(d+1) = I(d);
     return res;
   }
+
+  // -------------------------------------------------------------
+
+  bool compare_atindex(const index & at1, const index & at2)
+  {
+    return at1(0) > at2(0);
+  }
     
 };

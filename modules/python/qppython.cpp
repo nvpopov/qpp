@@ -1,6 +1,7 @@
 //#define PY_EXPORT
 
 #include <python/qppcpp.hpp>
+#include <io/io.py.hpp>
 /*
 #include <boost/python.hpp>
 #include <boost/python/list.hpp>
@@ -22,4 +23,5 @@ BOOST_PYTHON_MODULE(qpp_cpp)
   qpp_export7();
   qpp_export8();
   
+  qpp_io_export();
 }

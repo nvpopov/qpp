@@ -20,12 +20,14 @@ if(USE_SPGLIB)
 endif(USE_SPGLIB)
 target_link_libraries(qpp ${QPP_LINK_LIB} )
 
+set(IOPY io/io.py.cpp io/geomio.py.cpp)
+
 if(PYTHON_BINDINGS)
    add_library(qpp_cpp SHARED 
     python/qppython.cpp data/errors.cpp data/types.cpp data/data.cpp
     io/strfun.cpp symm/index.cpp python/qppcpp1.cpp python/qppcpp2.cpp
     python/qppcpp3.cpp python/qppcpp4.cpp python/qppcpp5.cpp
-    python/qppcpp6.cpp python/qppcpp7.cpp python/qppcpp8.cpp)
+    python/qppcpp6.cpp python/qppcpp7.cpp python/qppcpp8.cpp ${IOPY})
    target_link_libraries(qpp_cpp boost_python)
    #   target_compile_options(qpp_cpp "-DPY_EXPORT")
    set_target_properties(qpp_cpp PROPERTIES PREFIX "")
