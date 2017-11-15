@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.4)
 project(spglib C)
 set(CMAKE_MACOSX_RPATH 1)
-set(CMAKE_C_FLAGS_RELEASE "-Wall -O2")
+set(CMAKE_C_FLAGS_RELEASE "-Wall -O2 -fPIC")
 set(CMAKE_C_FLAGS_DEBUG "-g -DSPGDEBUG -DSPGWARNING")
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)

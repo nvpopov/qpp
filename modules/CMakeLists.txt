@@ -28,7 +28,7 @@ if(PYTHON_BINDINGS)
     io/strfun.cpp symm/index.cpp python/qppcpp1.cpp python/qppcpp2.cpp
     python/qppcpp3.cpp python/qppcpp4.cpp python/qppcpp5.cpp
     python/qppcpp6.cpp python/qppcpp7.cpp python/qppcpp8.cpp ${IOPY})
-   target_link_libraries(qpp_cpp boost_python)
+   target_link_libraries(qpp_cpp boost_python  spglib-imp)
    #   target_compile_options(qpp_cpp "-DPY_EXPORT")
    set_target_properties(qpp_cpp PROPERTIES PREFIX "")
    set_target_properties(qpp_cpp PROPERTIES COMPILE_FLAGS "-DPY_EXPORT")

@@ -13,7 +13,7 @@ void prnmtr(const matrix3d<double> & M)
   for (int i=0; i<3; i++)
     {
       for (int j=0; j<3; j++)
-        std::cout << fmt::format("{10.6} ", M(i,j));
+        std::cout << fmt::format("{} ", M(i,j));
       std::cout << std::endl;
     }
 }
@@ -32,7 +32,8 @@ int main()
 
   //matrix3d<double>::tol_equiv = 1e-6;
 
-  generalized_cell<double,matrix3d<double> > Oh = generator_form<matrix3d<double>, decltype(OH)>(OH);
+  generalized_cell<double,matrix3d<double> > Oh;
+  generator_form(Oh,OH);
 
   for (int d=0; d < Oh.DIM; d++)
     {
@@ -55,7 +56,7 @@ int main()
   UF6.add("F_shl", 0, 3, 0);
   UF6.add("F_shl", 0,-3, 0);
   UF6.add("F_shl", 0, 0, 3);
-  UF6.add("F_shl", 0, 0,-3.01);
+  UF6.add("F_shl", 0, 0,-3.0);
 
   std::cout << has_symmetry(UF6, Oh) << "\n";
 }

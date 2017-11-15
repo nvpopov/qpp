@@ -25,6 +25,7 @@ void py_geom_export(const char * pyname)
     .def("r",       & qpp::geometry<REAL,CELL>::py_pos2)    
     .def("r",       & qpp::geometry<REAL,CELL>::py_pos3)    
     .def("nat",              & qpp::geometry<REAL,CELL>::nat)
+    .def("__len__",          & qpp::geometry<REAL,CELL>::nat)
     .def("__getitem__",      & qpp::geometry<REAL,CELL>::py_getitem)
     .def("__setitem__",      & qpp::geometry<REAL,CELL>::py_setitem)
     //.add_property("cell",   

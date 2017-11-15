@@ -274,19 +274,20 @@ namespace qpp{
   // -------------------------------------------------------------------------------
 
   template <class TRANSFORM, class ARRAY = std::vector<TRANSFORM> >
-  generators_pack<TRANSFORM>  generator_form( ARRAY & G)
+  void generator_form(generators_pack<TRANSFORM> & R, ARRAY & G)
   {
     group_analyzer<TRANSFORM,ARRAY> A(G);
     std::vector<int> ee = {0}, gg = A.find_generators(ee);
     int DIM = gg.size();
     
-    generators_pack<TRANSFORM> R(DIM);
+    //generators_pack<TRANSFORM> R(DIM);
+    R.set_dim(DIM);
     for (int d = 0; d<DIM; d++)
       R.generators[d] = G[gg[d]];
       
     R.auto_orders();
     
-    return R;
+    //return R;
   }
 
   // -------------------------------------------------------------------------------

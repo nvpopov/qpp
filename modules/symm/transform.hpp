@@ -97,7 +97,18 @@ namespace qpp{
 
     inline bool operator==(const rotrans<REAL,BOUND> & b) const
     {
-      return norm(T - b.T) <= translation_tolerance && norm(R - b.R) <= rotation_tolerance;
+      if (!BOUND)
+	return norm(T - b.T) <= translation_tolerance && norm(R - b.R) <= rotation_tolerance;
+      else
+	{
+	  if ( norm(R - b.R) > rotation_tolerance) 
+	    return false;
+	  vector3d<REAL> f =  cell -> cart2frac(T - b.T);
+	  for (int d=0;  d<cell->DIM; d++)
+	    f(d) -= floor(f(d)+.5);
+	  f = cell -> frac2cart(f);
+	  return norm(f)<=translation_tolerance;
+	}
     }
 
     inline bool operator!=(const rotrans<REAL,BOUND> & b) const

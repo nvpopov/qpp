@@ -9,6 +9,8 @@ void def_autosymm()
   def("analyze_transform", qpp::py_analyze_transform<REAL>);
   def("find_point_symm", qpp::find_point_symm<REAL>);
   def("bravais_point_group", qpp::bravais_point_group<REAL>);
+  def("find_cryst_symm", qpp::py_find_cryst_symm1<REAL>);
+  def("find_cryst_symm", qpp::py_find_cryst_symm2<REAL>);
 }
 
 void qpp_export8()

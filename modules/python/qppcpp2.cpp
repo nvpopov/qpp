@@ -1,6 +1,7 @@
 #include "qppcpp.hpp"
 #include <symm/cell.hpp>
 #include <symm/gcell.hpp>
+#include <symm/group_theory.hpp>
 
 template<class REAL>
 void py_cell_export(const char * pyname)
@@ -51,6 +52,11 @@ void qpp_export2()
   qpp::generated_group<qpp::matrix3d<double> >::py_export("array_point_group_d");
   qpp::generated_group<qpp::rotrans<float,true> >::py_export("array_fincryst_group_f");
   qpp::generated_group<qpp::rotrans<double,true> >::py_export("array_fincryst_group_d");
+
+  def("generator_form", qpp::generator_form<qpp::matrix3d<double>,    qpp::generated_group<qpp::matrix3d<double> > >);  
+  def("generator_form", qpp::generator_form<qpp::matrix3d<float>,     qpp::generated_group<qpp::matrix3d<float> > > ); 
+  def("generator_form", qpp::generator_form<qpp::rotrans<double,true>,qpp::generated_group<qpp::rotrans<double,true> > >);
+  def("generator_form", qpp::generator_form<qpp::rotrans<float,true>, qpp::generated_group<qpp::rotrans<float,true> > >);
 
 }
 

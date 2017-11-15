@@ -7,6 +7,7 @@
 #include <symm/gcell.hpp>
 #include <symm/transform.hpp>
 #include <symm/group_theory.hpp>
+#include <symm/spgw.hpp>
 #include <Eigen/Dense>
 #include <algorithm>
 
@@ -850,11 +851,22 @@ namespace qpp{
   }
 
   // ------------------------------------------------------------------------------------------
+  template<class REAL>
+  void find_cryst_symm(generated_group<rotrans<REAL,true> > & G, 
+		       geometry<REAL,periodic_cell<REAL> > & geom,
+		       REAL R = geometry<REAL,periodic_cell<REAL>>::tol_geom_default)
+  {
+    spgw_get_symmetry(G,geom,R);
+  }
 
   template<class REAL>
-  void find_cryst_symm(generators_pack<rotrans<REAL> > & G, const geometry<REAL, periodic_cell<REAL> > & geom)
+  void find_cryst_symm(generators_pack<rotrans<REAL,true> > & G, 
+		       geometry<REAL, periodic_cell<REAL> > & geom,
+		       REAL R = geometry<REAL,periodic_cell<REAL>>::tol_geom_default)
   {
-
+    generated_group<rotrans<REAL,true> > G1;
+    spgw_get_symmetry(G1,geom,R);
+    generator_form(G,G1); 
   }
 
   template<class REAL>
@@ -865,13 +877,6 @@ namespace qpp{
 
   }
 
-  template<class REAL>
-  void find_point_subgroups(std::vector<generated_group<matrix3d<REAL> > > & subs, 
-			    std::vector<vector3d<REAL> > &cntrs,
-			    const geometry<REAL, generalized_cell<REAL, rotrans<REAL,false> > > & geom)
-  {
-
-  }
 
 #ifdef PY_EXPORT
 
@@ -930,7 +935,18 @@ namespace qpp{
     return res;
   }
     
+  template<class REAL>
+  void py_find_cryst_symm1(generated_group<rotrans<REAL,true> > & G, 
+			   geometry<REAL,periodic_cell<REAL> > & geom,
+			   REAL R = geometry<REAL,periodic_cell<REAL>>::tol_geom_default)
+  {  find_cryst_symm(G,geom,R); }
 
+  template<class REAL>
+  void py_find_cryst_symm2(generators_pack<rotrans<REAL,true> > & G, 
+			   geometry<REAL, periodic_cell<REAL> > & geom,
+			   REAL R = geometry<REAL,periodic_cell<REAL>>::tol_geom_default)
+  { find_cryst_symm(G,geom,R); }
+    
 #endif
 
 };

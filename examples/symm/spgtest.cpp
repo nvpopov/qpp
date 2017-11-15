@@ -47,6 +47,14 @@ int main()
     CaF2_g.add("F", 0.25, 0.5, 0.75);
     CaF2_g.build_type_table();
 
+    qpp::generated_group<qpp::rotrans<double,true> > G;
+    spgw_get_symmetry(G,CaF2_g);
+
+    std::cout << "Symmops:\n";
+    for (int i=0; i<G.size(); i++)
+      std::cout << G[i] << "\n";
+    
+
     std::cout<<fmt::format("CaF2 international symmetry = {}\n" \
                            "CaF2 schoenflies symmetry = {} \n",
                            spgw_get_international(CaF2_g),

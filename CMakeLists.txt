@@ -4,7 +4,7 @@ project(qpp CXX)
 set (QPP_VERSION_MAJOR 0)
 set (QPP_VERSION_MINOR 1)
 add_definitions(-O3 -std=c++11 -fPIC -DFMT_HEADER_ONLY)
-#set(CMAKE_CXX_FLAGS "-pg -ggdb")
+set(CMAKE_CXX_FLAGS "-pg -ggdb")
 #set(CMAKE_BUILD_TYPE "Debug")
 set(CMAKE_CXX_STANDARD 11)
 
@@ -95,8 +95,8 @@ file(GLOB_RECURSE ide_src "modules/*/*.cpp")
 file(GLOB_RECURSE ide_exm "examples/*/*.cpp")
 file(GLOB_RECURSE ide_t1 "tests/*/*.*pp")
 file(GLOB_RECURSE ide_t2 "tests/*.*pp")
-add_custom_target(ideheaders SOURCES ${ide_headers} ${ide_headersc}
-    ${ide_src} ${ide_exm} ${ide_t1} ${ide_t2})
+#add_custom_target(ideheaders SOURCES ${ide_headers} ${ide_headersc}
+#    ${ide_src} ${ide_exm} ${ide_t1} ${ide_t2})
 
 
 #Global includes

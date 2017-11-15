@@ -129,6 +129,8 @@ void py_rotrans_export(const char * pyname)
       .def_readwrite("unity", & qpp::rotrans<REAL,BOUND>::unity) 
       .def_readwrite("T", & qpp::rotrans<REAL,BOUND>::T)
       .def_readwrite("R", & qpp::rotrans<REAL,BOUND>::R)
+      .def_readwrite("tol_trans",& qpp::rotrans<REAL,BOUND>::translation_tolerance)
+      .def_readwrite("tol_rot",& qpp::rotrans<REAL,BOUND>::rotation_tolerance)
       .add_property("cell", make_getter(& qpp::rotrans<REAL,BOUND>::cell, return_value_policy<reference_existing_object>()))
      ;
   else
@@ -146,6 +148,8 @@ void py_rotrans_export(const char * pyname)
       .def_readwrite("unity", & qpp::rotrans<REAL,BOUND>::unity)
       .def_readwrite("T", & qpp::rotrans<REAL,BOUND>::T)
       .def_readwrite("R", & qpp::rotrans<REAL,BOUND>::R)
+      .def_readwrite("tol_trans",& qpp::rotrans<REAL,BOUND>::translation_tolerance)
+      .def_readwrite("tol_rot",& qpp::rotrans<REAL,BOUND>::rotation_tolerance)
       ;
   def("invert", qpp::py_invert_rt<REAL,BOUND>);
   def("pow",    qpp::py_pow_rt<REAL,BOUND>);
