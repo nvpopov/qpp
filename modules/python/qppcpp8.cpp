@@ -11,6 +11,8 @@ void def_autosymm()
   def("bravais_point_group", qpp::bravais_point_group<REAL>);
   def("find_cryst_symm", qpp::py_find_cryst_symm1<REAL>);
   def("find_cryst_symm", qpp::py_find_cryst_symm2<REAL>);
+  def("find_point_subgroups", qpp::py_find_point_subgroups1<REAL>);
+  def("find_point_subgroups", qpp::py_find_point_subgroups2<REAL>);
 }
 
 void qpp_export8()

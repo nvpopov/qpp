@@ -1,4 +1,6 @@
 add_executable(index index.cpp)
+target_link_libraries(index qpp)
+
 add_executable(index1 index1.cpp)
 target_link_libraries(index1 qpp)
 

@@ -19,6 +19,8 @@ namespace qpp{
     for(int i=0; i<num_atoms; i++){
       vector3d<VALTYPE> r = inGeom.coord(i);
       if (!inGeom.frac)
+	r = inGeom.cell.cart2frac(r);
+	/*
 	{
 	  matrix3d<VALTYPE> f2c,c2f;
 	  for (int j=0; j<3; j++)
@@ -27,6 +29,7 @@ namespace qpp{
 	  c2f = invert(f2c);
 	  r = c2f*r;
 	}
+	*/
       _positions[i][0] = r.x();
       _positions[i][1] = r.y();
       _positions[i][2] = r.z();

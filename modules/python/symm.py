@@ -195,7 +195,7 @@ def abelian_sub_by_index(group,i):
     return abelian_sub_by_element(group[i])
 
 def abelian_sub(*args,**kwds):
-    return overloader([abelian_sub_by_multab,abelian_sub_by_element],args,kwds, \
+    return overloader([abelian_sub_by_multab,abelian_sub_by_element,abelian_sub_by_index],args,kwds, \
                       "qpp: invalid arguments in abelian_sub call"+str(args)+str(kwds))
 
 #---------------------------------------------------------
@@ -236,7 +236,24 @@ def find_generators(*args,**kwds):
 
 #---------------------------------------------------------
 
-def class_left(G,H):
+def class_left_by_multab(multab,H):
+    if (type(multab) is list) and (type(multab[0]) is list) and (type(multab[0][0]) is int) \
+       and (type(H) is list) and (type(H[0]) is int):
+        N = len(multab)
+        classes=[H]
+        used = H
+        for g in xrange(N):
+            if not g in used:
+                newclass = []
+                for h in H:
+                    newclass.append(multab[g][h])
+                classes.append(newclass)
+                used = used + newclass
+        return classes
+    else:
+        raise TypeError()
+
+def class_left_by_group(G,H):
     classes = [H]
     used = H
     for g in G:
@@ -249,9 +266,31 @@ def class_left(G,H):
 #    return classes
     return [[G.index(g) for g in c] for c in classes]
 
+def class_left(*args,**kwds):
+    return overloader([class_left_by_multab,class_left_by_group],args,kwds, \
+                      "qpp: invalid arguments in class_left call"+str(args)+str(kwds))
+
+
 #---------------------------------------------------------
 
-def class_right(G,H):
+def class_right_by_multab(multab,H):
+    if (type(multab) is list) and (type(multab[0]) is list) and (type(multab[0][0]) is int) \
+       and (type(H) is list) and (type(H[0]) is int):
+        N = len(multab)
+        classes=[H]
+        used = H
+        for g in xrange(N):
+            if not g in used:
+                newclass = []
+                for h in H:
+                    newclass.append(multab[h][g])
+                classes.append(newclass)
+                used = used + newclass
+        return classes
+    else:
+        raise TypeError()
+
+def class_right_by_group(G,H):
     classes = [H]
     used = H
     for g in G:
@@ -261,29 +300,171 @@ def class_right(G,H):
                 newclass.append(h*g)
             classes.append(newclass)
             used = used + newclass
+#    return classes
     return [[G.index(g) for g in c] for c in classes]
+
+def class_right(*args,**kwds):
+    return overloader([class_right_by_multab,class_right_by_group],args,kwds, \
+                      "qpp: invalid arguments in class_left call"+str(args)+str(kwds))
 
 #---------------------------------------------------------
 
-def build_subgroups(G):
-    subs=[frozenset([0])]
-    for i in xrange(1,len(G)):
-        A = frozenset(abelian_sub(G,i))
-        if not A in subs:
-            subs.append(A)
-    contin=True
-    while contin:
-        contin=False
-        for A in subs:
-            for B in subs:
-                C = [G[0]]
-                for x in list(A)+list(B):
-                    add_symmetry(C,G[x])
-                CC = frozenset(group2idx(G,C))
-                if not CC in subs:
-                    contin=True
-                    subs.append(CC)
-                    print A,B, len(subs), is_group(C)
-                    print list(CC)
+def complete_subgroup_by_multab(s,multab):
+    if (type(multab) is list) and (type(multab[0]) is list) and (type(multab[0][0]) is int)\
+       and (type(s) is list):        
+        newelems = s
+        res = [0]
+        while newelems != []:
+            newnewelems = []
+            #print "new ", newelems
+            for g1 in newelems:
+                for g2 in res+newelems:
+                    h = multab[g1][g2]
+                    if not (h in res) and not (h in newelems) and not (h in newnewelems):
+                        newnewelems.append(h)
+                    h = multab[g2][g1]
+                    if not (h in res) and not (h in newelems) and not (h in newnewelems):
+                        newnewelems.append(h)
+            res.extend(newelems)
+            newelems = newnewelems
+        return list(set(res))
+    else:
+        raise TypeError()
+
+def complete_subgroup_by_group(S):
+    G = []
+    for g in S:
+        symm_add(G,g)
+    return G
+
+def complete_subgroup(*args,**kwds):
+    return overloader([complete_subgroup_by_multab,complete_subgroup_by_group],args,kwds, \
+                      "qpp: invalid arguments in complete_subgroup call"+str(args)+str(kwds))
+
+#---------------------------------------------------------
+
+def orthogonal_subgroups_iter(multab,lcls,rcls,lidx,ridx,lused,rused,seed):
+#    print "orth sub seed= ", seed
+#    print "   lcls  = ", lcls
+#    print "   rcls  = ", rcls
+#    print "   lidx  = ", lidx
+#    print "   ridx  = ", ridx
+#    print "   lused = ", lused
+#    print "   rused = ", rused    
+
+    if not (False in lused) or not (False in lused):
+        return [seed]
+
+    res = []
+    li = 0
+    while lused[li]: li = li + 1
+    for g in lcls[li]:
+        if not rused[ridx[g]]:
+            newgroup = complete_subgroup(seed + [g],multab)
+            ng = []
+            for h in newgroup:
+                if not (h in ng) and not (h in seed):
+                    ng.append(h)
+
+#            print " g = ", g, " ng = ", ng
+
+            contin = True
+            for h in ng:
+                if lused[lidx[h]] or rused[ridx[h]]:
+                    contin = False
+                    break
+            if contin:
+                newlused = [b for b in lused]
+                newrused = [b for b in rused]
+                for h in ng:
+                    newlused[lidx[h]] = True
+                    newrused[ridx[h]] = True
+                res = res + orthogonal_subgroups_iter(multab,lcls,rcls,lidx,ridx,newlused,newrused,seed+ng)
+    return res
+                        
+
+def orthogonal_subgroups(multab,group):
+    if group == [0]:
+        return range(len(multab))
+
+    lcls = class_left(multab,group)
+    rcls = class_right(multab,group)
+    lidx = [0]*len(multab)
+    ridx = [0]*len(multab)
+    n = len(lcls)
+    for i in xrange(n):
+        for g in lcls[i]: lidx[g] = i
+        for g in rcls[i]: ridx[g] = i
+    lused = [False]*n
+    rused = [False]*n
+    lused[0] = True
+    rused[0] = True
+    return orthogonal_subgroups_iter(multab,lcls,rcls,lidx,ridx,lused,rused,[0])
+            
+
+#---------------------------------------------------------
+
+def maximal_subgroups_by_multab(multab):
+    if (type(multab) is list) and (type(multab[0]) is list) and (type(multab[0][0]) is int):
+        done = [False]*len(multab)
+        done[0] = True
+        res = set()
+        for g in xrange(len(multab)):
+            if not done[g]:
+                a = abelian_sub(multab,g)
+#                print " a= " , a
+                for h in a: 
+                    if  symm_order(multab,h) == len(a):
+                        done[h] = True
+                for G in orthogonal_subgroups(multab,a):
+                    res.add(frozenset(G))
+        return [list(G) for G in res]
+    else:
+        raise TypeError()
+
+
+def maximal_subgroups_by_group(G):
+
     return subs
     
+def maximal_subgroups(*args,**kwds):
+    return overloader([maximal_subgroups_by_multab,maximal_subgroups_by_group],args,kwds, \
+                      "qpp: invalid arguments in build_subgroups call"+str(args)+str(kwds))
+
+#-----------------------------------------------------------
+
+def submultab(multab,sub):
+    N = len(sub)
+    stab = []
+    for i in xrange(N):
+        stab.append(list([0]*N))
+        for j in xrange(N):
+            m = multab[sub[i]][sub[j]]
+#            print i,j,sub[i],sub[j],multab[sub[i]][sub[j]]
+            k=0
+            while sub[k]!=m: k=k+1
+            stab[i][j] = k
+#            print i,j,sub[i],sub[j],multab[sub[i]][sub[j]],k
+    return stab
+
+#-----------------------------------------------------------
+
+def build_subgroups_iter(multab):
+    if len(multab)==1:
+        return []
+    res = [range(len(multab))]
+    
+    for G in maximal_subgroups(multab):
+        #print G
+        if len(G)>1:
+            stab = submultab(multab,G)
+            #print "stab= ",stab
+            sres = build_subgroups_iter(stab)
+            for SG in sres:
+                res.append([G[i] for i in SG])
+    return res
+
+def build_subgroups(multab):
+    X = set([frozenset(g) for g in build_subgroups_iter(multab)])
+    return [list(g) for g in X]+[[0]]
+

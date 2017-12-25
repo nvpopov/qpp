@@ -26,8 +26,8 @@ namespace qpp{
 
   //--------------------------------------------------------------//
 
-  /*! \class geometry 
-      \brief Test brief
+  /*! 
+      
 The supercell concept generalization for the geometry class looks like:
     template< int DIM, class REAL>
     class CELL{
@@ -71,15 +71,17 @@ The supercell concept generalization for the geometry class looks like:
       return atom != ai.atom || cell != ai.cell;
     }
     
-    };
-Geometry updated objects
-One geometry can maintain arbitrary number of "observers", i.e.
-objects which need to know about the changes made to geometry.
-Geometry will inform them all when atoms are added, inserted or removed
-  */
+    };*/
 
   enum before_after {before = 0, after = 1};
-      
+  
+  /*! \class geometry_observer
+    \brief Geometry updated objects
+    One geometry can maintain arbitrary number of "observers", i.e.
+    objects which need to know about the changes made to geometry.
+    Geometry will inform them all when atoms are added, inserted or removed
+  */
+
   template <class REAL>
   struct geometry_observer{
 
@@ -91,7 +93,13 @@ Geometry will inform them all when atoms are added, inserted or removed
     virtual void reordered( const std::vector<int> &, before_after) =0;
   };
 
-  //--------------------------------------------------------------//
+  /*! \class geometry
+    \brief geometry basically can store atomic symbols and coordinates for a molecule or crystal.
+    However, the functionality of geometry class is much more than that.
+    First, besides atomic symbols and coordinates any other additional data of real, 
+    integer, boolean or string type can be stored for each atom (see xgeometry).
+    Second, geometry can handle any type of space symmetry, periodic or non-periodic.
+  */
 
   template< class REAL, class CELL>
   class geometry 
@@ -117,14 +125,15 @@ Geometry will inform them all when atoms are added, inserted or removed
     typedef geometry_observer<REAL> DEP;
     typedef geometry<REAL,CELL> SELF;
 
-    // fixme - is that neccessary for something?
+    //! geometry tolerance - maximal distance between two atoms where they are considered at the same point
+    REAL tol_geom;   
+
+    //! default value for tol_geom
     static REAL tol_geom_default;
-    REAL tol_geom;
 
     int DIM;
 
     //! cell for periodic boundary conditions and on-the-fly transformations
-    //CELL * cell;    
     CELL cell;
 
     //! whether to update typetable on-the-fly
@@ -133,6 +142,7 @@ Geometry will inform them all when atoms are added, inserted or removed
     //! whether fractional coordinates are used
     bool frac;
 
+    //! the name of this geometry
     STRING name;
 
     virtual bool is_xgeometry() const
@@ -142,26 +152,27 @@ Geometry will inform them all when atoms are added, inserted or removed
     inline int size() const
     {return _crd.size();}
 
-    //! Synonim
+    //! \brief Number of atoms
     inline int nat() const
     {return _crd.size();}
 
-    //! The name of i-th atom
+    //! \brief The name of i-th atom
     inline STRING & atom(int at)
     {return _atm[at];}
 
     inline STRING atom(int at) const
     {return _atm[at];}
 
-     /*! coord gives the coordinates of i-th atom in the cell
-	@param at id of atom in cell	
-	*/		
+    /* \brief Gives the coordinates of an atom in the geometry
+      @param at - the number of atom in the geometry	
+    */		
     inline vector3d<REAL> coord(int at) const{return _crd[at];}
 
     inline vector3d<REAL>& coord(int at){return _crd[at];}
     
-    /*! real-space position of i-th atom, including i[0] as atom number and
-     other i components as symmetry indicies*/
+    /*! \brief real-space position of atom number at
+      @param at - the number of the atom in the geometry
+     */
     inline vector3d<REAL> r(int at) const
     { 
       vector3d<REAL> r1 = _crd[at];
@@ -170,6 +181,10 @@ Geometry will inform them all when atoms are added, inserted or removed
       return cell.transform(r1, index::D(DIM).all(0)); 
     }
 
+    /*! \brief real-space position of an atom
+      @param at  - the number of atom in the geometry
+      @param I   - the cell or symmetry indicies
+     */
     inline vector3d<REAL> r(int at, const index & I) const
     { 
       vector3d<REAL> r1 = _crd[at];
@@ -178,20 +193,25 @@ Geometry will inform them all when atoms are added, inserted or removed
       return cell.transform(r1, I); 
     }
 
-    //! The synonym
-    inline vector3d<REAL> pos(int at) const
-    { return r(at); }
 
-    inline vector3d<REAL> pos(int at, const index & I ) const
-    { return r(at,I); }
-
-    //! Another synonym with atom_index    
+    /*! \brief real-space position of an atom
+      @param ai  - complex index; ai[0] is the number of atom in the geometry, 
+      ai[1:DIM] are the cell or symmetry indicies
+     */
     inline vector3d<REAL> r(const index & ai) const
     {
       return cell.transform(_crd[ai(0)], ai.sub(1) );
     }
 
-    //! The synonym
+    //! \brief The synonym for r(at)
+    inline vector3d<REAL> pos(int at) const
+    { return r(at); }
+
+    //! \brief The synonym for r(at,I)
+    inline vector3d<REAL> pos(int at, const index & I ) const
+    { return r(at,I); }
+
+    //! \brief The synonym for r(ai)
     inline vector3d<REAL> pos(const index & ai) const
     {
       return cell.transform(_crd[ai(0)], ai.sub(1) );
@@ -211,37 +231,48 @@ Geometry will inform them all when atoms are added, inserted or removed
     
   public:
 
-    //! Number of atomic types in molecule
+    //! Number of different atomic types in molecule
     inline int n_atom_types() const
     {
       return _atm_types.size();
     }
 
+    //! Then synonim for n_atom_types()
     inline int n_types() const
     { return n_atom_types();}
 
-    //! Reference to atom of type number t (not the atom number t in atomic list!)
+    /*! \brief The string name of atom of type number t 
+      @param t - the atomic type number
+     */    
     inline STRING atom_of_type(int t) const
     {
       return _atm_types[t];
     }
 
-    //! Number of type of certain ATOM at
+    //! Number of atomic type for atom named at
     inline int type_of_atom(const STRING & at) const
     {
-      int t;
-      for (t=0; t < _atm_types.size(); t++)
+      for (int t=0; t < _atm_types.size(); t++)
 	if ( _atm_types[t] == at )
-	  break;
-      if (t == _atm_types.size())
-	return -1;
-      else
-	return t;
+	  return t;
+      return -1;
     }
 
-    //! synonym
+    //! Synonim for type_of_atom(const STRING & at)
     inline int type(const STRING & at) const
     { return type_of_atom(at); }
+
+    int define_type(const STRING & at)
+    {
+      int t = type_of_atom(at);
+      if (t==-1) 
+	{ 
+	  t = _atm_types.size();
+	  _atm_types.push_back(at);
+	  _symm_rad.push_back(default_symmetrize_radius);
+	}
+      return t;
+    }
 
     //! type of i-th atom in the geometry
     inline int type_table(int i) const
@@ -250,6 +281,10 @@ Geometry will inform them all when atoms are added, inserted or removed
     //! synonym
     inline int type(int i) const
     { return type_table(i); }
+
+    //! set type of i-th atom in the geometry
+    inline int & type(int i)
+    {return _type_table[i];}
 
     //! synonym
     inline int type_of_atom(int i) const
@@ -457,16 +492,7 @@ Geometry will inform them all when atoms are added, inserted or removed
       _shadow.push_back((char)false);
 
       if (auto_update_types)
-	{
-	  int t = type_of_atom(a);
-	  if (t == -1)
-	    {
-	      t = _atm_types.size();
-	      _atm_types.push_back(a);
-	      _symm_rad.push_back(default_symmetrize_radius);
-	    }
-	  _type_table.push_back(t);
-	}
+	_type_table.push_back(define_type(a));
 
       if (has_observers)
 	for (int i=0; i<observers.size(); i++)
@@ -504,16 +530,7 @@ Geometry will inform them all when atoms are added, inserted or removed
       _crd.insert(_crd.begin()+at,r2);
       _shadow.insert(_shadow.begin()+at,(char)false);
       if (auto_update_types)
-	{
-	  int t = type_of_atom(a);
-	  if (t == -1)
-	    {
-	      t = _atm_types.size();
-	      _atm_types.push_back(a);
-	      _symm_rad.push_back(default_symmetrize_radius);
-	    }
-	  _type_table.insert(_type_table.begin()+at,t);
-	}
+	_type_table.insert(_type_table.begin()+at,define_type(a));
 
       if (has_observers)
 	for (int j=0; j<observers.size(); j++)

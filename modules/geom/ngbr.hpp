@@ -485,8 +485,8 @@ namespace qpp{
       translational_grain_setup();
 
       REAL opt_gs = optimal_grainsize();
-
-      std::cout << "gs= " << grainsize << " opt_gs= " << opt_gs << "\n";
+      
+      //std::cout << "gs= " << grainsize << " opt_gs= " << opt_gs << "\n";
 
       if (auto_grainsize && grainsize < opt_gs )
 	{

@@ -252,6 +252,8 @@ namespace qpp{
       axis *= -REAL(1);
   }
   
+
+
   // ------------------------------------------------------
   class permutation
   {
@@ -723,14 +725,14 @@ namespace qpp{
       cntr += g.coord(i);
     cntr /= g.nat();
 
-    //    for (int i=0; i<g.nat(); i++)
-    //g.change(i,g.atom(i),g.coord(i)-cntr);
+    for (int i=0; i<g.nat(); i++)
+      g.change(i,g.atom(i),g.coord(i)-cntr);
 
     g.sort([](const geometry<REAL> & gg, int ii)->REAL {return norm(gg.pos(ii));});
 
     g.write(std::cout);
 
-    // define the "shells" of atom which can transform to each other
+    // define the possible "images" of atom to which it can transform
     std::vector<std::set<int> > images(g.nat());
 
     int i1=0, i2=0;
@@ -757,6 +759,8 @@ namespace qpp{
 	std::cout << "\n";
       }
     */
+
+    // Define the shells of atoms which can be transformed to each other
 
     std::vector< std::set<int> > shells;
 
@@ -797,6 +801,11 @@ namespace qpp{
 	std::cout << "\n";
       }
 
+    REAL angle_error = 0e0;
+    geometry<REAL, periodic_cell<REAL> > g1(geom);
+    std::vector<permutation> P;
+    P.push_back(permutation(g.nat()));
+
     // Shells are formed, let's try different combinations of atoms to be transformed to each other
 
     for (int sh1=0; sh1<shells.size(); sh1++)
@@ -817,6 +826,8 @@ namespace qpp{
 	      REAL a1 = std::asin(R/norm(r1)), a2 = std::asin(R/norm(r2)),
 			    alp = a1+a2, 
 			    s = scal(r1,r2)/(norm(r1)*norm(r2));
+	      
+	      if (alp > angle_error) angle_error = alp;
 
 	      if ( s > REAL(1) ) s = REAL(1);
 	      if ( s < REAL(-1) ) s = REAL(-1);
@@ -845,9 +856,47 @@ namespace qpp{
 			//std::cout << i1 << "," << j1 <<  " s1= " << s1 << " bet1= " << beta1 << "\n";
 			
 			if ( std::abs(beta-beta1) < alp )
-			  std::cout << i << "," << j << " -> " << i1 << "," << j1 << "\n";
+			  {
+			    std::cout << i << "," << j << " -> " << i1 << "," << j1 << "\n";
+			    vector3d<REAL> r11=g.pos(i1), r12 = g.pos(j1);
+			    matrix3d<REAL> U;
+			    best_transform(U,{r1,r2,r1%r2/sqrt(norm(r1)*norm(r2))},
+					   {r11,r12,r11%r12/sqrt(norm(r11)*norm(r12))});
+
+			    for (int k = 0; k<g.nat(); k++)
+			      g1.coord(k) = U*g.coord(k);
+
+			    std::vector<int> pp;
+			    if (equiv_geoms(pp,g,g1,R))
+			      if (std::find(P.begin(),P.end(),permutation(pp))==P.end())
+				{
+				  P.push_back(permutation(pp));
+				  G.group.push_back(U);
+				  permutation(pp).print();
+				  std::cout << "\n";
+				}
+
+			    best_transform(U,{r1,r2,r1%r2/sqrt(norm(r1)*norm(r2))},
+					   {r11,r12,-(r11%r12)/sqrt(norm(r11)*norm(r12))});
+
+			    for (int k = 0; k<g.nat(); k++)
+			      g1.coord(k) = U*g.coord(k);
+
+			    if (equiv_geoms(pp,g,g1,R))
+			      if (std::find(P.begin(),P.end(),permutation(pp))==P.end())
+				{
+				  P.push_back(permutation(pp));
+				  G.group.push_back(U);
+				  permutation(pp).print();
+				  std::cout << "\n";
+				}
+
+			  }
 		      }
 	    }    
+    
+    //finitize_point_group(G.group,P,angle_error);
+
   }
 
   // ------------------------------------------------------------------------------------------
@@ -869,12 +918,114 @@ namespace qpp{
     generator_form(G,G1); 
   }
 
+  // ---------- find point subgroups stuff ----------------------
+
+  template <class REAL, bool BOUND>
+  bool is_pure_translation(const rotrans<REAL,BOUND> & A)
+  {    
+    return norm(A.R - matrix3d<REAL>(REAL(1))) < rotrans<REAL,BOUND>::rotation_tolerance && 
+						 norm(A.T) > rotrans<REAL,BOUND>::translation_tolerance;
+  }
+
+  template <class REAL, bool BOUND>
+  int find_or_add(std::vector<rotrans<REAL,BOUND> > & registry, const rotrans<REAL,BOUND> & A)
+  {
+    for (int i=0; i<registry.size(); i++)
+      if ( A == registry[i] )
+	return i;
+    registry.push_back(A);
+    //std::cout << "adding " << A << "\n";
+    return registry.size()-1;
+  }
+  
+  template <class REAL, bool BOUND>
+  bool build_fingroup_by_registry(std::vector<int> & G, std::vector<rotrans<REAL,BOUND> > & registry)
+  {
+    int inew=0; 
+    while (inew < G.size())
+      {
+	int inewest = G.size();
+	  for (int ig1 = 0; ig1 < inewest; ig1++)
+	    for (int ig2 = inew; ig2 < inewest; ig2++)
+	      {
+		rotrans<REAL,BOUND> h1 = registry[G[ig1]]*registry[G[ig2]];
+		
+		if ( is_pure_translation(h1) )
+		  return false;
+
+		int ih1 = find_or_add(registry,h1);
+		if ( std::find(G.begin(),G.end(),ih1)==G.end() )
+		  {
+		    G.push_back(ih1);
+		    //std::cout << ih1 << h1 << "\n";
+		  }
+
+		rotrans<REAL,BOUND> h2 = registry[G[ig2]]*registry[G[ig1]];
+	
+		if ( is_pure_translation(h2) )
+		  return false;
+
+		int ih2 = find_or_add(registry,h2);
+		if ( std::find(G.begin(),G.end(),ih2)==G.end() )
+		  {
+		    G.push_back(ih2);
+		    //std::cout << ih1 << h1 << "\n";
+		  }
+	      } 
+	  inew = inewest;
+      }
+    return true;
+  }
+
+  /*! \brief Finds all point subgroups of crystalline symmetry group. 
+    Can be used to list all high symmetry sites in the lattice.
+    @param subs (OUT)    - std::vector containing point subgroups
+    @param cntrs (OUT)   - std::vector containing the central points of the point groups
+    @param G (IN)        - crystalline symmetry group in array form
+   */
   template<class REAL>
   void find_point_subgroups(std::vector<generated_group<matrix3d<REAL> > > & subs, 
 			    std::vector<vector3d<REAL> > &cntrs,
-			    const geometry<REAL, generalized_cell<REAL, rotrans<REAL,true> > > & geom)
+			    const generated_group<rotrans<REAL,false> > & G)
   {
+    std::vector<rotrans<REAL,false> > registry(G.group);
+    std::vector< std::vector<int> > isubs;
 
+    // Find the elements whose abelian subgroup is point; put these subgroup into isubs
+    for (int i=0; i<G.size(); i++)
+      {
+	std::vector<int> asub({i});
+	if ( build_fingroup_by_registry(asub,registry) )
+	  isubs.push_back(asub);
+      }
+
+    for (int i=0; i<isubs.size(); i++)
+      {
+	for (int j=0; j< isubs[i].size(); j++)
+	  std::cout << isubs[i][j]<< " ";
+	
+	vector3d<REAL> c={0,0,0};
+	for (int j=0; j< isubs[i].size(); j++)
+	  c += registry[isubs[i][j]]*vector3d<REAL>(0,0,0);
+	c = c/isubs[i].size();
+	cntrs.push_back(c);
+	std::cout << c << "\n";
+      }
+  }
+
+
+  template<class REAL>
+  void find_point_subgroups(std::vector<generated_group<matrix3d<REAL> > > & subs, 
+			    std::vector<vector3d<REAL> > &cntrs,
+			    const generated_group<rotrans<REAL,true> > & G)
+
+  {
+    generated_group<rotrans<REAL,false> > G1;
+    G1.group.clear();
+    for (const auto & x : G.group)
+      G1.group.push_back(rotrans<REAL,false>(x.T,x.R));
+
+    find_point_subgroups(subs,cntrs,G1);
   }
 
 
@@ -946,6 +1097,35 @@ namespace qpp{
 			   geometry<REAL, periodic_cell<REAL> > & geom,
 			   REAL R = geometry<REAL,periodic_cell<REAL>>::tol_geom_default)
   { find_cryst_symm(G,geom,R); }
+
+  template<class REAL>
+  void py_find_point_subgroups1(bp::list & subs, bp::list &cntrs,
+				const generated_group<rotrans<REAL,true> > & G)
+  {
+    std::vector<generated_group<matrix3d<REAL> > >  vsubs;
+    std::vector<vector3d<REAL> > vcntrs;
+    find_point_subgroups(vsubs,vcntrs,G);
+    for (int i=0; i<vsubs.size(); i++)
+      {
+	subs.append(vsubs[i]);
+	cntrs.append(vcntrs[i]);
+      }
+  }
+
+  template<class REAL>
+  void py_find_point_subgroups2(bp::list & subs, bp::list &cntrs,
+				const generated_group<rotrans<REAL,true> > & G)
+  {
+    std::vector<generated_group<matrix3d<REAL> > >  vsubs;
+    std::vector<vector3d<REAL> > vcntrs;
+    find_point_subgroups(vsubs,vcntrs,G);
+    for (int i=0; i<vsubs.size(); i++)
+      {
+	subs.append(vsubs[i]);
+	cntrs.append(vcntrs[i]);
+      }
+  }
+
     
 #endif
 

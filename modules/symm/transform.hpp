@@ -113,7 +113,7 @@ namespace qpp{
 
     inline bool operator!=(const rotrans<REAL,BOUND> & b) const
     {
-      return norm(T - b.T) > translation_tolerance || norm(R - b.R) > rotation_tolerance;
+      return !(*this == b);
     }
 
     inline vector3d<REAL> operator*(const vector3d<REAL> & v) const

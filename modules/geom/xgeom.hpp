@@ -67,6 +67,9 @@ namespace qpp{
     using geometry<REAL,CELL>::name;
     using geometry<REAL,CELL>::cell;
     using geometry<REAL,CELL>::nat;
+    using geometry<REAL,CELL>::type;
+    using geometry<REAL,CELL>::define_type;
+    using geometry<REAL,CELL>::auto_update_types;
 
     virtual bool is_xgeometry() const
     {return true;}
@@ -550,8 +553,10 @@ namespace qpp{
     void xfill(int j, Args... args)
     { 
       parse(0,j,args...); 
+      if (auto_update_types)
+	type(j) = define_type(_atm[j]);
     }
-
+    
     template<typename... Args>
     void xadd(Args... args)
     {

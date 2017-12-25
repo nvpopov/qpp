@@ -32,6 +32,11 @@ void py_cell_export(const char * pyname)
     ;
 }
 
+template <class REAL, class TRANSFORM, class ARRAY = std::vector<TRANSFORM> >
+void py_generator_form(qpp::generalized_cell<REAL,TRANSFORM> & R, ARRAY & G)
+{
+  qpp::generator_form(R,G);
+}
 
 void qpp_export2()
 {
@@ -53,10 +58,10 @@ void qpp_export2()
   qpp::generated_group<qpp::rotrans<float,true> >::py_export("array_fincryst_group_f");
   qpp::generated_group<qpp::rotrans<double,true> >::py_export("array_fincryst_group_d");
 
-  def("generator_form", qpp::generator_form<qpp::matrix3d<double>,    qpp::generated_group<qpp::matrix3d<double> > >);  
-  def("generator_form", qpp::generator_form<qpp::matrix3d<float>,     qpp::generated_group<qpp::matrix3d<float> > > ); 
-  def("generator_form", qpp::generator_form<qpp::rotrans<double,true>,qpp::generated_group<qpp::rotrans<double,true> > >);
-  def("generator_form", qpp::generator_form<qpp::rotrans<float,true>, qpp::generated_group<qpp::rotrans<float,true> > >);
+  def("generator_form", py_generator_form<double, qpp::matrix3d<double>,    qpp::generated_group<qpp::matrix3d<double> > >);  
+  def("generator_form", py_generator_form<float,  qpp::matrix3d<float>,     qpp::generated_group<qpp::matrix3d<float> > > ); 
+  def("generator_form", py_generator_form<double, qpp::rotrans<double,true>,qpp::generated_group<qpp::rotrans<double,true> > >);
+  def("generator_form", py_generator_form<float,  qpp::rotrans<float,true>, qpp::generated_group<qpp::rotrans<float,true> > >);
 
 }
 

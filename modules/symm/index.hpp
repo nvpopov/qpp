@@ -21,31 +21,36 @@ namespace sn = boost::python::self_ns;
 
 namespace qpp{
   
-  // ------------------- index class ----------------------
-  // Index is a general purpose complex index, having DIM
-  // integer components
-  // It is presumed that DIM > 0
+  /*! \brief index is a general purpose complex index, having DIM integer components
+   */
   class index{
     int *idx;
     bool del;
-
+    
   public:
+
+    //! The index dimension - number of components
     int DIM;
 
+    //! Typecast operator to int type returns the 0th component of the index
     inline operator int() const {return idx[0];}
 
+    //! The d-th component of the index
     inline int operator()(int d) const {return idx[d];} 
 
+    //! The d-th component of the index
     inline int& operator()(int d) {return idx[d];} 
 
-    inline index& operator=(int _i)
+    //! Typecast from integer: the 0th component of index is set to i, the rest is set to 0
+    inline index& operator=(int i)
     {
-      idx[0] = _i;
+      idx[0] = i;
       for (int d=1; d<DIM; d++)
 	idx[d] = 0;
       return *this;
     }
 
+    //! Assigment operator
     inline index& operator=(const index & I)
     {      
       if (DIM != I.DIM)
@@ -62,11 +67,13 @@ namespace qpp{
       return *this;
     }
 
+    //! The same as assigment operator in the form of explicitly called method
     inline void set(const index & I)
     {
       *this = I;
     }
 
+    //! Componentwise addition of two indicies
     inline index operator+(const index & I)
     {
       index res = D(DIM);
@@ -75,6 +82,7 @@ namespace qpp{
       return res;
     }
     
+    //! Componentwise subtraction of two indicies
     inline index operator-(const index & I)
     {
       index res = D(DIM);
@@ -83,6 +91,7 @@ namespace qpp{
       return res;
     }
     
+    //! Index I is added to this index componentwise
     inline index& operator+=(const index & I)
     {
       for (int d=0; d<DIM; d++)
@@ -90,6 +99,7 @@ namespace qpp{
       return *this;
     }
 
+    //! Index I is subtracted from this index componentwise
     inline index& operator-=(const index & I)
     {
       for (int d=0; d<DIM; d++)
@@ -97,10 +107,17 @@ namespace qpp{
       return *this;
     }
 
+    /*! \brief Using std::initializer_list to set the components of this index. Example:
+      qpp::index I({1,2,3,4,5});
+      std::cout << I << std::endl; // (1,2,3,4,5)
+      I.set({5,4,3,2,1});
+      std::cout << I << std::endl; // (5,4,3,2,1)
+      I.set({1,2,3}); // IndexError: Wrong number of index components
+     */
     inline void set(const std::initializer_list<int> &li)
     {
       if (li.size() != DIM)
-	throw std::range_error("Wrong number of index components");
+	IndexError("Wrong number of index components");
       int d=0;
       for (int i : li)
 	idx[d++] = i;
