@@ -2,6 +2,7 @@
 #define _QPPDATA_H
 
 #include <vector>
+#include <set>
 #include <typeinfo>
 #include <data/types.hpp>
 #include <data/errors.hpp>

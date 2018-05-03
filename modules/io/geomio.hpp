@@ -201,12 +201,12 @@ namespace qpp{
     if (geom.DIM>0)
       for (int d = 0; d<geom.DIM; d++)
 	for (int i=0; i<3; i++)
-	  out << fmt::format("{12.6} ", (geom.cell)(d)(i));
+	  out << fmt::format("{:12.6f} ", (geom.cell)(d)(i));
     //out << geom.name();
     out << std::endl;
     for (int i=0; i<geom.size(); i++)
-      out << fmt::format("{-4s} {12.6} {12.6} {12.6f}\n", geom.atom(i),
-                         geom.coord(i)(0)),  geom.coord(i)(1), geom.coord(i)(2);
+      out << fmt::format("{:8s} {:12.6f} {:12.6f} {:12.6f}\n", geom.atom(i),
+                         geom.coord(i)(0),  geom.coord(i)(1), geom.coord(i)(2));
   }
 
   // -------------------------------------------------------------------//  
@@ -221,11 +221,11 @@ namespace qpp{
     if (geom.DIM>0)
       for (int d = 0; d<geom.DIM; d++)
 	for (int i=0; i<3; i++)
-	  out << fmt::format("{12.6f}\n", geom.cell(d)(i));
+	  out << fmt::format("{:12.6f}\n", geom.cell(d)(i));
     //out << geom.name();
     out << std::endl;
     for (int i=0; i<geom.nat(); i++)
-      out <<  fmt::format("{4s} {12.6} {12.6} {12.6} {12.6}\n", geom.atom(i),
+      out <<  fmt::format("{:8s} {:12.6f} {:12.6f} {:12.6f} {:12.6f}\n", geom.atom(i),
                           geom.coord(i)(0), geom.coord(i)(1), geom.coord(i)(2), geom.charge(i));
   }
   // -------------------------------------------------------------------//

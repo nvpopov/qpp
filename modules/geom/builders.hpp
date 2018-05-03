@@ -14,23 +14,27 @@
 
 namespace qpp{
 
+  //!\brief the flags regulating the details of building procedures
   enum build_mode{
 
-    // ignore the situation when two or more atoms are put too close ("crowded") - simply put them into crowd
+    //!\brief ignore the situation when two or more atoms are put too close ("crowded") - simply put them into crowd
     crowd_ignore  = 0x00001,
 
-    // do not put another atom too close to already existing atom - omit it
+    //!\brief do not put another atom too close to already existing atom - omit it
     crowd_exclude = 0x00002,
 
-    // merge atoms of the same type placed in same point into one atom by summation of their electric charges and masses,
-    // i.e. atoms are considered as "fractions" 
+    /*!\brief merge atoms of the same type placed in same point into one atom 
+      by summation of their electric charges and masses,
+      i.e. atoms are considered as "fractions" 
+    */
     crowd_merge   = 0x00004,
 
-    // When filling a volume of certain geometric shape, omit all atoms outside that volume
+    //!\brief When filling a volume of certain geometric shape, omit all atoms outside that volume
     fill_atoms    = 0x00008,
 
-    // When filling a volume of certain geometric shape, put entire unit cell if the centre of 
-    // this cell is inside that volume
+    /*!\brief When filling a volume of certain geometric shape, put all atoms unit cell if the centre of 
+      this cell is inside that volume (even if some atoms are outside)
+    */
     fill_cells    = 0x00010
   };
 

@@ -11,6 +11,9 @@ namespace bp = boost::python;
 
 namespace qpp{
   
+  /*!\brief The generators_pack class implements Positionary Generator Form (PGF) for arbitrary finite 
+    group.
+  */
   template <class TRANSFORM>
   class generators_pack{
   public:

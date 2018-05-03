@@ -310,6 +310,11 @@ The supercell concept generalization for the geometry class looks like:
       //      ngbr.resize_disttable();
     }
 
+    void build_types()
+    {
+      build_type_table();
+    }
+
     void clear_type_table()
     {
       _atm_types.clear();

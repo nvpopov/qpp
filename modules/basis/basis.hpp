@@ -1,13 +1,20 @@
 #ifndef _QPP_BASIS_H
 #define _QPP_BASIS_H
 
-#include <data/qppdata.hpp>
+//#include <data/data.hpp>
 #include <geom/geom.hpp>
-#include <lace/lace3d.hpp>
-#include <boost/format.hpp>
-#include <boost/numeric/ublas/vector.hpp>
-//debug
-#include <iomanip>
+#include <basis/ecp.hpp>
+#include <geom/lace3d.hpp>
+#include <Eigen/Dense>
+#include <fmt/format.h>
+
+#ifdef PY_EXPORT
+
+#include <boost/python.hpp>
+#include <boost/python/suite/indexing/vector_indexing_suite.hpp>
+namespace bp = boost::python;
+
+#endif
 
 namespace qpp{
   //fixme - this drags the whole namespace into qpp::
@@ -28,7 +35,8 @@ namespace qpp{
     virtual STRING label(int i) =0;
 
     // Calculate the values of basis functions on a grid
-    virtual boost::numeric::ublas::vector<FREAL> & values(const std::vector<lace::vector3d<CREAL> > & grid) =0;
+
+    virtual Eigen::Matrix<FREAL, Eigen::Dynamic, 1> & values(const std::vector<vector3d<CREAL> > & grid) =0;
 
   };
 
@@ -42,7 +50,7 @@ namespace qpp{
     qbas_none
   };
 
-  qppobject_type qtype_bastype(qpp_bastype t);
+  //  qppobject_type qtype_bastype(qpp_bastype t);
 
   // -----------------------------------------------------------------
 
@@ -53,7 +61,7 @@ namespace qpp{
 
   // ----------------------------------------------------------------
 
-  template <qpp_bastype ST, class FREAL>
+  template <qpp_bastype BT, class FREAL>
   class qpp_shell;
   // ----------------------------------------------------------------
 
@@ -67,22 +75,39 @@ namespace qpp{
 
   // ----------------------------------------------------------------
 
-  template <qpp_bastype ST, class FREAL=double>
+  template <qpp_bastype BT, class FREAL=double>
   class atomic_basis{
   public:
 
-    STRING basis_import;
-    std::vector<qpp_shell<ST,FREAL> > shells;
+    STRING atom, basis_name;
+    std::vector<qpp_shell<BT,FREAL> > shells;
+    atomic_ecp<FREAL> ecp;
     
     bool empty()
     {
-      return shells.size() == 0 && basis_import == "";
-    }    
+      return shells.size() == 0 && basis_name == "";
+    }  
+
+#ifdef PY_EXPORT
+
+    static void py_export(const char * pyname)
+    {
+      class_< std::vector<qpp_shell<BT,FREAL> > >("noname")
+	.def(bp::vector_indexing_suite<std::vector<qpp_shell<BT,FREAL> > >() );
+      class_<atomic_basis<BT,FREAL> >(pyname)
+	.def_readwrite("shells", &atomic_basis<BT,FREAL>::shells )
+	.def_readwrite("ecp",    &atomic_basis<BT,FREAL>::ecp)
+	.def_readwrite("atom",   &atomic_basis<BT,FREAL>::atom )
+	.def_readwrite("basis_name",   &atomic_basis<BT,FREAL>::basis_name )
+	;
+    }
+
+#endif
 
   };
 
   // ----------------------------------------------------------------------
-  
+  /*
   template <qpp_bastype ST, class FREAL=double>
   class qpp_basis_data : public qpp_declaration{
     
@@ -137,7 +162,7 @@ namespace qpp{
 	  std::cerr << "\n\n";
 	}
       std::cerr << "=====================================\n";
-      */
+    
 
       new_atbasis();
 
@@ -370,7 +395,7 @@ namespace qpp{
     }
   
   };
-
+	  */
   // ----------------------------------------------------------------------
 
   const int Lmax = 3;
@@ -409,7 +434,7 @@ namespace qpp{
     {}
 
     // Calculate the values of basis functions on a grid
-    virtual boost::numeric::ublas::vector<FREAL> & values(const std::vector<lace::vector3d<CREAL> > & grid){}
+    virtual boost::numeric::ublas::vector<FREAL> & values(const std::vector<vector3d<CREAL> > & grid){}
 
     /*    virtual int n_next() const
     {
@@ -454,14 +479,15 @@ namespace qpp{
 
     bool _do_overlap, _do_d1_ovelap, _do_dipole, _do_coulomb, _do_d1_coulomb;
 
-      boost::numeric::ublas::matrix<REAL> * overlap;
+    
+    Eigen::Matrix<REAL, Eigen::Dynamic, Eigen::Dynamic> * overlap;
 
   public:
 
     void no_overlap()
     { do_overlap = false; }
 
-    void do_overlap(boost::numeric::ublas::matrix<REAL> & S)
+    void do_overlap(Eigen::Matrix<REAL, Eigen::Dynamic, Eigen::Dynamic> & S)
     { 
       _do_overlap = true;
       overlap = & S;

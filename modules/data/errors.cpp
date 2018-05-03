@@ -29,6 +29,18 @@ namespace qpp{
     throw_error_already_set();
   }
 
+  void PyValueError(const char * msg)
+  {
+    PyErr_SetString(PyExc_ValueError, msg);
+    throw_error_already_set();
+  }
+
+  void PySyntaxError(const char * msg)
+  {
+    PyErr_SetString(PyExc_SyntaxError, msg);
+    throw_error_already_set();
+  }
+
   void StopIter()
   {
     PyErr_SetString(PyExc_StopIteration, "");
@@ -60,7 +72,25 @@ namespace qpp{
 #ifdef PY_EXPORT
     PyKeyError(msg);
 #else
+    throw std::range_error(msg);
+#endif
+  }
+
+  void ValueError(const char * msg)
+  {
+#ifdef PY_EXPORT
+    PyValueError(msg);
+#else
     throw std::domain_error(msg);
+#endif
+  }
+
+  void SyntaxError(const char * msg)
+  {
+#ifdef PY_EXPORT
+    PySyntaxError(msg);
+#else
+    throw std::runtime_error(msg);
 #endif
   }
 

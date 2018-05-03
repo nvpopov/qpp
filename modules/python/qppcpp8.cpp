@@ -13,6 +13,7 @@ void def_autosymm()
   def("find_cryst_symm", qpp::py_find_cryst_symm2<REAL>);
   def("find_point_subgroups", qpp::py_find_point_subgroups1<REAL>);
   def("find_point_subgroups", qpp::py_find_point_subgroups2<REAL>);
+  def("find_translations", qpp::py_find_translations<REAL>);
 }
 
 void qpp_export8()

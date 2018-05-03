@@ -22,6 +22,8 @@ BOOST_PYTHON_MODULE(qpp_cpp)
   qpp_export6();
   qpp_export7();
   qpp_export8();
+  qpp_export9();
+  qpp_export10();
   
   qpp_io_export();
 }

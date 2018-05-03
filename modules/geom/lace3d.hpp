@@ -60,6 +60,11 @@ namespace qpp{
       return r[i];
     }
 
+    inline VALTYPE operator[](int i) const
+    {
+      return r[i];
+    }
+
     inline VALTYPE operator()(int i) const
     {
       return r[i];
@@ -425,6 +430,11 @@ namespace qpp{
     inline VALTYPE zz() const{return a[8];}
 
     inline vector3d<VALTYPE> operator()(int i) const
+    {
+      return vector3d<VALTYPE>(a[i],a[i+3],a[i+6]);
+    } 
+
+    inline vector3d<VALTYPE> operator[](int i) const
     {
       return vector3d<VALTYPE>(a[i],a[i+3],a[i+6]);
     } 

@@ -229,24 +229,32 @@ def find_point_subgroups(G):
         add_subspace(subspaces,elements,s,[g])
 
     n = len(subspaces)
+    '''
+    for  i in xrange(n):
+        print i, subspaces[i], len(elements[i])
+    '''
     for i in xrange(n):
         if subspaces[i].dim==0:
             for j in xrange(n):
                 if subspaces[i].c in subspaces[j]:
                     #elements[i] = complete_subgroup(elements[i] + elements[j])
                     elements[i] = elements[i] | elements[j]
-                    add_subspace(subspaces,elements,s,[g])
+                    #add_subspace(subspaces,elements,s,[g])
+    '''
+    print
+    for  i in xrange(n):
+        print i, subspaces[i], len(elements[i])
+    '''
     nnew = 0
     contin = True
-
     while contin:
         nnewnew = len(subspaces)
-        print nnew,nnewnew
+        #print nnew,nnewnew
 
         for i in xrange(nnew,len(subspaces)):
-            if subspaces[i].dim in (2,3):
+            if subspaces[i].dim in (1,2):
                 for j in xrange(n):
-                    if subspaces[j].dim in (2,3):
+                    if subspaces[j].dim in (1,2):
                         add_subspace(subspaces,elements, subspaces[i] & subspaces[j], \
                                      #elements[i] + elements[j])
                                      elements[i] | elements[j])

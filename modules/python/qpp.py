@@ -1,5 +1,5 @@
 from qpp_cpp import *
-from nice import overloader
+from aux import overloader, tbl2clms, tbl2raws
 from symm import symm_add, build_multab, symm_order, symm_invert, is_symm_group, \
     is_normal_subgroup, mul_groups, idx2grp, grp2idx, abelian_sub, find_generators
 

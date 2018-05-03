@@ -1,5 +1,5 @@
   template <class FREAL>
-  class qpp_shell<QBAS, FREAL> : public qpp_object{
+  class qpp_shell<QBAS, FREAL>{ //: public qpp_object{
 
     int _nprim, _nl;
     int * _l;
@@ -7,16 +7,21 @@
     STRING * _lbl;
 
     qpp_angtype _angtype;
-
-    qpp_param_array *_parm;
-
     const static FREAL eps;
+
+    void init_props()
+    {
+#ifdef PY_EXPORT
+      py_label.bind(this);
+      py_l.bind(this);
+      py_alpha.bind(this);
+      py_coeff.bind(this);
+#endif
+    }
 
   public:
 
-    qpp_shell(int __nprim, int __nl, qpp_angtype __angtype = qang_spherical, 
-	      qpp_object * __owner = NULL, int __line=-1, const STRING & __file = "") :
-      qpp_object("",__owner)
+    qpp_shell(int __nprim, int __nl, qpp_angtype __angtype = qang_spherical) 
     {
       _nprim = __nprim;
       _nl = __nl;
@@ -25,14 +30,11 @@
       _coeff = new FREAL[_nprim*_nl];
       _lbl = new STRING[_nl];
       _angtype = __angtype;
-      setline(__line);
-      setfile(__file);
-
-      _parm = new qpp_param_array("",this);
+      init_props();
     }
 
-    qpp_shell(const qpp_shell<QBAS,FREAL> & sh) :
-      qpp_object(sh.name(),sh.owner())
+    qpp_shell(const qpp_shell<QBAS,FREAL> & sh) 
+    //qpp_object(sh.name(),sh.owner())
     {
       _nprim = sh._nprim;
       _nl = sh._nl;
@@ -50,12 +52,8 @@
       for (int i=0; i<_nprim*_nl; i++)
 	_coeff[i] = sh._coeff[i];
       _angtype = sh._angtype;
-
-      setline(sh.line());
-      setfile(sh.file());
-
-      _parm = new qpp_param_array(*sh._parm);
-      _parm -> setowner(this);
+      init_props();
+      
     }
 
     ~qpp_shell()
@@ -90,10 +88,10 @@
     { return _alpha[i]; }
 
     inline FREAL & coeff(int i, int j)
-    { return _coeff[i*_nprim+j]; }
+    { return _coeff[i+j*_nprim]; }
 
     inline FREAL coeff(int i, int j) const
-    { return _coeff[i*_nprim+j]; }
+    { return _coeff[i+j*_nprim]; }
 
     qpp_angtype & angtype()
     { return _angtype; }
@@ -173,11 +171,12 @@
 	  for (int p=0; p<nprim(); p++)
 	    {
 	      for (int f=0; f<offset; f++) os << " ";
-	      os << boost::format("%15.6f %15.6f\n") % alpha(p) % coeff(i,p);
+	      os << fmt::format("{:15.6f} {:15.6f}\n", alpha(p), coeff(p,i));
 	    }
 	}      
     }
 
+/*
     virtual STRING category() const
     {
       return "shell";
@@ -207,7 +206,7 @@
     {
       return _parm->nested(i);
     }
-
+*/
     virtual void write(OSTREAM &os, int offset=0) const
     {
       for (int k=0; k<offset; k++) os << " ";
@@ -228,21 +227,73 @@
       for (int i=0; i<nprim(); i++)
 	{
 	  for (int k=0; k<offset+2; k++) os << " "; 
-	  os << boost::format("%15.8e ") % alpha(i);
+	  os << fmt::format("{:15.8f} ",alpha(i));
 	  for (int j=0; j<nshells(); j++)
-	    os << boost::format("%10.6f ") % coeff(j,i);
+	    os << fmt::format("{:10.6f} ", coeff(i,j));
 	  os << "\n";
 	}
       for (int k=0; k<offset; k++) os << " ";
       os << "}\n";
     }
     
+    /*
     virtual qpp_object * copy() const
     {
       return new qpp_shell<QBAS,FREAL>(*this);
-    }
+      }*/
+
+#ifdef PY_EXPORT
+
+    typedef qpp_shell<QBAS,FREAL> SELF;
+
+    inline void py_set_label(int i, const STRING & l)
+    { _lbl[i]=l; }
+
+    inline STRING py_get_label(int i)
+    { return _lbl[i]; }    
+
+    inline int py_get_l(int i)
+    { return _l[i]; }
+
+    inline void py_set_l(int i, const int & l) 
+    { _l[i] = l; }
+
+    inline FREAL py_get_alpha(int i)
+    { return _alpha[i]; }
+
+    inline void py_set_alpha(int i, const FREAL & a)
+    { _alpha[i]=a; }
+
+    inline FREAL py_get_coeff(int i, int j)
+    { return _coeff[i+j*_nprim]; }
+
+    inline void py_set_coeff(int i, int j, const FREAL & c)
+    { _coeff[i+j*_nprim] = c; }
+
+    inline FREAL py_get_coeff1(int i)
+    { TypeError("Contraction coefficient needs 2 indicies"); }
+
+    inline void py_set_coeff1(int i, const FREAL & c)
+    { TypeError("Contraction coefficient needs 2 indicies"); }
+
+    py_indexed_property< SELF, STRING, int, &SELF::py_get_label, &SELF::py_set_label> py_label;
+    py_indexed_property< SELF, int, int,    &SELF::py_get_l, &SELF::py_set_l> py_l;
+    py_indexed_property< SELF, FREAL, int,    &SELF::py_get_alpha, &SELF::py_set_alpha> py_alpha;
+    py_2indexed_property<SELF, FREAL, FREAL, int, &SELF::py_get_coeff1, &SELF::py_set_coeff1,
+			 &SELF::py_get_coeff, &SELF::py_set_coeff > py_coeff;
+
+    static void py_props()
+    {
+      py_indexed_property< SELF, STRING, int, &SELF::py_get_label, &SELF::py_set_label>::py_export("noname");
+      py_indexed_property< SELF, int, int,    &SELF::py_get_l, &SELF::py_set_l>::py_export("noname");
+      py_indexed_property< SELF, FREAL, int,    &SELF::py_get_alpha, &SELF::py_set_alpha>::py_export("noname");
+      py_2indexed_property<SELF, FREAL, FREAL, int, &SELF::py_get_coeff1, &SELF::py_set_coeff1,
+			   &SELF::py_get_coeff, &SELF::py_set_coeff >::py_2export("noname");
+   }
+
+#endif
 
   };
 
   template <class FREAL>
-  const FREAL qpp_shell<QBAS,FREAL>::eps = 1e-7;
+  const FREAL qpp_shell<QBAS,FREAL>::eps = 1e-8;

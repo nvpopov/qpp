@@ -8,6 +8,8 @@ namespace qpp{
   void PyIndexError(const char *);
   void PyTypeError(const char *);
   void PyKeyError(const char *);
+  void PyValueError(const char *);
+  void PySyntaxError(const char *);
   void StopIter();
 
 #endif
@@ -15,6 +17,8 @@ namespace qpp{
   void IndexError(const char *);
   void TypeError(const char *);
   void KeyError(const char *);
+  void ValueError(const char *);
+  void SyntaxError(const char *);
 
 };
 

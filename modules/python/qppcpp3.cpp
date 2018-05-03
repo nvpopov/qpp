@@ -33,6 +33,7 @@ void py_geom_export(const char * pyname)
     //make_getter(& qpp::geometry<REAL,CELL>::cell, return_value_policy<reference_existing_object>()), 
     //make_getter(& qpp::geometry<REAL,CELL>::cell, return_self<>()), 
     //& qpp::geometry<REAL,CELL>::py_setcell)
+    .def_readwrite("name",   & qpp::geometry<REAL,CELL>::name)
     .def_readwrite("cell",   & qpp::geometry<REAL,CELL>::cell)
     .def_readonly("dim",     & qpp::geometry<REAL,CELL>::DIM)
     .def_readwrite("atom",   & qpp::geometry<REAL,CELL>::py_atoms)

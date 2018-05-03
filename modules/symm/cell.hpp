@@ -50,17 +50,19 @@ namespace qpp{
 
   */
 
-  // Purely translational periodic cell with DIM=1,2,3 periodicity
+  /*! \brief Purely translational periodic cell with DIM=1,2,3 periodicity. The value
+    DIM=0 is also valid and means no periodicity
+   */
   template<class REAL = double>
   struct periodic_cell {
 
-    
+    //! \brief The dimension of periodicity
     int DIM;
 
     vector3d<REAL> *v;
     STRING name;
 
-    //@brief Create periodic cell of dimension dim with zero translation vectors
+    //! \brief Create periodic cell of dimension dim with zero translation vectors
     periodic_cell(int dim)
     {
       DIM = dim;
@@ -69,6 +71,7 @@ namespace qpp{
 	v[d] = 0;
     }
 
+    //! \brief Copy constructor for periodic cell
     periodic_cell(const periodic_cell<REAL> & cl)
     {
       DIM = cl.DIM;
@@ -77,9 +80,12 @@ namespace qpp{
 	v[i] = cl.v[i];
     }
 
+
+    /*! \brief Creates periodic cell of DIM==3 with given lattice constants and angles
+        @param a,b,c - lattice constants
+        @param alpha, beta, gamma - angles are in degrees!
+    */
     periodic_cell(REAL a, REAL b, REAL c, REAL alpha, REAL beta, REAL gamma)
-    // for DIM==3
-    // angles are in degrees!!
     {
       DIM = 3;
       v = new vector3d<REAL>[DIM];
@@ -94,6 +100,10 @@ namespace qpp{
       v[2] = vector3d<REAL>(nx,ny,nz)*c;
     }
     
+    /*! \brief Creates periodic cell with given translation vectors
+        @param a, b(optional), c(optional) - translation vectors. If only one provided, the resulting cell has 
+        DIM==1, if two provided, then DIM==2, and if all three provided, you get DIM==3 periodic cell
+    */
     periodic_cell(vector3d<REAL > a, vector3d<REAL > b=0, vector3d<REAL > c=0 )
     {
       DIM = 1;
@@ -118,6 +128,7 @@ namespace qpp{
     index end() const
     {return index::D(DIM).all(1); }
 
+    
     vector3d<REAL> transform(const vector3d<REAL> & r, const index & I) const
     {
       vector3d<REAL> r1 = r;
@@ -126,9 +137,13 @@ namespace qpp{
       return r1;
     }
 
+    /*! \brief Answers the question whether r belongs to the unit cell 
+      defined as parallelepiped with one vertex in
+      the coordinate origin
+      the others are pointed by lattice vectors
+    */
     bool within(const vector3d<REAL> & r) const
-    // Answers the question whether r belongs to the unit cell
-    {
+        {
       vector3d<REAL> f = cart2frac(r);
       bool res = true;
       for (int d=0; d<DIM; d++)
@@ -140,12 +155,12 @@ namespace qpp{
       return res;
     }
     
+    /*! \brief Brings the point r into the volume of unit cell by translations
+       unit cell is defined as parallelepiped with one vertex in
+       the coordinate origin
+       the others are pointed by lattice vectors
+    */
     vector3d<REAL> reduce(const vector3d<REAL> & r) const
-    // Brings the point r into the volume of unit cell
-    // by translations
-    // unit cell is defined as parallelepiped with one vertex in
-    // the coordinate origin
-    // the others are pointed by v[0],v[1],v[2] vectors
     {
       vector3d<REAL> f = cart2frac(r);
       for (int d=0; d<DIM; d++)
@@ -153,19 +168,21 @@ namespace qpp{
       return frac2cart(f);
     }
 
-    // find high symmetry point within "radius" distance from given point "r"
-    // makes sence for rotational symmetries
+    /*! \brief find high symmetry point within "radius" distance from given point "r"
+      makes sence for rotational symmetries
+    */
     vector3d<REAL> symmetrize(const vector3d<REAL> & r, REAL radius) const
     {
       return r;
     }
 
-    // fractional to cartesian and vice versa transformation
-    // makes sence only for periodic translational cells
+    /*! \brief fractional to cartesian  transformation
+       makes sence only for periodic translational cells
+       @param[in] r The fractional coordinates. In the case DIM==2 the third coordinate ( z=r(2) ) is
+       orthogonal to both translation vectors
+       @return Cartesian coordinates
+    */
     vector3d<REAL> frac2cart(const vector3d<REAL> & r) const
-    // Works for DIM==3 and DIM==2
-    // In the case DIM==2 the third coordinate ( z=r(2) ) is
-    // orthogonal to both translation vectors
     {
       vector3d<REAL> res=REAL(0);
       for (int i=0; i<DIM; i++)
@@ -181,11 +198,13 @@ namespace qpp{
       return res;
     }
 
+    /*! \brief cartesian to fractional transformation,
+       works for DIM==3 and DIM==2
+       @param[in] r  Fartesian coordinates
+       @return Fractional coordinates. In the case DIM==2 the third coordinate ( z=f(2) ) is
+       orthogonal to both translation vectors
+    */
     vector3d<REAL> cart2frac(const vector3d<REAL> & r) const
-    // cartesian to fractional
-    // works for DIM==3 and DIM==2
-    // In the case DIM==2 the third coordinate ( z=r(2) ) is
-    // orthogonal to both translation vectors
     {
       vector3d<REAL> v2;
       if (DIM==3)
@@ -218,11 +237,12 @@ namespace qpp{
       return *this;
     }
 
+    /*! \brief Brings the point r into the volume of unit cell
+       by translations
+       unit cell is defined as parallelepiped CENTRED in the
+       coordinate origin
+    */
     inline vector3d<REAL> reduce_cntr(const vector3d<REAL> & r) const
-    // Brings the point r into the volume of unit cell
-    // by translations
-    // unit cell is defined as parallelepiped CENTRED in the
-    // coordinate origin
     {
       vector3d<REAL> f = cart2frac(r);
       for (int i=0; i<DIM; i++)
@@ -233,14 +253,16 @@ namespace qpp{
       return frac2cart(f);
     }
 
+    /*! \brief Brings r into Wigner-Zeitz unit cell
+      fixme - not implemented yet!
+    */
     inline vector3d<REAL> reduce_wz(vector3d<REAL> r) const
-    // Brings r into Wigner-Zeitz unit cell
-    // fixme - implement this!
     {}
 
 
+    /*! \brief Answers the question whether r belongs to unit cell centred at the coordinate origin
+     */
     inline bool within_centered(vector3d<REAL> r) const
-    // does r belong to unit cell centred at the coords origin?
     {
       vector3d<REAL> f = cart2frac(r);
       bool res = true;
@@ -253,9 +275,10 @@ namespace qpp{
       return res;
     }
 
+    /*! \brief Answers the question whether r belongs to Wigner-Zeitz unit cell
+      fixme - not implemented yet!
+    */
     inline bool within_wz(vector3d<REAL> r) const
-    // does r belong to Wigner-Zeitz unit cell
-    // fixme - implement this!
     {}
 
     virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const
