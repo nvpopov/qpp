@@ -10,6 +10,7 @@
 #include <symm/spgw.hpp>
 #include <Eigen/Dense>
 #include <algorithm>
+#include <iomanip>
 
 #ifdef PY_EXPORT
 #include <boost/python.hpp>
@@ -1495,6 +1496,7 @@ namespace qpp{
   template<class REAL>
   void find_point_subgroups(std::vector<generated_group<matrix3d<REAL> > > & subs, 
 			    std::vector<vector3d<REAL> > &cntrs,
+			    std::vector<int> & dims,
 			    const generated_group<rotrans<REAL,false> > & G)
   {
     
@@ -1511,11 +1513,12 @@ namespace qpp{
       }
 
     //debug
-    /*
+    std::setprecision(4);
+    std::cout << std::fixed;
     for (int i=0; i<subspaces.size(); i++)
-      std::cout << i << "d= " << subspaces[i].dim << " pt= " << subspaces[i].pt << " n= " << subspaces[i].n 
+      std::cout << i << " d= " << subspaces[i].dim << " pt= " << subspaces[i].pt << " n= " << subspaces[i].n 
 		<< " ng= " << elements[i].size() << "\n";
-    */
+    
 
     for (int i=0; i<subspaces.size(); i++)
       if ( subspaces[i].dim == 0)
@@ -1526,12 +1529,12 @@ namespace qpp{
 		elements[i].push_back(gg);
 
     //debug
-    /*
+    
     std::cout << "\n\n";
     for (int i=0; i<subspaces.size(); i++)
       std::cout << i << "d= " << subspaces[i].dim << " pt= " << subspaces[i].pt << " n= " << subspaces[i].n 
 		<< " ng= " << elements[i].size() << "\n";
-    */
+    
     /*
     for (int i=0; i<subspaces.size(); i++)
       {
@@ -1564,6 +1567,7 @@ namespace qpp{
 	if (subspaces[i].dim==d)
 	  {
 	    cntrs.push_back(subspaces[i].pt);
+	    dims.push_back(d);
 	    subs.push_back(generated_group<matrix3d<REAL> >());
 	    int n=subs.size()-1;
 	    for (int j=0; j<elements[i].size(); j++)
@@ -1575,6 +1579,7 @@ namespace qpp{
   template<class REAL>
   void find_point_subgroups(std::vector<generated_group<matrix3d<REAL> > > & subs, 
 			    std::vector<vector3d<REAL> > &cntrs,
+			    std::vector<int> & dims,
 			    const generated_group<rotrans<REAL,true> > & G)
 
   {
@@ -1583,7 +1588,7 @@ namespace qpp{
     for (const auto & x : G.group)
       G1.group.push_back(rotrans<REAL,false>(x.T,x.R));
 
-    find_point_subgroups(subs,cntrs,G1);
+    find_point_subgroups(subs,cntrs,dims,G1);
   }
 
 
@@ -1656,13 +1661,14 @@ namespace qpp{
 			   REAL R = geometry<REAL,periodic_cell<REAL>>::tol_geom_default)
   { find_cryst_symm(G,geom,R); }
 
-  template<class REAL>
+  template<class REAL, bool BOUND>
   void py_find_point_subgroups1(bp::list & subs, bp::list &cntrs,
-				const generated_group<rotrans<REAL,false> > & G)
+				const generated_group<rotrans<REAL,BOUND> > & G)
   {
     std::vector<generated_group<matrix3d<REAL> > >  vsubs;
     std::vector<vector3d<REAL> > vcntrs;
-    find_point_subgroups(vsubs,vcntrs,G);
+    std::vector<int> vdims;
+    find_point_subgroups(vsubs,vcntrs,vdims,G);
     for (int i=0; i<vsubs.size(); i++)
       {
 	subs.append(vsubs[i]);
@@ -1670,6 +1676,23 @@ namespace qpp{
       }
   }
 
+  template<class REAL, bool BOUND>
+  void py_find_point_subgroups2(bp::list & subs, bp::list &cntrs, bp::list & dims,
+				 const generated_group<rotrans<REAL,BOUND> > & G)
+  {
+    std::vector<generated_group<matrix3d<REAL> > >  vsubs;
+    std::vector<vector3d<REAL> > vcntrs;
+    std::vector<int> vdims;
+    find_point_subgroups(vsubs,vcntrs,vdims,G);
+    for (int i=0; i<vsubs.size(); i++)
+      {
+	subs.append(vsubs[i]);
+	cntrs.append(vcntrs[i]);
+	dims.append(vdims[i]);
+      }
+  }
+
+  /*
   template<class REAL>
   void py_find_point_subgroups2(bp::list & subs, bp::list &cntrs,
 				const generated_group<rotrans<REAL,true> > & G)
@@ -1683,6 +1706,7 @@ namespace qpp{
 	cntrs.append(vcntrs[i]);
       }
   }
+  */
 
   template<class REAL>
   bp::list py_find_translations( geometry<REAL,periodic_cell<REAL> > & g1, 
