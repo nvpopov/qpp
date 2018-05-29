@@ -1,3 +1,4 @@
+/*
 #include "qppcpp.hpp"
 #include <data/molecule.hpp>
 #include <symm/gcell.hpp>
@@ -35,3 +36,4 @@ void qpp_export10()
   py_molecule_export<double, qpp::generalized_cell<double, qpp::rotrans<double,true> > >("molecule_fcgd");
 }
 
+*/

@@ -12,8 +12,8 @@
 //#include <lace/complex.hpp>
 
 #ifdef PY_EXPORT
-#include <boost/python/list.hpp>
-#include <boost/python.hpp>
+#include <pybind11/pybind11.h>
+namespace py = pybind11;
 #endif
 
 namespace qpp{
@@ -286,18 +286,18 @@ namespace qpp{
     inline void py_sety(VALTYPE v){ y()=v;}
     inline void py_setz(VALTYPE v){ z()=v;}
 
-    vector3d(const boost::python::list &l)
+    vector3d(const py::list &l)
     {
       // Assuming that length & type checks have been performed inside python code
       for (int i=0; i<3; i++)
-	r[i] = boost::python::extract<VALTYPE>(l[i]);
+        r[i] = py::cast<VALTYPE>(l[i]);
     }    
 
-    vector3d(const boost::python::tuple &l)
+    vector3d(const py::tuple &l)
     {
       // Assuming that length & type checks have been performed inside python code
       for (int i=0; i<3; i++)
-	r[i] = boost::python::extract<VALTYPE>(l[i]);
+        r[i] = py::cast<VALTYPE>(l[i]);
     }    
 
 #endif
@@ -560,18 +560,18 @@ namespace qpp{
 
 #ifdef PY_EXPORT
 
-    matrix3d(const boost::python::list &l)
+    matrix3d(const py::list &l)
     {
       // Assuming that length & type checks have been performed inside python code
       for (int i=0; i<9; i++)
-	a[i] = boost::python::extract<VALTYPE>(l[i]);
+        a[i] =py::cast<VALTYPE>(l[i]);
     }    
 
-    matrix3d(const boost::python::tuple &l)
+    matrix3d(const py::tuple &l)
     {
       // Assuming that length & type checks have been performed inside python code
       for (int i=0; i<9; i++)
-	a[i] = boost::python::extract<VALTYPE>(l[i]);
+        a[i] = py::cast<VALTYPE>(l[i]);
     }    
 
     inline matrix3d<VALTYPE> py_muln(VALTYPE s) const
@@ -583,15 +583,15 @@ namespace qpp{
     inline vector3d<VALTYPE> py_mulv(const vector3d<VALTYPE> & v)
     { return (*this)*v;}
 
-    inline VALTYPE py_getitem(boost::python::tuple I) const
+    inline VALTYPE py_getitem(py::tuple I) const
     { 
-      int i = boost::python::extract<int>(I[0]), j = boost::python::extract<int>(I[1]);
+      int i = py::cast<int>(I[0]), j = py::cast<int>(I[1]);
       return (*this)(i,j); 
     }
     
-    inline void py_setitem(boost::python::tuple I, VALTYPE v)
+    inline void py_setitem(py::tuple I, VALTYPE v)
     { 
-      int i = boost::python::extract<int>(I[0]), j = boost::python::extract<int>(I[1]);
+      int i = py::cast<int>(I[0]), j = py::cast<int>(I[1]);
       (*this)(i,j) = v; 
     }
 
@@ -1086,11 +1086,11 @@ namespace qpp{
   {  return RotMtrx(nn,phi);}
 
   template<class VALTYPE>
-  inline matrix3d<VALTYPE> py_rotmtrx_t(const boost::python::tuple & nn, VALTYPE phi)
+  inline matrix3d<VALTYPE> py_rotmtrx_t(const py::tuple & nn, VALTYPE phi)
   {  return RotMtrx(vector3d<VALTYPE>(nn),phi);}
 
   template<class VALTYPE>
-  inline matrix3d<VALTYPE> py_rotmtrx_l(const boost::python::list & nn, VALTYPE phi)
+  inline matrix3d<VALTYPE> py_rotmtrx_l(const py::list & nn, VALTYPE phi)
   {  return RotMtrx(vector3d<VALTYPE>(nn),phi);}
 
   template<class VALTYPE>
@@ -1098,11 +1098,11 @@ namespace qpp{
   {  return Sigma(nn);}
 
   template<class VALTYPE>
-  inline matrix3d<VALTYPE> py_sigma_t(const boost::python::tuple & nn)
+  inline matrix3d<VALTYPE> py_sigma_t(const py::tuple & nn)
   {  return Sigma(vector3d<VALTYPE>(nn));}
 
   template<class VALTYPE>
-  inline matrix3d<VALTYPE> py_sigma_l(const boost::python::list & nn)
+  inline matrix3d<VALTYPE> py_sigma_l(const py::list & nn)
   {  return Sigma(vector3d<VALTYPE>(nn));}
 
 #endif

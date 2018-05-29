@@ -36,47 +36,17 @@ add_subdirectory(deps)
 include_directories(${CMAKE_SOURCE_DIR}/deps/fmtlib)
 #add_subdirectory(${CMAKE_SOURCE_DIR}/deps/fmtlib)
 
-#boost related stuff
-option(USE_STATIC_BOOST "use static boost library for python bindings" OFF)
+
 
 #Python related stuff
-option(PYTHON_BINDINGS "build qpp python bindings" OFF)
-
-set(PYTHON_VERSION "2.7" CACHE STRING "Python version")
+option(PYTHON_BINDINGS "build qpp python bindings" ON)
 
 if(PYTHON_BINDINGS)
-    message("-- Compilation of python bindings is enabled")
-    message("-- Use Python ${PYTHON_VERSION} for bindings")
-    if(USE_STATIC_BOOST)
-        message("-- Using static boost python libs for linking")
-        add_definitions(-DBOOST_PYTHON_STATIC_LIB)
-    else()
-        message("-- Use dynamic boost python libs for linking")
-    endif()
-
-    find_package(PythonLibs ${PYTHON_VERSION} REQUIRED)
-    if(PYTHONLIBS_FOUND)
-        include_directories(${PYTHON_INCLUDE_DIRS})
-        if(NOT USE_STATIC_BOOST)
-            set(PYTHON_VERSION_ ${PYTHON_VERSION})
-            string(REPLACE "." "" PYTHON_VERSION_ ${PYTHON_VERSION})
-            if(${PYTHON_VERSION_} GREATER 30)
-                find_package(Boost COMPONENTS
-                    python-py${PYTHON_VERSION_} REQUIRED)
-                include_directories(${Boost_INCLUDE_DIR})
-            else()
-                find_package(Boost COMPONENTS python REQUIRED)
-                include_directories(${Boost_INCLUDE_DIR})
-            endif()
-
-        endif()
-    endif()
-
 endif()
 
 #eigen3
 option(USE_SYSTEM_EIGEN3
-    "use system avaiable eigen3 or download as deps" ON)
+	"use system avaiable eigen3 or download as deps" OFF)
 if(USE_SYSTEM_EIGEN3)
     find_package(Eigen3)
     if(Eigen3_FOUND)
@@ -102,7 +72,7 @@ file(GLOB_RECURSE ide_t2 "tests/*.*pp")
 #Global includes
 include_directories(modules/)
 
-option(USE_SPGLIB "use spglib")
+option(USE_SPGLIB "use spglib" ON)
 if(USE_SPGLIB)
     message("-- spglib bindings is enabled")
     include_directories(${CMAKE_SOURCE_DIR}/deps/spglib/src)
@@ -113,9 +83,9 @@ endif()
 
 #Only data fetching here
 add_subdirectory(modules)
-add_subdirectory(utils)
+#add_subdirectory(utils)
 
-option(BUILD_EXAMPLES "build examples" ON)
+option(BUILD_EXAMPLES "build examples" OFF)
 if(BUILD_EXAMPLES)
     message("-- Building examples is enabled")
     add_subdirectory(examples)

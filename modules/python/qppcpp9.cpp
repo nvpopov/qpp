@@ -1,7 +1,7 @@
 #include "qppcpp.hpp"
-#include <basis/basis.hpp>
-#include <basis/ecp.hpp>
-
+//#include <basis/basis.hpp>
+//#include <basis/ecp.hpp>
+/*
 template<qpp::qpp_bastype BT, class REAL>
 void py_basis_export(const char * pyname)
 {
@@ -44,4 +44,4 @@ void qpp_export9()
   py_ecp_export<double>("ecp_d");
   qpp::atomic_basis<qpp::qbas_gauss,float>::py_export("atomic_basis_gf");
   qpp::atomic_basis<qpp::qbas_gauss,double>::py_export("atomic_basis_gd");
-}
+}*/
