@@ -1,11 +1,9 @@
 language: cpp
 dist: trusty
 sudo: required
+python: '3.6'
 compiler:
  - gcc
-install: 
- - sudo apt-get install libboost-all-dev
- - sudo apt-get install libboost-python-dev
 script:
- - mkdir build && cd build && cmake .. -DUSE_SPGLIB=ON -DBUILD_QC=ON -DUSE_SYSTEM_EIGEN3=OFF -DBUILD_PYTHON_BINDINGS=ON && cmake --build .
+ - mkdir build && cd build && cmake .. -DUSE_SPGLIB=ON -DBUILD_QC=OFF -DUSE_SYSTEM_EIGEN3=OFF -DBUILD_PYTHON_BINDINGS=ON && cmake --build .
  
