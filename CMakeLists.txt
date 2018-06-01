@@ -34,6 +34,7 @@ endif()
 
 add_subdirectory(deps)
 include_directories(${CMAKE_SOURCE_DIR}/deps/fmtlib)
+include_directories(${CMAKE_SOURCE_DIR}/deps/pybind11/include)
 #add_subdirectory(${CMAKE_SOURCE_DIR}/deps/fmtlib)
 
 

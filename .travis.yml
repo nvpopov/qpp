@@ -1,7 +1,8 @@
 language: cpp
 dist: trusty
 sudo: required
-python: '3.6'
+python: 
+ - '3.6'
 compiler:
  - gcc
 script:

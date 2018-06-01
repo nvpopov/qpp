@@ -1,5 +1,5 @@
 include(ExternalProject)
-add_subdirectory(pybind11)
+add_subdirectory(${CMAKE_SOURCE_DIR}/deps/pybind11)
 
 
 #fmtlib for fast c++ format routines
