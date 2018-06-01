@@ -2,7 +2,7 @@ language: cpp
 dist: trusty
 sudo: required
 python: 
- - '3.6'
+ - 3.5
 compiler:
  - gcc
 script:
