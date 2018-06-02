@@ -5,8 +5,9 @@
 #include <vector>
 
 #ifdef PY_EXPORT
-#include <boost/python.hpp>
-namespace bp = boost::python;
+#include <pybind11/pybind11.h>
+#include <pybind11/operators.h>
+namespace py = pybind11;
 #endif
 
 namespace qpp{
@@ -230,10 +231,11 @@ namespace qpp{
       group[i] = t;
     }
 
-    static void py_export(const char * pyname)
+    static void py_export(py::module m, const char * pyname)
     {
-      bp::class_<generated_group<TRANSFORM> >(pyname,bp::init< bp::optional<TRANSFORM> >())
-	.def(bp::init<const generated_group<TRANSFORM> &>())
+      py::class_<generated_group<TRANSFORM> >(m, pyname)
+        .def(py::init<>())
+        .def(py::init<const generated_group<TRANSFORM> &>())
 	.def("index", & generated_group<TRANSFORM>::index )
 	.def("add",   & generated_group<TRANSFORM>::add )
 	.def("__getitem__",  & generated_group<TRANSFORM>::py_getitem)

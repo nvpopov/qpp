@@ -10,15 +10,10 @@
 #include <cmath>
 
 #ifdef PY_EXPORT
-#include <python/qppython.hpp>
-#include <boost/python/list.hpp>
-#include <boost/python/tuple.hpp>
-#include <boost/python/dict.hpp>
-#include <boost/python.hpp>
-
-namespace bp = boost::python;
-namespace sn = boost::python::self_ns;    
-
+#include <pybind11/pybind11.h>
+#include <pybind11/operators.h>
+#include <pyqpp/py_indexed_property.hpp>
+namespace py = pybind11;
 #endif
 
 namespace qpp{
@@ -169,33 +164,33 @@ namespace qpp{
 
 #ifdef PY_EXPORT
 
-    generalized_cell(const bp::list & G, const index & __begin, const index & __end):
+    generalized_cell(const py::list & G, const index & __begin, const index & __end):
       generators_pack<TRANSFORM>()
     {
       init_default();
       
-      DIM = bp::len(G);
+      DIM = py::len(G);
       for (int i=0; i<DIM; i++)
 	{
-	  if (!bp::extract<TRANSFORM>(G[i]).check())
-	    TypeError("generalized_cell constructor: expected symmetry operation");
-	  generators.push_back(bp::extract<TRANSFORM>(G[i]));
+	/*  if (!py::cast<TRANSFORM>(G[i])())
+	    TypeError("generalized_cell constructor: expected symmetry operation");*/
+	  generators.push_back(py::cast<TRANSFORM>(G[i]));
 	}
       _begin = __begin;
       _end   = __end;
     }
         
-    generalized_cell(const bp::list & G):
+    generalized_cell(const py::list & G):
       generators_pack<TRANSFORM>()
     {
       init_default();
       
-      DIM = bp::len(G);
+      DIM = py::len(G);
       for (int i=0; i<DIM; i++)
 	{
-	  if (!bp::extract<TRANSFORM>(G[i]).check())
-	    TypeError("generalized_cell constructor: expected symmetry operation");
-	  generators.push_back(bp::extract<TRANSFORM>(G[i]));
+	/*  if (!py::cast<TRANSFORM>(G[i])())
+	    TypeError("generalized_cell constructor: expected symmetry operation");*/
+	  generators.push_back(py::cast<TRANSFORM>(G[i]));
 	}
       _begin = _end = index::D(DIM).all(0);
     }
@@ -221,33 +216,34 @@ namespace qpp{
       return (*this)(I);
     }
 
-    TRANSFORM py_call1(bp::tuple I)
+    TRANSFORM py_call1(py::tuple I)
     {
       //std::cout << "() from tuple called\n";
       return (*this)(index(I));
     }
 
-    bp::list py_generate()
+    py::list py_generate()
     {
       std::vector<TRANSFORM> v;
       generate(v);
-      bp::list l;
+      py::list l;
       for (const auto & g : v)
 	l.append(g);
       return l;
     }
 
-    static void py_export(const char * pyname)
+    static void py_export(py::module m, const char * pyname)
     {
-      py_indexed_property<SELF, TRANSFORM, int, & SELF::py_getgen, &SELF::py_setgen>::py_export("noname");
-      bp::class_<generalized_cell<REAL,TRANSFORM> >(pyname)
-	.def(bp::init<const generalized_cell<REAL,TRANSFORM> >())
-	.def(bp::init<const bp::list &, const index &, const index&>())
-	.def(bp::init<const bp::list &>())
-	.def_readwrite("begin",  & SELF::begin )
-	.def_readwrite("end",    & SELF::end )
+      std::string indexPropName = fmt::format("{0}_{1}",pyname,"indexed_property");
+      py_indexed_property<SELF, TRANSFORM, int, & SELF::py_getgen, &SELF::py_setgen>::py_export(m, indexPropName.c_str());
+      py::class_<generalized_cell<REAL,TRANSFORM> >(m, pyname)
+        .def(py::init<const generalized_cell<REAL,TRANSFORM> >())
+        .def(py::init<const py::list &, const index &, const index&>())
+        .def(py::init<const py::list &>())
+        .def("begin",  & SELF::begin )
+        .def("end",    & SELF::end )
 	.def_readwrite("generator", &SELF::py_gen)
-	.add_property("dim", &SELF::get_dim, &SELF::set_dim)
+	.def_property("dim", &SELF::get_dim, &SELF::set_dim)
 	.def("transform",   &SELF::transform)
 	.def("within",      &SELF::within)
 	.def("cart2frac",   &SELF::cart2frac)

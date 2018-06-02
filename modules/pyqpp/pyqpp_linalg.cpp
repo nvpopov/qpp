@@ -16,7 +16,7 @@ inline typename qpp::numeric_type<VALTYPE>::norm py_vec_norm(
 { return x.norm(); }
 
 template<class VALTYPE>
-void py_vector3d_export(const char * pyname, py::module m){
+void py_vector3d_export(py::module m, const char * pyname){
   py::class_<qpp::vector3d<VALTYPE> >(m, pyname )
       .def(py::init<>())
       .def(py::init<VALTYPE,VALTYPE,VALTYPE>())
@@ -48,7 +48,7 @@ void py_vector3d_export(const char * pyname, py::module m){
 }
 
 template<class VALTYPE>
-void py_matrix3d_export(const char * pyname, py::module m){
+void py_matrix3d_export(py::module m, const char * pyname){
   py::class_<qpp::matrix3d<VALTYPE> >(m, pyname)
       .def(py::init<>())
       .def(py::init<const qpp::matrix3d<VALTYPE>&>())
@@ -118,7 +118,7 @@ void py_eigen3_export(py::module m){
 
 
 template<class REAL, bool BOUND>
-void py_rotrans_export(const char * pyname, py::module m){
+void py_rotrans_export(py::module m, const char * pyname){
   if (BOUND)
     py::class_<qpp::rotrans<REAL,BOUND> >(m, pyname)
         //.def()
@@ -164,29 +164,29 @@ void py_rotrans_export(const char * pyname, py::module m){
 
 void pyqpp_linalg_export(py::module m){
 
-  py_vector3d_export<float>("vector3f", m);
-  py_vector3d_export<double>("vector3d", m);
-  py_vector3d_export<std::complex<float> >("vector3c", m);
-  py_vector3d_export<std::complex<double> >("vector3z", m);
+  py_vector3d_export<float>(m, "vector3f");
+  py_vector3d_export<double>(m, "vector3d");
+  py_vector3d_export<std::complex<float> >(m, "vector3c");
+  py_vector3d_export<std::complex<double> >(m, "vector3z");
 
 
-  py_matrix3d_export<float>("matrix3f", m);
-  py_matrix3d_export<double>("matrix3d", m);
-  py_matrix3d_export<std::complex<float> >("matrix3c", m);
-  py_matrix3d_export<std::complex<double> >("matrix3z", m);
+  py_matrix3d_export<float>(m, "matrix3f");
+  py_matrix3d_export<double>(m, "matrix3d");
+  py_matrix3d_export<std::complex<float> >(m, "matrix3c");
+  py_matrix3d_export<std::complex<double> >(m, "matrix3z");
 
 
   py_eigen3_export<float>(m);
   py_eigen3_export<double>(m);
 
 
-  py_rotrans_export<float,false>("rotrans_f", m);
-  py_rotrans_export<double,false>("rotrans_d", m);
-  py_rotrans_export<float,true>("bound_rotrans_f", m);
-  py_rotrans_export<double,true>("bound_rotrans_d", m);
+  py_rotrans_export<float,false>(m, "rotrans_f");
+  py_rotrans_export<double,false>(m, "rotrans_d");
+  py_rotrans_export<float,true>(m, "bound_rotrans_f");
+  py_rotrans_export<double,true>(m, "bound_rotrans_d");
 
 
-  qpp::index::py_export("index", m);
-  qpp::iterator::py_export("iterator", m);
-  qpp::index_range::py_export("index_range", m);
+  qpp::index::py_export( m, "index");
+  qpp::iterator::py_export(m, "iterator");
+  qpp::index_range::py_export(m, "index_range");
 }

@@ -271,7 +271,7 @@ namespace qpp{
       del = true;
     }
 
-    static void py_export(const char * pyname, py::module m)
+    static void py_export( py::module m, const char * pyname)
     {
       py::class_<index >(m, pyname)
         .def(py::init<>())
@@ -397,7 +397,7 @@ namespace qpp{
       return res;
     }
 
-    static void py_export(const char * pyname, py::module m)
+    static void py_export(py::module m, const char * pyname)
     {
       py::class_<iterator>(m, pyname)
         .def(py::init<const index&, const index&>())
@@ -430,7 +430,7 @@ namespace qpp{
     iterator  __iter__()
     { return iterator(a,b); }
 
-    static void py_export(const char * pyname, py::module m)
+    static void py_export(py::module m, const char * pyname)
     {
       py::class_<index_range>(m, pyname)
         .def(py::init<const index&, const index&>())
