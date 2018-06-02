@@ -9,13 +9,8 @@
 #include <cmath>
 
 #ifdef PY_EXPORT
-#include <boost/python.hpp>
-#include <boost/python/list.hpp>
-#include <boost/python/tuple.hpp>
-
-namespace bp = boost::python;
-namespace sn = boost::python::self_ns;
-
+#include <pybind11/pybind11.h>
+namespace py = pybind11;
 #endif
 
 namespace qpp{
@@ -324,23 +319,23 @@ namespace qpp{
       return v[i];
     }
     
-    inline void py_setitem2(bp::tuple I, REAL a)
+    inline void py_setitem2(py::tuple I, REAL a)
     { 
-      int i=bp::extract<int>(I[0]), j=bp::extract<int>(I[1]);
+      int i= py::cast<int>(I[0]), j= py::cast<int>(I[1]);
       v[i](j) = a; 
     }
 
-    inline REAL py_getitem2(bp::tuple I) const
+    inline REAL py_getitem2(py::tuple I) const
     { 
-      int i=bp::extract<int>(I[0]), j=bp::extract<int>(I[1]);
+      int i= py::cast<int>(I[0]), j= py::cast<int>(I[1]);
       return v[i](j);
     }
 
-    periodic_cell(bp::tuple t1, bp::tuple t2=bp::tuple(),  bp::tuple t3=bp::tuple())
+    periodic_cell(py::tuple t1, py::tuple t2=py::tuple(),  py::tuple t3=py::tuple())
     {
       DIM = 1;
-      if (bp::len(t2)>0) DIM = 2;
-      if (bp::len(t3)>0) DIM = 3;
+      if (py::len(t2)>0) DIM = 2;
+      if (py::len(t3)>0) DIM = 3;
 
       v = new vector3d<REAL>[DIM];
 
@@ -349,11 +344,11 @@ namespace qpp{
       if (DIM>2) v[2] = vector3d<REAL>(t3);
     }
 
-    periodic_cell(bp::list t1, bp::list t2=bp::list(),  bp::list t3=bp::list())
+    periodic_cell(py::list t1, py::list t2=py::list(),  py::list t3=py::list())
     {
       DIM = 1;
-      if (bp::len(t2)>0) DIM = 2;
-      if (bp::len(t3)>0) DIM = 3;
+      if (py::len(t2)>0) DIM = 2;
+      if (py::len(t3)>0) DIM = 3;
 
       v = new vector3d<REAL>[DIM];
 

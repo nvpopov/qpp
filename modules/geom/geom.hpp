@@ -9,16 +9,9 @@
 #include <symm/cell.hpp>
 
 #ifdef PY_EXPORT
-#include <boost/python.hpp>
-#include <boost/python/list.hpp>
-#include <boost/python/tuple.hpp>
-#include <python/qppython.hpp>
-
-namespace bp = boost::python;
-namespace sn = boost::python::self_ns;
-
+#include <pybind11/pybind11.h>
+namespace py = pybind11;
 #endif
-
 namespace qpp{
 
   template< class REAL = double, class CELL = periodic_cell<REAL> >

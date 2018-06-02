@@ -8,12 +8,8 @@
 #include <algorithm>
 
 #ifdef PY_EXPORT
-#include <boost/python.hpp>
-#include <python/qppython.hpp>
-
-namespace bp = boost::python;
-namespace sn = boost::python::self_ns;
-
+#include <pybind11/pybind11.h>
+namespace py = pybind11;
 #endif
 
 #define v2d vector2d<VALTYPE>

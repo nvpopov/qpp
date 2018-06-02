@@ -7,13 +7,6 @@
 #include <consts.hpp>
 #include <vector>
 
-#ifdef PY_EXPORT
-#include <boost/python.hpp>
-namespace bp = boost::python;
-namespace sn = boost::python::self_ns;
-#endif
-
-
 namespace qpp{
 
   /*! \brief rotrans is the general rotational and translational symmetry operation turning the vector r into R*r+T, where R is rotation (and probably reflection) matrix and T is a translation vector. Thus, rotrans class implements all possible operations of space groups.

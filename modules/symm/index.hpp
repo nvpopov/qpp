@@ -9,14 +9,9 @@
 #include <data/errors.hpp>
 
 #ifdef PY_EXPORT
-#include <boost/python/list.hpp>
-#include <boost/python/tuple.hpp>
-#include <boost/python.hpp>
-#include <python/qppython.hpp>
-
-namespace bp = boost::python;
-namespace sn = boost::python::self_ns;
-
+#include <pybind11/pybind11.h>
+#include <pybind11/operators.h>
+namespace py = pybind11;
 #endif
 
 namespace qpp{
@@ -256,44 +251,45 @@ namespace qpp{
       return sub(d1);
     }    
 
-    index(const bp::list &l)
+    index(const py::list &l)
     {
       // Assuming that type checks have been performed inside python code
-      DIM = bp::len(l);
+      DIM = py::len(l);
       idx = new int[DIM];
       for (int d=0; d<DIM; d++)
-	idx[d] = bp::extract<int>(l[d]);
+        idx[d] =py::cast<int>(l[d]);
       del = true;
     }
 
-    index(const bp::tuple &l)
+    index(const py::tuple &l)
     {
       // Assuming that type checks have been performed inside python code
-      DIM = bp::len(l);
+      DIM = py::len(l);
       idx = new int[DIM];
       for (int d=0; d<DIM; d++)
-	idx[d] = bp::extract<int>(l[d]);
+        idx[d] = py::cast<int>(l[d]);
       del = true;
     }
 
-    static void py_export(const char * pyname)
+    static void py_export(py::module m, const char * pyname)
     {
-      bp::class_<index >(pyname,bp::init<>())
-	.def(bp::init<bp::list&>())
-	.def(bp::init<bp::tuple&>())
-	.def(bp::init<index const&>())
-	.def(bp::init<index const&, int, bp::optional<int> >())
-	//.def(bp::init<int>())	
+      py::class_<index >(m, pyname)
+        .def(py::init<>())
+        .def(py::init<py::list&>())
+        .def(py::init<py::tuple&>())
+        .def(py::init<index const&>())
+        .def(py::init<index const&, int, int >())
+        //.def(py::init<int>())
 	.def("__getitem__",&index::py_getitem)
 	.def("__setitem__",&index::py_setitem)
 	.def("sub",  &index::sub)
 	.def("sub",  &index::sub1)
-	.def(sn::str(sn::self))
-	.def(sn::repr(sn::self))
-	.def(sn::self + sn::self)
-	.def(sn::self - sn::self)
-	.def(sn::self == sn::self)
-	.def(sn::self != sn::self)
+//	.def(py::str(py::self))
+//	.def(py::repr(py::self))
+	.def(py::self + py::self)
+	.def(py::self - py::self)
+	.def(py::self == py::self)
+	.def(py::self!= py::self)
 	;
     }
     
@@ -400,11 +396,12 @@ namespace qpp{
       return res;
     }
 
-    static void py_export(const char * pyname)
+    static void py_export(py::module m, const char * pyname)
     {
-      bp::class_<iterator>(pyname,bp::init<const index&, const index&>())
-	.def(bp::init<bp::list,bp::list>())
-	.def(bp::init<bp::tuple,bp::tuple>())
+      py::class_<iterator>(m, pyname)
+        .def(py::init<const index&, const index&>())
+        .def(py::init<py::list,py::list>())
+        .def(py::init<py::tuple,py::tuple>())
 	.def("next", & iterator::py_next)
 	;
     }    
@@ -423,20 +420,21 @@ namespace qpp{
     index_range(const index & _a, const index & _b) :
       a(_a), b(_b) {}
 
-    index_range(const bp::list & l1, const bp::list & l2) :
+    index_range(const py::list & l1, const py::list & l2) :
       a(l1), b(l2){}
 
-    index_range(const bp::tuple & l1, const bp::tuple & l2) :
+    index_range(const py::tuple & l1, const py::tuple & l2) :
       a(l1), b(l2) {}
 
     iterator  __iter__()
     { return iterator(a,b); }
 
-    static void py_export(const char * pyname)
+    static void py_export(py::module m, const char * pyname)
     {
-      bp::class_<index_range>(pyname,bp::init<const index&, const index&>())
-	.def(bp::init<const bp::list&, const bp::list&>())
-	.def(bp::init<const bp::tuple&, const bp::tuple&>())
+      py::class_<index_range>(m, pyname)
+        .def(py::init<const index&, const index&>())
+        .def(py::init<const py::list&, const py::list&>())
+        .def(py::init<const py::tuple&, const py::tuple&>())
 	.def("__iter__", & index_range::__iter__)
 	;
     }
