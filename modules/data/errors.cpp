@@ -2,9 +2,9 @@
 #include <stdexcept>
 
 #ifdef PY_EXPORT
-#include <boost/python.hpp>
-using namespace boost::python;
-
+#include <pybind11/pybind11.h>
+#include <pybind11/operators.h>
+namespace py = pybind11;
 #endif
 
 namespace qpp{
@@ -14,37 +14,37 @@ namespace qpp{
   void PyIndexError(const char * msg)
   {
     PyErr_SetString(PyExc_IndexError, msg);
-    throw_error_already_set();
+    throw  py::error_already_set();
   }
 
   void PyTypeError(const char * msg)
   {
     PyErr_SetString(PyExc_TypeError, msg);
-    throw_error_already_set();
+    throw  py::error_already_set();
   }
 
   void PyKeyError(const char * msg)
   {
     PyErr_SetString(PyExc_KeyError, msg);
-    throw_error_already_set();
+    throw  py::error_already_set();
   }
 
   void PyValueError(const char * msg)
   {
     PyErr_SetString(PyExc_ValueError, msg);
-    throw_error_already_set();
+    throw  py::error_already_set();
   }
 
   void PySyntaxError(const char * msg)
   {
     PyErr_SetString(PyExc_SyntaxError, msg);
-    throw_error_already_set();
+    throw  py::error_already_set();
   }
 
   void StopIter()
   {
     PyErr_SetString(PyExc_StopIteration, "");
-    throw_error_already_set();
+    throw  py::error_already_set();
   }
 
 #endif

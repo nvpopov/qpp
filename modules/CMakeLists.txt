@@ -24,6 +24,7 @@ if(PYTHON_BINDINGS)
     pybind11_add_module(pyqpp SHARED
         pyqpp/pyqpp.cpp
         pyqpp/pyqpp_linalg.cpp
+        data/errors.cpp
         )
     set_target_properties(pyqpp PROPERTIES COMPILE_FLAGS "-DPY_EXPORT")
     set_target_properties(pyqpp PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
