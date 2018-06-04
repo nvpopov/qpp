@@ -800,9 +800,12 @@ The supercell concept generalization for the geometry class looks like:
       py_setcoord(i,d,c);
     }
 
-    py_indexed_property<SELF, REAL, int, &SELF::py_getxyz<0>, &SELF::py_setxyz<0> > py_x;
-    py_indexed_property<SELF, REAL, int, &SELF::py_getxyz<1>, &SELF::py_setxyz<1> > py_y;
-    py_indexed_property<SELF, REAL, int, &SELF::py_getxyz<2>, &SELF::py_setxyz<2> > py_z;
+    py_indexed_property<SELF, REAL, int,
+    &SELF::py_getxyz<0>, &SELF::py_setxyz<0> > py_x;
+    py_indexed_property<SELF, REAL, int,
+    &SELF::py_getxyz<1>, &SELF::py_setxyz<1> > py_y;
+    py_indexed_property<SELF, REAL, int,
+    &SELF::py_getxyz<2>, &SELF::py_setxyz<2> > py_z;
 
     REAL py_getsymmrad(const char * at)
     {
@@ -817,7 +820,8 @@ The supercell concept generalization for the geometry class looks like:
     void py_setsymmrad(const char *at, const REAL &r)
     { set_symmetrize_radius(at,r);  }
 
-    py_indexed_property<SELF,REAL,const char *, &SELF::py_getsymmrad, &SELF::py_setsymmrad> py_symmrad;
+    py_indexed_property<SELF,REAL,const char *,
+    &SELF::py_getsymmrad, &SELF::py_setsymmrad> py_symmrad;
 
     py::dict py_symmrad2dict()
     {

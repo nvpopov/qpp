@@ -26,8 +26,12 @@ if(PYTHON_BINDINGS)
         pyqpp/pyqpp_linalg.cpp
         pyqpp/pyqpp_cell.cpp
         pyqpp/pyqpp_geom.cpp
+        pyqpp/pyqpp_xgeom.cpp
         data/errors.cpp
         data/data.cpp
+        data/types.cpp
+        symm/index.cpp
+        io/strfun.cpp
         )
     set_target_properties(pyqpp PROPERTIES COMPILE_FLAGS "-DPY_EXPORT")
     set_target_properties(pyqpp PROPERTIES POSITION_INDEPENDENT_CODE TRUE)

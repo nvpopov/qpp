@@ -6,4 +6,5 @@ namespace py = pybind11;
 void pyqpp_linalg_export (py::module m);
 void pyqpp_cell_export   (py::module m);
 void pyqpp_geom_export   (py::module m);
+void pyqpp_xgeom_export  (py::module m);
 #endif
