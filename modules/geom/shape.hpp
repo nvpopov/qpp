@@ -9,6 +9,8 @@
 
 #ifdef PY_EXPORT
 #include <pybind11/pybind11.h>
+#include <pybind11/operators.h>
+#include <pyqpp/py_indexed_property.hpp>
 namespace py = pybind11;
 #endif
 
@@ -60,7 +62,8 @@ namespace qpp{
     virtual v3d fmax(const periodic_cell<VALTYPE> &v) const =0;
     // Minimal and maximal fractional coordinates of the shape for given cell
 
-    virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const =0;
+    virtual void write(std::basic_ostream<CHAR,TRAITS> &os,
+                       int offset=0) const =0;
 
     shape<VALTYPE> & operator|(shape<VALTYPE> & sh)
     {  return *new shape_union<VALTYPE>(*this,sh);}
@@ -96,13 +99,19 @@ namespace qpp{
 
     static void py_export(const char * pyname)
     {
+      /*
       bp::class_<shape<VALTYPE>, boost::noncopyable>(pyname, bp::no_init)
-	.def("__or__",     & shape<VALTYPE>::py_or,  bp::return_value_policy<bp::manage_new_object>())
-	.def("__and__",    & shape<VALTYPE>::py_and, bp::return_value_policy<bp::manage_new_object>())
-	.def("__sub__",    & shape<VALTYPE>::py_sub, bp::return_value_policy<bp::manage_new_object>())
-	.def("__xor__",    & shape<VALTYPE>::py_xor, bp::return_value_policy<bp::manage_new_object>())
-	.def("__invert__", & shape<VALTYPE>::py_inv, bp::return_value_policy<bp::manage_new_object>())
-	;
+        .def("__or__",     & shape<VALTYPE>::py_or,
+             bp::return_value_policy<bp::manage_new_object>())
+        .def("__and__",    & shape<VALTYPE>::py_and,
+             bp::return_value_policy<bp::manage_new_object>())
+        .def("__sub__",    & shape<VALTYPE>::py_sub,
+             bp::return_value_policy<bp::manage_new_object>())
+        .def("__xor__",    & shape<VALTYPE>::py_xor,
+             bp::return_value_policy<bp::manage_new_object>())
+        .def("__invert__", & shape<VALTYPE>::py_inv,
+             bp::return_value_policy<bp::manage_new_object>())
+        ;*/
     }
 
 #endif
@@ -117,8 +126,7 @@ namespace qpp{
 
     v3d crn, a[3];
 
-    void fill_corners(v3d *corners) const
-    {
+    void fill_corners(v3d *corners) const {
       corners[0] = crn;
       corners[1] = crn+a[0];
       corners[2] = crn+a[1];
@@ -136,18 +144,15 @@ namespace qpp{
     shape_box(){}
 
     shape_box(const v3d & a1, const v3d & a2, const v3d & a3, const v3d & r0, 
-		       const STRING & __name = "") :
-      shape<VALTYPE>(__name)
-    {
+                       const STRING & __name = "") : shape<VALTYPE>(__name){
       crn = r0;
       a[0] = a1;
       a[1] = a2;
       a[2] = a3;
     }
 
-    shape_box(const v3d & a1, const v3d & a2, const v3d & a3, const STRING & __name = "") :
-      shape<VALTYPE>(__name)
-    {
+    shape_box(const v3d & a1, const v3d & a2, const v3d & a3,
+              const STRING & __name = "") : shape<VALTYPE>(__name){
        crn = 0e0;
       a[0] = a1;
       a[1] = a2;
@@ -155,8 +160,7 @@ namespace qpp{
     }
     
     shape_box(VALTYPE a1, VALTYPE a2, VALTYPE a3, const STRING & __name = "") :
-      shape<VALTYPE>(__name)
-    {
+      shape<VALTYPE>(__name){
       crn = 0e0;
       a[0] = v3d(a1,  0e0, 0e0);
       a[1] = v3d(0e0, a2,  0e0);
@@ -164,16 +168,14 @@ namespace qpp{
     }
 
     shape_box(const shape_box<VALTYPE> & s) :
-      shape<VALTYPE>(s.name)
-    {
+      shape<VALTYPE>(s.name){
       crn = s.crn;
       a[0] = s.a[0];
       a[1] = s.a[1];
       a[2] = s.a[2];
     }
 
-    virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const
-    {
+    virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const{
       for (int i=0; i<offset; i++)
 	os << " ";
       os << "box";
@@ -184,8 +186,7 @@ namespace qpp{
 
     // --------------------------------------------------
 
-    virtual bool within(const v3d & r) const
-    {
+    virtual bool within(const v3d & r) const{
       if ( scal(r-crn,a[1]%a[2])*scal(r-crn-a[0],a[1]%a[2]) > 0e0)
 	return false;
       if ( scal(r-crn,a[2]%a[0])*scal(r-crn-a[1],a[2]%a[0]) > 0e0)
@@ -195,8 +196,7 @@ namespace qpp{
       return true;
     }
     
-    virtual v3d rmin() const
-    {
+    virtual v3d rmin() const{
       v3d corners[8];
       fill_corners(corners);
 
@@ -209,8 +209,7 @@ namespace qpp{
       return res;
     }
 
-    virtual v3d rmax() const
-    {
+    virtual v3d rmax() const{
       v3d corners[8];
       fill_corners(corners);
 
@@ -223,8 +222,7 @@ namespace qpp{
       return res;
     }
 
-    virtual v3d fmin(const periodic_cell<VALTYPE> &v) const
-    {
+    virtual v3d fmin(const periodic_cell<VALTYPE> &v) const{
       v3d corners[8];
       fill_corners(corners);
 
@@ -240,8 +238,7 @@ namespace qpp{
       return res;
     }
 
-    virtual v3d fmax(const periodic_cell<VALTYPE> &v) const
-    {
+    virtual v3d fmax(const periodic_cell<VALTYPE> &v) const{
       v3d corners[8];
       fill_corners(corners);
 
@@ -257,28 +254,25 @@ namespace qpp{
       return res;
     }
 
-    // Minimal & maximal fractional coordinates of the shape for given translation vectors v
+    // Minimal & maximal fractional coordinates of the shape for given
+    // translation vectors v
 
-    virtual VALTYPE volume() const
-    {
+    virtual VALTYPE volume() const{
       return std::abs(det(a[0], a[1], a[2]));
     }
 
-    virtual void scale(VALTYPE s)
-    {
+    virtual void scale(VALTYPE s){
       crn *= s;
       a[0] *= s;
       a[1] *= s;
       a[2] *= s;
     }
 
-    virtual void move(const v3d & v)
-    {
+    virtual void move(const v3d & v){
       crn += v;
     }
 
-    virtual void rotate(const matrix3d<VALTYPE> & Rot)
-    {
+    virtual void rotate(const matrix3d<VALTYPE> & Rot){
       crn  = Rot*crn;
       a[0] = Rot*a[0];
       a[1] = Rot*a[1];
@@ -286,16 +280,23 @@ namespace qpp{
     }
 
 #ifdef PY_EXPORT
-
-    static void py_export(const char * pyname)
-    {
+/*
+    static void py_export(const char * pyname){
       bp::class_<shape_box<VALTYPE>, bp::bases<shape<VALTYPE> > >(pyname)
-	.def(init<const v3d&, const v3d&, const v3d&, const v3d&, bp::optional<const STRING &> >())
-	.def(init<const v3d&, const v3d&, const v3d&, bp::optional<const STRING &> >())
-	.def(init<VALTYPE, VALTYPE, VALTYPE, bp::optional<const STRING &> >())        
+        .def(init<const v3d&,
+             const v3d&,
+             const v3d&,
+             const v3d&,
+             bp::optional<const STRING &> >())
+
+	.def(init<const v3d&,
+	     const v3d&,
+	     const v3d&, bp::optional<const STRING &> >())
+	.def(init<VALTYPE, VALTYPE, VALTYPE,
+	     bp::optional<const STRING &> >())
 	;
     }
-
+*/
 #endif
 
   };
@@ -303,20 +304,18 @@ namespace qpp{
 #ifdef PY_EXPORT
     
   template <class VALTYPE>
-  shape<VALTYPE> * py_shape_box1(const v3d& a, const v3d& b, const v3d& c, const v3d& r)
-  {
+  shape<VALTYPE> * py_shape_box1(const v3d& a, const v3d& b,
+                                 const v3d& c, const v3d& r){
     return new shape_box<VALTYPE>(a,b,c,r);
   }
 
   template <class VALTYPE>
-  shape<VALTYPE> * py_shape_box2(const v3d& a, const v3d& b, const v3d& c)
-  {
+  shape<VALTYPE> * py_shape_box2(const v3d& a, const v3d& b, const v3d& c){
     return new shape_box<VALTYPE>(a,b,c);
   }
   
   template <class VALTYPE>
-  shape<VALTYPE> * py_shape_box3(VALTYPE a, VALTYPE b, VALTYPE c)
-  {
+  shape<VALTYPE> * py_shape_box3(VALTYPE a, VALTYPE b, VALTYPE c){
     return new shape_box<VALTYPE>(a,b,c);
   }
 
@@ -337,27 +336,24 @@ namespace qpp{
 
     shape_sphere(){}
 
-    shape_sphere(VALTYPE _R, const STRING & __name = "") : shape<VALTYPE>(__name)
-    {
+    shape_sphere(VALTYPE _R, const STRING & __name = "")
+      : shape<VALTYPE>(__name){
       R = _R;
       r0 = 0e0;
     }
 
     shape_sphere(VALTYPE _R, const v3d & _r0, const STRING & __name = "") :
-      shape<VALTYPE>(__name)
-    {
+      shape<VALTYPE>(__name){
       R = _R;
       r0 = _r0;
     }
 
-    shape_sphere(const shape_sphere<VALTYPE> & s) : shape<VALTYPE>(s.name)
-    {
+    shape_sphere(const shape_sphere<VALTYPE> & s) : shape<VALTYPE>(s.name){
       R = s.R;
       r0 = s.r0;
     }
 
-    virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const
-    {
+    virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const{
       for (int i=0; i<offset; i++)
 	os << " ";
       os << "sphere";
@@ -368,23 +364,19 @@ namespace qpp{
 
     // --------------------------------------------------
 
-    virtual bool within(const v3d & r) const
-    {
+    virtual bool within(const v3d & r) const{
       return norm(r-r0) <= R;
     }
     
-    virtual v3d rmin() const
-    {
+    virtual v3d rmin() const{
       return r0 - v3d(R,R,R);
     }
 
-    virtual v3d rmax() const
-    {
+    virtual v3d rmax() const{
       return r0 + v3d(R,R,R);
     }
 
-    virtual v3d fmin(const periodic_cell<VALTYPE> &v) const
-    {
+    virtual v3d fmin(const periodic_cell<VALTYPE> &v) const{
       matrix3d<VALTYPE> A(v(0),v(1),v(2));
       matrix3d<VALTYPE> B = invert(A);
 
@@ -397,8 +389,7 @@ namespace qpp{
       return B*r0 - R*res;
     }
 
-    virtual v3d fmax(const periodic_cell<VALTYPE> &v) const
-    {      
+    virtual v3d fmax(const periodic_cell<VALTYPE> &v) const{      
       matrix3d<VALTYPE> A(v(0),v(1),v(2));
       matrix3d<VALTYPE> B = invert(A);
 
@@ -411,38 +402,34 @@ namespace qpp{
       return B*r0 + R*res;
     }
 
-    // Minimal & maximal fractional coordinates of the shape for given translation vectors v
+    // Minimal & maximal fractional coordinates of the shape for given
+    // translation vectors v
 
-    virtual VALTYPE volume() const
-    {
+    virtual VALTYPE volume() const{
       return 4*qpp::pi*R*R*R/3;
     }
 
-    virtual void scale(VALTYPE s)
-    {
+    virtual void scale(VALTYPE s){
       R *= s;
     }
 
-    virtual void move(const v3d & v)
-    {
+    virtual void move(const v3d & v){
       r0 += v;
     }
 
-    virtual void rotate(const matrix3d<VALTYPE> & Rot)
-    {
+    virtual void rotate(const matrix3d<VALTYPE> & Rot){
       r0 = Rot*r0;
     }
 
 #ifdef PY_EXPORT
-
-    static void py_export(const char * pyname)
-    {
+/*
+    static void py_export(const char * pyname){
       bp::class_<shape_sphere<VALTYPE>, bp::bases<shape<VALTYPE> > >(pyname)
 	.def(bp::init<VALTYPE, bp::optional<const STRING &> >())
 	.def(bp::init<VALTYPE, const v3d&, bp::optional<const STRING &> >())
 	;
     }
-
+*/
 #endif
 
   };
@@ -745,19 +732,18 @@ namespace qpp{
   public:
     using shape<VALTYPE>::name;
 
-    shape_xor(shape<VALTYPE> & __sh1, shape<VALTYPE> &__sh2, const STRING & __name = ""):
+    shape_xor(shape<VALTYPE> & __sh1, shape<VALTYPE> &__sh2,
+              const STRING & __name = ""):
       shape<VALTYPE>(__name)
     { sh1 = &__sh1; sh2 = &__sh2; }
 
     shape_xor(const shape_subtract<VALTYPE> & s) :
-      shape<VALTYPE>(s.name)
-    {
+      shape<VALTYPE>(s.name){
       sh1 = s.sh1;
       sh2 = s.sh2;
     }
 
-    virtual bool within(const v3d & r) const
-    { 
+    virtual bool within(const v3d & r) const{ 
       bool in1 = sh1->within(r);
       bool in2 = sh2->within(r);
       return (in1 && ! in2) || (in2 && ! in1); 
@@ -775,40 +761,35 @@ namespace qpp{
     virtual void rotate(const matrix3d<VALTYPE> & Rot)
     { sh1->rotate(Rot); sh2->rotate(Rot); }
 
-    virtual v3d rmin() const
-    { 
+    virtual v3d rmin() const{ 
       v3d r, r1 = sh1->rmin(), r2 = sh2->rmin();
       for (int i=0; i<3; i++)
 	r(i) = std::min(r1(i),r2(i));
       return r;
     }
 
-    virtual v3d rmax() const
-    { 
+    virtual v3d rmax() const{ 
       v3d r, r1 = sh1->rmax(), r2 = sh2->rmax();
       for (int i=0; i<3; i++)
 	r(i) = std::max(r1(i),r2(i));
       return r;
     }
 
-    virtual v3d fmin(const periodic_cell<VALTYPE> &v) const
-    {
+    virtual v3d fmin(const periodic_cell<VALTYPE> &v) const{
       v3d f, f1 = sh1->fmin(v), f2 = sh2->fmin(v);
       for (int i=0; i<3; i++)
 	f(i) = std::min(f1(i),f2(i));
       return f;
     }
 
-    virtual v3d fmax(const periodic_cell<VALTYPE> &v) const
-    {
+    virtual v3d fmax(const periodic_cell<VALTYPE> &v) const{
       v3d f, f1 = sh1->fmax(v), f2 = sh2->fmax(v);
       for (int i=0; i<3; i++)
 	f(i) = std::max(f1(i),f2(i));
       return f;
     }
 
-    virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const
-    {
+    virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const{
       for (int i=0; i<offset; i++) os << " ";
       os << "xor";
       if (name != "")
@@ -825,7 +806,7 @@ namespace qpp{
   // ----------------------------------------------------------------
 
 #ifdef PY_EXPORT
-
+/*
   template <class VALTYPE>
   struct py_shape : shape<VALTYPE>, bp::wrapper<shape<VALTYPE> >
   {
@@ -861,10 +842,10 @@ namespace qpp{
     { this->get_override("write")(os,offset);}
 
   };
-
+*/
 #endif
 
-};
+}
 
 #undef v3d
 #undef v2d
