@@ -29,8 +29,7 @@ namespace qpp{
     inline void setitem(IDX i, const ELEM & e)
     { ((*owner).*SET)(i,e); }
 
-    static void py_export(py::module m, const char * pyname)
-    {
+    static void py_export(py::module m, const char * pyname){
       py::module prop = m.def_submodule("props", "props");
       py::class_<SELF>(prop, pyname)
         .def(py::init<>())
@@ -59,14 +58,13 @@ namespace qpp{
     inline void setitem(IDX i, const ELEM & e)
     { ((*owner).*SET)(i,e); }
 
-    inline ELEM2 getitem2(py::tuple I)
-    {
-      IDX i=py::cast<IDX>(I[0]), j=py::cast<IDX>(I[1]);
+    inline ELEM2 getitem2(py::tuple I){
+      IDX i = py::cast<IDX>(I[0]);
+      IDX j = py::cast<IDX>(I[1]);
       return ((*owner).*GET2)(i,j);
     }
 
-    inline void setitem2(py::tuple I, const ELEM2 & e)
-    {
+    inline void setitem2(py::tuple I, const ELEM2 & e){
       IDX i=py::cast<IDX>(I[0]), j=py::cast<IDX>(I[1]);
       ((*owner).*SET2)(i,j,e);
     }
@@ -79,8 +77,7 @@ namespace qpp{
           .def(py::init<>())
           .def(py::init<OWNER*>())
 	  .def("__getitem__", & SELF2::getitem2)
-	  .def("__setitem__", & SELF2::setitem2)
-	  ;
+	  .def("__setitem__", & SELF2::setitem2);
       }
       else{
         py::module prop = m.def_submodule("props", "props");
@@ -90,8 +87,7 @@ namespace qpp{
 	  .def("__getitem__", & SELF2::getitem)
 	  .def("__setitem__", & SELF2::setitem)
 	  .def("__getitem__", & SELF2::getitem2)
-	  .def("__setitem__", & SELF2::setitem2)
-	  ;
+	  .def("__setitem__", & SELF2::setitem2);
       }
     }
 
@@ -99,6 +95,9 @@ namespace qpp{
     py_2indexed_property(OWNER * _owner){
       owner = _owner;
     }
+
+
+
 
   };
 }

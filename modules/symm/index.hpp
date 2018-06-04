@@ -11,6 +11,7 @@
 #ifdef PY_EXPORT
 #include <pybind11/pybind11.h>
 #include <pybind11/operators.h>
+#include <pyqpp/py_indexed_property.hpp>
 namespace py = pybind11;
 #endif
 

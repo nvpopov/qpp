@@ -923,10 +923,10 @@ The supercell concept generalization for the geometry class looks like:
     {
       return
           py::len(l) == 4 &&
-          py::isinstance<STRING>(l[0]) &&
-          py::isinstance<REAL>(l[1]) &&
-          py::isinstance<REAL>(l[2]) &&
-          py::isinstance<REAL>(l[3]);
+          py::isinstance<py::str>(l[0]) &&
+          py::isinstance<py::float_>(l[1]) &&
+          py::isinstance<py::float_>(l[2]) &&
+          py::isinstance<py::float_>(l[3]);
     }
 
     virtual void py_add_list(const py::list & l)
@@ -934,10 +934,10 @@ The supercell concept generalization for the geometry class looks like:
       if (!py_check_axyz(l))
         TypeError("geometry::Invalid list. List must be [atom,x,y,z]");
       
-      add(py::cast<STRING>(l[0]),
-          py::cast<REAL>(l[1]),
-          py::cast<REAL>(l[2]),
-          py::cast<REAL>(l[3]));
+      add(py::cast<py::str>(l[0]),
+          py::cast<py::float_>(l[1]),
+          py::cast<py::float_>(l[2]),
+          py::cast<py::float_>(l[3]));
     }
 
     void py_add3(const py::list & l)

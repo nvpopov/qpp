@@ -763,7 +763,8 @@ namespace qpp{
   //-------------------------------------------------
 
   template<class VALTYPE>
-  vector3d<typename numeric_type<VALTYPE>::complex> solve_cubeq(VALTYPE a, VALTYPE b, VALTYPE c, VALTYPE d)
+  vector3d<typename numeric_type<VALTYPE>::complex> solve_cubeq(
+      VALTYPE a, VALTYPE b, VALTYPE c, VALTYPE d)
   // Solves ax^3 + bx^2 + cx + d = 0, a is assumed to be nonzero
   {
     typename numeric_type<VALTYPE>::complex I(0,1);
@@ -779,8 +780,8 @@ namespace qpp{
 
     if ( std::abs(Q) < eps )
       {
-	VALTYPE R13 = std::pow(2*std::abs(R),1./3)*sgnr;
-	res = {-1, VALTYPE(.5) + s32*I, VALTYPE(.5) - s32*I };
+        VALTYPE R13 = std::pow(2*std::abs(R),1./3)*sgnr;
+        res = {-1, VALTYPE(.5) + s32*I, VALTYPE(.5) - s32*I };
 	res *= R13;
 	for (int i=0; i<3; i++)
 	  res(i) -= b/3;
@@ -791,12 +792,14 @@ namespace qpp{
       {
 	VALTYPE SQ = std::sqrt(Q);
 	VALTYPE theta = std::acos(R/(Q*SQ));
-	res = {-2*SQ*std::cos(theta/3)-b/3, -2*SQ*std::cos((theta+2*pi)/3)-b/3, -2*SQ*std::cos((theta+4*pi)/3)-b/3};
+	res = {-2*SQ*std::cos(theta/3)-b/3,
+	       -2*SQ*std::cos((theta+2*pi)/3)-b/3,
+	       -2*SQ*std::cos((theta+4*pi)/3)-b/3};
       }
 
     else
       {
-	VALTYPE A = -std::pow(std::abs(R)+std::sqrt(R*R-Q*Q*Q), 1./3)*sgnr;
+        VALTYPE A = -std::pow(std::abs(R)+std::sqrt(R*R-Q*Q*Q), 1./3)*sgnr;
 	VALTYPE B=0;
 	if ( std::abs(A)>eps)
 	  B = Q/A;

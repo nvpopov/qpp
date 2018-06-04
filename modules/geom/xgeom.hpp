@@ -653,8 +653,8 @@ namespace qpp{
 
           py::tuple t = py::cast<py::tuple>(f[i]);
 
-          if (py::len(t)!=2 || !py::isinstance<STRING>(t[0]) ||
-             !py::isinstance<STRING>(t[1]))
+          if (py::len(t)!=2 || !py::isinstance<py::str>(t[0]) ||
+             !py::isinstance<py::str>(t[1]))
             TypeError("In xgeometry constructor - bad format list");
 
           fn.push_back(py::cast<STRING>(t[0]));
@@ -699,22 +699,22 @@ namespace qpp{
 
       for (int i=0; i<nfields(); i++){
           if (field_type(i)==type_string){
-              if (!py::isinstance<STRING>(l[i]))
+              if (!py::isinstance<py::str>(l[i]))
                 TypeError("xgeometry:: bad list of fields");
               xfield<STRING>(i,j) = py::cast<STRING>(l[i]);
             }
           else if (field_type(i)==type_real){
-              if (!py::isinstance<REAL>(l[i]))
+              if (!py::isinstance<py::float_>(l[i]))
                 TypeError("xgeometry:: bad list of fields");
               xfield<REAL>(i,j) = py::cast<REAL>(l[i]);
             }
           else if (field_type(i)==type_int){
-              if (!py::isinstance<int>(l[i]))
+              if (!py::isinstance<py::int_>(l[i]))
                 TypeError("xgeometry:: bad list of fields");
               xfield<int>(i,j) = py::cast<int>(l[i]);
             }
           else if (field_type(i)==type_bool){
-              if (!py::isinstance<bool>(l[i]))
+              if (!py::isinstance<py::bool_>(l[i]))
                 TypeError("xgeometry:: bad list of fields");
               xfield<bool>(i,j) = py::cast<bool>(l[i]);
             }
@@ -759,22 +759,22 @@ namespace qpp{
 
       basic_types t = field_type(i);
       if (t==type_string){
-          if ( !py::isinstance<STRING>(o))
+          if ( !py::isinstance<py::str>(o))
             TypeError("xgeometry: string value of the field expected");
           xfield<STRING>(i,j) = py::cast<STRING>(o);
         }
       else if (t==type_real){
-          if ( !py::isinstance<REAL>(o))
+          if ( !py::isinstance<py::float_>(o))
             TypeError("xgeometry: real value of the field expected");
           xfield<REAL>(i,j) = py::cast<REAL>(o);
         }
       else if (t==type_int){
-          if ( !py::isinstance<int>(o))
+          if ( !py::isinstance<py::int_>(o))
             TypeError("xgeometry: int value of the field expected");
           xfield<int>(i,j) = py::cast<int>(o);
         }
       else if (t==type_bool){
-          if ( !py::isinstance<bool>(o))
+          if ( !py::isinstance<py::bool_>(o))
             TypeError("xgeometry: bool value of the field expected");
           xfield<bool>(i,j) = py::cast<bool>(o);
         }

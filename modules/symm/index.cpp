@@ -18,4 +18,4 @@ namespace qpp{
     return at1(0) > at2(0);
   }
     
-};
+}
