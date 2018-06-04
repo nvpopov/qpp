@@ -1,6 +1,6 @@
 #ifndef _LACE3D_H
 #define _LACE3D_H
-
+#pragma GCC diagnostic ignored "-Wnarrowing"
 #include <cmath>
 #include <complex>
 #include <ostream>

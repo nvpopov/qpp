@@ -1,6 +1,6 @@
 #ifndef _QPP_BUILDERS_H
 #define _QPP_BUILDERS_H
-
+#pragma GCC diagnostic ignored "-Wnarrowing"
 #include <vector>
 #include <cmath>
 #include <symm/index.hpp>
