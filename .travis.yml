@@ -1,10 +1,8 @@
 language: cpp
 dist: trusty
 sudo: required
-python: 
- - 3.5
 compiler:
  - gcc
 script:
- - mkdir build && cd build && cmake .. -DUSE_SPGLIB=ON -DBUILD_QC=OFF -DUSE_SYSTEM_EIGEN3=OFF -DBUILD_PYTHON_BINDINGS=ON && cmake --build .
+ - mkdir build && cd build && cmake .. -DPYBIND11_PYTHON_VERSION=3 -DUSE_SPGLIB=ON -DBUILD_QC=OFF -DUSE_SYSTEM_EIGEN3=OFF -DBUILD_PYTHON_BINDINGS=ON && cmake --build .
  
