@@ -21,7 +21,7 @@ target_link_libraries(qpp ${QPP_LINK_LIB} )
 #set(IOPY io/io.py.cpp io/geomio.py.cpp io/gmsio.py.cpp)
 
 if(PYTHON_BINDINGS)
-    pybind11_add_module(pyqpp SHARED
+    pybind11_add_module(pyqpp SHARED NO_EXTRAS
         pyqpp/pyqpp.cpp
         pyqpp/pyqpp_linalg.cpp
         pyqpp/pyqpp_cell.cpp
