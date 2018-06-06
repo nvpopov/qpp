@@ -29,6 +29,7 @@ if(PYTHON_BINDINGS)
         pyqpp/pyqpp_xgeom.cpp
         pyqpp/pyqpp_neighbours.cpp
         pyqpp/pyqpp_builders.cpp
+        pyqpp/pyqpp_experimental.cpp
         data/errors.cpp
         data/data.cpp
         data/types.cpp

@@ -10,8 +10,8 @@ void py_geom_export(py::module m, const char * pyname)
          py::arg("dim"), py::arg("__name") = "")
     .def(py::init<CELL&, const STRING&>(),
          py::arg("CELL"), py::arg("__name") = "")
-    //.def("add_observer",    & qpp::geometry<REAL,CELL>::add_observer )
-    //.def("remove_observer", & qpp::geometry<REAL,CELL>::remove_observer )
+    .def("add_observer",    & qpp::geometry<REAL,CELL>::add_observer )
+    .def("remove_observer", & qpp::geometry<REAL,CELL>::remove_observer )
     .def("build_types",     & qpp::geometry<REAL,CELL>::build_type_table)
     .def("add",        &qpp::geometry<REAL,CELL>::py_add1)
     .def("add",        &qpp::geometry<REAL,CELL>::py_add2)
@@ -73,18 +73,20 @@ void py_geom_export(py::module m, const char * pyname)
     ;
 }
 
-/*
+
 template<class REAL>
 void py_observer_export(py::module m, const char * pyname)
 {
-  py::class_<qpp::py_geometry_observer<REAL>,py::>(m, pyname)
-    .def("added",    pure_virtual(&qpp::py_geometry_observer<REAL>::added))
-    .def("inserted", pure_virtual(&qpp::py_geometry_observer<REAL>::inserted))
-    .def("changed",  pure_virtual(&qpp::py_geometry_observer<REAL>::changed))
-    .def("erased",   pure_virtual(&qpp::py_geometry_observer<REAL>::erased))
-    .def("shaded",   pure_virtual(&qpp::py_geometry_observer<REAL>::shaded))
+  py::class_<qpp::geometry_observer<REAL>,
+      qpp::py_geometry_observer<REAL> >(m, pyname)
+    .def(py::init<>())
+    .def("added",    &qpp::geometry_observer<REAL>::added)
+    .def("inserted", &qpp::geometry_observer<REAL>::inserted)
+    .def("changed",  &qpp::geometry_observer<REAL>::changed)
+    .def("erased",   &qpp::geometry_observer<REAL>::erased)
+    .def("shaded",   &qpp::geometry_observer<REAL>::shaded)
     ;
-}*/
+}
 
 void pyqpp_geom_export(py::module m){
   py_geom_export<float,qpp::periodic_cell<float> >(m, "geometry_f");
@@ -104,6 +106,6 @@ void pyqpp_geom_export(py::module m){
     .value("after",  qpp::after)
     ;
 
-  //py_observer_export<float>(m, "gobserver_f");
-  //py_observer_export<double>(m, "gobserver_d");
+  py_observer_export<float>(m, "gobserver_f");
+  py_observer_export<double>(m, "gobserver_d");
 }
