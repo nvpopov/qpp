@@ -352,7 +352,8 @@ namespace qpp{
       
       int N = G.size();
       if (N!=n.rows() || N!=n.cols())
-	throw  std::range_error("group_characters::subspace_decompose : only regular representaion subspaces!");
+        throw  std::range_error("group_characters::subspace_decompose : "
+                                "only regular representaion subspaces!");
 
       // Step 1. Form the matrix commuting the regular representation
       //std::cout << "step1\n";
@@ -417,8 +418,7 @@ namespace qpp{
     // into invariant subspaces
     // fixme - find more efficient algorithm (MeatAxe?)
     // fixme - should this algorithm be recursive?
-    void build_chi()
-    {
+    void build_chi(){
       int N = G.size();
       //chi.resize(A.n_classes());
       
@@ -439,13 +439,11 @@ namespace qpp{
 
       chi.resize(1,A.n_classes());
 
-      for (int rep = 0; rep < dims.size(); rep++)
-	{
+      for (int rep = 0; rep < dims.size(); rep++){
 	  i1 = i0 + dims[rep] - 1;
 	  
 	  vector new_chi(A.n_classes());
-	  for (int cl = 0; cl < A.n_classes(); cl++)
-	    {
+	  for (int cl = 0; cl < A.n_classes(); cl++){
 	      int g = A.class_element(cl,0);
 	      matrix R(dims[rep],dims[rep]);
 	      R = n.block(0,i0,n.rows(),i1-i0+1).adjoint()*regrep(g)*n.block(0,i0,n.rows(),i1-i0+1);
@@ -458,14 +456,12 @@ namespace qpp{
 
 	  bool already = false;
 	  for (int irrep=0; irrep < nfound; irrep++)
-	    if ( std::abs(chi_scal(new_chi,irrep)) > chi_tol )
-	      {
+	    if ( std::abs(chi_scal(new_chi,irrep)) > chi_tol ){
 		already = true;
 		break;
 	      }
 
-	  if (!already)
-	    {
+	  if (!already){
 	      chi.conservativeResize(nfound+1, A.n_classes() );
 	      for (int cl = 0; cl < A.n_classes(); cl++)
 		chi(nfound,cl) = new_chi(cl);
@@ -486,6 +482,6 @@ namespace qpp{
 
   };
   
-};
+}
 
 #endif

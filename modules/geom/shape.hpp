@@ -181,7 +181,8 @@ namespace qpp{
       os << "box";
       if (name != "")
 	os << " " << name;
-      os << "( a" << a[0] << ", b" << a[1] << ", c" << a[2] << ", corner" << crn << ")";
+      os << "( a" << a[0] << ", b" << a[1] << ", c"
+         << a[2] << ", corner" << crn << ")";
     }
 
     // --------------------------------------------------
@@ -614,8 +615,7 @@ namespace qpp{
     { sh1 = &__sh1; sh2 = &__sh2; }
 
     shape_subtract(const shape_subtract<VALTYPE> & s) :
-      shape<VALTYPE>(s.name)
-    {
+      shape<VALTYPE>(s.name){
       sh1 = s.sh1;
       sh2 = s.sh2;
     }
@@ -647,8 +647,7 @@ namespace qpp{
     virtual v3d fmax(const periodic_cell<VALTYPE> &v) const
     { return sh1->fmax(v); }
 
-    virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const
-    {
+    virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const{
       for (int i=0; i<offset; i++) os << " ";
       os << "subtract";
       if (name != "")
@@ -677,8 +676,7 @@ namespace qpp{
     { sh = &__sh; }
 
     shape_invert(const shape_subtract<VALTYPE> & s) :
-      shape<VALTYPE>(s.name)
-    {
+      shape<VALTYPE>(s.name){
       sh = s.sh;
     }
 
@@ -709,8 +707,7 @@ namespace qpp{
     virtual v3d fmax(const periodic_cell<VALTYPE> &v) const
     { return  {infty, infty, infty}; }
 
-    virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const
-    {
+    virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const{
       for (int i=0; i<offset; i++) os << " ";
       os << "invert";
       if (name != "")
