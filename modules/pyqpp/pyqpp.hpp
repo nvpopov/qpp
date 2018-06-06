@@ -11,6 +11,7 @@ void pyqpp_linalg_export       (py::module m);
 void pyqpp_cell_export         (py::module m);
 void pyqpp_geom_export         (py::module m);
 void pyqpp_xgeom_export        (py::module m);
+void pyqpp_shape_export        (py::module m);
 void pyqpp_neighbours_export   (py::module m);
 void pyqpp_builders_export     (py::module m);
 void pyqpp_autosymm_export     (py::module m);

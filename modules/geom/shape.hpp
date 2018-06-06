@@ -27,10 +27,11 @@ namespace qpp{
   template <class VALTYPE> class shape_invert;
   template <class VALTYPE> class shape_xor;
 
+
   // ------------------ 3D primitives prototype ------------------------
 
   template <class VALTYPE>
-  class shape{ 
+  class shape{
 
   public:
 
@@ -97,27 +98,20 @@ namespace qpp{
     shape<VALTYPE> * py_inv()
     { return new shape_invert<VALTYPE>(*this); }
 
-    static void py_export(const char * pyname)
-    {
-      /*
-      bp::class_<shape<VALTYPE>, boost::noncopyable>(pyname, bp::no_init)
-        .def("__or__",     & shape<VALTYPE>::py_or,
-             bp::return_value_policy<bp::manage_new_object>())
-        .def("__and__",    & shape<VALTYPE>::py_and,
-             bp::return_value_policy<bp::manage_new_object>())
-        .def("__sub__",    & shape<VALTYPE>::py_sub,
-             bp::return_value_policy<bp::manage_new_object>())
-        .def("__xor__",    & shape<VALTYPE>::py_xor,
-             bp::return_value_policy<bp::manage_new_object>())
-        .def("__invert__", & shape<VALTYPE>::py_inv,
-             bp::return_value_policy<bp::manage_new_object>())
-        ;*/
+    static void py_export(py::module m, const char * pyname){
+      py::class_<shape<VALTYPE> >(m, pyname)
+          .def("__or__",     & shape<VALTYPE>::py_or)
+          .def("__and__",    & shape<VALTYPE>::py_and)
+          .def("__sub__",    & shape<VALTYPE>::py_sub)
+          .def("__xor__",    & shape<VALTYPE>::py_xor)
+          .def("__invert__", & shape<VALTYPE>::py_inv)
+          ;
     }
 
 #endif
 
- };
-    
+  };
+
 
   // ------------------ 3D primitives ------------------------
 
@@ -143,8 +137,8 @@ namespace qpp{
 
     shape_box(){}
 
-    shape_box(const v3d & a1, const v3d & a2, const v3d & a3, const v3d & r0, 
-                       const STRING & __name = "") : shape<VALTYPE>(__name){
+    shape_box(const v3d & a1, const v3d & a2, const v3d & a3, const v3d & r0,
+              const STRING & __name = "") : shape<VALTYPE>(__name){
       crn = r0;
       a[0] = a1;
       a[1] = a2;
@@ -153,7 +147,7 @@ namespace qpp{
 
     shape_box(const v3d & a1, const v3d & a2, const v3d & a3,
               const STRING & __name = "") : shape<VALTYPE>(__name){
-       crn = 0e0;
+      crn = 0e0;
       a[0] = a1;
       a[1] = a2;
       a[2] = a3;
@@ -175,12 +169,13 @@ namespace qpp{
       a[2] = s.a[2];
     }
 
-    virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const{
+    virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0)
+    const{
       for (int i=0; i<offset; i++)
-	os << " ";
+        os << " ";
       os << "box";
       if (name != "")
-	os << " " << name;
+        os << " " << name;
       os << "( a" << a[0] << ", b" << a[1] << ", c"
          << a[2] << ", corner" << crn << ")";
     }
@@ -189,11 +184,11 @@ namespace qpp{
 
     virtual bool within(const v3d & r) const{
       if ( scal(r-crn,a[1]%a[2])*scal(r-crn-a[0],a[1]%a[2]) > 0e0)
-	return false;
+        return false;
       if ( scal(r-crn,a[2]%a[0])*scal(r-crn-a[1],a[2]%a[0]) > 0e0)
-	return false;
+        return false;
       if ( scal(r-crn,a[0]%a[1])*scal(r-crn-a[2],a[0]%a[1]) > 0e0)
-	return false;
+        return false;
       return true;
     }
     
@@ -203,9 +198,9 @@ namespace qpp{
 
       v3d res=crn;
       for (int i=0; i<8; i++)
-	for (int j=0; j<3; j++)
-	  if ( res(j) > corners[i](j))
-	    res(j) = corners[i](j);
+        for (int j=0; j<3; j++)
+          if ( res(j) > corners[i](j))
+            res(j) = corners[i](j);
 
       return res;
     }
@@ -216,9 +211,9 @@ namespace qpp{
 
       v3d res=crn;
       for (int i=0; i<8; i++)
-	for (int j=0; j<3; j++)
-	  if ( res(j) < corners[i](j))
-	    res(j) = corners[i](j);
+        for (int j=0; j<3; j++)
+          if ( res(j) < corners[i](j))
+            res(j) = corners[i](j);
 
       return res;
     }
@@ -228,13 +223,13 @@ namespace qpp{
       fill_corners(corners);
 
       for (int i=0; i<8; i++)
-	corners[i] = v.cart2frac(corners[i]);
+        corners[i] = v.cart2frac(corners[i]);
 
       v3d res=corners[0];
       for (int i=1; i<8; i++)
-	for (int j=0; j<3; j++)
-	  if ( res(j) > corners[i](j))
-	    res(j) = corners[i](j);
+        for (int j=0; j<3; j++)
+          if ( res(j) > corners[i](j))
+            res(j) = corners[i](j);
       
       return res;
     }
@@ -244,13 +239,13 @@ namespace qpp{
       fill_corners(corners);
 
       for (int i=0; i<8; i++)
-	corners[i] = v.cart2frac(corners[i]);
+        corners[i] = v.cart2frac(corners[i]);
 
       v3d res=corners[0];
       for (int i=1; i<8; i++)
-	for (int j=0; j<3; j++)
-	  if ( res(j) < corners[i](j))
-	    res(j) = corners[i](j);
+        for (int j=0; j<3; j++)
+          if ( res(j) < corners[i](j))
+            res(j) = corners[i](j);
       
       return res;
     }
@@ -281,29 +276,20 @@ namespace qpp{
     }
 
 #ifdef PY_EXPORT
-/*
-    static void py_export(const char * pyname){
-      bp::class_<shape_box<VALTYPE>, bp::bases<shape<VALTYPE> > >(pyname)
-        .def(init<const v3d&,
-             const v3d&,
-             const v3d&,
-             const v3d&,
-             bp::optional<const STRING &> >())
 
-	.def(init<const v3d&,
-	     const v3d&,
-	     const v3d&, bp::optional<const STRING &> >())
-	.def(init<VALTYPE, VALTYPE, VALTYPE,
-	     bp::optional<const STRING &> >())
-	;
+
+    static void py_export(py::module m, const char * pyname){
+
+
+
     }
-*/
+
 #endif
 
   };
 
 #ifdef PY_EXPORT
-    
+
   template <class VALTYPE>
   shape<VALTYPE> * py_shape_box1(const v3d& a, const v3d& b,
                                  const v3d& c, const v3d& r){
@@ -354,12 +340,13 @@ namespace qpp{
       r0 = s.r0;
     }
 
-    virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const{
+    virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0)
+    const{
       for (int i=0; i<offset; i++)
-	os << " ";
+        os << " ";
       os << "sphere";
       if (name != "")
-	os << " " << name;
+        os << " " << name;
       os << "( R=" << R << ", center" << r0 << ")";
     }
 
@@ -383,23 +370,23 @@ namespace qpp{
 
       v3d res = 0e0;
       for (int i=0; i<3; i++)
-	for (int j=0; j<3; j++)
-	  res(i) += B(i,j)*B(i,j);
+        for (int j=0; j<3; j++)
+          res(i) += B(i,j)*B(i,j);
       for (int i=0; i<3; i++)
-	res(i) = std::sqrt(res(i));
+        res(i) = std::sqrt(res(i));
       return B*r0 - R*res;
     }
 
-    virtual v3d fmax(const periodic_cell<VALTYPE> &v) const{      
+    virtual v3d fmax(const periodic_cell<VALTYPE> &v) const{
       matrix3d<VALTYPE> A(v(0),v(1),v(2));
       matrix3d<VALTYPE> B = invert(A);
 
       v3d res = 0e0;
       for (int i=0; i<3; i++)
-	for (int j=0; j<3; j++)
-	  res(i) += B(i,j)*B(i,j);
+        for (int j=0; j<3; j++)
+          res(i) += B(i,j)*B(i,j);
       for (int i=0; i<3; i++)
-	res(i) = std::sqrt(res(i));
+        res(i) = std::sqrt(res(i));
       return B*r0 + R*res;
     }
 
@@ -423,12 +410,12 @@ namespace qpp{
     }
 
 #ifdef PY_EXPORT
-/*
+    /*
     static void py_export(const char * pyname){
       bp::class_<shape_sphere<VALTYPE>, bp::bases<shape<VALTYPE> > >(pyname)
-	.def(bp::init<VALTYPE, bp::optional<const STRING &> >())
-	.def(bp::init<VALTYPE, const v3d&, bp::optional<const STRING &> >())
-	;
+        .def(bp::init<VALTYPE, bp::optional<const STRING &> >())
+        .def(bp::init<VALTYPE, const v3d&, bp::optional<const STRING &> >())
+        ;
     }
 */
 #endif
@@ -445,19 +432,19 @@ namespace qpp{
   public:
     using shape<VALTYPE>::name;
 
-    shape_union(shape<VALTYPE> & __sh1, shape<VALTYPE> &__sh2, const STRING & __name = ""):
-      shape<VALTYPE>(__name)
-    { sh1 = &__sh1; sh2 = &__sh2; }
+    shape_union(shape<VALTYPE> & __sh1, shape<VALTYPE> &__sh2,
+                const STRING & __name = "") : shape<VALTYPE>(__name){
+      sh1 = &__sh1; sh2 = &__sh2;
+    }
 
-    shape_union(const shape_union<VALTYPE> & s) :  shape<VALTYPE>(s.name)
-    {
+    shape_union(const shape_union<VALTYPE> & s) :  shape<VALTYPE>(s.name){
       sh1 = s.sh1;
       sh2 = s.sh2;
     }
 
     virtual bool within(const v3d & r) const
     { return sh1->within(r) || sh2->within(r); }
- 
+
     virtual VALTYPE volume() const
     { return 0; }
 
@@ -470,44 +457,40 @@ namespace qpp{
     virtual void rotate(const matrix3d<VALTYPE> & Rot)
     { sh1->rotate(Rot); sh2->rotate(Rot); }
 
-    virtual v3d rmin() const
-    { 
+    virtual v3d rmin() const {
       v3d r, r1 = sh1->rmin(), r2 = sh2->rmin();
       for (int i=0; i<3; i++)
-	r(i) = std::min(r1(i),r2(i));
+        r(i) = std::min(r1(i),r2(i));
       return r;
     }
 
-    virtual v3d rmax() const
-    { 
+    virtual v3d rmax() const {
       v3d r, r1 = sh1->rmax(), r2 = sh2->rmax();
       for (int i=0; i<3; i++)
-	r(i) = std::max(r1(i),r2(i));
+        r(i) = std::max(r1(i),r2(i));
       return r;
     }
 
-    virtual v3d fmin(const periodic_cell<VALTYPE> &v) const
-    {
+    virtual v3d fmin(const periodic_cell<VALTYPE> &v) const {
       v3d f, f1 = sh1->fmin(v), f2 = sh2->fmin(v);
       for (int i=0; i<3; i++)
-	f(i) = std::min(f1(i),f2(i));
+        f(i) = std::min(f1(i),f2(i));
       return f;
     }
 
-    virtual v3d fmax(const periodic_cell<VALTYPE> &v) const
-    {
+    virtual v3d fmax(const periodic_cell<VALTYPE> &v) const {
       v3d f, f1 = sh1->fmax(v), f2 = sh2->fmax(v);
       for (int i=0; i<3; i++)
-	f(i) = std::max(f1(i),f2(i));
+        f(i) = std::max(f1(i),f2(i));
       return f;
     }
 
-    virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const
-    {
+    virtual void write(std::basic_ostream<CHAR,TRAITS> &os,
+                       int offset=0) const {
       for (int i=0; i<offset; i++) os << " ";
       os << "union";
       if (name != "")
-	os << " " << name;
+        os << " " << name;
       os << "( shape1 = ";
       sh1->write(os);
       os << ", shape2 = ";
@@ -527,20 +510,19 @@ namespace qpp{
   public:
     using shape<VALTYPE>::name;
 
-    shape_intersect(shape<VALTYPE> & __sh1, shape<VALTYPE> &__sh2, const STRING & __name = ""):
-      shape<VALTYPE>(__name)
+    shape_intersect(shape<VALTYPE> & __sh1, shape<VALTYPE> &__sh2,
+                    const STRING & __name = "") : shape<VALTYPE>(__name)
     { sh1 = &__sh1; sh2 = &__sh2; }
 
     shape_intersect(const shape_intersect<VALTYPE> & s) :
-      shape<VALTYPE>(s.name)
-    {
+      shape<VALTYPE>(s.name){
       sh1 = s.sh1;
       sh2 = s.sh2;
     }
 
     virtual bool within(const v3d & r) const
     { return sh1->within(r) && sh2->within(r); }
- 
+
     virtual VALTYPE volume() const
     { return 0; }
 
@@ -553,44 +535,40 @@ namespace qpp{
     virtual void rotate(const matrix3d<VALTYPE> & Rot)
     { sh1->rotate(Rot); sh2->rotate(Rot); }
 
-    virtual v3d rmin() const
-    { 
+    virtual v3d rmin() const{
       v3d r, r1 = sh1->rmin(), r2 = sh2->rmin();
       for (int i=0; i<3; i++)
-	r(i) = std::max(r1(i),r2(i));
+        r(i) = std::max(r1(i),r2(i));
       return r;
     }
 
-    virtual v3d rmax() const
-    { 
+    virtual v3d rmax() const{
       v3d r, r1 = sh1->rmax(), r2 = sh2->rmax();
       for (int i=0; i<3; i++)
-	r(i) = std::min(r1(i),r2(i));
+        r(i) = std::min(r1(i),r2(i));
       return r;
     }
 
-    virtual v3d fmin(const periodic_cell<VALTYPE> &v) const
-    {
+    virtual v3d fmin(const periodic_cell<VALTYPE> &v) const{
       v3d f, f1 = sh1->fmin(v), f2 = sh2->fmin(v);
       for (int i=0; i<3; i++)
-	f(i) = std::max(f1(i),f2(i));
+        f(i) = std::max(f1(i),f2(i));
       return f;
     }
 
-    virtual v3d fmax(const periodic_cell<VALTYPE> &v) const
-    {
+    virtual v3d fmax(const periodic_cell<VALTYPE> &v) const{
       v3d f, f1 = sh1->fmax(v), f2 = sh2->fmax(v);
       for (int i=0; i<3; i++)
-	f(i) = std::min(f1(i),f2(i));
+        f(i) = std::min(f1(i),f2(i));
       return f;
     }
 
-    virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const
-    {
+    virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0)
+    const{
       for (int i=0; i<offset; i++) os << " ";
       os << "intersect";
       if (name != "")
-	os << " " << name;
+        os << " " << name;
       os << "( shape1 = ";
       sh1->write(os);
       os << ", shape2 = ";
@@ -610,7 +588,8 @@ namespace qpp{
   public:
     using shape<VALTYPE>::name;
 
-    shape_subtract(shape<VALTYPE> & __sh1, shape<VALTYPE> &__sh2, const STRING & __name = ""):
+    shape_subtract(shape<VALTYPE> & __sh1, shape<VALTYPE> &__sh2,
+                   const STRING & __name = ""):
       shape<VALTYPE>(__name)
     { sh1 = &__sh1; sh2 = &__sh2; }
 
@@ -622,7 +601,7 @@ namespace qpp{
 
     virtual bool within(const v3d & r) const
     { return sh1->within(r) && (! sh2->within(r)); }
- 
+
     virtual VALTYPE volume() const
     { return 0; }
 
@@ -647,11 +626,12 @@ namespace qpp{
     virtual v3d fmax(const periodic_cell<VALTYPE> &v) const
     { return sh1->fmax(v); }
 
-    virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const{
+    virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0)
+    const{
       for (int i=0; i<offset; i++) os << " ";
       os << "subtract";
       if (name != "")
-	os << " " << name;
+        os << " " << name;
       os << "( shape1 = ";
       sh1->write(os);
       os << ", shape2 = ";
@@ -682,7 +662,7 @@ namespace qpp{
 
     virtual bool within(const v3d & r) const
     { return ! sh->within(r); }
- 
+
     virtual VALTYPE volume() const
     { return infty; }
 
@@ -707,11 +687,12 @@ namespace qpp{
     virtual v3d fmax(const periodic_cell<VALTYPE> &v) const
     { return  {infty, infty, infty}; }
 
-    virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const{
+    virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0)
+    const{
       for (int i=0; i<offset; i++) os << " ";
       os << "invert";
       if (name != "")
-	os << " " << name;
+        os << " " << name;
       os << "( shape = ";
       sh->write(os);
       os << ")";
@@ -740,12 +721,12 @@ namespace qpp{
       sh2 = s.sh2;
     }
 
-    virtual bool within(const v3d & r) const{ 
+    virtual bool within(const v3d & r) const{
       bool in1 = sh1->within(r);
       bool in2 = sh2->within(r);
-      return (in1 && ! in2) || (in2 && ! in1); 
+      return (in1 && ! in2) || (in2 && ! in1);
     }
- 
+
     virtual VALTYPE volume() const
     { return 0; }
 
@@ -758,39 +739,40 @@ namespace qpp{
     virtual void rotate(const matrix3d<VALTYPE> & Rot)
     { sh1->rotate(Rot); sh2->rotate(Rot); }
 
-    virtual v3d rmin() const{ 
+    virtual v3d rmin() const{
       v3d r, r1 = sh1->rmin(), r2 = sh2->rmin();
       for (int i=0; i<3; i++)
-	r(i) = std::min(r1(i),r2(i));
+        r(i) = std::min(r1(i),r2(i));
       return r;
     }
 
-    virtual v3d rmax() const{ 
+    virtual v3d rmax() const{
       v3d r, r1 = sh1->rmax(), r2 = sh2->rmax();
       for (int i=0; i<3; i++)
-	r(i) = std::max(r1(i),r2(i));
+        r(i) = std::max(r1(i),r2(i));
       return r;
     }
 
     virtual v3d fmin(const periodic_cell<VALTYPE> &v) const{
       v3d f, f1 = sh1->fmin(v), f2 = sh2->fmin(v);
       for (int i=0; i<3; i++)
-	f(i) = std::min(f1(i),f2(i));
+        f(i) = std::min(f1(i),f2(i));
       return f;
     }
 
     virtual v3d fmax(const periodic_cell<VALTYPE> &v) const{
       v3d f, f1 = sh1->fmax(v), f2 = sh2->fmax(v);
       for (int i=0; i<3; i++)
-	f(i) = std::max(f1(i),f2(i));
+        f(i) = std::max(f1(i),f2(i));
       return f;
     }
 
-    virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const{
+    virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0)
+    const{
       for (int i=0; i<offset; i++) os << " ";
       os << "xor";
       if (name != "")
-	os << " " << name;
+        os << " " << name;
       os << "( shape1 = ";
       sh1->write(os);
       os << ", shape2 = ";
@@ -803,43 +785,97 @@ namespace qpp{
   // ----------------------------------------------------------------
 
 #ifdef PY_EXPORT
-/*
+
   template <class VALTYPE>
-  struct py_shape : shape<VALTYPE>, bp::wrapper<shape<VALTYPE> >
+  struct py_shape : shape<VALTYPE>
   {
+    using shape<VALTYPE>::shape;
 
     bool within(const v3d & r) const
-    { this->get_override("within")(r); }
+    override {
+      PYBIND11_OVERLOAD_PURE(
+            const bool,
+            shape<VALTYPE>,
+            within,
+            r);
+    }
 
     void scale(VALTYPE s)
-    { this->get_override("scale")(s); }
+    override {
+      PYBIND11_OVERLOAD_PURE(
+            void,
+            shape<VALTYPE>,
+            scale,
+            s);
+    }
 
     void move(const v3d & v)
-    { this->get_override("move")(v);}
+    override {
+      PYBIND11_OVERLOAD_PURE(
+            void,
+            shape<VALTYPE>,
+            move,
+            v);
+    }
 
     void rotate(const matrix3d<VALTYPE> & Rot)
-    { this->get_override("rotate")(Rot);}
+    override {
+      PYBIND11_OVERLOAD_PURE(
+            void,
+            shape<VALTYPE>,
+            rotate,
+            Rot);
+    }
 
     VALTYPE volume() const
-    { this->get_override("volume")();}
+    override {
+      PYBIND11_OVERLOAD_PURE(
+            const VALTYPE,
+            shape<VALTYPE>,
+            volume);
+    }
 
     v3d rmin() const
-    { this->get_override("rmin")();}
+    override {
+      PYBIND11_OVERLOAD_PURE(
+            const v3d,
+            shape<VALTYPE>,
+            rmin);
+    }
 
     v3d rmax() const
-    { this->get_override("rmax")();}
+    override {
+      PYBIND11_OVERLOAD_PURE(
+            const v3d,
+            shape<VALTYPE>,
+            rmax);
+    }
 
     v3d fmin(const periodic_cell<VALTYPE> &v) const
-    { this->get_override("fmin")(v);}
+    override {
+      PYBIND11_OVERLOAD_PURE(
+            const v3d,
+            shape<VALTYPE>,
+            fmin,
+            v);
+    }
 
     v3d fmax(const periodic_cell<VALTYPE> &v) const
-    { this->get_override("fmax")(v);}
+    override {
+      PYBIND11_OVERLOAD_PURE(
+            const v3d,
+            shape<VALTYPE>,
+            rmin,
+            v);
+    }
 
     void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const
-    { this->get_override("write")(os,offset);}
+    {
+      //this->get_override("write")(os,offset);
+    }
 
   };
-*/
+
 #endif
 
 }
