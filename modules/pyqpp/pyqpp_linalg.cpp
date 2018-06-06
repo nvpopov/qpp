@@ -25,8 +25,8 @@ void py_vector3d_export(py::module m, const char * pyname){
       .def(py::init<const qpp::vector3d<VALTYPE>&>())
       //.def(py::str(py::self))
       .def("__str__", [](const qpp::vector3d<VALTYPE> &vec){
-      return fmt::format("[{0}, {1}, {2}]", vec[0], vec[1], vec[2]);
-    })
+        return fmt::format("[{0}, {1}, {2}]", vec[0], vec[1], vec[2]);
+       })
       .def("__add__",     &qpp::vector3d<VALTYPE>::py_add)
       .def("__sub__",     &qpp::vector3d<VALTYPE>::py_sub)
       .def("__getitem__", &qpp::vector3d<VALTYPE>::py_getitem)
@@ -36,10 +36,13 @@ void py_vector3d_export(py::module m, const char * pyname){
       .def("__rmul__",    &qpp::vector3d<VALTYPE>::py_mul)
       .def("norm",        &qpp::vector3d<VALTYPE>::py_norm)
       .def("norm2",       &qpp::vector3d<VALTYPE>::py_norm2)
+
       .def_property("x",  &qpp::vector3d<VALTYPE>::py_getx,
                     &qpp::vector3d<VALTYPE>::py_setx)
+
       .def_property("y",  &qpp::vector3d<VALTYPE>::py_gety,
                     &qpp::vector3d<VALTYPE>::py_sety)
+
       .def_property("z",  &qpp::vector3d<VALTYPE>::py_getz,
                     &qpp::vector3d<VALTYPE>::py_setz);
   // .def_readwrite("tol_equiv", &qpp::vector3d<VALTYPE>::tol_equiv) ;

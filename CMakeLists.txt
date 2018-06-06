@@ -43,6 +43,7 @@ include_directories(${CMAKE_SOURCE_DIR}/deps/pybind11/include)
 option(PYTHON_BINDINGS "build qpp python bindings" ON)
 
 if(PYTHON_BINDINGS)
+    message("-- Python bindings are enabled")
 endif()
 
 #eigen3
@@ -75,7 +76,7 @@ include_directories(modules/)
 
 option(USE_SPGLIB "use spglib" ON)
 if(USE_SPGLIB)
-    message("-- spglib bindings is enabled")
+    message("-- spglib bindings are enabled")
     include_directories(${CMAKE_SOURCE_DIR}/deps/spglib/src)
     add_library(spglib-imp STATIC IMPORTED)
     set_target_properties(spglib-imp PROPERTIES IMPORTED_LOCATION
@@ -88,16 +89,16 @@ add_subdirectory(modules)
 
 option(BUILD_EXAMPLES "build examples" OFF)
 if(BUILD_EXAMPLES)
-    message("-- Building examples is enabled")
+    message("-- Examples are enabled")
     add_subdirectory(examples)
 else()
-    message("-- Building examples is disabled")
+    message("-- Examples are disabled")
 endif()
 
 #Build tests
 option(BUILD_TESTS "build tests executable" OFF)
 if(BUILD_TESTS)
-    message("-- Testing are enabled")
+    message("-- Testing is enabled")
     enable_testing()
 
     include_directories(tests/src)

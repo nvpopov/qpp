@@ -57,9 +57,9 @@ namespace qpp{
     vector3d<REAL> *v;
     STRING name;
 
-    //! \brief Create periodic cell of dimension dim with zero translation vectors
-    periodic_cell(int dim)
-    {
+    //! \brief Create periodic cell of dimension dim with zero
+    //!  translation vectors
+    periodic_cell(int dim){
       DIM = dim;
       v = new vector3d<REAL>[DIM];
       for (int d=0; d<DIM; d++)
@@ -67,8 +67,7 @@ namespace qpp{
     }
 
     //! \brief Copy constructor for periodic cell
-    periodic_cell(const periodic_cell<REAL> & cl)
-    {
+    periodic_cell(const periodic_cell<REAL> & cl){
       DIM = cl.DIM;
       v = new vector3d<REAL>[DIM];
       for(int i=0; i<DIM; i++)
@@ -76,12 +75,12 @@ namespace qpp{
     }
 
 
-    /*! \brief Creates periodic cell of DIM==3 with given lattice constants and angles
+    /*! \brief Creates periodic cell of DIM==3 with given lattice
+     * constants and angles
         @param a,b,c - lattice constants
         @param alpha, beta, gamma - angles are in degrees!
     */
-    periodic_cell(REAL a, REAL b, REAL c, REAL alpha, REAL beta, REAL gamma)
-    {
+    periodic_cell(REAL a, REAL b, REAL c, REAL alpha, REAL beta, REAL gamma){
       DIM = 3;
       v = new vector3d<REAL>[DIM];
       alpha *= pi/180;
@@ -96,11 +95,14 @@ namespace qpp{
     }
     
     /*! \brief Creates periodic cell with given translation vectors
-        @param a, b(optional), c(optional) - translation vectors. If only one provided, the resulting cell has 
-        DIM==1, if two provided, then DIM==2, and if all three provided, you get DIM==3 periodic cell
+        @param a, b(optional), c(optional) - translation vectors.
+        If only one provided, the resulting cell has
+        DIM==1, if two provided, then DIM==2, and if all
+        three provided, you get DIM==3 periodic cell
     */
-    periodic_cell(vector3d<REAL > a, vector3d<REAL > b=0, vector3d<REAL > c=0 )
-    {
+    periodic_cell(vector3d<REAL > a,
+                  vector3d<REAL > b=0,
+                  vector3d<REAL > c=0 ){
       DIM = 1;
       if (b != 0)
 	DIM = 2;
@@ -124,8 +126,7 @@ namespace qpp{
     {return index::D(DIM).all(1); }
 
     
-    vector3d<REAL> transform(const vector3d<REAL> & r, const index & I) const
-    {
+    vector3d<REAL> transform(const vector3d<REAL> & r, const index & I) const{
       vector3d<REAL> r1 = r;
       for (int d=0; d<DIM; d++)
 	r1 += v[d]*I(d);
@@ -137,13 +138,11 @@ namespace qpp{
       the coordinate origin
       the others are pointed by lattice vectors
     */
-    bool within(const vector3d<REAL> & r) const
-        {
+    bool within(const vector3d<REAL> & r) const{
       vector3d<REAL> f = cart2frac(r);
       bool res = true;
       for (int d=0; d<DIM; d++)
-	if ( f(d)<REAL(0) || f(d) >= REAL(1) )
-	  {
+	if ( f(d)<REAL(0) || f(d) >= REAL(1) ){
 	    res = false;
 	    break;
 	  }
@@ -155,8 +154,7 @@ namespace qpp{
        the coordinate origin
        the others are pointed by lattice vectors
     */
-    vector3d<REAL> reduce(const vector3d<REAL> & r) const
-    {
+    vector3d<REAL> reduce(const vector3d<REAL> & r) const{
       vector3d<REAL> f = cart2frac(r);
       for (int d=0; d<DIM; d++)
 	f(d) -= floor(f(d));
@@ -166,8 +164,7 @@ namespace qpp{
     /*! \brief find high symmetry point within "radius" distance from given point "r"
       makes sence for rotational symmetries
     */
-    vector3d<REAL> symmetrize(const vector3d<REAL> & r, REAL radius) const
-    {
+    vector3d<REAL> symmetrize(const vector3d<REAL> & r, REAL radius) const{
       return r;
     }
 
@@ -177,14 +174,12 @@ namespace qpp{
        orthogonal to both translation vectors
        @return Cartesian coordinates
     */
-    vector3d<REAL> frac2cart(const vector3d<REAL> & r) const
-    {
+    vector3d<REAL> frac2cart(const vector3d<REAL> & r) const{
       vector3d<REAL> res=REAL(0);
       for (int i=0; i<DIM; i++)
 	res += r(i)*v[i];
 
-      if (DIM==2)
-	{
+      if (DIM==2){
 	  vector3d<REAL> n12 = v[0]%v[1];
 	  n12 /= norm(n12);
 	  res += r(2)*n12;
@@ -196,16 +191,15 @@ namespace qpp{
     /*! \brief cartesian to fractional transformation,
        works for DIM==3 and DIM==2
        @param[in] r  Fartesian coordinates
-       @return Fractional coordinates. In the case DIM==2 the third coordinate ( z=f(2) ) is
+       @return Fractional coordinates. In the case DIM==2 the third
+       coordinate ( z=f(2) ) is
        orthogonal to both translation vectors
     */
-    vector3d<REAL> cart2frac(const vector3d<REAL> & r) const
-    {
+    vector3d<REAL> cart2frac(const vector3d<REAL> & r) const{
       vector3d<REAL> v2;
       if (DIM==3)
 	v2 = v[2];
-      else if (DIM==2)
-	{
+      else if (DIM==2){
 	  v2 = v[0]%v[1];
 	  v2 /= norm(v2);
 	}
@@ -216,17 +210,16 @@ namespace qpp{
 
     // -----------------------------------------------------------------------
 
-    inline vector3d<REAL> & operator()(int i)
+    inline vector3d<REAL> & operator()(int i){
     // fixme - not obvious convention
-    {
+
       return v[i]; 
     }
 
     inline vector3d<REAL> operator()(int i) const
     { return v[i]; }
     
-    inline periodic_cell<REAL> & operator=(const periodic_cell<REAL> & cl)
-    {
+    inline periodic_cell<REAL> & operator=(const periodic_cell<REAL> & cl){
       for(int i=0; i<DIM; i++)
 	v[i] = cl.v[i];
       return *this;
@@ -237,11 +230,9 @@ namespace qpp{
        unit cell is defined as parallelepiped CENTRED in the
        coordinate origin
     */
-    inline vector3d<REAL> reduce_cntr(const vector3d<REAL> & r) const
-    {
+    inline vector3d<REAL> reduce_cntr(const vector3d<REAL> & r) const{
       vector3d<REAL> f = cart2frac(r);
-      for (int i=0; i<DIM; i++)
-	{
+      for (int i=0; i<DIM; i++){
 	  f(i) -= int(f(i));
 	  if ( f(i) > REAL(1)/2 ) f(i)-=1;
 	}
@@ -257,27 +248,26 @@ namespace qpp{
 
     /*! \brief Answers the question whether r belongs to unit cell centred at the coordinate origin
      */
-    inline bool within_centered(vector3d<REAL> r) const
-    {
+    inline bool within_centered(vector3d<REAL> r) const{
       vector3d<REAL> f = cart2frac(r);
       bool res = true;
       for (int d=0; d<DIM; d++)
-	if ( f(d)<-REAL(1)/2 || f(d) > REAL(1)/2 )
-	  {
+	if ( f(d)<-REAL(1)/2 || f(d) > REAL(1)/2 ){
 	    res = false;
 	    break;
 	  }
       return res;
     }
 
-    /*! \brief Answers the question whether r belongs to Wigner-Zeitz unit cell
+    /*! \brief Answers the question whether r belongs to Wigner-Zeitz
+     * unit cell
       fixme - not implemented yet!
     */
     inline bool within_wz(vector3d<REAL> r) const
     {}
 
-    virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const
-    {
+    virtual void write(std::basic_ostream<CHAR,TRAITS> &os,
+                       int offset=0) const{
       if (DIM == 0) return;
       for (int k=0; k<offset; k++) os << " ";
       os << "vectors";
@@ -285,8 +275,7 @@ namespace qpp{
 	os << " " << name;
       os << "(" << DIM << "d){\n";
       
-      for (int i=0; i<DIM; i++)
-	{
+      for (int i=0; i<DIM; i++){
 	  for (int k=0; k<offset+2; k++) os << " ";
 	  //TODO Migrate to fmt
 //	  os << boost::format(" %11.6f %11.6f %11.6f\n")
@@ -301,8 +290,7 @@ namespace qpp{
 
     // --------------- PYTHON -------------------------------
 
-    inline void py_setitem(int i, const vector3d<REAL> & a)
-    { 
+    inline void py_setitem(int i, const vector3d<REAL> & a){ 
       if (i<0) 
 	i += DIM;
       if (i<0 || i>=DIM)
@@ -310,8 +298,7 @@ namespace qpp{
       v[i] = a; 
     }
 
-    inline vector3d<REAL> py_getitem(int i) const
-    {
+    inline vector3d<REAL> py_getitem(int i) const{
       if (i<0) 
 	i += DIM;
       if (i<0 || i>=DIM)
@@ -319,20 +306,18 @@ namespace qpp{
       return v[i];
     }
     
-    inline void py_setitem2(py::tuple I, REAL a)
-    { 
+    inline void py_setitem2(py::tuple I, REAL a){ 
       int i= py::cast<int>(I[0]), j= py::cast<int>(I[1]);
       v[i](j) = a; 
     }
 
-    inline REAL py_getitem2(py::tuple I) const
-    { 
+    inline REAL py_getitem2(py::tuple I) const{ 
       int i= py::cast<int>(I[0]), j= py::cast<int>(I[1]);
       return v[i](j);
     }
 
-    periodic_cell(py::tuple t1, py::tuple t2=py::tuple(),  py::tuple t3=py::tuple())
-    {
+    periodic_cell(py::tuple t1, py::tuple t2=py::tuple(),
+                  py::tuple t3=py::tuple()){
       DIM = 1;
       if (py::len(t2)>0) DIM = 2;
       if (py::len(t3)>0) DIM = 3;
@@ -344,8 +329,8 @@ namespace qpp{
       if (DIM>2) v[2] = vector3d<REAL>(t3);
     }
 
-    periodic_cell(py::list t1, py::list t2=py::list(),  py::list t3=py::list())
-    {
+    periodic_cell(py::list t1, py::list t2=py::list(),
+                  py::list t3=py::list()){
       DIM = 1;
       if (py::len(t2)>0) DIM = 2;
       if (py::len(t3)>0) DIM = 3;
@@ -365,8 +350,8 @@ namespace qpp{
 
   template<typename _CharT, class _Traits, class REAL>
   std::basic_ostream<_CharT, _Traits>&
-  operator<<(std::basic_ostream<_CharT, _Traits>& __os, const periodic_cell<REAL> &cl)
-  {
+  operator<<(std::basic_ostream<_CharT, _Traits>& __os,
+             const periodic_cell<REAL> &cl){
     std::basic_ostringstream<_CharT, _Traits> __s;
     __s.flags(__os.flags());
     __s.imbue(__os.getloc());
@@ -378,7 +363,7 @@ namespace qpp{
     return __os << __s.str();
   }
 
-};
+}
 
 #endif
 

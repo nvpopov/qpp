@@ -3,21 +3,17 @@
 namespace qpp{
   
   template<>
-  bool s2t<bool>(const STRING & s, bool & val)
-  {
+  bool s2t<bool>(const STRING & s, bool & val){
     STRING s1 = tolower(s);
-    if ( (s1 == "y") || (s1 == "yes") || (s1 == "true") || (s1 == "1"))
-      {
+    if ( (s1 == "y") || (s1 == "yes") || (s1 == "true") || (s1 == "1")){
 	val = true;
 	return true;
       }
-    else if ( (s1 == "n") || (s1 == "no") || (s1 == "false") || (s1 == "0"))
-      {
+    else if ( (s1 == "n") || (s1 == "no") || (s1 == "false") || (s1 == "0")){
 	val = false;
 	return true;
       }
-    else
-      {
+    else{
 	return false;
       }
   }
@@ -25,34 +21,31 @@ namespace qpp{
   // -----------------------------------------------------------
 
   template<>
-  STRING t2s(const bool & val)
-  {
+  STRING t2s(const bool & val){
     return val ? "y" : "n";
   }
 
   // -----------------------------------------------------------
-
-  STRING tolower(const STRING & s)
   // Make lowercase
-  {
+  STRING tolower(const STRING & s){
     STRING ss = s;
     std::transform(ss.begin(), ss.end(), ss.begin(), ::tolower);
     return ss;
   }
 
   // -----------------------------------------------------------
-
-  bool icompare(const STRING & s1, const STRING s2)
   // Case insensitive comparison of two strings
-  {
+  bool icompare(const STRING & s1, const STRING s2){
     return tolower(s1) == tolower(s2);
   }
 
   // -----------------------------------------------------------
 
-  void split(const STRING &s, std::vector<STRING> &elems, const STRING & delims  )
+  void split(const STRING &s,
+             std::vector<STRING> &elems,
+             const STRING & delims  ){
   // fixme - not efficient!
-  {
+
     SSTREAM ss(s);
     tokenizer tok(ss);
     tok.dump(delims);
@@ -74,8 +67,7 @@ namespace qpp{
 
   // -----------------------------------------------------------
 
-  std::vector<STRING> split(const STRING &s, const STRING & delims )
-  {
+  std::vector<STRING> split(const STRING &s, const STRING & delims ){
     std::vector<STRING> elems;
     split(s, elems, delims);
     return elems;
@@ -83,8 +75,7 @@ namespace qpp{
 
   // -----------------------------------------------------------
 
-  int strnf(const STRING & s)
-  {
+  int strnf(const STRING & s){
     std::basic_stringstream<CHAR,TRAITS> ss(s);
     STRING a;
     int nf = 0;
@@ -94,8 +85,7 @@ namespace qpp{
 
   // ----------------------------------------------------------
 
-  bool is_identifier(const STRING &s)
-  {
+  bool is_identifier(const STRING &s){
     if (s=="")
       return false;
 

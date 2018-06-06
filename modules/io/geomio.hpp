@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <fmt/format.h>
+#include <fmt/ostream.h>
 
 //#include <lace/lace3d.hpp>
 //#include <lace/lace.hpp>
@@ -53,37 +54,33 @@ namespace qpp{
   // -------------------------------------------------------------------//
 
   template<class REAL, class CELL>
-  void read_xyz(std::basic_istream<CHAR,TRAITS> & inp, geometry<REAL,CELL> & geom)
-  {
+  void read_xyz(std::basic_istream<CHAR,TRAITS> & inp,
+                geometry<REAL,CELL> & geom){
     STRING s;
     std::getline(inp,s);
     int nat;
     std::basic_stringstream<CHAR,TRAITS>(s) >> nat;
     std::getline(inp,s);
     // fixme - check these are numbers!
-    if (geom.DIM==3)
-      {
+    if (geom.DIM==3){
 	int nf = strnf(s);
-	if ( nf==9 || nf == 6 )
-	  {
+	if ( nf==9 || nf == 6 ){
 	    REAL vv[nf];
 	    std::basic_stringstream<CHAR,TRAITS> ss(s);
 	    for (int i=0; i<nf; i++) ss >> vv[i];
-	    if (nf==9)
-	      {
+	    if (nf==9){
 		geom.cell(0) = {vv[0],vv[1],vv[2]};
 		geom.cell(1) = {vv[3],vv[4],vv[5]};
 		geom.cell(2) = {vv[6],vv[7],vv[8]};
 	      }
 	    else
-	      geom.cell = periodic_cell<REAL>(vv[0],vv[1],vv[2],vv[3],vv[4],vv[5]);
+	      geom.cell =
+		  periodic_cell<REAL>(vv[0],vv[1],vv[2],vv[3],vv[4],vv[5]);
 	  }
       }
-    for (int i = 0; i<nat; i++)
-      {
+    for (int i = 0; i<nat; i++){
 	std::getline(inp,s);
-	if (i==0)
-	  {
+	if (i==0){
 	    // Analise the line, recognize .xyz type
 	  }
 	//	char s1[max_atomic_name_length];
@@ -99,42 +96,38 @@ namespace qpp{
   // -------------------------------------------------------------------//
 
   template<class REAL, class CELL>
-  void read_xyzq(std::basic_istream<CHAR,TRAITS> & inp, xgeometry<REAL,CELL> & geom)
-  {
+  void read_xyzq(std::basic_istream<CHAR,TRAITS> & inp,
+                 xgeometry<REAL,CELL> & geom){
     STRING s;
     std::getline(inp,s);
     int nat;
     std::basic_stringstream<CHAR,TRAITS>(s) >> nat;
     std::getline(inp,s);
     // fixme - check these are numbers!
-    if (geom.DIM==3)
-      {
+    if (geom.DIM==3){
 	int nf = strnf(s);
-	if ( nf==9 || nf == 6 )
-	  {
+	if ( nf==9 || nf == 6 ){
 	    REAL vv[nf];
 	    std::basic_stringstream<CHAR,TRAITS> ss(s);
 	    for (int i=0; i<nf; i++) ss >> vv[i];
-	    if (nf==9)
-	      {
+	    if (nf==9){
 		geom.cell(0) = {vv[0],vv[1],vv[2]};
 		geom.cell(1) = {vv[3],vv[4],vv[5]};
 		geom.cell(2) = {vv[6],vv[7],vv[8]};
 	      }
 	    else
-	      geom.cell = periodic_cell<REAL>(vv[0],vv[1],vv[2],vv[3],vv[4],vv[5]);
+	      geom.cell =
+		  periodic_cell<REAL>(vv[0],vv[1],vv[2],vv[3],vv[4],vv[5]);
 	  }
       }
 
     geom.clear();
     geom.set_format({"charge"},{type_real});
 
-    for (int i = 0; i<nat; i++)
-      {
+    for (int i = 0; i<nat; i++){
 	std::getline(inp,s);
-	if (i==0)
-	  {
-	    // Analise the line, recognize .xyz type
+	if (i==0){
+	    // Analyze the line, recognize .xyz type
 	  }
 	//	char s1[max_atomic_name_length];
 	STRING s1;
@@ -194,8 +187,7 @@ namespace qpp{
   // -------------------------------------------------------------------//
   template< class REAL, class TRANSFORM >
   void write_xyz(std::basic_ostream<CHAR,TRAITS>  & out, 
-		 const qpp::geometry<REAL,TRANSFORM> & geom)
-  {
+		 const qpp::geometry<REAL,TRANSFORM> & geom){
     out << geom.nat() << "\n";
 
     if (geom.DIM>0)
@@ -214,8 +206,7 @@ namespace qpp{
   // -------------------------------------------------------------------//
   template< class REAL, class TRANSFORM >
   void write_xyzq(std::basic_ostream<CHAR,TRAITS>  & out, 
-		  const qpp::xgeometry<REAL,TRANSFORM> & geom)
-  {
+		  const qpp::xgeometry<REAL,TRANSFORM> & geom){
     out << geom.nat() << "\n";
     
     if (geom.DIM>0)
@@ -225,8 +216,10 @@ namespace qpp{
     //out << geom.name();
     out << std::endl;
     for (int i=0; i<geom.nat(); i++)
-      out <<  fmt::format("{:8s} {:12.6f} {:12.6f} {:12.6f} {:12.6f}\n", geom.atom(i),
-                          geom.coord(i)(0), geom.coord(i)(1), geom.coord(i)(2), geom.charge(i));
+      out <<
+             fmt::format("{:8s} {:12.6f} {:12.6f} {:12.6f} {:12.6f}\n",
+                         geom.atom(i),geom.coord(i)(0), geom.coord(i)(1),
+                         geom.coord(i)(2), geom.charge(i));
   }
   // -------------------------------------------------------------------//
   //        writing geometry into xyz file together with displacements       //
@@ -254,28 +247,25 @@ namespace qpp{
 
   template< class REAL, class CELL>
   void write_ngbr(std::basic_ostream<CHAR,TRAITS>  & out,
-                  neighbours_table<REAL,CELL> & ngbr)
-  {
-    for (int i=0; i<ngbr.geom->nat(); i++)
-      {
+                  neighbours_table<REAL,CELL> & ngbr){
+    for (int i=0; i<ngbr.geom->nat(); i++){
 	out << i << " " << ngbr.geom->atom(i);
 	std::vector<index> nn;
+
 	for (int j=0; j<ngbr.n(i); j++)
 	  nn.push_back(ngbr(i,j));
 	std::sort(nn.begin(),nn.end(),compare_atindex);
+
 	for (int j=0; j<nn.size(); j++)
 	  out << " " << nn[j] << " "
 	      << norm(ngbr.geom->position(i)-ngbr.geom->position(nn[j]));
 	out << "\n";
+
       }
   }
 
-#ifdef PY_EXPORT
 
-  void qpp_export_ioxyz();
 
-#endif
-
-};
+}
 
 #endif

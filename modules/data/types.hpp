@@ -7,6 +7,7 @@
 #include <fstream>
 #include <complex>
 #include <fmt/format.h>
+#include <fmt/ostream.h>
 
 #include <stdexcept>
 

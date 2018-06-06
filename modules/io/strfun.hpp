@@ -8,153 +8,135 @@
 #include <iostream>
 namespace qpp{
 
-// -------------------- Simple tokenizer -----------------------------------
+  // -------------------- Simple tokenizer -----------------------------------
 
-class tokenizer
-{
-	std::basic_istream<CHAR,TRAITS> * _input;
-	STRING _buff, _dump, _sepr;
-	int _line_number;
-	STRING _filename;
-	bool _created_here;
+  class tokenizer{
+    std::basic_istream<CHAR,TRAITS> * _input;
+    STRING _buff, _dump, _sepr;
+    int _line_number;
+    STRING _filename;
+    bool _created_here;
 
-public:
+  public:
 
-	tokenizer(ISTREAM & input, const STRING & __filename="")
-	{
-		_input = & input;
-		_dump = " \t";
-		_line_number = 0;
-		_filename = __filename;
-		_created_here = false;
-	}
-	/*
-	tokenizer(const STRING & str)
-	{
-	  _input = new std::basic_stringstream<CHAR,TRAITS>(str);
-	  _dump = " \t";
-	  _line_number = 0;
-	  _filename = "";
-	  _created_here = true;
-	}
-	*/
-	tokenizer(const STRING & __filename)
-	{
-		_input = new std::basic_ifstream<CHAR,TRAITS>(__filename.c_str());
-		_dump = " \t";
-		_line_number = 0;
-		_filename = __filename;
-		_created_here = true;
-	}
+    tokenizer(ISTREAM & input, const STRING & __filename=""){
+      _input = & input;
+      _dump = " \t";
+      _line_number = 0;
+      _filename = __filename;
+      _created_here = false;
+    }
+    /*
+        tokenizer(const STRING & str)
+        {
+          _input = new std::basic_stringstream<CHAR,TRAITS>(str);
+          _dump = " \t";
+          _line_number = 0;
+          _filename = "";
+          _created_here = true;
+        }
+        */
+    tokenizer(const STRING & __filename){
+      _input = new
+          std::basic_ifstream<CHAR,TRAITS>(__filename.c_str());
+      _dump = " \t";
+      _line_number = 0;
+      _filename = __filename;
+      _created_here = true;
+    }
 
-	~tokenizer()
-	{
-		if (_created_here)
-			delete _input;
-	}
+    ~tokenizer(){
+      if (_created_here)
+        delete _input;
+    }
 
-	void dump(const STRING & smb)
-	{
-		_dump = smb;
-	}
+    void dump(const STRING & smb){
+      _dump = smb;
+    }
 
-	void separate(const STRING & smb)
-	{
-		_sepr = smb;
-	}
+    void separate(const STRING & smb){
+      _sepr = smb;
+    }
 
-	STRING get()
-	{
-		int i;
-		if (_buff == "" )
-		{
-			std::getline(*_input, _buff);
+    STRING get(){
+      int i;
+      if (_buff == "" ){
+          std::getline(*_input, _buff);
 
-			_line_number++;
-		}
+          _line_number++;
+        }
 
-		do
-		{
-			i = _buff.find_first_not_of(_dump);
+      do{
+          i = _buff.find_first_not_of(_dump);
 
-			//debug
-			//std::cout << "i = " << i << "\""  << _buff << "\"\n";
-			if (i != std::string::npos)
-			{
-				_buff = _buff.substr(i);
-				break;
-			}
-			else if ( !_input -> eof() )
-			{
-				std::getline(*_input, _buff);
-				_line_number++;
-			}
-			else
-			{
-				_buff = "";
-				break;
-			}
-		} while ( true );
+          //debug
+          //std::cout << "i = " << i << "\""  << _buff << "\"\n";
+          if (i != std::string::npos){
+              _buff = _buff.substr(i);
+              break;
+            }
+          else if ( !_input -> eof() ){
+              std::getline(*_input, _buff);
+              _line_number++;
+            }
+          else{
+              _buff = "";
+              break;
+            }
+        } while ( true );
 
-		if ( _input -> eof() && _buff.size()==0 )
-			return "";
+      if ( _input -> eof() && _buff.size()==0 )
+        return "";
 
-		//debug
-		//std::cout << "\"" << _buff << "\"\n";
+      //debug
+      //std::cout << "\"" << _buff << "\"\n";
 
-		STRING rez;
-		i = _buff.find_first_of(_sepr + _dump);
-		if (i==0)
-		{
-			//debug
-			//std::cout << "here1\n";
+      STRING rez;
+      i = _buff.find_first_of(_sepr + _dump);
+      if (i==0){
+          //debug
+          //std::cout << "here1\n";
 
-			rez = _buff.substr(0,1);
-			_buff = _buff.substr(1);
+          rez = _buff.substr(0,1);
+          _buff = _buff.substr(1);
 
-		}
-		else if (i != std::string::npos)
-		{
-			//debug
-			//std::cout << "here2\n";
+        }
+      else if (i != std::string::npos){
+          //debug
+          //std::cout << "here2\n";
 
-			rez =  _buff.substr(0,i);
-			_buff = _buff.substr(i);
-		}
-		else
-		{
-			//debug
-			//std::cout << "here3\n";
+          rez =  _buff.substr(0,i);
+          _buff = _buff.substr(i);
+        }
+      else{
+          //debug
+          //std::cout << "here3\n";
 
-			rez =  _buff;
-			_buff = "";
-		}
-		return rez;
-	}
+          rez =  _buff;
+          _buff = "";
+        }
+      return rez;
+    }
 
-	void back(STRING s)
-	{
-		_buff = s + " " + _buff;
-	}
+    void back(STRING s){
+      _buff = s + " " + _buff;
+    }
 
-	bool eof() const
-	{
-		return _input -> eof() && _buff == "";
-	}
+    bool eof() const{
+      return _input -> eof() && _buff == "";
+    }
 
-	int line() const
-	{
-		return _line_number;
-	}
+    int line() const{
+      return _line_number;
+    }
 
-	STRING file() const
-	{
-		return _filename;
-	}
+    STRING file() const{
+      return _filename;
+    }
 
-};
+  };
 
-// -----------------------------------------------------------
+  // -----------------------------------------------------------
 
   STRING tolower(const STRING & s);
   // Make lowercase
@@ -165,7 +147,9 @@ public:
   // Case insensitive comparison of two strings
   // -----------------------------------------------------------
   
-  void split(const STRING &s, std::vector<STRING> &elems, const STRING & delims = " \t");
+  void split(const STRING &s,
+             std::vector<STRING> &elems,
+             const STRING & delims = " \t");
   // fixme - not efficient!
   
   std::vector<STRING> split(const STRING &s, const STRING & delims=" \t");
@@ -176,35 +160,33 @@ public:
   
   int strnf(const STRING & s);
 
-// -------------------------------- string to type T convertor ----------------------------
+  // -------------------------------- string to type T convertor ----------------------------
 
-template<typename T>
-bool s2t(const STRING & s, T & val)
-{
-	std::basic_stringstream<CHAR,TRAITS> ss(s);
-	ss >> val;
+  template<typename T>
+  bool s2t(const STRING & s, T & val){
+    std::basic_stringstream<CHAR,TRAITS> ss(s);
+    ss >> val;
 
-	//std::cout << "ss eof= " << ss.eof() << "\n";
-	return (!ss.fail()) && ss.eof();
+    //std::cout << "ss eof= " << ss.eof() << "\n";
+    return (!ss.fail()) && ss.eof();
+  }
+
+  template<>
+  bool s2t<bool>(const STRING & s, bool & val);
+
+  // -------------------------------------------------------------
+
+  template<typename T>
+  STRING t2s(const T & val){
+    std::basic_stringstream<CHAR,TRAITS> ss;
+    ss << val;
+    return ss.str();
+  }
+
+  template<>
+  STRING t2s<bool>(const bool & val);
+
+  // -------------------------------------------------------------
 }
-
-template<>
-bool s2t<bool>(const STRING & s, bool & val);
-
-// -------------------------------------------------------------
-
-template<typename T>
-STRING t2s(const T & val)
-{
-	std::basic_stringstream<CHAR,TRAITS> ss;
-	ss << val;
-	return ss.str();
-}
-
-template<>
-STRING t2s<bool>(const bool & val);
-
-// -------------------------------------------------------------
-};
 
 #endif

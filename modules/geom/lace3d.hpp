@@ -27,7 +27,7 @@ namespace qpp{
 
   public:
 
-    simple_vector(){};
+    simple_vector(){}
 
     simple_vector(VALTYPE s)
     {
@@ -858,23 +858,22 @@ namespace qpp{
     
     /*
     std::cout << "eigvals= " << eigvals << "\n";
-    std::cout << " diffs: " << std::abs(e0-e1) << " "  << std::abs(e1-e2) << " " << std::abs(e2-e0) << 
+    std::cout << " diffs: " << std::abs(e0-e1) << " "
+     << std::abs(e1-e2) << " " << std::abs(e2-e0) <<
       " eps= " << eps << "\n";
     */
 
     if ( std::abs(e0-e1)>eps &&  std::abs(e1-e2)>eps &&  std::abs(e2-e0)>eps)
       ndiff = 3;
-    else if ( std::abs(e0-e1) <= eps &&  std::abs(e1-e2) <= eps &&  std::abs(e2-e0) <= eps)
+    else if ( std::abs(e0-e1) <= eps &&  std::abs(e1-e2) <=
+              eps &&  std::abs(e2-e0) <= eps)
       ndiff = 1;
-    else
-      {
+    else{
 	ndiff = 2;
-	if ( std::abs(e1-e2) <= eps )
-	  {
+	if ( std::abs(e1-e2) <= eps ){
 	    e=e2; e2=e0; e0=e;
 	  }
-	else if ( std::abs(e2-e0) <= eps )
-	  {
+	else if ( std::abs(e2-e0) <= eps ){
 	    e=e2; e2=e1; e1=e;
 	  }
 	eigvals = {e0,e1,e2};
@@ -891,17 +890,15 @@ namespace qpp{
     E = 0;
     E(0,0) = E(1,1) = E(2,2) = 1;
 
-    if (ndiff==1)
-      {
+    if (ndiff==1){
 	// e0, e1 and e2 
 	//std::cout << "e0==e1==e2\n";
 	n0 = {1,0,0};
 	n1 = {0,1,0};
 	n2 = {0,0,1};
       }
-    else if (ndiff==2)
+    else if (ndiff==2){
       // e0 == e1 != e2
-      {
 	//std::cout << "e0==e1!=e2\n";
 	B = AA - e2*E;
 	B /= B.norm();
@@ -940,9 +937,9 @@ namespace qpp{
 	n2 = n0%n1;
 	
       }
-    else
+    else{
       // e0 != e1 != e2
-      {
+
 	//std::cout << "e0!=e1!=e2\n";
 
 	B = (AA - e1*E);
@@ -982,9 +979,11 @@ namespace qpp{
 	//B = B.T();
 
 	i=0;
-	if ( norm(B(1)-n0*scal(n0,B(1))-n1*scal(n1,B(1)))>norm(B(0)-n0*scal(n0,B(0))-n1*scal(n1,B(0))) )
+	if ( norm(B(1)-n0*scal(n0,B(1))-n1*scal(n1,B(1)))>
+	     norm(B(0)-n0*scal(n0,B(0))-n1*scal(n1,B(0))) )
 	  i=1;
-	if ( norm(B(2)-n0*scal(n0,B(2))-n1*scal(n1,B(2)))>norm(B(i)-n0*scal(n0,B(i))-n1*scal(n1,B(i))) )
+	if ( norm(B(2)-n0*scal(n0,B(2))-n1*scal(n1,B(2)))>
+	     norm(B(i)-n0*scal(n0,B(i))-n1*scal(n1,B(i))) )
 	  i=2;
 	
 	n2 = B(i)-n0*scal(n0,B(i))-n1*scal(n1,B(i));
@@ -1007,8 +1006,7 @@ namespace qpp{
     if (std::abs(n2(i))<std::abs(n2(2))) i=2;
     n2 *= std::abs(n2(i))/n2(i);
 
-    for (int i=0; i<3; i++)
-      {
+    for (int i=0; i<3; i++){
 	eigvecs(i,0) = n0(i);
 	eigvecs(i,1) = n1(i);
 	eigvecs(i,2) = n2(i);
@@ -1017,8 +1015,7 @@ namespace qpp{
 
   template<class VALTYPE>
   bool diagon3d(vector3d<VALTYPE> & eigvals, matrix3d<VALTYPE> & eigvecs,
-		const matrix3d<VALTYPE> & A)
-  {
+		const matrix3d<VALTYPE> & A){
     vector3d<typename numeric_type<VALTYPE>::complex> ceigvals; 
     matrix3d<typename numeric_type<VALTYPE>::complex> ceigvecs;
     VALTYPE eps = vector3d<VALTYPE>::tol_equiv;
@@ -1026,16 +1023,14 @@ namespace qpp{
     bool res = true;
     diagon3d(ceigvals,ceigvecs,A);
 
-    for (int i=0; i<3; i++)
-      {
+    for (int i=0; i<3; i++){
 	eigvals(i) = ceigvals(i).real();
 	if ( std::abs(ceigvals(i).imag()) > eps )
 	  res = false;
       }
 
     for (int i=0; i<3; i++)
-      for (int j=0; j<3; j++)
-	{
+      for (int j=0; j<3; j++){
 	  eigvecs(i,j) = ceigvecs(i,j).real();
 	  if ( std::abs(ceigvecs(i,j).imag()) > eps )
 	    res = false;
@@ -1050,13 +1045,15 @@ namespace qpp{
   { return diagon3d(A); }
 
   template<class VALTYPE>
-  inline void py_diagon3dm(vector3d<typename numeric_type<VALTYPE>::complex> & eigvals, 
-			   matrix3d<typename numeric_type<VALTYPE>::complex> & eigvecs,
-			   const matrix3d<VALTYPE> & A)
+  inline void py_diagon3dm(
+      vector3d<typename numeric_type<VALTYPE>::complex> & eigvals,
+      matrix3d<typename numeric_type<VALTYPE>::complex> & eigvecs,
+      const matrix3d<VALTYPE> & A)
   { diagon3d(eigvals,eigvecs,A); }
 
   template<class VALTYPE>
-  inline bool py_diagon3dreal(vector3d<VALTYPE> & eigvals, matrix3d<VALTYPE> & eigvecs,
+  inline bool py_diagon3dreal(vector3d<VALTYPE> & eigvals,
+                              matrix3d<VALTYPE> & eigvecs,
 			      const matrix3d<VALTYPE> & A)
   { return diagon3d(eigvals,eigvecs,A); }
 
@@ -1065,16 +1062,21 @@ namespace qpp{
   { return det(a); }
 
   template<class VALTYPE>
-  inline VALTYPE py_detv(const vector3d<VALTYPE> & a, const vector3d<VALTYPE> & b, const vector3d<VALTYPE> & c)
+  inline VALTYPE py_detv(const vector3d<VALTYPE> & a,
+                         const vector3d<VALTYPE> & b,
+                         const vector3d<VALTYPE> & c)
   { return det(a,b,c); }
 
   template<class VALTYPE>
-  inline vector3d<VALTYPE> py_solve3m(const matrix3d<VALTYPE> & A, const vector3d<VALTYPE> & b)
+  inline vector3d<VALTYPE> py_solve3m(const matrix3d<VALTYPE> & A,
+                                      const vector3d<VALTYPE> & b)
   { return solve3d(A,b);}
 
   template<class VALTYPE>
-  inline vector3d<VALTYPE> py_solve3v(const vector3d<VALTYPE> & A0, const vector3d<VALTYPE> & A1, 
-				      const vector3d<VALTYPE> & A2, const vector3d<VALTYPE> & b)
+  inline vector3d<VALTYPE> py_solve3v(const vector3d<VALTYPE> & A0,
+                                      const vector3d<VALTYPE> & A1,
+                                      const vector3d<VALTYPE> & A2,
+                                      const vector3d<VALTYPE> & b)
   { return solve3d(A0,A1,A2,b);}
 
   template<class VALTYPE>
@@ -1082,10 +1084,12 @@ namespace qpp{
   { return invert(A);}
 
   template<class VALTYPE>
-  inline matrix3d<VALTYPE> py_pow_mtr(const matrix3d<VALTYPE> & A, int n) {return pow(A,n);}
+  inline matrix3d<VALTYPE> py_pow_mtr(const matrix3d<VALTYPE> & A, int n)
+  {return pow(A,n);}
 
   template<class VALTYPE>
-  inline matrix3d<VALTYPE> py_rotmtrx_v(const vector3d<VALTYPE> & nn, VALTYPE phi)
+  inline matrix3d<VALTYPE> py_rotmtrx_v(const vector3d<VALTYPE> & nn,
+                                        VALTYPE phi)
   {  return RotMtrx(nn,phi);}
 
   template<class VALTYPE>
@@ -1142,8 +1146,8 @@ namespace qpp{
 
   template<typename _CharT, class _Traits, class VALTYPE>
   std::basic_ostream<_CharT, _Traits>&
-  operator<<(std::basic_ostream<_CharT, _Traits>& __os, const matrix3d<VALTYPE> & a)
-  {
+  operator<<(std::basic_ostream<_CharT, _Traits>& __os,
+             const matrix3d<VALTYPE> & a){
     std::basic_ostringstream<_CharT, _Traits> __s;
     __s.flags(__os.flags());
     __s.imbue(__os.getloc());
@@ -1166,8 +1170,7 @@ namespace qpp{
     vector2d()
     {}
 
-    vector2d(VALTYPE _x, VALTYPE _y)
-    {
+    vector2d(VALTYPE _x, VALTYPE _y){
       r[0] = _x;
       r[1] = _y;
     }
@@ -1190,29 +1193,25 @@ namespace qpp{
 
   public:
 
-    matrix2d(VALTYPE a00, VALTYPE a01, VALTYPE a10, VALTYPE a11)
-    {
+    matrix2d(VALTYPE a00, VALTYPE a01, VALTYPE a10, VALTYPE a11){
       a[0] = a00;
       a[1] = a01;
       a[2] = a10;
       a[3] = a11;
     }
 
-    matrix2d(const vector2d<VALTYPE> & a0, const vector2d<VALTYPE> & a1)
-    {
+    matrix2d(const vector2d<VALTYPE> & a0, const vector2d<VALTYPE> & a1){
       a[0] = a0.x;
       a[1] = a1.x;
       a[2] = a0.y;
       a[3] = a1.y;
     }
 
-    inline VALTYPE & operator()(int i, int j)
-    {
+    inline VALTYPE & operator()(int i, int j){
       return a[2*i+j];
     }
 
-    inline VALTYPE operator()(int i, int j) const
-    {
+    inline VALTYPE operator()(int i, int j) const{
       return a[2*i+j];
     }
 
@@ -1222,8 +1221,8 @@ namespace qpp{
 
   template<typename _CharT, class _Traits, class VALTYPE, int DIM>
   std::basic_ostream<_CharT, _Traits>&
-  operator<<(std::basic_ostream<_CharT, _Traits>& __os, const simple_vector<VALTYPE, DIM> &v)
-  {
+  operator<<(std::basic_ostream<_CharT, _Traits>& __os,
+             const simple_vector<VALTYPE, DIM> &v){
     std::basic_ostringstream<_CharT, _Traits> __s;
     __s.flags(__os.flags());
     __s.imbue(__os.getloc());
@@ -1237,6 +1236,6 @@ namespace qpp{
     return __os << __s.str();
   }
 
-};
+}
 
 #endif

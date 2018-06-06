@@ -7,6 +7,7 @@
 #include <geom/lace3d.hpp>
 #include <Eigen/Dense>
 #include <fmt/format.h>
+#include <fmt/ostream.h>
 
 #ifdef PY_EXPORT
 
