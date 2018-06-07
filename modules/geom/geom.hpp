@@ -793,7 +793,7 @@ The supercell concept generalization for the geometry class looks like:
 
     static void py_props(py::module m, const char * pyname){
       std::string sPropNameAtom =
-          fmt::format("{0}_{1}",pyname,"idx_property_atom");
+          fmt::format("{0}_{1}",pyname,"idx_prop_atom");
       py_indexed_property<
           SELF,
           STRING,
@@ -802,7 +802,7 @@ The supercell concept generalization for the geometry class looks like:
           &SELF::py_setatom>::py_export(m, sPropNameAtom.c_str());
 
       std::string sPropNameShadow =
-          fmt::format("{0}_{1}",pyname,"idx_property_shadow");
+          fmt::format("{0}_{1}",pyname,"idx_prop_shadow");
       py_indexed_property<
           SELF,
           bool,
@@ -812,7 +812,7 @@ The supercell concept generalization for the geometry class looks like:
 
 
       std::string sPropNameCoord =
-          fmt::format("{0}_{1}",pyname,"2idx_property_coord");
+          fmt::format("{0}_{1}",pyname,"2idx_prop_coord");
       py_2indexed_property<
           SELF,
           vector3d<REAL>,
@@ -824,7 +824,7 @@ The supercell concept generalization for the geometry class looks like:
           &SELF::py_setcoord >::py_2export(m, sPropNameCoord.c_str());
 
       std::string sPropNameXYZ0 =
-          fmt::format("{0}_{1}",pyname,"idx_property_xyz0");
+          fmt::format("{0}_{1}",pyname,"idx_prop_xyz0");
       py_indexed_property<
           SELF,
           REAL,
@@ -833,7 +833,7 @@ The supercell concept generalization for the geometry class looks like:
           &SELF::py_setxyz<0> >::py_export(m, sPropNameXYZ0.c_str());
 
       std::string sPropNameXYZ1 =
-          fmt::format("{0}_{1}",pyname,"idx_property_xyz1");
+          fmt::format("{0}_{1}",pyname,"idx_prop_xyz1");
       py_indexed_property<
           SELF,
           REAL,
@@ -842,7 +842,7 @@ The supercell concept generalization for the geometry class looks like:
           &SELF::py_setxyz<1> >::py_export(m, sPropNameXYZ1.c_str());
 
       std::string sPropNameXYZ2 =
-          fmt::format("{0}_{1}",pyname,"idx_property_xyz2");
+          fmt::format("{0}_{1}",pyname,"idx_prop_xyz2");
       py_indexed_property<
           SELF,
           REAL,
@@ -851,7 +851,7 @@ The supercell concept generalization for the geometry class looks like:
           &SELF::py_setxyz<2> >::py_export(m, sPropNameXYZ2.c_str());
 
       std::string sPropNameSymRad =
-          fmt::format("{0}_{1}",pyname,"idx_property_symrad");
+          fmt::format("{0}_{1}",pyname,"idx_prop_symrad");
       py_indexed_property<
           SELF,
           REAL,

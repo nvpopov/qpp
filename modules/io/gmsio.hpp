@@ -222,7 +222,7 @@ namespace qpp{
           out << std::endl;
           for (int j=0; j<bas.size(); j++)
             if (bas[j].atom == xgeom->atom(i)){
-                write_gms_basis(out,bas[j]);
+                qpp::write_gms_basis(out,bas[j]);
               }
           out << std::endl;
         }
@@ -235,7 +235,7 @@ namespace qpp{
                       qmmm_molecule<REAL,CELL,qbas_gauss,FREAL> & mol){
     for (int i : mol.fixedatoms)
       mol.geom->shadow(i,true);
-    write_gms_data(out, *mol.geom, mol.basis);
+    qpp::write_gms_data(out, *mol.geom, mol.basis);
     for (int i : mol.fixedatoms)
       mol.geom->shadow(i,false);
   }
@@ -283,11 +283,7 @@ namespace qpp{
       mol.geom->shadow(i,false);
   }
 
-#ifdef PY_EXPORT
 
-  void qpp_export_gmsio();
-
-#endif
 
 }
 

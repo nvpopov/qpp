@@ -808,13 +808,13 @@ namespace qpp{
     static void py_export(py::module m, const char * pyname){
 
       std::string sPropNameField =
-           fmt::format("{0}_{1}",pyname,"idx_property_xfield");
+           fmt::format("{0}_{1}",pyname,"idx_prop_xfield");
       py_2indexed_property<SELF, py::object, py::object, int, &SELF::py_getfield1,
           &SELF::py_setfield1, &SELF::py_getfield,
           &SELF::py_setfield >::py_2export(m, sPropNameField.c_str());
 
       std::string sPropNameAdd =
-           fmt::format("{0}_{1}",pyname,"idx_property_xadd");
+           fmt::format("{0}_{1}",pyname,"idx_prop_xadd");
       py_indexed_property<SELF, bool, int, &SELF::py_getadd,
           &SELF::py_setadd >::py_export(m, sPropNameAdd.c_str());
 

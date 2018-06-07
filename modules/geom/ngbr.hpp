@@ -252,12 +252,12 @@ namespace qpp{
     
     static void py_export(py::module m, const char * pyname){
       std::string sPropNameCovRad =
-          fmt::format("{0}_{1}",pyname,"idx_property_covrad");
+          fmt::format("{0}_{1}",pyname,"idx_prop_covrad");
       py_indexed_property<SELF, REAL, const STRING & , &SELF::covrad,
           &SELF::set_covrad>::py_export(m, sPropNameCovRad.c_str());
 
       std::string sPropNamePair =
-          fmt::format("{0}_{1}",pyname,"idx_property_pair");
+          fmt::format("{0}_{1}",pyname,"idx_prop_pair");
       py_2indexed_property<SELF,REAL,REAL, const STRING , &SELF::py_getpair,
           &SELF::py_setpair,&SELF::py_getpair2, &SELF::py_setpair2 >
           ::py_2export(m, sPropNamePair.c_str(),true);

@@ -10,11 +10,11 @@
 #include <fmt/ostream.h>
 
 #ifdef PY_EXPORT
-
-#include <boost/python.hpp>
-#include <boost/python/suite/indexing/vector_indexing_suite.hpp>
-namespace bp = boost::python;
-
+#include <pybind11/pybind11.h>
+#include <pybind11/operators.h>
+#include <pybind11/stl.h>
+#include <pyqpp/py_indexed_property.hpp>
+namespace py = pybind11;
 #endif
 
 namespace qpp{
@@ -37,7 +37,8 @@ namespace qpp{
 
     // Calculate the values of basis functions on a grid
 
-    virtual Eigen::Matrix<FREAL, Eigen::Dynamic, 1> & values(const std::vector<vector3d<CREAL> > & grid) =0;
+    virtual Eigen::Matrix<FREAL, Eigen::Dynamic, 1> &
+                  values(const std::vector<vector3d<CREAL> > & grid) =0;
 
   };
 
@@ -81,22 +82,25 @@ namespace qpp{
   public:
 
     STRING atom, basis_name;
-    std::vector<qpp_shell<BT,FREAL> > shells;
+    std::vector<qpp_shell<BT, FREAL> > shells;
     atomic_ecp<FREAL> ecp;
     
-    bool empty()
-    {
+    bool empty(){
       return shells.size() == 0 && basis_name == "";
     }  
 
 #ifdef PY_EXPORT
 
-    static void py_export(const char * pyname)
+    static void py_export(py::module m, const char * pyname)
     {
-      class_< std::vector<qpp_shell<BT,FREAL> > >("noname")
-	.def(bp::vector_indexing_suite<std::vector<qpp_shell<BT,FREAL> > >() );
-      class_<atomic_basis<BT,FREAL> >(pyname)
-	.def_readwrite("shells", &atomic_basis<BT,FREAL>::shells )
+      //*py::class_< std::vector<qpp_shell<BT,FREAL> > >(m, pyname)
+      //.def(bp::vector_indexing_suite<std::vector<qpp_shell<BT,FREAL> > >() );
+
+      py::class_<atomic_basis<BT,FREAL> >(m, pyname)
+        //TODO: Why init didnt be here in original bp bindings?
+        .def(py::init<>())
+        //TODO: cannot add
+        .def_readwrite("shells", &atomic_basis<BT,FREAL>::shells )
 	.def_readwrite("ecp",    &atomic_basis<BT,FREAL>::ecp)
 	.def_readwrite("atom",   &atomic_basis<BT,FREAL>::atom )
 	.def_readwrite("basis_name",   &atomic_basis<BT,FREAL>::basis_name )
@@ -396,7 +400,7 @@ namespace qpp{
     }
   
   };
-	  */
+          */
   // ----------------------------------------------------------------------
 
   const int Lmax = 3;

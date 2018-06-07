@@ -2,12 +2,10 @@
 #define _QPP_ECP_H
 
 #ifdef PY_EXPORT
-
-#include <python/qppython.hpp>
-#include <boost/python.hpp>
-#include <boost/python/list.hpp>
-namespace bp = boost::python;
-
+#include <pybind11/pybind11.h>
+#include <pybind11/operators.h>
+#include <pyqpp/py_indexed_property.hpp>
+namespace py = pybind11;
 #endif
 
 namespace qpp{
@@ -23,8 +21,7 @@ namespace qpp{
     STRING name;
     int nelec;
 
-    void init_props()
-    {
+    void init_props(){
 #ifdef PY_EXPORT
       py_n.bind(this);
       py_nprim.bind(this);
@@ -33,38 +30,32 @@ namespace qpp{
 #endif
     }
 
-    atomic_ecp()
-    {
+    atomic_ecp(){
       init_props();
     }
 
     atomic_ecp(int __L):
-      _coeff(__L+1), _alpha(__L+1), _n(__L+1)
-    { 
+      _coeff(__L+1), _alpha(__L+1), _n(__L+1){
       init_props();
     }
 
-    atomic_ecp(const std::vector<int> & nl)
-    {
+    atomic_ecp(const std::vector<int> & nl){
       _n.resize(nl.size());
       _coeff.resize(nl.size());
       _alpha.resize(nl.size());
-      for (int i=0; i<nl.size(); i++)
-	{
-	  _n[i].resize(nl[i]);
-	  _coeff[i].resize(nl[i]);
-	  _alpha[i].resize(nl[i]);
-	}
+      for (int i=0; i<nl.size(); i++){
+          _n[i].resize(nl[i]);
+          _coeff[i].resize(nl[i]);
+          _alpha[i].resize(nl[i]);
+        }
       init_props();
     }
 
-    inline int nprim(int l) const
-    {
+    inline int nprim(int l) const{
       return _n[l].size();
     }
 
-    inline void setnprim(int l, int nl)
-    {
+    inline void setnprim(int l, int nl){
       _n[l].resize(nl);
       _coeff[l].resize(nl);
       _alpha[l].resize(nl);
@@ -98,82 +89,96 @@ namespace qpp{
 
     typedef atomic_ecp<FREAL> SELF;
 
-    atomic_ecp(const bp::list & nl)
-    {
-      int _L = bp::len(nl);
+    atomic_ecp(const py::list & nl){
+      int _L = py::len(nl);
       _n.resize(_L);
       _coeff.resize(_L);
       _alpha.resize(_L);
       for (int i=0; i<_L; i++)
-	{
-	  int ni = bp::extract<int>(nl[i]);
-	  _n[i].resize(ni);
-	  _coeff[i].resize(ni);
-	  _alpha[i].resize(ni);
-	}
+        {
+          int ni = py::cast<int>(nl[i]);
+          _n[i].resize(ni);
+          _coeff[i].resize(ni);
+          _alpha[i].resize(ni);
+        }
       init_props();
     }
-    
+
     int  py_getnprim(int l) { return nprim(l); }
     void py_setnprim(int l, const int & np) { setnprim(l,np); }
 
-    py_indexed_property< SELF, int, int, & SELF::py_getnprim, & SELF::py_setnprim> py_nprim;
-    
-    bp::list py_getalln(int l)
-    {}
-    void py_setalln(int l, const bp::list & ln)
-    {}
+    py_indexed_property< SELF, int, int,
+                        & SELF::py_getnprim,
+                        & SELF::py_setnprim> py_nprim;
+
+    py::list py_getalln(int l){}
+
+    void py_setalln(int l, const py::list & ln){}
 
     int  py_getn(int l, int i) { return n(l,i);}
     void py_setn(int l, int i, const int & nn) { n(l,i) = nn;}
-    py_2indexed_property<SELF, bp::list, int, int, 
-			 &SELF::py_getalln, &SELF::py_setalln, 
-			 &SELF::py_getn, &SELF::py_setn > py_n;
+    py_2indexed_property<SELF, py::list, int, int,
+    &SELF::py_getalln, &SELF::py_setalln,
+    &SELF::py_getn, &SELF::py_setn > py_n;
 
 
 
-    bp::list py_getallcoeff(int l) 
-    {}
-    void py_setallcoeff(int l, const bp::list & a)
-    {}
+    py::list py_getallcoeff(int l){}
+
+    void py_setallcoeff(int l, const py::list & a){}
+
     FREAL py_getcoeff(int l, int i) { return coeff(l,i); }
     void py_setcoeff(int l, int i, const FREAL & a) { coeff(l,i) = a; }
-    py_2indexed_property<SELF, bp::list, FREAL, int, 
-			 &SELF::py_getallcoeff, &SELF::py_setallcoeff,
-			 &SELF::py_getcoeff, &SELF::py_setcoeff > py_coeff;
+    py_2indexed_property<SELF, py::list, FREAL, int,
+    &SELF::py_getallcoeff, &SELF::py_setallcoeff,
+    &SELF::py_getcoeff, &SELF::py_setcoeff > py_coeff;
 
 
-    bp::list py_getallalpha(int l) 
-    {}
-    void py_setallalpha(int l, const bp::list & a)
-    {}
+    py::list py_getallalpha(int l) {}
+
+    void py_setallalpha(int l, const py::list & a){}
+
     FREAL py_getalpha(int l, int i) { return alpha(l,i); }
     void py_setalpha(int l, int i, const FREAL & a) { alpha(l,i) = a; }
-    py_2indexed_property<SELF, bp::list, FREAL, int, 
-			 &SELF::py_getallalpha, &SELF::py_setallalpha,
-			 &SELF::py_getalpha, &SELF::py_setalpha > py_alpha;
+    py_2indexed_property<SELF, py::list, FREAL, int,
+    &SELF::py_getallalpha, &SELF::py_setallalpha,
+    &SELF::py_getalpha, &SELF::py_setalpha > py_alpha;
 
-    
 
-    static void py_props()
-    {
-      py_indexed_property< SELF, int, int, & SELF::py_getnprim, & SELF::py_setnprim>::py_export("noname");
-      py_2indexed_property<SELF, bp::list, int, int, 
-			   &SELF::py_getalln, &SELF::py_setalln, 
-			   &SELF::py_getn, &SELF::py_setn >::py_2export("noname");
-      py_2indexed_property<SELF, bp::list, FREAL, int, 
-			   &SELF::py_getallcoeff, &SELF::py_setallcoeff,
-			   &SELF::py_getcoeff, &SELF::py_setcoeff >::py_2export("noname");
-      py_2indexed_property<SELF, bp::list, FREAL, int, 
-			   &SELF::py_getallalpha, &SELF::py_setallalpha,
-			   &SELF::py_getalpha, &SELF::py_setalpha >::py_2export("noname");
+
+    static void py_props(py::module m, const char * pyname){
+
+      std::string sPropNameNPrim =
+           fmt::format("{0}_{1}",pyname,"idx_prop_nprim");
+      py_indexed_property< SELF, int, int, & SELF::py_getnprim,
+          & SELF::py_setnprim>::py_export(m, sPropNameNPrim.c_str());
+
+      std::string sPropNameN =
+           fmt::format("{0}_{1}",pyname,"idx_prop_n");
+      py_2indexed_property<SELF, py::list, int, int,
+          &SELF::py_getalln, &SELF::py_setalln,
+          &SELF::py_getn, &SELF::py_setn >::py_2export(m, sPropNameN.c_str());
+
+      std::string sPropNameCoeff =
+           fmt::format("{0}_{1}",pyname,"idx_prop_coeff");
+      py_2indexed_property<SELF, py::list, FREAL, int,
+          &SELF::py_getallcoeff, &SELF::py_setallcoeff,
+          &SELF::py_getcoeff,
+          &SELF::py_setcoeff >::py_2export(m, sPropNameCoeff.c_str());
+
+      std::string sPropNameAlpha =
+           fmt::format("{0}_{1}",pyname,"idx_prop_alpha");
+      py_2indexed_property<SELF, py::list, FREAL, int,
+          &SELF::py_getallalpha, &SELF::py_setallalpha,
+          &SELF::py_getalpha, &SELF::py_setalpha >
+          ::py_2export(m, sPropNameAlpha.c_str());
     }
 
 #endif
 
   };
 
-};
+}
 
 #endif
 

@@ -8,8 +8,11 @@
 #include <basis/ecp.hpp>
 
 #ifdef PY_EXPORT
-#include <boost/python.hpp>
-namespace bp=boost::python;
+#include <pybind11/pybind11.h>
+#include <pybind11/operators.h>
+#include <pybind11/stl.h>
+#include <pyqpp/py_indexed_property.hpp>
+namespace py = pybind11;
 #endif
 
 namespace qpp{
@@ -29,20 +32,18 @@ namespace qpp{
 
     //std::vector<qpp_atom<FREAL>*> atoms;
 
-    //! \brief Gives the name of atomic type number t. For correct work of molecule::atom the 
-    // type table of molecule::geom must be correctly built
-    STRING atom(int t) const
-    {
+    //! \brief Gives the name of atomic type number t. For correct
+    //! work of molecule::atom the type table of molecule::geom
+    //! must be correctly built
+    STRING atom(int t) const{
       return geom->atom_of_type(t);
     }
 
-    int type(const STRING & at) const
-    {
+    int type(const STRING & at) const{
       return geom->type_of_atom(at);
     }
 
-    int define_type(const STRING & at)
-    {
+    int define_type(const STRING & at){
       geom -> define_type(at);
     }
 
@@ -68,6 +69,6 @@ namespace qpp{
     
   };
   
-};
+}
 
 #endif

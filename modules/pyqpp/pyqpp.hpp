@@ -15,7 +15,10 @@ void pyqpp_shape_export        (py::module m);
 void pyqpp_neighbours_export   (py::module m);
 void pyqpp_builders_export     (py::module m);
 void pyqpp_autosymm_export     (py::module m);
+void pyqpp_basis_ecp_export    (py::module m);
+void pyqpp_molecule_export     (py::module m);
 void pyqpp_io_export           (py::module m);
+void pyqpp_gmsio_export        (py::module m);
 void pyqpp_experimental_export (py::module m);
 
 #endif

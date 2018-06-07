@@ -9,7 +9,8 @@
 
 namespace qpp{
 
-  // Really ugly implementation of variable data container, but we don't want boost::variant neither boost::any!
+  // Really ugly implementation of variable data container,
+  // but we don't want boost::variant neither boost::any!
   class datum{
     union{
       int    i;
@@ -123,8 +124,7 @@ namespace qpp{
     __s.imbue(__os.getloc());
     __s.precision(__os.precision());
     
-    switch (v.type())
-      {
+    switch (v.type()){
       case type_bool:   __s << (v.get<bool>() ? "true" : "false"); break;
       case type_int:    __s << v.get<int>(); break;
       case type_float:  __s << v.get<float>(); break;
