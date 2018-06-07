@@ -558,8 +558,7 @@ namespace qpp{
 
     // -------------------------------------------------------------------
 
-    void reference_build()
-    {
+    void reference_build(){
 
       //std::cout << "reference build\n";
       
@@ -636,8 +635,11 @@ namespace qpp{
                       /*
                       if (at1==31|| at2==31)
                         {
-                          std::cout << "at1 = " << at1 << " grain " << I << " at2= "<< at2 << " grain " << J <<  " DI =" << DI <<"\n";
-                          std::cout << "type1= " << geom->type(at1) <<  " type2= " << geom->type(at2) << " d= " << distance(geom->type(at1), geom->type(at2)) << " r= " << r << "\n";
+                          std::cout << "at1 = " << at1 << " grain " << I <<
+ " at2= "<< at2 << " grain " << J <<  " DI =" << DI <<"\n";
+                          std::cout << "type1= " << geom->type(at1) <<
+  " type2= " << geom->type(at2) << " d= "
+<< distance(geom->type(at1), geom->type(at2)) << " r= " << r << "\n";
                         }
                       */
 
@@ -760,12 +762,12 @@ namespace qpp{
                 //<< " grain " << I << " at2= "<< at2.atom <<
                 //at2.cell << " grain " << I+DI <<  " DI =" << DI <<"\n";
 
-                if ( r <= distance(geom->type_table(at1), geom->type_table(at2)))
-                  {
+                if ( r <= distance(geom->type_table(at1),
+                                   geom->type_table(at2))){
                     if ( at1.sub(1) == index::D(DIM).all(0) )
-                      _add_ngbr(at1,at2);
+                      _add_ngbr(at1, at2);
                     if ( at2.sub(1) == index::D(DIM).all(0) )
-                      _add_ngbr(at2,at1);
+                      _add_ngbr(at2, at1);
                   }
 
               }
@@ -777,17 +779,20 @@ namespace qpp{
 
     typedef  geometry_observer<REAL> DEP;
 
-    void ref_inserted(int at, before_after st, const STRING & a, const vector3d<REAL> & r)
-    {
-      if (st == DEP::after)
-        {
+    void ref_inserted(int at,
+                      before_after st,
+                      const STRING & a,
+                      const vector3d<REAL> & r){
+      if (st == DEP::after){
           _table.insert(_table.begin()+at, std::vector<index>());
           for (int i=0; i<geom->nat(); i++)
             if (! geom->shadow(i))
-              for (iterator j(geom->cell.begin(),geom->cell.end()); j.end(); j++)
-                if ( !(i==at && j==index::D(DIM).all(0)) && norm(geom->r(at) - geom->r(i,j)) <
-                     distance(geom->type_table(at), geom->type_table(i)) )
-                  {
+              for (iterator j(geom->cell.begin(),
+                              geom->cell.end()); j.end(); j++)
+                if ( !(i==at && j==index::D(DIM).all(0)) &&
+                     norm(geom->r(at) - geom->r(i, j)) <
+                     distance(geom->type_table(at), geom->type_table(i))
+                   ){
                     _table[at].push_back(index(i,j));
                     index iat = at;
                     iat.sub(1) -= j;
@@ -796,29 +801,31 @@ namespace qpp{
         }
     }
 
-    void ref_added(before_after st, const STRING & a,  const vector3d<REAL> & r)
-    {
+    void ref_added(before_after st,
+                   const STRING & a,
+                   const vector3d<REAL> & r){
       ref_inserted(geom->nat()-1,st,a,r);
     }
 
-    void ref_moved(   int at, before_after st, const vector3d<REAL> & r)
-    {}
+    void ref_moved(int at,
+                   before_after st,
+                   const vector3d<REAL> & r){
 
-    void ref_erased(  int at, before_after st)
-    {
-      if (st==DEP::before)
-        {
+    }
+
+    void ref_erased(int at,
+                    before_after st){
+
+      if (st==DEP::before){
           _table.erase(_table.begin()+at);
 
           for (int i=geom->nat()-2; i>=0; i--)
             for (int j=n(i)-1; j>=0; j--)
-              if (_table[i][j](0)==at)
-                {
+              if (_table[i][j](0)==at){
                   //std::cerr << "erase " << i << " " << _table[i][j] << "\n";
                   _table[i].erase(_table[i].begin()+j);
                 }
-              else if (_table[i][j](0)>at)
-                {
+              else if (_table[i][j](0)>at){
                   //std::cerr << _table[i][j] << "->";
                   _table[i][j](0)--;
                   //std::cerr << _table[i][j] << "\n";
@@ -826,42 +833,51 @@ namespace qpp{
         }
     }
 
-    void ref_shaded(  int at, before_after st, bool sh)
+    void ref_shaded(  int at,
+                      before_after st,
+                      bool sh){}
+
+    virtual void added( before_after st,
+                        const STRING & a,
+                        const vector3d<REAL> & r)
     {}
 
-    virtual void added( before_after st, const STRING & a,  const vector3d<REAL> & r)
+    virtual void inserted(int at,
+                          before_after st,
+                          const STRING & a,
+                          const vector3d<REAL> & r)
     {}
 
-    virtual void inserted(int at, before_after st, const STRING & a, const vector3d<REAL> & r)
+    virtual void changed(int at,
+                         before_after st,
+                         const STRING & a,
+                         const vector3d<REAL> & r)
     {}
 
-    virtual void changed(int at, before_after st, const STRING & a, const vector3d<REAL> & r)
+    virtual void erased(int at,
+                        before_after st)
     {}
 
-    virtual void erased(  int at, before_after st)
+    virtual void shaded(int at,
+                        before_after st,
+                        bool sh)
     {}
 
-    virtual void shaded(  int at, before_after st, bool sh)
-    {}
-
-    virtual void reordered( const std::vector<int> &, before_after)
+    virtual void reordered(const std::vector<int> &,
+                           before_after)
     {}
 
     //------------------------------------------------------------
-    bool operator==(const neighbours_table & t) const
-    {
+    bool operator==(const neighbours_table & t) const{
       if (_table.size() != t._table.size())
         return false;
-      for (int i=0; i<_table.size(); i++)
-        {
+      for (int i=0; i<_table.size(); i++){
           if (_table[i].size() != t._table[i].size())
             return false;
-          for (int j=0; j<_table[i].size(); j++)
-            {
+          for (int j=0; j<_table[i].size(); j++){
               bool found = false;
               for (int k=0; k<_table[i].size(); k++)
-                if (_table[i][j]==t._table[i][k])
-                  {
+                if (_table[i][j]==t._table[i][k]){
                     found=true;
                     break;
                   }
@@ -872,8 +888,7 @@ namespace qpp{
       return true;
     }
 
-    bool operator!=(const neighbours_table & t) const
-    {
+    bool operator!=(const neighbours_table & t) const {
       return ! (*this == t);
     }
 
@@ -886,7 +901,7 @@ namespace qpp{
         IndexError("Index out of range in ngbr_table::getitem");
       py::list l;
       for(int j=0; j<n(i); j++)
-        l.append(table(i,j));
+        l.append(table(i, j));
       return l;
     }
 
@@ -915,30 +930,37 @@ namespace qpp{
     static void py_export(py::module m, const char * pyname){
       py::class_<neighbours_table<REAL,CELL> >(m, pyname)
           .def(py::init< geometry<REAL, CELL> &, bonding_table<REAL> & >())
-          .def_property("auto_update", &SELF::get_auto_update,  &SELF::set_auto_update,
+          .def_property("auto_update",
+                        &SELF::get_auto_update,
+                        &SELF::set_auto_update,
                         "bool auto_update (default: False). If auto_update==True, "
                         "any modifications made to atoms are\nautomatically "
                         "reflected by neighbours_table")
 
-          .def_readwrite("reference_mode", &SELF::reference_mode,
+          .def_readwrite("reference_mode",
+                         &SELF::reference_mode,
                          "bool reference_mode (default: False). "
                          "If reference_mode==True, simple but very inefficient\n"
                          "algorythm is used for building neighbours_table. For "
                          "small molecules (less then 100 atoms) and for"
                          " debugging purpose")
 
-          .def_property("grain_size", &SELF::get_grain_size, &SELF::set_grain_size,
+          .def_property("grain_size",
+                        &SELF::get_grain_size,
+                        &SELF::set_grain_size,
                         "real grain_size (default: auto). Building and updating"
                         " neighbour_table is done by dividing the\nmolecule "
                         "space into cubic grains of grain_size. The value of "
                         "grain_size\nis normally selected automatically, "
                         "however, you can set it manually")
 
-          .def_readwrite("auto_grainsize", &SELF::auto_grainsize,
+          .def_readwrite("auto_grainsize",
+                         &SELF::auto_grainsize,
                          "bool auto_grainsize (default: True). Whether to "
                          "choose grain_size value automatically")
 
-          .def_readwrite("transl_mode", &SELF::transl_mode)
+          .def_readwrite("transl_mode",
+                         &SELF::transl_mode)
           .def("build", &SELF::build, "Build the neighbours_table")
           .def(py::self == py::self)
           .def(py::self != py::self)

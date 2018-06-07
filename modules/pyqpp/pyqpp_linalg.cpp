@@ -24,9 +24,8 @@ void py_vector3d_export(py::module m, const char * pyname){
       .def(py::init<const py::tuple&>())
       .def(py::init<const qpp::vector3d<VALTYPE>&>())
       //.def(py::str(py::self))
-      .def("__str__", [](const qpp::vector3d<VALTYPE> &vec){
-        return fmt::format("[{0}, {1}, {2}]", vec[0], vec[1], vec[2]);
-       })
+      .def("__str__",     &qpp::vector3d<VALTYPE>::print)
+      .def("__repr__",    &qpp::vector3d<VALTYPE>::print)
       .def("__add__",     &qpp::vector3d<VALTYPE>::py_add)
       .def("__sub__",     &qpp::vector3d<VALTYPE>::py_sub)
       .def("__getitem__", &qpp::vector3d<VALTYPE>::py_getitem)
@@ -68,15 +67,12 @@ void py_matrix3d_export(py::module m, const char * pyname){
            const qpp::vector3d<VALTYPE>&>())
       .def(py::init<const py::list&>())
       .def(py::init<const py::tuple&>())
-      .def("__str__", [](const qpp::matrix3d<VALTYPE> &m){
-      return fmt::format("[{0}, {1}, {2}\n {3}, {4}, {5}\n {6}, {7}, {8}]",
-                         m[0][0], m[0][1], m[0][2],
-          m[1][0], m[1][1], m[1][2],
-          m[2][0], m[2][1], m[2][2]);})
+      .def("__str__",  &qpp::matrix3d<VALTYPE>::print)
+      .def("__repr__", &qpp::matrix3d<VALTYPE>::print)
 
       //  .def(sn::repr(sn::self))
       .def(py::self - py::self)
-      .def(py::self + py::self)
+      .def(py::self + py::self, py::return_value_policy::move)
       .def(py::self * py::self)
       .def(py::self == py::self)
       .def(py::self != py::self)
@@ -110,7 +106,8 @@ void py_matrix3d_export(py::module m, const char * pyname){
                     &qpp::matrix3d<VALTYPE>::py_setzy)
       .def_property("zz",  &qpp::matrix3d<VALTYPE>::py_getzz,
                     &qpp::matrix3d<VALTYPE>::py_setzz)
-      // .def_readwrite("tol_equiv", & qpp::matrix3d<VALTYPE>::tol_equiv)
+      .def_readwrite_static("tol_equiv",
+                            &qpp::matrix3d<VALTYPE>::tol_equiv)
       ;
   m.def("det",       qpp::py_detm<VALTYPE>);
   m.def("det",       qpp::py_detv<VALTYPE>);
@@ -143,8 +140,10 @@ void py_rotrans_export(py::module m, const char * pyname){
     py::class_<qpp::rotrans<REAL,BOUND> >(m, pyname)
         //.def()
         .def(py::init<const qpp::rotrans<REAL,BOUND> >())
-        .def(py::init<const qpp::vector3d<REAL>, qpp::periodic_cell<REAL>* >())
-        .def(py::init<const qpp::matrix3d<REAL>, qpp::periodic_cell<REAL>*  >())
+        .def(py::init<const qpp::vector3d<REAL>,
+             qpp::periodic_cell<REAL>* >())
+        .def(py::init<const qpp::matrix3d<REAL>,
+             qpp::periodic_cell<REAL>*  >())
         .def(py::init<const qpp::vector3d<REAL>,
              const qpp::matrix3d<REAL>, qpp::periodic_cell<REAL>* >())
         .def("__mul__", &qpp::rotrans<REAL,BOUND>::py_mulr)
@@ -153,14 +152,17 @@ void py_rotrans_export(py::module m, const char * pyname){
         //   .def(sn::repr(sn::self))
         .def(py::self==py::self)
         .def(py::self!=py::self)
-        .def_readwrite_static("unity", & qpp::rotrans<REAL,BOUND>::unity)
+        .def_readwrite_static("unity",
+                              & qpp::rotrans<REAL,BOUND>::unity)
         .def_readwrite("T", &qpp::rotrans<REAL,BOUND>::T)
         .def_readwrite("R", &qpp::rotrans<REAL,BOUND>::R)
         .def_readwrite_static("tol_trans",
                               &qpp::rotrans<REAL,BOUND>::translation_tolerance)
         .def_readwrite_static("tol_rot",
                               &qpp::rotrans<REAL,BOUND>::rotation_tolerance)
-        //  .add_property("cell", make_getter(& qpp::rotrans<REAL,BOUND>::cell,     return_value_policy<reference_existing_object>()))
+        .def_readwrite("cell", &qpp::rotrans<REAL,BOUND>::cell,
+                       py::return_value_policy::reference_internal)
+        //return_value_policy<reference_existing_object>()))
         ;
   else
     py::class_<qpp::rotrans<REAL,BOUND> >(m, pyname)
@@ -168,13 +170,14 @@ void py_rotrans_export(py::module m, const char * pyname){
         .def(py::init<const qpp::rotrans<REAL,BOUND> >())
         .def(py::init<const qpp::vector3d<REAL> >())
         .def(py::init<const qpp::matrix3d<REAL> >())
-        .def(py::init<const qpp::vector3d<REAL>, const qpp::matrix3d<REAL> >())
+        .def(py::init<const qpp::vector3d<REAL>,
+             const qpp::matrix3d<REAL> >())
         .def("__mul__", &qpp::rotrans<REAL,BOUND>::py_mulr)
         .def("__mul__", &qpp::rotrans<REAL,BOUND>::py_mulv)
         //.def(sn::str(sn::self))
         //.def(sn::repr(sn::self))
         .def(py::self==py::self)
-        //.def(sn::self!=sn::self)
+        .def(py::self!=py::self)
         .def("__ne__", &qpp::rotrans<REAL,BOUND>::operator!=)
         .def_readwrite_static("unity", &qpp::rotrans<REAL,BOUND>::unity)
         .def_readwrite("T", &qpp::rotrans<REAL,BOUND>::T)

@@ -7,6 +7,7 @@
 #include <stdexcept>
 #include <geom/lace3d.hpp>
 #include <data/errors.hpp>
+#include <io/strfun.hpp>
 
 #ifdef PY_EXPORT
 #include <pybind11/pybind11.h>
@@ -38,8 +39,7 @@ namespace qpp{
     inline int& operator()(int d) {return idx[d];} 
 
     //! Typecast from integer: the 0th component of index is set to i, the rest is set to 0
-    inline index& operator=(int i)
-    {
+    inline index& operator=(int i){
       idx[0] = i;
       for (int d=1; d<DIM; d++)
 	idx[d] = 0;
@@ -47,10 +47,8 @@ namespace qpp{
     }
 
     //! Assigment operator
-    inline index& operator=(const index & I)
-    {      
-      if (DIM != I.DIM)
-	{
+    inline index& operator=(const index & I){      
+      if (DIM != I.DIM){
 	  if (del)
 	    delete idx;
 	  DIM = I.DIM;
@@ -64,14 +62,12 @@ namespace qpp{
     }
 
     //! The same as assigment operator in the form of explicitly called method
-    inline void set(const index & I)
-    {
+    inline void set(const index & I){
       *this = I;
     }
 
     //! Componentwise addition of two indicies
-    inline index operator+(const index & I)
-    {
+    inline index operator+(const index & I){
       index res = D(DIM);
       for (int d=0; d<DIM; d++)
 	res(d) = idx[d] + I(d);
@@ -79,8 +75,7 @@ namespace qpp{
     }
     
     //! Componentwise subtraction of two indicies
-    inline index operator-(const index & I)
-    {
+    inline index operator-(const index & I){
       index res = D(DIM);
       for (int d=0; d<DIM; d++)
 	res(d) = idx[d] - I(d);
@@ -88,16 +83,16 @@ namespace qpp{
     }
     
     //! Index I is added to this index componentwise
-    inline index& operator+=(const index & I)
-    {
+    inline index& operator+=(const index & I){
+
       for (int d=0; d<DIM; d++)
 	idx[d] = idx[d] + I(d);
       return *this;
     }
 
     //! Index I is subtracted from this index componentwise
-    inline index& operator-=(const index & I)
-    {
+    inline index& operator-=(const index & I){
+
       for (int d=0; d<DIM; d++)
 	idx[d] = idx[d] - I(d);
       return *this;
@@ -110,10 +105,9 @@ namespace qpp{
       std::cout << I << std::endl; // (5,4,3,2,1)
       I.set({1,2,3}); // IndexError: Wrong number of index components
      */
-    inline void set(const std::initializer_list<int> &li)
-    {
-      if (li.size() != DIM)
-	IndexError("Wrong number of index components");
+    inline void set(const std::initializer_list<int> &li){
+
+      if (li.size() != DIM) IndexError("Wrong number of index components");
       int d=0;
       for (int i : li)
 	idx[d++] = i;
@@ -128,8 +122,8 @@ namespace qpp{
     }
     */
 
-    index()
-    {
+    index(){
+
       DIM = 0;
       idx=NULL;
       del = false;
@@ -145,8 +139,8 @@ namespace qpp{
     }
     */
 
-    index(const index & I)
-    {
+    index(const index & I){
+
       DIM = I.DIM;
       idx = new int[DIM];
       for (int d=0; d<DIM; d++)
@@ -154,49 +148,46 @@ namespace qpp{
       del = true;
     }
 
-    index(const index & I, int d1, int d2 = -1)
-    {
-      if (d2==-1) 
-	d2 = I.DIM-1;
+    index(const index & I, int d1, int d2 = -1){
+
+      if (d2==-1) d2 = I.DIM-1;
       DIM = d2-d1+1;
       idx = & I.idx[d1];
       del = false;
     }
 
-    index(const std::initializer_list<int> &li)
-    {
+    index(const std::initializer_list<int> &li){
+
       DIM = li.size();
       idx = new int[DIM];
       set(li);
       del = true;
     }
 
-    ~index()
-    {
+    ~index(){
       if (del)
 	delete idx;
     }
 
-    inline index sub(int d1, int d2 = -1) const
-    {
+    inline index sub(int d1,
+                     int d2 = -1) const{
+
       return index(*this,d1,d2);
     }
 
-    inline bool operator==(const index &I) const
-    {
+    inline bool operator==(const index &I) const{
+
       bool res = DIM == I.DIM;
       if (res)
 	for (int d=0; d<DIM; d++)
-	  if (idx[d]!=I(d))
-	    {
+	  if (idx[d]!=I(d)){
 	      res = false;
 	      break;
 	    }
       return res;
     }
 
-    inline bool operator!=(const index &I) const
-    {
+    inline bool operator!=(const index &I) const{
       return ! ((*this)==I);
     }
 
@@ -205,8 +196,8 @@ namespace qpp{
 
       factory(int dim){DIM=dim;}
 
-      index all(int a)
-      {
+      index all(int a){
+
 	index t;
 	t.DIM = DIM;
 	t.del = true;
@@ -217,8 +208,8 @@ namespace qpp{
 	return t;
       }
 
-      index atom(int a)
-      {
+      index atom(int a){
+
 	index t = all(0);
 	t(0)=a;
 	return t;
@@ -228,8 +219,8 @@ namespace qpp{
 
     };
 
-    static factory D(int dim)
-    {
+    static factory D(int dim){
+
       return factory(dim);
     }
       
@@ -237,23 +228,23 @@ namespace qpp{
 
     // --------------- PYTHON -------------------------------
 
-    int py_getitem(int d) const
-    {
+    int py_getitem(int d) const{
+
       return idx[d];
     }
     
-    void py_setitem(int d, int v)
-    {
+    void py_setitem(int d, int v){
+
       idx[d] = v;
     }
 
-    inline index sub1(int d1)
-    {
+    inline index sub1(int d1){
+
       return sub(d1);
     }    
 
-    index(const py::list &l)
-    {
+    index(const py::list &l){
+
       // Assuming that type checks have been performed inside python code
       DIM = py::len(l);
       idx = new int[DIM];
@@ -262,8 +253,8 @@ namespace qpp{
       del = true;
     }
 
-    index(const py::tuple &l)
-    {
+    index(const py::tuple &l){
+
       // Assuming that type checks have been performed inside python code
       DIM = py::len(l);
       idx = new int[DIM];
@@ -272,8 +263,21 @@ namespace qpp{
       del = true;
     }
 
-    static void py_export( py::module m, const char * pyname)
-    {
+    std::string print(){
+      std::string _tmp = "{";
+
+      _tmp = "idx(" + t2s(idx[0]);
+
+      for (int d=1; d<DIM; d++)
+        _tmp += "," + t2s(idx[d]);
+      _tmp += ")";
+
+      return _tmp;
+
+    }
+
+    static void py_export( py::module m, const char * pyname){
+
       py::class_<index >(m, pyname)
         .def(py::init<>())
         .def(py::init<py::list&>())
@@ -292,6 +296,8 @@ namespace qpp{
 	.def(py::self - py::self)
 	.def(py::self == py::self)
 	.def(py::self!= py::self)
+	.def("__str__", &index::print)
+	.def("__repr__", &index::print)
 	;
     }
     
@@ -303,21 +309,24 @@ namespace qpp{
 
   template<typename _CharT, class _Traits>
   std::basic_ostream<_CharT, _Traits>&
-  operator<<(std::basic_ostream<_CharT, _Traits>& __os, const index &I)
-  {
+  operator<<(std::basic_ostream<_CharT,
+             _Traits>& __os,
+             const index &I){
+
     std::basic_ostringstream<_CharT, _Traits> __s;
     __s.flags(__os.flags());
     __s.imbue(__os.getloc());
     __s.precision(__os.precision());
     
-    if (I.DIM > 0)
-      {
+    if (I.DIM > 0){
+
 	__s  << "(" << I(0);
 	for (int d=1; d<I.DIM; d++)
 	  __s << "," << I(d);
 	__s << ")";
       }
     else
+
       __s << "()";
     return __os << __s.str();
   }
@@ -326,7 +335,8 @@ namespace qpp{
 
   // -------------------------------------------------------------
 
-  bool compare_atindex(const index & at1, const index & at2);
+  bool compare_atindex(const index & at1,
+                       const index & at2);
     
   // ------------------- iterator class --------------------
   // Iterator allows you run through all (or some) atoms of this cell
@@ -342,21 +352,21 @@ namespace qpp{
     
     //using index::idx;
      
-    inline void inc()
-    {
-      if (DIM==0)
-	{
+    inline void inc(){
+
+      if (DIM==0){
+
 	  _end = true;
 	  return;
 	}
 
       int d = 0;
 
-      while (++(*this)(d) > b(d))
-	{
+      while (++(*this)(d) > b(d)){
+
 	  (*this)(d)=a(d);
-	  if (++d >= DIM) 
-	    {
+	  if (++d >= DIM) {
+
 	      _end = true;
 	      break;
 	    }
@@ -366,19 +376,19 @@ namespace qpp{
   public:
 
     iterator(const index & _a, const index & _b) :
-      index(_a), a(_a), b(_b)
-    {
+      index(_a), a(_a), b(_b){
+
       _end = false;   
     }
     
-    inline void reset()
-    {
+    inline void reset(){
+
       _end = false;
       set(a);
     }
 
-    iterator & operator++(int)
-    {
+    iterator & operator++(int){
+
       inc();
       return *this;
     }
@@ -389,8 +399,8 @@ namespace qpp{
 
     // --------------- PYTHON -------------------------------
 
-    index py_next()
-    {
+    index py_next(){
+
       if (end())
 	StopIter();
       index res = *this;
@@ -398,8 +408,8 @@ namespace qpp{
       return res;
     }
 
-    static void py_export(py::module m, const char * pyname)
-    {
+    static void py_export(py::module m, const char * pyname){
+
       py::class_<iterator>(m, pyname)
         .def(py::init<const index&, const index&>())
         .def(py::init<py::list,py::list>())
@@ -419,20 +429,23 @@ namespace qpp{
     index a,b;
 
   public:
-    index_range(const index & _a, const index & _b) :
+    index_range(const index & _a,
+                const index & _b) :
       a(_a), b(_b) {}
 
-    index_range(const py::list & l1, const py::list & l2) :
+    index_range(const py::list & l1,
+                const py::list & l2) :
       a(l1), b(l2){}
 
-    index_range(const py::tuple & l1, const py::tuple & l2) :
+    index_range(const py::tuple & l1,
+                const py::tuple & l2) :
       a(l1), b(l2) {}
 
     iterator  __iter__()
     { return iterator(a,b); }
 
-    static void py_export(py::module m, const char * pyname)
-    {
+    static void py_export(py::module m,
+                          const char * pyname){
       py::class_<index_range>(m, pyname)
         .def(py::init<const index&, const index&>())
         .def(py::init<const py::list&, const py::list&>())

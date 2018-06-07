@@ -20,11 +20,11 @@ void py_shape_export(py::module m, const char * pyname){
     .def("fmax",      & qpp::shape<REAL>::fmax)
     .def("write",     & qpp::shape<REAL>::write)
       // TODO: bp::return_value_policy<bp::manage_new_object>() start
-    .def("__or__",     & qpp::shape<REAL>::py_or)
-    .def("__and__",    & qpp::shape<REAL>::py_and)
-    .def("__sub__",    & qpp::shape<REAL>::py_sub)
-    .def("__xor__",    & qpp::shape<REAL>::py_xor)
-    .def("__invert__", & qpp::shape<REAL>::py_inv)
+    .def("__or__",    & qpp::shape<REAL>::py_or,  py::return_value_policy::copy)
+    .def("__and__",   & qpp::shape<REAL>::py_and, py::return_value_policy::copy)
+    .def("__sub__",   & qpp::shape<REAL>::py_sub, py::return_value_policy::copy)
+    .def("__xor__",   & qpp::shape<REAL>::py_xor, py::return_value_policy::copy)
+    .def("__invert__",& qpp::shape<REAL>::py_inv, py::return_value_policy::copy)
        // bp::return_value_policy<bp::manage_new_object>() end
     ;
 

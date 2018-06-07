@@ -29,134 +29,121 @@ namespace qpp{
 
     simple_vector(){}
 
-    simple_vector(VALTYPE s)
-    {
+    simple_vector(VALTYPE s){
       for(int i=0; i<DIM; i++)
-	r[i] = s;
+        r[i] = s;
     }
 
-    simple_vector(const simple_vector<VALTYPE,DIM> & v)
-    {
+    simple_vector(const simple_vector<VALTYPE,DIM> & v){
       for(int i=0; i<DIM; i++)
-	r[i] = v.r[i];
+        r[i] = v.r[i];
     }
 
-    simple_vector(const std::initializer_list<VALTYPE> & li)
-    {
+    simple_vector(const std::initializer_list<VALTYPE> & li){
       if (li.size() != DIM)
-	throw std::range_error("Wrong number of vector components");
+        throw std::range_error("Wrong number of vector components");
       int d=0;
       for (int x : li)
-	r[d++] = x;
+        r[d++] = x;
     }
 
-    inline VALTYPE& operator()(int i)
-    {
+    inline VALTYPE& operator()(int i){
       return r[i];
     }
 
-    inline VALTYPE& operator[](int i)
-    {
+    inline VALTYPE& operator[](int i){
       return r[i];
     }
 
-    inline VALTYPE operator[](int i) const
-    {
+    inline VALTYPE operator[](int i) const{
       return r[i];
     }
 
-    inline VALTYPE operator()(int i) const
-    {
+    inline VALTYPE operator()(int i) const{
       return r[i];
     }
 
-    inline typename numeric_type<VALTYPE>::norm norm2() const
-    {
+    inline typename numeric_type<VALTYPE>::norm norm2() const{
       VALTYPE s=0e0;
       for (int i=0; i<DIM; i++)
-	s+=std::conj(r[i])*r[i];
+        s+=std::conj(r[i])*r[i];
       return std::abs(s);
     }
 
     inline typename numeric_type<VALTYPE>::norm norm() const
     {return std::sqrt(norm2());}
 
-    inline simple_vector<VALTYPE,DIM> operator+(const simple_vector<VALTYPE,DIM> & v) const
-    {
+    inline simple_vector<VALTYPE,DIM> operator+(
+        const simple_vector<VALTYPE,DIM> & v) const{
       simple_vector<VALTYPE,DIM> res(0e0);
       for (int i=0; i<DIM; i++)
-	res.r[i] = r[i] + v.r[i];
+        res.r[i] = r[i] + v.r[i];
       return res;
     }
 
-    inline simple_vector<VALTYPE,DIM> operator-(const simple_vector<VALTYPE,DIM> & v) const
-    {
+    inline simple_vector<VALTYPE,DIM> operator-(
+        const simple_vector<VALTYPE,DIM> & v) const{
       simple_vector<VALTYPE,DIM> res(0e0);
       for (int i=0; i<DIM; i++)
-	res.r[i] = r[i] - v.r[i];
+        res.r[i] = r[i] - v.r[i];
       return res;
     }
 
-    inline simple_vector<VALTYPE,DIM> operator*(VALTYPE s) const
-    {
+    inline simple_vector<VALTYPE,DIM> operator*(VALTYPE s) const{
       simple_vector<VALTYPE,DIM> res(0e0);
       for (int i=0; i<DIM; i++)
-	res.r[i] = s*r[i];
+        res.r[i] = s*r[i];
       return res;
     }
 
-    inline simple_vector<VALTYPE,DIM> operator/(VALTYPE s) const
-    {
+    inline simple_vector<VALTYPE,DIM> operator/(VALTYPE s) const{
       simple_vector<VALTYPE,DIM> res(0e0);
       for (int i=0; i<DIM; i++)
-	res.r[i] = r[i]/s;
+        res.r[i] = r[i]/s;
       return res;
     }
 
-    inline simple_vector<VALTYPE,DIM>& operator=(const simple_vector<VALTYPE,DIM> & v)
-    {
+    inline simple_vector<VALTYPE,DIM>& operator=(
+        const simple_vector<VALTYPE,DIM> & v){
       for (int i=0; i<DIM; i++)
-	r[i] = v.r[i];
+        r[i] = v.r[i];
       return *this;
     }
 
-    inline simple_vector<VALTYPE,DIM>& operator+=(const simple_vector<VALTYPE,DIM> & v)
-    {
+    inline simple_vector<VALTYPE,DIM>& operator+=(
+        const simple_vector<VALTYPE,DIM> & v){
       simple_vector<VALTYPE,DIM> res(0e0);
       for (int i=0; i<DIM; i++)
-	r[i] += v.r[i];
+        r[i] += v.r[i];
       return *this;
     }
 
-    inline simple_vector<VALTYPE,DIM>& operator-=(const simple_vector<VALTYPE,DIM> & v)
-    {
+    inline simple_vector<VALTYPE,DIM>& operator-=(
+        const simple_vector<VALTYPE,DIM> & v){
       simple_vector<VALTYPE,DIM> res(0e0);
       for (int i=0; i<DIM; i++)
-	r[i] -= v.r[i];
+        r[i] -= v.r[i];
       return *this;
     }
 
-    inline simple_vector<VALTYPE,DIM>& operator*=(VALTYPE s)
-    {
+    inline simple_vector<VALTYPE,DIM>& operator*=(VALTYPE s){
       simple_vector<VALTYPE,DIM> res(0e0);
       for (int i=0; i<DIM; i++)
-	r[i] *= s;
+        r[i] *= s;
       return *this;
     }
 
-    inline simple_vector<VALTYPE,DIM>& operator/=(VALTYPE s)
-    {
+    inline simple_vector<VALTYPE,DIM>& operator/=(VALTYPE s){
       simple_vector<VALTYPE,DIM> res(0e0);
       for (int i=0; i<DIM; i++)
-	r[i] /= s;
+        r[i] /= s;
       return *this;
     }
 
-    inline simple_vector<VALTYPE,DIM> operator-() const
-    {
+    inline simple_vector<VALTYPE,DIM> operator-() const{
       simple_vector<VALTYPE,DIM> res;
       for (int i=0; i<DIM; i++)
-	res.r[i] = -r[i];
+        res.r[i] = -r[i];
       return res;
     }
 
@@ -165,7 +152,7 @@ namespace qpp{
   // -----------------------------------------------------------------------
 
   template<class VALTYPE = double>
-  class vector3d : public simple_vector<VALTYPE,3>{
+  class vector3d : public simple_vector<VALTYPE, 3>{
   protected:
     using simple_vector<VALTYPE,3>::r;
     using simple_vector<VALTYPE,3>::norm;
@@ -174,25 +161,23 @@ namespace qpp{
   public:
 
     static typename numeric_type<VALTYPE>::norm tol_equiv;
-    // tolerance for two vector equivalence, i.e. a==b if |a-b|<tol_equiv
+    // tolerance for two vector equivalence,
+    // i.e. a==b if |a-b|<tol_equiv
 
     vector3d(){}
 
     vector3d(VALTYPE s) :
       simple_vector<VALTYPE,3>(s){}
     
-    inline void set(VALTYPE x, VALTYPE y, VALTYPE z)
-    {
+    inline void set(VALTYPE x, VALTYPE y, VALTYPE z){
       r[0] = x; r[1] = y; r[2] = z;
     }
 
-    vector3d(VALTYPE x, VALTYPE y, VALTYPE z)
-    {
-      set(x,y,z);
+    vector3d(VALTYPE x, VALTYPE y, VALTYPE z){
+      set(x, y, z);
     }
 
-    vector3d(const vector3d<VALTYPE> & v)
-    {
+    vector3d(const vector3d<VALTYPE> & v){
       r[0] = v(0);
       r[1] = v(1);
       r[2] = v(2);
@@ -202,8 +187,8 @@ namespace qpp{
     vector3d(const vector3d<VALTYPE>& v) :
       simple_vector<VALTYPE,3>(v){}
     */
-    vector3d(const simple_vector<VALTYPE,3> & v) :
-      simple_vector<VALTYPE,3>(v){}
+    vector3d(const simple_vector<VALTYPE, 3> & v) :
+      simple_vector<VALTYPE, 3>(v){}
     
     inline VALTYPE& x(){return r[0];}
 
@@ -217,29 +202,33 @@ namespace qpp{
 
     inline VALTYPE z() const {return r[2];}
 
-    inline vector3d<VALTYPE> operator%(const vector3d<VALTYPE> & v) const
-    {
-      vector3d<VALTYPE> res( y()*v.z() - z()*v.y(), 
-			     z()*v.x() - x()*v.z(), 
-			     x()*v.y() - y()*v.x() );
+    inline vector3d<VALTYPE> operator%(
+        const vector3d<VALTYPE> & v) const{
+      vector3d<VALTYPE> res( y()*v.z() - z()*v.y(),
+                             z()*v.x() - x()*v.z(),
+                             x()*v.y() - y()*v.x() );
       return res;
     }
 
 
-    inline bool operator==(const vector3d<VALTYPE> & b)
-    {
+    inline bool operator==(const vector3d<VALTYPE> & b){
       return (*this - b).norm() <=  tol_equiv;
     }
 
-    inline bool operator!=(const vector3d<VALTYPE> & b)
-    {
+    inline bool operator!=(const vector3d<VALTYPE> & b){
       return ! ((*this)==b);
     }
 
     template<class VALTYPE2>
-    explicit operator vector3d<VALTYPE2>() const
-    {
+    explicit operator vector3d<VALTYPE2>() const{
       return vector3d<VALTYPE2>(r[0],r[1],r[2]);
+    }
+
+    std::string print(){
+      return fmt::format("[{0}, {1}, {2}]",
+                         r[0],
+                         r[1],
+                         r[2]);
     }
 
 #ifdef PY_EXPORT
@@ -286,49 +275,50 @@ namespace qpp{
     inline void py_sety(VALTYPE v){ y()=v;}
     inline void py_setz(VALTYPE v){ z()=v;}
 
-    vector3d(const py::list &l)
-    {
-      // Assuming that length & type checks have been performed inside python code
+    vector3d(const py::list &l){
+      // Assuming that length & type checks have been performed
+      // inside python code
       for (int i=0; i<3; i++)
         r[i] = py::cast<VALTYPE>(l[i]);
-    }    
+    }
 
-    vector3d(const py::tuple &l)
-    {
-      // Assuming that length & type checks have been performed inside python code
+    vector3d(const py::tuple &l){
+      // Assuming that length & type checks have been performed
+      // inside python code
       for (int i=0; i<3; i++)
         r[i] = py::cast<VALTYPE>(l[i]);
-    }    
+    }
 
 #endif
 
   };
 
   template<class VALTYPE,int DIM>
-  inline simple_vector<VALTYPE,DIM> operator*(VALTYPE s, const simple_vector<VALTYPE,DIM> &v)
-  {
+  inline simple_vector<VALTYPE,DIM> operator*(
+      VALTYPE s,
+      const simple_vector<VALTYPE,DIM> &v){
     return v.operator*(s);
   }
 
   template<class VALTYPE,int DIM>
-  inline simple_vector<VALTYPE,DIM> operator*(int s, const simple_vector<VALTYPE,DIM> &v)
-  {
+  inline simple_vector<VALTYPE,DIM> operator*(
+      int s,
+      const simple_vector<VALTYPE,DIM> &v){
     return v.operator*((VALTYPE)s);
   }
 
   template<class VALTYPE,int DIM>
-  inline VALTYPE scal(const simple_vector<VALTYPE,DIM> & v1, 
-		      const simple_vector<VALTYPE,DIM> & v2)
-  {
+  inline VALTYPE scal(const simple_vector<VALTYPE,DIM> & v1,
+                      const simple_vector<VALTYPE,DIM> & v2){
     VALTYPE res=0e0;
     for (int i=0; i<DIM; i++)
       res += std::conj(v1(i))*v2(i);
     return res;
   }
- 
+
   template<class VALTYPE,int DIM>
-  inline typename numeric_type<VALTYPE>::norm norm2(const simple_vector<VALTYPE,DIM> & v)
-  { 
+  inline typename numeric_type<VALTYPE>::norm norm2(
+      const simple_vector<VALTYPE,DIM> & v){
     VALTYPE res=0e0;
     for (int i=0; i<DIM; i++)
       res += std::conj(v(i))*v(i);
@@ -336,12 +326,12 @@ namespace qpp{
   }
 
   template<class VALTYPE,int DIM>
-  inline typename numeric_type<VALTYPE>::norm norm(const simple_vector<VALTYPE,DIM> & v)
-  {
+  inline typename numeric_type<VALTYPE>::norm norm(
+      const simple_vector<VALTYPE,DIM> & v){
     return std::sqrt(norm2(v));
   }
 
- /*---------------------------------------------------------*/
+  /*---------------------------------------------------------*/
 
   template<class VALTYPE = double>
   class matrix3d{
@@ -357,29 +347,27 @@ namespace qpp{
 
     matrix3d(){}
 
-    matrix3d(const matrix3d<VALTYPE> & m)
-    {
+    matrix3d(const matrix3d<VALTYPE> & m){
       for (int i=0; i<9; i++)
-	a[i] = m.a[i];
+        a[i] = m.a[i];
     }
 
     matrix3d(VALTYPE axx, VALTYPE axy, VALTYPE axz,
-	     VALTYPE ayx, VALTYPE ayy, VALTYPE ayz,
-	     VALTYPE azx, VALTYPE azy, VALTYPE azz)
-    {
+             VALTYPE ayx, VALTYPE ayy, VALTYPE ayz,
+             VALTYPE azx, VALTYPE azy, VALTYPE azz){
       a[0] = axx; a[1] = axy; a[2] = axz;
       a[3] = ayx; a[4] = ayy; a[5] = ayz;
       a[6] = azx; a[7] = azy; a[8] = azz;
     }
 
-    matrix3d(VALTYPE alpha)
-    {
+    matrix3d(VALTYPE alpha){
       a[0] = a[4] = a[8] = alpha;
-      a[1] = a[2] = a[3] = a[5] = a[6] = a[7] = VALTYPE(0);      
+      a[1] = a[2] = a[3] = a[5] = a[6] = a[7] = VALTYPE(0);
     }
 
-    matrix3d(const vector3d<VALTYPE> & a1, const vector3d<VALTYPE> & b, const vector3d<VALTYPE> & c)
-    {
+    matrix3d(const vector3d<VALTYPE> & a1,
+             const vector3d<VALTYPE> & b,
+             const vector3d<VALTYPE> & c){
       a[0] = a1.x(); a[1] = b.x(); a[2] = c.x();
       a[3] = a1.y(); a[4] = b.y(); a[5] = c.y();
       a[6] = a1.z(); a[7] = b.z(); a[8] = c.z();
@@ -412,167 +400,173 @@ namespace qpp{
     //------------------------------------
 
     inline VALTYPE xx() const{return a[0];}
-		             
+
     inline VALTYPE xy() const{return a[1];}
-		             
+
     inline VALTYPE xz() const{return a[2];}
 
     inline VALTYPE yx() const{return a[3];}
-		             
+
     inline VALTYPE yy() const{return a[4];}
-		             
+
     inline VALTYPE yz() const{return a[5];}
 
     inline VALTYPE zx() const{return a[6];}
-		             
+
     inline VALTYPE zy() const{return a[7];}
-		             
+
     inline VALTYPE zz() const{return a[8];}
 
-    inline vector3d<VALTYPE> operator()(int i) const
-    {
-      return vector3d<VALTYPE>(a[i],a[i+3],a[i+6]);
-    } 
+    inline vector3d<VALTYPE> operator()(int i) const{
+      return vector3d<VALTYPE>(a[i], a[i+3], a[i+6]);
+    }
 
-    inline vector3d<VALTYPE> operator[](int i) const
-    {
-      return vector3d<VALTYPE>(a[i],a[i+3],a[i+6]);
-    } 
+    inline vector3d<VALTYPE> operator[](int i) const{
+      return vector3d<VALTYPE>(a[i], a[i+3], a[i+6]);
+    }
 
     //------------------------------------
 
-    inline vector3d<VALTYPE> operator*(const vector3d<VALTYPE> & x) const
-    {
+    inline vector3d<VALTYPE> operator*(
+        const vector3d<VALTYPE> & x) const{
       
-      vector3d<VALTYPE> res( a[0]*x.x() + a[1]*x.y() + a[2]*x.z(), 
-			     a[3]*x.x() + a[4]*x.y() + a[5]*x.z(),
-			     a[6]*x.x() + a[7]*x.y() + a[8]*x.z());
+      vector3d<VALTYPE> res( a[0]*x.x() + a[1]*x.y() + a[2]*x.z(),
+          a[3]*x.x() + a[4]*x.y() + a[5]*x.z(),
+          a[6]*x.x() + a[7]*x.y() + a[8]*x.z());
       return res;
     }
 
-    inline matrix3d<VALTYPE> operator*(const matrix3d<VALTYPE> & b) const
-    {
+    inline matrix3d<VALTYPE> operator*(
+        const matrix3d<VALTYPE> & b) const{
       // fixme -- not efficient!!!
       
       matrix3d<VALTYPE> res;
 
       for(int i=0; i<3; i++)
-	for(int j=0; j<3; j++)
-	  {
-	    res(i,j) = 0e0;
-	    for (int k=0; k<3; k++)
-	      res(i,j) += (*this)(i,k)*b(k,j);
-	  }
+        for(int j=0; j<3; j++){
+            res(i,j) = 0e0;
+            for (int k=0; k<3; k++)
+              res(i,j) += (*this)(i,k)*b(k,j);
+          }
       return res;
     }
 
-    inline matrix3d<VALTYPE> T() const
-    {
+    inline matrix3d<VALTYPE> T() const{
       return matrix3d<VALTYPE>( a[0], a[3], a[6],
-				a[1], a[4], a[7],
-				a[2], a[5], a[8]);
+          a[1], a[4], a[7],
+          a[2], a[5], a[8]);
     }
 
-    inline matrix3d<VALTYPE>& operator=(VALTYPE alpha)
-    {
+    inline matrix3d<VALTYPE>& operator=(VALTYPE alpha){
+
       a[0] = a[4] = a[8] = VALTYPE(alpha);
       a[1] = a[2] = a[3] = a[5] = a[6] = a[7] = VALTYPE(0);
       return *this;
     }
 
-    inline matrix3d<VALTYPE> operator+(const matrix3d<VALTYPE> & b) const
-    {
-      return  matrix3d<VALTYPE>( a[0]+b(0,0), a[1]+b(0,1), a[2]+b(0,2),
-				 a[3]+b(1,0), a[4]+b(1,1), a[5]+b(1,2),
-				 a[6]+b(2,0), a[7]+b(2,1), a[8]+b(2,2));
-    } 
+    inline matrix3d<VALTYPE> operator+(
+        const matrix3d<VALTYPE> & b) const{
 
-    inline matrix3d<VALTYPE> operator-(const matrix3d<VALTYPE> & b) const
-    {
-      return  matrix3d<VALTYPE>( a[0]-b(0,0), a[1]-b(0,1), a[2]-b(0,2),
-				 a[3]-b(1,0), a[4]-b(1,1), a[5]-b(1,2),
-				 a[6]-b(2,0), a[7]-b(2,1), a[8]-b(2,2));
-    } 
+      return  matrix3d<VALTYPE>(
+          a[0]+b(0,0), a[1]+b(0,1), a[2]+b(0,2),
+          a[3]+b(1,0), a[4]+b(1,1), a[5]+b(1,2),
+          a[6]+b(2,0), a[7]+b(2,1), a[8]+b(2,2));
+    }
 
-    inline matrix3d<VALTYPE> operator-() const
-    {
+    inline matrix3d<VALTYPE> operator-(
+        const matrix3d<VALTYPE> & b) const{
+
+      return  matrix3d<VALTYPE>(
+          a[0]-b(0,0), a[1]-b(0,1), a[2]-b(0,2),
+          a[3]-b(1,0), a[4]-b(1,1), a[5]-b(1,2),
+          a[6]-b(2,0), a[7]-b(2,1), a[8]-b(2,2));
+    }
+
+    inline matrix3d<VALTYPE> operator-() const{
+
       return  matrix3d<VALTYPE>( -a[0], -a[1], -a[2],
-				 -a[3], -a[4], -a[5],
-				 -a[6], -a[7], -a[8]);
+          -a[3], -a[4], -a[5],
+          -a[6], -a[7], -a[8]);
     }
 
-    inline matrix3d<VALTYPE> operator*(VALTYPE alpha) const
-    {
-      return  matrix3d<VALTYPE>( a[0]*alpha, a[1]*alpha, a[2]*alpha,
-				 a[3]*alpha, a[4]*alpha, a[5]*alpha,
-				 a[6]*alpha, a[7]*alpha, a[8]*alpha);
+    inline matrix3d<VALTYPE> operator*(VALTYPE alpha) const{
+
+      return  matrix3d<VALTYPE>(
+          a[0]*alpha, a[1]*alpha, a[2]*alpha,
+          a[3]*alpha, a[4]*alpha, a[5]*alpha,
+          a[6]*alpha, a[7]*alpha, a[8]*alpha);
     }
 
-    inline matrix3d<VALTYPE> operator/(VALTYPE alpha) const
-    {
+    inline matrix3d<VALTYPE> operator/(VALTYPE alpha) const{
+
       return operator*(VALTYPE(1)/alpha);
     }
 
-    inline matrix3d<VALTYPE> operator*=(VALTYPE alpha)
-    {
+    inline matrix3d<VALTYPE> operator*=(VALTYPE alpha){
+
       for (int i = 0; i<9; i++)
-	a[i] *= alpha;
+        a[i] *= alpha;
       return *this;
     }
 
-    inline matrix3d<VALTYPE> operator/=(VALTYPE alpha)
-    {
+    inline matrix3d<VALTYPE> operator/=(VALTYPE alpha){
+
       for (int i = 0; i<9; i++)
-	a[i] /= alpha;
+        a[i] /= alpha;
       return *this;
     }
 
-    inline typename numeric_type<VALTYPE>::norm norm2() const
-    {
+    inline typename numeric_type<VALTYPE>::norm norm2() const{
+
       VALTYPE s = 0e0;
       for (int i = 0; i<9; i++)
-	s += std::conj(a[i])*a[i];
+        s += std::conj(a[i])*a[i];
       return std::abs(s);
     }
 
-    inline typename numeric_type<VALTYPE>::norm norm() const
-    {
+    inline typename numeric_type<VALTYPE>::norm norm() const{
+
       return std::sqrt(norm2());
     }
 
-    inline bool operator==(const matrix3d<VALTYPE> & b) const
-    {
+    inline bool operator==(const matrix3d<VALTYPE> & b) const{
       return ((*this) - b ).norm() <= tol_equiv;
     }
 
-    inline bool operator!=(const matrix3d<VALTYPE> & b) const
-    {
+    inline bool operator!=(const matrix3d<VALTYPE> & b) const{
       return ((*this) - b ).norm() > tol_equiv;
     }
 
-    inline VALTYPE det() const
-    {
-      return 
-	xx()*( yy()*zz() - yz()*zy() )-
-	xy()*( yx()*zz() - zx()*yz() )+
-	xz()*( yx()*zy() - zx()*yy() );
+    inline VALTYPE det() const{
+      return
+          xx()*( yy()*zz() - yz()*zy() )-
+          xy()*( yx()*zz() - zx()*yz() )+
+          xz()*( yx()*zy() - zx()*yy() );
+    }
+
+    std::string print(){
+      return fmt::format(
+            "[{0}, {1}, {2}\n {3}, {4}, {5}\n {6}, {7}, {8}]",
+                         a[0], a[1], a[2],
+                         a[3], a[4], a[5],
+                         a[6], a[7], a[8]);
     }
 
 #ifdef PY_EXPORT
 
-    matrix3d(const py::list &l)
-    {
-      // Assuming that length & type checks have been performed inside python code
+    matrix3d(const py::list &l){
+      // Assuming that length & type checks have been performed
+      // inside python code
       for (int i=0; i<9; i++)
         a[i] =py::cast<VALTYPE>(l[i]);
-    }    
+    }
 
-    matrix3d(const py::tuple &l)
-    {
-      // Assuming that length & type checks have been performed inside python code
+    matrix3d(const py::tuple &l){
+      // Assuming that length & type checks have been performed
+      // inside python code
       for (int i=0; i<9; i++)
         a[i] = py::cast<VALTYPE>(l[i]);
-    }    
+    }
 
     inline matrix3d<VALTYPE> py_muln(VALTYPE s) const
     { return (*this)*s;}
@@ -584,28 +578,25 @@ namespace qpp{
     { return (*this)*v;}
 
     inline VALTYPE py_getitem(py::tuple I) const
-    { 
+    {
       int i = py::cast<int>(I[0]), j = py::cast<int>(I[1]);
-      return (*this)(i,j); 
+      return (*this)(i,j);
     }
     
-    inline void py_setitem(py::tuple I, VALTYPE v)
-    { 
+    inline void py_setitem(py::tuple I, VALTYPE v){
       int i = py::cast<int>(I[0]), j = py::cast<int>(I[1]);
-      (*this)(i,j) = v; 
+      (*this)(i,j) = v;
     }
 
-    inline vector3d<VALTYPE> py_getitemv(int i) const
-    {
+    inline vector3d<VALTYPE> py_getitemv(int i) const{
       return (*this)(i);
     }
 
-    inline void py_setitemv(int i, const vector3d<VALTYPE> & v)
-    {
+    inline void py_setitemv(int i, const vector3d<VALTYPE> & v){
       a[i] = v(0);
       a[i+3] = v(1);
       a[i+6] = v(2);
-    } 
+    }
 
     inline VALTYPE py_getxx() const {return xx();}
     inline VALTYPE py_getxy() const {return xy();}
@@ -640,10 +631,10 @@ namespace qpp{
   template<class VALTYPE>
   inline VALTYPE det(const vector3d<VALTYPE> & a, const vector3d<VALTYPE> & b, const vector3d<VALTYPE> & c)
   {
-    return 
-	a.x()*( b.y()*c.z() - b.z()*c.y() )-
-	a.y()*( b.x()*c.z() - c.x()*b.z() )+
-	a.z()*( b.x()*c.y() - c.x()*b.y() );
+    return
+        a.x()*( b.y()*c.z() - b.z()*c.y() )-
+        a.y()*( b.x()*c.z() - c.x()*b.z() )+
+        a.z()*( b.x()*c.y() - c.x()*b.y() );
   }
 
   template<class VALTYPE>
@@ -675,7 +666,7 @@ namespace qpp{
     matrix3d<VALTYPE> res;
     for (int i=0; i<3; i++)
       for (int j=0; j<3; j++)
-	res(i,j) = a(i)*b(j);
+        res(i,j) = a(i)*b(j);
     return res;
   }
 
@@ -688,9 +679,9 @@ namespace qpp{
 
     VALTYPE c = std::cos(phi), s = std::sin(phi);
     return matrix3d<VALTYPE>
-      ( n(0)*n(0)*(1-c) + c,       n(0)*n(1)*(1-c) + n(2)*s,  n(0)*n(2)*(1-c) - n(1)*s,
-	n(1)*n(0)*(1-c) - n(2)*s,  n(1)*n(1)*(1-c) + c,       n(1)*n(2)*(1-c) + n(0)*s,
-	n(2)*n(0)*(1-c) + n(1)*s,  n(2)*n(1)*(1-c) - n(0)*s,  n(2)*n(2)*(1-c) + c    );
+        ( n(0)*n(0)*(1-c) + c,       n(0)*n(1)*(1-c) + n(2)*s,  n(0)*n(2)*(1-c) - n(1)*s,
+          n(1)*n(0)*(1-c) - n(2)*s,  n(1)*n(1)*(1-c) + c,       n(1)*n(2)*(1-c) + n(0)*s,
+          n(2)*n(0)*(1-c) + n(1)*s,  n(2)*n(1)*(1-c) - n(0)*s,  n(2)*n(2)*(1-c) + c    );
   }
 
   template<class VALTYPE>
@@ -698,19 +689,19 @@ namespace qpp{
   {
     vector3d<VALTYPE> n = nn/norm(nn);
     return matrix3d<VALTYPE>
-      ( 1e0 - 2*n(0)*n(0), -2*n(0)*n(1),      -2*n(0)*n(2),
-	-2*n(0)*n(1),      1e0 - 2*n(1)*n(1), -2*n(1)*n(2),
-	-2*n(0)*n(2),      -2*n(1)*n(2),      1e0 - 2*n(2)*n(2) );
-  } 
+        ( 1e0 - 2*n(0)*n(0), -2*n(0)*n(1),      -2*n(0)*n(2),
+          -2*n(0)*n(1),      1e0 - 2*n(1)*n(1), -2*n(1)*n(2),
+          -2*n(0)*n(2),      -2*n(1)*n(2),      1e0 - 2*n(2)*n(2) );
+  }
 
   template<class VALTYPE>
   vector3d<VALTYPE> solve3d(const matrix3d<VALTYPE> & A, const vector3d<VALTYPE> & b)
   {
-    VALTYPE 
-      D = det(A),
-      X = det(b,    A(1), A(2)),
-      Y = det(A(0), b,    A(2)),
-      Z = det(A(0), A(1), b);
+    VALTYPE
+        D = det(A),
+        X = det(b,    A(1), A(2)),
+        Y = det(A(0), b,    A(2)),
+        Z = det(A(0), A(1), b);
     return vector3d<VALTYPE>(X, Y, Z)/D;
   }
 
@@ -718,8 +709,8 @@ namespace qpp{
   matrix3d<VALTYPE> invert(const matrix3d<VALTYPE> & A)
   {
     matrix3d<VALTYPE> b(  A(1,1)*A(2,2) - A(1,2)*A(2,1), -A(0,1)*A(2,2) + A(0,2)*A(2,1),  A(0,1)*A(1,2) - A(1,1)*A(0,2),
-			 -A(1,0)*A(2,2) + A(2,0)*A(1,2),  A(0,0)*A(2,2) - A(0,2)*A(2,0), -A(0,0)*A(1,2) + A(1,0)*A(0,2), 
-			  A(1,0)*A(2,1) - A(2,0)*A(1,1), -A(0,0)*A(2,1) + A(2,0)*A(0,1),  A(0,0)*A(1,1) - A(1,0)*A(0,1));
+                          -A(1,0)*A(2,2) + A(2,0)*A(1,2),  A(0,0)*A(2,2) - A(0,2)*A(2,0), -A(0,0)*A(1,2) + A(1,0)*A(0,2),
+                          A(1,0)*A(2,1) - A(2,0)*A(1,1), -A(0,0)*A(2,1) + A(2,0)*A(0,1),  A(0,0)*A(1,1) - A(1,0)*A(0,1));
     return b/det(A);
   }
 
@@ -730,27 +721,27 @@ namespace qpp{
     matrix3d<VALTYPE> R=VALTYPE(1);
     if (n>0)
       {
-	while (n-- > 0)
-	  R = A*R;
+        while (n-- > 0)
+          R = A*R;
       }
     else if (n<0)
       {
-	matrix3d<VALTYPE>  B = invert(A);
-	while (n++ < 0)
-	  R = B*R;
+        matrix3d<VALTYPE>  B = invert(A);
+        while (n++ < 0)
+          R = B*R;
       }
     return R;
   }
 
   template<class VALTYPE>
-  vector3d<VALTYPE> solve3d(const vector3d<VALTYPE> & A0, const vector3d<VALTYPE> & A1, 
-			    const vector3d<VALTYPE> & A2, const vector3d<VALTYPE> & b)
+  vector3d<VALTYPE> solve3d(const vector3d<VALTYPE> & A0, const vector3d<VALTYPE> & A1,
+                            const vector3d<VALTYPE> & A2, const vector3d<VALTYPE> & b)
   {
-    VALTYPE 
-      D = det(A0, A1, A2),
-      X = det(b,  A1, A2),
-      Y = det(A0, b,  A2),
-      Z = det(A0, A1, b);
+    VALTYPE
+        D = det(A0, A1, A2),
+        X = det(b,  A1, A2),
+        Y = det(A0, b,  A2),
+        Z = det(A0, A1, b);
     return vector3d<VALTYPE>(X, Y, Z)/D;
   }
 
@@ -782,28 +773,28 @@ namespace qpp{
       {
         VALTYPE R13 = std::pow(2*std::abs(R),1./3)*sgnr;
         res = {-1, VALTYPE(.5) + s32*I, VALTYPE(.5) - s32*I };
-	res *= R13;
-	for (int i=0; i<3; i++)
-	  res(i) -= b/3;
+        res *= R13;
+        for (int i=0; i<3; i++)
+          res(i) -= b/3;
       }
 
     else if (R*R<Q*Q*Q)
       // three real roots
       {
-	VALTYPE SQ = std::sqrt(Q);
-	VALTYPE theta = std::acos(R/(Q*SQ));
-	res = {-2*SQ*std::cos(theta/3)-b/3,
-	       -2*SQ*std::cos((theta+2*pi)/3)-b/3,
-	       -2*SQ*std::cos((theta+4*pi)/3)-b/3};
+        VALTYPE SQ = std::sqrt(Q);
+        VALTYPE theta = std::acos(R/(Q*SQ));
+        res = {-2*SQ*std::cos(theta/3)-b/3,
+               -2*SQ*std::cos((theta+2*pi)/3)-b/3,
+               -2*SQ*std::cos((theta+4*pi)/3)-b/3};
       }
 
     else
       {
         VALTYPE A = -std::pow(std::abs(R)+std::sqrt(R*R-Q*Q*Q), 1./3)*sgnr;
-	VALTYPE B=0;
-	if ( std::abs(A)>eps)
-	  B = Q/A;
-	res = { -b/3 + A + B, -b/3 - (A + B)/2 + I*s32*(A - B), -b/3 - (A + B)/2 - I*s32*(A - B)};
+        VALTYPE B=0;
+        if ( std::abs(A)>eps)
+          B = Q/A;
+        res = { -b/3 + A + B, -b/3 - (A + B)/2 + I*s32*(A - B), -b/3 - (A + B)/2 - I*s32*(A - B)};
       }
 
     return res;
@@ -816,7 +807,7 @@ namespace qpp{
   {
     VALTYPE b = A(0,0) + A(1,1) + A(2,2);
     VALTYPE c = A(0,1)*A(1,0) + A(1,2)*A(2,1) + A(2,0)*A(0,2) -
-      A(0,0)*A(1,1) - A(1,1)*A(2,2) - A(2,2)*A(0,0);
+        A(0,0)*A(1,1) - A(1,1)*A(2,2) - A(2,2)*A(0,0);
     VALTYPE d = det(A);
 
     vector3d<typename numeric_type<VALTYPE>::complex> lbd = solve_cubeq(-VALTYPE(1e0),b,c,d);
@@ -827,32 +818,32 @@ namespace qpp{
   }
 
   template<class VALTYPE>
-  void diagon3d(vector3d<typename numeric_type<VALTYPE>::complex> & eigvals, 
-		matrix3d<typename numeric_type<VALTYPE>::complex> & eigvecs,
-		const matrix3d<VALTYPE> & A)
+  void diagon3d(vector3d<typename numeric_type<VALTYPE>::complex> & eigvals,
+                matrix3d<typename numeric_type<VALTYPE>::complex> & eigvecs,
+                const matrix3d<VALTYPE> & A)
   {
     typename numeric_type<VALTYPE>::real eps = vector3d<VALTYPE>::tol_equiv;
     
     VALTYPE offd = A(0,1)*A(0,1) + A(1,0)*A(1,0) + A(1,2)*A(1,2) +
-      A(2,1)*A(2,1) + A(2,0)*A(2,0) + A(0,2)*A(0,2);
+        A(2,1)*A(2,1) + A(2,0)*A(2,0) + A(0,2)*A(0,2);
 
     if ( offd < eps*eps )
       // Already diagonal
       {
-	eigvals = { A(0,0), A(1,1), A(2,2)};
-	eigvecs = { {1,0,0}, {0,1,0}, {0,0,1} };
-	return;
+        eigvals = { A(0,0), A(1,1), A(2,2)};
+        eigvecs = { {1,0,0}, {0,1,0}, {0,0,1} };
+        return;
       }
 
 
     VALTYPE b = A(0,0) + A(1,1) + A(2,2);
     VALTYPE c = A(0,1)*A(1,0) + A(1,2)*A(2,1) + A(2,0)*A(0,2) -
-      A(0,0)*A(1,1) - A(1,1)*A(2,2) - A(2,2)*A(0,0);
+        A(0,0)*A(1,1) - A(1,1)*A(2,2) - A(2,2)*A(0,0);
     VALTYPE d = det(A);
 
     eigvals = solve_cubeq(-VALTYPE(1),b,c,d);
     typename numeric_type<VALTYPE>::complex e0 = eigvals(0),
-      e1 = eigvals(1), e2=eigvals(2), e;
+        e1 = eigvals(1), e2=eigvals(2), e;
 
     int ndiff;
     
@@ -869,14 +860,14 @@ namespace qpp{
               eps &&  std::abs(e2-e0) <= eps)
       ndiff = 1;
     else{
-	ndiff = 2;
-	if ( std::abs(e1-e2) <= eps ){
-	    e=e2; e2=e0; e0=e;
-	  }
-	else if ( std::abs(e2-e0) <= eps ){
-	    e=e2; e2=e1; e1=e;
-	  }
-	eigvals = {e0,e1,e2};
+        ndiff = 2;
+        if ( std::abs(e1-e2) <= eps ){
+            e=e2; e2=e0; e0=e;
+          }
+        else if ( std::abs(e2-e0) <= eps ){
+            e=e2; e2=e1; e1=e;
+          }
+        eigvals = {e0,e1,e2};
       }
 
     //std::cout << "eigvals after sorting = " << eigvals << "\n";
@@ -886,109 +877,109 @@ namespace qpp{
 
     for (int i=0; i<3; i++)
       for (int j=0; j<3; j++)
-	AA(i,j)=A(i,j);
+        AA(i,j)=A(i,j);
     E = 0;
     E(0,0) = E(1,1) = E(2,2) = 1;
 
     if (ndiff==1){
-	// e0, e1 and e2 
-	//std::cout << "e0==e1==e2\n";
-	n0 = {1,0,0};
-	n1 = {0,1,0};
-	n2 = {0,0,1};
+        // e0, e1 and e2
+        //std::cout << "e0==e1==e2\n";
+        n0 = {1,0,0};
+        n1 = {0,1,0};
+        n2 = {0,0,1};
       }
     else if (ndiff==2){
-      // e0 == e1 != e2
-	//std::cout << "e0==e1!=e2\n";
-	B = AA - e2*E;
-	B /= B.norm();
-	//B = B.T();
+        // e0 == e1 != e2
+        //std::cout << "e0==e1!=e2\n";
+        B = AA - e2*E;
+        B /= B.norm();
+        //B = B.T();
 
-	int i=0;
-	if ( norm(B(1))>norm(B(0)) )
-	  i=1;
-	if (norm(B(2))>norm(B(i)))
-	  i=2;
-	n0 = B(i)/norm(B(i));
-	
-	i=0;
-	if ( norm(B(1)-n0*scal(n0,B(1))) > norm(B(0)-n0*scal(n0,B(0))))
-	  i=1;
-	if ( norm(B(2)-n0*scal(n0,B(2))) > norm(B(i)-n0*scal(n0,B(i))))
-	  i=2;
-	n1 = B(i)-n0*scal(n0,B(i));
-	n1 /= norm(n1);
-	
-	/*
-	B = (AA - e0*E);
-	B /= B.norm();
-	B = B*(AA - e0*E);
-	B /= B.norm();
-	//B = B.T();
+        int i=0;
+        if ( norm(B(1))>norm(B(0)) )
+          i=1;
+        if (norm(B(2))>norm(B(i)))
+          i=2;
+        n0 = B(i)/norm(B(i));
 
-	i=0;
-	if ( norm(B(1))>norm(B(0)) )
-	  i=1;
-	if (norm(B(2))>norm(B(i)))
-	  i=2;
-	n2 = B(i)/norm(B(i));
-	*/
+        i=0;
+        if ( norm(B(1)-n0*scal(n0,B(1))) > norm(B(0)-n0*scal(n0,B(0))))
+          i=1;
+        if ( norm(B(2)-n0*scal(n0,B(2))) > norm(B(i)-n0*scal(n0,B(i))))
+          i=2;
+        n1 = B(i)-n0*scal(n0,B(i));
+        n1 /= norm(n1);
 
-	n2 = n0%n1;
-	
+        /*
+        B = (AA - e0*E);
+        B /= B.norm();
+        B = B*(AA - e0*E);
+        B /= B.norm();
+        //B = B.T();
+
+        i=0;
+        if ( norm(B(1))>norm(B(0)) )
+          i=1;
+        if (norm(B(2))>norm(B(i)))
+          i=2;
+        n2 = B(i)/norm(B(i));
+        */
+
+        n2 = n0%n1;
+
       }
     else{
-      // e0 != e1 != e2
+        // e0 != e1 != e2
 
-	//std::cout << "e0!=e1!=e2\n";
+        //std::cout << "e0!=e1!=e2\n";
 
-	B = (AA - e1*E);
-	B /= B.norm();
-	B = B*(AA - e2*E);
-	B /= B.norm();
-	//B = B.T();
+        B = (AA - e1*E);
+        B /= B.norm();
+        B = B*(AA - e2*E);
+        B /= B.norm();
+        //B = B.T();
 
-	int i=0;
-	if ( norm(B(1))>norm(B(0)) )
-	  i=1;
-	if (norm(B(2))>norm(B(i)))
-	  i=2;
-	n0 = B(i)/norm(B(i));
+        int i=0;
+        if ( norm(B(1))>norm(B(0)) )
+          i=1;
+        if (norm(B(2))>norm(B(i)))
+          i=2;
+        n0 = B(i)/norm(B(i));
 
-	B = (AA - e0*E);
-	B /= B.norm();
-	B = B*(AA - e2*E);
-	B /= B.norm();
-	//B = B.T();
+        B = (AA - e0*E);
+        B /= B.norm();
+        B = B*(AA - e2*E);
+        B /= B.norm();
+        //B = B.T();
 
-	i=0;
-	if ( norm(B(1)-n0*scal(n0,B(1)))>norm(B(0)-n0*scal(n0,B(1))) )
-	  i=1;
-	if ( norm(B(2)-n0*scal(n0,B(2)))>norm(B(i)-n0*scal(n0,B(i))) )
-	  i=2;
+        i=0;
+        if ( norm(B(1)-n0*scal(n0,B(1)))>norm(B(0)-n0*scal(n0,B(1))) )
+          i=1;
+        if ( norm(B(2)-n0*scal(n0,B(2)))>norm(B(i)-n0*scal(n0,B(i))) )
+          i=2;
 
-	n1 = B(i) - n0*scal(n0,B(i));
-	n1 /= norm(n1);
-	
-	//n1 = B(i)/norm(B(i));
+        n1 = B(i) - n0*scal(n0,B(i));
+        n1 /= norm(n1);
 
-	B = (AA - e0*E);
-	B /= B.norm();
-	B = B*(AA - e1*E);
-	B /= B.norm();
-	//B = B.T();
+        //n1 = B(i)/norm(B(i));
 
-	i=0;
-	if ( norm(B(1)-n0*scal(n0,B(1))-n1*scal(n1,B(1)))>
-	     norm(B(0)-n0*scal(n0,B(0))-n1*scal(n1,B(0))) )
-	  i=1;
-	if ( norm(B(2)-n0*scal(n0,B(2))-n1*scal(n1,B(2)))>
-	     norm(B(i)-n0*scal(n0,B(i))-n1*scal(n1,B(i))) )
-	  i=2;
-	
-	n2 = B(i)-n0*scal(n0,B(i))-n1*scal(n1,B(i));
-	n2 /= norm(n2);	
-	//n2 = B(i)/norm(B(i));
+        B = (AA - e0*E);
+        B /= B.norm();
+        B = B*(AA - e1*E);
+        B /= B.norm();
+        //B = B.T();
+
+        i=0;
+        if ( norm(B(1)-n0*scal(n0,B(1))-n1*scal(n1,B(1)))>
+             norm(B(0)-n0*scal(n0,B(0))-n1*scal(n1,B(0))) )
+          i=1;
+        if ( norm(B(2)-n0*scal(n0,B(2))-n1*scal(n1,B(2)))>
+             norm(B(i)-n0*scal(n0,B(i))-n1*scal(n1,B(i))) )
+          i=2;
+
+        n2 = B(i)-n0*scal(n0,B(i))-n1*scal(n1,B(i));
+        n2 /= norm(n2);
+        //n2 = B(i)/norm(B(i));
       }
 
     int i=0;
@@ -1007,16 +998,16 @@ namespace qpp{
     n2 *= std::abs(n2(i))/n2(i);
 
     for (int i=0; i<3; i++){
-	eigvecs(i,0) = n0(i);
-	eigvecs(i,1) = n1(i);
-	eigvecs(i,2) = n2(i);
-      }    
+        eigvecs(i,0) = n0(i);
+        eigvecs(i,1) = n1(i);
+        eigvecs(i,2) = n2(i);
+      }
   }
 
   template<class VALTYPE>
   bool diagon3d(vector3d<VALTYPE> & eigvals, matrix3d<VALTYPE> & eigvecs,
-		const matrix3d<VALTYPE> & A){
-    vector3d<typename numeric_type<VALTYPE>::complex> ceigvals; 
+                const matrix3d<VALTYPE> & A){
+    vector3d<typename numeric_type<VALTYPE>::complex> ceigvals;
     matrix3d<typename numeric_type<VALTYPE>::complex> ceigvecs;
     VALTYPE eps = vector3d<VALTYPE>::tol_equiv;
 
@@ -1024,17 +1015,17 @@ namespace qpp{
     diagon3d(ceigvals,ceigvecs,A);
 
     for (int i=0; i<3; i++){
-	eigvals(i) = ceigvals(i).real();
-	if ( std::abs(ceigvals(i).imag()) > eps )
-	  res = false;
+        eigvals(i) = ceigvals(i).real();
+        if ( std::abs(ceigvals(i).imag()) > eps )
+          res = false;
       }
 
     for (int i=0; i<3; i++)
       for (int j=0; j<3; j++){
-	  eigvecs(i,j) = ceigvecs(i,j).real();
-	  if ( std::abs(ceigvecs(i,j).imag()) > eps )
-	    res = false;
-	}
+          eigvecs(i,j) = ceigvecs(i,j).real();
+          if ( std::abs(ceigvecs(i,j).imag()) > eps )
+            res = false;
+        }
     return res;
   }
 
@@ -1054,7 +1045,7 @@ namespace qpp{
   template<class VALTYPE>
   inline bool py_diagon3dreal(vector3d<VALTYPE> & eigvals,
                               matrix3d<VALTYPE> & eigvecs,
-			      const matrix3d<VALTYPE> & A)
+                              const matrix3d<VALTYPE> & A)
   { return diagon3d(eigvals,eigvecs,A); }
 
   template<class VALTYPE>
@@ -1117,14 +1108,14 @@ namespace qpp{
   //-------------------------------------------------
 
   //template<class VALTYPE>
-  // bool diagon3d(const matrix3d<VALTYPE> & A, 
+  // bool diagon3d(const matrix3d<VALTYPE> & A,
   // 		matrix3d<VALTYPE> & Q, vector3d<VALTYPE> &lambda)
   // {
   //   const VALTYPE tol = 1e-10;
   //   const int N = 100;
 
   //   matrix3d<VALTYPE> AA = A;
-    
+
   //   n=0;
   //   while (n<3)
   //     {
@@ -1152,10 +1143,10 @@ namespace qpp{
     __s.flags(__os.flags());
     __s.imbue(__os.getloc());
     __s.precision(__os.precision());
-    __s  << "matrix3(" 
-	 << a(0,0) << "," << a(0,1) << "," << a(0,2) << ",  "
-	 << a(1,0) << "," << a(1,1) << "," << a(1,2) << ",  "
-	 << a(2,0) << "," << a(2,1) << "," << a(2,2) << ")" ;
+    __s  << "matrix3("
+         << a(0,0) << "," << a(0,1) << "," << a(0,2) << ",  "
+         << a(1,0) << "," << a(1,1) << "," << a(1,2) << ",  "
+         << a(2,0) << "," << a(2,1) << "," << a(2,2) << ")" ;
     return __os << __s.str();
   }
 
