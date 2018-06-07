@@ -28,11 +28,8 @@ cmake .. -D<Build Flag Name>=<Flag value>
 |BUILD_DOC            |Build HTML documentation             	|Bool(OFF)	      |
 |BUILD_QC     	  |Build quantum chemistry code   		|Bool(OFF)            |
 |BUILD_TESTS     	  |Build tests executable	   		|Bool(OFF)            |
-|USE_SPGLIB   	  |Use spglib for handling crystal symmetry     |Bool(OFF)            |
-|USE_STATIC_BOOST     |Linking with static boost   			|Bool(OFF)            |
-|USE_SYSTEM_EIGEN3    |Use system Eigen3, instead download it   	|Bool(ON)             |
 |PYTHON_BINDINGS      |Build python bindings		   	|Bool(ON)             |
-|PYTHON_VERSION       |Determine  python version			|String(2.7)          |
+|PYBIND11_PYTHON_VERSION       |Determine  python version			|String(3)          |
 
 CI
 --
