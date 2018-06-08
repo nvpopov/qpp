@@ -312,7 +312,8 @@ The supercell concept generalization for the geometry class looks like:
       return _symm_rad[t];
     }
 
-    void set_symmetrize_radius(int t, REAL rad){
+    void set_symmetrize_radius(int t,
+                               REAL rad){
       _symm_rad[t] = rad;
     }
 
@@ -327,7 +328,8 @@ The supercell concept generalization for the geometry class looks like:
         return _symm_rad[t];
     }
 
-    void set_symmetrize_radius(const STRING & a, REAL rad){
+    void set_symmetrize_radius(const STRING & a,
+                               REAL rad){
       int t = type_of_atom(a);
 
       if (t == -1){

@@ -45,8 +45,8 @@ namespace qpp{
 
   */
 
-  /*! \brief Purely translational periodic cell with DIM=1,2,3 periodicity. The value
-    DIM=0 is also valid and means no periodicity
+  /*! \brief Purely translational periodic cell with DIM=1,2,3 periodicity.
+   * The value DIM=0 is also valid and means no periodicity
    */
   template<class REAL = double>
   struct periodic_cell {
@@ -246,7 +246,8 @@ namespace qpp{
     {}
 
 
-    /*! \brief Answers the question whether r belongs to unit cell centred at the coordinate origin
+    /*! \brief Answers the question whether r belongs to unit cell
+     * centred at the coordinate origin
      */
     inline bool within_centered(vector3d<REAL> r) const{
       vector3d<REAL> f = cart2frac(r);
