@@ -1,5 +1,9 @@
 set(M_IO_SRC  io/strfun.cpp)
-set(M_DATA_SRC data/types.cpp data/errors.cpp data/data.cpp)
+set(M_DATA_SRC
+    data/types.cpp
+    data/errors.cpp
+    data/data.cpp
+    data/ptable.cpp)
 set(M_SYMM_SRC symm/index.cpp)
 set(M_SRC ${M_IO_SRC} ${M_DATA_SRC} ${M_SYMM_SRC})
 add_library(qpp ${M_SRC})
@@ -33,12 +37,14 @@ if(PYTHON_BINDINGS)
         pyqpp/pyqpp_autosymm.cpp
         pyqpp/pyqpp_basis_ecp.cpp
         pyqpp/pyqpp_molecule.cpp
+        pyqpp/pyqpp_atable.cpp
         pyqpp/pyqpp_io.cpp
         pyqpp/pyqpp_gmsio.cpp
         pyqpp/pyqpp_experimental.cpp
         data/errors.cpp
         data/data.cpp
         data/types.cpp
+        data/ptable.cpp
         symm/index.cpp
         io/strfun.cpp
         )

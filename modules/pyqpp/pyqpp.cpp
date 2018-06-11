@@ -12,5 +12,7 @@ PYBIND11_MODULE(pyqpp, m) {
   pyqpp_autosymm_export(m);
   pyqpp_io_export(m);
   pyqpp_gmsio_export(m);
+  pyqpp_ptable_export(m);
+
   pyqpp_experimental_export(m);
 }

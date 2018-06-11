@@ -1,5 +1,6 @@
 #include <iostream>
 #include <geom/geom.hpp>
+#include <data/ptable.hpp>
 
 int main()
 {
@@ -47,6 +48,6 @@ int main()
       std::cout << "\n";
     }
   
-
+  std::cout<<qpp::ptable::symbol_by_number(2)<<std::endl;
 }
 
