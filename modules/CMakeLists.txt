@@ -37,7 +37,7 @@ if(PYTHON_BINDINGS)
         pyqpp/pyqpp_autosymm.cpp
         pyqpp/pyqpp_basis_ecp.cpp
         pyqpp/pyqpp_molecule.cpp
-        pyqpp/pyqpp_atable.cpp
+        pyqpp/pyqpp_ptable.cpp
         pyqpp/pyqpp_io.cpp
         pyqpp/pyqpp_gmsio.cpp
         pyqpp/pyqpp_experimental.cpp
