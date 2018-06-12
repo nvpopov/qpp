@@ -21,7 +21,7 @@ void qpp::ptable::init_default(){
   this->arecs[1].aNumber=2;
   this->arecs[1].aName="Helium";
   this->arecs[1].aSymbol="He";
-  this->arecs[1].aRadius=-0.01;
+  this->arecs[1].aRadius=0.79;
   this->arecs[1].aMass=4.002602;
   this->arecs[1].aCovRad_Slater=-0.01;
   this->arecs[1].aIonicRadius=-0.01;
@@ -119,7 +119,7 @@ void qpp::ptable::init_default(){
   this->arecs[7].aNumber=8;
   this->arecs[7].aName="Oxygen";
   this->arecs[7].aSymbol="O";
-  this->arecs[7].aRadius=-0.01;
+  this->arecs[7].aRadius=0.92;
   this->arecs[7].aMass=15.999;
   this->arecs[7].aCovRad_Slater=0.6;
   this->arecs[7].aIonicRadius=1.35;
@@ -136,7 +136,7 @@ void qpp::ptable::init_default(){
   this->arecs[8].aNumber=9;
   this->arecs[8].aName="Fluorine";
   this->arecs[8].aSymbol="F";
-  this->arecs[8].aRadius=-0.01;
+  this->arecs[8].aRadius=0.92;
   this->arecs[8].aMass=18.998403163;
   this->arecs[8].aCovRad_Slater=0.5;
   this->arecs[8].aIonicRadius=1.285;
@@ -153,7 +153,7 @@ void qpp::ptable::init_default(){
   this->arecs[9].aNumber=10;
   this->arecs[9].aName="Neon";
   this->arecs[9].aSymbol="Ne";
-  this->arecs[9].aRadius=-0.01;
+  this->arecs[9].aRadius=0.92;
   this->arecs[9].aMass=20.1797;
   this->arecs[9].aCovRad_Slater=-0.01;
   this->arecs[9].aIonicRadius=-0.01;
@@ -282,7 +282,7 @@ void qpp::ptable::init_default(){
   this->arecs[16].aNumber=17;
   this->arecs[16].aName="Chlorine";
   this->arecs[16].aSymbol="Cl";
-  this->arecs[16].aRadius=-0.01;
+  this->arecs[16].aRadius=1.27;
   this->arecs[16].aMass=35.45;
   this->arecs[16].aCovRad_Slater=1.0;
   this->arecs[16].aIonicRadius=1.81;
@@ -301,7 +301,7 @@ void qpp::ptable::init_default(){
   this->arecs[17].aNumber=18;
   this->arecs[17].aName="Argon";
   this->arecs[17].aSymbol="Ar";
-  this->arecs[17].aRadius=-0.01;
+  this->arecs[17].aRadius=1.27;
   this->arecs[17].aMass=39.948;
   this->arecs[17].aCovRad_Slater=-0.01;
   this->arecs[17].aIonicRadius=-0.01;
@@ -658,7 +658,7 @@ void qpp::ptable::init_default(){
   this->arecs[34].aNumber=35;
   this->arecs[34].aName="Bromine";
   this->arecs[34].aSymbol="Br";
-  this->arecs[34].aRadius=-0.01;
+  this->arecs[34].aRadius=1.400;
   this->arecs[34].aMass=79.904;
   this->arecs[34].aCovRad_Slater=1.15;
   this->arecs[34].aIonicRadius=1.96;
@@ -680,7 +680,7 @@ void qpp::ptable::init_default(){
   this->arecs[35].aNumber=36;
   this->arecs[35].aName="Krypton";
   this->arecs[35].aSymbol="Kr";
-  this->arecs[35].aRadius=-0.01;
+  this->arecs[35].aRadius=1.400;
   this->arecs[35].aMass=83.798;
   this->arecs[35].aCovRad_Slater=-0.01;
   this->arecs[35].aIonicRadius=-0.01;
@@ -1087,7 +1087,7 @@ void qpp::ptable::init_default(){
   this->arecs[52].aNumber=53;
   this->arecs[52].aName="Iodine";
   this->arecs[52].aSymbol="I";
-  this->arecs[52].aRadius=-0.01;
+  this->arecs[52].aRadius=1.6;
   this->arecs[52].aMass=126.90447;
   this->arecs[52].aCovRad_Slater=1.4000000000000001;
   this->arecs[52].aIonicRadius=2.2;
@@ -1112,7 +1112,7 @@ void qpp::ptable::init_default(){
   this->arecs[53].aNumber=54;
   this->arecs[53].aName="Xenon";
   this->arecs[53].aSymbol="Xe";
-  this->arecs[53].aRadius=-0.01;
+  this->arecs[53].aRadius=1.6;
   this->arecs[53].aMass=131.293;
   this->arecs[53].aCovRad_Slater=-0.01;
   this->arecs[53].aIonicRadius=0.4;
@@ -1298,7 +1298,7 @@ void qpp::ptable::init_default(){
   this->arecs[60].aNumber=61;
   this->arecs[60].aName="Promethium";
   this->arecs[60].aSymbol="Pm";
-  this->arecs[60].aRadius=-0.01;
+  this->arecs[60].aRadius=1.82;
   this->arecs[60].aMass=144.91276;
   this->arecs[60].aCovRad_Slater=1.85;
   this->arecs[60].aIonicRadius=0.97;
@@ -1965,7 +1965,7 @@ void qpp::ptable::init_default(){
   this->arecs[84].aNumber=85;
   this->arecs[84].aName="Astatine";
   this->arecs[84].aSymbol="At";
-  this->arecs[84].aRadius=-0.01;
+  this->arecs[84].aRadius=1.76;
   this->arecs[84].aMass=210.0;
   this->arecs[84].aCovRad_Slater=-0.01;
   this->arecs[84].aIonicRadius=0.62;
@@ -1994,7 +1994,7 @@ void qpp::ptable::init_default(){
   this->arecs[85].aNumber=86;
   this->arecs[85].aName="Radon";
   this->arecs[85].aSymbol="Rn";
-  this->arecs[85].aRadius=-0.01;
+  this->arecs[85].aRadius=1.76;
   this->arecs[85].aMass=222.0;
   this->arecs[85].aCovRad_Slater=-0.01;
   this->arecs[85].aIonicRadius=-0.01;
@@ -2023,7 +2023,7 @@ void qpp::ptable::init_default(){
   this->arecs[86].aNumber=87;
   this->arecs[86].aName="Francium";
   this->arecs[86].aSymbol="Fr";
-  this->arecs[86].aRadius=-0.01;
+  this->arecs[86].aRadius=1.76;
   this->arecs[86].aMass=223.0;
   this->arecs[86].aCovRad_Slater=-0.01;
   this->arecs[86].aIonicRadius=1.8;
@@ -2053,7 +2053,7 @@ void qpp::ptable::init_default(){
   this->arecs[87].aNumber=88;
   this->arecs[87].aName="Radium";
   this->arecs[87].aSymbol="Ra";
-  this->arecs[87].aRadius=-0.01;
+  this->arecs[87].aRadius=1.76;
   this->arecs[87].aMass=226.0;
   this->arecs[87].aCovRad_Slater=2.15;
   this->arecs[87].aIonicRadius=1.48;
