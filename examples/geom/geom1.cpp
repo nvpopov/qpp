@@ -1,6 +1,17 @@
 #include <iostream>
 #include <geom/geom.hpp>
 #include <data/ptable.hpp>
+#include <io/vasp_io.hpp>
+
+template<int N>
+struct Fact{
+  static const int value = N * Fact<N-1>::value;
+};
+
+template<>
+struct Fact<0>{
+  static const int value = 1;
+};
 
 int main()
 {
@@ -49,5 +60,15 @@ int main()
     }
   
   std::cout<<qpp::ptable::symbol_by_number(2)<<std::endl;
+  std::cout<<Fact<4>::value <<std::endl;
+
+  qpp::periodic_cell<double> cell2({1,0,0},{0,1,0},{0,0,1});
+  qpp::geometry<double, decltype(cell2)> g2(cell2);
+
+  std::ifstream poscar("../examples/io/vasp_data/La44F148.POSCAR");
+
+  qpp::read_vasp_poscar(poscar, g2);
+  std::cout << g2.nat() << std::endl;
+  std::cout << g2.cell << std::endl;
 }
 
