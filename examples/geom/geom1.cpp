@@ -13,8 +13,7 @@ struct Fact<0>{
   static const int value = 1;
 };
 
-int main()
-{
+int main(){
   qpp::periodic_cell<double> cell({4,0,0},{0,6,0},{0,0,4});
 
   qpp::geometry<double,decltype(cell)> g(cell);
@@ -43,7 +42,8 @@ int main()
   for (int i=0; i<g.n_atom_types(); i++)
     std::cout << i << " = " << g.atom_of_type(i) << "\n";
 
-  for ( qpp::iterator I(qpp::index::D(3).all(-1),qpp::index::D(3).all(1)); !I.end(); I++)
+  for ( qpp::iterator I(qpp::index::D(3).all(-1),qpp::index::D(3).all(1));
+        !I.end(); I++)
     for (int at=0; at<g.nat(); at++)
       std::cout << g.atom(at) << " " << at << " " << I << " " << g.r(at,I) << "\n";
 
@@ -51,8 +51,7 @@ int main()
   std::vector<qpp::datum> v = {"Chugunium",11.,12.,13.};
   g.set_fields(-1,v);
 
-  for (int at=0; at<g.nat(); at++)
-    {
+  for (int at=0; at<g.nat(); at++){
       g.get_fields(at,v);
       for (int j=0; j<v.size(); j++)
 	std::cout << v[j] << " ";
@@ -65,10 +64,29 @@ int main()
   qpp::periodic_cell<double> cell2({1,0,0},{0,1,0},{0,0,1});
   qpp::geometry<double, decltype(cell2)> g2(cell2);
 
+  qpp::periodic_cell<double> cell3({1,0,0},{0,1,0},{0,0,1});
+  qpp::geometry<double, decltype(cell3)> g3(cell3);
+
   std::ifstream poscar("../examples/io/vasp_data/La44F148.POSCAR");
+  std::ifstream outcar("/home/nvpopov/work/python-playground/potfit_md/mddata"
+                       "/laf3_v1.OUTCAR");
+
+  std::vector<qpp::geometry<double,qpp::periodic_cell<double>>* > geom_l;
+  std::vector<std::vector<qpp::vector3d<double> > >vel_l;
+  std::vector<double> toten;
+  std::vector<double> kin_t;
 
   qpp::read_vasp_poscar(poscar, g2);
+  qpp::read_vasp_outcar_md(outcar, geom_l, vel_l, toten, kin_t);
   std::cout << g2.nat() << std::endl;
   std::cout << g2.cell << std::endl;
+
+  std::cout << geom_l[111]->cell << std::endl;
+  std::cout << geom_l[1491]->atom(0) << geom_l[1491]->r(0) << std::endl;
+  std::cout << "force test = " << vel_l[0][0] << std::endl;
+
+  std::cout << "total en num " << toten.size() << std::endl;
+  std::cout << "temp num " << kin_t.size() << std::endl;
+
 }
 

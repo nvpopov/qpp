@@ -6,8 +6,8 @@
 #include <symm/cell.hpp>
 #include <geom/geom.hpp>
 #include <geom/xgeom.hpp>
-#include <qc/mtable.hpp>
 
+/*
 namespace qpp {
   template<typename REAL = double>
   REAL calc_geom_q1q2(geometry<REAL> &geom,int _i, int _j)
@@ -43,5 +43,5 @@ namespace qpp {
   }
 
 
-}
+}*/
 #endif

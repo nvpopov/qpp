@@ -102,12 +102,13 @@ void py_gmsio_export2(py::module m){
 
 
 void pyqpp_gmsio_export(pybind11::module m){
-  py_gmsio_export1<float>(m);
-  py_gmsio_export1<double>(m);
-  py_gmsio_export2<float, qpp::periodic_cell<float> >(m);
-  py_gmsio_export2<double, qpp::periodic_cell<double> >(m);
+  py::module io = m.def_submodule("io");
+  py_gmsio_export1<float>(io);
+  py_gmsio_export1<double>(io);
+  py_gmsio_export2<float, qpp::periodic_cell<float> >(io);
+  py_gmsio_export2<double, qpp::periodic_cell<double> >(io);
   py_gmsio_export2<float,
-      qpp::generalized_cell<float,  qpp::matrix3d<float> > >(m);
+      qpp::generalized_cell<float,  qpp::matrix3d<float> > >(io);
   py_gmsio_export2<double,
-      qpp::generalized_cell<double,  qpp::matrix3d<double> > >(m);
+      qpp::generalized_cell<double,  qpp::matrix3d<double> > >(io);
 }
