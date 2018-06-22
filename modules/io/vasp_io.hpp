@@ -61,6 +61,7 @@ namespace qpp{
     std::getline(inp, poscar_atypes);
     std::getline(inp, poscar_acount);
     std::getline(inp, poscar_coord_type);
+    STRING poscar_coord_type_t = tolower(poscar_coord_type);
 
     //Construct cell
     qpp::vector3d<REAL> va = vec_from_string<REAL>(poscar_a);
@@ -82,10 +83,11 @@ namespace qpp{
         for (int q = 0; q < cur_atom_count; q++){
             std::getline(inp, poscar_arecord);
 
-            if (poscar_coord_type == "cart")
+            if (poscar_coord_type_t.find("cart") != std::string::npos)
               geom.add(atypes_l[i], vec_from_string<REAL>(poscar_arecord));
 
-            if (poscar_coord_type == "frac"){
+            if ((poscar_coord_type_t.find("frac") != std::string::npos) ||
+               (poscar_coord_type_t.find("direct") != std::string::npos)){
                 qpp::vector3d<REAL> cv =
                     vec_from_string<REAL>(poscar_arecord);
                 qpp::vector3d<REAL> vpos =

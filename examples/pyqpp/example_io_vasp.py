@@ -4,7 +4,7 @@ import pyqpp
 
 file_vasp_poscar = open('../io/ref_data/La44F148.POSCAR', 'r')
 g1 = pyqpp.geometry_d(3)
-pyqpp.read_vasp_poscar(file_vasp_poscar.fileno(), g1)
+pyqpp.io.read_vasp_poscar(file_vasp_poscar.fileno(), g1)
 
 print("Number of atoms = {0}".format(g1.nat()))
 print(" a = {0}, b = {1}, c = {2} ".format(g1.cell[0], g1.cell[1], g1.cell[2]))
