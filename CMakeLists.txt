@@ -22,13 +22,21 @@ set(LAPACK_INCLUDE "-" CACHE STRING "Lapack include dir")
 set(LAPACK_LIB "-" CACHE STRING "Lapack lib dir")
 set(LA_TYPE "MKL" CACHE STRING "Type of linear algebra library, (MKL,ACML)")
 
+set(EX_PR "example_")
+set(EX_SF  "")
+
+function(def_example arg_name arg_src)
+    add_executable(${EX_PR}${arg_name}${EX_SF} ${arg_src})
+    target_link_libraries(${EX_PR}${arg_name}${EX_SF} qpp)
+endfunction(def_example)
+
 if (LA_TYPE EQUAL "MKL")
-	set(BLAS_LIBS_COM
-	-L${BLAS_LIB}
-	-l mkl_core
-	)
-	include_directories(${BLAS_INCLUDE})
-	message(STATUS "MKL!")
+    set(BLAS_LIBS_COM
+        -L${BLAS_LIB}
+        -l mkl_core
+        )
+    include_directories(${BLAS_INCLUDE})
+    message(STATUS "MKL!")
 endif()
 
 
@@ -49,7 +57,7 @@ endif()
 
 #eigen3
 option(USE_SYSTEM_EIGEN3
-	"use system avaiable eigen3 or download as deps" OFF)
+    "use system avaiable eigen3 or download as deps" OFF)
 if(USE_SYSTEM_EIGEN3)
     find_package(Eigen3)
     if(Eigen3_FOUND)
@@ -60,7 +68,7 @@ else()
     message("-- Internal Eigen3 will be used")
     include_directories(${CMAKE_SOURCE_DIR}/deps/eigen3)
 endif()
- 
+
 #Add all src and headers to qtcreator ide
 file(GLOB_RECURSE ide_headers "modules/*/*.hpp")
 file(GLOB_RECURSE ide_headersc "modules/*.hpp")
@@ -69,23 +77,22 @@ file(GLOB_RECURSE ide_exm "examples/*/*.cpp")
 #file(GLOB_RECURSE ide_t1 "tests/*/*.*pp")
 #file(GLOB_RECURSE ide_t2 "tests/*.*pp")
 add_custom_target(ideheaders SOURCES ${ide_headers} ${ide_headersc}
-   ${ide_src} ${ide_exm})
+    ${ide_src} ${ide_exm})
 
 
 #Global includes
 include_directories(modules/)
 
-option(USE_SPGLIB "use spglib" ON)
-if(USE_SPGLIB)
-    message("-- spglib bindings are enabled")
-    include_directories(${CMAKE_SOURCE_DIR}/deps/spglib/src)
-    add_library(spglib-imp STATIC IMPORTED)
-    set_target_properties(spglib-imp PROPERTIES IMPORTED_LOCATION
-        "${PROJECT_BINARY_DIR}/deps/spglib-prefix/src/spglib-build/libsymspg.a")
-endif()
+
+include_directories(${CMAKE_SOURCE_DIR}/deps/spglib/src)
+add_library(spglib-imp STATIC IMPORTED)
+set_target_properties(spglib-imp PROPERTIES IMPORTED_LOCATION
+    "${PROJECT_BINARY_DIR}/deps/spglib-prefix/src/spglib-build/libsymspg.a")
+
 
 #Only data fetching here
 add_subdirectory(modules)
+
 #add_subdirectory(utils)
 
 option(BUILD_EXAMPLES "build examples" OFF)
@@ -114,7 +121,7 @@ if(BUILD_QC)
     message("-- @ Building of quantum chemistry programs enabled")
     add_library(int-imp STATIC IMPORTED)
     set_target_properties(int-imp PROPERTIES IMPORTED_LOCATION
-      "${CMAKE_SOURCE_DIR}/deps/libint/lib/.libs/libint2.a")
+        "${CMAKE_SOURCE_DIR}/deps/libint/lib/.libs/libint2.a")
     include_directories(${CMAKE_SOURCE_DIR}/deps/libint/include)
     add_subdirectory(${CMAKE_SOURCE_DIR}/examples/qc)
     #find_package(OpenMP)
@@ -132,21 +139,21 @@ if(BUILD_DOCS)
         set(DOXYGEN_INPUT docs/doxyfile_qpp)
         set(DOXYGEN_OUTPUT docs/render)
         add_custom_command(
-          OUTPUT ${DOXYGEN_OUTPUT}
-          COMMAND ${CMAKE_COMMAND}
-          -E echo_append "Building API Documentation..."
-          COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_INPUT}
-          COMMAND ${CMAKE_COMMAND} -E echo "Done."
-          WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-          DEPENDS ${DOXYGEN_INPUT})
+            OUTPUT ${DOXYGEN_OUTPUT}
+            COMMAND ${CMAKE_COMMAND}
+            -E echo_append "Building API Documentation..."
+            COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_INPUT}
+            COMMAND ${CMAKE_COMMAND} -E echo "Done."
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+            DEPENDS ${DOXYGEN_INPUT})
         add_custom_target(apidoc ALL DEPENDS ${DOXYGEN_OUTPUT})
         add_custom_target(apidoc_forced
-          COMMAND ${CMAKE_COMMAND}
-          -E echo_append "Building API Documentation..."
-          COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_INPUT}
-          COMMAND ${CMAKE_COMMAND}
-          -E echo "Done."
-          WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+            COMMAND ${CMAKE_COMMAND}
+            -E echo_append "Building API Documentation..."
+            COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_INPUT}
+            COMMAND ${CMAKE_COMMAND}
+            -E echo "Done."
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
     endif(DOXYGEN_FOUND)
 else()
     message("-- HTML Documentation is disabled")

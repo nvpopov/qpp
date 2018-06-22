@@ -1,30 +1,8 @@
-add_executable(vec vec.cpp)
-
-add_executable(geom1 geom1.cpp)
-target_link_libraries(geom1 qpp)
-
-#add_executable(geom2 geom2.cpp)
-#target_link_libraries(geom2 qpp)
-
-add_executable(geom6 geom6.cpp)
-target_link_libraries(geom6 qpp)
-
-add_executable(geom_oh geom_oh.cpp)
-target_link_libraries(geom_oh qpp)
-
-add_executable(ngbr ngbr.cpp)
-target_link_libraries(ngbr qpp)
-
-#add_executable(si-ngbr si-ngbr.cpp)
-
-add_executable(shape shape.cpp)
-target_link_libraries(shape qpp)
-
-add_executable(xgeom xgeom.cpp)
-target_link_libraries(xgeom qpp)
-
-add_executable(xgeom1 xgeom1.cpp)
-target_link_libraries(xgeom1 qpp)
-
-#add_executable(reorder reorder.cpp)
-#target_link_libraries(reorder qpp)
+def_example(vec vec.cpp)
+def_example(geom1 geom1.cpp)
+def_example(geom6 geom6.cpp)
+def_example(geom_oh geom_oh.cpp)
+def_example(ngbr ngbr.cpp)
+def_example(shape shape.cpp)
+def_example(xgeom xgeom.cpp)
+def_example(xgeom1 xgeom1.cpp)
