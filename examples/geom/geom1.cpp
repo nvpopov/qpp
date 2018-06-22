@@ -58,6 +58,7 @@ int main(){
       std::cout << "\n";
     }
   
+  /* 
   std::cout<<qpp::ptable::symbol_by_number(2)<<std::endl;
   std::cout<<Fact<4>::value <<std::endl;
 
@@ -67,7 +68,7 @@ int main(){
   qpp::periodic_cell<double> cell3({1,0,0},{0,1,0},{0,0,1});
   qpp::geometry<double, decltype(cell3)> g3(cell3);
 
-  std::ifstream poscar("../examples/io/vasp_data/La44F148.POSCAR");
+  std::ifstream poscar("../examples/io/ref_data/La44F148.POSCAR");
   std::ifstream outcar("/home/nvpopov/work/python-playground/potfit_md/mddata"
                        "/laf3_v1.OUTCAR");
 
@@ -87,6 +88,6 @@ int main(){
 
   std::cout << "total en num " << toten.size() << std::endl;
   std::cout << "temp num " << kin_t.size() << std::endl;
-
+  */
 }
 

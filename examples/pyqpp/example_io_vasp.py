@@ -2,7 +2,7 @@ import sys
 sys.path.append("../../build/modules")
 import pyqpp 
 
-file_vasp_poscar = open('../io/vasp_data/La44F148.POSCAR', 'r')
+file_vasp_poscar = open('../io/ref_data/La44F148.POSCAR', 'r')
 g1 = pyqpp.geometry_d(3)
 pyqpp.read_vasp_poscar(file_vasp_poscar.fileno(), g1)
 
