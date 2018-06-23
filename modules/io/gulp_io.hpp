@@ -25,7 +25,12 @@
 #include <algorithm>
 
 namespace qpp{
+  template<class REAL, class CELL>
+  void read_gulp_simple_input(
+      std::basic_istream<CHAR,TRAITS> & inp,
+      geometry<REAL,CELL> & geom){
 
+  }
 
 }
 
