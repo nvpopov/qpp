@@ -22,6 +22,33 @@ set(LAPACK_INCLUDE "-" CACHE STRING "Lapack include dir")
 set(LAPACK_LIB "-" CACHE STRING "Lapack lib dir")
 set(LA_TYPE "MKL" CACHE STRING "Type of linear algebra library, (MKL,ACML)")
 
+# option declaration
+option(PYTHON_BINDINGS "build qpp python bindings" ON)
+option(USE_SYSTEM_EIGEN3 "use system avaiable eigen3 or download as deps" OFF)
+option(BUILD_EXAMPLES "build examples" OFF)
+option(BUILD_TESTS "build tests executable" OFF)
+option(BUILD_QC "build qc stuff")
+option(BUILD_DOCS "build documentation")
+option(BUILD_TOOLS  "build tools" OFF)
+option(BUILD_QPPCAD "build qppcad" OFF)
+# end option declaration
+
+#read options from file if it exists
+if(EXISTS ${CMAKE_SOURCE_DIR}/qpp.config)
+    file(STRINGS ${CMAKE_SOURCE_DIR}/qpp.config ConfigContents)
+    foreach(NameAndValue ${ConfigContents})
+      # Strip leading spaces
+      string(REGEX REPLACE "^[ ]+" "" NameAndValue ${NameAndValue})
+      # Find variable name
+      string(REGEX MATCH "^[^=]+" Name ${NameAndValue})
+      # Find the value
+      string(REPLACE "${Name}=" "" Value ${NameAndValue})
+      # Set the variable
+      set(${Name} "${Value}")
+    endforeach()
+endif()
+
+# example framework , use def_example(<example name> <example src>)
 set(EX_PR "example_")
 set(EX_SF  "")
 
@@ -29,6 +56,7 @@ function(def_example arg_name arg_src)
     add_executable(${EX_PR}${arg_name}${EX_SF} ${arg_src})
     target_link_libraries(${EX_PR}${arg_name}${EX_SF} qpp)
 endfunction(def_example)
+# end example framework
 
 if (LA_TYPE EQUAL "MKL")
     set(BLAS_LIBS_COM
@@ -39,25 +67,19 @@ if (LA_TYPE EQUAL "MKL")
     message(STATUS "MKL!")
 endif()
 
-
-
 add_subdirectory(deps)
 include_directories(${CMAKE_SOURCE_DIR}/deps/fmtlib)
 include_directories(${CMAKE_SOURCE_DIR}/deps/pybind11/include)
 #add_subdirectory(${CMAKE_SOURCE_DIR}/deps/fmtlib)
 
 
-
 #Python related stuff
-option(PYTHON_BINDINGS "build qpp python bindings" ON)
-
 if(PYTHON_BINDINGS)
     message("-- Python bindings are enabled")
 endif()
+#end python stuff
 
 #eigen3
-option(USE_SYSTEM_EIGEN3
-    "use system avaiable eigen3 or download as deps" OFF)
 if(USE_SYSTEM_EIGEN3)
     find_package(Eigen3)
     if(Eigen3_FOUND)
@@ -68,6 +90,7 @@ else()
     message("-- Internal Eigen3 will be used")
     include_directories(${CMAKE_SOURCE_DIR}/deps/eigen3)
 endif()
+#end eigen3
 
 #Add all src and headers to qtcreator ide
 file(GLOB_RECURSE ide_headers "modules/*/*.hpp")
@@ -78,24 +101,20 @@ file(GLOB_RECURSE ide_exm "examples/*/*.cpp")
 #file(GLOB_RECURSE ide_t2 "tests/*.*pp")
 add_custom_target(ideheaders SOURCES ${ide_headers} ${ide_headersc}
     ${ide_src} ${ide_exm})
-
+#end ideheaders
 
 #Global includes
 include_directories(modules/)
 
-
+#spglib
 include_directories(${CMAKE_SOURCE_DIR}/deps/spglib/src)
 add_library(spglib-imp STATIC IMPORTED)
 set_target_properties(spglib-imp PROPERTIES IMPORTED_LOCATION
     "${PROJECT_BINARY_DIR}/deps/spglib-prefix/src/spglib-build/libsymspg.a")
+#end spglib
 
-
-#Only data fetching here
 add_subdirectory(modules)
 
-#add_subdirectory(utils)
-
-option(BUILD_EXAMPLES "build examples" OFF)
 if(BUILD_EXAMPLES)
     message("-- Examples are enabled")
     add_subdirectory(examples)
@@ -104,7 +123,6 @@ else()
 endif()
 
 #Build tests
-option(BUILD_TESTS "build tests executable" OFF)
 if(BUILD_TESTS)
     message("-- Testing is enabled")
     enable_testing()
@@ -116,7 +134,6 @@ else()
 endif()
 
 #qc stuff
-option(BUILD_QC "build qc stuff")
 if(BUILD_QC)
     message("-- @ Building of quantum chemistry programs enabled")
     add_library(int-imp STATIC IMPORTED)
@@ -131,7 +148,6 @@ if(BUILD_QC)
 endif(BUILD_QC)
 
 #Documentation
-option(BUILD_DOCS "build documentation")
 if(BUILD_DOCS)
     message("-- HTML Documentation enabled")
     find_package(Doxygen)
@@ -159,12 +175,11 @@ else()
     message("-- HTML Documentation is disabled")
 endif()
 
-option(BUILD_TOOLS  "build tools" OFF)
+
 if(BUILD_TOOLS)
     message("-- building tools enabled")
 endif(BUILD_TOOLS)
 
-option(BUILD_QPPCAD "build qppcad" OFF)
 if(BUILD_QPPCAD)
     message("-- building qppcad enabled")
     #force building tools

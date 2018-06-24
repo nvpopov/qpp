@@ -1,3 +1,2 @@
-add_executable(io1 io1.cpp)
-target_link_libraries(io1 qpp)
-
+def_example(io1 io1.cpp)
+def_example(io2 io2.cpp)
