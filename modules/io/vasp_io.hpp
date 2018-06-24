@@ -25,18 +25,6 @@
 
 namespace qpp{
 
-  template<class REAL>
-  qpp::vector3d<REAL> vec_from_string(STRING &_inst,
-                                      int idx = 0,
-                                      int idy = 1,
-                                      int idz = 2 ){
-    std::vector<STRING> vfs_l = split(_inst);
-    REAL vx, vy, vz = 0.0;
-    s2t(vfs_l[idx], vx);
-    s2t(vfs_l[idy], vy);
-    s2t(vfs_l[idz], vz);
-    return qpp::vector3d<REAL>(vx, vy, vz);
-  }
 
   template<class REAL, class CELL>
   void read_vasp_poscar(
