@@ -1,7 +1,7 @@
 #include <iostream>
-
-
+#include <GLFW/glfw3.h>
+#include <qppcad/app.hpp>
 
 int main(){
-  std::cout<<"qpp::cad placeholder launched!"<<std::endl;
+  qpp::cad_app::run();
 }
