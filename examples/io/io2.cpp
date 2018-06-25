@@ -1,5 +1,6 @@
 #include <io/geomio.hpp>
 #include <io/gulp_io.hpp>
+#include <io/vasp_io.hpp>
 #include <iostream>
 
 int main(){
@@ -24,4 +25,13 @@ int main(){
 
   std::cout<<std::endl<<"Testing write_gulp_simple_input:"<<std::endl;
   qpp::write_gulp_simple_input(std::cout, g1);
+
+  std::cout<<std::endl<<"Testing write_vasp_poscar:"<<std::endl;
+  std::ifstream poscar("../examples/io/ref_data/La44F148.POSCAR");
+  qpp::periodic_cell<double> cell3(3);
+  qpp::geometry<double,decltype(cell3)> g3(cell3);
+  qpp::read_vasp_poscar(poscar, g3);
+  //g3.build_type_table();
+  qpp::write_vasp_poscar(std::cout, g3);
+
 }

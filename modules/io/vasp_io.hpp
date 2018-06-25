@@ -75,7 +75,7 @@ namespace qpp{
               geom.add(atypes_l[i], vec_from_string<REAL>(poscar_arecord));
 
             if ((poscar_coord_type_t.find("frac") != std::string::npos) ||
-               (poscar_coord_type_t.find("direct") != std::string::npos)){
+                (poscar_coord_type_t.find("direct") != std::string::npos)){
                 qpp::vector3d<REAL> cv =
                     vec_from_string<REAL>(poscar_arecord);
                 qpp::vector3d<REAL> vpos =
@@ -186,21 +186,21 @@ namespace qpp{
 
         if ((inps.find("total energy   ETOTAL =") != std::string::npos) &&
             !bLineChecked){
-              std::vector<STRING> etotal = split(inps);
-              REAL etotal_val = 0.0;
-              //std::cout<<etotal[4]<<std::endl;
-              if (s2t(etotal[4], etotal_val))
-                toten.push_back(etotal_val);
-              bLineChecked = true;
+            std::vector<STRING> etotal = split(inps);
+            REAL etotal_val = 0.0;
+            //std::cout<<etotal[4]<<std::endl;
+            if (s2t(etotal[4], etotal_val))
+              toten.push_back(etotal_val);
+            bLineChecked = true;
           }
 
         if ((inps.find("kin. lattice  EKIN_LAT=") != std::string::npos) &&
             !bLineChecked){
-              std::vector<STRING> temp_l = split(inps);
-              REAL temp_val = 0.0;
-              if (s2t(temp_l[5], temp_val))
-                temperature.push_back(temp_val);
-              bLineChecked = true;
+            std::vector<STRING> temp_l = split(inps);
+            REAL temp_val = 0.0;
+            if (s2t(temp_l[5], temp_val))
+              temperature.push_back(temp_val);
+            bLineChecked = true;
           }
 
       }//end while
@@ -210,8 +210,30 @@ namespace qpp{
   template< class REAL, class CELL >
   void write_vasp_poscar(
       std::basic_ostream<CHAR,TRAITS>  & out,
-      const qpp::geometry<REAL,CELL> & geom){
+      qpp::geometry<REAL,CELL> & geom){
+    STRING poscar_comment = "";
 
+    for (int i = 0; i < geom.n_types(); i++)
+      poscar_comment += geom.atom_of_type(i) + " ";
+    out << poscar_comment << std::endl;
+    out << "1.00000000" << std::endl;
+    for (int i = 0; i < 3; i++)
+      out << fmt::format("{:15.8f} {:15.8f} {:15.8f}",
+          geom.cell.v[i][0],
+          geom.cell.v[i][1],
+          geom.cell.v[i][2]) << std::endl;
+    out << poscar_comment << std::endl;
+    for (int i = 0; i < geom.n_types(); i++)
+      out << geom.get_atom_count_by_type(i) << " ";
+    out << std::endl;
+    out << "cartesian" << std::endl;
+    for (int i = 0; i < geom.n_types(); i++)
+      for (int q = 0; q < geom.nat(); q++)
+        if (geom.type_table(q) == i)
+          std::cout << fmt::format("{:15.8f} {:15.8f} {:15.8f}",
+               geom.pos(q)[0],
+               geom.pos(q)[1],
+               geom.pos(q)[2]) << std::endl;
   }
 }
 #endif
