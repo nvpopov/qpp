@@ -27,7 +27,7 @@
 
 #include "imgui.h"
 #include "imgui_impl_opengl3.h"
-#include <glad/glad.h>    // This example is using gl3w to access OpenGL functions. You may freely use any other OpenGL loader such as: glew, glad, glLoadGen, etc.
+#include <GL/gl3w.h>    // This example is using gl3w to access OpenGL functions. You may freely use any other OpenGL loader such as: glew, glad, glLoadGen, etc.
 //#include <glew.h>
 
 // OpenGL Data
