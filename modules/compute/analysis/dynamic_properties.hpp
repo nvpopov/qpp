@@ -40,17 +40,34 @@ namespace qpp {
   }
 
   template<class REAL>
-  REAL velocity_autocor_func_t(
-      const std::vector<std::vector<qpp::vector3d<double> > > &vl,
-      const int timeStep, const int atomId){
-    REAL retval = 0.0f;
+  std::vector<REAL> velocity_autocor_func(
+      const std::vector<std::vector<qpp::vector3d<REAL> > > &vl,
+      const int timeStep = 1){
+    std::vector<REAL> retvec;
     int totalSteps = vl.size() / timeStep;
-    for(int i = 0; i < vl.size(); i+= timeStep){
-        qpp::vector3d<REAL> v1 = vl[0][atomId];
-        qpp::vector3d<REAL> v2 = vl[i][atomId];
-        retval = v1.dot(v2);
+    int totalAtoms = vl[0].size();
+    REAL dot00 = 0.0f;
+
+    for(int i = 0; i < totalAtoms; i++){
+        qpp::vector3d<REAL> v0i = vl[0][i];
+      dot00 += v0i.dot(v0i);
       }
-    return retval / totalSteps;
+    dot00 /= totalAtoms;
+
+    for(int i = 0; i < vl.size(); i+= timeStep){
+
+        REAL retval = 0.0f;
+
+        for(int q =0; q < vl[i].size(); q++){
+            qpp::vector3d<REAL> v1 = vl[0][q];
+            qpp::vector3d<REAL> v2 = vl[i][q];
+            retval += v1.dot(v2) / dot00;
+          }
+
+        retvec.push_back((retval/totalAtoms));
+
+      }
+    return retvec;
 
   }
 }

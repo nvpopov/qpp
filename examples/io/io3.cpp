@@ -22,11 +22,17 @@ int main(){
 //            << qpp::velocity_autocor_func_t<double>(vel_l, 10, 2)
 //            << std::endl;
 
-  for (int i = 1; i < 100; i++){
+  /*for (int i = 1; i < 100; i++){
       std::cout<< fmt::format(
                     "{:4} {:10.8f}", i,
                     qpp::velocity_autocor_func_t<double>(vel_l, i, 64))
                << std::endl;
-    }
+    }*/
 
+  std::vector<double> av = qpp::velocity_autocor_func(vel_l);
+  for(int i = 0; i < av.size(); i++)
+    std::cout<< fmt::format(
+                  "{:4} {:10.8f}", i,
+                  av[i])
+             << std::endl;
 }
