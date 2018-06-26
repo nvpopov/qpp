@@ -261,6 +261,13 @@ The supercell concept generalization for the geometry class looks like:
       return t;
     }
 
+    inline int get_atom_count_by_type(int atype){
+      int retval = 0;
+      for(int i = 0; i < _type_table.size(); i++)
+        if(_type_table[i] == atype) retval+=1;
+      return retval;
+    }
+
     //! type of i-th atom in the geometry
     inline int type_table(int i) const
     {return _type_table[i];}

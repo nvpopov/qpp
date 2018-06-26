@@ -147,6 +147,13 @@ namespace qpp{
       return res;
     }
 
+    inline VALTYPE dot(const simple_vector<VALTYPE,DIM> & v){
+      VALTYPE res = 0.0f;
+      for (int i=0; i<DIM; i++)
+        res += r[i]*v.r[i];
+      return res;
+    }
+
   };
 
   // -----------------------------------------------------------------------
@@ -154,11 +161,11 @@ namespace qpp{
   template<class VALTYPE = double>
   class vector3d : public simple_vector<VALTYPE, 3>{
   protected:
+
+  public:
     using simple_vector<VALTYPE,3>::r;
     using simple_vector<VALTYPE,3>::norm;
     using simple_vector<VALTYPE,3>::norm2;
-
-  public:
 
     static typename numeric_type<VALTYPE>::norm tol_equiv;
     // tolerance for two vector equivalence,
