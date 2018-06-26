@@ -1,5 +1,12 @@
 #include <qppcad/app.hpp>
 
+static const GLfloat g_vertex_buffer_data[] = {
+  -1.0f, -1.0f, 0.0f,
+  1.0f, -1.0f, 0.0f,
+  0.0f,  1.0f, 0.0f,
+};
+
+GLuint vertexbuffer;
 
 void qpp::cad_app::error_callback(int error, const char* description){
   std::cout << description << std::endl;
@@ -32,8 +39,9 @@ void qpp::cad_app::run(){
 
   glfwMakeContextCurrent(qpp::cad_app::curWindow);
   glfwSwapInterval(1);
-  gl3wInit();
-
+  if (gl3wInit()) {
+      fprintf(stderr, "failed to initialize OpenGL\n");
+    }
 
   ImGui::CreateContext();
   ImGuiIO& io = ImGui::GetIO(); (void)io;
@@ -43,17 +51,23 @@ void qpp::cad_app::run(){
 
   ImGui::StyleColorsDark();
 
+
   ImGui_ImplGlfw_InitForOpenGL(qpp::cad_app::curWindow, true);
   ImGui_ImplOpenGL3_Init();
+
   glfwSetKeyCallback(qpp::cad_app::curWindow, qpp::cad_app::key_callback);
 
   //glEnable(GL_DEPTH_TEST);
+  glGenBuffers(1, &vertexbuffer);
+  glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+  glBufferData(GL_ARRAY_BUFFER,
+               sizeof(g_vertex_buffer_data),
+               g_vertex_buffer_data, GL_STATIC_DRAW);
 
   while (!glfwWindowShouldClose(qpp::cad_app::curWindow)){
 
       qpp::cad_app::begin_render();
       qpp::cad_app::render();
-      qpp::cad_app::render_ui();
       qpp::cad_app::end_render();
 
     }
@@ -63,12 +77,15 @@ void qpp::cad_app::run(){
   exit(EXIT_SUCCESS);
 }
 
-void qpp::cad_app::app_cycle(){
-
-
-}
-
 void qpp::cad_app::begin_render(){
+
+  glfwPollEvents();
+  glfwMakeContextCurrent(qpp::cad_app::curWindow);
+
+  ImGui_ImplOpenGL3_NewFrame();
+  ImGui_ImplGlfw_NewFrame();
+  ImGui::NewFrame();
+  qpp::cad_app::compose_ui();
 
   float ratio;
   int width, height;
@@ -76,28 +93,61 @@ void qpp::cad_app::begin_render(){
 
   ratio = width / (float) height;
   glViewport(0, 0, width, height);
-  glClearColor(1.0, 1.0, 1.0, 1.0);
-  glClear(GL_COLOR_BUFFER_BIT);
-  ImGui_ImplOpenGL3_NewFrame();
-  ImGui_ImplGlfw_NewFrame();
-  ImGui::NewFrame();
+
+  glClearColor(0.8, 0.8, 0.8, 0.8);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+
 }
 
 void qpp::cad_app::end_render(){
-  ImGui::Render();
+
   glfwSwapBuffers(qpp::cad_app::curWindow);
-  glfwPollEvents();
+
 }
 
 void qpp::cad_app::render(){
-
+  ImGui::Render();
+  ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
-void qpp::cad_app::render_ui(){
-  ImGui::Begin("Another Window");
-  ImGui::Text("retsts");
-  ImGui::End();
+void qpp::cad_app::compose_ui(){
+  qpp::cad_app::compose_ui_menu();
+}
 
+void qpp::cad_app::compose_ui_menu(){
+  if (ImGui::BeginMainMenuBar()){
+      if (ImGui::BeginMenu("File")){
+          ImGui::MenuItem("New");
+          ImGui::MenuItem("Open");
+          ImGui::MenuItem("Save");
+          ImGui::MenuItem("Save as");
+          ImGui::MenuItem("Exit");
+          ImGui::EndMenu();
+        }
+
+
+      if (ImGui::BeginMenu("Edit")){
+          ImGui::MenuItem("Undo");
+          ImGui::MenuItem("Redo");
+          ImGui::EndMenu();
+        }
+
+      if (ImGui::BeginMenu("Tools")){
+          ImGui::MenuItem("Tool1");
+          ImGui::MenuItem("Tool2");
+          ImGui::EndMenu();
+        }
+
+      if (ImGui::BeginMenu("Help")){
+          ImGui::MenuItem("Help1");
+          ImGui::MenuItem("Help2");
+          ImGui::EndMenu();
+        }
+
+      ImGui::EndMainMenuBar();
+
+    }
 }
 
 GLFWwindow* qpp::cad_app::curWindow;

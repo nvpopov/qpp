@@ -16,11 +16,11 @@ namespace qpp{
                              int key, int scancode, int action, int mods);
     static void begin_render();
     static void render();
-    static void render_ui();
+    static void compose_ui();
+    static void compose_ui_menu();
     static void end_render();
   public:
     static void run();
-    static void app_cycle();
   };
 }
 #endif
