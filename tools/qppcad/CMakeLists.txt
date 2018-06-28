@@ -18,6 +18,9 @@ set(GL_LIBRARY GL  X11)
 add_executable(qppcad
     main.cpp
     app.cpp
+    shader_program.cpp
+    mesh.cpp
+    gl_math.cpp
     deps/imgui/examples/imgui_impl_glfw.cpp
     deps/imgui/examples/imgui_impl_opengl3.cpp
     deps/glfw/deps/gl3w.c

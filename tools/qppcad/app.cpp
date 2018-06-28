@@ -1,46 +1,46 @@
 #include <qppcad/app.hpp>
 
-static const GLfloat g_vertex_buffer_data[] = {
-  -1.0f, -1.0f, 0.0f,
-  1.0f, -1.0f, 0.0f,
-  0.0f,  1.0f, 0.0f,
-};
-
-GLuint vertexbuffer;
-
-void qpp::cad_app::error_callback(int error, const char* description){
-  std::cout << description << std::endl;
+void qpp::c_app::error_callback(int error, const char* description){
+  std::string s1(description);
+  qpp::c_app::log(s1);
 }
 
-void qpp::cad_app::key_callback(GLFWwindow* window,
-                                int key, int scancode, int action, int mods){
+void qpp::c_app::key_callback(GLFWwindow* window,
+                              int key, int scancode, int action, int mods){
+  qpp::c_app::log(fmt::format("Key pressed  {}, scancode = {}", key, scancode));
+
   if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
     glfwSetWindowShouldClose(window, GL_TRUE);
 }
 
-void qpp::cad_app::run(){
+void qpp::c_app::run(){
 
-  glfwSetErrorCallback(qpp::cad_app::error_callback);
+  glfwSetErrorCallback(qpp::c_app::error_callback);
 
-  if (!glfwInit())
-    exit(EXIT_FAILURE);
+  if (!glfwInit()){
+      qpp::c_app::log("Failed to initialize GLFW3");
+      exit(EXIT_FAILURE);
+    }
 
   glfwWindowHint(GLFW_MAXIMIZED, GLFW_TRUE);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-  qpp::cad_app::curWindow = glfwCreateWindow(640, 480, "qpp::cad", NULL, NULL);
+  qpp::c_app::curWindow = glfwCreateWindow(qpp::c_app::get_state().wWidth,
+                                           qpp::c_app::get_state().wHeight,
+                                           "qpp::cad", NULL, NULL);
 
-  if (!qpp::cad_app::curWindow){
+  if (!qpp::c_app::curWindow){
       glfwTerminate();
+      qpp::c_app::log("Failed to initialize window");
       exit(EXIT_FAILURE);
     }
 
-  glfwMakeContextCurrent(qpp::cad_app::curWindow);
+  glfwMakeContextCurrent(qpp::c_app::curWindow);
   glfwSwapInterval(1);
   if (gl3wInit()) {
-      fprintf(stderr, "failed to initialize OpenGL\n");
+      qpp::c_app::log("Failed  to initialize OpenGL");
     }
 
   ImGui::CreateContext();
@@ -52,44 +52,43 @@ void qpp::cad_app::run(){
   ImGui::StyleColorsDark();
 
 
-  ImGui_ImplGlfw_InitForOpenGL(qpp::cad_app::curWindow, true);
+  ImGui_ImplGlfw_InitForOpenGL(qpp::c_app::curWindow, true);
   ImGui_ImplOpenGL3_Init();
 
-  glfwSetKeyCallback(qpp::cad_app::curWindow, qpp::cad_app::key_callback);
+  glfwSetKeyCallback(qpp::c_app::curWindow, qpp::c_app::key_callback);
+  glfwSetWindowSizeCallback(qpp::c_app::curWindow,
+                            qpp::c_app::resize_window_callback);
 
-  //glEnable(GL_DEPTH_TEST);
-  glGenBuffers(1, &vertexbuffer);
-  glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-  glBufferData(GL_ARRAY_BUFFER,
-               sizeof(g_vertex_buffer_data),
-               g_vertex_buffer_data, GL_STATIC_DRAW);
 
-  while (!glfwWindowShouldClose(qpp::cad_app::curWindow)){
+  qpp::c_app::log("qpp::cad initialized succesfully!");
 
-      qpp::cad_app::begin_render();
-      qpp::cad_app::render();
-      qpp::cad_app::end_render();
+  glEnable(GL_DEPTH_TEST);
+  while (!glfwWindowShouldClose(qpp::c_app::curWindow)){
+
+      qpp::c_app::begin_render();
+      qpp::c_app::render();
+      qpp::c_app::end_render();
 
     }
 
-  glfwDestroyWindow(qpp::cad_app::curWindow);
+  glfwDestroyWindow(qpp::c_app::curWindow);
   glfwTerminate();
   exit(EXIT_SUCCESS);
 }
 
-void qpp::cad_app::begin_render(){
+void qpp::c_app::begin_render(){
 
   glfwPollEvents();
-  glfwMakeContextCurrent(qpp::cad_app::curWindow);
+  glfwMakeContextCurrent(qpp::c_app::curWindow);
 
   ImGui_ImplOpenGL3_NewFrame();
   ImGui_ImplGlfw_NewFrame();
   ImGui::NewFrame();
-  qpp::cad_app::compose_ui();
+  qpp::c_app::compose_ui();
 
   float ratio;
   int width, height;
-  glfwGetFramebufferSize(qpp::cad_app::curWindow, &width, &height);
+  glfwGetFramebufferSize(qpp::c_app::curWindow, &width, &height);
 
   ratio = width / (float) height;
   glViewport(0, 0, width, height);
@@ -100,22 +99,23 @@ void qpp::cad_app::begin_render(){
 
 }
 
-void qpp::cad_app::end_render(){
+void qpp::c_app::end_render(){
 
-  glfwSwapBuffers(qpp::cad_app::curWindow);
+  glfwSwapBuffers(qpp::c_app::curWindow);
 
 }
 
-void qpp::cad_app::render(){
+void qpp::c_app::render(){
   ImGui::Render();
   ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
-void qpp::cad_app::compose_ui(){
-  qpp::cad_app::compose_ui_menu();
+void qpp::c_app::compose_ui(){
+  qpp::c_app::compose_ui_menu();
+  qpp::c_app::compose_io_object_inspector();
 }
 
-void qpp::cad_app::compose_ui_menu(){
+void qpp::c_app::compose_ui_menu(){
   if (ImGui::BeginMainMenuBar()){
       if (ImGui::BeginMenu("File")){
           ImGui::MenuItem("New");
@@ -150,4 +150,35 @@ void qpp::cad_app::compose_ui_menu(){
     }
 }
 
-GLFWwindow* qpp::cad_app::curWindow;
+void qpp::c_app::compose_io_object_inspector(){
+  //  ImGuiWindowFlags window_flags = 0;
+  //  window_flags |= ImGuiWindowFlags_NoCollapse;
+  //  window_flags |= ImGuiWindowFlags_NoNav;
+  //  window_flags |= ImGuiWindowFlags_NoTitleBar;
+
+  //  ImGui::SetNextWindowSize(ImVec2(300,600));
+  //  ImGui::SetNextWindowPos(ImVec2(1920-400,1080-700));
+  //  bool popen = false;
+  //  if (ImGui::Begin("Example: Constrained Resize", &popen, window_flags)){
+  //      ImGui::Text("Object inspector");
+  //      ImGui::End();
+  //  }
+}
+
+void qpp::c_app::resize_window_callback(GLFWwindow *window,
+                                        int _width, int _height){
+  qpp::c_app::get_state().wWidth = _width;
+  qpp::c_app::get_state().wHeight = _height;
+}
+
+void qpp::c_app::log(const std::string logText){
+
+  std::time_t t = std::chrono::system_clock::to_time_t(
+        std::chrono::system_clock::now());
+  std::string ts( ctime( &t) );
+  std::cout << fmt::format("[{}] {}",
+                           ts.substr( 0, ts.length() -1  ), logText) << std::endl;
+}
+
+GLFWwindow* qpp::c_app::curWindow;
+qpp::app_state* qpp::c_app::a_state;
