@@ -36,8 +36,9 @@ namespace qpp {
 
   template<class VALTYPE>
   matrix3<VALTYPE> RotMtrx(const vector3<VALTYPE> & nn, VALTYPE phi){
-    Eigen::AngleAxis<VALTYPE> aa(phi, nn);
-    return aa.toRotationMatrix();
+    vector3<VALTYPE> n = nn.normalized();
+    matrix3<VALTYPE> m1 = Eigen::AngleAxisd(phi, n).toRotationMatrix();
+    return m1;
   }
 
   template<class VALTYPE>

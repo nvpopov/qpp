@@ -91,6 +91,10 @@ public:
     return res;
   }
 
+  inline bool isApprox(const permutation &b){
+    return *this == b;
+  }
+
   inline bool operator!=(const permutation & b)
   {
     return ! ((*this)==b);

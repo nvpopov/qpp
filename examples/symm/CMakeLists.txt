@@ -5,7 +5,7 @@ def_example(symm_oh symm_oh.cpp)
 def_example(cell cell.cpp)
 def_example(rotrans rotrans.cpp)
 def_example(chartab chartab.cpp)
-def_example(permut permut.cpp)
+#def_example(permut permut.cpp)
 def_example(autosymm1 autosymm1.cpp)
 def_example(autosymm2 autosymm2.cpp)
 

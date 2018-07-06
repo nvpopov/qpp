@@ -1,6 +1,7 @@
 #ifndef _QPP_SYMM_H
 #define _QPP_SYMM_H
 
+#include <data/types.hpp>
 #include <symm/index.hpp>
 #include <vector>
 
@@ -23,8 +24,7 @@ namespace qpp{
     index _begin, _end;
     int DIM;
     
-    generators_pack(int dim=0)
-    {
+    generators_pack(int dim=0){
       DIM=dim;
       generators.resize(DIM);
       _begin = index::D(DIM);
@@ -32,8 +32,7 @@ namespace qpp{
     }
 
     generators_pack(const std::vector<TRANSFORM> & g,
-                    const index & __begin, const index & __end)
-    {
+                    const index & __begin, const index & __end){
       DIM = g.size();
       generators.resize(DIM);
       int d=0;
@@ -43,8 +42,7 @@ namespace qpp{
       _end   = __end;
     }
 
-    generators_pack(const std::vector<TRANSFORM> & g)
-    {
+    generators_pack(const std::vector<TRANSFORM> & g){
       DIM = g.size();
       generators.resize(DIM);
 
@@ -93,7 +91,7 @@ namespace qpp{
       const TRANSFORM & g = generators[d];
       TRANSFORM a = g;
       int n=1;
-      while (a != TRANSFORM::Identity()){
+      while (!a.isApprox(TRANSFORM::Identity(), symm_tol_equiv)){
           a = a*g;
           n++;
         }
@@ -138,8 +136,8 @@ namespace qpp{
     int index(const TRANSFORM & g){
       int i;
       bool result=false;
-      for (i=0; i<group.size(); i++)
-        if ( group[i] == g ){
+      for (i = 0; i < group.size(); i++)
+        if ( (group[i]-g).norm() < tol_equiv ){
             result = true;
             break;
           }
@@ -174,8 +172,7 @@ namespace qpp{
 
           int inewest = size();
           for (int ig1 = 0; ig1 < inewest; ig1++)
-            for (int ig2 = inew; ig2 < inewest; ig2++)
-              {
+            for (int ig2 = inew; ig2 < inewest; ig2++){
                 //std::cout << "ig1= " << ig1 << " ig2= " << ig2 << "\n";
 
                 TRANSFORM h1 = group[ig1]*group[ig2];
@@ -188,7 +185,7 @@ namespace qpp{
 
                 //std::cout << "h2= " << h2 << "\n";
 
-                if (h2 != h1 && index(h2)==-1)
+                if (!(h2.isApprox(h1, symm_tol_equiv)) && index(h2)==-1)
                   group.push_back(h2);
               }
           //std::cout << inew << " " << inewest << "\n";
@@ -203,8 +200,7 @@ namespace qpp{
 
 #ifdef PY_EXPORT
 
-    inline TRANSFORM py_getitem(int i)
-    {
+    inline TRANSFORM py_getitem(int i){
       if (i<0)
         i += size();
       if (i<0 || i>=size())
@@ -212,8 +208,7 @@ namespace qpp{
       return group[i];
     }
 
-    inline void py_setitem(int i, const TRANSFORM & t)
-    {
+    inline void py_setitem(int i, const TRANSFORM & t){
       if (i<0)
         i += size();
       if (i<0 || i>=size())
@@ -221,8 +216,7 @@ namespace qpp{
       group[i] = t;
     }
 
-    static void py_export(py::module m, const char * pyname)
-    {
+    static void py_export(py::module m, const char * pyname){
       py::class_<generated_group<TRANSFORM> >(m, pyname)
           .def(py::init<>())
           .def(py::init<const generated_group<TRANSFORM> &>())
@@ -239,6 +233,6 @@ namespace qpp{
     
   };
   
-};
+}
 
 #endif
