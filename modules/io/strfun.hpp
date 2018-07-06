@@ -191,7 +191,7 @@ namespace qpp{
   // -------------------------------------------------------------
 
   template<class REAL>
-  qpp::vector3d<REAL> vec_from_string(STRING &_inst,
+  qpp::vector3<REAL> vec_from_string(STRING &_inst,
                                       int idx = 0,
                                       int idy = 1,
                                       int idz = 2 ){
@@ -200,7 +200,7 @@ namespace qpp{
     s2t(vfs_l[idx], vx);
     s2t(vfs_l[idy], vy);
     s2t(vfs_l[idz], vz);
-    return qpp::vector3d<REAL>(vx, vy, vz);
+    return qpp::vector3<REAL>(vx, vy, vz);
   }
 
 }

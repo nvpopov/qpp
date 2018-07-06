@@ -5,5 +5,5 @@ using namespace qpp;
 
 int main()
 {
-  vector3d<int> a,b,c;
+  vector3<int> a,b,c;
 }

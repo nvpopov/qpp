@@ -46,7 +46,7 @@ namespace qpp{
         if ((lower_s.find("vectors") != std::string::npos) && (!bLineChecked)){
             for (int i = 0; i<3; i++){
                 std::getline(inp, s);
-                qpp::vector3d<REAL> cellv = vec_from_string<REAL>(s);
+                qpp::vector3<REAL> cellv = vec_from_string<REAL>(s);
                 geom.cell.v[i] = cellv;
               }
             bLineChecked = true;

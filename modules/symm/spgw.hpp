@@ -17,7 +17,7 @@ namespace qpp{
 			     double _lattice[3][3], double _positions[][3], int *_types){
     int num_atoms = inGeom.size();
     for(int i=0; i<num_atoms; i++){
-      vector3d<VALTYPE> r = inGeom.coord(i);
+      vector3<VALTYPE> r = inGeom.coord(i);
       if (!inGeom.frac)
 	r = inGeom.cell.cart2frac(r);
 	/*
@@ -45,7 +45,8 @@ namespace qpp{
   }
 
   template<class VALTYPE, class CELL>
-  int spgw_standartize_cell(geometry<VALTYPE,CELL> &inGeom,geometry<VALTYPE,CELL> &outGeom, float symprec = 1e-5)
+  int spgw_standartize_cell(geometry<VALTYPE,CELL> &inGeom,geometry<VALTYPE,CELL>
+                            &outGeom, float symprec = 1e-5)
   {
     
     int num_atoms = inGeom.size();
@@ -57,7 +58,8 @@ namespace qpp{
     int to_primitive = 1;
     int no_idealize = 0;
     int num_primitive_atom = spg_standardize_cell(latticev, position, types,
-                                                  to_primitive, no_idealize, num_atoms, symprec);
+                                                  to_primitive, no_idealize,
+                                                  num_atoms, symprec);
     
     //Get standartized cell back to user
     for(int i=0; i<3; i++){
@@ -67,7 +69,8 @@ namespace qpp{
     }
     
     for(int i=0; i<num_atoms; i++){
-      outGeom.add(inGeom.atom_of_type(types[i]),position[i][0],position[i][1],position[i][2]);
+      outGeom.add(inGeom.atom_of_type(types[i]),
+                  position[i][0], position[i][1], position[i][2]);
     }
     
     return num_primitive_atom;
@@ -92,7 +95,7 @@ namespace qpp{
     //std::cout << "before get symmetry\n";
     
     nsymm = spg_get_symmetry(rotation, translation, max_size, lattice, position, types, nat, R);
-    matrix3d<REAL> f2c,c2f;
+    matrix3<REAL> f2c,c2f;
 
     //std::cout << "after get symmetry\n";
 
@@ -107,8 +110,8 @@ namespace qpp{
       {
 	//std::cout << "i= " << i << "\n";
 	
-      matrix3d<REAL> rot;
-      vector3d<REAL> transl = {translation[i][0],translation[i][1],translation[i][2]};
+      matrix3<REAL> rot;
+      vector3<REAL> transl = {translation[i][0],translation[i][1],translation[i][2]};
       for (int j=0; j<3; j++)
 	for (int k=0; k<3; k++)
 	  rot(j,k) = rotation[i][j][k];
@@ -125,7 +128,8 @@ namespace qpp{
   }
 
   template<class VALTYPE, class CELL>
-  std::string spgw_get_international(geometry<VALTYPE,CELL> &inGeom, float symprec = 1e-7){
+  std::string spgw_get_international(geometry<VALTYPE,CELL> &inGeom,
+                                     float symprec = 1e-7){
     
     int num_atoms = inGeom.size();
     auto latticev = new VALTYPE[3][3]();
@@ -152,6 +156,6 @@ namespace qpp{
     return std::string(symbol);
   }
   
-};
+}
 
 #endif // SPGW_HPP

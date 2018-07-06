@@ -81,9 +81,12 @@ The supercell concept generalization for the geometry class looks like:
   template <class REAL>
   struct geometry_observer{
 
-    virtual void added(before_after, const STRING &,  const vector3d<REAL> &) =0;
-    virtual void inserted(int at, before_after, const STRING &, const vector3d<REAL> &) =0;
-    virtual void changed( int at, before_after, const STRING &, const vector3d<REAL> &) =0;
+    virtual void added(before_after, const STRING &,
+                       const vector3<REAL> &) =0;
+    virtual void inserted(int at, before_after,
+                          const STRING &, const vector3<REAL> &) =0;
+    virtual void changed( int at, before_after,
+                          const STRING &, const vector3<REAL> &) =0;
     virtual void erased(  int at, before_after) =0;
     virtual void shaded(  int at, before_after, bool) =0;
     virtual void reordered( const std::vector<int> &, before_after) =0;
@@ -106,7 +109,7 @@ The supercell concept generalization for the geometry class looks like:
     std::vector<STRING> _atm;
 
     // Storage of coordinates
-    std::vector<vector3d<REAL> > _crd;
+    std::vector<vector3<REAL> > _crd;
 
     //! Special logical array allows to "hide" or "shadow" some atoms
     std::vector<char> _shadow;
@@ -163,15 +166,15 @@ The supercell concept generalization for the geometry class looks like:
     /* \brief Gives the coordinates of an atom in the geometry
       @param at - the number of atom in the geometry
     */
-    inline vector3d<REAL> coord(int at) const{return _crd[at];}
+    inline vector3<REAL> coord(int at) const{return _crd[at];}
 
-    inline vector3d<REAL>& coord(int at){return _crd[at];}
+    inline vector3<REAL>& coord(int at){return _crd[at];}
     
     /*! \brief real-space position of atom number at
       @param at - the number of the atom in the geometry
      */
-    inline vector3d<REAL> r(int at) const{
-      vector3d<REAL> r1 = _crd[at];
+    inline vector3<REAL> r(int at) const{
+      vector3<REAL> r1 = _crd[at];
       if (frac)
         r1 = cell.frac2cart(r1);
       return cell.transform(r1, index::D(DIM).all(0));
@@ -181,8 +184,8 @@ The supercell concept generalization for the geometry class looks like:
       @param at  - the number of atom in the geometry
       @param I   - the cell or symmetry indicies
      */
-    inline vector3d<REAL> r(int at, const index & I) const{
-      vector3d<REAL> r1 = _crd[at];
+    inline vector3<REAL> r(int at, const index & I) const{
+      vector3<REAL> r1 = _crd[at];
       if (frac)
         r1 = cell.frac2cart(r1);
       return cell.transform(r1, I);
@@ -193,20 +196,20 @@ The supercell concept generalization for the geometry class looks like:
       @param ai  - complex index; ai[0] is the number of atom in the geometry,
       ai[1:DIM] are the cell or symmetry indicies
      */
-    inline vector3d<REAL> r(const index & ai) const{
+    inline vector3<REAL> r(const index & ai) const{
       return cell.transform(_crd[ai(0)], ai.sub(1) );
     }
 
     //! \brief The synonym for r(at)
-    inline vector3d<REAL> pos(int at) const
+    inline vector3<REAL> pos(int at) const
     { return r(at); }
 
     //! \brief The synonym for r(at,I)
-    inline vector3d<REAL> pos(int at, const index & I ) const
+    inline vector3<REAL> pos(int at, const index & I ) const
     { return r(at,I); }
 
     //! \brief The synonym for r(ai)
-    inline vector3d<REAL> pos(const index & ai) const{
+    inline vector3<REAL> pos(const index & ai) const{
       return cell.transform(_crd[ai(0)], ai.sub(1) );
     }
     
@@ -456,10 +459,10 @@ The supercell concept generalization for the geometry class looks like:
 
   protected:
 
-    inline void _add(const STRING & a, const vector3d<REAL> & r1){
+    inline void _add(const STRING & a, const vector3<REAL> & r1){
       //std::cerr << "geometry::add entry\n";
 
-      vector3d<REAL> r2 = r1;
+      vector3<REAL> r2 = r1;
       if (auto_symmetrize){
           REAL rad = symmetrize_radius(a);
           r2 = cell.symmetrize(r1,rad);
@@ -497,8 +500,8 @@ The supercell concept generalization for the geometry class looks like:
           observers[j]->erased(at,after);
     }
 
-    inline void _insert(int at, const STRING & a, const vector3d<REAL> & r1){
-      vector3d<REAL> r2 = r1;
+    inline void _insert(int at, const STRING & a, const vector3<REAL> & r1){
+      vector3<REAL> r2 = r1;
       if (auto_symmetrize)
         r2 = cell.symmetrize(r1,symmetrize_radius(a));
       
@@ -517,7 +520,7 @@ The supercell concept generalization for the geometry class looks like:
           observers[j]->inserted(at,after, a, r2);
     }
 
-    inline void _change(int at, const STRING & a1, const vector3d<REAL> & r1){
+    inline void _change(int at, const STRING & a1, const vector3<REAL> & r1){
       if (has_observers)
         for (int i=0; i<observers.size(); i++)
           observers[i]->changed(at, before, a1, r1);
@@ -530,13 +533,13 @@ The supercell concept generalization for the geometry class looks like:
     }
 
   public:
-    virtual void add(const STRING & a, const vector3d<REAL> & r1)
+    virtual void add(const STRING & a, const vector3<REAL> & r1)
     { _add(a,r1); }
 
     void add(STRING a, const REAL _x, const REAL _y, const REAL _z)
     {  add(a,{_x,_y,_z}); }
 
-    virtual void insert(int at, const STRING & a, const vector3d<REAL> & r1)
+    virtual void insert(int at, const STRING & a, const vector3<REAL> & r1)
     { _insert(at,a,r1); }
 
     void insert(int at, const STRING & a, const REAL _x, const REAL _y, const REAL _z)
@@ -553,7 +556,7 @@ The supercell concept generalization for the geometry class looks like:
         observers[i]->shaded(at, after, sh);
     }
 
-    virtual void change(int at, const STRING & a1, const vector3d<REAL> & r1)
+    virtual void change(int at, const STRING & a1, const vector3<REAL> & r1)
     { _change(at,a1,r1); }
 
     virtual void reorder(const std::vector<int> & ord){
@@ -562,7 +565,7 @@ The supercell concept generalization for the geometry class looks like:
       // fixme - might be inefficient for large molecules
       
       std::vector<STRING> __atm(_atm);
-      std::vector<vector3d<REAL> > __crd(_crd);
+      std::vector<vector3<REAL> > __crd(_crd);
       std::vector<char> __shadow(_shadow);
       std::vector<int> __type_table(_type_table);
       bool reorder_types = (_type_table.size() == size());
@@ -604,7 +607,7 @@ The supercell concept generalization for the geometry class looks like:
 
       v.clear();
       v.push_back(atom(j));
-      vector3d<REAL> r = coord(j);
+      vector3<REAL> r = coord(j);
       v.push_back(r(0));
       v.push_back(r(1));
       v.push_back(r(2));
@@ -617,7 +620,8 @@ The supercell concept generalization for the geometry class looks like:
       if (v.size()!=4)
         IndexError("geometry::set_fields: wrong number of fields, must be 4");
 
-      change(j, v[0].get<STRING>(), qpp::vector3d<REAL>(v[1].get<REAL>(), v[2].get<REAL>(), v[3].get<REAL>()));
+      change(j, v[0].get<STRING>(), qpp::vector3<REAL>(v[1].get<REAL>(),
+          v[2].get<REAL>(), v[3].get<REAL>()));
     }
 
 
@@ -673,13 +677,13 @@ The supercell concept generalization for the geometry class looks like:
     */
     // --------------------------------------------------------
 
-    inline vector3d<REAL> py_pos1(int at) const
+    inline vector3<REAL> py_pos1(int at) const
     { return r(at); }
 
-    inline vector3d<REAL> py_pos2(int at, const index & I ) const
+    inline vector3<REAL> py_pos2(int at, const index & I ) const
     { return r(at,I); }
 
-    inline vector3d<REAL> py_pos3(const index & AI ) const
+    inline vector3<REAL> py_pos3(const index & AI ) const
     { return r(AI); }
 
 
@@ -728,24 +732,24 @@ The supercell concept generalization for the geometry class looks like:
     void py_setcoord(int i, int d, const REAL & c){
       if (i<0) i+=nat();
       if (i<0 || i>=nat() || d<0 || d>2 ) IndexError("geometry::coord::Index out of range");
-      vector3d<REAL> r1 = coord(i);
+      vector3<REAL> r1 = coord(i);
       r1(d) = c;
       change(i,atom(i),r1);
     }
 
-    vector3d<REAL> py_getvec(int i){
+    vector3<REAL> py_getvec(int i){
       if (i<0) i+=nat();
       if (i<0 || i>=nat()) IndexError("geometry::coord::Index out of range");
       return coord(i);
     }
 
-    void py_setvec(int i, const vector3d<REAL> & v){
+    void py_setvec(int i, const vector3<REAL> & v){
       if (i<0) i+=nat();
       if (i<0 || i>=nat()) IndexError("geometry::coord::Index out of range");
       change(i,atom(i),v);
     }
 
-    py_2indexed_property<SELF,vector3d<REAL>,REAL, int, &SELF::py_getvec, &SELF::py_setvec,
+    py_2indexed_property<SELF,vector3<REAL>,REAL, int, &SELF::py_getvec, &SELF::py_setvec,
     &SELF::py_getcoord, &SELF::py_setcoord > py_coords;
 
     template<int d>
@@ -825,7 +829,7 @@ The supercell concept generalization for the geometry class looks like:
           fmt::format("{0}_{1}",pyname,"2idx_prop_coord");
       py_2indexed_property<
           SELF,
-          vector3d<REAL>,
+          vector3<REAL>,
           REAL,
           int,
           &SELF::py_getvec,
@@ -873,7 +877,7 @@ The supercell concept generalization for the geometry class looks like:
 
     // --------------------------------------------------------------------
 
-    void py_add1(const STRING & a, const vector3d<REAL> & r1)
+    void py_add1(const STRING & a, const vector3<REAL> & r1)
     { add(a,r1); }
 
     void py_add2(STRING a, const REAL _x, const REAL _y, const REAL _z)
@@ -908,7 +912,7 @@ The supercell concept generalization for the geometry class looks like:
         py_add_list(l);
     }
 
-    void py_insert1(int i, const STRING & a, const vector3d<REAL> & r1){
+    void py_insert1(int i, const STRING & a, const vector3<REAL> & r1){
       if (i<0) i+=nat();
       if (i<0 || i>nat()) IndexError("geometry::Index out of range");
 
@@ -1002,13 +1006,13 @@ The supercell concept generalization for the geometry class looks like:
   struct py_geometry_observer : geometry_observer<REAL>,
   {
 
-    void added(before_after s, const STRING & a,  const vector3d<REAL> & v)
+    void added(before_after s, const STRING & a,  const vector3<REAL> & v)
     { this->get_override("added")(s,a,v);}
 
-    void inserted(int at, before_after s, const STRING & a, const vector3d<REAL> & v)
+    void inserted(int at, before_after s, const STRING & a, const vector3<REAL> & v)
     { this->get_override("inserted")(at,s,a,v);}
 
-    void changed( int at, before_after s, const STRING & a, const vector3d<REAL> & v)
+    void changed( int at, before_after s, const STRING & a, const vector3<REAL> & v)
     { this->get_override("changed")(at,s,a,v);}
 
     void erased(  int at, before_after s)
@@ -1025,7 +1029,7 @@ The supercell concept generalization for the geometry class looks like:
   template<class REAL>
   struct py_geometry_observer : geometry_observer<REAL>{
     using geometry_observer<REAL>::geometry_observer;
-    void added(before_after s, const STRING & a, const vector3d<REAL> & v)
+    void added(before_after s, const STRING & a, const vector3<REAL> & v)
     override {
       PYBIND11_OVERLOAD_PURE(
       void,
@@ -1035,7 +1039,7 @@ The supercell concept generalization for the geometry class looks like:
     }
 
     void inserted(int at, before_after s, const STRING & a,
-                  const vector3d<REAL> & v)
+                  const vector3<REAL> & v)
     override {
       PYBIND11_OVERLOAD_PURE(
       void,
@@ -1045,7 +1049,7 @@ The supercell concept generalization for the geometry class looks like:
     }
 
     void changed(int at, before_after s, const STRING & a,
-                  const vector3d<REAL> & v)
+                  const vector3<REAL> & v)
     override {
       PYBIND11_OVERLOAD_PURE(
       void,

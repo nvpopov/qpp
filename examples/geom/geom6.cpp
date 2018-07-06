@@ -39,9 +39,10 @@ int main()
   //std::cout << "alive4\n";
 
   for (int i=0; i<g.size(); i++)
-    for (int j=0; j<ngbr.n(i); j++)
-      {
+    for (int j=0; j<ngbr.n(i); j++){
 	qpp::index k = ngbr.table(i,j);
-	std::cout << g.atom(i) << " " << i << " " << g.atom(k) << " " << k << " " <<  norm(g.pos(i) - g.pos(k)) << "\n";
+	std::cout << g.atom(i) << " " << i << " " <<
+		     g.atom(k) << " " << k << " " <<
+		     (g.pos(i) - g.pos(k)).norm() << "\n";
       }
 }

@@ -9,7 +9,7 @@ int main(){
                        "/laf3_v1.OUTCAR");
 
   std::vector<qpp::geometry<double,qpp::periodic_cell<double>>* > geom_l;
-  std::vector<std::vector<qpp::vector3d<double> > > vel_l;
+  std::vector<std::vector<qpp::vector3<double> > > vel_l;
   std::vector<double> toten;
   std::vector<double> kin_t;
 

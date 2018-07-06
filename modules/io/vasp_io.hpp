@@ -52,9 +52,9 @@ namespace qpp{
     STRING poscar_coord_type_t = tolower(poscar_coord_type);
 
     //Construct cell
-    qpp::vector3d<REAL> va = vec_from_string<REAL>(poscar_a);
-    qpp::vector3d<REAL> vb = vec_from_string<REAL>(poscar_b);
-    qpp::vector3d<REAL> vc = vec_from_string<REAL>(poscar_c);
+    qpp::vector3<REAL> va = vec_from_string<REAL>(poscar_a);
+    qpp::vector3<REAL> vb = vec_from_string<REAL>(poscar_b);
+    qpp::vector3<REAL> vc = vec_from_string<REAL>(poscar_c);
     geom.cell.v[0] = va;
     geom.cell.v[1] = vb;
     geom.cell.v[2] = vc;
@@ -76,9 +76,9 @@ namespace qpp{
 
             if ((poscar_coord_type_t.find("frac") != std::string::npos) ||
                 (poscar_coord_type_t.find("direct") != std::string::npos)){
-                qpp::vector3d<REAL> cv =
+                qpp::vector3<REAL> cv =
                     vec_from_string<REAL>(poscar_arecord);
-                qpp::vector3d<REAL> vpos =
+                qpp::vector3<REAL> vpos =
                     va * cv[0] + vb * cv[1] + vc * cv[2];
                 geom.add(atypes_l[i], vpos);
               }
@@ -91,7 +91,7 @@ namespace qpp{
   void read_vasp_outcar_md(
       std::basic_istream<CHAR,TRAITS> & inp,
       std::vector<geometry<REAL,CELL>* > &geom_list,
-      std::vector<std::vector<qpp::vector3d<REAL> > > &vel_list,
+      std::vector<std::vector<qpp::vector3<REAL> > > &vel_list,
       std::vector<REAL> &toten,
       std::vector<REAL> &temperature){
 
@@ -104,7 +104,7 @@ namespace qpp{
 
     std::vector<STRING> atom_types;
     std::vector<int> atom_count;
-    std::vector<std::array<qpp::vector3d<REAL>, 3 > > cells;
+    std::vector<std::array<qpp::vector3<REAL>, 3 > > cells;
 
     int total_frames = 0;
     int local_atom_count = 0;
@@ -141,7 +141,7 @@ namespace qpp{
 
         if (!bLineChecked &&
             (inps.find("direct lattice vectors") != std::string::npos)){
-            std::array<qpp::vector3d<REAL>, 3 > _cell;
+            std::array<qpp::vector3<REAL>, 3 > _cell;
             for(int i = 0; i < 3; i++){
                 std::getline(inp, inps);
                 _cell[i] = vec_from_string<REAL>(inps);
@@ -172,8 +172,8 @@ namespace qpp{
 
         if (bParseGeomData && !bLineChecked){
             if (inps.find("------------------------") == std::string::npos){
-                qpp::vector3d<REAL> pos = vec_from_string<REAL>(inps);
-                qpp::vector3d<REAL> vel = vec_from_string<REAL>(inps, 3, 4, 5);
+                qpp::vector3<REAL> pos = vec_from_string<REAL>(inps);
+                qpp::vector3<REAL> vel = vec_from_string<REAL>(inps, 3, 4, 5);
                 geom_list[total_frames-1]->
                     add(atom_types[atom_lookup_v[local_atom_count]],
                     pos);

@@ -8,8 +8,7 @@
 
 using namespace qpp;
 
-void prnmtr(const matrix3d<double> & M)
-{
+void prnmtr(const matrix3<double> & M){
   for (int i=0; i<3; i++)
     {
       for (int j=0; j<3; j++)
@@ -20,11 +19,11 @@ void prnmtr(const matrix3d<double> & M)
 
 int main()
 {
-  matrix3d<double> C4x = RotMtrx({1,0,0},pi/2);
-  matrix3d<double> C4y = RotMtrx({0,1,0},pi/2);
-  matrix3d<double> I(-1);
+  matrix3<double> C4x = RotMtrx({1,0,0},pi/2);
+  matrix3<double> C4y = RotMtrx({0,1,0},pi/2);
+  matrix3<double> I = matrix3<double>::Identity()*-1;
 
-  generated_group<matrix3d<double> > OH;
+  generated_group<matrix3<double> > OH;
 
   OH.add(C4x);
   OH.add(C4y);
@@ -32,7 +31,7 @@ int main()
 
   //matrix3d<double>::tol_equiv = 1e-6;
 
-  generalized_cell<double,matrix3d<double> > Oh;
+  generalized_cell<double,matrix3<double> > Oh;
   generator_form(Oh,OH);
 
   for (int d=0; d < Oh.DIM; d++)

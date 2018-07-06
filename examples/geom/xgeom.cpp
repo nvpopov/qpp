@@ -15,7 +15,8 @@ int main()
   qpp::xgeometry<double, qpp::periodic_cell<double> > 
     g(cl, 
       {"charge","number","hren","mass","mult","word"},
-      {qpp::type_real,qpp::type_int,qpp::type_bool,qpp::type_real,qpp::type_int,qpp::type_string},
+      {qpp::type_real, qpp::type_int, qpp::type_bool,
+       qpp::type_real, qpp::type_int, qpp::type_string},
       "g1");
 
   /*
@@ -50,8 +51,11 @@ int main()
 
   xgeometry<double, periodic_cell<double> > 
     g2(cl, 
-       {"atom",      "number", "z",       "charge",  "x",       "y",       "mass",    "magmom",  "word"},
-       {type_string, type_int, type_real, type_real, type_real, type_real, type_real, type_real, type_string},
+       {"atom",      "number", "z",       "charge",
+        "x",       "y",       "mass",    "magmom",  "word"},
+       {type_string, type_int, type_real,
+        type_real, type_real, type_real,
+        type_real, type_real, type_string},
        "rich_geometry");
 
   g2.xadd("H",   1,   0.3, 0.6,   3,  6, 1.01, 3.731e-3, "hydrogen");
@@ -71,11 +75,13 @@ int main()
 
   g2.write(std::cout);
 
-  std::vector<qpp::datum> s = {qpp::datum("Hru"), qpp::datum(555), qpp::datum(-1.11), qpp::datum(2.22), 
-			       qpp::datum(3.33), qpp::datum(-1.11), qpp::datum(2.22), qpp::datum(3.33), 
+  std::vector<qpp::datum> s = {qpp::datum("Hru"), qpp::datum(555),
+                               qpp::datum(-1.11), qpp::datum(2.22),
+                               qpp::datum(3.33), qpp::datum(-1.11),
+                               qpp::datum(2.22), qpp::datum(3.33),
 			       qpp::datum("piggy-piggy")};
 
-  g2.add("", qpp::vector3d<double>(0e0));
+  g2.add("", qpp::vector3<double>::Zero());
   g2.set_fields(-1,s);
 
   for (int i=0; i<g2.nat(); i++)

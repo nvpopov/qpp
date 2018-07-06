@@ -29,6 +29,7 @@ public:
       p.push_back(i);
   }
 
+
   permutation(const permutation & b) 
   {
     //std::cout << "copy constructor\n";
@@ -59,6 +60,10 @@ public:
 
   inline int size() const
   {return p.size();}
+
+  static inline permutation Identity(){
+    return permutation::unity;
+  }
 
   inline permutation  operator*(const permutation & b)
   {
