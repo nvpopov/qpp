@@ -1,6 +1,5 @@
 #ifndef _QPP_SYMM_H
 #define _QPP_SYMM_H
-
 #include <data/types.hpp>
 #include <symm/index.hpp>
 #include <vector>
@@ -13,8 +12,8 @@ namespace py = pybind11;
 
 namespace qpp{
   
-  /*!\brief The generators_pack class implements Positionary Generator Form (PGF) for arbitrary finite
-    group.
+  /*!\brief The generators_pack class implements
+   * Positionary Generator Form (PGF) for arbitrary finite group.
   */
   template <class TRANSFORM>
   class generators_pack{
@@ -74,9 +73,11 @@ namespace qpp{
 
       //TRANSFORM A = pow(generators[0],n(0));
       TRANSFORM A = generators[0].pow(n(0));
-      for (int d = 1; d<DIM; d++)
-        //A = A*pow(generators[d],n(d));
-        A = A * generators[d].pow(n(d));
+      for (int d = 1; d<DIM; d++){
+          //A = A*pow(generators[d],n(d));
+          TRANSFORM Anp = A * generators[d].pow(n(d));
+          A = Anp;
+        }
       return A;
     }
 
@@ -137,7 +138,7 @@ namespace qpp{
       int i;
       bool result=false;
       for (i = 0; i < group.size(); i++)
-        if ( (group[i]-g).norm() < tol_equiv ){
+        if ( group[i].isApprox(g)){
             result = true;
             break;
           }

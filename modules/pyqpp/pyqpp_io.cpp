@@ -19,7 +19,7 @@ template<class REAL, class CELL>
 py::tuple py_read_vasp_outcar_md(int fd){
   boost::fdistream inp(fd);
   std::vector<qpp::geometry<REAL,CELL>* > geom;
-  std::vector<std::vector<qpp::vector3d<REAL> > > vel_list;
+  std::vector<std::vector<qpp::vector3<REAL> > > vel_list;
   std::vector<REAL> toten;
   std::vector<REAL> temperature;
   read_vasp_outcar_md(inp, geom, vel_list, toten, temperature);
@@ -82,10 +82,10 @@ void pyqpp_io_export(py::module m){
 
   /*
     py_export_ioxyz<float, qpp::generalized_cell<float,
-        qpp::matrix3d<float>  > >(m);
+        qpp::matrix3<float>  > >(m);
 
     py_export_ioxyz<double,
-        qpp::generalized_cell<double, qpp::matrix3d<double> > >(m);
+        qpp::generalized_cell<double, qpp::matrix3<double> > >(m);
 
     py_export_ioxyz<float,
         qpp::generalized_cell<float,  qpp::rotrans<float>   > >(m);

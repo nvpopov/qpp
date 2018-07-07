@@ -33,12 +33,34 @@ namespace qpp {
   template <typename ELEM, int n> using matrixnn = Eigen::Matrix<ELEM, n, n>;
   template <typename ELEM, int n, int m> using matrixnm = Eigen::Matrix<ELEM, n, m>;
 
+  template<class VALTYPE>
+  vector3<VALTYPE> gen_vec3(VALTYPE x, VALTYPE y, VALTYPE z){
+    vector3<VALTYPE> retvec;
+    retvec << x, y, z;
+    return retvec;
+  }
+
+  template<class VALTYPE>
+  matrix3<VALTYPE> gen_matrix3(vector3<VALTYPE> v1,
+                               vector3<VALTYPE> v2,
+                               vector3<VALTYPE> v3){
+    matrix3<VALTYPE> retm;
+    retm.row(0) = v1;
+    retm.row(1) = v2;
+    retm.row(2) = v3;
+  }
 
   template<class VALTYPE>
   matrix3<VALTYPE> RotMtrx(const vector3<VALTYPE> & nn, VALTYPE phi){
     vector3<VALTYPE> n = nn.normalized();
-    matrix3<VALTYPE> m1 = Eigen::AngleAxisd(phi, n).toRotationMatrix();
+    matrix3<VALTYPE> m1 = Eigen::AngleAxis<VALTYPE>(phi, n).toRotationMatrix();
     return m1;
+  }
+  template<class VALTYPE>
+  matrix3<VALTYPE> gen_matrix(const VALTYPE value){
+    matrix3<VALTYPE> retm;
+    for (int i = 0; i < 9; i++) retm << value;
+    return retm;
   }
 
   template<class VALTYPE>

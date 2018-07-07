@@ -10,9 +10,9 @@ void pyqpp_xgeom_export(pybind11::module m){
       ::py_export(m, "xgeometry_d");
 
   qpp::xgeometry<float, qpp::generalized_cell<float,
-      qpp::matrix3d<float>  > >::py_export(m, "xgeometry_pgf");
+      qpp::matrix3<float>  > >::py_export(m, "xgeometry_pgf");
   qpp::xgeometry<double,qpp::generalized_cell<double,
-      qpp::matrix3d<double> > >::py_export(m, "xgeometry_pgd");
+      qpp::matrix3<double> > >::py_export(m, "xgeometry_pgd");
   qpp::xgeometry<float, qpp::generalized_cell<float,
       qpp::rotrans<float>   > >::py_export(m, "xgeometry_cgf");
   qpp::xgeometry<double,qpp::generalized_cell<double,

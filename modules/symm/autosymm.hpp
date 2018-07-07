@@ -35,12 +35,12 @@ namespace qpp{
     // fixme - inefficient for large molecules, N^2 scaling
     ord.clear();
     
-    for (int i=0; i<N; i++){
+    for (int i = 0; i < N; i++){
         bool found = false;
-        for (int j=0; j<N; j++)
-          if ( norm2(g1.pos(i)-g2.pos(j)) < R*R &&
-               g1.atom(i) == g2.atom(j) &&
-               std::find(ord.begin(),ord.end(),j) == ord.end() ){
+        for (int j = 0; j < N; j++)
+          if ((g1.pos(i) - g2.pos(j)).squaredNorm() < R * R &&
+              g1.atom(i) == g2.atom(j) &&
+              std::find(ord.begin(), ord.end(),j) == ord.end() ){
               found = true;
               ord.push_back(j);
               break;
@@ -116,9 +116,9 @@ namespace qpp{
   bool best_transform( matrix3<REAL> & res,
                        const std::vector<vector3<REAL> > &a,
                        const std::vector<vector3<REAL> > &b){
-    REAL eps = vector3<REAL>::tol_equiv;
+    REAL eps = tol_equiv;
 
-    matrix3<REAL> C(0e0);
+    matrix3<REAL> C = matrix3<REAL>::Zero();
     for (int i=0; i<3; i++)
       for (int j=0; j<3; j++)
         for (int k=0; k<a.size(); k++)
@@ -126,8 +126,9 @@ namespace qpp{
 
     //std::cout << "C matrix= " << C << "\n";
 
-    matrix3<typename numeric_type<REAL>::complex> dv, SS(0e0);
-    matrix3<REAL> D = C*C.T(), S(0e0);
+    matrix3<typename numeric_type<REAL>::complex> dv,
+        SS( matrix3<typename numeric_type<REAL>::complex>::Zero());
+    matrix3<REAL> D = C*C.transpose(), S(matrix3<REAL>::Zero());
     vector3<typename numeric_type<REAL>::complex> de;
 
     //std::cout << "C*C.T matrix= " << D << "\n";
@@ -164,9 +165,9 @@ namespace qpp{
   void rotate_pair( matrix3<REAL> & R,
                     const vector3<REAL> & a1, const vector3<REAL> & a2,
                     const vector3<REAL> & b1, const vector3<REAL> & b2){
-    vector3<REAL> a3 = a1%a2, b3 = b1%b2;
-    a3 *= std::sqrt(norm(a1)*norm(a2))/norm(a3);
-    b3 *= std::sqrt(norm(b1)*norm(b2))/norm(b3);
+    vector3<REAL> a3 = a1.cross(a2), b3 = b1.cross(b2);
+    a3 *= std::sqrt(a1.norm()*a2.norm())/(a3.norm());
+    b3 *= std::sqrt(b1.norm()*b2.norm())/(b3.norm());
     
     best_transform(R,{a1,a2,a3},{b1,b2,b3});
   }
@@ -174,14 +175,15 @@ namespace qpp{
   template<class REAL>
   void analyze_transform(vector3<REAL> & axis, REAL & phi, bool & inversion,
                          const matrix3<REAL> & R){
-    REAL eps = vector3<REAL>::tol_equiv;
+    REAL eps = tol_equiv;
     vector3<typename numeric_type<REAL>::complex> e, nax;
     matrix3<typename numeric_type<REAL>::complex> n;
     typename numeric_type<REAL>::complex I(0,1);
 
-    inversion = det(R)<0;
-    matrix3<REAL> R1=REAL(inversion? -1:1)*R;
-    diagon3(e,n,R1);
+    inversion = R.determinant() < 0;
+    matrix3<REAL> R1 = matrix3<REAL>::Zero();
+    if (inversion) R1 = matrix3<REAL>::Identity()*-1*R;
+    else matrix3<REAL>::Identity()*R;
 
     int i1=0,i2=0;
     for (int i=0; i<3; i++){
@@ -210,7 +212,7 @@ namespace qpp{
 
     //std::cout << " i0, i1, i2= " << i0 << " " << i1 << " " << i2 << " eigvals= " << e << "\n";
 
-    nax = n(i0);
+    nax = n.row(i0);
     
     int i=0;
     if ( std::abs(nax(i))<std::abs(nax(1))) i=1;
@@ -235,7 +237,10 @@ namespace qpp{
     else
       phi = std::acos(cos);
 
-    if ( norm(R1-RotMtrx(axis,phi)) > norm(R1-RotMtrx(-axis,phi)) )
+    matrix3<REAL> _m1 = RotMtrx<REAL>(axis,phi);
+    matrix3<REAL> _m2 = RotMtrx<REAL>(-axis,phi);
+
+    if ( (R1-_m1).norm() > (R1-_m2).norm() )
       axis *= -REAL(1);
   }
   
@@ -313,6 +318,10 @@ namespace qpp{
           }
       return res;
     }
+
+    inline bool isApprox(const permutation & b, float tol = 1e-8) const{
+      return *this == b;
+    }
     
     inline bool operator!=(const permutation & b) const{
       return ! ((*this)==b);
@@ -353,15 +362,15 @@ namespace qpp{
       if (dim == -1)
         return false;
       else if (dim == 0)
-        return norm(pt - x) < tol_equiv;
+        return (pt - x).norm() < tol_equiv;
       else if (dim == 1){
           vector3<REAL> y = x - pt;
-          y = y - n*scal(y,n);
+          y = y - n*(y.dot(n));
           return y.norm() < tol_equiv;
         }
       else if (dim == 2){
           vector3<REAL>  y = x - pt;
-          return std::abs(scal(y,n)) < tol_equiv;
+          return std::abs(y.dot(n)) < tol_equiv;
         }
       else if (dim == 3)
         return true;
@@ -415,8 +424,8 @@ namespace qpp{
                 return linear3d_subspace<REAL>(-1,vector3<REAL>(0,0,0));
             }
           else if (std::abs((p2-p1).dot(n1.cross(n2))) < tol_equiv){
-              REAL s = (n1,n2).dot();
-              REAL x1 = (n1 - s*n2, p2-p1).dot()/(1-s*s);
+              REAL s = n1.dot(n2);
+              REAL x1 = ((n1 - s*n2).dot(p2-p1))/(1-s*s);
               return linear3d_subspace<REAL>(0,p1+x1*n1);
             }
           else
@@ -433,8 +442,7 @@ namespace qpp{
             return  linear3d_subspace(0,p2+n2*n1.dot(p1-p2)/n1.dot(n2));
         }
       if (d1==2 and d2==2){
-          if ((n1-n2).norm() < vector3<REAL>::tol_equiv or (n1+n2).norm() <
-              tol_equiv){
+          if ((n1-n2).norm() < tol_equiv or (n1+n2).norm() < tol_equiv){
               if (std::abs(n1.dot(p1-p2)) < tol_equiv)
                 return *this;
               else
@@ -577,12 +585,12 @@ namespace qpp{
           continue;
         bool found = false;
         for (int j=0; j<same_axis.size(); j++){
-            if ( norm(axis[i]+axis[same_axis[j][0]])<delta ){
+            if ( (axis[i]+axis[same_axis[j][0]]).norm() < delta ){
                 axis[i] = -axis[i];
                 phi[i]  = -phi[i];
               }
-            if ( norm(axis[i]-axis[same_axis[j][0]])<delta ||
-                 norm(axis[i]+axis[same_axis[j][0]])<delta){
+            if ( (axis[i]-axis[same_axis[j][0]]).norm() < delta ||
+                 (axis[i]+axis[same_axis[j][0]]).norm() < delta){
                 found=true;
                 same_axis[j].push_back(i);
                 break;
@@ -609,7 +617,7 @@ namespace qpp{
     
     // Correcting axes
 
-    REAL eps = vector3<REAL>::tol_equiv;
+    REAL eps = tol_equiv;
     std::vector<vector3<REAL> > exact_axis(M);
 
     if (M>1){
@@ -629,7 +637,7 @@ namespace qpp{
                      std::cos(phi[k1]/2))/
                     (std::sin(phi[i1]/2)*std::sin(phi[j1]/2));
 
-                if (S(i,j)*scal(axis[i1],axis[j1])<0)
+                if (S(i,j)*(axis[i1].dot(axis[j1]))<0)
                   S(i,j) = S(j,i) = -S(i,j);
 
                 /*
@@ -661,7 +669,7 @@ namespace qpp{
               if ( std::abs(exact_axis[jy].y()) > eps )
                 break;
 
-            if ( jy<i && std::abs(scal(n,exact_axis[jy])-S(i,jy))>eps)
+            if ( jy<i && std::abs((n.dot(exact_axis[jy]))-S(i,jy))>eps)
               n.y() *= -1;
 
             exact_axis[i] = n;
@@ -679,14 +687,18 @@ namespace qpp{
 
         bool complanar = true;
         for (int i=2; i<M; i++)
-          if ( std::abs(det(exact_axis[0],exact_axis[1],exact_axis[i])) > eps ){
+          if (
+              std::abs(
+                (exact_axis[0],
+                 exact_axis[1],
+                 exact_axis[i]).determinant()) > eps ){
               complanar = false;
               break;
             }
 
         if (complanar){
-            p0.push_back(exact_axis[0] % exact_axis[1]);
-            p1.push_back(axis[same_axis[0][0]] % axis[same_axis[1][0]]);
+            p0.push_back(exact_axis[0].cross(exact_axis[1]));
+            p1.push_back(axis[same_axis[0][0]].cross(axis[same_axis[1][0]]));
           }
 
         matrix3<REAL> U;
@@ -698,22 +710,26 @@ namespace qpp{
 
       }
     else{
-        exact_axis[0] = 0;
+        exact_axis[0] = vector3<REAL>::Zero();
         for (int i : same_axis[0])
           exact_axis[0] += axis[i];
-        exact_axis[0] /= norm(exact_axis[0]);
+        exact_axis[0] /= (exact_axis[0]).norm();
       }
 
     // Reconstruct the group
     G.clear();
-    G.push_back(matrix3<REAL>(1));
+    G.push_back(gen_matrix<REAL>(1));
     if (inversion>=0)
-      G.push_back(matrix3<REAL>(-1));
+      G.push_back(gen_matrix<REAL>(-1));
 
     for (int i=0; i<M; i++)
-      for (int j:same_axis[i])
-        G.push_back(RotMtrx(exact_axis[i],phi[j])*
-                    (inv[i] ? REAL(-1) : REAL(1)) );
+      for (int j:same_axis[i]){
+          if (inv[i]) G.push_back(
+                RotMtrx(exact_axis[i],phi[j])*gen_matrix<REAL>(-1));
+          else G.push_back(
+                RotMtrx(exact_axis[i],phi[j])*gen_matrix<REAL>(1));
+        }
+
     
     /*
     for (int i=0; i<M; i++)
@@ -732,8 +748,8 @@ namespace qpp{
                          const vector3<REAL> & b1, const vector3<REAL> & b2,
                          REAL R = geometry<REAL,periodic_cell<REAL>
                          >::tol_geom_default){
-    REAL aa1 = norm(a1), aa2 = norm(a2),
-        bb1 = norm(b1), bb2 = norm(b2);
+    REAL aa1 = a1.norm(), aa2 = a2.norm(),
+        bb1 = b1.norm(), bb2 = b2.norm();
 
     if ( std::abs(aa1-bb1) > R || std::abs(aa2-bb2) > R )
       return false;
@@ -741,7 +757,7 @@ namespace qpp{
     if ( aa1 < R || aa2 < R)
       return true;
 
-    REAL alp = std::acos(scal(a1,b1)/(aa1*bb1)), bet = std::acos(scal(a2,b2)
+    REAL alp = std::acos(a1.dot(b1)/(aa1*bb1)), bet = std::acos(a2.dot(b2)
                                                                  /(aa2*bb2)),
         alp1 = std::acos((aa1*aa1+bb1*bb1-R*R)/(2*aa1*bb1)),
         alp2 = std::acos((aa2*aa2+bb2*bb2-R*R)/(2*aa2*bb2));
@@ -763,7 +779,7 @@ namespace qpp{
                             >::tol_geom_default){
     matrix3<REAL> U;
     best_transform(U,{a1,a2,a3},{b1,b2,b3});
-    return norm(U*a1-b1)<R && norm(U*a2-b2)<R && norm(U*a3-b3)<R;
+    return (U*a1-b1).norm() < R && (U*a2-b2).norm() < R && (U*a3-b3).norm() <R;
   }
 
   enum{
@@ -798,33 +814,33 @@ namespace qpp{
     if (cell.DIM != 3)
       IndexError("bravais_point_group:: works only for 3d-periodic crystals");
 
-    matrix3<REAL> aa(0);
+    matrix3<REAL> aa(matrix3<REAL>::Zero());
 
     for (int i=0; i<3; i++)
       for (int j=0; j<3; j++)
-        aa(i,j) = scal(cell(i),cell(j));
+        aa(i,j) = cell(i).dot(cell(j));
 
     vector3<REAL> leig = diagon3d(aa);
     REAL lmin = leig(0);
     if (leig(1) < lmin) lmin = leig(1);
     if (leig(2) < lmin) lmin = leig(2);
 
-    REAL amax = norm(cell(0));
-    if (norm(cell(1))>amax) amax = norm(cell(1));
-    if (norm(cell(2))>amax) amax = norm(cell(2));
+    REAL amax = cell(0).norm();
+    if (cell(1).norm() > amax) amax = cell(1).norm();
+    if (cell(2).norm() > amax) amax = cell(2).norm();
 
     amax += R;
 
     int n = int(amax/std::sqrt(lmin))+1;
 
-    REAL eps = vector3<REAL>::tol_equiv;
+    REAL eps = tol_equiv;
     std::vector<vector3<REAL> > lattvecs;
 
     for (int i=-n; i<=n; i++)
       for (int j=-n; j<=n; j++)
         for (int k=-n; k<=n; k++){
             vector3<REAL> x = cell(0)*i + cell(1)*j + cell(2)*k;
-            if (norm(x) <= amax+eps)
+            if (x.norm() <= amax+eps)
               lattvecs.push_back(x);
           }
 
@@ -840,9 +856,9 @@ namespace qpp{
                 best_transform(U,{cell(0),cell(1),cell(2)},
                 {lattvecs[i],lattvecs[j],lattvecs[k]});
 
-                if ( norm(lattvecs[i]-U*cell(0))<R &&
-                     norm(lattvecs[j]-U*cell(1))<R &&
-                     norm(lattvecs[k]-U*cell(2))<R){
+                if ( (lattvecs[i]-U*cell(0)).norm() < R &&
+                     (lattvecs[j]-U*cell(1)).norm() < R &&
+                     (lattvecs[k]-U*cell(2)).norm() < R){
                     Gapprox.push_back(U);
                     ipoints.insert(i);
                     ipoints.insert(j);
@@ -862,7 +878,7 @@ namespace qpp{
         for (int i=0; i<points.size(); i++){
             vector3<REAL> r = g*points[i];
             for (int j=0; j<points.size(); j++)
-              if (norm(points[j]-r)<R)
+              if ((points[j]-r).norm()<R)
                 {
                   p.push_back(j);
                   break;
@@ -907,11 +923,12 @@ namespace qpp{
 
     // sort atoms in reverse order by the distance from centre
     g.sort(
-          [](const geometry<REAL> & gg, int ii)->REAL {return norm(gg.pos(ii));}
+          [](const geometry<REAL> & gg, int ii)->REAL
+    {return gg.pos(ii).norm();}
     );
 
     // estimate maximum angle error during the fit
-    REAL angle_error = 2*std::asin(R/norm(g.pos(0))), theta;
+    REAL angle_error = 2*std::asin(R/(g.pos(0).norm())), theta;
 
     // find the pair of non-collinear atoms with largest distances to centre
     int i,j;
@@ -919,13 +936,14 @@ namespace qpp{
 
     bool found = false;
 
-    for (j=1; j<g.nat() && norm(g.pos(j))>R; j++)
+    for (j=1; j<g.nat() && g.pos(j).norm()>R; j++)
       for (i=0; i<j; i++){
 
           ri = g.pos(i);
           rj = g.pos(j);
 
-          REAL cos_t = scal(g.pos(i),g.pos(j))/(norm(g.pos(i))*norm(g.pos(j)));
+          REAL cos_t = (g.pos(i).dot(g.pos(j))) /
+              (g.pos(i).norm() * g.pos(j).norm());
           if ( cos_t < REAL(-1) )
             cos_t = -REAL(1);
           if (cos_t > REAL(1) )
@@ -944,10 +962,10 @@ FOUND:
 
     // form the lists of possible images for i-th and j-th atoms
     std::vector<int> img_i, img_j;
-    REAL Ri = norm(ri), Rj = norm(rj);
+    REAL Ri = ri.norm(), Rj = rj.norm();
 
     for (int k = 0; k<g.nat(); k++){
-        REAL Rk = norm(g.pos(k));
+        REAL Rk = g.pos(k).norm();
         if ( Ri+R > Rk && Rk > Ri-R && g.atom(i)==g.atom(k) )
           img_i.push_back(k);
         if ( Rj+R > Rk && Rk > Rj-R && g.atom(j)==g.atom(k) )
@@ -973,7 +991,7 @@ FOUND:
       for (int j1 : img_j){
           vector3<REAL> ri1 = g.pos(i1), rj1 = g.pos(j1);
 
-          REAL cos_t1 = scal(ri1,rj1)/(norm(ri1)*norm(rj1));
+          REAL cos_t1 = (ri1.dot(rj1))/(ri1.norm()*rj1.norm());
           if ( cos_t1 < -REAL(1) )
             cos_t1 = -REAL(1);
           if (cos_t1 > REAL(1) )
@@ -984,23 +1002,23 @@ FOUND:
             continue;
 
           matrix3<REAL> U;
-          best_transform(U,{ri,rj,ri%rj/sqrt(Ri*Rj)},
-          {ri1,rj1,ri1%rj1/sqrt(norm(ri1)*norm(rj1))});
+          best_transform(U, {ri, rj, ri.cross(rj)/sqrt(Ri * Rj)},
+          {ri1, rj1, ri1.cross(rj1)/sqrt(ri1.norm() * rj1.norm())});
 
-          for (int k = 0; k<g.nat(); k++)
-            g1.coord(k) = U*g.coord(k);
+          for (int k = 0; k < g.nat(); k++)
+            g1.coord(k) = U * g.coord(k);
 
           std::vector<int> pp;
           if (equiv_geoms(pp,g,g1,R))
-            if (std::find(P.begin(),P.end(),permutation(pp))==P.end()){
+            if (std::find(P.begin(),P.end(),permutation(pp)) == P.end()){
                 P.push_back(permutation(pp));
                 G.group.push_back(U);
                 permutation(pp).print();
                 std::cout << "\n";
               }
 
-          best_transform(U,{ri,rj,ri%rj/sqrt(Ri*Rj)},
-          {ri1,rj1,-(ri1%rj1)/sqrt(norm(ri1)*norm(rj1))});
+          best_transform(U,{ri,rj,ri.cross(rj)/sqrt(Ri*Rj)},
+          {ri1,rj1,-(ri1.cross(rj1))/sqrt(ri1.norm()*rj1.norm())});
 
           for (int k = 0; k<g.nat(); k++)
             g1.coord(k) = U*g.coord(k);
@@ -1293,7 +1311,7 @@ FOUND:
             bool found = false;
             for (iterator J({-1,-1,-1},{1,1,1}); !J.end(); J++)
               for (int k=0; k<g.nat(); k++)
-                if (norm(g2.pos(k) - g.pos(j,J))<2*R && g2.atom(k)==g.atom(j)){
+                if ((g2.pos(k) - g.pos(j,J)).norm() < 2*R && g2.atom(k)==g.atom(j)){
                     //std::cout << j << g.coord(j);
 
                     found = true;
@@ -1317,8 +1335,8 @@ FOUND:
 	      }
 	  }
 	if (is_transl){
-	    vector3<REAL> dv = 0e0;
-	    for (int j=0; j<g.nat(); j++)
+	    vector3<REAL> dv = vector3<REAL>::Zero();
+	    for (int j=0; j < g.nat(); j++)
 	      dv += g2.pos(j) - g.pos(j);
 	    dv /= g.nat();
 	    transl.push_back(v+dv);
@@ -1377,11 +1395,11 @@ valid, if the displacement of atom due to
     generated_group<matrix3<REAL> > B;
     bravais_point_group(B,geom.cell,R);
     G.group.clear();
-    G.group.push_back(rotrans<REAL,true>(matrix3<REAL>(1),&geom.cell));
+    G.group.push_back(rotrans<REAL,true>(gen_matrix<REAL>(1),&geom.cell));
 
-    for (int i=0; i<B.size(); i++){
+    for (int i = 0; i < B.size(); i++){
         geometry<REAL,periodic_cell<REAL> > geom1(geom);
-        for (int j=0; j<geom1.nat(); j++)
+        for (int j = 0; j < geom1.nat(); j++)
           if (geom1.frac)
             geom1.coord(j) = geom1.cell.cart2frac(B[i]*geom1.pos(j));
           else
@@ -1393,8 +1411,8 @@ valid, if the displacement of atom due to
         //debug
         //std::cout << "matrix " << B[i] << "\n";
 
-        find_translations(T,P,geom1,geom,geom.cell,R);
-        for (int j=0; j<T.size(); j++){
+        find_translations(T, P, geom1, geom, geom.cell, R);
+        for (int j=0; j < T.size(); j++){
             //std::cout << i << " " << j << "\n";
             //int n = P[j].order();
             rotrans<REAL,true> S(T[j],B[i], & geom.cell);
@@ -1542,20 +1560,20 @@ valid, if the displacement of atom due to
         vector3<REAL> r;
         if (py::isinstance<vector3<REAL> >(A[i]))
           r = py::cast<vector3<REAL> >(A[i]);
-        else if (py::isinstance<py::tuple>(A[i]))
+        /*else if (py::isinstance<py::tuple>(A[i]))
           r = vector3<REAL>(py::cast<py::tuple>(A[i]));
         else if (py::isinstance<py::list>(A[i]))
-          r = vector3<REAL>(py::cast<py::list>(A[i]));
+          r = vector3<REAL>(py::cast<py::list>(A[i]));*/
         else
           TypeError("find_rotation: invalid (not vector3) item in A list");
         a.push_back(r);
 
         if (py::isinstance<vector3<REAL> >(B[i]))
           r = py::cast<vector3<REAL> >(B[i]);
-        else if (py::isinstance<py::tuple>(B[i]))
+        /*else if (py::isinstance<py::tuple>(B[i]))
           r = vector3<REAL>(py::cast<py::tuple>(B[i]));
         else if (py::isinstance<py::list>(B[i]))
-          r = vector3<REAL>(py::cast<py::list>(B[i]));
+          r = vector3<REAL>(py::cast<py::list>(B[i]));*/
         else
           TypeError("find_rotation: invalid (not vector3) item in B list");
         b.push_back(r);
@@ -1601,11 +1619,11 @@ valid, if the displacement of atom due to
   void py_find_point_subgroups1(py::list & subs, py::list &cntrs,
                                 const generated_group<rotrans<REAL,BOUND> >
                                 & G){
-    std::vector<generated_group<matrix3d<REAL> > >  vsubs;
+    std::vector<generated_group<matrix3<REAL> > >  vsubs;
     std::vector<vector3<REAL> > vcntrs;
     std::vector<int> vdims;
     find_point_subgroups(vsubs,vcntrs,vdims,G);
-    for (int i=0; i<vsubs.size(); i++){
+    for (int i = 0; i < vsubs.size(); i++){
         subs.append(vsubs[i]);
         cntrs.append(vcntrs[i]);
       }
@@ -1617,7 +1635,7 @@ valid, if the displacement of atom due to
                                 py::list & dims,
                                 const generated_group<rotrans<REAL,BOUND> >
                                 & G){
-    std::vector<generated_group<matrix3d<REAL> > >  vsubs;
+    std::vector<generated_group<matrix3<REAL> > >  vsubs;
     std::vector<vector3<REAL> > vcntrs;
     std::vector<int> vdims;
     find_point_subgroups(vsubs,vcntrs,vdims,G);

@@ -155,7 +155,7 @@ namespace qpp{
     
     shape_box(VALTYPE a1, VALTYPE a2, VALTYPE a3, const STRING & __name = "") :
       shape<VALTYPE>(__name){
-      crn = 0e0;
+      crn = v3d::Zero();
       a[0] = v3d(a1,  0e0, 0e0);
       a[1] = v3d(0e0, a2,  0e0);
       a[2] = v3d(0e0, 0e0, a3);

@@ -109,9 +109,9 @@ void pyqpp_geom_export(py::module m){
   py_geom_export<double,qpp::periodic_cell<double> >(m, "geometry_d");
 
   py_geom_export<float, qpp::generalized_cell<
-      float, qpp::matrix3d<float>  > >(m, "geometry_pgf");
+      float, qpp::matrix3<float>  > >(m, "geometry_pgf");
   py_geom_export<double,qpp::generalized_cell<
-      double, qpp::matrix3d<double> > >(m, "geometry_pgd");
+      double, qpp::matrix3<double> > >(m, "geometry_pgd");
   py_geom_export<float, qpp::generalized_cell<
       float, qpp::rotrans<float>   > >(m, "geometry_cgf");
   py_geom_export<double,qpp::generalized_cell<

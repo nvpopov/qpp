@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <vector>
 #include <cmath>
+#include <geom/lace3d.hpp>
 #include <data/data.hpp>
 #include <symm/index.hpp>
 #include <symm/cell.hpp>

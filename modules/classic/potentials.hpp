@@ -17,11 +17,11 @@ namespace qpp{
     std::vector<REAL> rmin, rmax;
     std::vector<STRING> atyp;
     
-    virtual REAL energy(const std::vector<vector3d<REAL> > &) const  =0;
+    virtual REAL energy(const std::vector<vector3<REAL> > &) const  =0;
 
-    virtual void grad(const std::vector<vector3d<REAL> > &, std::vector<vector3d<REAL> > &) const =0;
+    virtual void grad(const std::vector<vector3<REAL> > &, std::vector<vector3<REAL> > &) const =0;
 
-    virtual void d2e(const std::vector<vector3d<REAL> > &, Eigen::Matrix<REAL, Eigen::Dynamic, Eigen::Dynamic> &) =0;
+    virtual void d2e(const std::vector<vector3<REAL> > &, Eigen::Matrix<REAL, Eigen::Dynamic, Eigen::Dynamic> &) =0;
     
     // fixme - temporary
     virtual void load(ISTREAM &) =0;
@@ -44,22 +44,22 @@ namespace qpp{
     
     virtual REAL de12(REAL r) const =0;
 
-    virtual REAL energy( std::vector<vector3d<REAL> > & r)
+    virtual REAL energy( std::vector<vector3<REAL> > & r)
     {
-      REAL r12 = norm(r[1] - r[0]);
+      REAL r12 = (r[1] - r[0]).norm();
       if ( r12 >= rmin[0] && r12 <= rmax[0] )
 	return e12(r12);
       else
 	return 0e0;
     }
 
-    virtual void grad( std::vector<vector3d<REAL> > & r, std::vector<vector3d<REAL> > & g)
+    virtual void grad( std::vector<vector3<REAL> > & r, std::vector<vector3<REAL> > & g)
     {
-      REAL r12 = norm(r[1]-r[0]);
+      REAL r12 = (r[1]-r[0]).norm();
       if ( r12 >= rmin[0] && r12 <= rmax[0] )
 	g[0] = (r[1]-r[0])*de12(r12)/r12;
       else
-	g[0] = vector3d<REAL>(0e0);
+        g[0] = vector3<REAL>(0e0);
     }
   
   };
