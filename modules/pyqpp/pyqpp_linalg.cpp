@@ -5,85 +5,103 @@
 #include <fmt/format.h>
 #include <fmt/ostream.h>
 
-//template<class VALTYPE>
-//inline VALTYPE py_vec_scal(const qpp::vector3<VALTYPE> & x,
-//                           const qpp::vector3<VALTYPE> & y)
-//{ return qpp::scal(x,y); }
-
-//template<class VALTYPE>
-//inline typename qpp::numeric_type<VALTYPE>::norm py_vec_norm(
-//    const qpp::vector3<VALTYPE> & x)
-//{ return x.norm(); }
-
 template<class VALTYPE>
 void py_vector3_export(py::module m, const char * pyname){
   py::class_<qpp::vector3<VALTYPE> >(m, pyname )
       .def(py::init<>())
-      .def(py::init([](VALTYPE x, VALTYPE y, VALTYPE z){
-            return qpp::gen_vec3(x, y, z);
-           }))
-      // .def(py::init<VALTYPE, VALTYPE, VALTYPE>())
-      // .def(py::init<const py::list&>())
-      // .def(py::init<const py::tuple&>())
+      .def(py::init<VALTYPE, VALTYPE, VALTYPE>())
+      .def(py::init<VALTYPE>())
+      .def(py::init<const py::list&>())
+      .def(py::init<const py::tuple&>())
       .def(py::init<const qpp::vector3<VALTYPE>&>())
-      //.def(py::str(py::self))
-      //.def("__str__",     &qpp::vector3<VALTYPE>::print)
-      // .def("__repr__",    &qpp::vector3<VALTYPE>::print)
-      .def(py::self - py::self)
-      .def(py::self + py::self, py::return_value_policy::move)
-      //      .def(float() * py::self)
-      //      .def(int() * py::self)
-      //      .def(double() * py::self)
-      //.def(py::self == py::self)
-      // .def(py::self != py::self)
-      //.def("__getitem__", &qpp::vector3<VALTYPE>::py_getitem)
-      //.def("__setitem__", &qpp::vector3<VALTYPE>::py_setitem)
+
+      .def("__str__", &qpp::vector3<VALTYPE>::to_string_vec)
+      .def("__repr__", &qpp::vector3<VALTYPE>::to_string_vec)
+
+      .def("__add__", [](qpp::vector3<VALTYPE> &self, qpp::vector3<VALTYPE> &other)
+        {return self.sum_proxy(other);})
+
+      .def("__sub__", [](qpp::vector3<VALTYPE> &self, qpp::vector3<VALTYPE> &other)
+        {return self.sub_proxy(other);})
+
+      .def("__mul__", [](qpp::vector3<VALTYPE> &self, const VALTYPE ns)
+        {return self.mul_proxy(ns);})
+
+      .def("__rmul__", [](qpp::vector3<VALTYPE> &self, const VALTYPE ns)
+        {return self.mul_proxy(ns);})
+
+      .def("__div__",[](qpp::vector3<VALTYPE> &self, const VALTYPE ns)
+        {return self.div_proxy(ns);} )
+
+      .def("__truediv__",[](qpp::vector3<VALTYPE> &self, const VALTYPE ns)
+        {return self.div_proxy(ns);} )
+
+      .def("__cmp__", &qpp::vector3<VALTYPE>::equal_proxy)
+      .def("__rcmp__", &qpp::vector3<VALTYPE>::nequal_proxy)
+      .def("__getitem__", &qpp::vector3<VALTYPE>::py_getitem)
+      .def("__setitem__", &qpp::vector3<VALTYPE>::py_setitem)
+      .def("dot", &qpp::vector3<VALTYPE>::dot_product_proxy)
+
+      .def("cross", &qpp::vector3<VALTYPE>::cross_product_proxy)
+
       .def("norm",  [](const qpp::vector3<VALTYPE> &vec){ return vec.norm();})
-
       .def("norm2",    &qpp::vector3<VALTYPE>::squaredNorm)
-      .def("normalized",       &qpp::vector3<VALTYPE>::normalized);
 
-      //      .def_property("x",  &qpp::vector3<VALTYPE>::py_getx,
-      //                    &qpp::vector3d<VALTYPE>::py_setx)
+      .def("normalized",       &qpp::vector3<VALTYPE>::normalized_proxy)
+      .def_static("identity", &qpp::vector3<VALTYPE>::identity_proxy)
 
-      //      .def_property("y",  &qpp::vector3<VALTYPE>::py_gety,
-      //                    &qpp::vector3<VALTYPE>::py_sety)
+      .def_property("x",  &qpp::vector3<VALTYPE>::py_getx,
+                &qpp::vector3<VALTYPE>::py_setx)
 
-      //      .def_property("z",  &qpp::vector3<VALTYPE>::py_getz,
-      //                    &qpp::vector3<VALTYPE>::py_setz);
-      // .def_readwrite("tol_equiv", &qpp::vector3d<VALTYPE>::tol_equiv) ;
-      //.def("y",           & qpp::vector3d<VALTYPE>::y)
-      //.def("z",           & qpp::vector3d<VALTYPE>::z)
+      .def_property("y",  &qpp::vector3<VALTYPE>::py_gety,
+                    &qpp::vector3<VALTYPE>::py_sety)
 
-      // m.def("scal", py_vec_scal<VALTYPE>);
-      //def("norm", py_vec_norm<VALTYPE>);
+      .def_property("z",  &qpp::vector3<VALTYPE>::py_getz,
+                    &qpp::vector3<VALTYPE>::py_setz)
+      .def_readwrite_static("tol_equiv", &qpp::vector3<VALTYPE>::tol_equiv) ;
+
 }
 
 template<class VALTYPE>
 void py_matrix3_export(py::module m, const char * pyname){
   py::class_<qpp::matrix3<VALTYPE> >(m, pyname)
       .def(py::init<>())
+      .def(py::init<VALTYPE>())
       .def(py::init<const qpp::matrix3<VALTYPE>&>())
+      .def(py::init<const qpp::vector3<VALTYPE>&,
+           const qpp::vector3<VALTYPE>&,
+           const qpp::vector3<VALTYPE>&>())
 
-      //      .def(py::init<
-      //           VALTYPE,VALTYPE,VALTYPE,
-      //           VALTYPE,VALTYPE,VALTYPE,
-      //           VALTYPE,VALTYPE,VALTYPE>())
-      //      .def(py::init<VALTYPE>())
-      //      .def(py::init<const qpp::vector3<VALTYPE>&,
-      //           const qpp::vector3<VALTYPE>&,
-      //           const qpp::vector3<VALTYPE>&>())
-      //      .def(py::init<const py::list&>())
-      //      .def(py::init<const py::tuple&>())
-      //.def("__str__",  &qpp::matrix3<VALTYPE>::print)
-      //.def("__repr__", &qpp::matrix3<VALTYPE>::print)
+      .def("__str__", &qpp::matrix3<VALTYPE>::to_string_matr)
+      .def("__repr__", &qpp::matrix3<VALTYPE>::to_string_matr)
 
-      //  .def(sn::repr(sn::self))
-      .def(py::self - py::self)
-      .def(py::self + py::self, py::return_value_policy::move)
-      .def(py::self * py::self);
-  // .def(py::self == py::self)
-  //  .def(py::self != py::self);
+      .def("__add__", [](qpp::matrix3<VALTYPE> &self, qpp::matrix3<VALTYPE> &other)
+        {return self.sum_proxy(other);})
+
+      .def("__sub__", [](qpp::matrix3<VALTYPE> &self, qpp::matrix3<VALTYPE> &other)
+        {return self.sub_proxy(other);})
+
+      .def("__mul__", [](qpp::matrix3<VALTYPE> &self, const VALTYPE ns)
+        {return self.mul_proxy(ns);})
+
+      .def("__rmul__", [](qpp::matrix3<VALTYPE> &self, const VALTYPE ns)
+        {return self.mul_proxy(ns);})
+
+      .def("__div__",[](qpp::matrix3<VALTYPE> &self, const VALTYPE ns)
+        {return self.div_proxy(ns);} )
+
+      .def("__truediv__",[](qpp::matrix3<VALTYPE> &self, const VALTYPE ns)
+        {return self.div_proxy(ns);} )
+
+      .def("__cmp__", &qpp::matrix3<VALTYPE>::equal_proxy)
+      .def("__rcmp__", &qpp::matrix3<VALTYPE>::nequal_proxy)
+      .def_static("identity", &qpp::matrix3<VALTYPE>::identity_proxy)
+      .def("inv", &qpp::matrix3<VALTYPE>::inverse_proxy)
+      .def("tran", &qpp::matrix3<VALTYPE>::transpose_proxy)
+      .def("norm",  [](const qpp::matrix3<VALTYPE> &vec){ return vec.norm();})
+      .def("det", &qpp::matrix3<VALTYPE>::determinant)
+      .def("norm2",    &qpp::matrix3<VALTYPE>::squaredNorm)
+
   //      .def("__getitem__", &qpp::matrix3<VALTYPE>::py_getitemv)
   //      .def("__setitem__", &qpp::matrix3<VALTYPE>::py_setitemv)
   //      .def("__getitem__", &qpp::matrix3<VALTYPE>::py_getitem)
@@ -92,30 +110,33 @@ void py_matrix3_export(py::module m, const char * pyname){
   //      .def("__div__",     &qpp::matrix3<VALTYPE>::py_divn)
   //      .def("__rmul__",    &qpp::matrix3<VALTYPE>::py_muln)
   //      .def("__mul__",     &qpp::matrix3<VALTYPE>::py_mulv)
+
   //      .def("norm",        &qpp::matrix3<VALTYPE>::norm)
   //      .def("norm2",       &qpp::matrix3<VALTYPE>::norm2)
+
   //      .def("det",         &qpp::matrix3<VALTYPE>::det)
   //      .def("T",           &qpp::matrix3<VALTYPE>::T)
-  //      .def_property("xx", &qpp::matrix3<VALTYPE>::py_getxx,
-  //                    &qpp::matrix3<VALTYPE>::py_setxx)
-  //      .def_property("xy",  &qpp::matrix3<VALTYPE>::py_getxy,
-  //                    &qpp::matrix3<VALTYPE>::py_setxy)
-  //      .def_property("xz",  &qpp::matrix3<VALTYPE>::py_getxz,
-  //                    &qpp::matrix3<VALTYPE>::py_setxz)
-  //      .def_property("yx",  &qpp::matrix3<VALTYPE>::py_getyx,
-  //                    &qpp::matrix3<VALTYPE>::py_setyx)
-  //      .def_property("yy",  &qpp::matrix3<VALTYPE>::py_getyy,
-  //                    &qpp::matrix3<VALTYPE>::py_setyy)
-  //      .def_property("yz",  &qpp::matrix3<VALTYPE>::py_getyz,
-  //                    &qpp::matrix3<VALTYPE>::py_setyz)
-  //      .def_property("zx",  &qpp::matrix3<VALTYPE>::py_getzx,
-  //                    &qpp::matrix3<VALTYPE>::py_setzx)
-  //      .def_property("zy",  &qpp::matrix3<VALTYPE>::py_getzy,
-  //                    &qpp::matrix3<VALTYPE>::py_setzy)
-  //      .def_property("zz",  &qpp::matrix3<VALTYPE>::py_getzz,
-  //                    &qpp::matrix3<VALTYPE>::py_setzz)
-  //      .def_readwrite_static("tol_equiv",
-  //                            &qpp::matrix3<VALTYPE>::tol_equiv)
+
+        .def_property("xx", &qpp::matrix3<VALTYPE>::py_getxx,
+                      &qpp::matrix3<VALTYPE>::py_setxx)
+        .def_property("xy",  &qpp::matrix3<VALTYPE>::py_getxy,
+                      &qpp::matrix3<VALTYPE>::py_setxy)
+        .def_property("xz",  &qpp::matrix3<VALTYPE>::py_getxz,
+                      &qpp::matrix3<VALTYPE>::py_setxz)
+        .def_property("yx",  &qpp::matrix3<VALTYPE>::py_getyx,
+                      &qpp::matrix3<VALTYPE>::py_setyx)
+        .def_property("yy",  &qpp::matrix3<VALTYPE>::py_getyy,
+                      &qpp::matrix3<VALTYPE>::py_setyy)
+        .def_property("yz",  &qpp::matrix3<VALTYPE>::py_getyz,
+                      &qpp::matrix3<VALTYPE>::py_setyz)
+        .def_property("zx",  &qpp::matrix3<VALTYPE>::py_getzx,
+                      &qpp::matrix3<VALTYPE>::py_setzx)
+        .def_property("zy",  &qpp::matrix3<VALTYPE>::py_getzy,
+                      &qpp::matrix3<VALTYPE>::py_setzy)
+        .def_property("zz",  &qpp::matrix3<VALTYPE>::py_getzz,
+                      &qpp::matrix3<VALTYPE>::py_setzz)
+        .def_readwrite_static("tol_equiv",
+                              &qpp::matrix3<VALTYPE>::tol_equiv);
   //      ;
   //  m.def("det",       qpp::py_detm<VALTYPE>);
   //  m.def("det",       qpp::py_detv<VALTYPE>);
@@ -194,8 +215,8 @@ void py_rotrans_export(py::module m, const char * pyname){
                               &qpp::rotrans<REAL,BOUND>::translation_tolerance)
         .def_readwrite_static("tol_rot",
                               &qpp::rotrans<REAL,BOUND>::rotation_tolerance);
-//  m.def("invert", qpp::py_invert_rt<REAL,BOUND>);
-//  m.def("pow",   qpp::py_pow_rt<REAL,BOUND>);
+  //  m.def("invert", qpp::py_invert_rt<REAL,BOUND>);
+  //  m.def("pow",   qpp::py_pow_rt<REAL,BOUND>);
 }
 
 void pyqpp_linalg_export(py::module m){

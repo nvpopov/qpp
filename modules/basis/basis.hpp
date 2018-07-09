@@ -490,7 +490,7 @@ namespace qpp{
   public:
 
     void no_overlap()
-    { do_overlap = false; }
+    { _do_overlap = false; }
 
     void do_overlap(Eigen::Matrix<REAL, Eigen::Dynamic, Eigen::Dynamic> & S)
     { 

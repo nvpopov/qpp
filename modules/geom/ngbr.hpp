@@ -793,8 +793,8 @@ namespace qpp{
                      norm(geom->r(at) - geom->r(i, j)) <
                      distance(geom->type_table(at), geom->type_table(i))
                    ){
-                    _table[at].push_back(index(i,j));
-                    index iat = at;
+                    _table[at].push_back(index({i,j}));
+                    index iat = {at};
                     iat.sub(1) -= j;
                     _table[i].push_back(iat);
                   }

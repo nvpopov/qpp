@@ -342,8 +342,10 @@ namespace qpp{
       if (v.size()!=nfields())
         IndexError("xgeometry::set_fields: wrong number of fields");
 
-      STRING a1 = v[ix_atom].get<STRING>();
-      vector3<REAL> r1(v[ix_x].get<REAL>(),v[ix_y].get<REAL>(),v[ix_z].get<REAL>());
+      STRING a1 = v[ix_atom].template get<STRING>();
+      vector3<REAL> r1(v[ix_x].template get<REAL>(),
+                       v[ix_y].template get<REAL>(),
+                       v[ix_z].template get<REAL>());
       if (has_observers)
         for (int i=0; i<observers.size(); i++)
           observers[i]->changed(j, before, a1, r1);
