@@ -69,7 +69,7 @@ namespace qpp{
 
     TRANSFORM operator()(const index & n) const{
       if (DIM==0)
-        return TRANSFORM::Identity();
+        return TRANSFORM::unity;
 
       //TRANSFORM A = pow(generators[0],n(0));
       TRANSFORM A = generators[0].pow(n(0));
@@ -92,7 +92,7 @@ namespace qpp{
       const TRANSFORM & g = generators[d];
       TRANSFORM a = g;
       int n=1;
-      while (!a.isApprox(TRANSFORM::Identity(), symm_tol_equiv)){
+      while (a != TRANSFORM::unity){
           a = a*g;
           n++;
         }
@@ -138,14 +138,14 @@ namespace qpp{
       int i;
       bool result=false;
       for (i = 0; i < group.size(); i++)
-        if ( group[i].isApprox(g)){
+        if ( group[i] == g ){
             result = true;
             break;
           }
       return result? i : -1;
     }
 
-    generated_group(TRANSFORM E = TRANSFORM::Identity()){
+    generated_group(TRANSFORM E = TRANSFORM::unity){
       group.push_back(E);
     }
 
@@ -186,7 +186,7 @@ namespace qpp{
 
                 //std::cout << "h2= " << h2 << "\n";
 
-                if (!(h2.isApprox(h1, symm_tol_equiv)) && index(h2)==-1)
+                if (!(h2 == h1) && index(h2)==-1)
                   group.push_back(h2);
               }
           //std::cout << inew << " " << inewest << "\n";

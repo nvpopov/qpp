@@ -319,10 +319,6 @@ namespace qpp{
       return res;
     }
 
-    inline bool isApprox(const permutation & b, float tol = 1e-8) const{
-      return *this == b;
-    }
-    
     inline bool operator!=(const permutation & b) const{
       return ! ((*this)==b);
     }

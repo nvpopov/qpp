@@ -40,8 +40,7 @@ namespace qpp{
       int i;
       bool result=false;
       for (i=0; i<G.size(); i++)
-        if ( G[i].isApprox(g, symm_tol_equiv))
-          {
+        if ( G[i] == g){
             result = true;
             break;
           }
@@ -49,8 +48,7 @@ namespace qpp{
     }
 
     // Construction of the group multiplication table
-    void build_multab()
-    {
+    void build_multab(){
       if (mtab!=NULL)
         delete mtab;
       mtab = new int[G.size()*G.size()];
@@ -60,17 +58,14 @@ namespace qpp{
     }
 
     // Find orders of all elements
-    void build_orders()
-    {
+    void build_orders(){
       if (ordr!=NULL)
         delete ordr;
       ordr = new int [G.size()];
 
-      for (int g=0; g<G.size(); g++)
-        {
-          int n=0, h=g;
-          while (h!=0)
-            {
+      for (int g = 0; g < G.size(); g++){
+          int n = 0, h = g;
+          while (h != 0){
               n++;
               h = multab(h,g);
             }
@@ -79,21 +74,18 @@ namespace qpp{
     }
 
     // Find the classes
-    void build_classes()
-    {
+    void build_classes(){
       std::vector<bool> already(G.size());
       for (int i=0; i<G.size(); i++)
         already[i] = false;
       int Ncl = 0;
-      do
-        {
+      do{
           int i=0;
           while ( i<G.size() && already[i] ) i++;
           if (i==G.size()) break;
           cltab.resize(Ncl+1);
 
-          for (int j=0; j<G.size(); j++)
-            {
+          for (int j=0; j<G.size(); j++){
               int k = multab(multab(j,i),invert(j));
               if (!already[k])
                 {
@@ -106,15 +98,12 @@ namespace qpp{
         } while (true);
 
       classof.resize(G.size());
-      for (int i=0; i<G.size(); i++)
-        {
+      for (int i=0; i<G.size(); i++){
           bool found = false;
           int jcl;
-          for (jcl=0; jcl<cltab.size(); jcl++)
-            {
+          for (jcl=0; jcl<cltab.size(); jcl++){
               for (int k=0; k<cltab[jcl].size(); k++)
-                if (cltab[jcl][k]==i)
-                  {
+                if (cltab[jcl][k]==i){
                     found = true; break;
                   }
               if (found)
@@ -129,46 +118,39 @@ namespace qpp{
     }
 
     // multiplication table
-    inline int multab(int i, int j) const
-    {
+    inline int multab(int i, int j) const{
       return mtab[mtidx(i,j)];
     }
 
     // order of the element
-    inline int order(int i) const
-    {
+    inline int order(int i) const{
       return ordr[i];
     }
 
     // inverse of i-th element
-    int invert(int i) const
-    {
+    int invert(int i) const{
       int j=0;
       while (multab(i,j)!=0) j++;
       return j;
     }
     
     // number of classes
-    inline int n_classes() const
-    {
+    inline int n_classes() const{
       return cltab.size();
     }
 
     // nember of elements in i-th class
-    inline int class_size(int i) const
-    {
+    inline int class_size(int i) const{
       return cltab[i].size();
     }
 
     // j-th element of i-th class
-    inline int class_element(int i, int j) const
-    {
+    inline int class_element(int i, int j) const{
       return cltab[i][j];
     }
     
     // class of i-th element
-    inline int class_of(int i) const
-    {
+    inline int class_of(int i) const{
       return classof[i];
     }
 
@@ -178,8 +160,7 @@ namespace qpp{
     std::vector<int> abelian_sub(int g){
       std::vector<int> sub = {0};
       int h = g;
-      while (h!=0)
-        {
+      while (h!=0){
           sub.push_back(h);
           h = multab(g,h);
         }

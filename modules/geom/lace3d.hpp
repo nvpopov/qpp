@@ -61,6 +61,7 @@ namespace qpp {
   class generic_matrix : public Eigen::Matrix<VALTYPE, N , M >{
   public:
     static typename numeric_type<VALTYPE>::norm tol_equiv;
+    static generic_matrix unity;
 
     generic_matrix(void):Eigen::Matrix<VALTYPE, N , M >() {}
 
@@ -94,6 +95,14 @@ namespace qpp {
       return *this;
     }
 
+    inline const bool operator==(const generic_matrix<VALTYPE, N , M> & b) const{
+      return ((*this) - b).norm() <=  tol_equiv;
+    }
+
+   inline const bool operator!=(const generic_matrix<VALTYPE, N , M> &b) const{
+      return ! ((*this)==b);
+    }
+
     template<typename = std::enable_if<check_is_vector3<N , M>::value> >
     const STRING to_string_vec(){
       return fmt::format("[{}, {}, {}]", (*this)[0], (*this)[1], (*this)[2]);
@@ -106,6 +115,8 @@ namespace qpp {
                          (*this).row(1),
                          (*this).row(2));
     }
+
+
 
 #ifdef PY_EXPORT
     static const generic_matrix<VALTYPE, N , M> identity_proxy(){
@@ -129,6 +140,10 @@ namespace qpp {
       return _tmv;
     }
 
+    const generic_matrix<VALTYPE, N , M> pow_proxy(const VALTYPE& other){
+      return (*this).pow(other);
+    }
+
     const generic_matrix<VALTYPE, N , M> sum_proxy
     (const generic_matrix<VALTYPE, N , M>& other){
       generic_matrix<VALTYPE, N , M> _tmv(
@@ -145,6 +160,12 @@ namespace qpp {
     template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
     const generic_matrix<VALTYPE, N , M> inverse_proxy(){
       return (*this).inverse();
+    }
+
+    template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
+    const generic_matrix<VALTYPE, 3 , 1> mv_mul_proxy
+    (const generic_matrix<VALTYPE, 3 , 1> & other){
+      return (*this)*other;
     }
 
     template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
@@ -165,11 +186,11 @@ namespace qpp {
     }
 
     bool equal_proxy(const generic_matrix<VALTYPE, N , M> & b){
-      return ((*this) - b).norm() <=  tol_equiv;
+      return (*this) == b;
     }
 
     bool nequal_proxy(const generic_matrix<VALTYPE, N , M> &b){
-      return ! ((*this)==b);
+      return (*this) != b;
     }
 
     template<typename = std::enable_if<check_is_vector3<N , M>::value> >
@@ -187,11 +208,11 @@ namespace qpp {
     }
 
     template<typename = std::enable_if<check_is_vector3<N , M>::value> >
-    inline VALTYPE py_getitem(int i) const
+    inline VALTYPE py_getitem_v(int i) const
     { return (*this)[i]; }
 
     template<typename = std::enable_if<check_is_vector3<N , M>::value> >
-    inline void py_setitem(int i, VALTYPE v)
+    inline void py_setitem_v(int i, VALTYPE v)
     { (*this)[i] = v;  }
 
     template<typename = std::enable_if<check_is_vector3<N , M>::value> >
@@ -266,6 +287,28 @@ namespace qpp {
     template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
     inline void py_setzz(VALTYPE v) {(*this)(2,2) = v;}
 
+    template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
+    inline VALTYPE py_getitem(py::tuple I) const{
+      int i = py::cast<int>(I[0]), j = py::cast<int>(I[1]);
+      return (*this)(i,j);
+    }
+
+    template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
+    inline void py_setitem(py::tuple I, VALTYPE v){
+      int i = py::cast<int>(I[0]), j = py::cast<int>(I[1]);
+      (*this)(i,j) = v;
+    }
+
+    template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
+    inline generic_matrix<VALTYPE, 3, 1> py_getitemv(int i) const{
+      return (*this)(i);
+    }
+
+    template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
+    inline void py_setitemv(int i, const generic_matrix<VALTYPE, 3, 1> & v){
+      (*this).row(i) = v;
+    }
+
 
 #endif
 
@@ -324,6 +367,15 @@ namespace qpp {
   }
 
   template<class VALTYPE>
+  vector3<VALTYPE> solve3(const vector3<VALTYPE> & A0,
+                           const vector3<VALTYPE> & A1,
+                           const vector3<VALTYPE> & A2,
+                           const vector3<VALTYPE> & b){
+    matrix3<VALTYPE> A(A0, A1, A2);
+    return solve3(A, b);
+  }
+
+  template<class VALTYPE>
   vector3<VALTYPE> diagon3d(const matrix3<VALTYPE> & A){
     Eigen::ComplexEigenSolver<Eigen::Matrix<VALTYPE, 3 , 3> > ces;
     ces.compute(A);
@@ -372,5 +424,70 @@ namespace qpp {
 
   template<class VALTYPE, int N, int M>
   typename numeric_type<VALTYPE>::norm generic_matrix<VALTYPE, N, M>::tol_equiv = 1e-8;
+
+  template<class VALTYPE, int N, int M>
+  generic_matrix<VALTYPE, N, M> generic_matrix<VALTYPE, N, M>::unity =
+      generic_matrix<VALTYPE, N, M>::Identity();
+
+#ifdef PY_EXPORT
+
+  template<class VALTYPE>
+  inline vector3<VALTYPE> py_diagon3dv(const matrix3<VALTYPE> & A)
+  { return diagon3d(A); }
+
+  template<class VALTYPE>
+  inline void py_diagon3dm(
+      vector3<typename numeric_type<VALTYPE>::complex> & eigvals,
+      matrix3<typename numeric_type<VALTYPE>::complex> & eigvecs,
+      const matrix3<VALTYPE> & A)
+  { diagon3d(eigvals,eigvecs,A); }
+
+  template<class VALTYPE>
+  inline bool py_diagon3dreal(vector3<VALTYPE> & eigvals,
+                              matrix3<VALTYPE> & eigvecs,
+                              const matrix3<VALTYPE> & A)
+  { return diagon3d(eigvals,eigvecs,A); }
+
+
+
+  template<class VALTYPE>
+  inline vector3<VALTYPE> py_solve3m(const matrix3<VALTYPE> & A,
+                                      const vector3<VALTYPE> & b)
+  { return solve3(A,b);}
+
+  template<class VALTYPE>
+  inline vector3<VALTYPE> py_solve3v(const vector3<VALTYPE> & A0,
+                                     const vector3<VALTYPE> & A1,
+                                     const vector3<VALTYPE> & A2,
+                                     const vector3<VALTYPE> & b)
+  { return solve3(A0,A1,A2,b);}
+
+  template<class VALTYPE>
+  inline matrix3<VALTYPE> py_rotmtrx_v(const vector3<VALTYPE> & nn,
+                                        VALTYPE phi)
+  {  return RotMtrx(nn,phi);}
+
+  template<class VALTYPE>
+  inline matrix3<VALTYPE> py_rotmtrx_t(const py::tuple & nn, VALTYPE phi)
+  {  return RotMtrx(vector3<VALTYPE>(nn),phi);}
+
+  template<class VALTYPE>
+  inline matrix3<VALTYPE> py_rotmtrx_l(const py::list & nn, VALTYPE phi)
+  {  return RotMtrx(vector3<VALTYPE>(nn),phi);}
+
+  template<class VALTYPE>
+  inline matrix3<VALTYPE> py_sigma_v(const vector3<VALTYPE> & nn)
+  {  return Sigma(nn);}
+
+  template<class VALTYPE>
+  inline matrix3<VALTYPE> py_sigma_t(const py::tuple & nn)
+  {  return Sigma(vector3<VALTYPE>(nn));}
+
+  template<class VALTYPE>
+  inline matrix3<VALTYPE> py_sigma_l(const py::list & nn)
+  {  return Sigma(vector3<VALTYPE>(nn));}
+
+#endif
+
 }
 #endif

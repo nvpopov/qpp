@@ -37,8 +37,8 @@ namespace qpp{
     
     //!\brief empty constructor creates unity operation
     rotrans(){
-      T = vector3<REAL>::Zero();
-      R = matrix3<REAL>::Identity();
+      T = vector3<REAL>(0);
+      R = matrix3<REAL>::unity;
       cell = NULL;
     }
 
@@ -55,7 +55,7 @@ namespace qpp{
     //!\brief creates translation operation with _T vector
     rotrans(const vector3<REAL> &_T, BOUNDARY * _cell = NULL){
       T=_T;
-      R = matrix3<REAL>::Identity();
+      R = matrix3<REAL>::unity;
       if (BOUND)
         cell = _cell;
       else
@@ -64,7 +64,7 @@ namespace qpp{
     
     //!\brief creates rotation operation with _R matrix
     rotrans(const matrix3<REAL> & _R, BOUNDARY * _cell = NULL){
-      T = vector3<REAL>::Zero();
+      T = vector3<REAL>(0);
       R = _R;
       if (BOUND)
         cell = _cell;
@@ -125,15 +125,6 @@ namespace qpp{
         }
     }
 
-    //Eigen3 compatible
-    inline bool isApprox(const rotrans<REAL, BOUND> & b,
-                         const REAL tol = 1e-8){
-      return *this == b;
-    }
-
-    inline static const rotrans<REAL, BOUND> Identity(){
-      return rotrans<REAL, BOUND>::unity;
-    }
 
     //!\brief Inequality operator. Simply !(a==b).
     inline bool operator!=(const rotrans<REAL, BOUND> & b) const{
@@ -211,7 +202,7 @@ namespace qpp{
   
   template<class REAL, bool BOUND>
   rotrans<REAL,BOUND>
-  rotrans<REAL,BOUND>::unity(vector3<REAL>::Zero(),matrix3<REAL>::Identity());
+  rotrans<REAL,BOUND>::unity(vector3<REAL>(0),matrix3<REAL>::unity);
 
   //!\brief Inverse of rotrans R, P=R^(-1). Means R*P==1.
 //  template<class REAL, bool BOUND>
