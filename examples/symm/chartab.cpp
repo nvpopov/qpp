@@ -21,7 +21,7 @@ int main()
   auto C4 = RotMtrx({1,0,0},pi/2);
   auto C3 = RotMtrx({1,1,1},2*pi/3);
   auto C31 = RotMtrx({1,-1,-1},2*pi/3);
-  generated_group<matrix3d<double> > T;
+  generated_group<matrix3<double> > T;
   T.add(C4);
   T.add(C3);
   // T.generator(C31);

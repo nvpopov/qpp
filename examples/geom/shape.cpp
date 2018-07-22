@@ -4,21 +4,18 @@
 #include <time.h>
 #include <stdlib.h>
 
-typedef qpp::vector3d<double> v3d;
+typedef qpp::vector3<double> v3d;
 
-double rnd()
-{
+double rnd(){
   return rand() / (RAND_MAX + 1.);
 }
 
-void init_rand()
-{
+void init_rand(){
   srand(time(NULL));
 }
 
 
-int main()
-{
+int main(){
 
   init_rand();
 
@@ -34,12 +31,12 @@ int main()
 
   qpp::geometry<double> g(0);
 
-  qpp::vector3d<double> r1 = sh.rmin(), r2 = sh.rmax();
+  qpp::vector3<double> r1 = sh.rmin(), r2 = sh.rmax();
   int N = 1000000, N1=0;
 
   for (int i=0; i<N; i++)
     {
-      qpp::vector3d<double> r;
+      qpp::vector3<double> r;
       for (int j=0; j<3; j++)
 	r(j) = r1(j) + rnd()*(r2(j)-r1(j));
       if (sh.within(r)) N1++;

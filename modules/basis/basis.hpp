@@ -38,7 +38,7 @@ namespace qpp{
     // Calculate the values of basis functions on a grid
 
     virtual Eigen::Matrix<FREAL, Eigen::Dynamic, 1> &
-                  values(const std::vector<vector3d<CREAL> > & grid) =0;
+                  values(const std::vector<vector3<CREAL> > & grid) =0;
 
   };
 
@@ -490,7 +490,7 @@ namespace qpp{
   public:
 
     void no_overlap()
-    { do_overlap = false; }
+    { _do_overlap = false; }
 
     void do_overlap(Eigen::Matrix<REAL, Eigen::Dynamic, Eigen::Dynamic> & S)
     { 

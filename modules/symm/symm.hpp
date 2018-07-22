@@ -1,6 +1,6 @@
 #ifndef _QPP_SYMM_H
 #define _QPP_SYMM_H
-
+#include <data/types.hpp>
 #include <symm/index.hpp>
 #include <vector>
 
@@ -12,8 +12,8 @@ namespace py = pybind11;
 
 namespace qpp{
   
-  /*!\brief The generators_pack class implements Positionary Generator Form (PGF) for arbitrary finite 
-    group.
+  /*!\brief The generators_pack class implements
+   * Positionary Generator Form (PGF) for arbitrary finite group.
   */
   template <class TRANSFORM>
   class generators_pack{
@@ -23,34 +23,31 @@ namespace qpp{
     index _begin, _end;
     int DIM;
     
-    generators_pack(int dim=0)
-    {
+    generators_pack(int dim=0){
       DIM=dim;
       generators.resize(DIM);
       _begin = index::D(DIM);
       _end   = index::D(DIM);
     }
 
-    generators_pack(const std::vector<TRANSFORM> & g, 
-		     const index & __begin, const index & __end)
-    {
+    generators_pack(const std::vector<TRANSFORM> & g,
+                    const index & __begin, const index & __end){
       DIM = g.size();
       generators.resize(DIM);
       int d=0;
       for (const TRANSFORM & t : g)
-	generators[d++]=t; 
+        generators[d++]=t;
       _begin = __begin;
       _end   = __end;
     }
 
-    generators_pack(const std::vector<TRANSFORM> & g)
-    {
+    generators_pack(const std::vector<TRANSFORM> & g){
       DIM = g.size();
       generators.resize(DIM);
 
       int d=0;
       for (const TRANSFORM & t : g)
-	generators[d++]=t; 
+        generators[d++]=t;
 
       _begin = index::D(DIM);
       _end   = index::D(DIM);
@@ -62,8 +59,7 @@ namespace qpp{
 
     int get_dim(){return DIM;}
 
-    void set_dim(int D)
-    {
+    void set_dim(int D){
       DIM = D;
       generators.resize(DIM);
       
@@ -71,42 +67,41 @@ namespace qpp{
       _end   = index::D(DIM);
     }
 
-    TRANSFORM operator()(const index & n) const
-    {
+    TRANSFORM operator()(const index & n) const{
       if (DIM==0)
-	return TRANSFORM::unity;
+        return TRANSFORM::unity;
 
-      TRANSFORM A = pow(generators[0],n(0));
-      for (int d = 1; d<DIM; d++)
-	A = A*pow(generators[d],n(d));
+      //TRANSFORM A = pow(generators[0],n(0));
+      TRANSFORM A = generators[0].pow(n(0));
+      for (int d = 1; d<DIM; d++){
+          //A = A*pow(generators[d],n(d));
+          TRANSFORM Anp = A * generators[d].pow(n(d));
+          A = Anp;
+        }
       return A;
     }
 
     template <class ARRAY>
-    void generate(ARRAY & group)
-    {
+    void generate(ARRAY & group){
       for (iterator n(_begin, _end); !n.end(); n++)
-	group.push_back((*this)(n));
+        group.push_back((*this)(n));
     }
 
-    void auto_order(int d)
-    {
+    void auto_order(int d){
       _begin(d) = 0;
       const TRANSFORM & g = generators[d];
       TRANSFORM a = g;
       int n=1;
-      while (a != TRANSFORM::unity)
-	{
-	  a = a*g;
-	  n++;
-	}
+      while (a != TRANSFORM::unity){
+          a = a*g;
+          n++;
+        }
       _end(d) = n-1;
     }
 
-    void auto_orders()
-    {      
+    void auto_orders(){
       for (int d=0; d<DIM; d++)
-	auto_order(d);
+        auto_order(d);
     }
 
     inline index begin() const
@@ -139,21 +134,18 @@ namespace qpp{
     
     std::vector<TRANSFORM> group;
 
-    int index(const TRANSFORM & g)
-    {
+    int index(const TRANSFORM & g){
       int i;
       bool result=false;
-      for (i=0; i<group.size(); i++)
-	if ( group[i] == g )
-	  {
-	    result = true;
-	    break;
-	  }
+      for (i = 0; i < group.size(); i++)
+        if ( group[i] == g ){
+            result = true;
+            break;
+          }
       return result? i : -1;
     }
 
-    generated_group(TRANSFORM E = TRANSFORM::unity)
-    {
+    generated_group(TRANSFORM E = TRANSFORM::unity){
       group.push_back(E);
     }
 
@@ -170,78 +162,71 @@ namespace qpp{
     inline int size() const
     { return group.size(); }
 
-    void add(const TRANSFORM & g)
-    {
+    void add(const TRANSFORM & g){
       if ( index(g) >= 0 )
-	return;
+        return;
       int inew = size();
       group.push_back(g);
 
-      while (inew < size())
-	{
-	  //std::cout << size() << "\n";
+      while (inew < size()){
+          //std::cout << size() << "\n";
 
-	  int inewest = size();
-	  for (int ig1 = 0; ig1 < inewest; ig1++)
-	    for (int ig2 = inew; ig2 < inewest; ig2++)
-	      {
-		//std::cout << "ig1= " << ig1 << " ig2= " << ig2 << "\n";
+          int inewest = size();
+          for (int ig1 = 0; ig1 < inewest; ig1++)
+            for (int ig2 = inew; ig2 < inewest; ig2++){
+                //std::cout << "ig1= " << ig1 << " ig2= " << ig2 << "\n";
 
-		TRANSFORM h1 = group[ig1]*group[ig2];
-		
-		//std::cout << "h1= " << h1 << "\n";
+                TRANSFORM h1 = group[ig1]*group[ig2];
 
-		if (index(h1)==-1)
-		  group.push_back(h1);
-		TRANSFORM h2 = group[ig2]*group[ig1];
+                //std::cout << "h1= " << h1 << "\n";
 
-		//std::cout << "h2= " << h2 << "\n";
+                if (index(h1)==-1)
+                  group.push_back(h1);
+                TRANSFORM h2 = group[ig2]*group[ig1];
 
-		if (h2 != h1 && index(h2)==-1)
-		  group.push_back(h2);
-	      } 
-	  //std::cout << inew << " " << inewest << "\n";
+                //std::cout << "h2= " << h2 << "\n";
 
-	  inew = inewest;
-	}
+                if (!(h2 == h1) && index(h2)==-1)
+                  group.push_back(h2);
+              }
+          //std::cout << inew << " " << inewest << "\n";
+
+          inew = inewest;
+        }
     }
 
-    virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const
-    {
+    virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const{
       // fixme
     }
 
 #ifdef PY_EXPORT
 
-    inline TRANSFORM py_getitem(int i)
-    {
-      if (i<0) 
-	i += size();
+    inline TRANSFORM py_getitem(int i){
+      if (i<0)
+        i += size();
       if (i<0 || i>=size())
-	IndexError("cell: index out of range");
-      return group[i]; 
+        IndexError("cell: index out of range");
+      return group[i];
     }
 
-    inline void py_setitem(int i, const TRANSFORM & t)
-    {
-      if (i<0) 
-	i += size();
+    inline void py_setitem(int i, const TRANSFORM & t){
+      if (i<0)
+        i += size();
       if (i<0 || i>=size())
-	IndexError("cell: index out of range"); 
+        IndexError("cell: index out of range");
       group[i] = t;
     }
 
-    static void py_export(py::module m, const char * pyname)
-    {
+    static void py_export(py::module m, const char * pyname){
       py::class_<generated_group<TRANSFORM> >(m, pyname)
-        .def(py::init<>())
-        .def(py::init<const generated_group<TRANSFORM> &>())
-	.def("index", & generated_group<TRANSFORM>::index )
-	.def("add",   & generated_group<TRANSFORM>::add )
-	.def("__getitem__",  & generated_group<TRANSFORM>::py_getitem)
-	.def("__setitem__",  & generated_group<TRANSFORM>::py_setitem)
-	.def("__len__", & generated_group<TRANSFORM>::size)
-	;
+          .def(py::init<>())
+          .def(py::init<const generated_group<TRANSFORM> &>())
+          .def("index", & generated_group<TRANSFORM>::index )
+          .def("add",   & generated_group<TRANSFORM>::add )
+          .def("__getitem__",  & generated_group<TRANSFORM>::py_getitem)
+          .def("__setitem__",  & generated_group<TRANSFORM>::py_setitem)
+          .def("__len__", & generated_group<TRANSFORM>::size)
+          ;
       // bp::def("len", py_group_len<TRANSFORM>);
     }
 
@@ -249,6 +234,6 @@ namespace qpp{
     
   };
   
-};
+}
 
 #endif

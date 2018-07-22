@@ -31,10 +31,10 @@ void pyqpp_molecule_export(pybind11::module m){
   py_molecule_export<double, qpp::periodic_cell<double> >(m, "molecule_d");
 
   py_molecule_export<float, qpp::generalized_cell<float,
-      qpp::matrix3d<float> > >(m, "molecule_pgf");
+      qpp::matrix3<float> > >(m, "molecule_pgf");
 
   py_molecule_export<double, qpp::generalized_cell<double,
-      qpp::matrix3d<double> > >(m, "molecule_pgd");
+      qpp::matrix3<double> > >(m, "molecule_pgd");
 
   py_molecule_export<float, qpp::generalized_cell<float,
       qpp::rotrans<float, false> > >(m, "molecule_cgf");

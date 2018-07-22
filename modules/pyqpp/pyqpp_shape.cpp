@@ -1,8 +1,8 @@
 #include <pyqpp/pyqpp.hpp>
 #include <geom/shape.hpp>
 
-#define v2d qpp::vector2d<REAL>
-#define v3d qpp::vector3d<REAL>
+#define v2d qpp::vector2<REAL>
+#define v3d qpp::vector3<REAL>
 
 template<class REAL>
 void py_shape_export(py::module m, const char * pyname){

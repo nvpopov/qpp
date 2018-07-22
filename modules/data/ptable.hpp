@@ -2,8 +2,9 @@
 #define _QPP_ptable_H
 
 #include <iostream>
-#include <data/types.hpp>
 #include <geom/lace3d.hpp>
+#include <data/types.hpp>
+
 
 #ifdef PY_EXPORT
 #include <pybind11/pybind11.h>

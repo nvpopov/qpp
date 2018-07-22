@@ -14,8 +14,8 @@
 namespace py = pybind11;
 #endif
 
-#define v2d vector2d<VALTYPE>
-#define v3d vector3d<VALTYPE>
+#define v2d qpp::vector2<VALTYPE>
+#define v3d qpp::vector3<VALTYPE>
 
 namespace qpp{
 
@@ -50,7 +50,7 @@ namespace qpp{
 
     virtual void scale(VALTYPE s) =0;
     virtual void move(const v3d & v) =0;
-    virtual void rotate(const matrix3d<VALTYPE> & Rot) =0;
+    virtual void rotate(const matrix3<VALTYPE> & Rot) =0;
 
     // -------------------------------------
     
@@ -147,7 +147,7 @@ namespace qpp{
 
     shape_box(const v3d & a1, const v3d & a2, const v3d & a3,
               const STRING & __name = "") : shape<VALTYPE>(__name){
-      crn = 0e0;
+      crn = v3d::Zero();
       a[0] = a1;
       a[1] = a2;
       a[2] = a3;
@@ -155,7 +155,7 @@ namespace qpp{
     
     shape_box(VALTYPE a1, VALTYPE a2, VALTYPE a3, const STRING & __name = "") :
       shape<VALTYPE>(__name){
-      crn = 0e0;
+      crn = v3d::Zero();
       a[0] = v3d(a1,  0e0, 0e0);
       a[1] = v3d(0e0, a2,  0e0);
       a[2] = v3d(0e0, 0e0, a3);
@@ -183,11 +183,11 @@ namespace qpp{
     // --------------------------------------------------
 
     virtual bool within(const v3d & r) const{
-      if ( scal(r-crn,a[1]%a[2])*scal(r-crn-a[0],a[1]%a[2]) > 0e0)
+      if ((r-crn).dot(a[1].cross(a[2]))*(r-crn-a[0]).dot(a[1].cross(a[2])) > 0e0)
         return false;
-      if ( scal(r-crn,a[2]%a[0])*scal(r-crn-a[1],a[2]%a[0]) > 0e0)
+      if ((r-crn).dot(a[2].cross(a[0]))*(r-crn-a[1]).dot(a[2].cross(a[0])) > 0e0)
         return false;
-      if ( scal(r-crn,a[0]%a[1])*scal(r-crn-a[2],a[0]%a[1]) > 0e0)
+      if ((r-crn).dot(a[0].cross(a[1]))*(r-crn-a[2]).dot(a[0].cross(a[1])) > 0e0)
         return false;
       return true;
     }
@@ -254,7 +254,11 @@ namespace qpp{
     // translation vectors v
 
     virtual VALTYPE volume() const{
-      return std::abs(det(a[0], a[1], a[2]));
+      matrix3<VALTYPE> m;
+      m.row(0) = a[0];
+      m.row(1) = a[1];
+      m.row(2) = a[2];
+      return std::abs(m.determinant());
     }
 
     virtual void scale(VALTYPE s){
@@ -268,7 +272,7 @@ namespace qpp{
       crn += v;
     }
 
-    virtual void rotate(const matrix3d<VALTYPE> & Rot){
+    virtual void rotate(const matrix3<VALTYPE> & Rot){
       crn  = Rot*crn;
       a[0] = Rot*a[0];
       a[1] = Rot*a[1];
@@ -326,7 +330,7 @@ namespace qpp{
     shape_sphere(VALTYPE _R, const STRING & __name = "")
       : shape<VALTYPE>(__name){
       R = _R;
-      r0 = 0e0;
+      r0 = v3d::Zero();
     }
 
     shape_sphere(VALTYPE _R, const v3d & _r0, const STRING & __name = "") :
@@ -353,7 +357,7 @@ namespace qpp{
     // --------------------------------------------------
 
     virtual bool within(const v3d & r) const{
-      return norm(r-r0) <= R;
+      return (r-r0).norm() <= R;
     }
     
     virtual v3d rmin() const{
@@ -365,10 +369,13 @@ namespace qpp{
     }
 
     virtual v3d fmin(const periodic_cell<VALTYPE> &v) const{
-      matrix3d<VALTYPE> A(v(0),v(1),v(2));
-      matrix3d<VALTYPE> B = invert(A);
+      matrix3<VALTYPE> A;
+      A.row(0) = v(0);
+      A.row(1) = v(1);
+      A.row(2) = v(2);
+      matrix3<VALTYPE> B = A.inverse();
 
-      v3d res = 0e0;
+      v3d res = v3d::Zero();
       for (int i=0; i<3; i++)
         for (int j=0; j<3; j++)
           res(i) += B(i,j)*B(i,j);
@@ -378,10 +385,13 @@ namespace qpp{
     }
 
     virtual v3d fmax(const periodic_cell<VALTYPE> &v) const{
-      matrix3d<VALTYPE> A(v(0),v(1),v(2));
-      matrix3d<VALTYPE> B = invert(A);
+      matrix3<VALTYPE> A;
+      A.row(0) = v(0);
+      A.row(1) = v(1);
+      A.row(2) = v(2);
+      matrix3<VALTYPE> B = A.inverse();
 
-      v3d res = 0e0;
+      v3d res = v3d::Zero();
       for (int i=0; i<3; i++)
         for (int j=0; j<3; j++)
           res(i) += B(i,j)*B(i,j);
@@ -405,7 +415,7 @@ namespace qpp{
       r0 += v;
     }
 
-    virtual void rotate(const matrix3d<VALTYPE> & Rot){
+    virtual void rotate(const matrix3<VALTYPE> & Rot){
       r0 = Rot*r0;
     }
 
@@ -454,7 +464,7 @@ namespace qpp{
     virtual void move(const v3d & v)
     { sh1 -> move(v); sh2 -> move(v);}
 
-    virtual void rotate(const matrix3d<VALTYPE> & Rot)
+    virtual void rotate(const matrix3<VALTYPE> & Rot)
     { sh1->rotate(Rot); sh2->rotate(Rot); }
 
     virtual v3d rmin() const {
@@ -532,7 +542,7 @@ namespace qpp{
     virtual void move(const v3d & v)
     { sh1 -> move(v); sh2 -> move(v);}
 
-    virtual void rotate(const matrix3d<VALTYPE> & Rot)
+    virtual void rotate(const matrix3<VALTYPE> & Rot)
     { sh1->rotate(Rot); sh2->rotate(Rot); }
 
     virtual v3d rmin() const{
@@ -611,7 +621,7 @@ namespace qpp{
     virtual void move(const v3d & v)
     { sh1 -> move(v); sh2 -> move(v);}
 
-    virtual void rotate(const matrix3d<VALTYPE> & Rot)
+    virtual void rotate(const matrix3<VALTYPE> & Rot)
     { sh1->rotate(Rot); sh2->rotate(Rot); }
 
     virtual v3d rmin() const
@@ -672,7 +682,7 @@ namespace qpp{
     virtual void move(const v3d & v)
     { sh -> move(v);}
 
-    virtual void rotate(const matrix3d<VALTYPE> & Rot)
+    virtual void rotate(const matrix3<VALTYPE> & Rot)
     { sh->rotate(Rot); }
 
     virtual v3d rmin() const
@@ -736,7 +746,7 @@ namespace qpp{
     virtual void move(const v3d & v)
     { sh1 -> move(v); sh2 -> move(v);}
 
-    virtual void rotate(const matrix3d<VALTYPE> & Rot)
+    virtual void rotate(const matrix3<VALTYPE> & Rot)
     { sh1->rotate(Rot); sh2->rotate(Rot); }
 
     virtual v3d rmin() const{
@@ -818,7 +828,7 @@ namespace qpp{
             v);
     }
 
-    void rotate(const matrix3d<VALTYPE> & Rot)
+    void rotate(const matrix3<VALTYPE> & Rot)
     override {
       PYBIND11_OVERLOAD_PURE(
             void,

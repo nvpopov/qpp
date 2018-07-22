@@ -29,6 +29,7 @@ public:
       p.push_back(i);
   }
 
+
   permutation(const permutation & b) 
   {
     //std::cout << "copy constructor\n";
@@ -60,6 +61,10 @@ public:
   inline int size() const
   {return p.size();}
 
+  static inline permutation Identity(){
+    return permutation::unity;
+  }
+
   inline permutation  operator*(const permutation & b)
   {
     /*
@@ -84,6 +89,10 @@ public:
 	  break;
 	}
     return res;
+  }
+
+  inline bool isApprox(const permutation &b){
+    return *this == b;
   }
 
   inline bool operator!=(const permutation & b)

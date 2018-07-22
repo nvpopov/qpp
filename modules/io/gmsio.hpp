@@ -216,7 +216,7 @@ namespace qpp{
 
     for (int i=0; i<geom.nat(); i++)
       if (!geom.shadow(i)){
-          vector3d<REAL> r = xgeom->pos(i);
+          vector3<REAL> r = xgeom->pos(i);
           out << fmt::format("{:8s}  {:12.6f} {:14.8f} {:14.8f} {:14.8f}",
                              xgeom->atom(i),xgeom->charge(i),r(0),r(1),r(2));
           out << std::endl;
@@ -261,7 +261,7 @@ namespace qpp{
 
     for (int i=0; i<geom.nat(); i++)
       if (!geom.shadow(i)){
-          vector3d<REAL> r = ang_to_bohr*geom.coord(i);
+          vector3<REAL> r = ang_to_bohr*geom.coord(i);
           out <<
                  fmt::format("{:5d} {:16.8f} {:16.8f} {16.8f}",
                              i,r.x(),r.y(),r.z())<< std::endl;

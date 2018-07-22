@@ -153,14 +153,14 @@ namespace qpp{
       if (!src.shadow(at)){
           std::vector<datum> v;
           src.get_fields(at,v);
-          const vector3d<REALSRC> & r = src.coord(at);
-          vector3d<REALSRC> r1;
+          const vector3<REALSRC> & r = src.coord(at);
+          vector3<REALSRC> r1;
           v[ix].set(&r1(0));
           v[iy].set(&r1(1));
           v[iz].set(&r1(2));
           for (iterator I(begin,end); !I.end(); I++){
               // fixme - to be replaced with dst.add_fields(v)
-              dst.add("",vector3d<REALDST>(0));
+              dst.add("",vector3<REALDST>::Zero());
               r1 = cell.transform(r,I);
               dst.set_fields(dst.nat()-1,v);
             }
@@ -203,7 +203,7 @@ namespace qpp{
     std::cout << "fill alive 1\n";
 
     std::vector<std::vector<datum> > v(src.nat());
-    std::vector<vector3d<REALSRC> > r1(src.nat());
+    std::vector<vector3<REALSRC> > r1(src.nat());
     for (int at=0; at<src.nat(); at++){
         src.get_fields(at,v[at]);
         v[at][ix].set(&r1[at][0]);
@@ -230,7 +230,7 @@ namespace qpp{
         if (something)
           for (int at=0; at<src.nat(); at++)
             if (!src.shadow(at) && (allcell || inside[at])){
-                dst.add("",vector3d<REALDST>(0));
+                dst.add("",vector3<REALDST>::Zero());
                 dst.set_fields(dst.nat()-1,v[at]);
               }
       }
@@ -250,15 +250,15 @@ namespace qpp{
 
         // Minimal and maximal fractional coordinates of the shape
         periodic_cell<REALSRC> * cell = (periodic_cell<REALSRC>*)(&src.cell);
-        vector3d<REALSRC> Smin = shp.fmin(*cell),
+        vector3<REALSRC> Smin = shp.fmin(*cell),
             Smax = shp.fmax(*cell);
 
         std::cout << "Smin= " << Smin << " Smax= " << Smax << "\n";
 
         // Minimal and maximal fractional coordinates of atoms
-        vector3d<REALSRC> fmin,fmax;
+        vector3<REALSRC> fmin,fmax;
         for (int at=0; at<src.nat(); at++){
-            vector3d<REALSRC> f = src.coord(at);
+            vector3<REALSRC> f = src.coord(at);
             if (!src.frac) f = cell->cart2frac(f);
             if (at==0)
               fmin = fmax = f;

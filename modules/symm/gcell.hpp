@@ -86,12 +86,12 @@ namespace qpp{
       generators_pack<TRANSFORM>(G)
     { init_default();}
 
-    inline vector3d<REAL> transform(const vector3d<REAL> & r,
+    inline vector3<REAL> transform(const vector3<REAL> & r,
                                     const index & I) const{
       return (*this)(I)*r;
     }
 
-    inline bool within(const vector3d<REAL> & r) const{
+    inline bool within(const vector3<REAL> & r) const{
     // Answers the question whether r belongs to the unit cell
       // Does not make sense for generalized_cell
       return true;
@@ -105,14 +105,14 @@ namespace qpp{
     // the others are pointed by v[0],v[1],v[2] vectors
 
     // Does not make sense for generalized_cell */
-    inline vector3d<REAL> reduce(const vector3d<REAL> & r) const{
+    inline vector3<REAL> reduce(const vector3<REAL> & r) const{
       return r;
     }
 
     // find high symmetry point within "radius" distance from given point "r"
     // makes sence for rotational symmetries
-    vector3d<REAL> symmetrize(const vector3d<REAL> & r, REAL radius) const{
-      std::vector<vector3d<REAL> > points;
+    vector3<REAL> symmetrize(const vector3<REAL> & r, REAL radius) const{
+      std::vector<vector3<REAL> > points;
 
       //std::cerr << "symmetrize for " << r << "\n";
 
@@ -120,16 +120,16 @@ namespace qpp{
       for (iterator I(_begin,_end); !I.end(); I++){
           if (I==index::D(DIM).all(0)) continue;
 
-          vector3d<REAL> r1 = transform(r,I);
-          for (const vector3d<REAL> & pt : points)
-            if (norm(r1-pt)<radius ){
+          vector3<REAL> r1 = transform(r,I);
+          for (const vector3<REAL> & pt : points)
+            if ((r1-pt).norm() < radius ){
                 //std::cerr << "close\n";
                 points.push_back(r1);
                 break;
               }
         }
-      vector3d<REAL> res = 0e0;
-      for (const vector3d<REAL> & pt : points)
+      vector3<REAL> res = vector3<REAL>::Zero();
+      for (const vector3<REAL> & pt : points)
         res += pt;
       res /= points.size();
       return res;
@@ -137,7 +137,7 @@ namespace qpp{
 
     // fractional to cartesian and vice versa transformation
     // makes sence only for periodic translational cells
-    vector3d<REAL> frac2cart(const vector3d<REAL> & r) const{
+    vector3<REAL> frac2cart(const vector3<REAL> & r) const{
       // Works for DIM==3 and DIM==2
       // In the case DIM==2 the third coordinate ( z=r(2) ) is
       // orthogonal to both translation vectors
@@ -145,7 +145,7 @@ namespace qpp{
       // Does not make sense for generalized_cell
     }
 
-    vector3d<REAL> cart2frac(const vector3d<REAL> & r) const{
+    vector3<REAL> cart2frac(const vector3<REAL> & r) const{
       // cartesian to fractional
       // works for DIM==3 and DIM==2
       // In the case DIM==2 the third coordinate ( z=r(2) ) is

@@ -342,8 +342,10 @@ namespace qpp{
       if (v.size()!=nfields())
         IndexError("xgeometry::set_fields: wrong number of fields");
 
-      STRING a1 = v[ix_atom].get<STRING>();
-      vector3d<REAL> r1(v[ix_x].get<REAL>(),v[ix_y].get<REAL>(),v[ix_z].get<REAL>());
+      STRING a1 = v[ix_atom].template get<STRING>();
+      vector3<REAL> r1(v[ix_x].template get<REAL>(),
+                       v[ix_y].template get<REAL>(),
+                       v[ix_z].template get<REAL>());
       if (has_observers)
         for (int i=0; i<observers.size(); i++)
           observers[i]->changed(j, before, a1, r1);
@@ -376,7 +378,7 @@ namespace qpp{
         _xbool[i].erase(_xbool[i].begin()+j);
     }
 
-    void add(const STRING & a, const vector3d<REAL> & r,
+    void add(const STRING & a, const vector3<REAL> & r,
              std::initializer_list<STRING> xts,
              std::initializer_list<REAL> xtr = {},
              std::initializer_list<int> xti = {},
@@ -401,7 +403,7 @@ namespace qpp{
       geometry<REAL,CELL>::add(a,r);
     }
 
-    void insert(const int j, const STRING & a, const vector3d<REAL> &r,
+    void insert(const int j, const STRING & a, const vector3<REAL> &r,
                 std::initializer_list<STRING> xts,
                 std::initializer_list<REAL> xtr = {},
                 std::initializer_list<int> xti = {},
@@ -425,7 +427,7 @@ namespace qpp{
       geometry<REAL,CELL>::insert(j,a,r);
     }
 
-    virtual void add(const STRING &a, const vector3d<REAL> & r){
+    virtual void add(const STRING &a, const vector3<REAL> & r){
       for (int i=0; i<_nxstring; i++)
         _xstring[i].push_back( "" );
       for (int i=0; i<_nxreal; i++)
@@ -437,7 +439,7 @@ namespace qpp{
       geometry<REAL,CELL>::add(a,r);
     }
 
-    virtual void insert(const int j, STRING a, const vector3d<REAL> &r){
+    virtual void insert(const int j, STRING a, const vector3<REAL> &r){
       for (int i=0; i<_nxstring; i++)
         _xstring[i].insert(_xstring[i].begin()+j, "" );
       for (int i=0; i<_nxreal; i++)

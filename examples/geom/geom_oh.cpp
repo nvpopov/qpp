@@ -15,7 +15,7 @@ int main()
   auto C3 = RotMtrx<double>({1,1,1},2*pi/3);
   auto C31 = RotMtrx<double>({1,-1,-1},2*pi/3);
   auto S6 = RotMtrx<double>({1,1,1},pi/3)*Sigma<double>({1,1,1});
-  matrix3d<double> Inv = -1;
+  matrix3<double> Inv = matrix3<double>::Identity()*-1.0f;
 
   /*
   generalized_cell<4,double,decltype(C4)> G({C4,C3,C31,Inv});

@@ -18,7 +18,7 @@ void def_builders3(py::module m){
   def_builders4< REALDST, CELLDST, REALSRC, qpp::periodic_cell<REALSRC> >(m);
   def_builders4< REALDST, CELLDST, REALSRC,
       qpp::generalized_cell<REALSRC,
-      qpp::matrix3d<REALSRC> > >(m);
+      qpp::matrix3<REALSRC> > >(m);
   def_builders4< REALDST, CELLDST, REALSRC,
       qpp::generalized_cell<REALSRC,
       qpp::rotrans<REALSRC> > >(m);
@@ -34,7 +34,7 @@ template<class REALDST>
 void def_builders1(py::module m){
   def_builders2< REALDST, qpp::periodic_cell<REALDST> >(m);
   def_builders2< REALDST, qpp::generalized_cell<REALDST,
-      qpp::matrix3d<REALDST> > >(m);
+      qpp::matrix3<REALDST> > >(m);
   def_builders2< REALDST, qpp::generalized_cell<REALDST,
       qpp::rotrans<REALDST> > >(m);
 }
@@ -45,11 +45,11 @@ void pyqpp_builders_export(py::module m){
 
   m.def("treat_crowd", qpp::treat_crowd<float,
                        qpp::generalized_cell<float,
-                       qpp::matrix3d<float> > >);
+                       qpp::matrix3<float> > >);
 
   m.def("treat_crowd", qpp::treat_crowd<double,
                        qpp::generalized_cell<double,
-                       qpp::matrix3d<double> > >);
+                       qpp::matrix3<double> > >);
 
   m.def("treat_crowd", qpp::treat_crowd<float,
                        qpp::generalized_cell<float,

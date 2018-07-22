@@ -12,6 +12,7 @@
 #include <stdexcept>
 
 namespace qpp{
+  const double symm_tol_equiv = 1e-8;
 
 #ifdef WCHAR
 

@@ -6,17 +6,16 @@
 
 using namespace qpp;
 
-int main()
-{
+int main(){
 
-  vector3d<double> n,T;
+  vector3<double> n,T;
   double phi;
-  matrix3d<double> R;
+  matrix3<double> R;
   int inv;
 
   std::cout << "axis= ";
   std::cin >> n.x() >> n.y() >> n.z();
-  n = n/norm(n);
+  n = n / n.norm();
 
   std::cout << "phi= ";
   std::cin >> phi;

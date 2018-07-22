@@ -4,7 +4,7 @@
 
 using namespace qpp;
 
-void prnmtr(const matrix3d<double> & M)
+void prnmtr(const matrix3<double> & M)
 {
   for (int i=0; i<3; i++)
     {
@@ -15,20 +15,18 @@ void prnmtr(const matrix3d<double> & M)
     }
 }
 
-int main()
-{
-  matrix3d<double> C4x = RotMtrx({1,0,0},pi/2);
-  matrix3d<double> C4y = RotMtrx({0,1,0},pi/2);
-  matrix3d<double> I(-1);
+int main(){
+  matrix3<double> C4x = RotMtrx({1,0,0},pi/2);
+  matrix3<double> C4y = RotMtrx({0,1,0},pi/2);
+  matrix3<double> I = matrix3<double>::Identity()*-1.0;
 
-  generated_group<matrix3d<double> > OH;
+  generated_group<matrix3<double> > OH;
 
   OH.add(C4x);
   OH.add(C4y);
   OH.add(I);
   
-  for (int i=0; i<OH.size(); i++)
-    {
+  for (int i=0; i<OH.size(); i++){
       std::cout << i << std::endl;
       prnmtr(OH[i]);
     }
@@ -39,7 +37,7 @@ int main()
 
   std::cout <<"C4x index is " << i1 << " C4y index is " << i2 << std::endl;
 
-  group_analyzer< matrix3d<double>, decltype(OH) > AOH(OH);
+  group_analyzer< matrix3<double>, decltype(OH) > AOH(OH);
 
   std::cout << "Abelian subgroup of C4x: ";
   for (int g : AOH.abelian_sub(i1))

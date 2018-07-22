@@ -31,7 +31,7 @@ namespace qpp {
       const int atmIdx){
     REAL retval = 0.0f;
     for(size_t i = 1; i < geom_list.size() ; i++){
-        qpp::vector3d<REAL> dx =
+        qpp::vector3<REAL> dx =
             geom_list[i]->r(0) - geom_list[i]->r(atmIdx);
         REAL dx_n = dx.norm2();
         retval += dx_n;
@@ -41,7 +41,7 @@ namespace qpp {
 
   template<class REAL>
   std::vector<REAL> velocity_autocor_func(
-      const std::vector<std::vector<qpp::vector3d<REAL> > > &vl,
+      const std::vector<std::vector<qpp::vector3<REAL> > > &vl,
       const int timeStep = 1){
     std::vector<REAL> retvec;
     int totalSteps = vl.size() / timeStep;
@@ -49,7 +49,7 @@ namespace qpp {
     REAL dot00 = 0.0f;
 
     for(int i = 0; i < totalAtoms; i++){
-        qpp::vector3d<REAL> v0i = vl[0][i];
+        qpp::vector3<REAL> v0i = vl[0][i];
       dot00 += v0i.dot(v0i);
       }
     dot00 /= totalAtoms;
@@ -59,8 +59,8 @@ namespace qpp {
         REAL retval = 0.0f;
 
         for(int q =0; q < vl[i].size(); q++){
-            qpp::vector3d<REAL> v1 = vl[0][q];
-            qpp::vector3d<REAL> v2 = vl[i][q];
+            qpp::vector3<REAL> v1 = vl[0][q];
+            qpp::vector3<REAL> v2 = vl[i][q];
             retval += v1.dot(v2) / dot00;
           }
 

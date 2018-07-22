@@ -402,7 +402,7 @@ namespace qpp{
   private:
     REAL grainsize;
 
-    vector3d<REAL> Rmin, Rmax;
+    vector3<REAL> Rmin, Rmax;
     index ngrain;
     std::vector<std::vector<index> > grains;
 
@@ -413,7 +413,7 @@ namespace qpp{
       bool ndef = true;
 
       for (int i=0; i<geom->size(); i++){
-          vector3d<REAL> r = geom->pos(i);
+          vector3<REAL> r = geom->pos(i);
           if (ndef){
               Rmin = Rmax = r;
               ndef = false;
@@ -429,8 +429,8 @@ namespace qpp{
 
       if (DIM!=0){
           //std::cout << "Extension of Rmin, Rmax\n";
-          Rmin -= vector3d<REAL>(1,1,1)*(grainsize+1e-5);
-          Rmax += vector3d<REAL>(1,1,1)*(grainsize+1e-5);
+          Rmin -= vector3<REAL>(1,1,1)*(grainsize+1e-5);
+          Rmax += vector3<REAL>(1,1,1)*(grainsize+1e-5);
         }
 
       ngrain = index::D(3);
@@ -488,7 +488,7 @@ namespace qpp{
     inline std::vector<index> & grain(const index & I){return grains[gidx(I)];}
 
     inline index igrain(const index & at){
-      vector3d<REAL> r = geom->r(at);
+      vector3<REAL> r = geom->r(at);
       index I = index::D(3);
       for (int j=0; j<3; j++)
         I(j) = std::floor( (r(j)-Rmin(j))/grainsize );
@@ -567,7 +567,7 @@ namespace qpp{
           for (int k=0; k<geom->nat(); k++)
             if (!geom->shadow(k))
               for (iterator I(geom->cell.begin(), geom->cell.end()); !I.end(); I++)
-                if ( norm(geom->pos(i) - geom->pos(k,I)) <
+                if ( (geom->pos(i) - geom->pos(k,I)).norm() <
                      distance(geom->type_table(i), geom->type_table(k))
                      && !( i==k && I==index::D(DIM).all(0)) )
                   _table[i].push_back(atom_index(k,I));
@@ -630,7 +630,7 @@ namespace qpp{
 
                       index at1 = grains[g1][c1];
                       index at2 = grains[g2][c2];
-                      REAL r = norm(geom->pos(at1) - geom->pos(at2));
+                      REAL r = (geom->pos(at1) - geom->pos(at2)).norm();
 
                       /*
                       if (at1==31|| at2==31)
@@ -756,7 +756,7 @@ namespace qpp{
                 if (skip)
                   continue;
 
-                REAL r = norm(geom->pos(at1) - geom->pos(at2));
+                REAL r = (geom->pos(at1) - geom->pos(at2)).norm();
 
                 //std::cout << "at1 = " << at1.atom << at1.cell
                 //<< " grain " << I << " at2= "<< at2.atom <<
@@ -782,7 +782,7 @@ namespace qpp{
     void ref_inserted(int at,
                       before_after st,
                       const STRING & a,
-                      const vector3d<REAL> & r){
+                      const vector3<REAL> & r){
       if (st == DEP::after){
           _table.insert(_table.begin()+at, std::vector<index>());
           for (int i=0; i<geom->nat(); i++)
@@ -793,8 +793,8 @@ namespace qpp{
                      norm(geom->r(at) - geom->r(i, j)) <
                      distance(geom->type_table(at), geom->type_table(i))
                    ){
-                    _table[at].push_back(index(i,j));
-                    index iat = at;
+                    _table[at].push_back(index({i,j}));
+                    index iat = {at};
                     iat.sub(1) -= j;
                     _table[i].push_back(iat);
                   }
@@ -803,13 +803,13 @@ namespace qpp{
 
     void ref_added(before_after st,
                    const STRING & a,
-                   const vector3d<REAL> & r){
+                   const vector3<REAL> & r){
       ref_inserted(geom->nat()-1,st,a,r);
     }
 
     void ref_moved(int at,
                    before_after st,
-                   const vector3d<REAL> & r){
+                   const vector3<REAL> & r){
 
     }
 
@@ -839,19 +839,19 @@ namespace qpp{
 
     virtual void added( before_after st,
                         const STRING & a,
-                        const vector3d<REAL> & r)
+                        const vector3<REAL> & r)
     {}
 
     virtual void inserted(int at,
                           before_after st,
                           const STRING & a,
-                          const vector3d<REAL> & r)
+                          const vector3<REAL> & r)
     {}
 
     virtual void changed(int at,
                          before_after st,
                          const STRING & a,
-                         const vector3d<REAL> & r)
+                         const vector3<REAL> & r)
     {}
 
     virtual void erased(int at,
