@@ -20,7 +20,11 @@ add_executable(qppcad
     app.cpp
     shader_program.cpp
     mesh.cpp
+    draw_style.cpp
+    workspace.cpp
+    action.cpp
     gl_math.cpp
+    ui_manager.cpp
     deps/imgui/examples/imgui_impl_glfw.cpp
     deps/imgui/examples/imgui_impl_opengl3.cpp
     deps/glfw/deps/gl3w.c

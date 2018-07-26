@@ -1,5 +1,19 @@
 #include <qppcad/app.hpp>
 
+void
+MessageCallback( GLenum source,
+                 GLenum type,
+                 GLuint id,
+                 GLenum severity,
+                 GLsizei length,
+                 const GLchar* message,
+                 const void* userParam )
+{
+  fprintf( stderr, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n",
+           ( type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : "" ),
+            type, severity, message );
+}
+
 void qpp::c_app::error_callback(int error, const char* description){
   std::string s1(description);
   qpp::c_app::log(s1);
@@ -27,8 +41,8 @@ void qpp::c_app::run(){
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-  qpp::c_app::curWindow = glfwCreateWindow(qpp::c_app::get_state().wWidth,
-                                           qpp::c_app::get_state().wHeight,
+  qpp::c_app::curWindow = glfwCreateWindow(800,
+                                           600,
                                            "qpp::cad", NULL, NULL);
 
   if (!qpp::c_app::curWindow){
@@ -51,7 +65,8 @@ void qpp::c_app::run(){
 
   ImGui::StyleColorsDark();
 
-
+  glEnable              ( GL_DEBUG_OUTPUT );
+  glDebugMessageCallback( MessageCallback, 0 );
   ImGui_ImplGlfw_InitForOpenGL(qpp::c_app::curWindow, true);
   ImGui_ImplOpenGL3_Init();
 
@@ -62,13 +77,14 @@ void qpp::c_app::run(){
 
   qpp::c_app::log("qpp::cad initialized succesfully!");
 
-  glEnable(GL_DEPTH_TEST);
+
   while (!glfwWindowShouldClose(qpp::c_app::curWindow)){
 
       qpp::c_app::begin_render();
       qpp::c_app::render();
       qpp::c_app::end_render();
 
+      glfwPollEvents();
     }
 
   glfwDestroyWindow(qpp::c_app::curWindow);
@@ -78,7 +94,7 @@ void qpp::c_app::run(){
 
 void qpp::c_app::begin_render(){
 
-  glfwPollEvents();
+
   glfwMakeContextCurrent(qpp::c_app::curWindow);
 
   ImGui_ImplOpenGL3_NewFrame();
@@ -93,19 +109,21 @@ void qpp::c_app::begin_render(){
   ratio = width / (float) height;
   glViewport(0, 0, width, height);
 
-  glClearColor(0.8, 0.8, 0.8, 0.8);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+  glDepthFunc(GL_LESS);
+
+  glClearColor(0.4, 0.4, 0.4, 1);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 }
 
 void qpp::c_app::end_render(){
-
   glfwSwapBuffers(qpp::c_app::curWindow);
-
 }
 
 void qpp::c_app::render(){
+  app_state* astate = &(c_app::get_state());
+  astate->_workspace_manager->render_current_workspace();
   ImGui::Render();
   ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }

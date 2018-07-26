@@ -39,9 +39,10 @@ namespace qpp{
     static void compose_ui_menu();
     static void compose_io_object_inspector();
     static void end_render();
-    static void log(const std::string logText);
+
 
   public:
+    static void log(const std::string logText);
     static void run();
     static app_state & get_state(){
       if (c_app::a_state == NULL)
