@@ -1,5 +1,5 @@
 #ifndef _QPP_GLMATH_H
-#define _QPP_GLMATR_H
+#define _QPP_GLMATH_H
 #include <Eigen/Eigen>
 #include <geom/lace3d.hpp>
 #include <mathf/math.hpp>
@@ -28,10 +28,10 @@ namespace qpp{
   }
 
   template<typename REAL>
-  matrix4<REAL> lookAt(
-      matrix4<REAL> const & camPos,
-      matrix4<REAL> const & center,
-      matrix4<REAL> const & up
+  matrix4<REAL> look_at(
+      vector3<REAL> const & camPos,
+      vector3<REAL> const & center,
+      vector3<REAL> const & up
       ){
 
     vector3<REAL> f = (center - camPos).normalized();

@@ -8,8 +8,10 @@ qpp::shader_program::shader_program(){
 qpp::shader_program::shader_program(const std::string _programName,
                                     const std::string &_vs_text,
                                     const std::string &_fs_text,
-                                    bool _bUniformColor,
-                                    bool _bUniformTrVec){
+                                    bool _bUColor,
+                                    bool _bUTrans,
+                                    bool _bUViewProjMat,
+                                    bool _bUModelViewProjMat){
 
   programName = _programName;
   GLuint vertexShaderID = glCreateShader(GL_VERTEX_SHADER);
@@ -59,16 +61,25 @@ qpp::shader_program::shader_program(const std::string _programName,
   glDeleteShader(vertexShaderID);
   glDeleteShader(fragmentShaderID);
 
-  bUniformColor = _bUniformColor;
-  bUniformTrVec = _bUniformTrVec;
+  bUnfColor = _bUColor;
+  bUnfTrans = _bUTrans;
+  bUnfViewProjMat = _bUViewProjMat;
+  bUnfModelViewProjMat = _bUModelViewProjMat;
 
-  if(bUniformColor) uiUniformColor = glGetUniformLocation(programID, "uColor");
-  if(bUniformTrVec) uiUniformTrVec = glGetUniformLocation(programID, "uTrVec");
+  if(bUnfColor) uiUnfColor = glGetUniformLocation(programID, "uColor");
+  if(bUnfTrans) uiUnfTrans = glGetUniformLocation(programID, "uTrans");
+  if(bUnfViewProjMat) uiUnfViewProj = glGetUniformLocation(programID, "uVP_Mat");
+  if(bUnfModelViewProjMat)
+    uiUnfModelViewProj = glGetUniformLocation(programID, "uMVP_Mat");
 
 }
 
 void qpp::shader_program::begin_shader_program(){
   glUseProgram(programID);
+  if (bUnfViewProjMat){
+      glUniformMatrix4fv(uiUnfViewProj, 1,
+                         GL_FALSE, c_app::get_state().mViewProjection.data());
+    }
 }
 
 void qpp::shader_program::end_shader_program(){
@@ -80,10 +91,11 @@ qpp::shader_program* qpp::gen_default_program(){
       "#version 330\n"
       "in vec3 in_Position;\n"
       "out vec4 ex_Color;\n"
+      "uniform mat4 uVP_Mat;\n"
       "\n"
       "void main(void)\n"
       "{\n"
-      "       gl_Position = vec4(in_Position, 1.0);\n"
+      "       gl_Position = uVP_Mat*vec4(in_Position, 1.0);\n"
       "       ex_Color = vec4(0.0, 1.0, 1.0, 1.0);\n"
       "}";
 

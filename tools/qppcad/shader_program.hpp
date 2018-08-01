@@ -12,14 +12,18 @@ namespace qpp {
   private:
     GLuint programID;
   public:
-    GLint uiUniformColor;
-    GLint uiUniformTrVec;
+    GLint uiUnfColor;
+    GLint uiUnfTrans;
+    GLint uiUnfModelViewProj;
+    GLint uiUnfViewProj;
 
-    bool bUniformColor;
-    bool bUniformTrVec;
-    bool bUniformModelMatrix;
-    bool bUniformViewMatrix;
-    bool bUniformModelViewMatrix;
+    bool bUnfColor;
+    bool bUnfTrans;
+    bool bUnfModelMat;
+    bool bUnfViewMat;
+    bool bUnfModelViewMat;
+    bool bUnfViewProjMat;
+    bool bUnfModelViewProjMat;
 
     std::string programName;
 
@@ -28,8 +32,10 @@ namespace qpp {
     shader_program(const std::string _programName,
                    const std::string &_vs_text,
                    const std::string &_fs_text,
-                   bool _bUniformColor = false,
-                   bool _bUniformTrVec = false);
+                   bool _bUColor = false,
+                   bool _bUTrans = false,
+                   bool _bUViewProjMat = true,
+                   bool _bUModelViewProjMat = false);
 
     void begin_shader_program();
     void end_shader_program();

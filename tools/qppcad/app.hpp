@@ -7,9 +7,6 @@
 #include <fmt/format.h>
 #include <fmt/ostream.h>
 #include <io/strfun.hpp>
-#include <imgui.h>
-#include <imgui_impl_glfw.h>
-#include <imgui_impl_opengl3.h>
 #include <qppcad/app_state.hpp>
 #include <qppcad/gl_math.hpp>
 #include <chrono>
@@ -33,11 +30,21 @@ namespace qpp{
     static void resize_window_callback(GLFWwindow* window,
                                        int _width,
                                        int _height);
+
+    static void mouse_callback( GLFWwindow *window,
+                                 double x,
+                                 double y );
+
+    static void mouse_scroll_callback(GLFWwindow* window,
+                                      double xoffset,
+                                      double yoffset);
+
+    static void mouse_button_callback( GLFWwindow * window,
+                                     int button,
+                                     int action,
+                                     int mods );
     static void begin_render();
     static void render();
-    static void compose_ui();
-    static void compose_ui_menu();
-    static void compose_io_object_inspector();
     static void end_render();
 
 

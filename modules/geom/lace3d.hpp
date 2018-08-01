@@ -26,7 +26,7 @@ namespace qpp {
 
 
   template <typename ELEM> using vector2 = Eigen::Matrix<ELEM, 2, 1>;
-  //template <typename ELEM> using vector3 = Eigen::Matrix<ELEM, 3, 1>;
+  template <typename ELEM> using _vector3 = Eigen::Matrix<ELEM, 3, 1>;
   template <typename ELEM> using vector4 = Eigen::Matrix<ELEM, 4, 1>;
   template <typename ELEM, int n> using vectorn = Eigen::Matrix<ELEM, n, 1>;
 
