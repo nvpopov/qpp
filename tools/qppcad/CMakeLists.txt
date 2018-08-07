@@ -17,9 +17,9 @@ endif(NOT OPENGL_FOUND)
 set(GL_LIBRARY GL  X11)
 add_executable(qppcad
     main.cpp
+    mesh.cpp
     app.cpp
     shader_program.cpp
-    mesh.cpp
     draw_style.cpp
     workspace.cpp
     action.cpp

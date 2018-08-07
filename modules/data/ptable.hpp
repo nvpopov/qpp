@@ -44,15 +44,18 @@ namespace qpp {
         double       aIonicRadius;// A
 
         int          aNValenceElec;
-        std::tuple<int,int,int> aColorJmol, aColorGV, aColorCPK;
+        vector3<float> aColorJmol, aColorGV, aColorCPK;
         //(1,"s",2),(2,"s",3)
         std::vector<std::tuple<int,std::string,int> > aElecConf;
 
     };
 
     class ptable{
-    private:
+    public:
+
         static ptable *instance;
+
+        std::map<std::string, int> cache_atom_idx;
         std::array<ptable_atom_record, PTABLE_ELEM_N> arecs;
 
         static ptable* get_instance(){
@@ -64,10 +67,20 @@ namespace qpp {
         }
 
         void init_default();
+        void assembly_ptable_0();
+        void assembly_ptable_1();
+        void assembly_ptable_2();
+        void assembly_ptable_3();
+        void assembly_ptable_4();
+        void assembly_ptable_5();
+        void assembly_ptable_6();
+        void assembly_ptable_7();
+        void assembly_ptable_8();
+        void assembly_ptable_9();
 
-    public:
+        void init_cache_atom_idx();
 
-        ptable(){};
+        ptable(){}
 
         static STRING symbol_by_number(const int number){
             ptable *table = ptable::get_instance();
@@ -93,9 +106,12 @@ namespace qpp {
 
         static const int number_by_symbol(const STRING& symbol){
             ptable *table = ptable::get_instance();
-            for(int i = 0; i < PTABLE_ELEM_N; i++)
-                if(table->arecs[i].aSymbol == symbol)
-                    return i+1;
+            if ( table->cache_atom_idx.find(symbol) ==
+                 table->cache_atom_idx.end() ) {
+              return PTABLE_INT_NONE;
+            } else {
+              return table->cache_atom_idx[symbol];
+            }
             return PTABLE_INT_NONE;
         }
 

@@ -7,11 +7,13 @@ MessageCallback( GLenum source,
                  GLenum severity,
                  GLsizei length,
                  const GLchar* message,
-                 const void* userParam )
-{
-  fprintf( stderr, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n",
-           ( type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : "" ),
-            type, severity, message );
+                 const void* userParam ){
+  if (type == GL_DEBUG_TYPE_ERROR){
+      fprintf( stderr, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n",
+               ( type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : "" ),
+               type, severity, message );
+      exit(0);
+    }
 }
 
 void qpp::c_app::error_callback(int error, const char* description){
@@ -60,6 +62,13 @@ void qpp::c_app::run(){
   ImGui::CreateContext();
   ImGuiIO& io = ImGui::GetIO(); (void)io;
   io.Fonts->AddFontDefault();
+  /*ImWchar ranges[] = { 0xf000, 0xf3ff, 0 };
+  ImFontConfig config;
+  config.MergeMode = true;*/
+
+  //  io.Fonts->AddFontFromFileTTF("../tools/qppcad/assets/fa-regular-400.ttf",
+  //                               16.0f);
+
   io.Fonts->Build();
   io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 
@@ -82,9 +91,24 @@ void qpp::c_app::run(){
   qpp::c_app::log("qpp::cad initialized succesfully!");
   app_state* astate = &(c_app::get_state());
 
-  while (!glfwWindowShouldClose(qpp::c_app::curWindow)){
+  glEnable(GL_DEPTH_TEST);
+  glDepthFunc(GL_LESS);
+  /// main app cycle
 
-      qpp::c_app::get_state().update();
+  float previousTime = glfwGetTime();
+  int frameCount = 0;
+
+  while (!glfwWindowShouldClose(qpp::c_app::curWindow)){
+      float currentTime = glfwGetTime();
+      frameCount++;
+      if ( currentTime - previousTime >= 1.0 ){
+          astate->FPS = frameCount;
+          frameCount = 0;
+          previousTime = currentTime;
+        }
+
+      astate->update();
+
       qpp::c_app::begin_render();
       qpp::c_app::render();
       qpp::c_app::end_render();
@@ -114,10 +138,18 @@ void qpp::c_app::begin_render(){
   ratio = width / (float) height;
   glViewport(0, 0, width, height);
 
+  if (c_app::get_state().cur_task == app_task_type::TASK_WORKSPACE_EDITOR){
+      glClearColor(0.4, 0.4, 0.4, 1);
+    }
 
-  glDepthFunc(GL_LESS);
+  if (c_app::get_state().cur_task == app_task_type::TASK_NODE_EDITOR){
+      glClearColor(1, 1, 1, 1);
+    }
 
-  glClearColor(0.4, 0.4, 0.4, 1);
+  if (c_app::get_state().cur_task == app_task_type::TASK_MENDELEY_TABLE){
+      glClearColor(0.9, 0.9, 0.9, 1);
+    }
+
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 }
@@ -128,16 +160,31 @@ void qpp::c_app::end_render(){
 
 void qpp::c_app::render(){
   app_state* astate = &(c_app::get_state());
-  astate->_workspace_manager->render_current_workspace();
+  glViewport(astate->vViewportXY(0),
+             astate->vViewportXY(1),
+             astate->vViewportWidthHeight(0),
+             astate->vViewportWidthHeight(1));
+  if (astate->cur_task == app_task_type::TASK_WORKSPACE_EDITOR)
+    astate->_workspace_manager->render_current_workspace();
+  glViewport(0, 0, astate->wWidth, astate->wHeight);
   ImGui::Render();
   ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
-
 void qpp::c_app::resize_window_callback(GLFWwindow *window,
                                         int _width, int _height){
-  qpp::c_app::get_state().wWidth = _width;
-  qpp::c_app::get_state().wHeight = _height;
+  app_state* astate = &(c_app::get_state());
+  astate->wWidth = _width;
+  astate->wHeight = _height;
+  astate->vViewportXY(0) = 0.0;
+  astate->vViewportXY(1) = astate->_ui_manager->iWorkPanelHeight +
+      astate->_ui_manager->iWorkPanelYOffset - 64;
+  astate->vViewportWidthHeight(0) = _width - astate->_ui_manager->iObjInspWidth;
+  astate->vViewportWidthHeight(1) = _height -
+      (astate->_ui_manager->iWorkPanelHeight +
+       astate->_ui_manager->iWorkPanelYOffset) ;
+
+
 }
 
 void qpp::c_app::mouse_scroll_callback(GLFWwindow *window,
@@ -147,7 +194,7 @@ void qpp::c_app::mouse_scroll_callback(GLFWwindow *window,
 }
 
 void qpp::c_app::mouse_callback(GLFWwindow *window, double x, double y){
-  std::cout<<x<<" "<<y<<std::endl;
+  //std::cout<<x<<" "<<y<<std::endl;
   qpp::c_app::get_state().update_mouse_coord(x, y);
 }
 
@@ -155,11 +202,12 @@ void qpp::c_app::mouse_button_callback(GLFWwindow *window,
                                        int button,
                                        int action,
                                        int mods){
-  bool _bUpdateCameraRotation = false;
-  _bUpdateCameraRotation =
-      (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS);
 
-   qpp::c_app::get_state().update_camera_rotation(_bUpdateCameraRotation);
+  qpp::c_app::get_state().update_camera_rotation(
+        button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS);
+
+  qpp::c_app::get_state().update_camera_translation(
+        button == GLFW_MOUSE_BUTTON_MIDDLE && action == GLFW_PRESS);
 }
 
 void qpp::c_app::log(const std::string logText){

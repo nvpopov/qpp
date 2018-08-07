@@ -28,6 +28,10 @@ namespace qpp{
     return (rad * 180) / M_PI;
   }
 
+  template <class REAL>
+  inline REAL clamp(REAL val, REAL lo, REAL hi) {
+      return std::max(lo, std::min(hi, val));
+  }
 }
 
 #endif

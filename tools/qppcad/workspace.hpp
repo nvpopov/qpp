@@ -2,6 +2,7 @@
 #define _QPP_WORKSPACE_H
 
 #include <geom/lace3d.hpp>
+#include <geom/geom.hpp>
 #include <vector>
 #include <iostream>
 
@@ -9,6 +10,12 @@ namespace qpp{
 
   class workspace;
   class ws_item;
+
+  enum ws_periodic {
+    ws_periodic_a,
+    ws_periodic_b,
+    ws_periodic_c
+  };
 
   class workspace_manager {
   public:
@@ -30,15 +37,22 @@ namespace qpp{
 
   class ws_item {
   public:
-    vector3<float> pos;
-    ws_item(){ pos = vector3<float>::Zero();}
+    std::string name;
+    ws_item(){}
     virtual void render() = 0;
+    virtual void render_ui() = 0;
   };
 
   class ws_atom_list : public ws_item {
   public:
-    ws_atom_list(){}
+    bool bPeriodicA;
+    bool bPeriodicB;
+    bool bPeriodicC;
+    periodic_cell<float> *cell;
+    geometry<float> *geom;
+    ws_atom_list();
     void render() override;
+    void render_ui() override;
   };
 
 }
