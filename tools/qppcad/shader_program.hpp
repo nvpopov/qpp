@@ -13,6 +13,7 @@ namespace qpp {
   /// Uniform fixed name
   enum sp_u_name {
     mModelView,
+    mModelViewNoScale,
     mModelViewInvTr,
     mViewInvTr,
     mModelViewProj,
@@ -45,36 +46,38 @@ namespace qpp {
 
   /// Map uniform internal name to string
   static std::map<sp_u_name, std::string> map_u2s = {
-    std::make_pair(sp_u_name::mModelView,      "mMV"),
-    std::make_pair(sp_u_name::mModelViewInvTr, "mMV_InvTr"),
-    std::make_pair(sp_u_name::mViewInvTr,      "mV_InvTr"),
-    std::make_pair(sp_u_name::mModelViewProj,  "mMVP"),
-    std::make_pair(sp_u_name::mViewProj,       "mVP"),
-    std::make_pair(sp_u_name::mView,           "mV"),
-    std::make_pair(sp_u_name::vLightPos,       "vLightPos"),
-    std::make_pair(sp_u_name::vColor,          "vColor"),
-    std::make_pair(sp_u_name::vScale,          "vScale"),
-    std::make_pair(sp_u_name::vTranslate,      "vTranslate"),
-    std::make_pair(sp_u_name::fScale,          "fScale"),
-    std::make_pair(sp_u_name::vLineStart,      "vLineStart"),
-    std::make_pair(sp_u_name::vLineEnd,        "vLineEnd")
+    std::make_pair(sp_u_name::mModelView,        "mMV"),
+    std::make_pair(sp_u_name::mModelViewNoScale, "mMV_NoScale"),
+    std::make_pair(sp_u_name::mModelViewInvTr,   "mMV_InvTr"),
+    std::make_pair(sp_u_name::mViewInvTr,        "mV_InvTr"),
+    std::make_pair(sp_u_name::mModelViewProj,    "mMVP"),
+    std::make_pair(sp_u_name::mViewProj,         "mVP"),
+    std::make_pair(sp_u_name::mView,             "mV"),
+    std::make_pair(sp_u_name::vLightPos,         "vLightPos"),
+    std::make_pair(sp_u_name::vColor,            "vColor"),
+    std::make_pair(sp_u_name::vScale,            "vScale"),
+    std::make_pair(sp_u_name::vTranslate,        "vTranslate"),
+    std::make_pair(sp_u_name::fScale,            "fScale"),
+    std::make_pair(sp_u_name::vLineStart,        "vLineStart"),
+    std::make_pair(sp_u_name::vLineEnd,          "vLineEnd")
   };
 
   /// Map uniform internal name to OpenGL uniform type
   static std::map<sp_u_name, sp_u_type> map_u2at = {
-    std::make_pair(sp_u_name::mModelView,      sp_u_type::a_m4f),
-    std::make_pair(sp_u_name::mModelViewInvTr, sp_u_type::a_m3f),
-    std::make_pair(sp_u_name::mViewInvTr,      sp_u_type::a_m3f),
-    std::make_pair(sp_u_name::mModelViewProj,  sp_u_type::a_m4f),
-    std::make_pair(sp_u_name::mViewProj,       sp_u_type::a_m4f),
-    std::make_pair(sp_u_name::mView,           sp_u_type::a_m4f),
-    std::make_pair(sp_u_name::vLightPos,       sp_u_type::a_v3f),
-    std::make_pair(sp_u_name::vColor,          sp_u_type::a_v3f),
-    std::make_pair(sp_u_name::vScale,          sp_u_type::a_v3f),
-    std::make_pair(sp_u_name::vTranslate,      sp_u_type::a_v3f),
-    std::make_pair(sp_u_name::fScale,          sp_u_type::a_sf),
-    std::make_pair(sp_u_name::vLineStart,      sp_u_type::a_v3f),
-    std::make_pair(sp_u_name::vLineEnd,        sp_u_type::a_v3f)
+    std::make_pair(sp_u_name::mModelView,        sp_u_type::a_m4f),
+    std::make_pair(sp_u_name::mModelViewNoScale, sp_u_type::a_m4f),
+    std::make_pair(sp_u_name::mModelViewInvTr,   sp_u_type::a_m3f),
+    std::make_pair(sp_u_name::mViewInvTr,        sp_u_type::a_m3f),
+    std::make_pair(sp_u_name::mModelViewProj,    sp_u_type::a_m4f),
+    std::make_pair(sp_u_name::mViewProj,         sp_u_type::a_m4f),
+    std::make_pair(sp_u_name::mView,             sp_u_type::a_m4f),
+    std::make_pair(sp_u_name::vLightPos,         sp_u_type::a_v3f),
+    std::make_pair(sp_u_name::vColor,            sp_u_type::a_v3f),
+    std::make_pair(sp_u_name::vScale,            sp_u_type::a_v3f),
+    std::make_pair(sp_u_name::vTranslate,        sp_u_type::a_v3f),
+    std::make_pair(sp_u_name::fScale,            sp_u_type::a_sf),
+    std::make_pair(sp_u_name::vLineStart,        sp_u_type::a_v3f),
+    std::make_pair(sp_u_name::vLineEnd,          sp_u_type::a_v3f)
   };
 
   /// Shader program implements wrapper around OpenGL program, i.e contains

@@ -99,6 +99,8 @@ void qpp::c_app::run(){
   int frameCount = 0;
 
   while (!glfwWindowShouldClose(qpp::c_app::curWindow)){
+
+      glfwPollEvents();
       float currentTime = glfwGetTime();
       frameCount++;
       if ( currentTime - previousTime >= 1.0 ){
@@ -112,8 +114,6 @@ void qpp::c_app::run(){
       qpp::c_app::begin_render();
       qpp::c_app::render();
       qpp::c_app::end_render();
-
-      glfwPollEvents();
     }
 
   glfwDestroyWindow(qpp::c_app::curWindow);
@@ -122,7 +122,6 @@ void qpp::c_app::run(){
 }
 
 void qpp::c_app::begin_render(){
-
 
   glfwMakeContextCurrent(qpp::c_app::curWindow);
 
@@ -151,7 +150,6 @@ void qpp::c_app::begin_render(){
     }
 
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 }
 
 void qpp::c_app::end_render(){
@@ -174,6 +172,8 @@ void qpp::c_app::render(){
 void qpp::c_app::resize_window_callback(GLFWwindow *window,
                                         int _width, int _height){
   app_state* astate = &(c_app::get_state());
+  if (_width < 0)  _width = 10;
+  if (_height < 0) _height = 10;
   astate->wWidth = _width;
   astate->wHeight = _height;
   astate->vViewportXY(0) = 0.0;
@@ -183,14 +183,13 @@ void qpp::c_app::resize_window_callback(GLFWwindow *window,
   astate->vViewportWidthHeight(1) = _height -
       (astate->_ui_manager->iWorkPanelHeight +
        astate->_ui_manager->iWorkPanelYOffset) ;
-
-
 }
 
 void qpp::c_app::mouse_scroll_callback(GLFWwindow *window,
                                        double xoffset, double yoffset){
   app_state* astate =  &(c_app::get_state());
-  astate->update_camera_dist(-yoffset);
+  if (astate->cur_task == app_task_type::TASK_WORKSPACE_EDITOR)
+    astate->_camera->update_camera_zoom(-yoffset);
 }
 
 void qpp::c_app::mouse_callback(GLFWwindow *window, double x, double y){
@@ -202,12 +201,15 @@ void qpp::c_app::mouse_button_callback(GLFWwindow *window,
                                        int button,
                                        int action,
                                        int mods){
+  app_state* astate =  &(c_app::get_state());
+  if (astate->cur_task == app_task_type::TASK_WORKSPACE_EDITOR){
 
-  qpp::c_app::get_state().update_camera_rotation(
-        button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS);
+      astate->_camera->update_camera_rotation(
+            button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS);
 
-  qpp::c_app::get_state().update_camera_translation(
-        button == GLFW_MOUSE_BUTTON_MIDDLE && action == GLFW_PRESS);
+      astate->_camera->update_camera_translation(
+            button == GLFW_MOUSE_BUTTON_MIDDLE && action == GLFW_PRESS);
+    }
 }
 
 void qpp::c_app::log(const std::string logText){

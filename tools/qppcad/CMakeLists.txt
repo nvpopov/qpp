@@ -22,6 +22,7 @@ add_executable(qppcad
     shader_program.cpp
     draw_style.cpp
     workspace.cpp
+    camera.cpp
     action.cpp
     gl_math.cpp
     ui_manager.cpp

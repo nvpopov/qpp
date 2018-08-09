@@ -4,7 +4,7 @@
 using namespace qpp;
 
 ui_manager::ui_manager(){
-  iObjInspWidth = 250;
+  iObjInspWidth = 300;
   iWorkPanelHeight = 35;
   iWorkPanelYOffset = 28;
 }
@@ -150,24 +150,26 @@ void ui_manager::render_work_panel(){
   ImGui::SameLine();
   ImGui::Spacing();
 
-  int e_camera_proj = c_app::get_state().cur_proj;
+  int e_camera_proj = c_app::get_state()._camera->cur_proj;
   ImGui::SameLine();
   ImGui::RadioButton("Persp", &e_camera_proj,
                      int(app_camera_proj_type::CAMERA_PROJ_PERSP));
   ImGui::SameLine();
   ImGui::RadioButton("Ortho", &e_camera_proj,
                      int(app_camera_proj_type::CAMERA_PROJ_ORTHO));
-  c_app::get_state().cur_proj = app_camera_proj_type(e_camera_proj);
+  c_app::get_state()._camera->cur_proj = app_camera_proj_type(e_camera_proj);
 
   ImGui::SameLine();
   if (ImGui::Button("Reset cam" , ImVec2(80,20))){
-      c_app::get_state().reset_camera();
+      c_app::get_state()._camera->reset_camera();
     }
 
   bool bCartAxis = c_app::get_state().bDrawAxis;
   ImGui::SameLine();
   ImGui::Checkbox("Cart. Axis" , &bCartAxis);
   c_app::get_state().bDrawAxis = bCartAxis;
+
+
 
   ImGui::End();
   ImGui::PopStyleVar();
@@ -181,7 +183,10 @@ void ui_manager::render_object_inspector(){
 
   app_state* astate = &(c_app::get_state());
 
-  ImGui::SetNextWindowSize(ImVec2(iObjInspWidth , astate->wHeight*0.95));
+  ImGui::SetNextWindowSize(ImVec2(iObjInspWidth ,
+                                  astate->wHeight-(iWorkPanelYOffset +
+                                  iWorkPanelHeight)
+                                  ));
   ImGui::SetNextWindowPos(ImVec2(astate->wWidth - iObjInspWidth,
                                  iWorkPanelYOffset + iWorkPanelHeight));
 
@@ -201,9 +206,9 @@ void ui_manager::render_object_inspector(){
   workspace* cur_ws = astate->_workspace_manager->ws[iCurWs];
   if (cur_ws != NULL)
     for (int i = 0; i < cur_ws->ws_items.size(); i++){
-      if (ImGui::CollapsingHeader(cur_ws->ws_items.at(i)->name.c_str()))
-          cur_ws->ws_items.at(i)->render_ui();
-    }
+        bool _clp = ImGui::CollapsingHeader(cur_ws->ws_items.at(i)->name.c_str());
+        if (_clp) cur_ws->ws_items.at(i)->render_ui();
+      }
 
 
   ImGui::End();

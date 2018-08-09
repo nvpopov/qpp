@@ -210,6 +210,7 @@ qpp::shader_program *qpp::gen_bond_draw_program(){
   std::string vs =
       "#version 330\n"
       "uniform mat4 mMV;\n"
+      "uniform mat4 mMV_NoScale;\n"
       "uniform mat4 mMVP;\n"
       "in vec3 vs_Position;\n"
       "in vec3 vs_Normal;\n"
@@ -218,7 +219,7 @@ qpp::shader_program *qpp::gen_bond_draw_program(){
       "void main(void)\n"
       "{\n"
       "  vec3 tr_Position = (vs_Position);\n"
-      "  fs_Normal = vec3(mMV * vec4(vs_Normal,0.0));\n"
+      "  fs_Normal = vec3(mMV_NoScale * vec4(vs_Normal,0.0));\n"
       "  fs_Position = vec3(mMV * vec4(tr_Position, 1.0));\n"
       "  gl_Position = mMVP * vec4(tr_Position, 1.0);\n"
       "}";
@@ -250,5 +251,6 @@ qpp::shader_program *qpp::gen_bond_draw_program(){
   sp->u_on(sp_u_name::mModelView);
   sp->u_on(sp_u_name::vLightPos);
   sp->u_on(sp_u_name::vColor);
+  sp->u_on(sp_u_name::mModelViewNoScale);
   return sp;
 }

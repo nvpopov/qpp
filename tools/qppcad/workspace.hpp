@@ -3,6 +3,7 @@
 
 #include <geom/lace3d.hpp>
 #include <geom/geom.hpp>
+#include <geom/ngbr.hpp>
 #include <vector>
 #include <iostream>
 
@@ -45,14 +46,16 @@ namespace qpp{
 
   class ws_atom_list : public ws_item {
   public:
-    bool bPeriodicA;
-    bool bPeriodicB;
-    bool bPeriodicC;
+    int iDim;
+    bool bNeedToRebuildNBT;
     periodic_cell<float> *cell;
     geometry<float> *geom;
+    bonding_table<float> *bt;
+    neighbours_table<float> *nt;
     ws_atom_list();
     void render() override;
     void render_ui() override;
+    void rebuild_ngbt();
   };
 
 }

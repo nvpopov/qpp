@@ -32,8 +32,8 @@ void default_draw_style::render_atom(const vector3<float> color,
 
   // our Model matrix equals unity matrix, so just pass matrix from app state
   astate->def_shader->set_u(sp_u_name::mModelViewProj,
-                            astate->mViewProjection.data());
-  astate->def_shader->set_u(sp_u_name::mModelView, astate->mView.data());
+                            astate->_camera->mViewProjection.data());
+  astate->def_shader->set_u(sp_u_name::mModelView, astate->_camera->mView.data());
 
   astate->_sph_meshes[0]->render();
   // astate->trm->render();
@@ -66,14 +66,17 @@ void default_draw_style::render_bond(const vector3<float> color,
   //std::cout << "posnorm = " << pos_d.norm() << std::endl;
 
   matrix4<float> mModel = mModelTr  * rotM * mModelSc ;
+  matrix4<float> mModelViewNoScale = astate->_camera->mView * mModelTr  * rotM;
 
-  matrix4<float> mModelView = astate->mView * mModel;
-  matrix4<float> mModelViewProjection = astate->mViewProjection * mModel;
+  matrix4<float> mModelView = astate->_camera->mView * mModel;
+  matrix4<float> mModelViewProjection = astate->_camera->mViewProjection * mModel;
 
   astate->bond_shader->set_u(sp_u_name::mModelViewProj,
                                   mModelViewProjection.data());
   astate->bond_shader->set_u(sp_u_name::mModelView, mModelView.data());
   astate->bond_shader->set_u(sp_u_name::vColor, (GLfloat*)(color.data()));
+  astate->bond_shader->set_u(sp_u_name::mModelViewNoScale,
+                             mModelViewNoScale.data());
 
   astate->cylinder_mesh->render();
   astate->bond_shader->end_shader_program();
@@ -108,8 +111,9 @@ void default_draw_style::render_line(const vector3<float> color,
   astate->unit_line_shader->set_u(sp_u_name::vLineEnd,
                                   (GLfloat*)vEnd.data());
   astate->unit_line_shader->set_u(sp_u_name::mModelViewProj,
-                            astate->mViewProjection.data());
-  astate->unit_line_shader->set_u(sp_u_name::mModelView, astate->mView.data());
+                            astate->_camera->mViewProjection.data());
+  astate->unit_line_shader->set_u(sp_u_name::mModelView,
+                                  astate->_camera->mView.data());
   astate->unit_line->render();
   astate->unit_line_shader->end_shader_program();
 }
