@@ -6,6 +6,7 @@
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
+#include <io/strfun.hpp>
 #include <cstdlib>
 
 namespace qpp{
@@ -19,6 +20,7 @@ namespace qpp{
     void render_main_menu();
     void render_work_panel();
     void render_task_panel();
+    void render_ws_tabs();
     void render_object_inspector();
     void render_mtable_big();
   };

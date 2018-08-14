@@ -30,6 +30,7 @@ namespace qpp {
     shader_program* def_shader;
     shader_program* unit_line_shader;
     shader_program* bond_shader;
+    shader_program* shaderLineMesh;
     workspace_manager* _workspace_manager;
     ui_manager* _ui_manager;
     camera* _camera;
@@ -45,11 +46,13 @@ namespace qpp {
     mesh* cylinder_mesh;
     mesh* unit_line;
     mesh* trm;
+    mesh* gridXZ;
 
     int FPS;
 
     int wWidth;
     int wHeight;
+
     vector2<float> vViewportXY;
     vector2<float> vViewportWidthHeight;
 
@@ -73,8 +76,7 @@ namespace qpp {
 
       FPS = 60;
       cur_task = app_task_type::TASK_WORKSPACE_EDITOR;
-      bDrawAxis = false;
-
+      bDrawAxis = true;
 
       vLigthPos = vector3<float>(0, 25.0, 25.0);
       vLightPosTr = vector3<float>(0, 0, 0);
@@ -91,11 +93,11 @@ namespace qpp {
       _sph_meshes.push_back(mesh::generate_sphere_mesh(15, 15));
       cylinder_mesh = mesh::generate_cylinder_whole(15, 4);
       unit_line = mesh::generate_unit_line();
-
+      gridXZ = mesh::generate_xz_plane(20, 0.5, 20, 0.5);
       def_shader = gen_default_program();
       unit_line_shader = gen_unit_line_program();
       bond_shader = gen_bond_draw_program();
-
+      shaderLineMesh = gen_line_mesh_program();
       _workspace_manager->init_default_workspace();
       _ui_manager = new ui_manager();
     }

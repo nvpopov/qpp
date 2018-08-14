@@ -254,3 +254,43 @@ qpp::shader_program *qpp::gen_bond_draw_program(){
   sp->u_on(sp_u_name::mModelViewNoScale);
   return sp;
 }
+
+qpp::shader_program *qpp::gen_line_mesh_program(){
+  std::string vs =
+      "#version 330\n"
+      "uniform mat4 mMV;\n"
+      "uniform mat3 mV_InvTr;\n"
+      "uniform mat4 mMVP;\n"
+      "uniform vec3 vTranslate;\n"
+      "in vec3 vs_Position;\n"
+      "out float fs_Z;\n"
+      "void main(void)\n"
+      "{\n"
+      "  vec4 tr_Position =  mMVP * vec4(vs_Position + vTranslate, 1.0);\n"
+      "  fs_Z = tr_Position.z ;\n"
+      "  gl_Position = tr_Position;\n"
+      "}";
+
+  std::string fs =
+      "#version 330\n"
+      "uniform vec3 vColor;\n"
+      "in float fs_Z;\n"
+      "out vec4 Color;\n"
+      "void main(void)\n"
+      "{\n"
+         "float effectAlpha = exp(-0.06 * max(0.0, 25 - fs_Z));"
+      "  vec4 bgColor = vec4(0.4, 0.4, 0.4, 1.0);\n"
+      "  Color = mix(vec4(vColor, 1), bgColor, effectAlpha);\n"
+      "}\n";
+
+  qpp::shader_program *sp =
+      new qpp::shader_program(std::string("grid_program"), vs, fs);
+  sp->u_on(sp_u_name::mModelViewProj);
+  sp->u_on(sp_u_name::mModelView);
+//  sp->u_on(sp_u_name::vLightPos);
+  sp->u_on(sp_u_name::mViewInvTr);
+  sp->u_on(sp_u_name::vTranslate);
+//  sp->u_on(sp_u_name::fScale);
+  sp->u_on(sp_u_name::vColor);
+  return sp;
+}

@@ -203,6 +203,8 @@ namespace qpp{
     return qpp::vector3<REAL>(vx, vy, vz);
   }
 
+  char *vec_str_to_char(const std::string & s);
+
 }
 
 #endif

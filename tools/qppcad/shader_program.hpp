@@ -103,8 +103,10 @@ namespace qpp {
 
   /// Default shader testing program - Gourand shading
   shader_program* gen_default_program();
+
   shader_program* gen_unit_line_program();
   shader_program* gen_bond_draw_program();
+  shader_program* gen_line_mesh_program();
 }
 #endif
 

@@ -3,6 +3,7 @@
 
 #include <geom/lace3d.hpp>
 #include <geom/geom.hpp>
+#include <geom/xgeom.hpp>
 #include <geom/ngbr.hpp>
 #include <vector>
 #include <iostream>
@@ -49,7 +50,7 @@ namespace qpp{
     int iDim;
     bool bNeedToRebuildNBT;
     periodic_cell<float> *cell;
-    geometry<float> *geom;
+    xgeometry<float, periodic_cell<float> > *geom;
     bonding_table<float> *bt;
     neighbours_table<float> *nt;
     ws_atom_list();

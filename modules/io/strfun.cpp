@@ -1,7 +1,14 @@
 #include "io/strfun.hpp"
 
 namespace qpp{
-  
+
+  char *vec_str_to_char(const STRING & s)
+  {
+     char *pc = new char[s.size()+1];
+     std::strcpy(pc, s.c_str());
+     return pc;
+  }
+
   template<>
   bool s2t<bool>(const STRING & s, bool & val){
     STRING s1 = tolower(s);

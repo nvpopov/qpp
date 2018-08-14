@@ -463,12 +463,12 @@ namespace qpp{
         _xbool[i].clear();
     }
 
-    /*
+
     virtual void add(STRING a, REAL _x, REAL _y, REAL _z)
     {
       add(a, {_x,_y,_z});
     }
-    
+    /*
     virtual void insert(const int j, STRING a, const REAL _x, const REAL _y, const REAL _z)
     {
       insert(j,a, {_x,_y,_z});

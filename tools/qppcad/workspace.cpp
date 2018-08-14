@@ -7,19 +7,45 @@ using namespace qpp;
 void workspace::render(){
   app_state* astate = &(c_app::get_state());
   if (astate->_draw_style != NULL){
+      astate->shaderLineMesh->begin_shader_program();
+      vector3<float> color(0.75, 0.75, 0.75);
+      astate->shaderLineMesh->set_u(sp_u_name::mModelViewProj,
+                                    astate->_camera->mViewProjection.data());
+      astate->shaderLineMesh->set_u(sp_u_name::mModelView,
+                                    astate->_camera->mView.data());
+      astate->shaderLineMesh->set_u(sp_u_name::vColor,
+                                    (GLfloat*)color.data());
+
+      for (int dx = -4; dx <= 4; dx++)
+        for (int dz = -4; dz <= 4; dz++){
+            vector3<float> vTr(dx * (20 * 0.5), 0.0, dz * (20 * 0.5));
+            astate->shaderLineMesh->set_u(sp_u_name::vTranslate,
+                                          (GLfloat*)vTr.data());
+            astate->gridXZ->render();
+
+          }
+      astate->shaderLineMesh->end_shader_program();
 
       if (astate->bDrawAxis){
-          astate->_draw_style->render_line(vector3<float>(1.0,  0.0, 0.0),
-                                           vector3<float>(0.0,  0.0, 0.0),
-                                           vector3<float>(1.0, 0.0, 0.0) );
+          vector3<float> vScrTW = astate->_camera->unproject(-0.95, -0.90);
+          // vScrTW(2) = 1.0;
+          // std::cout << astate->_camera->fStoredDist << std::endl;
+          float fAxisLen = 0.07 *astate->_camera->fStoredDist;
+          if (astate->_camera->cur_proj ==
+              app_camera_proj_type::CAMERA_PROJ_PERSP)
+            fAxisLen = 0.015;
 
-          astate->_draw_style->render_line(vector3<float>(0.0,  1.0, 0.0),
-                                           vector3<float>(0.0,  0.0, 0.0),
-                                           vector3<float>(0.0, 1.0, 0.0) );
+          astate->_draw_style->render_line(vector3<float>(1.0, 0.0, 0.0),
+                                           vector3<float>(0.0, 0.0, 0.0) + vScrTW,
+                                           vector3<float>(fAxisLen, 0.0, 0.0) + vScrTW);
 
-          astate->_draw_style->render_line(vector3<float>(0.0,  0.0, 1.0),
-                                           vector3<float>(0.0,  0.0, 0.0),
-                                           vector3<float>(0.0, 0.0, 1.0) );
+          astate->_draw_style->render_line(vector3<float>(0.0, 1.0, 0.0),
+                                           vector3<float>(0.0, 0.0, 0.0) + vScrTW,
+                                           vector3<float>(0.0, fAxisLen, 0.0) + vScrTW);
+
+          astate->_draw_style->render_line(vector3<float>(0.0, 0.0, 1.0),
+                                           vector3<float>(0.0, 0.0, 0.0) + vScrTW,
+                                           vector3<float>(0.0, 0.0, fAxisLen) + vScrTW);
         }
     }
 
@@ -37,7 +63,23 @@ ws_atom_list::ws_atom_list(){
   {0.0, 20.0, 0.0},
   {0.0, 0.0, 20.0});
 
-  geom = new geometry<float, periodic_cell<float> >(iDim);
+  geom = new xgeometry<float, periodic_cell<float> >(*cell,
+  {"atom",
+   "number",
+   "charge",
+   "x",
+   "y",
+   "z",
+   "show"},
+
+  {type_string,
+   type_int,
+   type_real,
+   type_real,
+   type_real,
+   type_real,
+   type_bool},
+  "rg1");
 
 }
 
@@ -56,25 +98,26 @@ void ws_atom_list::render(){
         }
 
 
-      for (int i = 0; i < geom->nat(); i++)
-        for (int j = 0; j < nt->n(i); j++){
-            //std::cout<< i << "  " << nt->table(i, j) <<std::endl;
-            astate->_draw_style->render_bond(vector3<float>(1.0, 1.0, 1.0),
-                                             geom->pos(i),
-                                             geom->pos(nt->table(i, j)),
-                                             0.08);
-          }
+//      for (int i = 0; i < geom->nat(); i++)
+//        for (int j = 0; j < nt->n(i); j++){
+//            //std::cout<< i << "  " << nt->table(i, j) <<std::endl;
+//            astate->_draw_style->render_bond(vector3<float>(1.0, 1.0, 1.0),
+//                                             geom->pos(i),
+//                                             geom->pos(nt->table(i, j)),
+//                                             0.08);
+//          }
     }
 }
 
 void ws_atom_list::render_ui(){
+  ImGui::Separator();
   ImGui::Button("Rebond");
   ImGui::SameLine();
   ImGui::Button("Delete");
   static bool bVisible;
   ImGui::SameLine();
   ImGui::Checkbox("Show" , &bVisible);
-
+  ImGui::Separator();
   int _dim = iDim;
   ImGui::Text("Geom. dim:"); ImGui::SameLine();
   ImGui::SliderInt("", &_dim, 0, 3);
@@ -83,16 +126,18 @@ void ws_atom_list::render_ui(){
   if (ImGui::TreeNode("Atoms")){
       for (int i = 0; i < geom->nat(); i++)
         if (ImGui::TreeNode(fmt::format("{}:{}", geom->atom(i), i).c_str())){
-          //  ImGui::Columns(2);
-//            float _x = geom->pos(i)[0];
-//            float _y = geom->pos(i)[1];
-//            float _z = geom->pos(i)[2];
+//            ImGui::SameLine();
+//            ImGui::Button("eeeee");
+            //  ImGui::Columns(2);
+            //            float _x = geom->pos(i)[0];
+            //            float _y = geom->pos(i)[1];
+            //            float _z = geom->pos(i)[2];
 
             float vec3f[3] = { geom->pos(i)[0], geom->pos(i)[1], geom->pos(i)[2]};
 
-//            ImGui::Text("X");
-//            ImGui::Text("Y");
-//            ImGui::Text("Z");
+            //            ImGui::Text("X");
+            //            ImGui::Text("Y");
+            //            ImGui::Text("Z");
             //ImGui::Se
             ImGui::Text("Pos.:");
             ImGui::SameLine();
@@ -102,7 +147,7 @@ void ws_atom_list::render_ui(){
 
 
             geom->coord(i) = vector3<float>(vec3f[0], vec3f[1], vec3f[2]);
-         //   ImGui::Columns(1);
+            //   ImGui::Columns(1);
             ImGui::TreePop();
           }
       ImGui::TreePop();
@@ -110,11 +155,11 @@ void ws_atom_list::render_ui(){
 }
 
 void ws_atom_list::rebuild_ngbt(){
-  bt->default_distance = 0.01;
-  bt->set_pair("C", "C", 1.8);
-  //nt->build_disttable();
-  geom->build_types();
-  nt->build();
+//  bt->default_distance = 0.01;
+//  bt->set_pair("C", "C", 1.8);
+//  //nt->build_disttable();
+//  geom->build_types();
+//  nt->build();
   bNeedToRebuildNBT = false;
 }
 
@@ -127,21 +172,33 @@ void workspace_manager::init_default_workspace(){
   _wsl->geom->add("O",         -1.89675,        0.44072,        0.26071);
   _wsl->geom->add("H",          1.76784,       -0.40647,       -1.07847);
   _wsl->geom->add("H",          1.89801,       -0.77424,        0.49847);
-  _wsl->geom->add("H",         0.36238,        1.46995,       -0.60184);
-  _wsl->geom->add("H",         0.50565,        1.07184,        1.11828);
-  _wsl->geom->add("H",        -0.66487,       -1.16329 ,       0.70383);
+  _wsl->geom->add("H",          0.36238,        1.46995,       -0.60184);
+  _wsl->geom->add("H",          0.50565,        1.07184,        1.11828);
+  _wsl->geom->add("H",         -0.66487,       -1.16329 ,       0.70383);
   _wsl->geom->add("H",         -0.80945,       -0.76139,       -1.02735);
   _wsl->geom->add("H",         -2.63443,       -0.14886 ,       0.18560);
-   _wsl->bt = new bonding_table<float>();
-   _wsl->bt->default_distance = 0.01;
-   _wsl->bt->set_pair("C", "C", 1.8);
-   _wsl->bt->set_pair("H", "C", 1.8);
-   _wsl->bt->set_pair("O", "C", 1.8);
-   _wsl->bt->set_pair("H", "O", 1.8);
-   _wsl->bt->set_pair("N", "C", 1.8);
-   _wsl->bt->set_pair("N", "H", 1.8);
-   _wsl->nt = new neighbours_table<float>(*_wsl->geom, *_wsl->bt);
-  _wsl->rebuild_ngbt();
+
+
+//  _wsl->bt = new bonding_table<float>();
+//  _wsl->bt->default_distance = 0.01;
+//  _wsl->bt->set_pair("C", "C", 1.8);
+//  _wsl->bt->set_pair("H", "C", 1.8);
+//  _wsl->bt->set_pair("O", "C", 1.8);
+//  _wsl->bt->set_pair("H", "O", 1.8);
+//  _wsl->bt->set_pair("N", "C", 1.8);
+//  _wsl->bt->set_pair("N", "H", 1.8);
+//  _wsl->nt = new neighbours_table<float>(*_wsl->geom, *_wsl->bt);
+//  _wsl->rebuild_ngbt();
+  ws_atom_list* _wsl2 = new ws_atom_list();
+  ws_atom_list* _wsl3 = new ws_atom_list();
+
+  _wsl2->geom->add("Ca",          2,       2,       -0.15305);
+  _wsl2->geom->add("F",          0.46128,        2,        0.10589);
+  _wsl2->geom->add("F",         -0.74491,       -0.32028,       -0.01207);
+
+  _wsl3->geom->add("Ba",          1,       2,       -0.15305);
+  _wsl3->geom->add("Zn",          2,        2,        0.10589);
+  _wsl3->geom->add("O",         -0.74491,       -1.32028,       -0.01207);
 
   workspace* _ws = new workspace();
   _ws->ws_name = "default1";
@@ -153,6 +210,9 @@ void workspace_manager::init_default_workspace(){
   _ws3->ws_name = "default3";
 
   _ws->ws_items.push_back(_wsl);
+  _ws2->ws_items.push_back(_wsl2);
+  _ws3->ws_items.push_back(_wsl3);
+
   ws.push_back(_ws2);
   ws.push_back(_ws3);
   ws.push_back(_ws);

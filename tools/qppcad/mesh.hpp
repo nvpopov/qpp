@@ -38,9 +38,13 @@ namespace qpp{
     GLenum mesh_rt;
 
     mesh();
-    static mesh* generate_sphere_mesh(const int latBands, const int longBands);
-    static mesh* generate_cylinder_whole(const int numPhi, const int numZ);
+    static mesh *generate_sphere_mesh(const int latBands, const int longBands);
+    static mesh *generate_cylinder_whole(const int numPhi, const int numZ);
     static mesh *generate_unit_line();
+    static mesh *generate_xz_plane(const int iNumX,
+                                   const float fDeltaX,
+                                   const int iNumZ,
+                                   const float fDeltaZ);
     void render();
     void bind_data();
   };
@@ -50,14 +54,6 @@ namespace qpp{
                               const vector3<REAL> _v){
     for (int i = 0; i < 3; i++) invec.push_back(_v(i));
   }
-
-  ///unit sphere mesh
-  class sphere_mesh : public mesh{
-  public:
-    sphere_mesh(const float radius = 1.0f,
-                const unsigned int num_azimut = 12,
-                const unsigned int num_polar = 12);
-  };
 
 }
 #endif

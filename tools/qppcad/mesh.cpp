@@ -55,51 +55,6 @@ void mesh::bind_data(){
                  indicesData.size()) << std::endl;
 }
 
-sphere_mesh::sphere_mesh(const float radius,
-                         const unsigned int num_azimut,
-                         const unsigned int num_polar) : mesh(){
-
-  unsigned int total_segs = num_azimut * num_polar;
-
-  float azimut_step = (2.0f * float(qpp::pi)) / float(num_azimut);
-  float polar_step = float(qpp::pi) / float(num_polar);
-
-  float r = 1.0f;
-  num_vertices = 0;
-
-  for (unsigned int m = 0; m < num_azimut; m++)
-    for (unsigned int n = 0; n < num_polar; n++){
-        float phi = azimut_step * m;
-        float theta = polar_step * n;
-
-        float x = r * sin(theta) * cos(phi);
-        float y = r * sin(theta) * sin(phi);
-        float z = r * cos(theta);
-
-        vertexData.push_back(x);
-        vertexData.push_back(y);
-        vertexData.push_back(z);
-        vector3<float> vx(x,y,z);
-        vector3<float> norm = vx.normalized();
-
-        for (int i = 0; i < 3; i++) normalData.push_back(norm(i));
-
-        indicesData.push_back(num_vertices % total_segs);
-        indicesData.push_back((num_vertices + num_azimut) % total_segs);
-        indicesData.push_back((num_vertices + num_azimut + 1) %
-                              total_segs);
-
-        indicesData.push_back(num_vertices % total_segs);
-        indicesData.push_back((num_vertices + num_azimut + 1) %
-                              total_segs);
-        indicesData.push_back((num_vertices + 1) % total_segs);
-
-        num_vertices++;
-      }
-
-  bind_data();
-}
-
 mesh* mesh::generate_sphere_mesh(const int latBands, const int longBands){
   mesh* _mesh = new mesh();
 
@@ -234,6 +189,61 @@ mesh *mesh::generate_unit_line(){
   _mesh->mesh_rt = GL_LINES;
   return _mesh;
 
+}
+
+mesh *mesh::generate_xz_plane(const int iNumX,
+                              const float fDeltaX,
+                              const int iNumZ,
+                              const float fDeltaZ){
+  mesh* _mesh = new mesh();
+
+  for (int ix = 0; ix < iNumX; ix++){
+      _mesh->vertexData.push_back(fDeltaX * ix);
+      _mesh->vertexData.push_back(0.0);
+      _mesh->vertexData.push_back(0);
+
+      _mesh->normalData.push_back(0.0);
+      _mesh->normalData.push_back(0.0);
+      _mesh->normalData.push_back(0.0);
+
+      _mesh->vertexData.push_back(fDeltaX * ix);
+      _mesh->vertexData.push_back(0.0);
+      _mesh->vertexData.push_back(iNumZ*fDeltaZ);
+
+      _mesh->normalData.push_back(0.0);
+      _mesh->normalData.push_back(0.0);
+      _mesh->normalData.push_back(0.0);
+    }
+
+  for (int iz = 0; iz < iNumZ; iz++){
+      _mesh->vertexData.push_back(0);
+      _mesh->vertexData.push_back(0.0);
+      _mesh->vertexData.push_back(fDeltaZ * iz);
+
+      _mesh->normalData.push_back(0.0);
+      _mesh->normalData.push_back(0.0);
+      _mesh->normalData.push_back(0.0);
+
+      _mesh->vertexData.push_back(iNumX*fDeltaX);
+      _mesh->vertexData.push_back(0.0);
+      _mesh->vertexData.push_back(fDeltaZ * iz);
+
+      _mesh->normalData.push_back(0.0);
+      _mesh->normalData.push_back(0.0);
+      _mesh->normalData.push_back(0.0);
+    }
+
+  _mesh->num_vertices = _mesh->vertexData.size() / 2;
+
+  for (int i = 0; i < _mesh->num_vertices; i++){
+     _mesh->indicesData.push_back(i * 2 );
+     _mesh->indicesData.push_back(i * 2 + 1);
+    }
+
+
+  _mesh->bind_data();
+  _mesh->mesh_rt = GL_LINES;
+  return _mesh;
 }
 
 

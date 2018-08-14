@@ -14,6 +14,7 @@ void ui_manager::render_ui(){
   render_task_panel();
   if(c_app::get_state().cur_task == app_task_type::TASK_WORKSPACE_EDITOR){
       render_work_panel();
+      render_ws_tabs();
       render_object_inspector();
     }
 
@@ -23,7 +24,8 @@ void ui_manager::render_ui(){
 }
 
 void ui_manager::render_main_menu(){
-
+  bool bShowExitDialog = false;
+  app_state* astate = &(c_app::get_state());
   //
   //ImGui::PushStyleVar(, ImVec2(0.85, 2.85));
   ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(8,8));
@@ -37,26 +39,8 @@ void ui_manager::render_main_menu(){
           ImGui::MenuItem("Save as");
 
           if (ImGui::MenuItem("Exit")){
-
               qpp::c_app::log("Menu -> File -> Exit clicked");
-              ImGui::OpenPopup("Warning");
-              bool _show_exit_md = true;
-              if (ImGui::BeginPopupModal("Warning",
-                                         nullptr,
-                                         ImGuiWindowFlags_AlwaysAutoResize)){
-                  ImGui::Text("Do you want to quit?");
-                  if (ImGui::Button("Yes", ImVec2(120, 40))){
-                      //ImGui::CloseCurrentPopup();
-                      exit(0);
-                    }
-                  if (ImGui::Button("No", ImVec2(120, 40))){
-                      //ImGui::CloseCurrentPopup();
-                    }
-
-                  ImGui::SetItemDefaultFocus();
-                  ImGui::EndPopup();
-                }
-
+              bShowExitDialog = true;
             }
 
           ImGui::EndMenu();
@@ -82,6 +66,7 @@ void ui_manager::render_main_menu(){
         }
 
       int e_task = c_app::get_state().cur_task;
+      ImGui::Separator();
       ImGui::SameLine();
       ImGui::RadioButton("Workspace editor", &e_task,
                          int(app_task_type::TASK_WORKSPACE_EDITOR));
@@ -92,14 +77,63 @@ void ui_manager::render_main_menu(){
       ImGui::RadioButton("Mendeley table", &e_task,
                          int(app_task_type::TASK_MENDELEY_TABLE));
       c_app::get_state().cur_task = app_task_type(e_task);
+      ImGui::Separator();
+      ImGui::SameLine();
+
+      //
+      int iCurWS = astate->_workspace_manager->iCurrentWorkSpace;
+      std::vector<std::string>  vStr;
+      std::vector<char*>  vChar;
+      for (int i = 0; i < astate->_workspace_manager->ws.size(); i++)
+        vStr.push_back(astate->_workspace_manager->ws[i]->ws_name);
+      std::transform(vStr.begin(), vStr.end(),
+                     std::back_inserter(vChar),
+                     vec_str_to_char);
+      ImGui::PushItemWidth(150);
+      ImGui::Combo("Workspace", &iCurWS, vChar.data(),
+                   astate->_workspace_manager->ws.size());
+      ImGui::PopItemWidth();
+
+      for ( size_t i = 0 ; i < vChar.size() ; i++ ) delete [] vChar[i];
+      astate->_workspace_manager->iCurrentWorkSpace = iCurWS;
+      //
+
+      if (ImGui::Button("New")){
+
+        }
+
+      if (ImGui::Button("Del")){
+
+        }
+
+      if (ImGui::Button("Ren")){
+
+        }
+
+      ImGui::Separator();
       ImGui::SameLine();
       ImGui::Text(fmt::format("| FPS : {} |", c_app::get_state().FPS).c_str());
-
 
       ImGui::EndMainMenuBar();
 
     }
+
   ImGui::PopStyleVar();
+
+  if (bShowExitDialog) ImGui::OpenPopup("Quit?");
+  if (ImGui::BeginPopupModal("Quit?")){
+      ImGui::Text("Do you want to quit?");
+      if (ImGui::Button("Yes", ImVec2(120, 40))){
+          //ImGui::CloseCurrentPopup();
+          exit(0);
+        }
+      ImGui::SameLine();
+      if (ImGui::Button("No", ImVec2(120, 40))){
+          ImGui::CloseCurrentPopup();
+        }
+      ImGui::SetItemDefaultFocus();
+      ImGui::EndPopup();
+    }
   //
 }
 
@@ -115,6 +149,8 @@ void ui_manager::render_work_panel(){
                ImGuiWindowFlags_NoScrollbar |
                ImGuiWindowFlags_NoBringToFrontOnFocus);
 
+
+
   ImGui::Button("a" , ImVec2(20,20));
 
   ImGui::SameLine();
@@ -123,8 +159,6 @@ void ui_manager::render_work_panel(){
   ImGui::SameLine();
   ImGui::Button("c" , ImVec2(20,20));
 
-  ImGui::SameLine();
-  ImGui::Spacing();
 
   ImGui::SameLine();
   ImGui::Button("Rx" , ImVec2(20,20));
@@ -134,9 +168,6 @@ void ui_manager::render_work_panel(){
 
   ImGui::SameLine();
   ImGui::Button("Rz" , ImVec2(20,20));
-
-  ImGui::SameLine();
-  ImGui::Spacing();
 
   ImGui::SameLine();
   ImGui::Button("Tx" , ImVec2(20,20));
@@ -179,13 +210,39 @@ void ui_manager::render_task_panel(){
 
 }
 
+void ui_manager::render_ws_tabs(){
+//  ImGui::SetNextWindowSize(ImVec2(c_app::get_state().wWidth - iObjInspWidth ,
+//                                  35
+//                                  ));
+//  ImGui::SetNextWindowPos(ImVec2(0,
+//                                 iWorkPanelYOffset + iWorkPanelHeight));
+
+// ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+// ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 0.f);
+
+//  if (ImGui::Begin("tanb", NULL,
+//               ImGuiWindowFlags_NoMove |
+//               ImGuiWindowFlags_NoResize |
+//               ImGuiWindowFlags_NoCollapse |
+//               ImGuiWindowFlags_NoNavFocus |
+//               ImGuiWindowFlags_NoTitleBar)){
+// // ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 1.0f);
+//  ImGui::Button("workspace1");
+//  //ImGui::PopStyleVar();
+//    }
+//  ImGui::End();
+
+//  ImGui::PopStyleVar(2);
+
+}
+
 void ui_manager::render_object_inspector(){
 
   app_state* astate = &(c_app::get_state());
 
   ImGui::SetNextWindowSize(ImVec2(iObjInspWidth ,
                                   astate->wHeight-(iWorkPanelYOffset +
-                                  iWorkPanelHeight)
+                                                   iWorkPanelHeight)
                                   ));
   ImGui::SetNextWindowPos(ImVec2(astate->wWidth - iObjInspWidth,
                                  iWorkPanelYOffset + iWorkPanelHeight));
@@ -202,6 +259,11 @@ void ui_manager::render_object_inspector(){
   //      ImGui::Button("Node\neditor" , ImVec2(75,40));
   //      ImGui::Button("Mendeley\ntable" , ImVec2(75,40));
   //  ImGui::EndGroup();
+  ImGui::Separator();
+  ImGui::Button("Add geom ");
+  ImGui::SameLine();
+  ImGui::Button("Import geom ");
+  ImGui::Separator();
   int iCurWs = astate->_workspace_manager->iCurrentWorkSpace;
   workspace* cur_ws = astate->_workspace_manager->ws[iCurWs];
   if (cur_ws != NULL)
