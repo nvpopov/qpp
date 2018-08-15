@@ -54,7 +54,7 @@ void camera::rotate_camera_around_axis(const float fAngle,
 }
 
 void camera::rotate_camera_orbit_yaw(const float fYawAngle){
-  rotate_camera_around_axis(fYawAngle, vLookUp);
+  rotate_camera_around_axis(fYawAngle, vector3<float>(0.0, 1.0, 0.0));
 }
 
 void camera::rotate_camera_orbit_pitch(const float fPitchAngle){

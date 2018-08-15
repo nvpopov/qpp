@@ -11,9 +11,11 @@ namespace qpp {
     virtual void load_style() = 0;
     virtual void unload_style() = 0;
     virtual void render() = 0;
+    virtual void begin_atom_render() = 0;
     virtual void render_atom(const vector3<float> color,
                              const vector3<float> pos,
                              const float radius) = 0;
+    virtual void end_atom_render() = 0;
     virtual void render_bond(const vector3<float> color,
                      const vector3<float> vBondStart,
                      const vector3<float> vBondEnd,
@@ -34,9 +36,13 @@ namespace qpp {
     void load_style() override;
     void unload_style() override;
     void render() override;
+
+    void begin_atom_render() override;
     void render_atom(const vector3<float> color,
                      const vector3<float> pos,
                      const float radius) override;
+    void end_atom_render() override;
+
     void render_bond(const vector3<float> color,
                      const vector3<float> vBondStart,
                      const vector3<float> vBondEnd,

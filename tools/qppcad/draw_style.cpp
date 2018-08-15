@@ -19,6 +19,11 @@ void default_draw_style::render(){
 
 }
 
+void default_draw_style::begin_atom_render(){
+  app_state* astate = &(c_app::get_state());
+  astate->def_shader->begin_shader_program();
+}
+
 void default_draw_style::render_atom(const vector3<float> color,
                                      const vector3<float> pos,
                                      const float radius){
@@ -34,9 +39,13 @@ void default_draw_style::render_atom(const vector3<float> color,
   astate->def_shader->set_u(sp_u_name::mModelViewProj,
                             astate->_camera->mViewProjection.data());
   astate->def_shader->set_u(sp_u_name::mModelView, astate->_camera->mView.data());
-
   astate->_sph_meshes[0]->render();
   // astate->trm->render();
+
+}
+
+void default_draw_style::end_atom_render(){
+  app_state* astate = &(c_app::get_state());
   astate->def_shader->end_shader_program();
 }
 

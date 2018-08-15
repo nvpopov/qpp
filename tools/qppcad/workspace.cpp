@@ -1,6 +1,7 @@
 #include <qppcad/workspace.hpp>
 #include <qppcad/app.hpp>
 #include <data/ptable.hpp>
+#include <io/geomio.hpp>
 
 using namespace qpp;
 
@@ -86,7 +87,9 @@ ws_atom_list::ws_atom_list(){
 void ws_atom_list::render(){
 
   app_state* astate = &(c_app::get_state());
+
   if (astate->_draw_style != NULL){
+      astate->_draw_style->begin_atom_render();
       for (int i = 0; i < geom->nat(); i++){
           int ap_idx = ptable::number_by_symbol(geom->atom(i));
           vector3<float> color =
@@ -106,6 +109,7 @@ void ws_atom_list::render(){
 //                                             geom->pos(nt->table(i, j)),
 //                                             0.08);
 //          }
+      astate->_draw_style->end_atom_render();
     }
 }
 
@@ -166,18 +170,22 @@ void ws_atom_list::rebuild_ngbt(){
 void workspace_manager::init_default_workspace(){
   ws_atom_list* _wsl = new ws_atom_list();
   _wsl->name = "geometry1";
-  _wsl->geom->add("N",          1.75524,       -0.03055,       -0.15305);
-  _wsl->geom->add("C",          0.46128,        0.62257,        0.10589);
-  _wsl->geom->add("C",         -0.74491,       -0.32028,       -0.01207);
-  _wsl->geom->add("O",         -1.89675,        0.44072,        0.26071);
-  _wsl->geom->add("H",          1.76784,       -0.40647,       -1.07847);
-  _wsl->geom->add("H",          1.89801,       -0.77424,        0.49847);
-  _wsl->geom->add("H",          0.36238,        1.46995,       -0.60184);
-  _wsl->geom->add("H",          0.50565,        1.07184,        1.11828);
-  _wsl->geom->add("H",         -0.66487,       -1.16329 ,       0.70383);
-  _wsl->geom->add("H",         -0.80945,       -0.76139,       -1.02735);
-  _wsl->geom->add("H",         -2.63443,       -0.14886 ,       0.18560);
-
+  std::ifstream si2("../examples/io/ref_data/slab.xyz");
+  read_xyz(si2, *(_wsl->geom));
+//  for(int i = 0; i < 30; i++)
+//   for(int j = 0; j < 30; j++){
+//   _wsl->geom->add("N",          1.75524 + j * 4,     -0.03055 +j* 4,       -0.15305 + i);
+//   _wsl->geom->add("C",          0.46128 + j * 4,        0.62257 +j* 4,        0.10589 + i);
+//   _wsl->geom->add("C",         -0.74491 + j * 4,       -0.32028 +j* 4,       -0.01207 + i);
+//   _wsl->geom->add("O",         -1.89675 + j * 4,        0.44072 +j* 4,        0.26071 + i);
+//   _wsl->geom->add("H",          1.76784 + j * 4,       -0.40647 +j* 4,       -1.07847 + i* 4);
+//   _wsl->geom->add("H",          1.89801 + j * 4,       -0.77424 +j* 4,        0.49847 + i);
+//   _wsl->geom->add("H",          0.36238 + j * 4,        1.46995 +j* 4,       -0.60184 + i);
+//   _wsl->geom->add("H",          0.50565 + j * 4,        1.07184 +j,        1.11828 + i* 4);
+//   _wsl->geom->add("H",         -0.66487 + j * 4,       -1.16329  +j,       0.70383 + i);
+//   _wsl->geom->add("H",         -0.80945 + j * 4 ,       -0.76139 +j,       -1.02735 + i* 4);
+//   _wsl->geom->add("H",         -2.63443 + j * 4,       -0.14886  +j,       0.18560 + i* 4);
+//}
 
 //  _wsl->bt = new bonding_table<float>();
 //  _wsl->bt->default_distance = 0.01;
