@@ -20,7 +20,7 @@ add_executable(qppcad
     mesh.cpp
     app.cpp
     shader_program.cpp
-    draw_style.cpp
+    draw_pipeline.cpp
     workspace.cpp
     camera.cpp
     action.cpp

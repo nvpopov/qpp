@@ -7,7 +7,7 @@
 #include <algorithm>
 #include <imgui.h>
 #include <mathf/math.hpp>
-#include <qppcad/draw_style.hpp>
+#include <qppcad/draw_pipeline.hpp>
 #include <qppcad/workspace.hpp>
 #include <qppcad/mesh.hpp>
 #include <qppcad/shader_program.hpp>
@@ -26,7 +26,7 @@ namespace qpp {
 
   class app_state {
   public:
-    draw_style* _draw_style;
+    draw_pipeline* _draw_pipeline;
     shader_program* def_shader;
     shader_program* unit_line_shader;
     shader_program* bond_shader;
@@ -61,14 +61,17 @@ namespace qpp {
     vector3<float> vLightPosTr;
 
     bool bDrawAxis;
+    bool bDrawGrid;
 
     void update_mouse_coord(const double _mcx, const double _mcy){
       MouseX = _mcx; MouseY = _mcy;}
 
     /// Update application state
     void update(){
-      _camera->update_camera();
-      vLightPosTr = mat4_to_mat3<float>(_camera->mView) * vLigthPos;
+      if (_camera != NULL){
+          _camera->update_camera();
+          vLightPosTr = mat4_to_mat3<float>(_camera->mView) * vLigthPos;
+        }
     }
 
     /// Initialize app state
@@ -77,17 +80,17 @@ namespace qpp {
       FPS = 60;
       cur_task = app_task_type::TASK_WORKSPACE_EDITOR;
       bDrawAxis = true;
+      bDrawGrid = false;
 
       vLigthPos = vector3<float>(0, 25.0, 25.0);
       vLightPosTr = vector3<float>(0, 0, 0);
-      _workspace_manager = new workspace_manager();
+
       wWidth  = 600;
       wHeight = 600;
 
-      _camera = new camera();
-      _camera->reset_camera();
+      _camera = NULL;
 
-      _draw_style = new default_draw_style();
+      _draw_pipeline = new draw_pipeline();
 
       //default meshes
       _sph_meshes.push_back(mesh::generate_sphere_mesh(15, 15));
@@ -98,6 +101,8 @@ namespace qpp {
       unit_line_shader = gen_unit_line_program();
       bond_shader = gen_bond_draw_program();
       shaderLineMesh = gen_line_mesh_program();
+
+      _workspace_manager = new workspace_manager();
       _workspace_manager->init_default_workspace();
       _ui_manager = new ui_manager();
     }

@@ -207,8 +207,8 @@ mesh *mesh::generate_xz_plane(const int iNumX,
       _mesh->normalData.push_back(0.0);
 
       _mesh->vertexData.push_back(fDeltaX * ix);
-      _mesh->vertexData.push_back(0.0);
       _mesh->vertexData.push_back(iNumZ*fDeltaZ);
+      _mesh->vertexData.push_back(0.0);
 
       _mesh->normalData.push_back(0.0);
       _mesh->normalData.push_back(0.0);
@@ -217,16 +217,16 @@ mesh *mesh::generate_xz_plane(const int iNumX,
 
   for (int iz = 0; iz < iNumZ; iz++){
       _mesh->vertexData.push_back(0);
-      _mesh->vertexData.push_back(0.0);
       _mesh->vertexData.push_back(fDeltaZ * iz);
+      _mesh->vertexData.push_back(0.0);
 
       _mesh->normalData.push_back(0.0);
       _mesh->normalData.push_back(0.0);
       _mesh->normalData.push_back(0.0);
 
       _mesh->vertexData.push_back(iNumX*fDeltaX);
-      _mesh->vertexData.push_back(0.0);
       _mesh->vertexData.push_back(fDeltaZ * iz);
+      _mesh->vertexData.push_back(0.0);
 
       _mesh->normalData.push_back(0.0);
       _mesh->normalData.push_back(0.0);

@@ -93,27 +93,31 @@ void qpp::c_app::run(){
 
   glEnable(GL_DEPTH_TEST);
   glDepthFunc(GL_LESS);
+  glEnable(GL_CULL_FACE);
+  glCullFace(GL_FRONT);
   /// main app cycle
 
   float previousTime = glfwGetTime();
   int frameCount = 0;
 
   while (!glfwWindowShouldClose(qpp::c_app::curWindow)){
+      if(!glfwGetWindowAttrib(qpp::c_app::curWindow, GLFW_ICONIFIED)){
+          glfwPollEvents();
+          float currentTime = glfwGetTime();
+          frameCount++;
+          if ( currentTime - previousTime >= 1.0 ){
+              astate->FPS = frameCount;
+              frameCount = 0;
+              previousTime = currentTime;
+            }
 
-      glfwPollEvents();
-      float currentTime = glfwGetTime();
-      frameCount++;
-      if ( currentTime - previousTime >= 1.0 ){
-          astate->FPS = frameCount;
-          frameCount = 0;
-          previousTime = currentTime;
+          astate->update();
+
+          qpp::c_app::begin_render();
+          qpp::c_app::render();
+          qpp::c_app::end_render();
         }
-
-      astate->update();
-
-      qpp::c_app::begin_render();
-      qpp::c_app::render();
-      qpp::c_app::end_render();
+      else glfwWaitEvents();
     }
 
   glfwDestroyWindow(qpp::c_app::curWindow);
@@ -188,7 +192,8 @@ void qpp::c_app::resize_window_callback(GLFWwindow *window,
 void qpp::c_app::mouse_scroll_callback(GLFWwindow *window,
                                        double xoffset, double yoffset){
   app_state* astate =  &(c_app::get_state());
-  if (astate->cur_task == app_task_type::TASK_WORKSPACE_EDITOR)
+  if ((astate->cur_task == app_task_type::TASK_WORKSPACE_EDITOR)&&
+      (astate->_camera != NULL))
     astate->_camera->update_camera_zoom(-yoffset);
 }
 
@@ -202,7 +207,8 @@ void qpp::c_app::mouse_button_callback(GLFWwindow *window,
                                        int action,
                                        int mods){
   app_state* astate =  &(c_app::get_state());
-  if (astate->cur_task == app_task_type::TASK_WORKSPACE_EDITOR){
+  if ((astate->cur_task == app_task_type::TASK_WORKSPACE_EDITOR) &&
+      (astate->_camera != NULL)){
 
       astate->_camera->update_camera_rotation(
             button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS);

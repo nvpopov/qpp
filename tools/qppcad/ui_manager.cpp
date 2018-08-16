@@ -181,18 +181,24 @@ void ui_manager::render_work_panel(){
   ImGui::SameLine();
   ImGui::Spacing();
 
-  int e_camera_proj = c_app::get_state()._camera->cur_proj;
-  ImGui::SameLine();
-  ImGui::RadioButton("Persp", &e_camera_proj,
-                     int(app_camera_proj_type::CAMERA_PROJ_PERSP));
-  ImGui::SameLine();
-  ImGui::RadioButton("Ortho", &e_camera_proj,
-                     int(app_camera_proj_type::CAMERA_PROJ_ORTHO));
-  c_app::get_state()._camera->cur_proj = app_camera_proj_type(e_camera_proj);
+  if (c_app::get_state()._camera != NULL){
+      int e_camera_proj = c_app::get_state()._camera->cur_proj;
+      ImGui::SameLine();
+      ImGui::RadioButton("Persp", &e_camera_proj,
+                         int(
+                           app_camera_proj_type::CAMERA_PROJ_PERSP));
+      ImGui::SameLine();
+      ImGui::RadioButton("Ortho", &e_camera_proj,
+                         int(
+                           app_camera_proj_type::CAMERA_PROJ_ORTHO));
+      c_app::get_state()._camera->cur_proj = app_camera_proj_type(
+            e_camera_proj);
 
-  ImGui::SameLine();
-  if (ImGui::Button("Reset cam" , ImVec2(80,20))){
-      c_app::get_state()._camera->reset_camera();
+      ImGui::SameLine();
+      if (ImGui::Button("Reset cam" , ImVec2(80,20))){
+          c_app::get_state()._workspace_manager->
+              get_current_workspace()->reset_camera();
+        }
     }
 
   bool bCartAxis = c_app::get_state().bDrawAxis;
@@ -200,7 +206,10 @@ void ui_manager::render_work_panel(){
   ImGui::Checkbox("Cart. Axis" , &bCartAxis);
   c_app::get_state().bDrawAxis = bCartAxis;
 
-
+  bool bDrawGrid = c_app::get_state().bDrawGrid;
+  ImGui::SameLine();
+  ImGui::Checkbox("Grid XY" , &bDrawGrid);
+  c_app::get_state().bDrawGrid = bDrawGrid;
 
   ImGui::End();
   ImGui::PopStyleVar();
@@ -211,28 +220,28 @@ void ui_manager::render_task_panel(){
 }
 
 void ui_manager::render_ws_tabs(){
-//  ImGui::SetNextWindowSize(ImVec2(c_app::get_state().wWidth - iObjInspWidth ,
-//                                  35
-//                                  ));
-//  ImGui::SetNextWindowPos(ImVec2(0,
-//                                 iWorkPanelYOffset + iWorkPanelHeight));
+  //  ImGui::SetNextWindowSize(ImVec2(c_app::get_state().wWidth - iObjInspWidth ,
+  //                                  35
+  //                                  ));
+  //  ImGui::SetNextWindowPos(ImVec2(0,
+  //                                 iWorkPanelYOffset + iWorkPanelHeight));
 
-// ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-// ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 0.f);
+  // ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+  // ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 0.f);
 
-//  if (ImGui::Begin("tanb", NULL,
-//               ImGuiWindowFlags_NoMove |
-//               ImGuiWindowFlags_NoResize |
-//               ImGuiWindowFlags_NoCollapse |
-//               ImGuiWindowFlags_NoNavFocus |
-//               ImGuiWindowFlags_NoTitleBar)){
-// // ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 1.0f);
-//  ImGui::Button("workspace1");
-//  //ImGui::PopStyleVar();
-//    }
-//  ImGui::End();
+  //  if (ImGui::Begin("tanb", NULL,
+  //               ImGuiWindowFlags_NoMove |
+  //               ImGuiWindowFlags_NoResize |
+  //               ImGuiWindowFlags_NoCollapse |
+  //               ImGuiWindowFlags_NoNavFocus |
+  //               ImGuiWindowFlags_NoTitleBar)){
+  // // ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 1.0f);
+  //  ImGui::Button("workspace1");
+  //  //ImGui::PopStyleVar();
+  //    }
+  //  ImGui::End();
 
-//  ImGui::PopStyleVar(2);
+  //  ImGui::PopStyleVar(2);
 
 }
 

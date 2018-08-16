@@ -1,32 +1,32 @@
-#include <qppcad/draw_style.hpp>
+#include <qppcad/draw_pipeline.hpp>
 #include <qppcad/app.hpp>
 
 using namespace qpp;
 
-default_draw_style::default_draw_style(){
+draw_pipeline::draw_pipeline(){
 
 }
 
-void default_draw_style::load_style(){
+void draw_pipeline::load_pipeline(){
 
 }
 
-void default_draw_style::unload_style(){
+void draw_pipeline::unload_pipeline(){
 
 }
 
-void default_draw_style::render(){
+void draw_pipeline::render(){
 
 }
 
-void default_draw_style::begin_atom_render(){
+void draw_pipeline::begin_atom_render(){
   app_state* astate = &(c_app::get_state());
   astate->def_shader->begin_shader_program();
 }
 
-void default_draw_style::render_atom(const vector3<float> color,
-                                     const vector3<float> pos,
-                                     const float radius){
+void draw_pipeline::render_atom(const vector3<float> color,
+                                const vector3<float> pos,
+                                const float radius){
 
   app_state* astate = &(c_app::get_state());
   astate->def_shader->begin_shader_program();
@@ -44,15 +44,15 @@ void default_draw_style::render_atom(const vector3<float> color,
 
 }
 
-void default_draw_style::end_atom_render(){
+void draw_pipeline::end_atom_render(){
   app_state* astate = &(c_app::get_state());
   astate->def_shader->end_shader_program();
 }
 
-void default_draw_style::render_bond(const vector3<float> color,
-                                     const vector3<float> vBondStart,
-                                     const vector3<float> vBondEnd,
-                                     const float fBondRadius){
+void draw_pipeline::render_bond(const vector3<float> color,
+                                const vector3<float> vBondStart,
+                                const vector3<float> vBondEnd,
+                                const float fBondRadius){
   app_state* astate = &(c_app::get_state());
   astate->bond_shader->begin_shader_program();
 
@@ -81,7 +81,7 @@ void default_draw_style::render_bond(const vector3<float> color,
   matrix4<float> mModelViewProjection = astate->_camera->mViewProjection * mModel;
 
   astate->bond_shader->set_u(sp_u_name::mModelViewProj,
-                                  mModelViewProjection.data());
+                             mModelViewProjection.data());
   astate->bond_shader->set_u(sp_u_name::mModelView, mModelView.data());
   astate->bond_shader->set_u(sp_u_name::vColor, (GLfloat*)(color.data()));
   astate->bond_shader->set_u(sp_u_name::mModelViewNoScale,
@@ -91,25 +91,25 @@ void default_draw_style::render_bond(const vector3<float> color,
   astate->bond_shader->end_shader_program();
 }
 
-void default_draw_style::render_molecule(){
+void draw_pipeline::render_molecule(){
 
 }
 
-void default_draw_style::render_cell(){
+void draw_pipeline::render_cell(){
 
 }
 
-void default_draw_style::render_vector(){
+void draw_pipeline::render_vector(){
 
 }
 
-void default_draw_style::render_primitive(){
+void draw_pipeline::render_primitive(){
 
 }
 
-void default_draw_style::render_line(const vector3<float> color,
-                                     const vector3<float> vStart,
-                                     const vector3<float> vEnd){
+void draw_pipeline::render_line(const vector3<float> color,
+                                const vector3<float> vStart,
+                                const vector3<float> vEnd){
   app_state* astate = &(c_app::get_state());
   astate->unit_line_shader->begin_shader_program();
 
@@ -120,7 +120,7 @@ void default_draw_style::render_line(const vector3<float> color,
   astate->unit_line_shader->set_u(sp_u_name::vLineEnd,
                                   (GLfloat*)vEnd.data());
   astate->unit_line_shader->set_u(sp_u_name::mModelViewProj,
-                            astate->_camera->mViewProjection.data());
+                                  astate->_camera->mViewProjection.data());
   astate->unit_line_shader->set_u(sp_u_name::mModelView,
                                   astate->_camera->mView.data());
   astate->unit_line->render();

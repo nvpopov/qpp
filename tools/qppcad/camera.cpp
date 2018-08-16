@@ -6,7 +6,7 @@ using namespace qpp;
 camera::camera(){
   fFOV = 60.0;
   fZNearPersp = 0.1;
-  fZFarPersp  = 100;
+  fZFarPersp  = 600;
   fZNearOrtho = -100;
   fZFarOrtho  = 100;
 
@@ -24,7 +24,7 @@ void camera::orthogonalize_gs(){
   vector3<float> vViewDir_n = vViewDir.normalized();
 
   if (vViewDir.isMuchSmallerThan(camera::fNormEps))
-    vLookUp = vector3<float>(0.0, 1.0, 0.0);
+    vLookUp = vector3<float>(0.0, 0.0, 1.0);
   else {
       vLookUp -= vViewDir_n * (vViewDir_n.dot(vLookUp));
       vLookUp.normalize();
@@ -54,7 +54,7 @@ void camera::rotate_camera_around_axis(const float fAngle,
 }
 
 void camera::rotate_camera_orbit_yaw(const float fYawAngle){
-  rotate_camera_around_axis(fYawAngle, vector3<float>(0.0, 1.0, 0.0));
+  rotate_camera_around_axis(fYawAngle, vector3<float>(0.0, 0.0, 1.0));
 }
 
 void camera::rotate_camera_orbit_pitch(const float fPitchAngle){
@@ -87,9 +87,9 @@ void camera::translate_camera(vector3<float> vShift){
 
 void camera::reset_camera(){
   //
-  vViewPoint = vector3<float>(0.0, 0.0, 9.0);
+  vViewPoint = vector3<float>(0.0, 9.0, 0.0);
   vLookAt    = vector3<float>(0.0, 0.0, 0.0);
-  vLookUp    = vector3<float>(0.0, 1.0, 0.0);
+  vLookUp    = vector3<float>(0.0, 0.0, 1.0);
   orthogonalize_gs();
 
   cur_proj = app_camera_proj_type::CAMERA_PROJ_PERSP;
