@@ -62,6 +62,7 @@ namespace qpp {
 
     bool bDrawAxis;
     bool bDrawGrid;
+    bool bDebugDrawRTree;
 
     void update_mouse_coord(const double _mcx, const double _mcy){
       MouseX = _mcx; MouseY = _mcy;}
@@ -81,6 +82,7 @@ namespace qpp {
       cur_task = app_task_type::TASK_WORKSPACE_EDITOR;
       bDrawAxis = true;
       bDrawGrid = false;
+      bDebugDrawRTree = false;
 
       vLigthPos = vector3<float>(0, 25.0, 25.0);
       vLightPosTr = vector3<float>(0, 0, 0);

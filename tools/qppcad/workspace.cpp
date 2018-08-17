@@ -34,6 +34,7 @@ void workspace::render(){
   app_state* astate = &(c_app::get_state());
   if (astate->_draw_pipeline != NULL){
 
+
       ///// Draw grid /////
       if (astate->bDrawGrid){
           astate->shaderLineMesh->begin_shader_program();
@@ -65,6 +66,7 @@ void workspace::render(){
               app_camera_proj_type::CAMERA_PROJ_PERSP)
             fAxisLen = 0.015;
 
+          astate->_draw_pipeline->begin_render_line();
           astate->_draw_pipeline->
               render_line(vector3<float>(1.0, 0.0, 0.0),
                           vector3<float>(0.0, 0.0, 0.0) + vScrTW,
@@ -79,6 +81,8 @@ void workspace::render(){
               render_line(vector3<float>(0.0, 0.0, 1.0),
                           vector3<float>(0.0, 0.0, 0.0) + vScrTW,
                           vector3<float>(0.0, 0.0, fAxisLen) + vScrTW);
+          astate->_draw_pipeline->end_render_line();
+
         }
       ///// Draw axis end /////
     }
@@ -114,13 +118,8 @@ ws_atom_list::ws_atom_list(){
    type_real,
    type_bool}, "rg1");
 
- // bt = new bonding_table<float>();
-//  bt->default_distance = 1.5;
-//  bt->set_pair("Si", "Si", 1.4);
- // nt = new neighbours_table<float>(*geom, *bt);
-//  nt->set_auto_update(true);
-//  nt->build();
   ext_obs = new extents_observer<float>(*geom);
+  rtree = new aux_rtree<float, periodic_cell<float>, vector3<float> >(*geom);
 }
 
 void ws_atom_list::vote_for_view_vectors(vector3<float> &vOutLookPos,
@@ -132,10 +131,30 @@ void ws_atom_list::vote_for_view_vectors(vector3<float> &vOutLookPos,
 }
 
 void ws_atom_list::render(){
-  //std::cout << ext_obs->min_pos << std::endl << ext_obs->max_pos << std::endl;
+
   app_state* astate = &(c_app::get_state());
 
   if (astate->_draw_pipeline != NULL){
+
+      if (astate->bDebugDrawRTree){
+          astate->_draw_pipeline->begin_render_aabb();
+          rtree->apply_visitor(
+                [astate](rtree_node<float, vector3<float>, 3> *inNode){
+            vector3<float> vAABBMin(inNode->rect.rect_min[0],
+                inNode->rect.rect_min[1],
+                inNode->rect.rect_min[2]);
+
+            vector3<float> vAABBMax(inNode->rect.rect_max[0],
+                inNode->rect.rect_max[1],
+                inNode->rect.rect_max[2]);
+
+            astate->_draw_pipeline->render_aabb(vector3<float>(1.0, 1.0, 1.0),
+                                                vAABBMin, vAABBMax);
+
+          });
+          astate->_draw_pipeline->end_render_aabb();
+        }
+
       // atom render start
       astate->_draw_pipeline->begin_atom_render();
       for (int i = 0; i < geom->nat(); i++){
@@ -151,14 +170,14 @@ void ws_atom_list::render(){
       // atom render end
 
       // bond render
-//      for (int i = 0; i < geom->nat(); i++)
-//        for (int j = 0; j < nt->n(i); j++){
-//            //std::cout<< i << "  " << nt->table(i, j) <<std::endl;
-//            astate->_draw_pipeline->render_bond(vector3<float>(1.0, 1.0, 1.0),
-//                                                geom->pos(i),
-//                                                geom->pos(nt->table(i, j)),
-//                                                0.08);
-//          }
+      //      for (int i = 0; i < geom->nat(); i++)
+      //        for (int j = 0; j < nt->n(i); j++){
+      //            //std::cout<< i << "  " << nt->table(i, j) <<std::endl;
+      //            astate->_draw_pipeline->render_bond(vector3<float>(1.0, 1.0, 1.0),
+      //                                                geom->pos(i),
+      //                                                geom->pos(nt->table(i, j)),
+      //                                                0.08);
+      //          }
       // bond render end
     }
 }

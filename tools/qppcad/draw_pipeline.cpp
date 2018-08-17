@@ -107,11 +107,102 @@ void draw_pipeline::render_primitive(){
 
 }
 
+void draw_pipeline::begin_render_aabb(){
+  begin_render_line();
+}
+
+void draw_pipeline::render_aabb(const vector3<float> vColor,
+                                const vector3<float> vBoxMin,
+                                const vector3<float> vBoxMax){
+
+  vector3<float> vBoxSize = vBoxMax - vBoxMin;
+
+  /// 1
+  render_line(
+        vColor,
+        vBoxMin,
+        vector3<float>(vBoxMin[0], vBoxMin[1], vBoxMin[2]+vBoxSize[2]));
+
+  /// 2
+  render_line(
+        vColor,
+        vBoxMin,
+        vector3<float>(vBoxMin[0], vBoxMin[1]+vBoxSize[1], vBoxMin[2] ));
+
+  /// 3
+  render_line(
+        vColor,
+        vBoxMin,
+        vector3<float>(vBoxSize[0]+vBoxMin[0], vBoxMin[1], vBoxMin[2]));
+
+  /// 4 +x +y
+  render_line(
+        vColor,
+        vector3<float>(vBoxMin[0]+vBoxSize[0], vBoxMin[1], vBoxMin[2]),
+        vector3<float>(vBoxMin[0]+vBoxSize[0], vBoxMin[1]+vBoxSize[1], vBoxMin[2]));
+
+  ///5 +x +z
+  render_line(
+        vColor,
+        vector3<float>(vBoxMin[0]+vBoxSize[0], vBoxMin[1], vBoxMin[2]),
+        vector3<float>(vBoxMin[0]+vBoxSize[0], vBoxMin[1], vBoxMin[2]+vBoxSize[2]));
+
+  /// 6 +y +x
+  render_line(
+        vColor,
+        vector3<float>(vBoxMin[0], vBoxMin[1]+vBoxSize[1], vBoxMin[2]),
+        vector3<float>(vBoxMin[0]+vBoxSize[0], vBoxMin[1]+vBoxSize[1], vBoxMin[2]));
+
+  /// 7 +y +z
+  render_line(
+        vColor,
+        vector3<float>(vBoxMin[0], vBoxMin[1]+vBoxSize[1], vBoxMin[2]),
+        vector3<float>(vBoxMin[0], vBoxMin[1]+vBoxSize[1], vBoxMin[2]+vBoxSize[2]));
+
+  /// 8  +z +x
+  render_line(
+        vColor,
+        vector3<float>(vBoxMin[0], vBoxMin[1], vBoxMin[2]+vBoxSize[2]),
+        vector3<float>(vBoxMin[0]+vBoxSize[1], vBoxMin[1], vBoxMin[2]+vBoxSize[2]));
+
+  /// 9 +z +y
+  render_line(
+        vColor,
+        vector3<float>(vBoxMin[0], vBoxMin[1], vBoxMin[2]+vBoxSize[2]),
+        vector3<float>(vBoxMin[0], vBoxMin[1]+vBoxSize[1], vBoxMin[2]+vBoxSize[2]));
+
+  /// 10
+  render_line(
+        vColor,
+        vBoxMax,
+        vector3<float>(vBoxMax[0], vBoxMax[1], vBoxMax[2]-vBoxSize[2]));
+
+  /// 11
+  render_line(
+        vColor,
+        vBoxMax,
+        vector3<float>(vBoxMax[0], vBoxMax[1]-vBoxSize[1], vBoxMax[2]));
+  /// 12
+ render_line(
+        vColor,
+        vBoxMax,
+        vector3<float>(vBoxMax[0]-vBoxSize[0], vBoxMax[1], vBoxMax[2]));
+}
+
+void draw_pipeline::end_render_aabb(){
+  end_render_line();
+}
+
+void draw_pipeline::begin_render_line(){
+  app_state* astate = &(c_app::get_state());
+  astate->unit_line_shader->begin_shader_program();
+}
+
 void draw_pipeline::render_line(const vector3<float> color,
                                 const vector3<float> vStart,
                                 const vector3<float> vEnd){
   app_state* astate = &(c_app::get_state());
-  astate->unit_line_shader->begin_shader_program();
+
 
   astate->unit_line_shader->set_u(sp_u_name::vColor,
                                   (GLfloat*)color.data());
@@ -124,5 +215,11 @@ void draw_pipeline::render_line(const vector3<float> color,
   astate->unit_line_shader->set_u(sp_u_name::mModelView,
                                   astate->_camera->mView.data());
   astate->unit_line->render();
+
+}
+
+void draw_pipeline::end_render_line(){
+  app_state* astate = &(c_app::get_state());
   astate->unit_line_shader->end_shader_program();
+
 }

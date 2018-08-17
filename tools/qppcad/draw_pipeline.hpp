@@ -27,9 +27,18 @@ namespace qpp {
     void render_cell();
     void render_vector();
     void render_primitive();
+
+    void begin_render_aabb();
+    void render_aabb(const vector3<float> vColor,
+                     const vector3<float> vMinPos,
+                     const vector3<float> vMaxPos);
+    void end_render_aabb();
+
+    void begin_render_line();
     void render_line(const vector3<float> color,
                      const vector3<float> vStart,
                      const vector3<float> vEnd);
+    void end_render_line();
   };
 
 }

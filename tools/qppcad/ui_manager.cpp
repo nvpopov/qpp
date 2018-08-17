@@ -53,6 +53,18 @@ void ui_manager::render_main_menu(){
           ImGui::EndMenu();
         }
 
+      if (ImGui::BeginMenu("View")){
+          if(ImGui::BeginMenu("Debug")){
+              bool bShowRTree = c_app::get_state().bDebugDrawRTree;
+              static float fRTreeSize = 0.1f;
+              ImGui::Checkbox("Show R-Tree", &bShowRTree);
+              c_app::get_state().bDebugDrawRTree = bShowRTree;
+              ImGui::SliderFloat("RTree line size", &fRTreeSize, 0.1, 2.0);
+              ImGui::EndMenu();
+            }
+          ImGui::EndMenu();
+        }
+
       if (ImGui::BeginMenu("Tools")){
           ImGui::MenuItem("Tool1");
           ImGui::MenuItem("Tool2");
