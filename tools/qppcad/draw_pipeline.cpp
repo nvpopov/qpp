@@ -29,16 +29,21 @@ void draw_pipeline::render_atom(const vector3<float> color,
                                 const float radius){
 
   app_state* astate = &(c_app::get_state());
-  astate->def_shader->begin_shader_program();
   // std::cout<<"render_atom"<<std::endl;
+
   astate->def_shader->set_u(sp_u_name::vTranslate, (GLfloat*)(pos.data()));
   astate->def_shader->set_u(sp_u_name::fScale, (GLfloat*)(&radius));
   astate->def_shader->set_u(sp_u_name::vColor, (GLfloat*)(color.data()));
 
+  matrix4<float> mModelViewInvTr = (
+        astate->_camera->mView*matrix4<float>::Identity()).inverse().transpose();
   // our Model matrix equals unity matrix, so just pass matrix from app state
   astate->def_shader->set_u(sp_u_name::mModelViewProj,
                             astate->_camera->mViewProjection.data());
   astate->def_shader->set_u(sp_u_name::mModelView, astate->_camera->mView.data());
+  astate->def_shader->set_u(sp_u_name::mModelViewInvTr,
+                            mModelViewInvTr.data());
+
   astate->_sph_meshes[0]->render();
   // astate->trm->render();
 
@@ -49,12 +54,17 @@ void draw_pipeline::end_atom_render(){
   astate->def_shader->end_shader_program();
 }
 
+void draw_pipeline::begin_render_bond(){
+  app_state* astate = &(c_app::get_state());
+  astate->bond_shader->begin_shader_program();
+}
+
 void draw_pipeline::render_bond(const vector3<float> color,
                                 const vector3<float> vBondStart,
                                 const vector3<float> vBondEnd,
                                 const float fBondRadius){
   app_state* astate = &(c_app::get_state());
-  astate->bond_shader->begin_shader_program();
+
 
   vector3<float> pos = (vBondStart + vBondEnd) * 0.5;
   vector3<float> pos_d = (vBondEnd - vBondStart);
@@ -71,7 +81,7 @@ void draw_pipeline::render_bond(const vector3<float> color,
   matrix4<float> mModelSc = matrix4<float>::Identity();
   mModelSc(0,0) = fBondRadius;
   mModelSc(1,1) = fBondRadius;
-  mModelSc(2,2) = pos_d.norm();
+  mModelSc(2,2) = pos_d.norm()/1.99;
   //std::cout << "posnorm = " << pos_d.norm() << std::endl;
 
   matrix4<float> mModel = mModelTr  * rotM * mModelSc ;
@@ -88,6 +98,11 @@ void draw_pipeline::render_bond(const vector3<float> color,
                              mModelViewNoScale.data());
 
   astate->cylinder_mesh->render();
+
+}
+
+void draw_pipeline::end_render_bond(){
+  app_state* astate = &(c_app::get_state());
   astate->bond_shader->end_shader_program();
 }
 

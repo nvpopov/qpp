@@ -35,13 +35,13 @@ namespace qpp{
     }
 
     void cmp_pos(const vector3<REAL> &vPosCm){
-      if ((vPosCm(0) > max_pos(0)) &&
-          (vPosCm(1) > max_pos(1)) &&
-          (vPosCm(2) > max_pos(2)) ) max_pos = vPosCm;
+      if ((vPosCm(0) >= max_pos(0)) &&
+          (vPosCm(1) >= max_pos(1)) &&
+          (vPosCm(2) >= max_pos(2)) ) max_pos = vPosCm;
 
-      if ((vPosCm(0) < min_pos(0)) &&
-          (vPosCm(1) < min_pos(1)) &&
-          (vPosCm(2) < min_pos(2)) ) min_pos = vPosCm;
+      if ((vPosCm(0) <= min_pos(0)) &&
+          (vPosCm(1) <= min_pos(1)) &&
+          (vPosCm(2) <= min_pos(2)) ) min_pos = vPosCm;
     }
 
     void added( before_after st,

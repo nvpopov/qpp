@@ -71,17 +71,17 @@ mesh* mesh::generate_sphere_mesh(const int latBands, const int longBands){
           float cosPhi = cos(phi);
 
           float x = cosPhi * sinTheta;   // x
-          float y = cosTheta;            // y
-          float z = sinPhi * sinTheta;   // z
+          float y = sinPhi * sinTheta;            // y
+          float z = cosTheta;   // z
 
           _mesh->vertexData.push_back(x);
           _mesh->vertexData.push_back(y);
           _mesh->vertexData.push_back(z);
 
           vector3<float> vx(x, y, z);
-          vector3<float> norm = vx.normalized();
+          //vector3<float> norm = vx.normalized();
 
-          for (int i = 0; i < 3; i++) _mesh->normalData.push_back(norm(i));
+          for (int i = 0; i < 3; i++) _mesh->normalData.push_back(vx(i));
 
           //          _mesh->normalData.push_back((x+1.0)*0.5);
           //          _mesh->normalData.push_back((y+1.0)*0.5);
@@ -131,10 +131,10 @@ mesh *mesh::generate_cylinder_whole(const int numPhi, const int numZ){
           vector3<float> p3(R*cos(phiN), R*sin(phiN), zN);
           vector3<float> p4(R*cos(phiC), R*sin(phiC), zN);
 
-          vector3<float> n1(R*cos(phiC), R*sin(phiC), 0.0);
-          vector3<float> n2(R*cos(phiN), R*sin(phiN), 0.0);
-          vector3<float> n3(R*cos(phiN), R*sin(phiN), 0.0);
-          vector3<float> n4(R*cos(phiC), R*sin(phiC), 0.0);
+          vector3<float> n1(R*cos(phiC),R*sin(phiC), zC);
+          vector3<float> n2(R*cos(phiN),R*sin(phiN), zC);
+          vector3<float> n3(R*cos(phiN),R*sin(phiN), zN);
+          vector3<float> n4(R*cos(phiC),R*sin(phiC), zN);
 //          std::cout << p1 << std::endl << std::endl
 //                    << p2 << std::endl << std::endl
 //                    << p3 << std::endl << std::endl
@@ -144,10 +144,10 @@ mesh *mesh::generate_cylinder_whole(const int numPhi, const int numZ){
           dump_vector3_to_vector<float>(_mesh->vertexData, p3);
           dump_vector3_to_vector<float>(_mesh->vertexData, p4);
 
-          dump_vector3_to_vector<float>(_mesh->normalData, n1);
-          dump_vector3_to_vector<float>(_mesh->normalData, n2);
-          dump_vector3_to_vector<float>(_mesh->normalData, n3);
-          dump_vector3_to_vector<float>(_mesh->normalData, n4);
+          dump_vector3_to_vector<float>(_mesh->normalData, n1.normalized());
+          dump_vector3_to_vector<float>(_mesh->normalData, n2.normalized());
+          dump_vector3_to_vector<float>(_mesh->normalData, n3.normalized());
+          dump_vector3_to_vector<float>(_mesh->normalData, n4.normalized());
 
           _mesh->indicesData.push_back(numIdx*4);
           _mesh->indicesData.push_back(numIdx*4 + 1);

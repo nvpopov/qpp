@@ -66,7 +66,7 @@ namespace qpp {
   static std::map<sp_u_name, sp_u_type> map_u2at = {
     std::make_pair(sp_u_name::mModelView,        sp_u_type::a_m4f),
     std::make_pair(sp_u_name::mModelViewNoScale, sp_u_type::a_m4f),
-    std::make_pair(sp_u_name::mModelViewInvTr,   sp_u_type::a_m3f),
+    std::make_pair(sp_u_name::mModelViewInvTr,   sp_u_type::a_m4f),
     std::make_pair(sp_u_name::mViewInvTr,        sp_u_type::a_m3f),
     std::make_pair(sp_u_name::mModelViewProj,    sp_u_type::a_m4f),
     std::make_pair(sp_u_name::mViewProj,         sp_u_type::a_m4f),

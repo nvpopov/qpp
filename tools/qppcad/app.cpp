@@ -92,9 +92,9 @@ void qpp::c_app::run(){
   app_state* astate = &(c_app::get_state());
 
   glEnable(GL_DEPTH_TEST);
-  glDepthFunc(GL_LESS);
+  glDepthFunc(GL_LEQUAL);
   glEnable(GL_CULL_FACE);
-  glCullFace(GL_FRONT);
+  glCullFace(GL_BACK);
   /// main app cycle
 
   float previousTime = glfwGetTime();

@@ -2,6 +2,7 @@
 #include <qppcad/app.hpp>
 #include <data/ptable.hpp>
 #include <io/geomio.hpp>
+#include <mathf/math.hpp>
 
 using namespace qpp;
 
@@ -23,6 +24,8 @@ void workspace::set_best_view(){
   ws_cam->vLookAt = _vLookAt;
   ws_cam->vViewPoint = _vLookPos;
 
+//  std::cout << "set bv " << _vLookAt << std::endl << _vLookPos << std::endl
+//            << "end bv " << std::endl;
 }
 
 void workspace::render(){
@@ -119,15 +122,20 @@ ws_atom_list::ws_atom_list(){
    type_bool}, "rg1");
 
   ext_obs = new extents_observer<float>(*geom);
-  rtree = new aux_rtree<float, periodic_cell<float>, vector3<float> >(*geom);
+  rtree = new aux_rtree<float>(*geom);
+  rtree->bAutoBonding = true;
 }
 
 void ws_atom_list::vote_for_view_vectors(vector3<float> &vOutLookPos,
                                          vector3<float> &vOutLookAt){
   vOutLookAt += (ext_obs->max_pos + ext_obs->min_pos) / 2.0;
-  vOutLookPos  += vOutLookAt +
-      vector3<float>( 1.5*(ext_obs->max_pos(0) - ext_obs->min_pos(0)),
-                      1.5*(ext_obs->max_pos(1) - ext_obs->min_pos(1)), 0);
+  vector3<float> vSize = ext_obs->max_pos - ext_obs->min_pos;
+ // std::cout << vSize << std::endl;
+  float fSize = vSize.norm();
+
+  vOutLookPos  +=
+      ext_obs->max_pos.normalized() * clamp<float>(fSize, 10.0, 100.0);
+  //std::cout << vSize << std::endl << vOutLookAt << std::endl << std::endl;
 }
 
 void ws_atom_list::render(){
@@ -139,7 +147,7 @@ void ws_atom_list::render(){
       if (astate->bDebugDrawRTree){
           astate->_draw_pipeline->begin_render_aabb();
           rtree->apply_visitor(
-                [astate](rtree_node<float, vector3<float>, 3> *inNode){
+                [astate](rtree_node<float> *inNode){
             vector3<float> vAABBMin(inNode->rect.rect_min[0],
                 inNode->rect.rect_min[1],
                 inNode->rect.rect_min[2]);
@@ -159,25 +167,41 @@ void ws_atom_list::render(){
       astate->_draw_pipeline->begin_atom_render();
       for (int i = 0; i < geom->nat(); i++){
           int ap_idx = ptable::number_by_symbol(geom->atom(i));
-          vector3<float> color =
-              ptable::get_instance()->arecs[ap_idx-1].aColorJmol;
+          float fDrawRad = 0.4;
+          vector3<float> color(0.0, 0.0, 1.0);
+
+          if(ap_idx != -1){
+              fDrawRad = ptable::get_instance()->arecs[ap_idx-1].aRadius * 0.25;
+              color = ptable::get_instance()->arecs[ap_idx-1].aColorJmol;
+            }
+
           astate->_draw_pipeline->render_atom(color,
-                                              geom->pos(i),
-                                              ptable::get_instance()->
-                                              arecs[ap_idx-1].aRadius * 0.35);
+                                              geom->pos(i), fDrawRad
+                                              );
         }
       astate->_draw_pipeline->end_atom_render();
       // atom render end
 
       // bond render
-      //      for (int i = 0; i < geom->nat(); i++)
-      //        for (int j = 0; j < nt->n(i); j++){
-      //            //std::cout<< i << "  " << nt->table(i, j) <<std::endl;
-      //            astate->_draw_pipeline->render_bond(vector3<float>(1.0, 1.0, 1.0),
-      //                                                geom->pos(i),
-      //                                                geom->pos(nt->table(i, j)),
-      //                                                0.08);
-      //          }
+      astate->_draw_pipeline->begin_render_bond();
+      int totB = 0;
+            for (int i = 0; i < geom->nat(); i++)
+              for (int j = 0; j < rtree->n(i); j++){
+                  //std::cout<< i << "  " << nt->table(i, j) <<std::endl;
+                  int ap_idx = ptable::number_by_symbol(geom->atom(i));
+                  vector3<float> color(0.0, 0.0, 1.0);
+
+                  if(ap_idx != -1){
+                      color = ptable::get_instance()->arecs[ap_idx-1].aColorJmol;
+                    }
+                  astate->_draw_pipeline->render_bond(color,
+                                                      geom->pos(i),
+                                                      geom->pos(rtree->table_atm(i,j)),
+                                                      0.08);
+                  totB += 1;
+                }
+//      std::cout << "Tot bond" << totB << std::endl;
+      astate->_draw_pipeline->end_render_bond();
       // bond render end
     }
 }
@@ -238,52 +262,34 @@ workspace *workspace_manager::get_current_workspace(){
 }
 
 void workspace_manager::init_default_workspace(){
+
   ws_atom_list* _wsl = new ws_atom_list();
   _wsl->name = "geometry1";
-  std::ifstream si2("../examples/io/ref_data/slab.xyz");
+  std::ifstream si2("../examples/io/ref_data/dna.xyz");
+  _wsl->rtree->bAutoBonding = false;
   read_xyz(si2, *(_wsl->geom));
-  //_wsl->make_camera_view();
-  //  for(int i = 0; i < 30; i++)
-  //   for(int j = 0; j < 30; j++){
-  //   _wsl->geom->add("N",          1.75524 + j * 4,     -0.03055 +j* 4,       -0.15305 + i);
-  //   _wsl->geom->add("C",          0.46128 + j * 4,        0.62257 +j* 4,        0.10589 + i);
-  //   _wsl->geom->add("C",         -0.74491 + j * 4,       -0.32028 +j* 4,       -0.01207 + i);
-  //   _wsl->geom->add("O",         -1.89675 + j * 4,        0.44072 +j* 4,        0.26071 + i);
-  //   _wsl->geom->add("H",          1.76784 + j * 4,       -0.40647 +j* 4,       -1.07847 + i* 4);
-  //   _wsl->geom->add("H",          1.89801 + j * 4,       -0.77424 +j* 4,        0.49847 + i);
-  //   _wsl->geom->add("H",          0.36238 + j * 4,        1.46995 +j* 4,       -0.60184 + i);
-  //   _wsl->geom->add("H",          0.50565 + j * 4,        1.07184 +j,        1.11828 + i* 4);
-  //   _wsl->geom->add("H",         -0.66487 + j * 4,       -1.16329  +j,       0.70383 + i);
-  //   _wsl->geom->add("H",         -0.80945 + j * 4 ,       -0.76139 +j,       -1.02735 + i* 4);
-  //   _wsl->geom->add("H",         -2.63443 + j * 4,       -0.14886  +j,       0.18560 + i* 4);
-  //}
+  _wsl->rtree->find_all_neighbours();
 
-  //  _wsl->bt = new bonding_table<float>();
-  //  _wsl->bt->default_distance = 0.01;
-  //  _wsl->bt->set_pair("C", "C", 1.8);
-  //  _wsl->bt->set_pair("H", "C", 1.8);
-  //  _wsl->bt->set_pair("O", "C", 1.8);
-  //  _wsl->bt->set_pair("H", "O", 1.8);
-  //  _wsl->bt->set_pair("N", "C", 1.8);
-  //  _wsl->bt->set_pair("N", "H", 1.8);
-  //  _wsl->nt = new neighbours_table<float>(*_wsl->geom, *_wsl->bt);
-  //  _wsl->rebuild_ngbt();
+
   ws_atom_list* _wsl2 = new ws_atom_list();
-  ws_atom_list* _wsl3 = new ws_atom_list();
+  std::ifstream nt2("../examples/io/ref_data/nanotube.xyz");
+  _wsl2->name = "nanotube";
+  _wsl2->rtree->bAutoBonding = false;
+  read_xyz(nt2, *(_wsl2->geom));
+  _wsl2->rtree->find_all_neighbours();
 
-  _wsl2->geom->add("Ca",          2,       2,       -0.15305);
-  _wsl2->geom->add("F",          0.46128,        2,        0.10589);
-  _wsl2->geom->add("F",         -0.74491,       -0.32028,       -0.01207);
-
-  _wsl3->geom->add("Ba",          1,       2,       -0.15305);
-  _wsl3->geom->add("Zn",          2,        2,        0.10589);
-  _wsl3->geom->add("O",         -0.74491,       -1.32028,       -0.01207);
+   ws_atom_list* _wsl3 = new ws_atom_list();
+  std::ifstream nt3("../examples/io/ref_data/cdse_nanocrystal.xyz");
+  _wsl3->name = "cdse";
+  _wsl3->rtree->bAutoBonding = false;
+  read_xyz(nt3, *(_wsl3->geom));
+  _wsl3->rtree->find_all_neighbours();
 
   workspace* _ws = new workspace();
   _ws->ws_name = "default1";
 
   workspace* _ws2 = new workspace();
-  _ws2->ws_name = "default2";
+  _ws2->ws_name = "nanotube";
 
   workspace* _ws3 = new workspace();
   _ws3->ws_name = "default3";

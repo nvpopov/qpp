@@ -19,10 +19,13 @@ namespace qpp {
                      const float radius);
     void end_atom_render();
 
+    void begin_render_bond();
     void render_bond(const vector3<float> color,
                      const vector3<float> vBondStart,
                      const vector3<float> vBondEnd,
                      const float fBondRadius);
+    void end_render_bond();
+
     void render_molecule();
     void render_cell();
     void render_vector();

@@ -10,7 +10,7 @@ camera::camera(){
   fZNearOrtho = -100;
   fZFarOrtho  = 100;
 
-  fMouseWhellCameraStep = 0.5f;
+  fMouseWhellCameraStep = 2.0f;
   fMouseZoomMinDistance = 4.0f;
   bRotateCamera = false;
   bMoveCamera = false;

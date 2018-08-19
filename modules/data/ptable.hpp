@@ -125,24 +125,28 @@ namespace qpp {
             ptable *table = ptable::get_instance();
             if ((number >= 1) && (number < PTABLE_ELEM_N))
                 return table->arecs[number-1].aIonicRadius;
+            else return 1.0f;
         }
 
         static const double cov_rad_by_number(const int number){
             ptable *table = ptable::get_instance();
             if ((number >= 1) && (number < PTABLE_ELEM_N))
                 return table->arecs[number-1].aCovRad_Slater;
+            else return 1.0f;
         }
 
         static const double vdw_rad_by_number(const int number){
             ptable *table = ptable::get_instance();
             if ((number >= 1) && (number < PTABLE_ELEM_N))
                 return table->arecs[number-1].aVdWRadius;
+            else return 1.0f;
         }
 
         static const int nval_elec_by_number(const int number){
             ptable *table = ptable::get_instance();
             if ((number >= 1) && (number < PTABLE_ELEM_N))
                 return table->arecs[number-1].aNValenceElec;
+            else return 1.0f;
         }
     };
 }

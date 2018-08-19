@@ -73,7 +73,7 @@ namespace qpp{
     xgeometry<float, periodic_cell<float> > *geom;
     bonding_table<float> *bt;
     neighbours_table<float> *nt;
-    aux_rtree<float, periodic_cell<float>, vector3<float> > *rtree;
+    aux_rtree<float, periodic_cell<float> > *rtree;
     extents_observer<float, periodic_cell<float> > *ext_obs;
 
     ws_atom_list();

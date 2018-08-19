@@ -96,7 +96,7 @@ namespace qpp {
 
       //default meshes
       _sph_meshes.push_back(mesh::generate_sphere_mesh(15, 15));
-      cylinder_mesh = mesh::generate_cylinder_whole(15, 4);
+      cylinder_mesh = mesh::generate_cylinder_whole(10, 4);
       unit_line = mesh::generate_unit_line();
       gridXZ = mesh::generate_xz_plane(20, 0.5, 20, 0.5);
       def_shader = gen_default_program();
