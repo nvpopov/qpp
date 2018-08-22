@@ -10,6 +10,9 @@
 #include <vector>
 #include <iostream>
 #include <geom/aux_rtree.hpp>
+#include <stack>
+#include <functional>
+
 
 namespace qpp{
 
@@ -28,11 +31,33 @@ namespace qpp{
     int iCurrentWorkSpace;
     std::vector<workspace*> ws;
 
+
     workspace_manager(){ iCurrentWorkSpace = -1;}
     workspace* get_current_workspace();
 
     void init_default_workspace();
     void render_current_workspace();
+  };
+
+  class Tool{
+  public:
+
+    virtual void mclick(int, int, int)=0;
+    virtual void mmove( double, double)=0;
+  };
+
+  class Pick : public Tool{
+  public:
+    Pick():selected(NULL), geom(NULL), cam(NULL){};
+
+    xgeometry<float, periodic_cell<float> > *geom;
+    std::stack<std::function<void()> >* undo_stack;
+    double x,y;
+    camera* cam;
+    std::vector<unsigned int> *selected; 
+    void mclick(int, int, int) override;
+    void mmove(double, double) override;
+
   };
 
   /// workspace
@@ -43,13 +68,22 @@ namespace qpp{
     camera* ws_cam;
     bool bFirstRender;
 
+    std::stack<std::function<void()> > undo_stack;
+
+    Tool* cur_tool;
+
     workspace(std::string _ws_name = "default"){
       ws_name = _ws_name;
       bFirstRender = true;
       ws_cam = new camera();
       ws_cam->reset_camera();
+      cur_tool = NULL;
     }
 
+    void set_tool(Tool* t);
+
+    void mclick(int button, int action, int mods);
+    void mmove(double,double);
     void reset_camera();
     void set_best_view();
     void render();
@@ -67,6 +101,7 @@ namespace qpp{
 
   class ws_atom_list : public ws_item {
   public:
+    std::vector<unsigned int> selected;
     int iDim;
     bool bNeedToRebuildNBT;
     periodic_cell<float> *cell;

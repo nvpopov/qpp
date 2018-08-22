@@ -43,6 +43,7 @@ namespace qpp{
                                      int button,
                                      int action,
                                      int mods );
+    // static void updateCallback(GLFWwindow * window);
     static void begin_render();
     static void render();
     static void end_render();

@@ -200,6 +200,11 @@ void qpp::c_app::mouse_scroll_callback(GLFWwindow *window,
 void qpp::c_app::mouse_callback(GLFWwindow *window, double x, double y){
   //std::cout<<x<<" "<<y<<std::endl;
   qpp::c_app::get_state().update_mouse_coord(x, y);
+  app_state* astate =  &(c_app::get_state());
+  if ((astate->cur_task == app_task_type::TASK_WORKSPACE_EDITOR) &&
+      (astate->_camera != NULL)){
+    astate->_workspace_manager->get_current_workspace()->mmove(x,y);
+  }
 }
 
 void qpp::c_app::mouse_button_callback(GLFWwindow *window,
@@ -215,6 +220,10 @@ void qpp::c_app::mouse_button_callback(GLFWwindow *window,
 
       astate->_camera->update_camera_translation(
             button == GLFW_MOUSE_BUTTON_MIDDLE && action == GLFW_PRESS);
+      printf("app::mouse_callback\n");
+      astate->_workspace_manager->
+      get_current_workspace()->mclick(button,action,mods);
+
     }
 }
 

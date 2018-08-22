@@ -6,6 +6,90 @@
 
 using namespace qpp;
 
+void Pick::mclick(int b, int action, int mods){
+  if(b == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS){
+    auto r0 = cam->vViewPoint;
+    auto a = cam->unproject(x,y);
+    double x0 = r0.x();
+    double y0 = r0.y();
+    double z0 = r0.z();
+    double ax = a.x();
+    double ay = a.y();
+    double az = a.z();
+    // r = r0 + a*t
+    double eps = 1;
+    double maxcos = -1e0;
+    int I = -1;
+    for(int i = 0; i< geom->nat(); i++){
+      auto r = geom->r(i);
+      auto xy = (r.x() - x0)/ax - (r.y() -y0)/ay;
+      auto zy = (r.z() - z0)/az - (r.y() -y0)/ay;
+      auto zx = (r.z() - z0)/az - (r.x() -x0)/ax;
+      if ( ( (xy - zx) <eps) && 
+           ((zx - zy) < eps) && 
+           ((xy - zy))< eps )
+      {
+        double cos = (r.x() * x0 + r.y()*y0 + r.z()*z0)/
+                     (r.norm() * sqrt(x0*x0 + y0*y0 + z0*z0));
+
+        if( cos  > maxcos){
+          maxcos = cos;
+          printf("cos %f\n", cos);
+          I=i;
+        }
+      }
+    }
+    I = 1; // fixme: hack
+    if( I != -1){
+      // select or unselect if selected
+      int found = -1;
+      for(int i =0; i< selected->size();i++){
+        if( I == selected->at(i)){
+          found = i;  
+          break; // return ;
+        }
+      }
+      if(found == -1) {
+        selected->push_back(I);
+        undo_stack->push(  [this](){
+          selected->pop_back();
+        });
+      }
+      else{
+        printf("Pick::click::unselect %i\n", found);
+        selected->erase( selected->begin() + found);
+        undo_stack->push([=,this](){
+          selected->insert(selected->begin() + found,I);
+        });
+      }
+    }
+
+  }
+  printf("Pick::mclick sels %i\n", selected->size());
+
+  if(b == GLFW_MOUSE_BUTTON_MIDDLE && action == GLFW_PRESS){
+    if(undo_stack->size() > 0){
+      undo_stack->top()();
+      undo_stack->pop();
+    }
+    printf("undo. %i f's yet\n", undo_stack->size() );
+  }
+
+}
+
+void Pick::mmove(double xx, double yy){
+  x = xx; y = yy;
+}
+
+void workspace::mmove(double x, double y){
+  cur_tool->mmove(x,y);
+}
+
+void workspace::mclick(int button, int action, int mods){
+  printf("workspace::mclick\n");
+  cur_tool->mclick(button, action, mods);
+}
+
 void workspace::reset_camera(){
   ws_cam->reset_camera();
   set_best_view();
@@ -174,6 +258,11 @@ void ws_atom_list::render(){
               fDrawRad = ptable::get_instance()->arecs[ap_idx-1].aRadius * 0.25;
               color = ptable::get_instance()->arecs[ap_idx-1].aColorJmol;
             }
+          // if is selected
+          if(std::find(selected.begin(), selected.end(),i) != selected.end())
+            color = vector3<float>(.5,.5,.5),
+            fDrawRad = 1.f;
+          ;
 
           astate->_draw_pipeline->render_atom(color,
                                               geom->pos(i), fDrawRad
@@ -262,7 +351,7 @@ workspace *workspace_manager::get_current_workspace(){
 }
 
 void workspace_manager::init_default_workspace(){
-
+// 
   ws_atom_list* _wsl = new ws_atom_list();
   _wsl->name = "geometry1";
   std::ifstream si2("../examples/io/ref_data/dna.xyz");
@@ -295,6 +384,16 @@ void workspace_manager::init_default_workspace(){
   _ws3->ws_name = "default3";
 
   _ws->ws_items.push_back(_wsl);
+  // set tools. fixme: It should not be done that
+
+  Pick * picker = new Pick;
+  picker->cam = _ws->ws_cam;
+  picker->geom= _wsl->geom;
+  picker->selected=&_wsl->selected;
+  picker->undo_stack=&_ws->undo_stack;
+  _ws->cur_tool = picker;
+
+  //////////////////////////////////////////
   _ws2->ws_items.push_back(_wsl2);
   _ws3->ws_items.push_back(_wsl3);
 
