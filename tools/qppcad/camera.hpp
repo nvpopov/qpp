@@ -1,5 +1,5 @@
-#ifndef _QPP_CAMERA_H
-#define _QPP_CAMERA_H
+#ifndef QPP_CAMERA_H
+#define QPP_CAMERA_H
 #include <geom/lace3d.hpp>
 #include <qppcad/gl_math.hpp>
 
@@ -11,8 +11,8 @@ namespace qpp{
 
   class camera{
   public:
-    static constexpr float fNormEps = 0.00001;
-    static constexpr float fNavTresh = 0.01;
+    static constexpr float fNormEps = 0.00001f;
+    static constexpr float fNavTresh = 0.01f;
     static constexpr int   iNavDivStepTranslation = 100;
     static constexpr int   iNavDivStepRotation = 100;
 

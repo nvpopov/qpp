@@ -1,6 +1,7 @@
-#ifndef _QPP_MATH_H
-#define _QPP_MATH_H
+#ifndef QPP_MATH_H
+#define QPP_MATH_H
 
+#include <algorithm>
 #include <cmath>
 
 namespace qpp{
@@ -31,6 +32,12 @@ namespace qpp{
   template <class REAL>
   inline REAL clamp(REAL val, REAL lo, REAL hi) {
       return std::max(lo, std::min(hi, val));
+  }
+
+  template <class REAL>
+  inline bool cmp_eps(const REAL a, const REAL b){
+    return std::fabs(a-b) <= std::numeric_limits<REAL>::epsilon() *
+        std::max(1.0f, std::max(std::fabs(a), std::fabs(b)));
   }
 }
 

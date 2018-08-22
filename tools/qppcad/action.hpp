@@ -1,4 +1,4 @@
-#ifndef _QPP_ACTION_H
-#define _QPP_ACTION_H
+#ifndef QPP_ACTION_H
+#define QPP_ACTION_H
 
 #endif

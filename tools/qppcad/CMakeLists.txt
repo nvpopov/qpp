@@ -22,6 +22,8 @@ add_executable(qppcad
     shader_program.cpp
     draw_pipeline.cpp
     workspace.cpp
+    ws_item.cpp
+    ws_atom_list.cpp
     camera.cpp
     action.cpp
     gl_math.cpp

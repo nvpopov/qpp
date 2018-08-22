@@ -1,5 +1,5 @@
-#ifndef _QPP_CAD_DRAW_PIPELINE_
-#define _QPP_CAD_DRAW_PIPELINE_
+#ifndef QPP_CAD_DRAW_PIPELINE_
+#define QPP_CAD_DRAW_PIPELINE_
 #include <string>
 #include <Eigen/Eigen>
 #include <geom/lace3d.hpp>

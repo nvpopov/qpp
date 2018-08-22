@@ -58,7 +58,7 @@ namespace qpp {
         std::map<std::string, int> cache_atom_idx;
         std::array<ptable_atom_record, PTABLE_ELEM_N> arecs;
 
-        static ptable* get_instance(){
+        static ptable* get_inst(){
             if(!instance){
                     instance = new ptable();
                     instance->init_default();
@@ -83,21 +83,21 @@ namespace qpp {
         ptable(){}
 
         static STRING symbol_by_number(const int number){
-            ptable *table = ptable::get_instance();
+            ptable *table = ptable::get_inst();
             if ((number >= 1) && (number < PTABLE_ELEM_N))
                 return table->arecs[number-1].aSymbol;
             return PTABLE_NONE;
         }
 
         static STRING name_by_number(const int number){
-            ptable *table = ptable::get_instance();
+            ptable *table = ptable::get_inst();
             if ((number >= 1) && (number < PTABLE_ELEM_N))
                 return table->arecs[number-1].aName;
             return PTABLE_NONE;
         }
 
         static const int number_by_name(const STRING& name){
-            ptable *table = ptable::get_instance();
+            ptable *table = ptable::get_inst();
             for(int i = 0; i < PTABLE_ELEM_N; i++)
                 if(table->arecs[i].aName == name)
                     return i+1;
@@ -105,7 +105,7 @@ namespace qpp {
         }
 
         static const int number_by_symbol(const STRING& symbol){
-            ptable *table = ptable::get_instance();
+            ptable *table = ptable::get_inst();
             if ( table->cache_atom_idx.find(symbol) ==
                  table->cache_atom_idx.end() ) {
               return PTABLE_INT_NONE;
@@ -116,34 +116,34 @@ namespace qpp {
         }
 
         static const double mass_by_number(const int number){
-            ptable *table = ptable::get_instance();
+            ptable *table = ptable::get_inst();
             if ((number >= 1) && (number < PTABLE_ELEM_N))
                 return table->arecs[number-1].aMass;
         }
 
         static const double ionic_rad_by_number(const int number){
-            ptable *table = ptable::get_instance();
+            ptable *table = ptable::get_inst();
             if ((number >= 1) && (number < PTABLE_ELEM_N))
                 return table->arecs[number-1].aIonicRadius;
             else return 1.0f;
         }
 
         static const double cov_rad_by_number(const int number){
-            ptable *table = ptable::get_instance();
+            ptable *table = ptable::get_inst();
             if ((number >= 1) && (number < PTABLE_ELEM_N))
                 return table->arecs[number-1].aCovRad_Slater;
             else return 1.0f;
         }
 
         static const double vdw_rad_by_number(const int number){
-            ptable *table = ptable::get_instance();
+            ptable *table = ptable::get_inst();
             if ((number >= 1) && (number < PTABLE_ELEM_N))
                 return table->arecs[number-1].aVdWRadius;
             else return 1.0f;
         }
 
         static const int nval_elec_by_number(const int number){
-            ptable *table = ptable::get_instance();
+            ptable *table = ptable::get_inst();
             if ((number >= 1) && (number < PTABLE_ELEM_N))
                 return table->arecs[number-1].aNValenceElec;
             else return 1.0f;

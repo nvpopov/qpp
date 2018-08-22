@@ -32,9 +32,15 @@ void ui_manager::render_main_menu(){
 
   if (ImGui::BeginMainMenuBar()){
 
+      ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4,4));
       if (ImGui::BeginMenu("File")){
           ImGui::MenuItem("New");
           ImGui::MenuItem("Open");
+          if (ImGui::BeginMenu("Import")){
+              ImGui::MenuItem("Standart XYZ(0D)");
+              ImGui::MenuItem("VASP POSCAR/CONTCAR)");
+              ImGui::EndMenu();
+            }
           ImGui::MenuItem("Save");
           ImGui::MenuItem("Save as");
 
@@ -55,13 +61,16 @@ void ui_manager::render_main_menu(){
 
       if (ImGui::BeginMenu("View")){
           if(ImGui::BeginMenu("Debug")){
-              bool bShowRTree = c_app::get_state().bDebugDrawRTree;
-              static float fRTreeSize = 0.1f;
-              ImGui::Checkbox("Show R-Tree", &bShowRTree);
-              c_app::get_state().bDebugDrawRTree = bShowRTree;
-              ImGui::SliderFloat("RTree line size", &fRTreeSize, 0.1, 2.0);
+              ImGui::Checkbox("Show tws-Tree",
+                              &(c_app::get_state().bDebugDrawRTree));
+              ImGui::Checkbox("Show debug selection ray",
+                              &(c_app::get_state().bDebugDrawSelectionRay));
               ImGui::EndMenu();
             }
+
+          ImGui::Checkbox("Cartesian Axis" , &(c_app::get_state().bDrawAxis));
+          ImGui::Checkbox("Grid XY" , &(c_app::get_state().bDrawGrid));
+
           ImGui::EndMenu();
         }
 
@@ -76,6 +85,8 @@ void ui_manager::render_main_menu(){
           ImGui::MenuItem("Help2");
           ImGui::EndMenu();
         }
+
+      ImGui::PopStyleVar();
 
       int e_task = c_app::get_state().cur_task;
       ImGui::Separator();
@@ -154,74 +165,46 @@ void ui_manager::render_work_panel(){
   ImGui::SetNextWindowPos(ImVec2(0, iWorkPanelYOffset));
   ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
   //ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.1f);
-  ImGui::Begin("task_panel", NULL,
+  ImGui::Begin("task_panel", nullptr,
                ImGuiWindowFlags_NoTitleBar |
                ImGuiWindowFlags_NoMove |
                ImGuiWindowFlags_NoResize |
                ImGuiWindowFlags_NoScrollbar |
                ImGuiWindowFlags_NoBringToFrontOnFocus);
-
-
+  ImGuiWindow* window = ImGui::GetCurrentWindow();
+  window->DC.LayoutType = ImGuiLayoutType_Horizontal;
 
   ImGui::Button("a" , ImVec2(20,20));
-
-  ImGui::SameLine();
   ImGui::Button("b" , ImVec2(20,20));
-
-  ImGui::SameLine();
   ImGui::Button("c" , ImVec2(20,20));
+  ImGui::Separator();
 
-
-  ImGui::SameLine();
   ImGui::Button("Rx" , ImVec2(20,20));
-
-  ImGui::SameLine();
   ImGui::Button("Ry" , ImVec2(20,20));
-
-  ImGui::SameLine();
   ImGui::Button("Rz" , ImVec2(20,20));
+  ImGui::Separator();
 
-  ImGui::SameLine();
   ImGui::Button("Tx" , ImVec2(20,20));
-
-  ImGui::SameLine();
   ImGui::Button("Ty" , ImVec2(20,20));
-
-  ImGui::SameLine();
   ImGui::Button("Tz" , ImVec2(20,20));
+  ImGui::Separator();
 
-  ImGui::SameLine();
-  ImGui::Spacing();
-
-  if (c_app::get_state()._camera != NULL){
-      int e_camera_proj = c_app::get_state()._camera->cur_proj;
-      ImGui::SameLine();
-      ImGui::RadioButton("Persp", &e_camera_proj,
-                         int(
-                           app_camera_proj_type::CAMERA_PROJ_PERSP));
-      ImGui::SameLine();
-      ImGui::RadioButton("Ortho", &e_camera_proj,
-                         int(
-                           app_camera_proj_type::CAMERA_PROJ_ORTHO));
-      c_app::get_state()._camera->cur_proj = app_camera_proj_type(
-            e_camera_proj);
-
-      ImGui::SameLine();
-      if (ImGui::Button("Reset cam" , ImVec2(80,20))){
-          c_app::get_state()._workspace_manager->
-              get_current_workspace()->reset_camera();
-        }
+  ImGui::Text("Edit mode:");
+  int edit_mode = int(c_app::get_state().cur_edit_type);
+  ImGui::BeginTabs("newtab", 2, edit_mode, 60 );
+  if (ImGui::AddTab( "NODE")) {
+      c_app::get_state().cur_edit_type = app_edit_type::EDIT_WS_ITEM;
     }
 
-  bool bCartAxis = c_app::get_state().bDrawAxis;
-  ImGui::SameLine();
-  ImGui::Checkbox("Cart. Axis" , &bCartAxis);
-  c_app::get_state().bDrawAxis = bCartAxis;
+  if (ImGui::AddTab( "CONTENT")) {
+      c_app::get_state().cur_edit_type = app_edit_type::EDIT_WS_ITEM_CONTENT;
+    }
+  ImGui::EndTabs();
+  c_app::get_state().cur_edit_type = app_edit_type(edit_mode);
 
-  bool bDrawGrid = c_app::get_state().bDrawGrid;
-  ImGui::SameLine();
-  ImGui::Checkbox("Grid XY" , &bDrawGrid);
-  c_app::get_state().bDrawGrid = bDrawGrid;
+  ImGui::Spacing();
+  ImGui::Separator();
+
 
   ImGui::End();
   ImGui::PopStyleVar();
@@ -270,27 +253,22 @@ void ui_manager::render_object_inspector(){
 
 
   ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-  ImGui::Begin("Object inspector", NULL,
+  ImGui::Begin("Object inspector", nullptr,
                ImGuiWindowFlags_NoMove |
                ImGuiWindowFlags_NoResize |
                ImGuiWindowFlags_NoCollapse);
 
-  //  ImGui::BeginGroup();
-  //      ImGui::Button("Workspace\neditor" , ImVec2(75,40));
-  //      ImGui::Button("Node\neditor" , ImVec2(75,40));
-  //      ImGui::Button("Mendeley\ntable" , ImVec2(75,40));
-  //  ImGui::EndGroup();
   ImGui::Separator();
   ImGui::Button("Add geom ");
   ImGui::SameLine();
   ImGui::Button("Import geom ");
   ImGui::Separator();
-  int iCurWs = astate->_workspace_manager->iCurrentWorkSpace;
+  auto iCurWs = astate->_workspace_manager->iCurrentWorkSpace;
   workspace* cur_ws = astate->_workspace_manager->ws[iCurWs];
-  if (cur_ws != NULL)
-    for (int i = 0; i < cur_ws->ws_items.size(); i++){
-        bool _clp = ImGui::CollapsingHeader(cur_ws->ws_items.at(i)->name.c_str());
-        if (_clp) cur_ws->ws_items.at(i)->render_ui();
+  if (cur_ws != nullptr)
+    for (ws_item* ws_it : cur_ws->ws_items){
+        bool _clp = ImGui::CollapsingHeader(ws_it->name.c_str());
+        if (_clp) ws_it->render_ui();
       }
 
 
@@ -300,23 +278,17 @@ void ui_manager::render_object_inspector(){
 }
 
 void ui_manager::render_mtable_big(){
-  float mendFrm = 0.85;
+  float mendFrm = 0.85f;
   ImGui::SetNextWindowSize(ImVec2(c_app::get_state().wWidth*mendFrm ,
                                   c_app::get_state().wHeight*mendFrm));
-  ImGui::SetNextWindowPos(ImVec2(c_app::get_state().wWidth*(1-mendFrm)*0.5,
-                                 c_app::get_state().wHeight*(1-mendFrm)*0.5));
+  ImGui::SetNextWindowPos(ImVec2(c_app::get_state().wWidth*(1-mendFrm)*0.5f,
+                                 c_app::get_state().wHeight*(1-mendFrm)*0.5f));
 
-  ImGui::Begin("Mendeley table", NULL,
+  ImGui::Begin("Mendeley table", nullptr,
                ImGuiWindowFlags_NoMove |
                ImGuiWindowFlags_NoResize |
                ImGuiWindowFlags_NoCollapse);
 
-  //  ImGui::BeginGroup();
-  //      ImGui::Button("Workspace\neditor" , ImVec2(75,40));
-  //      ImGui::Button("Node\neditor" , ImVec2(75,40));
-  //      ImGui::Button("Mendeley\ntable" , ImVec2(75,40));
-  //  ImGui::EndGroup();
-
-
   ImGui::End();
 }
+

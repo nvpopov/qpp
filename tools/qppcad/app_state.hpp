@@ -1,5 +1,5 @@
-#ifndef _QPP_APP_STATE_H
-#define _QPP_APP_STATE_H
+#ifndef QPP_APP_STATE_H
+#define QPP_APP_STATE_H
 
 #include <GL/gl3w.h>
 #include <GLFW/glfw3.h>
@@ -18,12 +18,23 @@
 
 namespace qpp {
 
+  ///
+  /// \brief The app_task_type enum
+  ///
   enum app_task_type {
-    TASK_WORKSPACE_EDITOR,
-    TASK_NODE_EDITOR,
-    TASK_MENDELEY_TABLE
+    TASK_WORKSPACE_EDITOR = 0,
+    TASK_NODE_EDITOR = 1,
+    TASK_MENDELEY_TABLE = 2
   };
 
+  enum app_edit_type {
+    EDIT_WS_ITEM = 0,
+    EDIT_WS_ITEM_CONTENT = 1
+  };
+
+  ///
+  /// \brief The app_state class
+  ///
   class app_state {
   public:
     draw_pipeline* _draw_pipeline;
@@ -41,6 +52,8 @@ namespace qpp {
     double MouseOldY;
 
     app_task_type cur_task;
+    app_edit_type cur_edit_type;
+
     // sphere mesh with differnet resolutions
     std::vector<mesh*> _sph_meshes;
     mesh* cylinder_mesh;
@@ -63,26 +76,40 @@ namespace qpp {
     bool bDrawAxis;
     bool bDrawGrid;
     bool bDebugDrawRTree;
+    bool bDebugDrawSelectionRay;
 
+    ///
+    /// \brief update_mouse_coord
+    /// \param _mcx
+    /// \param _mcy
+    ///
     void update_mouse_coord(const double _mcx, const double _mcy){
       MouseX = _mcx; MouseY = _mcy;}
 
-    /// Update application state
+    ///
+    /// \brief update
+    ///
     void update(){
-      if (_camera != NULL){
+      if (_camera != nullptr){
           _camera->update_camera();
           vLightPosTr = mat4_to_mat3<float>(_camera->mView) * vLigthPos;
         }
     }
 
-    /// Initialize app state
+    ///
+    /// \brief app_state
+    ///
     app_state(){
 
       FPS = 60;
+
       cur_task = app_task_type::TASK_WORKSPACE_EDITOR;
+      cur_edit_type = app_edit_type::EDIT_WS_ITEM_CONTENT;
+
       bDrawAxis = true;
       bDrawGrid = false;
       bDebugDrawRTree = false;
+      bDebugDrawSelectionRay = false;
 
       vLigthPos = vector3<float>(0, 25.0, 25.0);
       vLightPosTr = vector3<float>(0, 0, 0);
@@ -90,7 +117,7 @@ namespace qpp {
       wWidth  = 600;
       wHeight = 600;
 
-      _camera = NULL;
+      _camera = nullptr;
 
       _draw_pipeline = new draw_pipeline();
 

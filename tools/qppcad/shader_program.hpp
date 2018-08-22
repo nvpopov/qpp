@@ -1,5 +1,5 @@
-#ifndef _QPP_SHADER_PROGRAM_H
-#define _QPP_SHADER_PROGRAM_H
+#ifndef QPP_SHADER_PROGRAM_H
+#define QPP_SHADER_PROGRAM_H
 #include <GL/gl3w.h>
 #include <GLFW/glfw3.h>
 #include <iostream>

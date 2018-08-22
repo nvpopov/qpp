@@ -1,5 +1,5 @@
-#ifndef _QPP_CAD_H
-#define _QPP_CAD_H
+#ifndef QPP_CAD_H
+#define QPP_CAD_H
 
 #include <GL/gl3w.h>
 #include <GLFW/glfw3.h>
@@ -52,7 +52,7 @@ namespace qpp{
     static void log(const std::string logText);
     static void run();
     static app_state & get_state(){
-      if (c_app::a_state == NULL)
+      if (c_app::a_state == nullptr)
         c_app::a_state = new qpp::app_state();
       return *a_state;
     }

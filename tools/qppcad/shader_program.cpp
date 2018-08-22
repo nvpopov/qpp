@@ -280,7 +280,7 @@ qpp::shader_program *qpp::gen_line_mesh_program(){
       "out vec4 Color;\n"
       "void main(void)\n"
       "{\n"
-         "float effectAlpha = exp(-0.06 * max(0.0, 25 - fs_Z));"
+         "float effectAlpha = exp(-0.6 * max(0.0, 76- fs_Z));"
       "  vec4 bgColor = vec4(0.4, 0.4, 0.4, 1.0);\n"
       "  Color = mix(vec4(vColor, 1), bgColor, effectAlpha);\n"
       "}\n";

@@ -1,5 +1,5 @@
-#ifndef _QPP_MESH_H
-#define _QPP_MESH_H
+#ifndef QPP_MESH_H
+#define QPP_MESH_H
 #include <GL/gl3w.h>
 #include <GLFW/glfw3.h>
 #include <iostream>

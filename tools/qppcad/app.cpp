@@ -210,6 +210,9 @@ void qpp::c_app::mouse_button_callback(GLFWwindow *window,
   if ((astate->cur_task == app_task_type::TASK_WORKSPACE_EDITOR) &&
       (astate->_camera != NULL)){
 
+      if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+          astate->_workspace_manager->mouse_click();
+
       astate->_camera->update_camera_rotation(
             button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS);
 
