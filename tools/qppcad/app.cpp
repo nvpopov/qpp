@@ -45,7 +45,7 @@ void qpp::c_app::run(){
 
   qpp::c_app::curWindow = glfwCreateWindow(800,
                                            600,
-                                           "qpp::cad", NULL, NULL);
+                                           "qpp::cad", nullptr, nullptr);
 
   if (!qpp::c_app::curWindow){
       glfwTerminate();
@@ -138,11 +138,11 @@ void qpp::c_app::begin_render(){
   int width, height;
   glfwGetFramebufferSize(qpp::c_app::curWindow, &width, &height);
 
-  ratio = width / (float) height;
+  ratio = width / static_cast<float>(height);
   glViewport(0, 0, width, height);
 
   if (c_app::get_state().cur_task == app_task_type::TASK_WORKSPACE_EDITOR){
-      glClearColor(0.4, 0.4, 0.4, 1);
+      glClearColor(0.4f, 0.4f, 0.4f, 1);
     }
 
   if (c_app::get_state().cur_task == app_task_type::TASK_NODE_EDITOR){
@@ -150,7 +150,7 @@ void qpp::c_app::begin_render(){
     }
 
   if (c_app::get_state().cur_task == app_task_type::TASK_MENDELEY_TABLE){
-      glClearColor(0.9, 0.9, 0.9, 1);
+      glClearColor(0.9f, 0.9f, 0.9f, 1);
     }
 
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

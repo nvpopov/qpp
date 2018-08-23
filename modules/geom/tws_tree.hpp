@@ -27,7 +27,21 @@
 //namespace py = pybind11;
 //#endif
 
+#define TWS_TREE_DEBUG
+
 namespace qpp{
+
+  template<typename INT_TYPE>
+  inline INT_TYPE enc_tws_idx(const INT_TYPE a, const INT_TYPE b,
+                              const INT_TYPE c){
+    return a*9+b*3+c+13;
+  }
+
+  template<typename REAL>
+  inline int enc_tws_magn(const REAL p, const REAL v){
+    REAL _t = p / v;
+    return int(std::copysignf(1.0f, _t) * (round(fabs(-_t))));
+  }
 
   /// rtree node forward declaration                                        ///
   template<typename REAL>
@@ -61,13 +75,20 @@ namespace qpp{
     return a->dist <= b->dist;
   }
 
-  /// tws tree single node                                                      //
+  ///
+  /// \brief The tws_node struct
+  ///
   template<typename REAL = float>
   struct tws_node {
       tws_node<REAL>* parent;
       aabb_3d<REAL> bb;
-      std::vector<tws_node<REAL>* > childs;
+      //std::vector<tws_node<REAL>* > childs;
       std::vector<tws_node_content<REAL>* > content;
+      std::array<tws_node<REAL>*, 27> sub_nodes {};
+      int tot_childs;
+      tws_node(){
+        tot_childs = 0;
+      }
   };
 
 
@@ -98,8 +119,8 @@ namespace qpp{
         geom = & g;
         geom->add_observer(*this);
         DIM = geom -> DIM;
-        fGuessRectSize = 20.0f;
-        fMinTWSVolume  = 100.0;
+        fGuessRectSize = 6.0f;
+        fMinTWSVolume  = 65.0;
         root = nullptr;
         bAutoBonding = false;
         bMakeDirtyDistMap = true;
@@ -113,17 +134,26 @@ namespace qpp{
             //std::cout << "create root" << std::endl;
             root = new tws_node<REAL>();
             root->bb.fill_guess(fGuessRectSize);
+            if (root->bb.volume() < fMinTWSVolume)
+              root->bb.fill_guess(pow(fMinTWSVolume, 1/3.0));
           }
 
+      }
+
+      int get_tws_sub_node_idx(tws_node<REAL> *curNode, const vector3<float> p){
+        vector3<float> vs = (curNode->bb.max - curNode->bb.min)/2;
+        vector3<float> cnt = (curNode->bb.max + curNode->bb.min)/2;
+        return enc_tws_idx(enc_tws_magn(p[0]-cnt[0], vs[0]),
+            enc_tws_magn(p[1]-cnt[1], vs[1]),
+            enc_tws_magn(p[2]-cnt[2], vs[2]));
       }
 
       ///
       /// \brief apply_visitor
       /// \param f
       ///
-      void apply_visitor(
-          std::function<void(tws_node<REAL>*)> f){
-        traverse_apply_visitor(root, f);
+      void apply_visitor(std::function<void(tws_node<REAL>*, int)> f){
+        traverse_apply_visitor(root, 0, f);
       }
 
       ///
@@ -131,11 +161,11 @@ namespace qpp{
       /// \param curNode
       /// \param f
       ///
-      void traverse_apply_visitor(tws_node<REAL> *curNode,
-                                  std::function<void(tws_node<REAL>*)> f){
-        f(curNode);
-        for(tws_node<REAL>* child : curNode->childs)
-          traverse_apply_visitor(child, f);
+      void traverse_apply_visitor(tws_node<REAL> *curNode, int deepLevel,
+                                  std::function<void(tws_node<REAL>*, int)> f){
+        f(curNode, deepLevel);
+        for(tws_node<REAL>* child : curNode->sub_nodes)
+          if (child) traverse_apply_visitor(child, deepLevel+1, f);
       }
 
       ///
@@ -159,24 +189,26 @@ namespace qpp{
                               std::vector<tws_query_data<REAL>*> *res ){
 
         if (ray_aabb_test(_ray, &(curNode->bb))){
-            if (curNode->childs.size() > 0){
-                for (tws_node<REAL> *chNode : curNode->childs)
-                  traverse_query_ray(chNode, _ray, res);
+            if (curNode->tot_childs > 0){
+                for (tws_node<REAL> *chNode : curNode->sub_nodes)
+                  if (chNode) traverse_query_ray(chNode, _ray, res);
               }
             else
               for (tws_node_content<REAL> *nc : curNode->content){
                   int ap_idx = ptable::number_by_symbol(geom->atom(nc->atm));
+
+                  //TODO: move magic aRadius
                   REAL fAtRad =
                       ptable::get_inst()->arecs[ap_idx-1].aRadius * 0.25;
                   REAL fStoredDist = 0.0;
                   REAL fRayHitDist = ray_sphere_test( _ray, geom->pos(nc->atm, nc->idx),
-                                                   fAtRad);
+                                                      fAtRad);
                   bool bRayHit = fRayHitDist > -1.0f;
 
                   if(bRayHit){
                       tws_query_data<REAL>* newd = new tws_query_data<REAL>(
-                                                   nc->atm, nc->idx,
-                                                   fRayHitDist);
+                                                     nc->atm, nc->idx,
+                                                     fRayHitDist);
                       res->push_back(newd);
                     }
                 }
@@ -214,8 +246,8 @@ namespace qpp{
 
         if (curNode->bb.test_sphere(fSphRad, vSphCnt)){
 
-            for (tws_node<REAL> *child : curNode->childs)
-              traverse_query_sphere(child, fSphRad, vSphCnt, res);
+            for (tws_node<REAL> *child : curNode->sub_nodes)
+              if (child) traverse_query_sphere(child, fSphRad, vSphCnt, res);
 
             for (tws_node_content<REAL>* cnt : curNode->content)
               if ((vSphCnt - geom->r(cnt->atm, cnt->idx)).norm() <= fSphRad)
@@ -246,27 +278,48 @@ namespace qpp{
       bool traverse_insert_object_to_tree( tws_node<REAL> *curNode,
                                            const int atm, const index & idx){
 
-        bool bInCurRect = point_aabb_test(geom->r(atm, idx), curNode->bb);
+        vector3<REAL> p = geom->r(atm, idx);
+        vector3<REAL> cn_size = curNode->bb.max - curNode->bb.min;
+        vector3<REAL> cn_center = curNode->bb.center();
+
+        bool bInCurRect = point_aabb_test(p, curNode->bb);
         if (!bInCurRect) return false;
 
         if (bInCurRect){
-
-            if ((curNode->childs.size() == 0) &&
-                (curNode->bb.volume() / 27.0 <= fMinTWSVolume)){
+            // point in box and we reach minimum volume
+            if (curNode->bb.volume() / 27.0 <= fMinTWSVolume){
                 push_data_to_tws_node(curNode, atm, idx);
                 return true;
               }
+                //it is necessary to determine the indexes of the point
+                int i_x = -1 + int((p[0]-curNode->bb.min[0])/(cn_size[0]/3));
+                int i_y = -1 + int((p[1]-curNode->bb.min[1])/(cn_size[1]/3));
+                int i_z = -1 + int((p[2]-curNode->bb.min[2])/(cn_size[2]/3));
+                int nidx = enc_tws_idx(i_x, i_y, i_z);
 
-            if (curNode->childs.size() == 0){
-                if (curNode->bb.volume() / 27.0 > fMinTWSVolume){
-                    split_tws_node(curNode);
+                if (curNode->sub_nodes[nidx] == nullptr){
+
+                    tws_node<REAL> *newNode = new tws_node<REAL>();
+
+                    //define the 0,0,0 max min
+                    vector3<REAL> z_min = curNode->bb.min + cn_size / 3;
+                    vector3<REAL> z_max = curNode->bb.max - cn_size / 3;
+
+                    newNode->bb.min = z_min + vector3<REAL>
+                                      (i_x * cn_size[0]/ 3, i_y * cn_size[1]/ 3, i_z * cn_size[2]/ 3);
+                    newNode->bb.max = z_max + vector3<REAL>
+                                      (i_x * cn_size[0]/ 3, i_y * cn_size[1]/ 3, i_z * cn_size[2]/ 3);
+
+                    curNode->sub_nodes[nidx] = newNode;
+                    curNode->tot_childs+=1;
                   }
+
+                traverse_insert_object_to_tree(curNode->sub_nodes[nidx],
+                                                      atm, idx);
               }
 
-            for (uint i = 0; i < curNode->childs.size(); i++)
-              if (traverse_insert_object_to_tree(curNode->childs[i], atm, idx))
-                return true;
-          }
+
+
 
         return false;
       }
@@ -291,64 +344,65 @@ namespace qpp{
       ///
       void grow_tws_root( const int atm, const index & idx){
 
-        vector3<REAL> vSize = (root->bb.max - root->bb.min)/2.0;
-        tws_node<REAL>* newRoot = new tws_node<REAL>();
+#ifdef TWS_TREE_DEBUG
+        std::cout<<fmt::format(">>> pre grow vol={} {} {} {} nc = {}",
+                               root->bb.volume(),
+                               geom->pos(atm,idx)[0],
+            geom->pos(atm,idx)[1],
+            geom->pos(atm,idx)[2],
+            root->tot_childs) << root->bb <<std::endl;
+#endif
+        tws_node<REAL>* oldRoot = root;
+        root = nullptr;
 
-        newRoot->bb.min = root->bb.min * 2;
-        newRoot->bb.max = root->bb.max * 2;
+        tws_node<REAL>* newRoot = new tws_node<REAL>();
+        vector3<REAL> vSize = (oldRoot->bb.max - oldRoot->bb.max);
+        newRoot->bb.min = oldRoot->bb.min * (3.0);
+        newRoot->bb.max = oldRoot->bb.max * (3.0);
         newRoot->parent = nullptr;
 
-        for (int ix = -1; ix < 2; ix++)
-          for (int iy = -1; iy < 2; iy++)
-            for (int iz = -1; iz < 2; iz++){
-
-                if ((ix == 0) && (iy == 0) && (iz == 0))
-                  newRoot->childs.push_back(root);
-
-                else {
-                    tws_node<REAL>* nNode = new tws_node<REAL>();
-                    nNode->bb.min = root->bb.min + vector3<REAL>(ix * vSize[0],
-                        iy * vSize[1],
-                        iz * vSize[2]);
-
-                    nNode->bb.max = root->bb.max + vector3<REAL>(ix * vSize[0],
-                        iy * vSize[1],
-                        iz * vSize[2]);
-
-                    newRoot->childs.push_back(nNode);
-                  }
-              }
+        newRoot->sub_nodes[enc_tws_idx(0,0,0)] = oldRoot;
+        newRoot->tot_childs += 1;
+        oldRoot->parent = newRoot;
 
         root = newRoot;
 
+#ifdef TWS_TREE_DEBUG
+        std::cout<<fmt::format(">>> post grow vol={} {} {} {} nc = {}",
+                               root->bb.volume(),
+                               geom->pos(atm,idx)[0],
+            geom->pos(atm,idx)[1],
+            geom->pos(atm,idx)[2],
+            root->tot_childs) << root->bb <<std::endl;
+#endif
       }
 
       ///
       /// \brief split_tws_node
       /// \param curNode
       ///
-      void split_tws_node(tws_node<REAL> *curNode){
-        vector3<REAL> vSize = (curNode->bb.max - curNode->bb.min)/6.0;
-        vector3<REAL> vCntr = (curNode->bb.max+ curNode->bb.min)/2.0;
+      //      void split_tws_node(tws_node<REAL> *curNode){
+      //        vector3<REAL> vSize = (curNode->bb.max - curNode->bb.min)/6.0;
+      //        vector3<REAL> vCntr = (curNode->bb.max+ curNode->bb.min)/2.0;
 
-        for (int ix = -1; ix < 2; ix++)
-          for (int iy = -1; iy < 2; iy++)
-            for (int iz = -1; iz < 2; iz++){
-                tws_node<REAL>* nNode = new tws_node<REAL>();
+      //        for (int ix = -1; ix < 2; ix++)
+      //          for (int iy = -1; iy < 2; iy++)
+      //            for (int iz = -1; iz < 2; iz++){
+      //                tws_node<REAL>* nNode = new tws_node<REAL>();
 
-                nNode->bb.min =
-                    vCntr - vSize + vector3<REAL>(ix * vSize[0] * 2,
-                    iy * vSize[1] * 2,
-                    iz * vSize[2] * 2);
+      //                nNode->bb.min =
+      //                    vCntr - vSize + vector3<REAL>(ix * vSize[0] * 2,
+      //                    iy * vSize[1] * 2,
+      //                    iz * vSize[2] * 2);
 
-                nNode->bb.max =
-                    vCntr + vSize + vector3<REAL>(ix * vSize[0] * 2,
-                    iy * vSize[1] * 2,
-                    iz * vSize[2] * 2);
+      //                nNode->bb.max =
+      //                    vCntr + vSize + vector3<REAL>(ix * vSize[0] * 2,
+      //                    iy * vSize[1] * 2,
+      //                    iz * vSize[2] * 2);
 
-                curNode->childs.push_back(nNode);
-              }
-      }
+      //                curNode->childs.push_back(nNode);
+      //              }
+      //      }
 
 
       ///
@@ -486,8 +540,9 @@ namespace qpp{
                   << node->content.size()<< std::endl;
         totalEntries += node->content.size();
 
-        for (int i = 0; i < node->childs.size(); i++)
-          debug_print_traverse(node->childs[i], iDeepLevel+1, totalEntries);
+        for (tws_node<REAL>* _node : node->sub_nodes)
+          if (_node)
+            debug_print_traverse(_node, iDeepLevel+1, totalEntries);
 
       }
 

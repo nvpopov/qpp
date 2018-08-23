@@ -32,6 +32,14 @@ namespace qpp{
       }
 
       ///
+      /// \brief center
+      /// \return
+      ///
+      vector3<REAL> center(){
+        return (max+min)*0.5;
+      }
+
+      ///
       /// \brief squared_dist_point
       /// \param point
       /// \return

@@ -45,7 +45,7 @@ void ws_atom_list::render(){
       if (astate->bDebugDrawRTree){
           astate->_draw_pipeline->begin_render_aabb();
           tws_tr->apply_visitor(
-                [astate](tws_node<float> *inNode){
+                [astate](tws_node<float> *inNode, int deepLevel){
             vector3<float> vAABBMin(inNode->bb.min[0], inNode->bb.min[1],
                 inNode->bb.min[2]);
 
