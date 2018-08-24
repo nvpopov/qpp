@@ -35,12 +35,14 @@ namespace qpp{
       void update() override;
       void render() override;
       void render_ui() override;
-      void mouse_click(ray<float> *ray) override;
+      bool mouse_click(ray<float> *ray) override;
 
       bool support_translation() override;
       bool support_rotation() override;
       bool support_scaling() override;
       bool support_content_editing() override;
+      bool support_selection() override;
+      bool support_rendering_bounding_box() override;
 
       void shift(const vector3<float> vShift);
 

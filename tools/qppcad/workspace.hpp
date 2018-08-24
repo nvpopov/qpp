@@ -66,7 +66,7 @@ namespace qpp{
     void set_best_view();
     void render();
     void mouse_click(const double fMouseX, const double fMouseY);
-
+    void add_item_to_workspace(ws_item *item_to_add);
   };
 
 

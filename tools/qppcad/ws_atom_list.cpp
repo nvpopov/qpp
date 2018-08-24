@@ -8,8 +8,7 @@ ws_atom_list::ws_atom_list(){
 
   bNeedToRebuildNBT = true;
   iDim = 0;
-  cell = new periodic_cell<float>(
-  {20.0, 0.0, 0.0},
+  cell = new periodic_cell<float>({20.0, 0.0, 0.0},
   {0.0, 20.0, 0.0},
   {0.0, 0.0, 20.0});
 
@@ -23,7 +22,7 @@ ws_atom_list::ws_atom_list(){
   tws_tr = new tws_tree<float>(*geom);
   tws_tr->bAutoBonding = true;
 
-  pos = vector3<float>(0.0, 0.0, 0.0);
+
 }
 
 void ws_atom_list::vote_for_view_vectors(vector3<float> &vOutLookPos,
@@ -54,9 +53,7 @@ void ws_atom_list::render(){
           astate->_draw_pipeline->begin_render_aabb();
           tws_tr->apply_visitor(
                 [astate](tws_node<float> *inNode, int deepLevel){
-                  astate->_draw_pipeline->render_aabb(clr_maroon,
-                                                     inNode->bb.min,
-                                                     inNode->bb.max);
+            astate->_draw_pipeline->render_aabb(clr_maroon, inNode->bb.min, inNode->bb.max);
           });
 
           astate->_draw_pipeline->end_render_aabb();
@@ -71,13 +68,14 @@ void ws_atom_list::render(){
 
           if(ap_idx != -1){
               //TODO: radius scale factor
-              fDrawRad = ptable::get_inst()->arecs[ap_idx-1].aRadius
-                         * astate->fAtomRadiusScaleFactor;
-              color = ptable::get_inst()->arecs[ap_idx-1].aColorGV;
+              fDrawRad = ptable::get_inst()->arecs[ap_idx-1].aRadius *
+                         astate->fAtomRadiusScaleFactor;
+              color = ptable::get_inst()->arecs[ap_idx-1].aColorJmol;
             }
 
-          if(geom->xfield<bool>("sel", i)) color =
-              vector3<float>(0.43f, 0.55f, 0.12f);
+          if((parent_ws->cur_edit_type == ws_edit_type::EDIT_WS_ITEM_CONTENT) &&
+             (geom->xfield<bool>("sel", i)) && bSelected)
+            color = vector3<float>(0.43f, 0.55f, 0.12f);
 
           astate->_draw_pipeline->render_atom(color, geom->pos(i), fDrawRad);
         }
@@ -86,27 +84,20 @@ void ws_atom_list::render(){
 
       // bond render
       astate->_draw_pipeline->begin_render_bond();
-      int totB = 0;
+
 
       for (int i = 0; i < geom->nat(); i++)
         for (int j = 0; j < tws_tr->n(i); j++){
             int ap_idx = ptable::number_by_symbol(geom->atom(i));
             vector3<float> color(0.0, 0.0, 1.0);
-
-            if(ap_idx != -1){
-                color = ptable::get_inst()->arecs[ap_idx-1].aColorGV;
-              }
-
-
-
+            if(ap_idx != -1){color = ptable::get_inst()->arecs[ap_idx-1].aColorJmol;}
             astate->_draw_pipeline->render_bond(color, geom->pos(i),
                                                 geom->pos(tws_tr->table_atm(i,j)),
                                                 astate->fBondScaleFactor);
-            totB += 1;
           }
-      //      std::cout << "Tot bond" << totB << std::endl;
+
       astate->_draw_pipeline->end_render_bond();
-      // bond render end
+
     }
 }
 
@@ -155,20 +146,20 @@ void ws_atom_list::render_ui(){
     }
 }
 
-void ws_atom_list::mouse_click(ray<float> *ray){
+bool ws_atom_list::mouse_click(ray<float> *ray){
   if (ray){
       std::vector<tws_query_data<float>* > res;
       tws_tr->query_ray(ray, &res);
-      std::cout << "res_size = " << res.size() << std::endl;
-
+      //std::cout << "res_size = " << res.size() << std::endl;
       std::sort(res.begin(), res.end(), tws_query_data_sort_by_dist<float>);
-
       if (res.size() > 0){
-          std::cout << res[0]->atm << std::endl;
-          geom->xfield<bool>("sel", res[0]->atm ) =
-              !(geom->xfield<bool>("sel", res[0]->atm ));
+          //std::cout << res[0]->atm << std::endl;
+          if ((parent_ws->cur_edit_type == ws_edit_type::EDIT_WS_ITEM_CONTENT) && bSelected)
+            geom->xfield<bool>("sel", res[0]->atm ) = !(geom->xfield<bool>("sel", res[0]->atm ));
+          return true;
         }
     }
+  return false;
 }
 
 bool ws_atom_list::support_translation(){
@@ -187,6 +178,14 @@ bool ws_atom_list::support_content_editing(){
   return true;
 }
 
+bool ws_atom_list::support_selection(){
+  return true;
+}
+
+bool ws_atom_list::support_rendering_bounding_box(){
+  return true;
+}
+
 void ws_atom_list::shift(const vector3<float> vShift){
   tws_tr->bAutoBonding = false;
   tws_tr->bAutoBuild   = false;
@@ -196,9 +195,11 @@ void ws_atom_list::shift(const vector3<float> vShift){
 
   ext_obs->aabb.min = vShift + ext_obs->aabb.min;
   ext_obs->aabb.max = vShift + ext_obs->aabb.max;
+  tws_tr->apply_shift(vShift);
 
   tws_tr->bAutoBonding = true;
   tws_tr->bAutoBuild   = true;
+  update();
 }
 
 void ws_atom_list::load_from_file(qc_file_format eFileFormat,
@@ -233,8 +234,6 @@ void ws_atom_list::load_from_file(qc_file_format eFileFormat,
 
       ext_obs->aabb.min = -vCenter + ext_obs->aabb.min;
       ext_obs->aabb.max = -vCenter + ext_obs->aabb.max;
-
-
     }
 
   tws_tr->manual_build();
@@ -242,6 +241,7 @@ void ws_atom_list::load_from_file(qc_file_format eFileFormat,
   tws_tr->bAutoBonding = true;
   tws_tr->bAutoBuild   = true;
 
+  update();
 }
 
 void ws_atom_list::rebuild_ngbt(){

@@ -29,19 +29,19 @@ namespace qpp {
         unsigned int aNumber;
         STRING       aName;
         STRING       aSymbol;
-        double       aRadius; // A
-        double       aMass;
+        float       aRadius; // A
+        float       aMass;
 
-        double       aCovRad_Slater;// A
-        double       aCovRad_Bragg;// A
-        double       aCovRad_Cordero;// A
-        double       aCovRad_Pyykko;// A
-        double       aCovRad_Pyykko_D;// A
-        double       aCovRad_Pyykko_T;// A
+        float       aCovRad_Slater;// A
+        float       aCovRad_Bragg;// A
+        float       aCovRad_Cordero;// A
+        float       aCovRad_Pyykko;// A
+        float       aCovRad_Pyykko_D;// A
+        float       aCovRad_Pyykko_T;// A
 
-        double       aVdWRadius;// A
-        double       aVdWRadius_Alvarez;// A
-        double       aIonicRadius;// A
+        float       aVdWRadius;// A
+        float       aVdWRadius_Alvarez;// A
+        float       aIonicRadius;// A
 
         int          aNValenceElec;
         vector3<float> aColorJmol, aColorGV, aColorCPK;

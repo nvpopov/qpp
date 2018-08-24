@@ -43,12 +43,12 @@ void workspace::render(){
   app_state* astate = &(c_app::get_state());
 
   if (astate->bDebugDrawSelectionRay){
-  astate->_draw_pipeline->begin_render_line();
-  astate->_draw_pipeline->
-      render_line(vector3<float>(1.0, 1.0, 0.0),
-                  debugRay.start,
-                  debugRay.start+debugRay.dir*55.0);
-  astate->_draw_pipeline->end_render_line();
+      astate->_draw_pipeline->begin_render_line();
+      astate->_draw_pipeline->
+          render_line(vector3<float>(1.0, 1.0, 0.0),
+                      debugRay.start,
+                      debugRay.start+debugRay.dir*55.0);
+      astate->_draw_pipeline->end_render_line();
     }
 
   if (astate->_draw_pipeline != nullptr){
@@ -115,9 +115,27 @@ void workspace::mouse_click(const double fMouseX, const double fMouseY){
   debugRay.dir =
       (ws_cam->unproject(fMouseX, fMouseY) - ws_cam->vViewPoint).normalized();
   debugRay.start = ws_cam->vViewPoint;
-  for (ws_item* ws_it : ws_items)
-    ws_it->mouse_click(&debugRay);
 
+  bool bHitAny = false;
+
+  if (cur_edit_type != ws_edit_type::EDIT_WS_ITEM_CONTENT)
+    for (ws_item* ws_it : ws_items) ws_it->bSelected = false;
+
+  for (ws_item* ws_it : ws_items){
+      bool bWsHit = ws_it->mouse_click(&debugRay);
+      bHitAny = bHitAny || bWsHit;
+      if ((bWsHit) && (cur_edit_type == ws_edit_type::EDIT_WS_ITEM)
+          && ws_it->support_selection()) ws_it->bSelected = true;
+    }
+
+  if ((cur_edit_type != ws_edit_type::EDIT_WS_ITEM_CONTENT) && (!bHitAny))
+    for (ws_item* ws_it : ws_items) ws_it->bSelected = false;
+
+}
+
+void workspace::add_item_to_workspace(ws_item *item_to_add){
+  item_to_add->set_parent_workspace(this);
+  ws_items.push_back(item_to_add);
 }
 
 workspace *workspace_manager::get_current_workspace(){
@@ -136,13 +154,20 @@ void workspace_manager::init_default_workspace(){
 
   ws_atom_list* _wsl2 = new ws_atom_list();
   _wsl2->load_from_file(qc_file_format::format_standart_xyz,
-                       "../examples/io/ref_data/ddt.xyz",
-                       true);
+                        "../examples/io/ref_data/ddt.xyz",
+                        true);
 
   ws_atom_list* _wsl3 = new ws_atom_list();
   _wsl3->load_from_file(qc_file_format::format_standart_xyz,
-                       "../examples/io/ref_data/nanotube.xyz",
-                       true);
+                        "../examples/io/ref_data/nanotube.xyz",
+                        true);
+
+  ws_atom_list* _wsl4 = new ws_atom_list();
+  _wsl4->load_from_file(qc_file_format::format_standart_xyz,
+                        "../examples/io/ref_data/nanotube.xyz",
+                        true);
+
+  _wsl4->shift(vector3<float>(15.0f, 15.0f, 15.0f));
 
   workspace* _ws = new workspace();
   _ws->ws_name = "d1";
@@ -153,13 +178,15 @@ void workspace_manager::init_default_workspace(){
   workspace* _ws3 = new workspace();
   _ws3->ws_name = "nanotube";
 
-  _ws->ws_items.push_back(_wsl);
-  _ws2->ws_items.push_back(_wsl2);
-  _ws3->ws_items.push_back(_wsl3);
+  _ws->add_item_to_workspace(_wsl);
+  _ws->add_item_to_workspace(_wsl4);
+  _ws2->add_item_to_workspace(_wsl2);
+  _ws3->add_item_to_workspace(_wsl3);
 
   ws.push_back(_ws2);
   ws.push_back(_ws3);
   ws.push_back(_ws);
+
   iCurrentWorkSpace = ws.size() - 1;
 }
 

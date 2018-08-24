@@ -24,8 +24,8 @@ void draw_pipeline::begin_atom_render(){
   astate->def_shader->begin_shader_program();
 }
 
-void draw_pipeline::render_atom(const vector3<float> color,
-                                const vector3<float> pos,
+void draw_pipeline::render_atom(const vector3<float> &color,
+                                const vector3<float> &pos,
                                 const float radius){
 
   app_state* astate = &(c_app::get_state());
@@ -35,8 +35,8 @@ void draw_pipeline::render_atom(const vector3<float> color,
   astate->def_shader->set_u(sp_u_name::fScale, (GLfloat*)(&radius));
   astate->def_shader->set_u(sp_u_name::vColor, (GLfloat*)(color.data()));
 
-  matrix4<float> mModelViewInvTr = (
-                                     astate->_camera->mView*matrix4<float>::Identity()).inverse().transpose();
+  matrix4<float> mModelViewInvTr =
+      (astate->_camera->mView*matrix4<float>::Identity()).inverse().transpose();
   // our Model matrix equals unity matrix, so just pass matrix from app state
   astate->def_shader->set_u(sp_u_name::mModelViewProj,
                             astate->_camera->mViewProjection.data());
@@ -59,9 +59,9 @@ void draw_pipeline::begin_render_bond(){
   astate->bond_shader->begin_shader_program();
 }
 
-void draw_pipeline::render_bond(const vector3<float> color,
-                                const vector3<float> vBondStart,
-                                const vector3<float> vBondEnd,
+void draw_pipeline::render_bond(const vector3<float> &color,
+                                const vector3<float> &vBondStart,
+                                const vector3<float> &vBondEnd,
                                 const float fBondRadius){
   app_state* astate = &(c_app::get_state());
 
@@ -119,82 +119,116 @@ void draw_pipeline::begin_render_aabb(){
   begin_render_line();
 }
 
-void draw_pipeline::render_aabb(const vector3<float> vColor,
-                                const vector3<float> vBoxMin,
-                                const vector3<float> vBoxMax){
+void draw_pipeline::render_aabb(const vector3<float> &vColor,
+                                const vector3<float> &vBoxMin,
+                                const vector3<float> &vBoxMax){
 
-  vector3<float> vBoxSize = vBoxMax - vBoxMin;
+  vector3<float> vHalfBoxSize = (vBoxMax - vBoxMin) * 0.5f;
+  vector3<float> vBoxCenter   = (vBoxMax + vBoxMin) * 0.5f;
 
-  /// 1
-  render_line(
-        vColor,
-        vBoxMin,
-        vector3<float>(vBoxMin[0], vBoxMin[1], vBoxMin[2]+vBoxSize[2]));
+  static int disp[][6] = {
+    {-1,-1,-1,  1,-1,-1},
+    {-1,-1,-1, -1, 1,-1},
+    {-1,-1,-1, -1,-1, 1},
 
-  /// 2
-  render_line(
-        vColor,
-        vBoxMin,
-        vector3<float>(vBoxMin[0], vBoxMin[1]+vBoxSize[1], vBoxMin[2] ));
+    { 1, 1, 1, -1, 1, 1},
+    { 1, 1, 1,  1,-1, 1},
+    { 1, 1, 1,  1, 1,-1},
 
-  /// 3
-  render_line(
-        vColor,
-        vBoxMin,
-        vector3<float>(vBoxSize[0]+vBoxMin[0], vBoxMin[1], vBoxMin[2]));
+    {-1,-1, 1, -1, 1, 1},
+    {-1,-1, 1,  1,-1, 1},
 
-  /// 4 +x +y
-  render_line(
-        vColor,
-        vector3<float>(vBoxMin[0]+vBoxSize[0], vBoxMin[1], vBoxMin[2]),
-      vector3<float>(vBoxMin[0]+vBoxSize[0], vBoxMin[1]+vBoxSize[1], vBoxMin[2]));
+    { 1,-1, 1,  1,-1,-1},
+    {-1, 1,-1, -1, 1, 1},
 
-  ///5 +x +z
-  render_line(
-        vColor,
-        vector3<float>(vBoxMin[0]+vBoxSize[0], vBoxMin[1], vBoxMin[2]),
-      vector3<float>(vBoxMin[0]+vBoxSize[0], vBoxMin[1], vBoxMin[2]+vBoxSize[2]));
+    { 1, 1,-1,  1,-1,-1},
+    { 1, 1,-1, -1, 1,-1},
+  };
 
-  /// 6 +y +x
-  render_line(
-        vColor,
-        vector3<float>(vBoxMin[0], vBoxMin[1]+vBoxSize[1], vBoxMin[2]),
-      vector3<float>(vBoxMin[0]+vBoxSize[0], vBoxMin[1]+vBoxSize[1], vBoxMin[2]));
+  for (unsigned int i = 0; i < 12; i++){
+      vector3<float>
+          vLStart(
+            vHalfBoxSize[0]*disp[i][0],
+            vHalfBoxSize[1]*disp[i][1],
+            vHalfBoxSize[2]*disp[i][2]);
 
-  /// 7 +y +z
-  render_line(
-        vColor,
-        vector3<float>(vBoxMin[0], vBoxMin[1]+vBoxSize[1], vBoxMin[2]),
-      vector3<float>(vBoxMin[0], vBoxMin[1]+vBoxSize[1], vBoxMin[2]+vBoxSize[2]));
+      vector3<float>
+          vLEnd(
+            vHalfBoxSize[0]*disp[i][3],
+            vHalfBoxSize[1]*disp[i][4],
+            vHalfBoxSize[2]*disp[i][5]);
 
-  /// 8  +z +x
-  render_line(
-        vColor,
-        vector3<float>(vBoxMin[0], vBoxMin[1], vBoxMin[2]+vBoxSize[2]),
-      vector3<float>(vBoxMin[0]+vBoxSize[1], vBoxMin[1], vBoxMin[2]+vBoxSize[2]));
+      render_line(vColor, vBoxCenter+vLStart,vBoxCenter+vLEnd );
 
-  /// 9 +z +y
-  render_line(
-        vColor,
-        vector3<float>(vBoxMin[0], vBoxMin[1], vBoxMin[2]+vBoxSize[2]),
-      vector3<float>(vBoxMin[0], vBoxMin[1]+vBoxSize[1], vBoxMin[2]+vBoxSize[2]));
+    }
 
-  /// 10
-  render_line(
-        vColor,
-        vBoxMax,
-        vector3<float>(vBoxMax[0], vBoxMax[1], vBoxMax[2]-vBoxSize[2]));
+}
 
-  /// 11
-  render_line(
-        vColor,
-        vBoxMax,
-        vector3<float>(vBoxMax[0], vBoxMax[1]-vBoxSize[1], vBoxMax[2]));
-  /// 12
-  render_line(
-        vColor,
-        vBoxMax,
-        vector3<float>(vBoxMax[0]-vBoxSize[0], vBoxMax[1], vBoxMax[2]));
+void draw_pipeline::render_aabb_segmented(const vector3<float> &vColor,
+                                          const vector3<float> &vBoxMin,
+                                          const vector3<float> &vBoxMax){
+
+  vector3<float> vHalfBoxSize = (vBoxMax - vBoxMin) * 0.5f;
+  vector3<float> vBoxCenter   = (vBoxMax + vBoxMin) * 0.5f;
+
+/*
+  sign = lambda x: (1, -1)[x<0]
+  dt = 0.4
+  for x in [-1,1]:
+      for y in [-1,1]:
+          for z in [-1,1]:
+                  print("{{{:6.6}f,{:6.6}f,{:6.6}f,{:6.6}f,{:6.6}f,{:6.6}f}},".format(
+                      float(x), float(y), float(z), x-sign(x)*dt, float(y), float(z)))
+                  print("{{{:6.6}f,{:6.6}f,{:6.6}f,{:6.6}f,{:6.6}f,{:6.6}f}},".format(
+                      float(x), float(y), float(z),  float(x),y-sign(y)*dt, float(z)))
+                  print("{{{:6.6}f,{:6.6}f,{:6.6}f,{:6.6}f,{:6.6}f,{:6.6}f}},".format(
+                      float(x), float(y), float(z),  float(x), float(y), z-sign(z)*dt))*/
+
+
+  static float disp2[][6] = {
+    {  -1.0f,  -1.0f,  -1.0f,  -0.6f,  -1.0f,  -1.0f},
+    {  -1.0f,  -1.0f,  -1.0f,  -1.0f,  -0.6f,  -1.0f},
+    {  -1.0f,  -1.0f,  -1.0f,  -1.0f,  -1.0f,  -0.6f},
+    {  -1.0f,  -1.0f,   1.0f,  -0.6f,  -1.0f,   1.0f},
+    {  -1.0f,  -1.0f,   1.0f,  -1.0f,  -0.6f,   1.0f},
+    {  -1.0f,  -1.0f,   1.0f,  -1.0f,  -1.0f,   0.6f},
+    {  -1.0f,   1.0f,  -1.0f,  -0.6f,   1.0f,  -1.0f},
+    {  -1.0f,   1.0f,  -1.0f,  -1.0f,   0.6f,  -1.0f},
+    {  -1.0f,   1.0f,  -1.0f,  -1.0f,   1.0f,  -0.6f},
+    {  -1.0f,   1.0f,   1.0f,  -0.6f,   1.0f,   1.0f},
+    {  -1.0f,   1.0f,   1.0f,  -1.0f,   0.6f,   1.0f},
+    {  -1.0f,   1.0f,   1.0f,  -1.0f,   1.0f,   0.6f},
+    {   1.0f,  -1.0f,  -1.0f,   0.6f,  -1.0f,  -1.0f},
+    {   1.0f,  -1.0f,  -1.0f,   1.0f,  -0.6f,  -1.0f},
+    {   1.0f,  -1.0f,  -1.0f,   1.0f,  -1.0f,  -0.6f},
+    {   1.0f,  -1.0f,   1.0f,   0.6f,  -1.0f,   1.0f},
+    {   1.0f,  -1.0f,   1.0f,   1.0f,  -0.6f,   1.0f},
+    {   1.0f,  -1.0f,   1.0f,   1.0f,  -1.0f,   0.6f},
+    {   1.0f,   1.0f,  -1.0f,   0.6f,   1.0f,  -1.0f},
+    {   1.0f,   1.0f,  -1.0f,   1.0f,   0.6f,  -1.0f},
+    {   1.0f,   1.0f,  -1.0f,   1.0f,   1.0f,  -0.6f},
+    {   1.0f,   1.0f,   1.0f,   0.6f,   1.0f,   1.0f},
+    {   1.0f,   1.0f,   1.0f,   1.0f,   0.6f,   1.0f},
+    {   1.0f,   1.0f,   1.0f,   1.0f,   1.0f,   0.6f},
+  };
+
+   for (unsigned int i = 0; i < 24; i++){
+      vector3<float>
+          vLStart(
+            vHalfBoxSize[0]*disp2[i][0],
+            vHalfBoxSize[1]*disp2[i][1],
+            vHalfBoxSize[2]*disp2[i][2]);
+
+      vector3<float>
+          vLEnd(
+            vHalfBoxSize[0]*disp2[i][3],
+            vHalfBoxSize[1]*disp2[i][4],
+            vHalfBoxSize[2]*disp2[i][5]);
+
+      render_line(vColor, vBoxCenter+vLStart, vBoxCenter+vLEnd, 4.0f);
+
+    }
+
 }
 
 void draw_pipeline::end_render_aabb(){
@@ -206,12 +240,13 @@ void draw_pipeline::begin_render_line(){
   astate->unit_line_shader->begin_shader_program();
 }
 
-void draw_pipeline::render_line(const vector3<float> color,
-                                const vector3<float> vStart,
-                                const vector3<float> vEnd){
+void draw_pipeline::render_line(const vector3<float> &color,
+                                const vector3<float> &vStart,
+                                const vector3<float> &vEnd,
+                                const float fLineWidth){
   app_state* astate = &(c_app::get_state());
 
-
+  glLineWidth(fLineWidth);
   astate->unit_line_shader->set_u(sp_u_name::vColor,
                                   (GLfloat*)color.data());
   astate->unit_line_shader->set_u(sp_u_name::vLineStart,
@@ -223,6 +258,7 @@ void draw_pipeline::render_line(const vector3<float> color,
   astate->unit_line_shader->set_u(sp_u_name::mModelView,
                                   astate->_camera->mView.data());
   astate->unit_line->render();
+  glLineWidth(1.0f);
 
 }
 

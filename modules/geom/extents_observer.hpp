@@ -43,13 +43,13 @@ namespace qpp{
             bFirstData = false;
           }
         else {
-            if ((vPosCm(0) >= aabb.max(0)) &&
-                (vPosCm(1) >= aabb.max(1)) &&
-                (vPosCm(2) >= aabb.max(2)) ) aabb.max = vPosCm;
+            if (vPosCm(0) >= aabb.max(0)) aabb.max[0] = vPosCm(0);
+            if (vPosCm(1) >= aabb.max(1)) aabb.max[1] = vPosCm(1);
+            if (vPosCm(2) >= aabb.max(2)) aabb.max[2] = vPosCm(2);
 
-            if ((vPosCm(0) <= aabb.min(0)) &&
-                (vPosCm(1) <= aabb.min(1)) &&
-                (vPosCm(2) <= aabb.min(2)) ) aabb.min = vPosCm;
+            if (vPosCm(0) < aabb.min(0)) aabb.min[0] = vPosCm(0);
+            if (vPosCm(1) < aabb.min(1)) aabb.min[1] = vPosCm(1);
+            if (vPosCm(2) < aabb.min(2)) aabb.min[2] = vPosCm(2);
           }
       }
 

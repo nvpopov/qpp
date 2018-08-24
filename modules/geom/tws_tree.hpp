@@ -329,35 +329,36 @@ namespace qpp{
                 push_data_to_tws_node(curNode, atm, idx);
                 return true;
               }
-                //it is necessary to determine the indexes of the point
-                int i_x = -1 + int((p[0]-curNode->bb.min[0])/(cn_size[0]/3));
-                int i_y = -1 + int((p[1]-curNode->bb.min[1])/(cn_size[1]/3));
-                int i_z = -1 + int((p[2]-curNode->bb.min[2])/(cn_size[2]/3));
-                int nidx = enc_tws_idx(i_x, i_y, i_z);
+            //it is necessary to determine the indexes of the point
+            int i_x = -1 + int((p[0]-curNode->bb.min[0])/(cn_size[0]/3));
+            int i_y = -1 + int((p[1]-curNode->bb.min[1])/(cn_size[1]/3));
+            int i_z = -1 + int((p[2]-curNode->bb.min[2])/(cn_size[2]/3));
+            int nidx = enc_tws_idx(i_x, i_y, i_z);
 
-                if (curNode->sub_nodes[nidx] == nullptr){
+            if (curNode->sub_nodes[nidx] == nullptr){
 
-                    tws_node<REAL> *newNode = new tws_node<REAL>();
-                    flat_view.push_back(newNode);
-                    //define the 0,0,0 max min
-                    vector3<REAL> z_min = curNode->bb.min + cn_size / 3;
-                    vector3<REAL> z_max = curNode->bb.max - cn_size / 3;
+                tws_node<REAL> *newNode = new tws_node<REAL>();
+                flat_view.push_back(newNode);
+                //define the 0,0,0 max min
+                vector3<REAL> z_min = curNode->bb.min + cn_size / 3;
+                vector3<REAL> z_max = curNode->bb.max - cn_size / 3;
 
-                    newNode->bb.min = z_min + vector3<REAL>
-                                      (i_x * cn_size[0]/ 3, i_y * cn_size[1]/ 3, i_z * cn_size[2]/ 3);
-                    newNode->bb.max = z_max + vector3<REAL>
-                                      (i_x * cn_size[0]/ 3, i_y * cn_size[1]/ 3, i_z * cn_size[2]/ 3);
+                newNode->bb.min = z_min + vector3<REAL>(
+                                    i_x * cn_size[0]/ 3,
+                    i_y * cn_size[1]/ 3,
+                    i_z * cn_size[2]/ 3);
+                newNode->bb.max = z_max + vector3<REAL>(
+                                    i_x * cn_size[0]/ 3,
+                    i_y * cn_size[1]/ 3,
+                    i_z * cn_size[2]/ 3);
 
-                    curNode->sub_nodes[nidx] = newNode;
-                    curNode->tot_childs+=1;
-                  }
-
-                traverse_insert_object_to_tree(curNode->sub_nodes[nidx],
-                                                      atm, idx);
+                curNode->sub_nodes[nidx] = newNode;
+                curNode->tot_childs+=1;
               }
 
-
-
+            traverse_insert_object_to_tree(curNode->sub_nodes[nidx],
+                                           atm, idx);
+          }
 
         return false;
       }
@@ -476,14 +477,14 @@ namespace qpp{
 
                 if ((fBondRad1 >0) && (fBondRad2 > 0))
                   distMap[sym_key<int>(i,j)] = fBondRad1 + fBondRad2;
-
+#ifdef TWS_TREE_DEBUG
                 std::cout << "bondrad " << "["<< i << ", " << j<< "] "<<
                              geom->atom_of_type(i) << " " <<
                              geom->atom_of_type(j) << " " <<
                              fBondRad1 << " " << fBondRad2 << " " <<
                              pTableIdx1 << " " << pTableIdx2 << " " <<
                              distMap[sym_key<int>(i,j)] << std::endl;
-
+#endif
                 fMaxBondRad = std::max(fMaxBondRad, fBondRad1 + fBondRad2);
               }
             maxDistMap[i] = fMaxBondRad;
@@ -497,7 +498,7 @@ namespace qpp{
       /// \param i
       /// \param j
       ///
-      void add_ngbr(int ha, int i, const index & j){
+      void add_ngbr(int ha, int i, const index j){
         bool found = false;
         for (int k = 0; k < nTable[ha].size(); k++ )
           if ((nTable[ha][k]->atm == i ) && (nTable[ha][k]->idx == j)){
@@ -553,6 +554,10 @@ namespace qpp{
                       add_ngbr(r_el->atm, atNum , r_el->idx);
                   }
               }
+            //TODO: strange thing happened there
+//             for (tws_node_content<REAL> *r_el : res)
+//               if (r_el) delete r_el;
+            res.clear();
           }
       }
 
