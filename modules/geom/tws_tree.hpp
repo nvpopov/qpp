@@ -37,11 +37,6 @@ namespace qpp{
     return a*9+b*3+c+13;
   }
 
-  template<typename REAL>
-  inline int enc_tws_magn(const REAL p, const REAL v){
-    REAL _t = p / v;
-    return int(std::copysignf(1.0f, _t) * (round(fabs(-_t))));
-  }
 
   /// rtree node forward declaration                                        ///
   template<typename REAL>
@@ -103,13 +98,25 @@ namespace qpp{
       int DIM;
       geometry<REAL, CELL> *geom;
       tws_node<REAL> *root;
+      std::vector<tws_node<REAL>* > flat_view;
+
       std::unordered_map<qpp::sym_key<int>,
       REAL, qpp::sym_key_hash<int> > distMap;
       std::map<int, REAL> maxDistMap;
       std::vector<std::vector<tws_node_content<REAL>*> > nTable;
 
+
       bool bMakeDirtyDistMap;
+
+      ///
+      /// \brief bAutoBonding
+      ///
       bool bAutoBonding;
+
+      ///
+      /// \brief bAutoBuild
+      ///
+      bool bAutoBuild;
 
       ///
       /// \brief aux_rtree constructor
@@ -123,6 +130,7 @@ namespace qpp{
         fMinTWSVolume  = 65.0;
         root = nullptr;
         bAutoBonding = false;
+        bAutoBuild = true;
         bMakeDirtyDistMap = true;
       }
 
@@ -133,6 +141,7 @@ namespace qpp{
         if (root == nullptr){
             //std::cout << "create root" << std::endl;
             root = new tws_node<REAL>();
+            flat_view.push_back(root);
             root->bb.fill_guess(fGuessRectSize);
             if (root->bb.volume() < fMinTWSVolume)
               root->bb.fill_guess(pow(fMinTWSVolume, 1/3.0));
@@ -140,12 +149,38 @@ namespace qpp{
 
       }
 
-      int get_tws_sub_node_idx(tws_node<REAL> *curNode, const vector3<float> p){
-        vector3<float> vs = (curNode->bb.max - curNode->bb.min)/2;
-        vector3<float> cnt = (curNode->bb.max + curNode->bb.min)/2;
-        return enc_tws_idx(enc_tws_magn(p[0]-cnt[0], vs[0]),
-            enc_tws_magn(p[1]-cnt[1], vs[1]),
-            enc_tws_magn(p[2]-cnt[2], vs[2]));
+      ///
+      /// \brief clear_bonds
+      ///
+      void clear_ntable(){
+        //std::vector<std::vector<tws_node_content<REAL>*> > nTable;
+        for (std::vector<tws_node_content<REAL>*> &vPerAtom : nTable){
+            for (tws_node_content<REAL> *nc : vPerAtom){
+                delete nc;
+              }
+            vPerAtom.clear();
+          }
+        nTable.clear();
+      }
+
+      ///
+      /// \brief clear_tree
+      ///
+      void clear_tree(){
+        for (tws_node<REAL> *node : flat_view)
+          delete node;
+        flat_view.clear();
+      }
+
+      ///
+      /// \brief apply_shift
+      /// \param vShift
+      ///
+      void apply_shift(const vector3<REAL> vShift){
+        for (tws_node<REAL> *node : flat_view){
+            node->bb.min += vShift;
+            node->bb.max += vShift;
+          }
       }
 
       ///
@@ -174,8 +209,9 @@ namespace qpp{
       /// \param vRayDir
       ///
       void query_ray(ray<REAL> *_ray,
-                     std::vector<tws_query_data<REAL>*> *res ){
-        traverse_query_ray(root, _ray, res);
+                     std::vector<tws_query_data<REAL>*> *res,
+                     REAL fScaleFactor = 0.25){
+        traverse_query_ray(root, _ray, res, fScaleFactor);
       }
 
       ///
@@ -186,12 +222,13 @@ namespace qpp{
       ///
       bool traverse_query_ray(tws_node<REAL> *curNode,
                               ray<REAL> *_ray,
-                              std::vector<tws_query_data<REAL>*> *res ){
+                              std::vector<tws_query_data<REAL>*> *res,
+                              const REAL fScaleFactor){
 
         if (ray_aabb_test(_ray, &(curNode->bb))){
             if (curNode->tot_childs > 0){
                 for (tws_node<REAL> *chNode : curNode->sub_nodes)
-                  if (chNode) traverse_query_ray(chNode, _ray, res);
+                  if (chNode) traverse_query_ray(chNode, _ray, res, fScaleFactor);
               }
             else
               for (tws_node_content<REAL> *nc : curNode->content){
@@ -199,9 +236,10 @@ namespace qpp{
 
                   //TODO: move magic aRadius
                   REAL fAtRad =
-                      ptable::get_inst()->arecs[ap_idx-1].aRadius * 0.25;
+                      ptable::get_inst()->arecs[ap_idx-1].aRadius * fScaleFactor;
                   REAL fStoredDist = 0.0;
-                  REAL fRayHitDist = ray_sphere_test( _ray, geom->pos(nc->atm, nc->idx),
+                  REAL fRayHitDist = ray_sphere_test( _ray,
+                                                      geom->pos(nc->atm, nc->idx),
                                                       fAtRad);
                   bool bRayHit = fRayHitDist > -1.0f;
 
@@ -300,7 +338,7 @@ namespace qpp{
                 if (curNode->sub_nodes[nidx] == nullptr){
 
                     tws_node<REAL> *newNode = new tws_node<REAL>();
-
+                    flat_view.push_back(newNode);
                     //define the 0,0,0 max min
                     vector3<REAL> z_min = curNode->bb.min + cn_size / 3;
                     vector3<REAL> z_max = curNode->bb.max - cn_size / 3;
@@ -356,6 +394,8 @@ namespace qpp{
         root = nullptr;
 
         tws_node<REAL>* newRoot = new tws_node<REAL>();
+        flat_view.push_back(newRoot);
+
         vector3<REAL> vSize = (oldRoot->bb.max - oldRoot->bb.max);
         newRoot->bb.min = oldRoot->bb.min * (3.0);
         newRoot->bb.max = oldRoot->bb.max * (3.0);
@@ -485,6 +525,8 @@ namespace qpp{
       /// \param atNum
       ///
       void find_neighbours(int atNum){
+        if (!root) return;
+
         if (bMakeDirtyDistMap) {
             rebuild_dist_map();
             if (nTable.size() < geom->nat()) nTable.resize(geom->nat());
@@ -512,6 +554,14 @@ namespace qpp{
                   }
               }
           }
+      }
+
+      ///
+      /// \brief manual_build
+      ///
+      void manual_build(){
+        for (int i = 0; i < geom->nat(); i++)
+          insert_object_to_tree(i, index({0,0,0}));
       }
 
       ///
@@ -557,8 +607,12 @@ namespace qpp{
                   const vector3<REAL> & r) override {
         if (st == before_after::after){
             //std::cout << a << " added " << r << std::endl;
+
+
             nTable.resize(geom->nat());
-            insert_object_to_tree(geom->nat()-1, index({0,0,0}));
+            if (bAutoBuild)
+              insert_object_to_tree(geom->nat()-1, index({0,0,0}));
+
             if(bAutoBonding) {
                 //std::cout << "autobond " << geom->n_types() << std::endl;
                 bMakeDirtyDistMap = true;

@@ -71,6 +71,13 @@ void ui_manager::render_main_menu(){
           ImGui::Checkbox("Cartesian Axis" , &(c_app::get_state().bDrawAxis));
           ImGui::Checkbox("Grid XY" , &(c_app::get_state().bDrawGrid));
 
+          ImGui::SliderFloat("Atom size scale",
+                             &(c_app::get_state().fAtomRadiusScaleFactor),
+                             0.25f, 2.0f, "%.4f", 1);
+          ImGui::SliderFloat("Bond size scale",
+                             &(c_app::get_state().fBondScaleFactor),
+                             0.02f, 2.0f, "%.4f", 1);
+
           ImGui::EndMenu();
         }
 
@@ -105,6 +112,7 @@ void ui_manager::render_main_menu(){
 
       //
       int iCurWS = astate->_workspace_manager->iCurrentWorkSpace;
+
       std::vector<std::string>  vStr;
       std::vector<char*>  vChar;
       for (int i = 0; i < astate->_workspace_manager->ws.size(); i++)
@@ -112,6 +120,7 @@ void ui_manager::render_main_menu(){
       std::transform(vStr.begin(), vStr.end(),
                      std::back_inserter(vChar),
                      vec_str_to_char);
+
       ImGui::PushItemWidth(150);
       ImGui::Combo("Workspace", &iCurWS, vChar.data(),
                    astate->_workspace_manager->ws.size());
@@ -174,36 +183,43 @@ void ui_manager::render_work_panel(){
   ImGuiWindow* window = ImGui::GetCurrentWindow();
   window->DC.LayoutType = ImGuiLayoutType_Horizontal;
 
+
+  ImGui::Separator();
+
   ImGui::Button("a" , ImVec2(20,20));
   ImGui::Button("b" , ImVec2(20,20));
   ImGui::Button("c" , ImVec2(20,20));
   ImGui::Separator();
 
-  ImGui::Button("Rx" , ImVec2(20,20));
-  ImGui::Button("Ry" , ImVec2(20,20));
-  ImGui::Button("Rz" , ImVec2(20,20));
+  ImGui::Text("T:");
+  ImGui::Button("X" , ImVec2(20,20));
+  ImGui::Button("Y" , ImVec2(20,20));
+  ImGui::Button("Z" , ImVec2(20,20));
   ImGui::Separator();
 
-  ImGui::Button("Tx" , ImVec2(20,20));
-  ImGui::Button("Ty" , ImVec2(20,20));
-  ImGui::Button("Tz" , ImVec2(20,20));
-  ImGui::Separator();
+  if (c_app::get_state()._workspace_manager->has_wss()){
+      ImGui::Text("Edit:");
+      int edit_mode = int(c_app::get_state()._workspace_manager->
+                          get_current_workspace()->cur_edit_type);
 
-  ImGui::Text("Edit mode:");
-  int edit_mode = int(c_app::get_state().cur_edit_type);
-  ImGui::BeginTabs("newtab", 2, edit_mode, 60 );
-  if (ImGui::AddTab( "NODE")) {
-      c_app::get_state().cur_edit_type = app_edit_type::EDIT_WS_ITEM;
+      ImGui::BeginTabs("newtab", 2, edit_mode, 60 );
+      if (ImGui::AddTab( "ITEM")) {
+          c_app::get_state()._workspace_manager->
+              get_current_workspace()->cur_edit_type = ws_edit_type::EDIT_WS_ITEM;
+        }
+
+      if (ImGui::AddTab( "CONTENT")) {
+          c_app::get_state()._workspace_manager->
+              get_current_workspace()->cur_edit_type =
+              ws_edit_type::EDIT_WS_ITEM_CONTENT;
+        }
+      ImGui::EndTabs();
+      c_app::get_state()._workspace_manager->get_current_workspace()->
+          cur_edit_type = ws_edit_type(edit_mode);
+
+      ImGui::Spacing();
+      ImGui::Separator();
     }
-
-  if (ImGui::AddTab( "CONTENT")) {
-      c_app::get_state().cur_edit_type = app_edit_type::EDIT_WS_ITEM_CONTENT;
-    }
-  ImGui::EndTabs();
-  c_app::get_state().cur_edit_type = app_edit_type(edit_mode);
-
-  ImGui::Spacing();
-  ImGui::Separator();
 
 
   ImGui::End();
@@ -256,20 +272,31 @@ void ui_manager::render_object_inspector(){
   ImGui::Begin("Object inspector", nullptr,
                ImGuiWindowFlags_NoMove |
                ImGuiWindowFlags_NoResize |
-               ImGuiWindowFlags_NoCollapse);
+               ImGuiWindowFlags_NoCollapse |
+               ImGuiWindowFlags_MenuBar);
 
+  if(ImGui::BeginMenuBar()){
+      if(ImGui::BeginMenu("Add")){
+          ImGui::MenuItem("Geometry");
+          ImGui::MenuItem("Debug");
+          ImGui::EndMenu();
+        }
+
+      if(ImGui::BeginMenu("Import")){
+          ImGui::MenuItem("XYZ");
+          ImGui::MenuItem("VASP");
+          ImGui::EndMenu();
+        }
+
+      ImGui::EndMenuBar();
+    }
   ImGui::Separator();
-  ImGui::Button("Add geom ");
-  ImGui::SameLine();
-  ImGui::Button("Import geom ");
-  ImGui::Separator();
+  ImGui::Text("Workspace items:");
   auto iCurWs = astate->_workspace_manager->iCurrentWorkSpace;
   workspace* cur_ws = astate->_workspace_manager->ws[iCurWs];
-  if (cur_ws != nullptr)
-    for (ws_item* ws_it : cur_ws->ws_items){
-        bool _clp = ImGui::CollapsingHeader(ws_it->name.c_str());
-        if (_clp) ws_it->render_ui();
-      }
+  if (cur_ws != nullptr){
+
+    }
 
 
   ImGui::End();

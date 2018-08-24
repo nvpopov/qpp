@@ -190,6 +190,9 @@ namespace qpp{
 
   // -------------------------------------------------------------
 
+
+  std::string extract_base_name(std::string const & path);
+
   template<class REAL>
   qpp::vector3<REAL> vec_from_string(STRING &_inst,
                                       int idx = 0,

@@ -18,9 +18,15 @@ namespace qpp{
       ws_item();
       virtual void vote_for_view_vectors(vector3<float> &vOutLookPos,
                                          vector3<float> &vOutLookAt) = 0;
-      virtual void render() = 0;
+      virtual void render();
       virtual void render_ui() = 0;
       virtual void mouse_click(ray<float> *ray) = 0;
+      virtual void update();
+      virtual bool support_translation() = 0;
+      virtual bool support_rotation() = 0;
+      virtual bool support_scaling() = 0;
+      virtual bool support_content_editing() = 0;
+
       virtual ~ws_item(){ }
   };
 

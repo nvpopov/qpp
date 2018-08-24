@@ -1,5 +1,5 @@
-#ifndef _QPP_EXTENTS_OBS_H
-#define _QPP_EXTENTS_OBS_H
+#ifndef QPP_EXTENTS_OBS_H
+#define QPP_EXTENTS_OBS_H
 
 #include <typeinfo>
 #include <utility>
@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <cmath>
 #include <geom/geom.hpp>
+#include <geom/aabb.hpp>
 #include <string>
 
 #ifdef PY_EXPORT
@@ -21,52 +22,60 @@ namespace qpp{
 
   template <class REAL, class CELL = periodic_cell<REAL> >
   class extents_observer : public geometry_observer<REAL>{
-  public:
+    public:
 
-    vector3<REAL> max_pos;
-    vector3<REAL> min_pos;
-    geometry<REAL, CELL> * geom;
+      aabb_3d<REAL> aabb;
+      geometry<REAL, CELL> * geom;
+      bool bFirstData;
 
-    extents_observer( geometry<REAL, CELL> & g){
-      geom = &g;
-      geom->add_observer(*this);
-      max_pos = vector3<REAL>(0.0, 0.0, 0.0);
-      min_pos = vector3<REAL>(0.0, 0.0, 0.0);
-    }
+      extents_observer( geometry<REAL, CELL> & g){
+        geom = &g;
+        geom->add_observer(*this);
+        bFirstData = true;
+        aabb.max = vector3<REAL>(0.0, 0.0, 0.0);
+        aabb.min = vector3<REAL>(0.0, 0.0, 0.0);
+      }
 
-    void cmp_pos(const vector3<REAL> &vPosCm){
-      if ((vPosCm(0) >= max_pos(0)) &&
-          (vPosCm(1) >= max_pos(1)) &&
-          (vPosCm(2) >= max_pos(2)) ) max_pos = vPosCm;
+      void cmp_pos(const vector3<REAL> &vPosCm){
+        if (bFirstData){
+            aabb.max = vPosCm;
+            aabb.min = vPosCm;
+            bFirstData = false;
+          }
+        else {
+            if ((vPosCm(0) >= aabb.max(0)) &&
+                (vPosCm(1) >= aabb.max(1)) &&
+                (vPosCm(2) >= aabb.max(2)) ) aabb.max = vPosCm;
 
-      if ((vPosCm(0) <= min_pos(0)) &&
-          (vPosCm(1) <= min_pos(1)) &&
-          (vPosCm(2) <= min_pos(2)) ) min_pos = vPosCm;
-    }
+            if ((vPosCm(0) <= aabb.min(0)) &&
+                (vPosCm(1) <= aabb.min(1)) &&
+                (vPosCm(2) <= aabb.min(2)) ) aabb.min = vPosCm;
+          }
+      }
 
-    void added( before_after st,
-                const STRING & a,
-                const vector3<REAL> & r) override { cmp_pos(r); }
-
-    void inserted(int at,
-                  before_after st,
+      void added( before_after st,
                   const STRING & a,
                   const vector3<REAL> & r) override { cmp_pos(r); }
 
-    void changed(int at,
-                 before_after st,
-                 const STRING & a,
-                 const vector3<REAL> & r) override { cmp_pos(r); }
+      void inserted(int at,
+                    before_after st,
+                    const STRING & a,
+                    const vector3<REAL> & r) override { cmp_pos(r); }
 
-    void erased(int at,
-                before_after st) override {}
+      void changed(int at,
+                   before_after st,
+                   const STRING & a,
+                   const vector3<REAL> & r) override { cmp_pos(r); }
 
-    void shaded(int at,
-                before_after st,
-                bool sh) override { }
+      void erased(int at,
+                  before_after st) override {}
 
-    void reordered(const std::vector<int> &,
-                   before_after) override { }
+      void shaded(int at,
+                  before_after st,
+                  bool sh) override { }
+
+      void reordered(const std::vector<int> &,
+                     before_after) override { }
 
   };
 

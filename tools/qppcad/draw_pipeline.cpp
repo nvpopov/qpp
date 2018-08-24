@@ -36,7 +36,7 @@ void draw_pipeline::render_atom(const vector3<float> color,
   astate->def_shader->set_u(sp_u_name::vColor, (GLfloat*)(color.data()));
 
   matrix4<float> mModelViewInvTr = (
-        astate->_camera->mView*matrix4<float>::Identity()).inverse().transpose();
+                                     astate->_camera->mView*matrix4<float>::Identity()).inverse().transpose();
   // our Model matrix equals unity matrix, so just pass matrix from app state
   astate->def_shader->set_u(sp_u_name::mModelViewProj,
                             astate->_camera->mViewProjection.data());
@@ -65,27 +65,20 @@ void draw_pipeline::render_bond(const vector3<float> color,
                                 const float fBondRadius){
   app_state* astate = &(c_app::get_state());
 
-
-  vector3<float> pos = (vBondStart + vBondEnd) * 0.5;
-  vector3<float> pos_d = (vBondEnd - vBondStart);
-  vector3<float> pos_n = pos_d.normalized();
-  vector3<float> bond_c_n = pos.normalized();
-  matrix4<float> rotM = align_vectors4(pos_n, vector3<float>(0.0, 0.0, 1.0));
+  vector3<float> vBondEndNew = (vBondEnd - vBondStart)*(-0.498f) + vBondEnd;
 
   matrix4<float> mModelTr = matrix4<float>::Identity();
-  pos += -0.5*pos_n * pos_d.norm();
-  mModelTr(0,3) = pos(0);
-  mModelTr(1,3) = pos(1);
-  mModelTr(2,3) = pos(2);
+  mModelTr.block<3,1>(0,3) = vBondStart;
+  mModelTr.block<3,1>(0,2) = vBondEndNew - vBondStart;
 
-  matrix4<float> mModelSc = matrix4<float>::Identity();
-  mModelSc(0,0) = fBondRadius;
-  mModelSc(1,1) = fBondRadius;
-  mModelSc(2,2) = pos_d.norm()/1.99;
-  //std::cout << "posnorm = " << pos_d.norm() << std::endl;
+  vector3<float> vAxisNorm = mModelTr.block<3,1>(0,2).normalized();
+  mModelTr.block<3,1>(0,0) = vAxisNorm.unitOrthogonal() * fBondRadius;
+  mModelTr.block<3,1>(0,1) = vAxisNorm.cross(mModelTr.block<3,1>(0,0));
+  mModelTr.block<3,1>(0,3) = vBondStart;
 
-  matrix4<float> mModel = mModelTr  * rotM * mModelSc ;
-  matrix4<float> mModelViewNoScale = astate->_camera->mView * mModelTr  * rotM;
+  matrix4<float> mModel = mModelTr  /** rotM * mModelSc */;
+  matrix4<float> mModelViewInvTr =
+      (astate->_camera->mView * mModelTr).inverse().transpose(); /* * rotM*/;
 
   matrix4<float> mModelView = astate->_camera->mView * mModel;
   matrix4<float> mModelViewProjection = astate->_camera->mViewProjection * mModel;
@@ -94,8 +87,8 @@ void draw_pipeline::render_bond(const vector3<float> color,
                              mModelViewProjection.data());
   astate->bond_shader->set_u(sp_u_name::mModelView, mModelView.data());
   astate->bond_shader->set_u(sp_u_name::vColor, (GLfloat*)(color.data()));
-  astate->bond_shader->set_u(sp_u_name::mModelViewNoScale,
-                             mModelViewNoScale.data());
+  astate->bond_shader->set_u(sp_u_name::mModelViewInvTr,
+                             mModelViewInvTr.data());
 
   astate->cylinder_mesh->render();
 
@@ -154,37 +147,37 @@ void draw_pipeline::render_aabb(const vector3<float> vColor,
   render_line(
         vColor,
         vector3<float>(vBoxMin[0]+vBoxSize[0], vBoxMin[1], vBoxMin[2]),
-        vector3<float>(vBoxMin[0]+vBoxSize[0], vBoxMin[1]+vBoxSize[1], vBoxMin[2]));
+      vector3<float>(vBoxMin[0]+vBoxSize[0], vBoxMin[1]+vBoxSize[1], vBoxMin[2]));
 
   ///5 +x +z
   render_line(
         vColor,
         vector3<float>(vBoxMin[0]+vBoxSize[0], vBoxMin[1], vBoxMin[2]),
-        vector3<float>(vBoxMin[0]+vBoxSize[0], vBoxMin[1], vBoxMin[2]+vBoxSize[2]));
+      vector3<float>(vBoxMin[0]+vBoxSize[0], vBoxMin[1], vBoxMin[2]+vBoxSize[2]));
 
   /// 6 +y +x
   render_line(
         vColor,
         vector3<float>(vBoxMin[0], vBoxMin[1]+vBoxSize[1], vBoxMin[2]),
-        vector3<float>(vBoxMin[0]+vBoxSize[0], vBoxMin[1]+vBoxSize[1], vBoxMin[2]));
+      vector3<float>(vBoxMin[0]+vBoxSize[0], vBoxMin[1]+vBoxSize[1], vBoxMin[2]));
 
   /// 7 +y +z
   render_line(
         vColor,
         vector3<float>(vBoxMin[0], vBoxMin[1]+vBoxSize[1], vBoxMin[2]),
-        vector3<float>(vBoxMin[0], vBoxMin[1]+vBoxSize[1], vBoxMin[2]+vBoxSize[2]));
+      vector3<float>(vBoxMin[0], vBoxMin[1]+vBoxSize[1], vBoxMin[2]+vBoxSize[2]));
 
   /// 8  +z +x
   render_line(
         vColor,
         vector3<float>(vBoxMin[0], vBoxMin[1], vBoxMin[2]+vBoxSize[2]),
-        vector3<float>(vBoxMin[0]+vBoxSize[1], vBoxMin[1], vBoxMin[2]+vBoxSize[2]));
+      vector3<float>(vBoxMin[0]+vBoxSize[1], vBoxMin[1], vBoxMin[2]+vBoxSize[2]));
 
   /// 9 +z +y
   render_line(
         vColor,
         vector3<float>(vBoxMin[0], vBoxMin[1], vBoxMin[2]+vBoxSize[2]),
-        vector3<float>(vBoxMin[0], vBoxMin[1]+vBoxSize[1], vBoxMin[2]+vBoxSize[2]));
+      vector3<float>(vBoxMin[0], vBoxMin[1]+vBoxSize[1], vBoxMin[2]+vBoxSize[2]));
 
   /// 10
   render_line(
@@ -198,7 +191,7 @@ void draw_pipeline::render_aabb(const vector3<float> vColor,
         vBoxMax,
         vector3<float>(vBoxMax[0], vBoxMax[1]-vBoxSize[1], vBoxMax[2]));
   /// 12
- render_line(
+  render_line(
         vColor,
         vBoxMax,
         vector3<float>(vBoxMax[0]-vBoxSize[0], vBoxMax[1], vBoxMax[2]));

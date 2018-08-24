@@ -12,6 +12,8 @@
 #include <algorithm>
 #include <geom/tws_tree.hpp>
 #include <qppcad/ws_item.hpp>
+#include <data/color.hpp>
+#include <qppcad/file_formats.hpp>
 
 namespace qpp{
 
@@ -30,9 +32,26 @@ namespace qpp{
 
       void vote_for_view_vectors(vector3<float> &vOutLookPos,
                                  vector3<float> &vOutLookAt) override ;
+      void update() override;
       void render() override;
       void render_ui() override;
       void mouse_click(ray<float> *ray) override;
+
+      bool support_translation() override;
+      bool support_rotation() override;
+      bool support_scaling() override;
+      bool support_content_editing() override;
+
+      void shift(const vector3<float> vShift);
+
+      ///
+      /// \brief load_from_file
+      /// \param eFileFormat
+      /// \param sFileName
+      /// \param bAutoCenter
+      ///
+      void load_from_file(qc_file_format eFileFormat, std::string sFileName,
+                          bool bAutoCenter = false);
 
       void rebuild_ngbt();
 

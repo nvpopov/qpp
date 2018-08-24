@@ -27,10 +27,6 @@ namespace qpp {
     TASK_MENDELEY_TABLE = 2
   };
 
-  enum app_edit_type {
-    EDIT_WS_ITEM = 0,
-    EDIT_WS_ITEM_CONTENT = 1
-  };
 
   ///
   /// \brief The app_state class
@@ -52,7 +48,7 @@ namespace qpp {
     double MouseOldY;
 
     app_task_type cur_task;
-    app_edit_type cur_edit_type;
+    //app_edit_type cur_edit_type;
 
     // sphere mesh with differnet resolutions
     std::vector<mesh*> _sph_meshes;
@@ -65,6 +61,9 @@ namespace qpp {
 
     int wWidth;
     int wHeight;
+
+    float fAtomRadiusScaleFactor;
+    float fBondScaleFactor;
 
     vector2<float> vViewportXY;
     vector2<float> vViewportWidthHeight;
@@ -104,7 +103,7 @@ namespace qpp {
       FPS = 60;
 
       cur_task = app_task_type::TASK_WORKSPACE_EDITOR;
-      cur_edit_type = app_edit_type::EDIT_WS_ITEM_CONTENT;
+      //cur_edit_type = app_edit_type::EDIT_WS_ITEM_CONTENT;
 
       bDrawAxis = true;
       bDrawGrid = false;
@@ -116,6 +115,8 @@ namespace qpp {
 
       wWidth  = 600;
       wHeight = 600;
+      fAtomRadiusScaleFactor = 0.3f;
+      fBondScaleFactor = 0.09f;
 
       _camera = nullptr;
 

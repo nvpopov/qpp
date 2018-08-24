@@ -112,10 +112,10 @@ mesh* mesh::generate_sphere_mesh(const int latBands, const int longBands){
 mesh *mesh::generate_cylinder_whole(const int numPhi, const int numZ){
 
   mesh* _mesh = new mesh();
-  float R = 1.0;
+  float R = 1.0f;
 
-  float dZ = 1.0/(numZ - 1);
-  float dPhi = (2.0*qpp::pi)/(numPhi - 1);
+  float dZ = 1.0f/(numZ - 1);
+  float dPhi = (2.0f*qpp::pi)/(numPhi - 1);
   size_t id = 0;
   int numIdx = 0;
 

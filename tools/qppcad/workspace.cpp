@@ -28,6 +28,9 @@ void workspace::set_best_view(){
 
   //  std::cout << "set bv " << _vLookAt << std::endl << _vLookPos << std::endl
   //            << "end bv " << std::endl;
+
+  if ((ws_cam->vLookAt-ws_cam->vViewPoint).norm() < 0.4f)
+    ws_cam->reset_camera();
 }
 
 void workspace::render(){
@@ -126,35 +129,29 @@ workspace *workspace_manager::get_current_workspace(){
 void workspace_manager::init_default_workspace(){
 
   ws_atom_list* _wsl = new ws_atom_list();
-  _wsl->name = "geometry1";
-  std::ifstream si2("../examples/io/ref_data/dna.xyz");
-  _wsl->tws_tr->bAutoBonding = false;
-  read_xyz(si2, *(_wsl->geom));
-  _wsl->tws_tr->find_all_neighbours();
+  _wsl->load_from_file(qc_file_format::format_standart_xyz,
+                       "../examples/io/ref_data/dna.xyz",
+                       true);
 
 
   ws_atom_list* _wsl2 = new ws_atom_list();
-  std::ifstream nt2("../examples/io/ref_data/nanotube.xyz");
-  _wsl2->name = "nanotube";
-  _wsl2->tws_tr->bAutoBonding = false;
-  read_xyz(nt2, *(_wsl2->geom));
-  _wsl2->tws_tr->find_all_neighbours();
+  _wsl2->load_from_file(qc_file_format::format_standart_xyz,
+                       "../examples/io/ref_data/ddt.xyz",
+                       true);
 
   ws_atom_list* _wsl3 = new ws_atom_list();
-  std::ifstream nt3("../examples/io/ref_data/cdse_nanocrystal.xyz");
-  _wsl3->name = "cdse";
-  _wsl3->tws_tr->bAutoBonding = false;
-  read_xyz(nt3, *(_wsl3->geom));
-  _wsl3->tws_tr->find_all_neighbours();
+  _wsl3->load_from_file(qc_file_format::format_standart_xyz,
+                       "../examples/io/ref_data/nanotube.xyz",
+                       true);
 
   workspace* _ws = new workspace();
-  _ws->ws_name = "default1";
+  _ws->ws_name = "d1";
 
   workspace* _ws2 = new workspace();
-  _ws2->ws_name = "nanotube";
+  _ws2->ws_name = "d2";
 
   workspace* _ws3 = new workspace();
-  _ws3->ws_name = "default3";
+  _ws3->ws_name = "nanotube";
 
   _ws->ws_items.push_back(_wsl);
   _ws2->ws_items.push_back(_wsl2);

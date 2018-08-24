@@ -111,5 +111,10 @@ namespace qpp{
     return true;
   }
 
+  std::string extract_base_name(const std::string &path){
+    return path.substr(path.find_last_of("/\\") + 1);
+  }
+
+
 
 }

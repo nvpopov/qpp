@@ -21,6 +21,12 @@ namespace qpp{
     ws_periodic_c
   };
 
+  enum ws_edit_type {
+    EDIT_WS_ITEM = 0,
+    EDIT_WS_ITEM_CONTENT = 1
+  };
+
+
   /// workspace manager
   class workspace_manager {
   public:
@@ -38,6 +44,7 @@ namespace qpp{
   /// workspace
   class workspace {
   public:
+    ws_edit_type cur_edit_type;
     std::vector<ws_item*> ws_items;
     std::string ws_name;
     camera* ws_cam;
@@ -51,6 +58,7 @@ namespace qpp{
       bFirstRender = true;
       ws_cam = new camera();
       ws_cam->reset_camera();
+      cur_edit_type = ws_edit_type::EDIT_WS_ITEM;
 
     }
 

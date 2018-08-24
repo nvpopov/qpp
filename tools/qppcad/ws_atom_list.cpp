@@ -1,5 +1,6 @@
 #include <qppcad/ws_atom_list.hpp>
 #include <qppcad/app.hpp>
+#include <io/geomio.hpp>
 
 using namespace qpp;
 
@@ -21,23 +22,30 @@ ws_atom_list::ws_atom_list(){
   ext_obs = new extents_observer<float>(*geom);
   tws_tr = new tws_tree<float>(*geom);
   tws_tr->bAutoBonding = true;
+
+  pos = vector3<float>(0.0, 0.0, 0.0);
 }
 
 void ws_atom_list::vote_for_view_vectors(vector3<float> &vOutLookPos,
                                          vector3<float> &vOutLookAt){
   if(geom->nat() > 2){
-      vOutLookAt += (ext_obs->max_pos + ext_obs->min_pos) / 2.0;
-      vector3<float> vSize = ext_obs->max_pos - ext_obs->min_pos;
+      vOutLookAt += (ext_obs->aabb.max + ext_obs->aabb.min) / 2.0;
+      vector3<float> vSize = ext_obs->aabb.max - ext_obs->aabb.min;
       float fSize = vSize.norm();
 
       vOutLookPos  +=
-          ext_obs->max_pos.normalized() * clamp<float>(fSize, 10.0, 100.0);
+          ext_obs->aabb.max.normalized() * clamp<float>(fSize, 10.0, 100.0);
     }
   else vOutLookPos += vector3<float>(0.0, 0.0, -5.0);
+
+}
+
+void ws_atom_list::update(){
+  aabb = ext_obs->aabb;
 }
 
 void ws_atom_list::render(){
-
+  ws_item::render();
   app_state* astate = &(c_app::get_state());
 
   if (astate->_draw_pipeline != nullptr){
@@ -46,16 +54,11 @@ void ws_atom_list::render(){
           astate->_draw_pipeline->begin_render_aabb();
           tws_tr->apply_visitor(
                 [astate](tws_node<float> *inNode, int deepLevel){
-            vector3<float> vAABBMin(inNode->bb.min[0], inNode->bb.min[1],
-                inNode->bb.min[2]);
-
-            vector3<float> vAABBMax(inNode->bb.max[0], inNode->bb.max[1],
-                inNode->bb.max[2]);
-
-            astate->_draw_pipeline->render_aabb(vector3<float>(1.0, 1.0, 1.0),
-                                                vAABBMin, vAABBMax);
-
+                  astate->_draw_pipeline->render_aabb(clr_maroon,
+                                                     inNode->bb.min,
+                                                     inNode->bb.max);
           });
+
           astate->_draw_pipeline->end_render_aabb();
         }
 
@@ -68,7 +71,8 @@ void ws_atom_list::render(){
 
           if(ap_idx != -1){
               //TODO: radius scale factor
-              fDrawRad = ptable::get_inst()->arecs[ap_idx-1].aRadius * 0.25f;
+              fDrawRad = ptable::get_inst()->arecs[ap_idx-1].aRadius
+                         * astate->fAtomRadiusScaleFactor;
               color = ptable::get_inst()->arecs[ap_idx-1].aColorGV;
             }
 
@@ -97,7 +101,7 @@ void ws_atom_list::render(){
 
             astate->_draw_pipeline->render_bond(color, geom->pos(i),
                                                 geom->pos(tws_tr->table_atm(i,j)),
-                                                0.08f);
+                                                astate->fBondScaleFactor);
             totB += 1;
           }
       //      std::cout << "Tot bond" << totB << std::endl;
@@ -165,6 +169,79 @@ void ws_atom_list::mouse_click(ray<float> *ray){
               !(geom->xfield<bool>("sel", res[0]->atm ));
         }
     }
+}
+
+bool ws_atom_list::support_translation(){
+  return true;
+}
+
+bool ws_atom_list::support_rotation(){
+  return false;
+}
+
+bool ws_atom_list::support_scaling(){
+  return  false;
+}
+
+bool ws_atom_list::support_content_editing(){
+  return true;
+}
+
+void ws_atom_list::shift(const vector3<float> vShift){
+  tws_tr->bAutoBonding = false;
+  tws_tr->bAutoBuild   = false;
+
+  for (int i = 0; i < geom->nat(); i++)
+    geom->coord(i) = vShift + geom->pos(i) ;
+
+  ext_obs->aabb.min = vShift + ext_obs->aabb.min;
+  ext_obs->aabb.max = vShift + ext_obs->aabb.max;
+
+  tws_tr->bAutoBonding = true;
+  tws_tr->bAutoBuild   = true;
+}
+
+void ws_atom_list::load_from_file(qc_file_format eFileFormat,
+                                  std::string sFileName,
+                                  bool bAutoCenter){
+  //clean geom and tws-tree
+  tws_tr->bAutoBonding = false;
+  tws_tr->bAutoBuild   = false;
+  tws_tr->clear_ntable();
+  tws_tr->clear_tree();
+  ext_obs->bFirstData = true;
+  std::ifstream fQCData(sFileName);
+
+  switch (eFileFormat) {
+    case qc_file_format::format_standart_xyz:
+
+      name = extract_base_name(sFileName);
+      read_xyz(fQCData, *(geom));
+      break;
+
+    default: c_app::log("File format not implemented");
+
+    }
+
+  if(bAutoCenter){
+      vector3<float> vCenter(0.0, 0.0, 0.0);
+      for (int i = 0; i < geom->nat(); i++)
+        vCenter += geom->pos(i);
+      vCenter *= (1.0f / geom->nat());
+      for (int i = 0; i < geom->nat(); i++)
+        geom->coord(i) = -vCenter + geom->pos(i) ;
+
+      ext_obs->aabb.min = -vCenter + ext_obs->aabb.min;
+      ext_obs->aabb.max = -vCenter + ext_obs->aabb.max;
+
+
+    }
+
+  tws_tr->manual_build();
+  tws_tr->find_all_neighbours();
+  tws_tr->bAutoBonding = true;
+  tws_tr->bAutoBuild   = true;
+
 }
 
 void ws_atom_list::rebuild_ngbt(){

@@ -15,6 +15,11 @@ namespace qpp{
       vector3<REAL> max;
       vector3<REAL> min;
 
+      aabb_3d<REAL>& operator=(const aabb_3d<REAL>& other){
+        max = other.max;
+        min = other.min;
+      }
+
       ///
       /// \brief squared_dist_point_check
       /// \param pn
