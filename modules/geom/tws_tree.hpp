@@ -16,6 +16,7 @@
 #include <geom/ray.hpp>
 #include <geom/primitive_intersections.hpp>
 #include <data/ptable.hpp>
+#include <cassert>
 #include <string>
 
 
@@ -156,7 +157,7 @@ namespace qpp{
         //std::vector<std::vector<tws_node_content<REAL>*> > nTable;
         for (std::vector<tws_node_content<REAL>*> &vPerAtom : nTable){
             for (tws_node_content<REAL> *nc : vPerAtom){
-                delete nc;
+                if (nc) delete nc;
               }
             vPerAtom.clear();
           }
@@ -168,7 +169,7 @@ namespace qpp{
       ///
       void clear_tree(){
         for (tws_node<REAL> *node : flat_view)
-          delete node;
+          if (node) delete node;
         flat_view.clear();
       }
 
@@ -288,7 +289,7 @@ namespace qpp{
               if (child) traverse_query_sphere(child, fSphRad, vSphCnt, res);
 
             for (tws_node_content<REAL>* cnt : curNode->content)
-              if ((vSphCnt - geom->r(cnt->atm, cnt->idx)).norm() <= fSphRad)
+              if ((vSphCnt - geom->pos(cnt->atm, cnt->idx)).norm() <= fSphRad)
                 res->push_back(cnt);
           }
       }
@@ -300,8 +301,13 @@ namespace qpp{
       ///
       void insert_object_to_tree(const int atm, const index & idx){
         check_root();
-        while (!(point_aabb_test(geom->r(atm, idx), root->bb)) ) {
+        int q = 0;
+        while (!(point_aabb_test(geom->pos(atm, idx), root->bb)) ) {
             grow_tws_root(atm, idx);
+            q++;
+            std::cout<<fmt::format("rootgrow p = {}, {}, {}\n", geom->pos(atm, idx)[0],
+                geom->pos(atm, idx)[1], geom->pos(atm, idx)[2] );
+            assert(q<10);
           }
         traverse_insert_object_to_tree(root, atm, idx);
       }
@@ -316,7 +322,7 @@ namespace qpp{
       bool traverse_insert_object_to_tree( tws_node<REAL> *curNode,
                                            const int atm, const index & idx){
 
-        vector3<REAL> p = geom->r(atm, idx);
+        vector3<REAL> p = geom->pos(atm, idx);
         vector3<REAL> cn_size = curNode->bb.max - curNode->bb.min;
         vector3<REAL> cn_center = curNode->bb.center();
 
@@ -370,7 +376,7 @@ namespace qpp{
       /// \param idx
       ///
       void push_data_to_tws_node(tws_node<REAL> *curNode, const int atm,
-                                 const index & idx){
+                                 const index idx){
         tws_node_content<REAL>* cnt = new tws_node_content<REAL>(atm, idx);
         curNode->content.push_back(cnt);
       }
@@ -417,34 +423,6 @@ namespace qpp{
             root->tot_childs) << root->bb <<std::endl;
 #endif
       }
-
-      ///
-      /// \brief split_tws_node
-      /// \param curNode
-      ///
-      //      void split_tws_node(tws_node<REAL> *curNode){
-      //        vector3<REAL> vSize = (curNode->bb.max - curNode->bb.min)/6.0;
-      //        vector3<REAL> vCntr = (curNode->bb.max+ curNode->bb.min)/2.0;
-
-      //        for (int ix = -1; ix < 2; ix++)
-      //          for (int iy = -1; iy < 2; iy++)
-      //            for (int iz = -1; iz < 2; iz++){
-      //                tws_node<REAL>* nNode = new tws_node<REAL>();
-
-      //                nNode->bb.min =
-      //                    vCntr - vSize + vector3<REAL>(ix * vSize[0] * 2,
-      //                    iy * vSize[1] * 2,
-      //                    iz * vSize[2] * 2);
-
-      //                nNode->bb.max =
-      //                    vCntr + vSize + vector3<REAL>(ix * vSize[0] * 2,
-      //                    iy * vSize[1] * 2,
-      //                    iz * vSize[2] * 2);
-
-      //                curNode->childs.push_back(nNode);
-      //              }
-      //      }
-
 
       ///
       /// \brief n
@@ -566,7 +544,7 @@ namespace qpp{
       ///
       void manual_build(){
         for (int i = 0; i < geom->nat(); i++)
-          insert_object_to_tree(i, index({0,0,0}));
+          insert_object_to_tree(i, index({0}));
       }
 
       ///

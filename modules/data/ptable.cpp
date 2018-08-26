@@ -228,7 +228,7 @@ void qpp::ptable::assembly_ptable_0(){
   this->arecs[8].aSymbol       = "F";
   this->arecs[8].aRadius       = 0.92;
   this->arecs[8].aMass         = 18.998403163;
-  this->arecs[8].aCovRad_Slater= 0.5;
+  this->arecs[8].aCovRad_Slater= 0.72;
   this->arecs[8].aIonicRadius  = 1.285;
   this->arecs[8].aVdWRadius    = 1.47;
   this->arecs[8].aNValenceElec = 7;
@@ -993,7 +993,7 @@ void qpp::ptable::assembly_ptable_3(){
   this->arecs[34].aSymbol       = "Br";
   this->arecs[34].aRadius       = 1.4000;
   this->arecs[34].aMass         = 79.904;
-  this->arecs[34].aCovRad_Slater= 1.15;
+  this->arecs[34].aCovRad_Slater= 1.31;
   this->arecs[34].aIonicRadius  = 1.96;
   this->arecs[34].aVdWRadius    = 1.85;
   this->arecs[34].aNValenceElec = 7;
@@ -1588,7 +1588,7 @@ void qpp::ptable::assembly_ptable_5(){
   this->arecs[52].aNumber       = 53;
   this->arecs[52].aName         = "Iodine";
   this->arecs[52].aSymbol       = "I";
-  this->arecs[52].aRadius       = -0.01;
+  this->arecs[52].aRadius       = 1.6;
   this->arecs[52].aMass         = 126.90447;
   this->arecs[52].aCovRad_Slater= 1.4000000000000001;
   this->arecs[52].aIonicRadius  = 2.2;

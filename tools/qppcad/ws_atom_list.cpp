@@ -1,27 +1,25 @@
 #include <qppcad/ws_atom_list.hpp>
 #include <qppcad/app.hpp>
 #include <io/geomio.hpp>
+#include <io/vasp_io.hpp>
 
 using namespace qpp;
 
-ws_atom_list::ws_atom_list(){
+ws_atom_list::ws_atom_list(workspace* parent):ws_item(parent){
 
   bNeedToRebuildNBT = true;
-  iDim = 0;
-  cell = new periodic_cell<float>({20.0, 0.0, 0.0},
-  {0.0, 20.0, 0.0},
-  {0.0, 0.0, 20.0});
+  iDim = 3;
+  cell = new periodic_cell<float>({20.0, 0.0, 0.0}, {0.0, 20.0, 0.0}, {0.0, 0.0, 20.0});
 
-  geom = new xgeometry<float, periodic_cell<float> >(*cell,
-  {"atom", "number", "charge", "x", "y", "z", "show", "sel"},
+  geom = new xgeometry<float, periodic_cell<float> >(3,"rg1");
+  geom->set_format({"atom", "number", "charge", "x", "y", "z", "show", "sel"},
 
   {type_string, type_int, type_real, type_real, type_real, type_real,
-   type_bool, type_bool}, "rg1");
+   type_bool, type_bool});
 
   ext_obs = new extents_observer<float>(*geom);
   tws_tr = new tws_tree<float>(*geom);
   tws_tr->bAutoBonding = true;
-
 
 }
 
@@ -57,6 +55,17 @@ void ws_atom_list::render(){
           });
 
           astate->_draw_pipeline->end_render_aabb();
+        }
+
+      if (geom->DIM == 3){
+          astate->_draw_pipeline->begin_render_line();
+          astate->_draw_pipeline->render_line(clr_black, vector3<float>(0.0, 0.0, 0.0),
+                                              geom->cell.v[0]);
+          astate->_draw_pipeline->render_line(clr_black, vector3<float>(0.0, 0.0, 0.0),
+                                              geom->cell.v[1]);
+          astate->_draw_pipeline->render_line(clr_black, vector3<float>(0.0, 0.0, 0.0),
+                                              geom->cell.v[2]);
+          astate->_draw_pipeline->end_render_line();
         }
 
       // atom render start
@@ -205,24 +214,40 @@ void ws_atom_list::shift(const vector3<float> vShift){
 void ws_atom_list::load_from_file(qc_file_format eFileFormat,
                                   std::string sFileName,
                                   bool bAutoCenter){
+
+  c_app::log(fmt::format("Loading geometry from file {} to ws_atom_list in workspace {}",
+                         sFileName, parent_ws->ws_name));
+
+  std::ifstream fQCData(sFileName);
+  if (!(fQCData.good())) {
+      c_app::log(fmt::format("Error in loading from file {}", sFileName));
+      return;
+    }
+
   //clean geom and tws-tree
   tws_tr->bAutoBonding = false;
   tws_tr->bAutoBuild   = false;
   tws_tr->clear_ntable();
   tws_tr->clear_tree();
   ext_obs->bFirstData = true;
-  std::ifstream fQCData(sFileName);
+
 
   switch (eFileFormat) {
     case qc_file_format::format_standart_xyz:
-
       name = extract_base_name(sFileName);
       read_xyz(fQCData, *(geom));
+      break;
+
+    case qc_file_format::format_vasp_poscar:
+      name = extract_base_name(sFileName);
+      read_vasp_poscar(fQCData, *(geom));
       break;
 
     default: c_app::log("File format not implemented");
 
     }
+
+  fQCData.close();
 
   if(bAutoCenter){
       vector3<float> vCenter(0.0, 0.0, 0.0);
@@ -242,6 +267,7 @@ void ws_atom_list::load_from_file(qc_file_format eFileFormat,
   tws_tr->bAutoBuild   = true;
 
   update();
+
 }
 
 void ws_atom_list::rebuild_ngbt(){

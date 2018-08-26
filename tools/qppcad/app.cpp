@@ -124,7 +124,7 @@ void qpp::c_app::run(){
 
   glfwDestroyWindow(qpp::c_app::curWindow);
   glfwTerminate();
-  exit(EXIT_SUCCESS);
+  //exit(EXIT_SUCCESS);
 }
 
 void qpp::c_app::begin_render(){

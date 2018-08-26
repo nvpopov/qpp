@@ -146,46 +146,40 @@ workspace *workspace_manager::get_current_workspace(){
 
 void workspace_manager::init_default_workspace(){
 
-  ws_atom_list* _wsl = new ws_atom_list();
-  _wsl->load_from_file(qc_file_format::format_standart_xyz,
-                       "../examples/io/ref_data/dna.xyz",
-                       true);
+//  ws_atom_list* _wsl1 = new ws_atom_list();
+//  _wsl1->load_from_file(qc_file_format::format_standart_xyz, "../examples/io/ref_data/dna.xyz",
+//                        true);
 
+//  ws_atom_list* _wsl2 = new ws_atom_list();
+//  _wsl2->load_from_file(qc_file_format::format_standart_xyz, "../examples/io/ref_data/ddt.xyz",
+//                        true);
 
-  ws_atom_list* _wsl2 = new ws_atom_list();
-  _wsl2->load_from_file(qc_file_format::format_standart_xyz,
-                        "../examples/io/ref_data/ddt.xyz",
-                        true);
-
-  ws_atom_list* _wsl3 = new ws_atom_list();
-  _wsl3->load_from_file(qc_file_format::format_standart_xyz,
-                        "../examples/io/ref_data/nanotube.xyz",
-                        true);
-
-  ws_atom_list* _wsl4 = new ws_atom_list();
-  _wsl4->load_from_file(qc_file_format::format_standart_xyz,
-                        "../examples/io/ref_data/nanotube.xyz",
-                        true);
-
-  _wsl4->shift(vector3<float>(15.0f, 15.0f, 15.0f));
-
-  workspace* _ws = new workspace();
-  _ws->ws_name = "d1";
-
+//  ws_atom_list* _wsl3 = new ws_atom_list();
+//  _wsl3->load_from_file(qc_file_format::format_standart_xyz, "../examples/io/ref_data/nanotube.xyz",          true);
   workspace* _ws2 = new workspace();
   _ws2->ws_name = "d2";
+  ws_atom_list* _wsl4 = new ws_atom_list(_ws2);
+  _wsl4->load_from_file(qc_file_format::format_standart_xyz, "../examples/io/ref_data/dna.xyz",
+                        false);
 
-  workspace* _ws3 = new workspace();
-  _ws3->ws_name = "nanotube";
+//  _wsl1->shift(vector3<float>(15.0f, 15.0f, 15.0f));
 
-  _ws->add_item_to_workspace(_wsl);
-  _ws->add_item_to_workspace(_wsl4);
-  _ws2->add_item_to_workspace(_wsl2);
-  _ws3->add_item_to_workspace(_wsl3);
+//  workspace* _ws1 = new workspace();
+//  _ws1->ws_name = "d1";
+
+
+
+//  workspace* _ws3 = new workspace();
+//  _ws3->ws_name = "nanotube";
+
+//  _ws1->add_item_to_workspace(_wsl1);
+//  _ws1->add_item_to_workspace(_wsl2);
+  _ws2->add_item_to_workspace(_wsl4);
+ // _ws3->add_item_to_workspace(_wsl3);
 
   ws.push_back(_ws2);
-  ws.push_back(_ws3);
-  ws.push_back(_ws);
+ // ws.push_back(_ws3);
+//  ws.push_back(_ws1);
 
   iCurrentWorkSpace = ws.size() - 1;
 }

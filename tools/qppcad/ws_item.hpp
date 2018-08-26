@@ -21,7 +21,7 @@ namespace qpp{
       vector3<float> vScale;
       vector3<float> vRotation;
       bool bSelected;
-      ws_item();
+      ws_item(workspace* parent);
       virtual void vote_for_view_vectors(vector3<float> &vOutLookPos,
                                          vector3<float> &vOutLookAt) = 0;
       void set_parent_workspace(workspace* _parent_ws);

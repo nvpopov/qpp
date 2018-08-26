@@ -28,7 +28,7 @@ namespace qpp{
       tws_tree<float, periodic_cell<float> > *tws_tr;
       extents_observer<float, periodic_cell<float> > *ext_obs;
 
-      ws_atom_list();
+      ws_atom_list(workspace* parent);
 
       void vote_for_view_vectors(vector3<float> &vOutLookPos,
                                  vector3<float> &vOutLookAt) override ;

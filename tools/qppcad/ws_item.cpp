@@ -5,11 +5,12 @@
 
 using namespace qpp;
 
-ws_item::ws_item(){
+ws_item::ws_item(workspace* parent){
   vPosition = vector3<float>(0.0f, 0.0f, 0.0f);
   vScale    = vector3<float>(1.0f, 1.0f, 1.0f);
   vRotation = vector3<float>(0.0f, 0.0f, 0.0f);
   bSelected = false;
+  parent_ws = parent;
 }
 
 void ws_item::set_parent_workspace(workspace *_parent_ws){
