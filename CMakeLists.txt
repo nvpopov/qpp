@@ -25,7 +25,7 @@ set(LA_TYPE "MKL" CACHE STRING "Type of linear algebra library, (MKL,ACML)")
 # option declaration
 option(PYTHON_BINDINGS "build qpp python bindings" ON)
 option(USE_SYSTEM_EIGEN3 "use system avaiable eigen3 or download as deps" OFF)
-option(BUILD_EXAMPLES "build examples" OFF)
+option(BUILD_EXAMPLES "build examples" ON)
 option(BUILD_TESTS "build tests executable" OFF)
 option(BUILD_QC "build qc stuff")
 option(BUILD_DOCS "build documentation")
