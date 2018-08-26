@@ -4,5 +4,5 @@ sudo: required
 compiler:
  - gcc
 script:
- - mkdir build && cd build && cmake .. -DPYBIND11_PYTHON_VERSION=3 -DBUILD_QC=OFF -DBUILD_PYTHON_BINDINGS=ON && cmake --build .
+ - mkdir build && cd build && cmake .. -DPYBIND11_PYTHON_VERSION=3 -DBUILD_QC=OFF -DBUILD_PYTHON_BINDINGS=ON -DBUILD_EXAMPLES=ON && cmake --build .
  
