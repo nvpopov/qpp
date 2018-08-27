@@ -1,11 +1,11 @@
 include(ExternalProject)
-add_subdirectory(${CMAKE_SOURCE_DIR}/deps/pybind11)
+add_subdirectory(${PROJECT_SOURCE_DIR}/deps/pybind11)
 
 
 #fmtlib for fast c++ format routines
 ExternalProject_Add(fmtlib
 
-  SOURCE_DIR "${CMAKE_SOURCE_DIR}/deps/fmtlib"
+  SOURCE_DIR "${PROJECT_SOURCE_DIR}/deps/fmtlib"
   INSTALL_COMMAND ""
   UPDATE_COMMAND ""
   CONFIGURE_COMMAND ""
@@ -16,7 +16,7 @@ ExternalProject_Add(fmtlib
 if(NOT USE_SYSTEM_EIGEN3)
 ExternalProject_Add(eigen3
 
-  SOURCE_DIR "${CMAKE_SOURCE_DIR}/deps/eigen3"
+  SOURCE_DIR "${PROJECT_SOURCE_DIR}/deps/eigen3"
   INSTALL_COMMAND ""
   UPDATE_COMMAND ""
   CONFIGURE_COMMAND ""
@@ -27,7 +27,7 @@ endif()
 
 #spglib for crystal symmetry handling
     ExternalProject_Add(spglib
-        SOURCE_DIR "${CMAKE_SOURCE_DIR}/deps/spglib"
+        SOURCE_DIR "${PROJECT_SOURCE_DIR}/deps/spglib"
         INSTALL_COMMAND ""
         UPDATE_COMMAND ""
         CMAKE_ARGS ""
@@ -41,9 +41,9 @@ if(BUILD_QC)
         #  DOWNLOAD_NAME libint.tgz
         #  DOWNLOAD_DIR "${CMAKE_SOURCE_DIR}/deps/"
 
-        SOURCE_DIR "${CMAKE_SOURCE_DIR}/deps/libint"
+        SOURCE_DIR "${PROJECT_SOURCE_DIR}/deps/libint"
         BUILD_IN_SOURCE 1
-        CONFIGURE_COMMAND "${CMAKE_SOURCE_DIR}/deps/libint/./configure"
+        CONFIGURE_COMMAND "${PROJECT_SOURCE_DIR}/deps/libint/./configure"
         "--with-cxx=${CMAKE_CXX_COMPILER}"
 
         INSTALL_COMMAND ""

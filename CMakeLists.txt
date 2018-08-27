@@ -8,7 +8,7 @@ set(CMAKE_CXX_FLAGS "-O3 -funroll-loops -ftree-vectorize \
     ")
 #set(CMAKE_BUILD_TYPE "Debug")
 set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 
 include(FindOpenMP)
 if(OPENMP_FOUND)
@@ -34,8 +34,8 @@ option(BUILD_TOOLS  "build tools" OFF)
 # end option declaration
 
 #read options from file if it exists
-if(EXISTS ${CMAKE_SOURCE_DIR}/qpp.config)
-    file(STRINGS ${CMAKE_SOURCE_DIR}/qpp.config ConfigContents)
+if(EXISTS ${PROJECT_SOURCE_DIR}/qpp.config)
+    file(STRINGS ${PROJECT_SOURCE_DIR}/qpp.config ConfigContents)
     foreach(NameAndValue ${ConfigContents})
       # Strip leading spaces
       string(REGEX REPLACE "^[ ]+" "" NameAndValue ${NameAndValue})
@@ -74,8 +74,8 @@ if (LA_TYPE EQUAL "MKL")
 endif()
 
 add_subdirectory(deps)
-include_directories(${CMAKE_SOURCE_DIR}/deps/fmtlib)
-include_directories(${CMAKE_SOURCE_DIR}/deps/pybind11/include)
+include_directories(${PROJECT_SOURCE_DIR}/deps/fmtlib)
+include_directories(${PROJECT_SOURCE_DIR}/deps/pybind11/include)
 #add_subdirectory(${CMAKE_SOURCE_DIR}/deps/fmtlib)
 
 
@@ -94,7 +94,7 @@ if(USE_SYSTEM_EIGEN3)
     endif()
 else()
     message("-- Internal Eigen3 will be used")
-    include_directories(${CMAKE_SOURCE_DIR}/deps/eigen3)
+    include_directories(${PROJECT_SOURCE_DIR}/deps/eigen3)
 endif()
 #end eigen3
 
@@ -113,7 +113,7 @@ add_custom_target(ideheaders SOURCES ${ide_headers} ${ide_headersc}
 include_directories(modules/)
 
 #spglib
-include_directories(${CMAKE_SOURCE_DIR}/deps/spglib/src)
+include_directories(${PROJECT_SOURCE_DIR}/deps/spglib/src)
 add_library(spglib-imp STATIC IMPORTED)
 set_target_properties(spglib-imp PROPERTIES IMPORTED_LOCATION
     "${PROJECT_BINARY_DIR}/deps/spglib-prefix/src/spglib-build/libsymspg.a")
@@ -144,9 +144,9 @@ if(BUILD_QC)
     message("-- @ Building of quantum chemistry programs enabled")
     add_library(int-imp STATIC IMPORTED)
     set_target_properties(int-imp PROPERTIES IMPORTED_LOCATION
-        "${CMAKE_SOURCE_DIR}/deps/libint/lib/.libs/libint2.a")
-    include_directories(${CMAKE_SOURCE_DIR}/deps/libint/include)
-    add_subdirectory(${CMAKE_SOURCE_DIR}/examples/qc)
+        "${PROJECT_SOURCE_DIR}/deps/libint/lib/.libs/libint2.a")
+    include_directories(${PROJECT_SOURCE_DIR}/deps/libint/include)
+    add_subdirectory(${PROJECT_SOURCE_DIR}/examples/qc)
     #find_package(OpenMP)
     #if(OPENMP_FOUND)
     #    add_definitions(${OpenMP_CXX_FLAGS})
@@ -186,4 +186,4 @@ if(BUILD_TOOLS)
     message("-- building tools enabled")
 endif(BUILD_TOOLS)
 
-add_subdirectory(${CMAKE_SOURCE_DIR}/tools)
+add_subdirectory(${PROJECT_SOURCE_DIR}/tools)
