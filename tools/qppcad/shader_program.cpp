@@ -145,10 +145,11 @@ qpp::shader_program* qpp::gen_default_program(){
       "void main(void)\n"
       "{\n"
       "  //float distance = length(vLightPos - fs_Position);\n"
-      "  vec3 lightVector = normalize(vLightPos - fs_Position);\n"
-      "  float diffuse = max(dot(fs_Normal, lightVector), 0.1);\n"
+      "  vec3 spLightPos = normalize(vec3(0, 1, 1));\n"
+      "  vec3 lightVector = normalize(spLightPos - fs_Position);\n"
+      "  float diffuse = max(dot(fs_Normal, lightVector), 0.05);\n"
       "  // diffuse = diffuse * (1.0 / (1.0 + (0.25 * distance * distance)));\n"
-      "  vec4 ambient = vec4(0.05, 0.05, 0.05, 1.0);\n"
+      "  vec4 ambient = vec4(0.01, 0.01, 0.01, 1.0);\n"
       "  vec3 gamma = vec3(1.0/2.2, 1.0/2.2, 1.0/2.2);\n"
       "  vec4 linearColor =  vec4(vColor, 1.0) * diffuse;\n"
       "  Color = vec4(pow(linearColor.r, gamma.r),\n"
@@ -236,7 +237,9 @@ qpp::shader_program *qpp::gen_bond_draw_program(){
       "void main(void)\n"
       "{\n"
       "  //float distance = length(vLightPos - fs_Position);\n"
-      "  vec3 lightVector = normalize(vLightPos - fs_Position);\n"
+     // "  vec3 lightVector = normalize(vLightPos - fs_Position);\n"
+      "  vec3 spLightPos = (vec3(0, 1, 1));\n"
+      "  vec3 lightVector = normalize(spLightPos - fs_Position);\n"
       "  float diffuse = max(dot(fs_Normal, lightVector), 0.1);\n"
       "  // diffuse = diffuse * (1.0 / (1.0 + (0.25 * distance * distance)));\n"
       "  vec4 ambient = vec4(0.05, 0.05, 0.05, 1.0);\n"
@@ -294,6 +297,59 @@ qpp::shader_program *qpp::gen_line_mesh_program(){
   sp->u_on(sp_u_name::mViewInvTr);
   sp->u_on(sp_u_name::vTranslate);
 //  sp->u_on(sp_u_name::fScale);
+  sp->u_on(sp_u_name::vColor);
+  return sp;
+}
+
+qpp::shader_program *qpp::gen_screen_space_lighting_program(){
+  std::string vs =
+      "#version 330\n"
+      "uniform mat4 mMV;\n"
+      "uniform mat4 mMVP;\n"
+      "uniform mat4 mMV_InvTr;\n"
+      "uniform vec3 vTranslate;\n"
+      "uniform float fScale;\n"
+      "in vec3 vs_Position;\n"
+      "in vec3 vs_Normal;\n"
+      "out vec3 fs_Normal;\n"
+      "out vec3 fs_Position;\n"
+      "void main(void)\n"
+      "{\n"
+      "  vec3 tr_Position = (vs_Position*fScale + vTranslate);\n"
+      "  fs_Normal = vec3(mMV_InvTr * vec4(vs_Normal,0.0));\n"
+      "  fs_Position = vec3(mMV * vec4(tr_Position, 1.0));\n"
+      "  gl_Position = mMVP * vec4(tr_Position, 1.0);\n"
+      "}";
+
+  std::string fs =
+      "#version 330\n"
+      "uniform vec3 vLightPos;\n"
+      "uniform vec3 vColor;\n"
+      "in vec3 fs_Normal;\n"
+      "in vec3 fs_Position;\n"
+      "out vec4 Color;\n"
+      "void main(void)\n"
+      "{\n"
+      "  //float distance = length(vLightPos - fs_Position);\n"
+      "  vec3 lightVector = normalize(vLightPos - fs_Position);\n"
+      "  float diffuse = max(dot(fs_Normal, lightVector), 0.1);\n"
+      "  // diffuse = diffuse * (1.0 / (1.0 + (0.25 * distance * distance)));\n"
+      "  vec4 ambient = vec4(0.05, 0.05, 0.05, 1.0);\n"
+      "  vec3 gamma = vec3(1.0/2.2, 1.0/2.2, 1.0/2.2);\n"
+      "  vec4 linearColor =  vec4(vColor, 1.0) * diffuse;\n"
+      "  Color = vec4(pow(linearColor.r, gamma.r),\n"
+      "                  pow(linearColor.g, gamma.g),\n"
+      "                  pow(linearColor.b, gamma.b), 1.0);\n"
+      "}\n";
+
+  qpp::shader_program *sp =
+      new qpp::shader_program(std::string("default_program"), vs, fs);
+  sp->u_on(sp_u_name::mModelViewProj);
+  sp->u_on(sp_u_name::mModelView);
+  sp->u_on(sp_u_name::mModelViewInvTr);
+  sp->u_on(sp_u_name::vLightPos);
+  sp->u_on(sp_u_name::vTranslate);
+  sp->u_on(sp_u_name::fScale);
   sp->u_on(sp_u_name::vColor);
   return sp;
 }

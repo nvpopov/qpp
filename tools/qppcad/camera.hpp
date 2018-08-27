@@ -62,6 +62,7 @@ namespace qpp{
     void update_camera_translation(const bool _bMoveCamera);
     void update_camera_rotation(bool _bRotateCamera);
 
+    void set_projection(app_camera_proj_type _proj_to_set);
     vector3<float> unproject(const float _x, const float _y);
   };
 }

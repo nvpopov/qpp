@@ -166,12 +166,20 @@ void camera::update_camera_rotation(bool _bRotateCamera){
   bRotateCamera = _bRotateCamera;
 }
 
+void camera::set_projection(app_camera_proj_type _proj_to_set){
+  if (cur_proj != _proj_to_set){
+      reset_camera();
+      cur_proj = _proj_to_set;
+    }
+
+}
+
 vector3<float> camera::unproject(const float _x, const float _y){
   app_state* astate = &(c_app::get_state());
   matrix4<float> mMVP_Inv = (mProjection * mView).inverse();
   vector4<float> invec4(_x, _y, 0.5, 1.0);
   vector4<float> rvec4 = mMVP_Inv * invec4;
-  rvec4(3) = 1.0 / rvec4(3);
+  rvec4(3) = 1.0f / rvec4(3);
   rvec4(0) = rvec4(0) * rvec4(3);
   rvec4(1) = rvec4(1) * rvec4(3);
   rvec4(2) = rvec4(2) * rvec4(3);

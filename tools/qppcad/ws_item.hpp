@@ -37,6 +37,7 @@ namespace qpp{
       virtual bool support_selection() = 0;
       virtual bool support_rendering_bounding_box() = 0;
 
+      virtual float get_bb_prescaller();
       virtual ~ws_item(){ }
   };
 

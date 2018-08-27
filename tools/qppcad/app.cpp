@@ -144,7 +144,7 @@ void qpp::c_app::begin_render(){
   glViewport(0, 0, width, height);
 
   if (c_app::get_state().cur_task == app_task_type::TASK_WORKSPACE_EDITOR){
-      glClearColor(0.4f, 0.4f, 0.4f, 1);
+      glClearColor(0.75f, 0.75f, 0.75f, 1);
     }
 
   if (c_app::get_state().cur_task == app_task_type::TASK_NODE_EDITOR){
@@ -169,7 +169,7 @@ void qpp::c_app::render(){
              astate->vViewportWidthHeight(0),
              astate->vViewportWidthHeight(1));
   if (astate->cur_task == app_task_type::TASK_WORKSPACE_EDITOR)
-    astate->_workspace_manager->render_current_workspace();
+    astate->wm->render_current_workspace();
   glViewport(0, 0, astate->wWidth, astate->wHeight);
   ImGui::Render();
   ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -191,11 +191,10 @@ void qpp::c_app::resize_window_callback(GLFWwindow *window,
        astate->_ui_manager->iWorkPanelYOffset) ;
 }
 
-void qpp::c_app::mouse_scroll_callback(GLFWwindow *window,
-                                       double xoffset, double yoffset){
+void qpp::c_app::mouse_scroll_callback(GLFWwindow *window, double xoffset, double yoffset){
   app_state* astate =  &(c_app::get_state());
   if ((astate->cur_task == app_task_type::TASK_WORKSPACE_EDITOR)&&
-      (astate->_camera != NULL))
+      (astate->_camera != nullptr))
     astate->_camera->update_camera_zoom(-yoffset);
 }
 
@@ -204,16 +203,13 @@ void qpp::c_app::mouse_callback(GLFWwindow *window, double x, double y){
   qpp::c_app::get_state().update_mouse_coord(x, y);
 }
 
-void qpp::c_app::mouse_button_callback(GLFWwindow *window,
-                                       int button,
-                                       int action,
-                                       int mods){
+void qpp::c_app::mouse_button_callback(GLFWwindow *window, int button, int action, int mods){
   app_state* astate =  &(c_app::get_state());
   if ((astate->cur_task == app_task_type::TASK_WORKSPACE_EDITOR) &&
-      (astate->_camera != NULL)){
+      (astate->_camera != nullptr)){
 
       if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
-          astate->_workspace_manager->mouse_click();
+          astate->wm->mouse_click();
 
       astate->_camera->update_camera_rotation(
             button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS);

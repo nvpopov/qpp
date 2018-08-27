@@ -103,8 +103,31 @@ void draw_pipeline::render_molecule(){
 
 }
 
-void draw_pipeline::render_cell(){
+void draw_pipeline::render_cell_3d(const vector3<float> &a,
+                                   const vector3<float> &b,
+                                   const vector3<float> &c ){
+  static int disp[][6] = {
+    {0, 0, 0, 0, 0, 1},
+    {0, 0, 0, 0, 1, 0},
+    {0, 0, 0, 1, 0, 0},
+    {0, 0, 1, 0, 1, 1},
+    {0, 0, 1, 1, 0, 1},
+    {0, 1, 0, 0, 1, 1},
+    {0, 1, 0, 1, 1, 0},
+    {0, 1, 1, 1, 1, 1},
+    {1, 0, 0, 1, 0, 1},
+    {1, 0, 0, 1, 1, 0},
+    {1, 0, 1, 1, 1, 1},
+    {1, 1, 0, 1, 1, 1}
+  };
 
+  for (unsigned int i = 0; i < 12; i++){
+      vector3<float> vLStart = a*disp[i][0] + b*disp[i][1] + c*disp[i][2];
+      vector3<float> vLEnd   = a*disp[i][3] + b*disp[i][4] + c*disp[i][5];
+
+      render_line(clr_black, vLStart, vLEnd );
+
+    }
 }
 
 void draw_pipeline::render_vector(){

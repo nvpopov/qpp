@@ -33,12 +33,12 @@ namespace qpp {
   ///
   class app_state {
   public:
-    draw_pipeline* _draw_pipeline;
+    draw_pipeline* dp;
     shader_program* def_shader;
     shader_program* unit_line_shader;
     shader_program* bond_shader;
     shader_program* shaderLineMesh;
-    workspace_manager* _workspace_manager;
+    workspace_manager* wm;
     ui_manager* _ui_manager;
     camera* _camera;
 
@@ -120,7 +120,7 @@ namespace qpp {
 
       _camera = nullptr;
 
-      _draw_pipeline = new draw_pipeline();
+      dp = new draw_pipeline();
 
       //default meshes
       _sph_meshes.push_back(mesh::generate_sphere_mesh(15, 15));
@@ -132,8 +132,8 @@ namespace qpp {
       bond_shader = gen_bond_draw_program();
       shaderLineMesh = gen_line_mesh_program();
 
-      _workspace_manager = new workspace_manager();
-      _workspace_manager->init_default_workspace();
+      wm = new workspace_manager();
+      wm->init_default_workspace();
       _ui_manager = new ui_manager();
     }
 

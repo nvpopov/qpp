@@ -1,19 +1,21 @@
 #ifndef QPP_WS_ATOM_LIST_H
 #define QPP_WS_ATOM_LIST_H
 
+
 #include <geom/lace3d.hpp>
 #include <geom/geom.hpp>
 #include <geom/xgeom.hpp>
 #include <geom/ngbr.hpp>
 #include <geom/extents_observer.hpp>
+#include <geom/tws_tree.hpp>
+#include <data/color.hpp>
+#include <qppcad/ws_item.hpp>
 #include <qppcad/camera.hpp>
+#include <qppcad/file_formats.hpp>
+#include <functional>
 #include <vector>
 #include <iostream>
 #include <algorithm>
-#include <geom/tws_tree.hpp>
-#include <qppcad/ws_item.hpp>
-#include <data/color.hpp>
-#include <qppcad/file_formats.hpp>
 
 namespace qpp{
 
@@ -21,7 +23,6 @@ namespace qpp{
     public:
       int iDim;
       bool bNeedToRebuildNBT;
-      periodic_cell<float> *cell;
       xgeometry<float, periodic_cell<float> > *geom;
       bonding_table<float> *bt;
       neighbours_table<float> *nt;
@@ -43,6 +44,8 @@ namespace qpp{
       bool support_content_editing() override;
       bool support_selection() override;
       bool support_rendering_bounding_box() override;
+
+      float get_bb_prescaller() override;
 
       void shift(const vector3<float> vShift);
 

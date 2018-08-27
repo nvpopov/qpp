@@ -27,7 +27,9 @@ namespace qpp {
     void end_render_bond();
 
     void render_molecule();
-    void render_cell();
+    void render_cell_3d(const vector3<float> &a,
+                        const vector3<float> &b,
+                        const vector3<float> &c );
     void render_vector();
     void render_primitive();
 

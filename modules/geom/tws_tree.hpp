@@ -38,6 +38,19 @@ namespace qpp{
     return a*9+b*3+c+13;
   }
 
+  template<typename POL_REAL = float>
+  struct query_ray_add_all{
+      bool can_add(vector3<POL_REAL> &pos, index &idx, const int DIM = 0){
+        return true;
+      }
+  };
+
+  template<typename POL_REAL = float>
+  struct query_ray_add_ignore_images{
+      bool can_add(vector3<POL_REAL> &pos, index &idx, const int DIM = 0){
+        return (idx == index::D(DIM).all(0));
+      }
+  };
 
   /// rtree node forward declaration                                        ///
   template<typename REAL>
@@ -62,6 +75,23 @@ namespace qpp{
       tws_query_data(const int _atm, const index _idx,
                      const REAL _dist = 1000.0f){
         atm = _atm; idx = _idx; dist = _dist;
+      }
+
+      bool operator == (const tws_query_data<REAL> &a){
+        return (idx == a.idx) && (atm == a.atm);
+      }
+
+      tws_query_data<REAL>& operator =(const tws_query_data<REAL> &a){
+        idx = a.idx;
+        atm = a.atm;
+        dist = a.dist;
+        return *this;
+      }
+
+      tws_query_data<REAL>(const tws_query_data<REAL>& a){
+        idx = a.idx;
+        atm = a.atm;
+        dist = a.dist;
       }
   };
 
@@ -209,10 +239,11 @@ namespace qpp{
       /// \param vRayStart
       /// \param vRayDir
       ///
+      template<typename adding_result_policy = query_ray_add_all<REAL>>
       void query_ray(ray<REAL> *_ray,
                      std::vector<tws_query_data<REAL>*> *res,
                      REAL fScaleFactor = 0.25){
-        traverse_query_ray(root, _ray, res, fScaleFactor);
+        traverse_query_ray<adding_result_policy>(root, _ray, res, fScaleFactor);
       }
 
       ///
@@ -221,6 +252,7 @@ namespace qpp{
       /// \param vRayStart
       /// \param vRayDir
       ///
+      template<typename adding_result_policy>
       bool traverse_query_ray(tws_node<REAL> *curNode,
                               ray<REAL> *_ray,
                               std::vector<tws_query_data<REAL>*> *res,
@@ -229,7 +261,8 @@ namespace qpp{
         if (ray_aabb_test(_ray, &(curNode->bb))){
             if (curNode->tot_childs > 0){
                 for (tws_node<REAL> *chNode : curNode->sub_nodes)
-                  if (chNode) traverse_query_ray(chNode, _ray, res, fScaleFactor);
+                  if (chNode)
+                    traverse_query_ray<adding_result_policy>(chNode, _ray, res, fScaleFactor);
               }
             else
               for (tws_node_content<REAL> *nc : curNode->content){
@@ -239,16 +272,16 @@ namespace qpp{
                   REAL fAtRad =
                       ptable::get_inst()->arecs[ap_idx-1].aRadius * fScaleFactor;
                   REAL fStoredDist = 0.0;
-                  REAL fRayHitDist = ray_sphere_test( _ray,
-                                                      geom->pos(nc->atm, nc->idx),
-                                                      fAtRad);
+                  vector3<REAL> vTestPos = geom->pos(nc->atm, nc->idx);
+                  REAL fRayHitDist = ray_sphere_test( _ray, vTestPos,fAtRad);
                   bool bRayHit = fRayHitDist > -1.0f;
 
                   if(bRayHit){
                       tws_query_data<REAL>* newd = new tws_query_data<REAL>(
                                                      nc->atm, nc->idx,
                                                      fRayHitDist);
-                      res->push_back(newd);
+                      adding_result_policy apol;
+                      if (apol.can_add(vTestPos, nc->idx, geom->DIM)) res->push_back(newd);
                     }
                 }
           }
@@ -526,15 +559,15 @@ namespace qpp{
                                      geom->type_table(atNum),
                                      geom->type_table(r_el->atm))];
                 if ((fDr < fBondLength) &&
-                    !(( atNum == r_el->atm) && (r_el->idx == index({0,0,0})))){
+                    !(( atNum == r_el->atm) && (r_el->idx == index::D(geom->DIM).all(0)))){
                     add_ngbr(atNum, r_el->atm, r_el->idx);
-                    if (r_el->idx == index({0,0,0}))
+                    if (r_el->idx == index::D(geom->DIM).all(0))
                       add_ngbr(r_el->atm, atNum , r_el->idx);
                   }
               }
             //TODO: strange thing happened there
-//             for (tws_node_content<REAL> *r_el : res)
-//               if (r_el) delete r_el;
+            //             for (tws_node_content<REAL> *r_el : res)
+            //               if (r_el) delete r_el;
             res.clear();
           }
       }
@@ -543,8 +576,16 @@ namespace qpp{
       /// \brief manual_build
       ///
       void manual_build(){
-        for (int i = 0; i < geom->nat(); i++)
-          insert_object_to_tree(i, index({0}));
+        for (int i = 0; i < geom->nat(); i++){
+            if (geom->DIM == 0) insert_object_to_tree(i, index::D(geom->DIM).all(0));
+
+            if (geom->DIM == 3){
+                for (int a = -1; a < 2; a++)
+                  for (int b = -1; b < 2; b++)
+                    for (int c = -1; c < 2; c++)
+                      insert_object_to_tree(i, index({a,b,c}));
+              }
+          }
       }
 
       ///
@@ -594,7 +635,7 @@ namespace qpp{
 
             nTable.resize(geom->nat());
             if (bAutoBuild)
-              insert_object_to_tree(geom->nat()-1, index({0,0,0}));
+              insert_object_to_tree(geom->nat()-1, index::D(geom->DIM).all(0));
 
             if(bAutoBonding) {
                 //std::cout << "autobond " << geom->n_types() << std::endl;
@@ -672,6 +713,8 @@ namespace qpp{
       }
 
   };
+
+
 }
 
 #endif

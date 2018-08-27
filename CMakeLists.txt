@@ -3,7 +3,7 @@ cmake_minimum_required (VERSION 3.2)
 project(qpp CXX C)
 set (QPP_VERSION_MAJOR 0)
 set (QPP_VERSION_MINOR 1)
-add_definitions(-O3 -std=c++11 -fext-numeric-literals -fPIC -DFMT_HEADER_ONLY)
+add_definitions(-O3 -std=c++11 -fPIC -DFMT_HEADER_ONLY)
 set(CMAKE_CXX_FLAGS "-O3 -funroll-loops -ftree-vectorize \
     ")
 #set(CMAKE_BUILD_TYPE "Debug")

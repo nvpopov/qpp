@@ -3,6 +3,7 @@
 #include <geom/lace3d.hpp>
 #include <geom/aabb.hpp>
 #include <geom/ray.hpp>
+#include <mathf/math.hpp>
 #include <cmath>
 
 namespace qpp {

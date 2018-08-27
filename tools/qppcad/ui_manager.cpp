@@ -60,6 +60,21 @@ void ui_manager::render_main_menu(){
         }
 
       if (ImGui::BeginMenu("View")){
+          if (c_app::get_state().wm->has_wss()){
+              if(ImGui::BeginMenu("Camera")){
+                  int _cp_t = c_app::get_state()._camera->cur_proj;
+                  ImGui::RadioButton("Ortho", &_cp_t, int(app_camera_proj_type::CAMERA_PROJ_ORTHO)); ImGui::SameLine();
+                  ImGui::RadioButton("Perspective", &_cp_t, int(app_camera_proj_type::CAMERA_PROJ_PERSP)); ImGui::SameLine();
+                  if(_cp_t != c_app::get_state()._camera->cur_proj){
+                      c_app::get_state()._camera->set_projection(app_camera_proj_type(_cp_t));
+                      c_app::get_state().wm->get_current_workspace()->set_best_view();
+                    }
+                  ImGui::EndMenu();
+                }
+            }
+
+
+
           if(ImGui::BeginMenu("Debug")){
               ImGui::Checkbox("Show tws-Tree",
                               &(c_app::get_state().bDebugDrawRTree));
@@ -111,23 +126,23 @@ void ui_manager::render_main_menu(){
       ImGui::SameLine();
 
       //
-      int iCurWS = astate->_workspace_manager->iCurrentWorkSpace;
+      int iCurWS = astate->wm->iCurrentWorkSpace;
 
       std::vector<std::string>  vStr;
       std::vector<char*>  vChar;
-      for (int i = 0; i < astate->_workspace_manager->ws.size(); i++)
-        vStr.push_back(astate->_workspace_manager->ws[i]->ws_name);
+      for (int i = 0; i < astate->wm->ws.size(); i++)
+        vStr.push_back(astate->wm->ws[i]->ws_name);
       std::transform(vStr.begin(), vStr.end(),
                      std::back_inserter(vChar),
                      vec_str_to_char);
 
       ImGui::PushItemWidth(150);
       ImGui::Combo("Workspace", &iCurWS, vChar.data(),
-                   astate->_workspace_manager->ws.size());
+                   astate->wm->ws.size());
       ImGui::PopItemWidth();
 
       for ( size_t i = 0 ; i < vChar.size() ; i++ ) delete [] vChar[i];
-      astate->_workspace_manager->iCurrentWorkSpace = iCurWS;
+      astate->wm->iCurrentWorkSpace = iCurWS;
       //
 
       if (ImGui::Button("New")){
@@ -197,24 +212,24 @@ void ui_manager::render_work_panel(){
   ImGui::Button("Z" , ImVec2(20,20));
   ImGui::Separator();
 
-  if (c_app::get_state()._workspace_manager->has_wss()){
+  if (c_app::get_state().wm->has_wss()){
       ImGui::Text("Edit:");
-      int edit_mode = int(c_app::get_state()._workspace_manager->
+      int edit_mode = int(c_app::get_state().wm->
                           get_current_workspace()->cur_edit_type);
 
       ImGui::BeginTabs("newtab", 2, edit_mode, 60 );
       if (ImGui::AddTab( "ITEM")) {
-          c_app::get_state()._workspace_manager->
+          c_app::get_state().wm->
               get_current_workspace()->cur_edit_type = ws_edit_type::EDIT_WS_ITEM;
         }
 
       if (ImGui::AddTab( "CONTENT")) {
-          c_app::get_state()._workspace_manager->
+          c_app::get_state().wm->
               get_current_workspace()->cur_edit_type =
               ws_edit_type::EDIT_WS_ITEM_CONTENT;
         }
       ImGui::EndTabs();
-      c_app::get_state()._workspace_manager->get_current_workspace()->
+      c_app::get_state().wm->get_current_workspace()->
           cur_edit_type = ws_edit_type(edit_mode);
 
       ImGui::Spacing();
@@ -292,8 +307,8 @@ void ui_manager::render_object_inspector(){
     }
   ImGui::Separator();
   ImGui::Text("Workspace items:");
-  auto iCurWs = astate->_workspace_manager->iCurrentWorkSpace;
-  workspace* cur_ws = astate->_workspace_manager->ws[iCurWs];
+  auto iCurWs = astate->wm->iCurrentWorkSpace;
+  workspace* cur_ws = astate->wm->ws[iCurWs];
   if (cur_ws != nullptr){
 
     }

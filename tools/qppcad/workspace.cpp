@@ -43,15 +43,15 @@ void workspace::render(){
   app_state* astate = &(c_app::get_state());
 
   if (astate->bDebugDrawSelectionRay){
-      astate->_draw_pipeline->begin_render_line();
-      astate->_draw_pipeline->
+      astate->dp->begin_render_line();
+      astate->dp->
           render_line(vector3<float>(1.0, 1.0, 0.0),
                       debugRay.start,
                       debugRay.start+debugRay.dir*55.0);
-      astate->_draw_pipeline->end_render_line();
+      astate->dp->end_render_line();
     }
 
-  if (astate->_draw_pipeline != nullptr){
+  if (astate->dp != nullptr){
 
 
       ///// Draw grid /////
@@ -86,22 +86,22 @@ void workspace::render(){
               app_camera_proj_type::CAMERA_PROJ_PERSP)
             fAxisLen = 0.015f;
 
-          astate->_draw_pipeline->begin_render_line();
-          astate->_draw_pipeline->
+          astate->dp->begin_render_line();
+          astate->dp->
               render_line(vector3<float>(1.0, 0.0, 0.0),
                           vector3<float>(0.0, 0.0, 0.0) + vScrTW,
                           vector3<float>(fAxisLen, 0.0, 0.0) + vScrTW);
 
-          astate->_draw_pipeline->
+          astate->dp->
               render_line(vector3<float>(0.0, 1.0, 0.0),
                           vector3<float>(0.0, 0.0, 0.0) + vScrTW,
                           vector3<float>(0.0, fAxisLen, 0.0) + vScrTW);
 
-          astate->_draw_pipeline->
+          astate->dp->
               render_line(vector3<float>(0.0, 0.0, 1.0),
                           vector3<float>(0.0, 0.0, 0.0) + vScrTW,
                           vector3<float>(0.0, 0.0, fAxisLen) + vScrTW);
-          astate->_draw_pipeline->end_render_line();
+          astate->dp->end_render_line();
 
         }
       ///// Draw axis end /////
@@ -159,7 +159,7 @@ void workspace_manager::init_default_workspace(){
   workspace* _ws2 = new workspace();
   _ws2->ws_name = "d2";
   ws_atom_list* _wsl4 = new ws_atom_list(_ws2);
-  _wsl4->load_from_file(qc_file_format::format_standart_xyz, "../examples/io/ref_data/dna.xyz",
+  _wsl4->load_from_file(qc_file_format::format_vasp_poscar, "../examples/io/ref_data/p2.vasp",
                         false);
 
 //  _wsl1->shift(vector3<float>(15.0f, 15.0f, 15.0f));

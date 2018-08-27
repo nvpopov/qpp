@@ -9,13 +9,16 @@ ws_atom_list::ws_atom_list(workspace* parent):ws_item(parent){
 
   bNeedToRebuildNBT = true;
   iDim = 3;
-  cell = new periodic_cell<float>({20.0, 0.0, 0.0}, {0.0, 20.0, 0.0}, {0.0, 0.0, 20.0});
+  //cell = new periodic_cell<float>({20.0, 0.0, 0.0}, {0.0, 20.0, 0.0}, {0.0, 0.0, 20.0});
 
   geom = new xgeometry<float, periodic_cell<float> >(3,"rg1");
   geom->set_format({"atom", "number", "charge", "x", "y", "z", "show", "sel"},
 
   {type_string, type_int, type_real, type_real, type_real, type_real,
    type_bool, type_bool});
+
+  geom->DIM = 0;
+  geom->cell.DIM = 0;
 
   ext_obs = new extents_observer<float>(*geom);
   tws_tr = new tws_tree<float>(*geom);
@@ -45,31 +48,26 @@ void ws_atom_list::render(){
   ws_item::render();
   app_state* astate = &(c_app::get_state());
 
-  if (astate->_draw_pipeline != nullptr){
+  if (astate->dp != nullptr){
 
       if (astate->bDebugDrawRTree){
-          astate->_draw_pipeline->begin_render_aabb();
+          astate->dp->begin_render_aabb();
           tws_tr->apply_visitor(
                 [astate](tws_node<float> *inNode, int deepLevel){
-            astate->_draw_pipeline->render_aabb(clr_maroon, inNode->bb.min, inNode->bb.max);
+            astate->dp->render_aabb(clr_maroon, inNode->bb.min, inNode->bb.max);
           });
 
-          astate->_draw_pipeline->end_render_aabb();
+          astate->dp->end_render_aabb();
         }
 
       if (geom->DIM == 3){
-          astate->_draw_pipeline->begin_render_line();
-          astate->_draw_pipeline->render_line(clr_black, vector3<float>(0.0, 0.0, 0.0),
-                                              geom->cell.v[0]);
-          astate->_draw_pipeline->render_line(clr_black, vector3<float>(0.0, 0.0, 0.0),
-                                              geom->cell.v[1]);
-          astate->_draw_pipeline->render_line(clr_black, vector3<float>(0.0, 0.0, 0.0),
-                                              geom->cell.v[2]);
-          astate->_draw_pipeline->end_render_line();
+          astate->dp->begin_render_line();
+          astate->dp->render_cell_3d(geom->cell.v[0], geom->cell.v[1], geom->cell.v[2]);
+          astate->dp->end_render_line();
         }
 
       // atom render start
-      astate->_draw_pipeline->begin_atom_render();
+      astate->dp->begin_atom_render();
       for (int i = 0; i < geom->nat(); i++){
           int ap_idx = ptable::number_by_symbol(geom->atom(i));
           float fDrawRad = 0.4f;
@@ -86,13 +84,13 @@ void ws_atom_list::render(){
              (geom->xfield<bool>("sel", i)) && bSelected)
             color = vector3<float>(0.43f, 0.55f, 0.12f);
 
-          astate->_draw_pipeline->render_atom(color, geom->pos(i), fDrawRad);
+          astate->dp->render_atom(color, geom->pos(i), fDrawRad);
         }
-      astate->_draw_pipeline->end_atom_render();
+      astate->dp->end_atom_render();
       // atom render end
 
       // bond render
-      astate->_draw_pipeline->begin_render_bond();
+      astate->dp->begin_render_bond();
 
 
       for (int i = 0; i < geom->nat(); i++)
@@ -100,12 +98,12 @@ void ws_atom_list::render(){
             int ap_idx = ptable::number_by_symbol(geom->atom(i));
             vector3<float> color(0.0, 0.0, 1.0);
             if(ap_idx != -1){color = ptable::get_inst()->arecs[ap_idx-1].aColorJmol;}
-            astate->_draw_pipeline->render_bond(color, geom->pos(i),
-                                                geom->pos(tws_tr->table_atm(i,j)),
-                                                astate->fBondScaleFactor);
+            astate->dp->render_bond(color, geom->pos(i), geom->pos(tws_tr->table_atm(i,j),
+                                                                   tws_tr->table_idx(i,j)),
+                                    astate->fBondScaleFactor);
           }
 
-      astate->_draw_pipeline->end_render_bond();
+      astate->dp->end_render_bond();
 
     }
 }
@@ -158,9 +156,10 @@ void ws_atom_list::render_ui(){
 bool ws_atom_list::mouse_click(ray<float> *ray){
   if (ray){
       std::vector<tws_query_data<float>* > res;
-      tws_tr->query_ray(ray, &res);
+      tws_tr->query_ray<query_ray_add_ignore_images<float> >(ray, &res);
       //std::cout << "res_size = " << res.size() << std::endl;
       std::sort(res.begin(), res.end(), tws_query_data_sort_by_dist<float>);
+
       if (res.size() > 0){
           //std::cout << res[0]->atm << std::endl;
           if ((parent_ws->cur_edit_type == ws_edit_type::EDIT_WS_ITEM_CONTENT) && bSelected)
@@ -193,6 +192,11 @@ bool ws_atom_list::support_selection(){
 
 bool ws_atom_list::support_rendering_bounding_box(){
   return true;
+}
+
+float ws_atom_list::get_bb_prescaller(){
+  if (geom->DIM == 3) return 1.5f;
+  return 1.1f;
 }
 
 void ws_atom_list::shift(const vector3<float> vShift){
@@ -239,6 +243,8 @@ void ws_atom_list::load_from_file(qc_file_format eFileFormat,
       break;
 
     case qc_file_format::format_vasp_poscar:
+      geom->DIM = 3;
+      geom->cell.DIM = 3;
       name = extract_base_name(sFileName);
       read_vasp_poscar(fQCData, *(geom));
       break;

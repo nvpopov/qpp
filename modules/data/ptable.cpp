@@ -1590,7 +1590,7 @@ void qpp::ptable::assembly_ptable_5(){
   this->arecs[52].aSymbol       = "I";
   this->arecs[52].aRadius       = 1.6;
   this->arecs[52].aMass         = 126.90447;
-  this->arecs[52].aCovRad_Slater= 1.4000000000000001;
+  this->arecs[52].aCovRad_Slater= 1.7;
   this->arecs[52].aIonicRadius  = 2.2;
   this->arecs[52].aVdWRadius    = 1.98;
   this->arecs[52].aNValenceElec = 7;
