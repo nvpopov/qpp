@@ -31,7 +31,6 @@ option(BUILD_TESTS "build tests executable" OFF)
 option(BUILD_QC "build qc stuff")
 option(BUILD_DOCS "build documentation")
 option(BUILD_TOOLS  "build tools" OFF)
-option(BUILD_QPPCAD "build qppcad" OFF)
 # end option declaration
 
 #read options from file if it exists
@@ -187,9 +186,4 @@ if(BUILD_TOOLS)
     message("-- building tools enabled")
 endif(BUILD_TOOLS)
 
-if(BUILD_QPPCAD)
-    message("-- building qppcad enabled")
-    #force building tools
-    set(BUILD_TOOLS ON)
-endif(BUILD_QPPCAD)
 add_subdirectory(${CMAKE_SOURCE_DIR}/tools)
