@@ -1,7 +1,6 @@
 #include <iostream>
-
-
+#include <qppcad/app.hpp>
 
 int main(){
-  std::cout<<"qpp::cad placeholder launched!"<<std::endl;
+  qpp::c_app::run();
 }

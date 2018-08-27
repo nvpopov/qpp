@@ -4,7 +4,8 @@ project(qpp CXX C)
 set (QPP_VERSION_MAJOR 0)
 set (QPP_VERSION_MINOR 1)
 add_definitions(-O3 -std=c++11 -fPIC -DFMT_HEADER_ONLY)
-#set(CMAKE_CXX_FLAGS "-pg -ggdb")
+set(CMAKE_CXX_FLAGS "-O3 -funroll-loops -ftree-vectorize \
+    ")
 #set(CMAKE_BUILD_TYPE "Debug")
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
@@ -56,6 +57,12 @@ function(def_example arg_name arg_src)
     add_executable(${EX_PR}${arg_name}${EX_SF} ${arg_src})
     target_link_libraries(${EX_PR}${arg_name}${EX_SF} qpp)
 endfunction(def_example)
+
+function(def_example_custom_lib arg_name arg_src arg_lib)
+    add_executable(${EX_PR}${arg_name}${EX_SF} ${arg_src})
+    target_link_libraries(${EX_PR}${arg_name}${EX_SF} qpp ${arg_lib})
+endfunction(def_example_custom_lib)
+
 # end example framework
 
 if (LA_TYPE EQUAL "MKL")

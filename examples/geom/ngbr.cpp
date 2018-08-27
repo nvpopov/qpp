@@ -17,7 +17,7 @@ int main()
   amino.add("H",         -2.63443,       -0.14886,        0.18560);
 
   qpp::bonding_table<double> dt;
-  dt.default_distance = 1.6;
+  dt.default_distance = 0.0;
   dt.set_pair("C","C",1.7);
 
   qpp::neighbours_table<double> b(amino,dt);

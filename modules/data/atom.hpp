@@ -1,5 +1,5 @@
-#ifndef _QPP_ATOM_H
-#define _QPP_ATOM_H
+#ifndef QPP_ATOM_H
+#define QPP_ATOM_H
 
 namespace qpp{
 

@@ -1,5 +1,5 @@
-#ifndef _LACE3D_H
-#define _LACE3D_H
+#ifndef LACE3D_H
+#define LACE3D_H
 #pragma GCC diagnostic ignored "-Wnarrowing"
 #include <cmath>
 #include <complex>
@@ -26,7 +26,7 @@ namespace qpp {
 
 
   template <typename ELEM> using vector2 = Eigen::Matrix<ELEM, 2, 1>;
-  //template <typename ELEM> using vector3 = Eigen::Matrix<ELEM, 3, 1>;
+  template <typename ELEM> using _vector3 = Eigen::Matrix<ELEM, 3, 1>;
   template <typename ELEM> using vector4 = Eigen::Matrix<ELEM, 4, 1>;
   template <typename ELEM, int n> using vectorn = Eigen::Matrix<ELEM, n, 1>;
 
@@ -99,7 +99,7 @@ namespace qpp {
       return ((*this) - b).norm() <=  tol_equiv;
     }
 
-   inline const bool operator!=(const generic_matrix<VALTYPE, N , M> &b) const{
+    inline const bool operator!=(const generic_matrix<VALTYPE, N , M> &b) const{
       return ! ((*this)==b);
     }
 
@@ -321,6 +321,15 @@ namespace qpp {
   using matrix3 = generic_matrix<VALTYPE, 3, 3>;
 
   template<class VALTYPE>
+  matrix3<VALTYPE> mat4_to_mat3(const matrix4<VALTYPE> _inmat){
+    matrix3<VALTYPE> _res;
+    for (int i = 0; i < 3; i++)
+      for (int q = 0; q < 3; q++)
+        _res(i,q) = _inmat(i,q);
+    return _res;
+  }
+
+  template<class VALTYPE>
   vector3<VALTYPE> gen_vec3(VALTYPE x, VALTYPE y, VALTYPE z){
     vector3<VALTYPE> retvec;
     retvec << x, y, z;
@@ -368,9 +377,9 @@ namespace qpp {
 
   template<class VALTYPE>
   vector3<VALTYPE> solve3(const vector3<VALTYPE> & A0,
-                           const vector3<VALTYPE> & A1,
-                           const vector3<VALTYPE> & A2,
-                           const vector3<VALTYPE> & b){
+                          const vector3<VALTYPE> & A1,
+                          const vector3<VALTYPE> & A2,
+                          const vector3<VALTYPE> & b){
     matrix3<VALTYPE> A(A0, A1, A2);
     return solve3(A, b);
   }
@@ -452,7 +461,7 @@ namespace qpp {
 
   template<class VALTYPE>
   inline vector3<VALTYPE> py_solve3m(const matrix3<VALTYPE> & A,
-                                      const vector3<VALTYPE> & b)
+                                     const vector3<VALTYPE> & b)
   { return solve3(A,b);}
 
   template<class VALTYPE>
@@ -464,7 +473,7 @@ namespace qpp {
 
   template<class VALTYPE>
   inline matrix3<VALTYPE> py_rotmtrx_v(const vector3<VALTYPE> & nn,
-                                        VALTYPE phi)
+                                       VALTYPE phi)
   {  return RotMtrx(nn,phi);}
 
   template<class VALTYPE>
