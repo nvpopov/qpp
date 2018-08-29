@@ -148,7 +148,18 @@ namespace qpp{
 	  }
       return res;
     }
-    
+
+    bool within_epsilon_b(const vector3<REAL> & r, const REAL eps) const{
+      vector3<REAL> f = cart2frac(r);
+      bool res = true;
+      for (int d=0; d<DIM; d++)
+        if ( (f[d] < -eps) || (f[d] > 1 + eps)){
+            res = false;
+            break;
+          }
+      return res;
+    }
+
     /*! \brief Brings the point r into the volume of unit cell by translations
        unit cell is defined as parallelepiped with one vertex in
        the coordinate origin
@@ -205,9 +216,9 @@ namespace qpp{
 	}
 
       matrix3<REAL> A;
-      A.row(0) = v[0];
-      A.row(1) = v[1];
-      A.row(2) = v2;
+      A.col(0) = v[0];
+      A.col(1) = v[1];
+      A.col(2) = v2;
       return solve3(A, r);
     }
 

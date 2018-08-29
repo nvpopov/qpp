@@ -67,6 +67,20 @@ namespace qpp{
       }
   };
 
+  ///
+  /// \brief The imaginary_atom struct
+  ///
+  template<typename REAL>
+  struct imaginary_atom {
+      int atm;
+      index idx;
+      bool bSelected;
+      std::vector<tws_node_content<REAL>*> imBonds;
+      imaginary_atom(const int _atm, const index _idx){
+        atm = _atm; idx = _idx; bSelected = false;
+      }
+  };
+
   template<typename REAL = float>
   struct tws_query_data {
       int atm;
@@ -130,9 +144,9 @@ namespace qpp{
       geometry<REAL, CELL> *geom;
       tws_node<REAL> *root;
       std::vector<tws_node<REAL>* > flat_view;
+      std::vector<imaginary_atom<REAL>*> imgAtoms;
 
-      std::unordered_map<qpp::sym_key<int>,
-      REAL, qpp::sym_key_hash<int> > distMap;
+      std::unordered_map<qpp::sym_key<int>, REAL, qpp::sym_key_hash<int> > distMap;
       std::map<int, REAL> maxDistMap;
       std::vector<std::vector<tws_node_content<REAL>*> > nTable;
 
@@ -149,6 +163,12 @@ namespace qpp{
       ///
       bool bAutoBuild;
 
+
+      ///
+      /// \brief bBuildImaginaryAtomsBonds
+      ///
+      bool bBuildImaginaryAtomsBonds;
+
       ///
       /// \brief aux_rtree constructor
       /// \param g
@@ -163,6 +183,7 @@ namespace qpp{
         bAutoBonding = false;
         bAutoBuild = true;
         bMakeDirtyDistMap = true;
+        bBuildImaginaryAtomsBonds = true;
       }
 
       ///
@@ -178,6 +199,13 @@ namespace qpp{
               root->bb.fill_guess(pow(fMinTWSVolume, 1/3.0));
           }
 
+      }
+
+      imaginary_atom<REAL>* find_imaginary_atom(const int atm, const index idx){
+        for (uint16_t i = 0; i < imgAtoms.size(); i++)
+          if ((imgAtoms[i]->atm == atm) && (imgAtoms[i]->idx == idx))
+            return imgAtoms[i];
+        return nullptr;
       }
 
       ///
@@ -327,12 +355,21 @@ namespace qpp{
           }
       }
 
+      //
+      void insert_object_to_tree(const int atm){
+        for (iterator i(index::D(geom->DIM).all(-1), index::D(geom->DIM).all(1)); !i.end(); i++ )
+          if (i == index::D(geom->DIM).all(0))
+            insert_object_to_tree(atm, i);
+          else if (geom->cell.within_epsilon_b(geom->pos(atm, i), 0.09f))
+            insert_object_to_tree(atm, i);
+      }
+
       ///
       /// \brief Insert oject to tree
       /// \param atm
       /// \param idx
       ///
-      void insert_object_to_tree(const int atm, const index & idx){
+      void insert_object_to_tree(const int atm, const index idx){
         check_root();
         int q = 0;
         while (!(point_aabb_test(geom->pos(atm, idx), root->bb)) ) {
@@ -412,6 +449,12 @@ namespace qpp{
                                  const index idx){
         tws_node_content<REAL>* cnt = new tws_node_content<REAL>(atm, idx);
         curNode->content.push_back(cnt);
+        if ((geom->DIM == 3) && (idx != index::D(geom->DIM).all(0))){
+            imaginary_atom<REAL> *imgAtom = new imaginary_atom<REAL>(atm, idx);
+            imgAtoms.push_back(imgAtom);
+            //std::cout<<"new imga\n"<<std::endl;
+          }
+
       }
 
 
@@ -529,14 +572,18 @@ namespace qpp{
       ///
       void find_all_neighbours(){
         for (int i = 0; i < geom->nat(); i++)
-          find_neighbours(i);
+          find_neighbours(i, index::D(geom->DIM).all(0));
+
+        if (bBuildImaginaryAtomsBonds)
+        for (int i = 0; i < imgAtoms.size(); i++)
+          find_neighbours(imgAtoms[i]->atm, imgAtoms[i]->idx, true);
       }
 
       ///
       /// \brief find_neighbours
       /// \param atNum
       ///
-      void find_neighbours(int atNum){
+      void find_neighbours(int atNum, index idx, bool bImaginaryPass = false){
         if (!root) return;
 
         if (bMakeDirtyDistMap) {
@@ -548,22 +595,50 @@ namespace qpp{
         if ( fSphRad > 0.0){
 
             std::vector<tws_node_content<REAL>*> res;
-            query_sphere(fSphRad, geom->pos(atNum), &res);
+            query_sphere(fSphRad, geom->pos(atNum, idx), &res);
 
             for (tws_node_content<REAL> *r_el : res){
-                vector3<REAL> pos1 = geom->pos(atNum);
+                vector3<REAL> pos1 = geom->pos(atNum, idx);
                 vector3<REAL> pos2 = geom->pos(r_el->atm, r_el->idx);
+
                 REAL fDr = (pos1 - pos2).norm();
 
                 REAL fBondLength = distMap[sym_key<int>(
                                      geom->type_table(atNum),
                                      geom->type_table(r_el->atm))];
-                if ((fDr < fBondLength) &&
-                    !(( atNum == r_el->atm) && (r_el->idx == index::D(geom->DIM).all(0)))){
-                    add_ngbr(atNum, r_el->atm, r_el->idx);
-                    if (r_el->idx == index::D(geom->DIM).all(0))
-                      add_ngbr(r_el->atm, atNum , r_el->idx);
+
+                //real atoms
+                if (!bImaginaryPass &&
+                    fDr < fBondLength &&
+                    (idx == index::D(geom->DIM).all(0) || r_el->idx == index::D(geom->DIM).all(0))
+                    )
+                  if ((atNum != r_el->atm) || (idx != r_el->idx)){
+                      if (idx == index::D(geom->DIM).all(0)) add_ngbr(atNum, r_el->atm, r_el->idx);
+                      if (r_el->idx == index::D(geom->DIM).all(0)) add_ngbr(r_el->atm, atNum , r_el->idx);
+                    }
+
+
+                if ( bImaginaryPass &&
+                    (bBuildImaginaryAtomsBonds) &&
+                    (fDr < fBondLength) &&
+                    (idx != index::D(geom->DIM).all(0)) &&
+                    (r_el->idx != index::D(geom->DIM).all(0))
+                    ){
+                      imaginary_atom<REAL> *iat1, *iat2 = nullptr;
+                      iat1 = find_imaginary_atom(atNum, idx);
+                      iat2 = find_imaginary_atom(r_el->atm, r_el->idx);
+
+                      if (iat1 && iat2){
+                          tws_node_content<REAL>* newTableEntry1 =
+                              new tws_node_content<REAL>(r_el->atm, r_el->idx);
+                          tws_node_content<REAL>* newTableEntry2 =
+                              new tws_node_content<REAL>(atNum, idx);
+                          iat1->imBonds.push_back(newTableEntry1);
+                          iat2->imBonds.push_back(newTableEntry2);
+
+                        }
                   }
+
               }
             //TODO: strange thing happened there
             //             for (tws_node_content<REAL> *r_el : res)
@@ -576,16 +651,13 @@ namespace qpp{
       /// \brief manual_build
       ///
       void manual_build(){
-        for (int i = 0; i < geom->nat(); i++){
-            if (geom->DIM == 0) insert_object_to_tree(i, index::D(geom->DIM).all(0));
 
-            if (geom->DIM == 3){
-                for (int a = -1; a < 2; a++)
-                  for (int b = -1; b < 2; b++)
-                    for (int c = -1; c < 2; c++)
-                      insert_object_to_tree(i, index({a,b,c}));
-              }
-          }
+        //        std::cout<<geom->r(0, index({0,1,1})).to_string_vec()<<std::endl;
+        //        std::cout<<geom->cell.cart2frac(geom->r(0, index({0,0,0}))).to_string_vec()<<std::endl;
+        //        std::cout<<geom->cell.cart2frac(geom->r(0, index({0,0,1}))).to_string_vec()<<std::endl;
+        //        std::cout<<geom->cell.cart2frac(geom->r(0, index({1,1,1}))).to_string_vec()<<std::endl;
+
+        for (int i = 0; i < geom->nat(); i++) insert_object_to_tree(i);
       }
 
       ///
@@ -640,7 +712,7 @@ namespace qpp{
             if(bAutoBonding) {
                 //std::cout << "autobond " << geom->n_types() << std::endl;
                 bMakeDirtyDistMap = true;
-                find_neighbours(geom->nat()-1);
+                find_neighbours(geom->nat()-1, index::D(geom->DIM).all(0));
               }
           }
       }

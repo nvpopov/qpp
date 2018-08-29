@@ -192,6 +192,30 @@ The supercell concept generalization for the geometry class looks like:
       return cell.transform(r1, I);
     }
 
+    ///
+    /// \brief r_frac
+    /// \param at
+    /// \param I
+    /// \return
+    ///
+    inline vector3<REAL> r_frac(int at, const index & I) const{
+      vector3<REAL> r1 = _crd[at];
+      r1 = cell.cart2frac(r1);
+      return cell.transform(r1, I);
+    }
+
+    ///
+    /// \brief r_frac
+    /// \param at
+    /// \param I
+    /// \return
+    ///
+    inline vector3<REAL> r_frac(int at) const{
+      vector3<REAL> r1 = _crd[at];
+      r1 = cell.cart2frac(r1);
+      return cell.transform(r1, index::D(DIM).all(0));
+    }
+
 
     /*! \brief real-space position of an atom
       @param ai  - complex index; ai[0] is the number of atom in the geometry,
