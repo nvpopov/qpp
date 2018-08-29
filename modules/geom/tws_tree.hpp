@@ -72,7 +72,7 @@ namespace qpp{
   ///
   template<typename REAL>
   struct imaginary_atom {
-      int atm;
+      uint16_t atm;
       index idx;
       bool bSelected;
       std::vector<tws_node_content<REAL>*> imBonds;
@@ -83,7 +83,7 @@ namespace qpp{
 
   template<typename REAL = float>
   struct tws_query_data {
-      int atm;
+      uint16_t atm;
       index idx;
       REAL dist;
       tws_query_data(const int _atm, const index _idx,

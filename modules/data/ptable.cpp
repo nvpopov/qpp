@@ -365,7 +365,7 @@ void qpp::ptable::assembly_ptable_1(){
   this->arecs[13].aSymbol       = "Si";
   this->arecs[13].aRadius       = 1.32;
   this->arecs[13].aMass         = 28.085;
-  this->arecs[13].aCovRad_Slater= 1.1;
+  this->arecs[13].aCovRad_Slater= 1.4;
   this->arecs[13].aIonicRadius  = 0.26;
   this->arecs[13].aVdWRadius    = 2.1;
   this->arecs[13].aNValenceElec = 4;
