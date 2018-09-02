@@ -20,6 +20,16 @@ namespace qpp{
         min = other.min;
       }
 
+      void shift(const vector3<REAL> &shift){
+        min += shift;
+        max += shift;
+      }
+
+      const aabb_3d<REAL> shifted(const vector3<REAL> &shift){
+        aabb_3d<REAL> res_aabb = *this;
+        res_aabb.shift(shift);
+        return res_aabb;
+      }
       ///
       /// \brief squared_dist_point_check
       /// \param pn
@@ -83,11 +93,11 @@ namespace qpp{
       /// \param _fGuessVal
       /// \param shift
       ///
-      void fill_guess_with_shift(const REAL _fGuessVal,
-                                 const vector3<REAL> vShift){
+      void fill_guess_with_shift(const REAL guess_value,
+                                 const vector3<REAL> shift){
         for (unsigned int i = 0; i < DIM_RECT; i++){
-            this->min[i] = (-_fGuessVal / 2) + vShift[i];
-            this->max[i] = ( _fGuessVal / 2) + vShift[i];
+            this->min[i] = (-guess_value / 2) + shift[i];
+            this->max[i] = ( guess_value / 2) + shift[i];
           }
       }
 
@@ -101,15 +111,15 @@ namespace qpp{
                  aabb_3d<REAL> &nh,
                  const int iAxis = 0){
         for (uint i = 0; i < DIM_RECT; i++){
-            REAL fMidPoint = (max[i] - min[i]) /2 ;
+            REAL mid_point = (max[i] - min[i]) /2 ;
             nl.min[i] =  min[i];
             if (i == iAxis){
-                nl.max[i] = nl.min[i] + fMidPoint;
-                nh.min[i] = nl.min[i] + fMidPoint;
-                nh.max[i] = nl.max[i] + fMidPoint;
+                nl.max[i] = nl.min[i] + mid_point;
+                nh.min[i] = nl.min[i] + mid_point;
+                nh.max[i] = nl.max[i] + mid_point;
               }
             else {
-                nl.max[i] = nl.min[i] + fMidPoint * 2;
+                nl.max[i] = nl.min[i] + mid_point * 2;
                 nh.min[i] = nl.min[i] ;
                 nh.max[i] = nl.max[i];
               }
