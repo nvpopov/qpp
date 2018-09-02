@@ -62,16 +62,16 @@ The supercell concept generalization for the geometry class looks like:
     {
       return atom == ai.atom && cell == ai.cell;
     }
-    
+
     inline bool operator!=(const atom_index<DIM> & ai)
     {
       return atom != ai.atom || cell != ai.cell;
     }
-    
+
     };*/
 
   enum before_after {before = 0, after = 1};
-  
+
   /*! \class geometry_observer
     \brief Geometry updated objects
     One geometry can maintain arbitrary number of "observers", i.e.
@@ -105,7 +105,7 @@ The supercell concept generalization for the geometry class looks like:
   class geometry
   {
   public:
-    
+
     // Storage of atoms
     std::vector<STRING> _atm;
 
@@ -121,7 +121,7 @@ The supercell concept generalization for the geometry class looks like:
     bool has_observers;
 
   public:
-    
+
     typedef geometry_observer<REAL> DEP;
     typedef geometry<REAL,CELL> SELF;
 
@@ -170,7 +170,7 @@ The supercell concept generalization for the geometry class looks like:
     inline vector3<REAL> coord(int at) const{return _crd[at];}
 
     inline vector3<REAL>& coord(int at){return _crd[at];}
-    
+
     /*! \brief real-space position of atom number at
       @param at - the number of the atom in the geometry
      */
@@ -237,7 +237,7 @@ The supercell concept generalization for the geometry class looks like:
     inline vector3<REAL> pos(const index & ai) const{
       return cell.transform(_crd[ai(0)], ai.sub(1) );
     }
-    
+
     inline bool shadow(int at) const{
       return _shadow[at];
     }
@@ -248,7 +248,7 @@ The supercell concept generalization for the geometry class looks like:
     std::vector<STRING> _atm_types;
     std::vector<int> _type_table;
     std::vector<REAL> _symm_rad;
-    
+
   public:
 
     //! Number of different atomic types in molecule
@@ -289,6 +289,7 @@ The supercell concept generalization for the geometry class looks like:
       return t;
     }
 
+    //unifficent - need to be cached
     inline int get_atom_count_by_type(int atype){
       int retval = 0;
       for(int i = 0; i < _type_table.size(); i++)
@@ -335,7 +336,7 @@ The supercell concept generalization for the geometry class looks like:
       _atm_types.clear();
       _type_table.resize(size());
     }
-    
+
     // --------------- Symmetrization radius for each atomic type ----
 
     // whether to be aware of high symmetry points when placing atoms
@@ -355,7 +356,7 @@ The supercell concept generalization for the geometry class looks like:
 
     REAL symmetrize_radius(const STRING & a) const{
       int t = type_of_atom(a);
-      
+
       //std::cerr << "t= " << t << "\n";
 
       if (t==-1)
@@ -375,7 +376,7 @@ The supercell concept generalization for the geometry class looks like:
         }
       else
         _symm_rad[t] = rad;
-      
+
       //std::cerr << "t= " << t << "\n";
 
       //return _symm_rad[type_of_atom(a)];
@@ -404,7 +405,7 @@ The supercell concept generalization for the geometry class looks like:
 #endif
 
     }
-    
+
   public:
 
     geometry(const CELL & __cell, const STRING & __name = "") : cell(__cell){
@@ -529,7 +530,7 @@ The supercell concept generalization for the geometry class looks like:
       vector3<REAL> r2 = r1;
       if (auto_symmetrize)
         r2 = cell.symmetrize(r1,symmetrize_radius(a));
-      
+
       if (has_observers)
         for (int j=0; j<observers.size(); j++)
           observers[j]->inserted(at,before, a, r2);
@@ -588,7 +589,7 @@ The supercell concept generalization for the geometry class looks like:
       for (int i=0; i<observers.size(); i++)
         observers[i]->reordered(ord, before);
       // fixme - might be inefficient for large molecules
-      
+
       std::vector<STRING> __atm(_atm);
       std::vector<vector3<REAL> > __crd(_crd);
       std::vector<char> __shadow(_shadow);
@@ -721,7 +722,7 @@ The supercell concept generalization for the geometry class looks like:
       if (i<0 || i>=nat()) IndexError("geometry::atom::Index out of range");
       return atom(i);
     }
-    
+
     void py_setatom(int i, const STRING & a){
       if (i<0) i+=nat();
       if (i<0 || i>=nat()) IndexError("geometry::atom::Index out of range");
@@ -800,13 +801,13 @@ The supercell concept generalization for the geometry class looks like:
 
     REAL py_getsymmrad(const char * at){
       int t = type_of_atom(at);
-      
+
       if (t==-1)
         KeyError("geometry::symmrad::get_symmrad: Atom not specified");
       else
         return _symm_rad[t];
     }
-    
+
     void py_setsymmrad(const char *at, const REAL &r)
     { set_symmetrize_radius(at,r);  }
 
@@ -816,7 +817,7 @@ The supercell concept generalization for the geometry class looks like:
     py::dict py_symmrad2dict(){
       py::dict d;
       d["default"] = default_symmetrize_radius;
-      
+
       for (int i=0; i<n_atom_types(); i++)
         d[(atom_of_type(i)).c_str()] = _symm_rad[i];
 
@@ -920,7 +921,7 @@ The supercell concept generalization for the geometry class looks like:
     virtual void py_add_list(const py::list & l){
       if (!py_check_axyz(l))
         TypeError("geometry::Invalid list. List must be [atom,x,y,z]");
-      
+
       add(py::cast<py::str>(l[0]),
           py::cast<py::float_>(l[1]),
           py::cast<py::float_>(l[2]),
@@ -956,7 +957,7 @@ The supercell concept generalization for the geometry class looks like:
     virtual void py_insert_list(int i, const py::list & l){
       if (!py_check_axyz(l))
         TypeError("geometry::Invalid list. List must be [atom,x,y,z]");
-      
+
       insert(i,
              py::cast<STRING>(l[0]),
           py::cast<REAL>(l[1]),
@@ -998,11 +999,11 @@ The supercell concept generalization for the geometry class looks like:
       l.append(coord(i).z());
       return l;
     }
-    
+
     virtual void py_setitem(int i, const py::list & l){
       if (i<0)
         i+=nat();
-      
+
       if (i<0 || i>=nat())
         IndexError("geometry::Index out of range");
 
@@ -1013,10 +1014,10 @@ The supercell concept generalization for the geometry class looks like:
       REAL x1 = py::cast<REAL>(l[1]),
           y1 = py::cast<REAL>(l[2]),
           z1 = py::cast<REAL>(l[3]);
-      
+
       change(i,a1,{x1,y1,z1});
     }
-    
+
 
 #endif
 

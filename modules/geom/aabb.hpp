@@ -30,6 +30,7 @@ namespace qpp{
         res_aabb.shift(shift);
         return res_aabb;
       }
+
       ///
       /// \brief squared_dist_point_check
       /// \param pn
@@ -101,6 +102,7 @@ namespace qpp{
           }
       }
 
+
       ///
       /// \brief split
       /// \param nl
@@ -144,6 +146,21 @@ namespace qpp{
             max[i] = 0.0f;
             min[i] = 0.0f;
           }
+      }
+
+      aabb_3d(const REAL x1, const REAL y1, const REAL z1,
+              const REAL x2, const REAL y2, const REAL z2){
+        min[0] = x1; min[1] = y1; min[2] = z1;
+        max[0] = x2; max[1] = y2; max[2] = z2;
+      }
+
+      aabb_3d(const vector3<REAL> &shift,
+              const REAL x1, const REAL y1, const REAL z1,
+              const REAL x2, const REAL y2, const REAL z2){
+        min[0] = x1; min[1] = y1; min[2] = z1;
+        max[0] = x2; max[1] = y2; max[2] = z2;
+        min += shift;
+        max += shift;
       }
 
       //void split()
