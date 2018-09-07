@@ -29,6 +29,7 @@
 //#endif
 
 #define TWS_TREE_DEBUG
+using namespace std;
 
 namespace qpp{
 
@@ -40,14 +41,14 @@ namespace qpp{
 
   template<typename POL_REAL = float>
   struct query_ray_add_all{
-      bool can_add(vector3<POL_REAL> &pos, index &idx, const int DIM = 0){
+      static bool can_add(vector3<POL_REAL> &pos, index &idx, const int DIM = 0){
         return true;
       }
   };
 
   template<typename POL_REAL = float>
   struct query_ray_add_ignore_images{
-      bool can_add(vector3<POL_REAL> &pos, index &idx, const int DIM = 0){
+      static bool can_add(vector3<POL_REAL> &pos, index &idx, const int DIM = 0){
         return (idx == index::D(DIM).all(0));
       }
   };
@@ -74,10 +75,11 @@ namespace qpp{
   struct imaginary_atom_t {
       uint16_t atm;
       index idx;
-      bool bSelected;
-      std::vector<tws_node_content_t<REAL>*> imBonds;
+      bool selected;
+      tws_node_t<REAL> *parent;
+      std::vector<tws_node_content_t<REAL>*> img_bonds;
       imaginary_atom_t(const int _atm, const index _idx){
-        atm = _atm; idx = _idx; bSelected = false;
+        atm = _atm; idx = _idx; selected = false;
       }
   };
 
@@ -110,8 +112,8 @@ namespace qpp{
   };
 
   template<typename REAL = float>
-  bool tws_query_data_sort_by_dist(tws_query_data_t<REAL> *a,
-                                   tws_query_data_t<REAL> *b){
+  bool tws_query_data_sort_by_dist(unique_ptr<tws_query_data_t<REAL>> &a,
+                                   unique_ptr<tws_query_data_t<REAL>> &b){
     return a->dist <= b->dist;
   }
 
@@ -122,12 +124,15 @@ namespace qpp{
   struct tws_node_t {
       tws_node_t<REAL>* parent;
       aabb_3d_t<REAL> bb;
-      //std::vector<tws_node<REAL>* > childs;
-      std::vector<tws_node_content_t<REAL>* > content;
-      std::array<tws_node_t<REAL>*, 27> sub_nodes {};
+      vector<tws_node_content_t<REAL>* > content;
+      array<tws_node_t<REAL>*, 27> sub_nodes {};
       int tot_childs;
       tws_node_t(){
         tot_childs = 0;
+      }
+
+      bool operator == (const tws_node_t<REAL> &a){
+        return this == a;
       }
   };
 
@@ -141,16 +146,17 @@ namespace qpp{
       REAL guess_rect_size;
       REAL min_tws_volume;
       int DIM;
-      geometry<REAL, CELL> *geom;
-      tws_node_t<REAL> *root;
-      std::vector<tws_node_t<REAL>* > flat_view;
-      std::vector<imaginary_atom_t<REAL>*> img_atoms;
+      geometry<REAL, CELL>                       *geom;
+      tws_node_t<REAL>                           *root;
+      vector<tws_node_t<REAL>* >                 flat_view;
+      vector<imaginary_atom_t<REAL> >            img_atoms;
+      vector<vector<tws_node_content_t<REAL>*> > ngb_table;
 
-      std::unordered_map<qpp::sym_key<int>, REAL, qpp::sym_key_hash<int> > dist_map;
-      std::map<int, REAL> max_dist_map;
-      std::vector<std::vector<tws_node_content_t<REAL>*> > ngb_table;
+      unordered_map<qpp::sym_key<int>, REAL, sym_key_hash<int> > dist_map;
+      map<int, REAL> max_dist_map;
 
-
+      //      std::vector<tws_node_t<REAL>* > map_atom_to_node;
+      //      std::vector<tws_node_t<REAL>* > map_img_atom_to_node;
       bool make_dirty_dist_map;
 
       ///
@@ -201,26 +207,60 @@ namespace qpp{
 
       }
 
-      imaginary_atom_t<REAL>* find_imaginary_atom(const int atm, const index idx){
+      int find_imaginary_atom(const int atm, const index idx){
         for (uint16_t i = 0; i < img_atoms.size(); i++)
-          if (img_atoms[i]->atm == atm && img_atoms[i]->idx == idx)
-            return img_atoms[i];
-        return nullptr;
+          if (img_atoms[i].atm == atm && img_atoms[i].idx == idx)
+            return i;
+        return -1;
+      }
+
+      int find_imaginary_atom_by_id(const int atm){
+        for (uint16_t i = 0; i < img_atoms.size(); i++)
+          if (img_atoms[i].atm == atm)
+            return i;
+        return -1;
       }
 
       ///
       /// \brief clear_bonds
       ///
       void clear_ntable(){
-        for (std::vector<tws_node_content_t<REAL>*> &vPerAtom : ngb_table){
-            for (tws_node_content_t<REAL> *nc : vPerAtom){
+        for (std::vector<tws_node_content_t<REAL>*> &per_atom : ngb_table){
+            for (tws_node_content_t<REAL> *nc : per_atom){
                 if (nc) delete nc;
                 nc = nullptr;
               }
-            vPerAtom.clear();
+            per_atom.clear();
           }
         ngb_table.clear();
       }
+
+      ///
+      /// \brief clear_atom_bonding_data
+      /// \param atm
+      ///
+      void clear_atom_bonding_data(const int atm){
+
+      }
+
+      ///
+      /// \brief clear_atom_pair_bonding_data
+      /// \param atm1
+      /// \param atm2
+      ///
+      void clear_atom_pair_bonding_data(const int atm1, const int atm2){
+
+      }
+
+      ///
+      /// \brief clear_atom_from_tree
+      /// \param atm
+      ///
+      void clear_atom_from_tree(const int atm){
+
+
+      }
+
 
       ///
       /// \brief clear_tree
@@ -237,10 +277,10 @@ namespace qpp{
       /// \brief apply_shift
       /// \param vShift
       ///
-      void apply_shift(const vector3<REAL> vShift){
+      void apply_shift(const vector3<REAL> vec_shift){
         for (tws_node_t<REAL> *node : flat_view){
-            node->bb.min += vShift;
-            node->bb.max += vShift;
+            node->bb.min += vec_shift;
+            node->bb.max += vec_shift;
           }
       }
 
@@ -248,7 +288,7 @@ namespace qpp{
       /// \brief apply_visitor
       /// \param f
       ///
-      void apply_visitor(std::function<void(tws_node_t<REAL>*, int)> f){
+      void apply_visitor(function<void(tws_node_t<REAL>*, int)> f){
         traverse_apply_visitor(root, 0, f);
       }
 
@@ -258,7 +298,7 @@ namespace qpp{
       /// \param f
       ///
       void traverse_apply_visitor(tws_node_t<REAL> *cur_node, int deep_level,
-                                  std::function<void(tws_node_t<REAL>*, int)> f){
+                                  function<void(tws_node_t<REAL>*, int)> f){
         f(cur_node, deep_level);
         for(tws_node_t<REAL>* child : cur_node->sub_nodes)
           if (child) traverse_apply_visitor(child, deep_level+1, f);
@@ -269,9 +309,9 @@ namespace qpp{
       /// \param vRayStart
       /// \param vRayDir
       ///
-      template<typename adding_result_policy = query_ray_add_all<REAL>>
+      template<typename adding_result_policy = query_ray_add_all<REAL> >
       void query_ray(ray_t<REAL> *_ray,
-                     std::vector<tws_query_data_t<REAL>*> *res,
+                     vector<unique_ptr<tws_query_data_t<REAL> > > &res,
                      REAL scale_factor = 0.25){
         traverse_query_ray<adding_result_policy>(root, _ray, res, scale_factor);
       }
@@ -285,7 +325,7 @@ namespace qpp{
       template<typename adding_result_policy>
       bool traverse_query_ray(tws_node_t<REAL> *cur_node,
                               ray_t<REAL> *_ray,
-                              std::vector<tws_query_data_t<REAL>*> *res,
+                              vector<unique_ptr<tws_query_data_t<REAL> > > &res,
                               const REAL scale_factor){
 
         if (ray_aabb_test(_ray, &(cur_node->bb))){
@@ -306,11 +346,10 @@ namespace qpp{
                   REAL ray_hit_dist = ray_sphere_test( _ray, vTestPos,fAtRad);
                   bool bRayHit = ray_hit_dist > -1.0f;
 
-                  if(bRayHit){
-                      tws_query_data_t<REAL>* newd = new tws_query_data_t<REAL>(nc->atm, nc->idx,
-                                                                            ray_hit_dist);
-                      adding_result_policy apol;
-                      if (apol.can_add(vTestPos, nc->idx, geom->DIM)) res->push_back(newd);
+                  if (bRayHit) {
+                      if (adding_result_policy::can_add(vTestPos, nc->idx, geom->DIM))
+                        res.push_back(unique_ptr<tws_query_data_t<REAL>>(
+                                        new tws_query_data_t<REAL>(nc->atm, nc->idx, ray_hit_dist)));
                     }
                 }
           }
@@ -326,7 +365,7 @@ namespace qpp{
       /// \param res
       ///
       void query_sphere(const REAL sph_r, const vector3<REAL> sph_cnt,
-                        std::vector<tws_node_content_t<REAL>*> *res){
+                        vector<unique_ptr<tws_node_content_t<REAL> > > &res){
         traverse_query_sphere(root, sph_r, sph_cnt, res);
       }
 
@@ -341,8 +380,7 @@ namespace qpp{
           tws_node_t<REAL> *cur_node,
           const REAL sph_r,
           const vector3<REAL> sph_cnt,
-          std::vector<tws_node_content_t<REAL>*> *res){
-
+          vector<unique_ptr<tws_node_content_t<REAL> > > &res){
 
         if (cur_node->bb.test_sphere(sph_r, sph_cnt)){
 
@@ -351,7 +389,10 @@ namespace qpp{
 
             for (tws_node_content_t<REAL>* cnt : cur_node->content)
               if ((sph_cnt - geom->pos(cnt->atm, cnt->idx)).norm() <= sph_r)
-                res->push_back(cnt);
+                res.push_back(
+                      unique_ptr<tws_node_content_t<REAL> >
+                      (new tws_node_content_t<REAL>(cnt->atm, cnt->idx))
+                      );
           }
       }
 
@@ -445,13 +486,13 @@ namespace qpp{
       /// \param atm
       /// \param idx
       ///
-      void push_data_to_tws_node(tws_node_t<REAL> *cur_node, const int atm,
-                                 const index idx){
+      void push_data_to_tws_node(tws_node_t<REAL> *cur_node, const int atm, const index idx){
         tws_node_content_t<REAL>* cnt = new tws_node_content_t<REAL>(atm, idx);
         cur_node->content.push_back(cnt);
-        if ((geom->DIM == 3) && (idx != index::D(geom->DIM).all(0))){
-            imaginary_atom_t<REAL> *img_atom = new imaginary_atom_t<REAL>(atm, idx);
-            img_atoms.push_back(img_atom);
+
+        if ((geom->DIM > 0) && (idx != index::D(geom->DIM).all(0))){
+            img_atoms.push_back(imaginary_atom_t<REAL>(atm, idx));
+            //map_img_atom_to_node[img_atoms.size()-1] = cur_node;
             //std::cout<<"new imga\n"<<std::endl;
           }
 
@@ -573,7 +614,7 @@ namespace qpp{
         for (int i = 0; i < geom->nat(); i++) find_neighbours(i, index::D(geom->DIM).all(0));
         if (build_imaginary_atoms_bonds)
           for (int i = 0; i < img_atoms.size(); i++)
-            find_neighbours(img_atoms[i]->atm, img_atoms[i]->idx, true);
+            find_neighbours(img_atoms[i].atm, img_atoms[i].idx, true);
       }
 
       ///
@@ -591,10 +632,10 @@ namespace qpp{
         REAL sph_r = max_dist_map[geom->type_table(at_num)];
         if ( sph_r > 0.0){
 
-            std::vector<tws_node_content_t<REAL>*> res;
-            query_sphere(sph_r, geom->pos(at_num, idx), &res);
+            std::vector<unique_ptr<tws_node_content_t<REAL> > > res;
+            query_sphere(sph_r, geom->pos(at_num, idx), res);
 
-            for (tws_node_content_t<REAL> *r_el : res){
+            for (unique_ptr<tws_node_content_t<REAL> > &r_el : res){
                 vector3<REAL> pos1 = geom->pos(at_num, idx);
                 vector3<REAL> pos2 = geom->pos(r_el->atm, r_el->idx);
 
@@ -607,31 +648,30 @@ namespace qpp{
                 //real atoms
                 if (!imaginary_pass &&
                     f_dr < bond_len &&
-                    (idx == index::D(geom->DIM).all(0) || r_el->idx == index::D(geom->DIM).all(0))
-                    )
-                  if ((at_num != r_el->atm) || (idx != r_el->idx)){
+                    (idx == index::D(geom->DIM).all(0) || r_el->idx == index::D(geom->DIM).all(0)))
+                  if (at_num != r_el->atm || idx != r_el->idx){
                       if (idx == index::D(geom->DIM).all(0)) add_ngbr(at_num, r_el->atm, r_el->idx);
                       if (r_el->idx == index::D(geom->DIM).all(0)) add_ngbr(r_el->atm, at_num , r_el->idx);
                     }
 
 
                 if (imaginary_pass &&
-                    (build_imaginary_atoms_bonds) &&
-                    (f_dr < bond_len) &&
-                    (idx != index::D(geom->DIM).all(0)) &&
-                    (r_el->idx != index::D(geom->DIM).all(0))
-                    ){
-                    imaginary_atom_t<REAL> *iat1, *iat2 = nullptr;
+                    build_imaginary_atoms_bonds &&
+                    f_dr < bond_len &&
+                    idx != index::D(geom->DIM).all(0) &&
+                    r_el->idx != index::D(geom->DIM).all(0)){
+
+                    int iat1 = -1, iat2 = -1;
                     iat1 = find_imaginary_atom(at_num, idx);
                     iat2 = find_imaginary_atom(r_el->atm, r_el->idx);
 
-                    if (iat1 && iat2){
+                    if (iat1 >= 0  && iat2 >= 0){
                         tws_node_content_t<REAL>* new_table_entry1 =
                             new tws_node_content_t<REAL>(r_el->atm, r_el->idx);
                         tws_node_content_t<REAL>* new_table_entry2 =
                             new tws_node_content_t<REAL>(at_num, idx);
-                        iat1->imBonds.push_back(new_table_entry1);
-                        iat2->imBonds.push_back(new_table_entry2);
+                        img_atoms[iat1].img_bonds.push_back(new_table_entry1);
+                        img_atoms[iat1].img_bonds.push_back(new_table_entry2);
 
                       }
                   }
@@ -738,6 +778,9 @@ namespace qpp{
         if (st == before_after::after){
             //std::cout << a << " added " << r << std::endl;
             ngb_table.resize(geom->nat());
+            std::cout << fmt::format("atom {} changed", at) << std::endl;
+            // clear_atom_bonding_data(at);
+            clear_atom_from_tree(at);
           }
       }
 

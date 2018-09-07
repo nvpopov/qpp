@@ -124,12 +124,12 @@ namespace qpp{
       _nfields = ft.size();
       _field_idx.resize(_nfields);
 
-      int is=0, ib=0, ir=0, ii=0;
+      int is = 0, ib = 0, ir = 0, ii = 0;
 
       ix_x = ix_y = ix_z = ix_atom = -1;
       ix_charge = ix_mass = ix_number = -1;
 
-      for (int j=0; j<_nfields; j++){
+      for (int j = 0; j < _nfields; j++){
           basic_types tp = field_type(j);
           if ( tp == type_string ){
               _field_idx[j] = is++;
@@ -206,7 +206,7 @@ namespace qpp{
       _xint.resize(_nxint);
       _xbool.resize(_nxbool);
 
-      
+
     }
 
     xgeometry(CELL & __cell,  const std::vector<STRING> & fn,
@@ -225,9 +225,9 @@ namespace qpp{
     int nfields_bool() const{ return _nxbool;}
 
     bool additive(int i) const{ return (bool)_field_additive[i]; }
-    
+
     bool & additive(int i){ return *((bool*)(&_field_additive[i])); }
-    
+
     template<class T>
     T & xfield(int i, int j){
       basic_types ft = field_type(i);
@@ -309,14 +309,14 @@ namespace qpp{
     T xfield(const STRING & f, int j) const{
       int i = 0;
       while (_field_name[i]!=f && i<nfields()) i++;
-      
+
       if (i<nfields())
         return xfield<T>(i,j);
       else{
           KeyError("Field not found in xgeometry");
         }
     }
-    
+
     // ----------------------------------------------------
 
     virtual void get_fields(int j, std::vector<datum> & v) const{
@@ -365,7 +365,7 @@ namespace qpp{
         for (int i=0; i<observers.size(); i++)
           observers[i]->changed(j, after, a1, r1);
     }
-    
+
     // ----------------------------------------------------
 
     virtual void erase(int j){
@@ -450,7 +450,7 @@ namespace qpp{
         _xbool[i].insert(_xbool[i].begin()+j, false);
       geometry<REAL,CELL>::insert(j,a,r);
     }
-    
+
     virtual void clear(){
       geometry<REAL,CELL>::clear();
       for (int i=0; i<_nxstring; i++)
@@ -510,7 +510,7 @@ namespace qpp{
       if (auto_update_types)
         type(j) = define_type(_atm[j]);
     }
-    
+
     template<typename... Args>
     void xadd(Args... args){
       add("",{REAL(0),REAL(0),REAL(0)});
@@ -524,7 +524,7 @@ namespace qpp{
     }
 
     // ----------------------------------------
-    
+
     virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const{
       for (int k=0; k<offset; k++) os << " ";
       os << "geometry";
@@ -532,7 +532,7 @@ namespace qpp{
         os << " " << name;
       os << "(";
       cell.write(os);
-      
+
       for (int i=0; i<nfields(); i++){
           std::cout << ", " << field_name(i) << " = ";
           if (field_type(i)==type_string)
@@ -598,7 +598,7 @@ namespace qpp{
     int number(int i) const{
       if (i<0) i+=nat();
       if (i<0 || i>= nat()) IndexError("xgeometry::py_getitem: index out of range");
-      
+
       if (ix_number >= 0)
         return _xint[_field_idx[ix_number]][i];
       else
@@ -623,7 +623,7 @@ namespace qpp{
     REAL mass(int i) const{
       if (i<0) i+=nat();
       if (i<0 || i>= nat()) IndexError("xgeometry::py_getitem: index out of range");
-      
+
       if (ix_mass >= 0)
         return _xreal[_field_idx[ix_mass]][i];
       else
@@ -633,7 +633,7 @@ namespace qpp{
     REAL & mass(int i){
       if (i<0) i+=nat();
       if (i<0 || i>= nat()) IndexError("xgeometry::py_getitem: index out of range");
-      
+
       if (ix_mass >= 0)
         return _xreal[_field_idx[ix_mass]][i];
       else
@@ -791,7 +791,7 @@ namespace qpp{
         IndexError("xgeometry: field index out of range");
       return additive(i);
     }
-    
+
     void py_setadd(int i, const bool &a){
       if (i<0) i += nfields();
       if (i<0 || i >= nfields())
@@ -833,7 +833,7 @@ namespace qpp{
     }
 
 #endif
-    
+
   };
 
 }

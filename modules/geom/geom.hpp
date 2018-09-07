@@ -548,13 +548,13 @@ The supercell concept generalization for the geometry class looks like:
 
     inline void _change(int at, const STRING & a1, const vector3<REAL> & r1){
       if (has_observers)
-        for (int i=0; i<observers.size(); i++)
+        for (int i = 0; i < observers.size(); i++)
           observers[i]->changed(at, before, a1, r1);
       _crd[at] = r1;
       _atm[at] = a1;
 
       if (has_observers)
-        for (int i=0; i<observers.size(); i++)
+        for (int i = 0; i < observers.size(); i++)
           observers[i]->changed(at, after, a1, r1);
     }
 
@@ -585,6 +585,9 @@ The supercell concept generalization for the geometry class looks like:
     virtual void change(int at, const STRING & a1, const vector3<REAL> & r1)
     { _change(at,a1,r1); }
 
+    virtual void change_pos(int at, const vector3<REAL> & r1)
+    { _change(at, _atm[at], r1); }
+
     virtual void reorder(const std::vector<int> & ord){
       for (int i=0; i<observers.size(); i++)
         observers[i]->reordered(ord, before);
@@ -610,8 +613,8 @@ The supercell concept generalization for the geometry class looks like:
 
     void sort(REAL (*key)(const geometry<REAL,CELL> &, int i) ){
       std::vector<int> ord(size());
-      for (int i=0; i<size(); i++)
-        ord[i]=i;
+      for (int i = 0; i < size(); i++)
+        ord[i] = i;
       std::sort(ord.begin(), ord.end(),
                 [&](const int& a, const int& b){
           return ((*key)(*this,a) < (*key)(*this,b));
