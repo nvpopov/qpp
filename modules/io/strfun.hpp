@@ -142,24 +142,24 @@ namespace qpp{
 
   STRING tolower(const STRING & s);
   // Make lowercase
-  
+
   // -----------------------------------------------------------
-  
+
   bool icompare(const STRING & s1, const STRING s2);
   // Case insensitive comparison of two strings
   // -----------------------------------------------------------
-  
+
   void split(const STRING &s,
              std::vector<STRING> &elems,
              const STRING & delims = " \t");
   // fixme - not efficient!
-  
+
   std::vector<STRING> split(const STRING &s, const STRING & delims=" \t");
-  
+
   bool is_identifier(const STRING &s);
-  
+
   // --------------------------------------------------------------------//
-  
+
   int strnf(const STRING & s);
 
   // -------------------------------- string to type T convertor ----------------------------
@@ -206,8 +206,8 @@ namespace qpp{
     return qpp::vector3<REAL>(vx, vy, vz);
   }
 
-  char *vec_str_to_char(const std::string & s);
-
+  char *vec_str_to_char(const STRING & s);
+  const char *vec_str_to_char_ref(const STRING & s);
 }
 
 #endif

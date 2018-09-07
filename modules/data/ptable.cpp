@@ -26,7 +26,7 @@ void qpp::ptable::assembly_ptable_0(){
   this->arecs[0].aSymbol       = "H";
   this->arecs[0].aRadius       = 0.79;
   this->arecs[0].aMass         = 1.008;
-  this->arecs[0].aCovRad_Slater= 0.33; // gdis
+  this->arecs[0].aCovRad_Slater= 0.53; // gdis
   this->arecs[0].aIonicRadius  = -0.38;
   this->arecs[0].aVdWRadius    = 1.1;
   this->arecs[0].aNValenceElec = 1;
@@ -150,7 +150,7 @@ void qpp::ptable::assembly_ptable_0(){
   this->arecs[5].aSymbol       = "C";
   this->arecs[5].aRadius       = 0.91;
   this->arecs[5].aMass         = 12.011;
-  this->arecs[5].aCovRad_Slater= 0.78; //gdis
+  this->arecs[5].aCovRad_Slater= 0.86; //gdis
   this->arecs[5].aIonicRadius  = -0.08;
   this->arecs[5].aVdWRadius    = 1.7;
   this->arecs[5].aNValenceElec = 4;

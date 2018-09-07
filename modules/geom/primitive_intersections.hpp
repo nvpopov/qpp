@@ -16,16 +16,14 @@ namespace qpp {
   /// \return
   ///
   template <typename REAL>
-  REAL ray_sphere_test(ray<REAL> *_ray,
-                       const vector3<REAL> vCenter,
-                       const REAL fRadius){
+  REAL ray_sphere_test(ray_t<REAL> *_ray,
+                       const vector3<REAL> sph_center,
+                       const REAL sph_r){
     REAL a = _ray->dir.dot(_ray->dir);
-    vector3<REAL> s0_r0 = _ray->start - vCenter;
+    vector3<REAL> s0_r0 = _ray->start - sph_center;
     REAL b = 2.0f * _ray->dir.dot(s0_r0);
-    REAL c = s0_r0.dot(s0_r0) - (fRadius * fRadius);
-    if (b*b - 4.0*a*c < 0.0) {
-        return -1.0;
-      }
+    REAL c = s0_r0.dot(s0_r0) - (sph_r * sph_r);
+    if (b*b - 4.0*a*c < 0.0) return -1.0;
     return (-b - sqrt((b*b) - 4.0*a*c))/(2.0*a);
   }
 
@@ -37,7 +35,7 @@ namespace qpp {
   /// \return
   ///
   template <typename REAL>
-  bool ray_aabb_test(ray<REAL> *_ray, aabb_3d<REAL> *_aabb){
+  bool ray_aabb_test(ray_t<REAL> *_ray, aabb_3d_t<REAL> *_aabb){
 
     REAL t1 = (_aabb->min[0] - _ray->start[0]) /
         (cmp_eps(_ray->dir[0], 0.0f) ? 0.00001f : _ray->dir[0]);
@@ -78,7 +76,7 @@ namespace qpp {
   /// \return
   ///
   template <typename REAL>
-  bool aabb_aabb_test(aabb_3d<REAL> *a, aabb_3d<REAL> *b){
+  bool aabb_aabb_test(aabb_3d_t<REAL> *a, aabb_3d_t<REAL> *b){
     return
         (a->min[0] <= b->max[0] && a->max[0] >= b->min[0]) &&
         (a->min[1] <= b->max[1] && a->max[1] >= b->min[1]) &&
@@ -86,7 +84,7 @@ namespace qpp {
   }
 
   template <typename REAL>
-  bool point_aabb_test(const vector3<REAL> p, aabb_3d<REAL> &a){
+  bool point_aabb_test(const vector3<REAL> p, aabb_3d_t<REAL> &a){
     for (uint i = 0; i < 3; i++)
       if (!((p[i] >= a.min[i]) && (p[i] <= a.max[i])))
         return false;

@@ -2,26 +2,19 @@
 
 namespace qpp{
 
-  char *vec_str_to_char(const STRING & s)
-  {
-     char *pc = new char[s.size()+1];
-     std::strcpy(pc, s.c_str());
-     return pc;
-  }
-
   template<>
   bool s2t<bool>(const STRING & s, bool & val){
     STRING s1 = tolower(s);
     if ( (s1 == "y") || (s1 == "yes") || (s1 == "true") || (s1 == "1")){
-	val = true;
-	return true;
+        val = true;
+        return true;
       }
     else if ( (s1 == "n") || (s1 == "no") || (s1 == "false") || (s1 == "0")){
-	val = false;
-	return true;
+        val = false;
+        return true;
       }
     else{
-	return false;
+        return false;
       }
   }
 
@@ -66,7 +59,7 @@ namespace qpp{
 
       //std::cerr << "split:\"" << item << "\"";
       if (item.size()==0)
-	break;
+        break;
       elems.push_back(item);
     } while(true);
 
@@ -111,10 +104,19 @@ namespace qpp{
     return true;
   }
 
-  std::string extract_base_name(const std::string &path){
+  std::string extract_base_name(const STRING &path){
     return path.substr(path.find_last_of("/\\") + 1);
   }
 
+  const char *vec_str_to_char_ref(const STRING &s){
+     return s.c_str();
+  }
+
+  char *vec_str_to_char(const STRING & s){
+     char *pc = new char[s.size()+1];
+     std::strcpy(pc, s.c_str());
+     return pc;
+  }
 
 
 }

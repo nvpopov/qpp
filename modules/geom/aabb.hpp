@@ -11,11 +11,11 @@ namespace qpp{
 
   /// 3d axis aligned bounding box
   template<typename REAL = float>
-  struct aabb_3d {
+  struct aabb_3d_t {
       vector3<REAL> max;
       vector3<REAL> min;
 
-      aabb_3d<REAL>& operator=(const aabb_3d<REAL>& other){
+      aabb_3d_t<REAL>& operator=(const aabb_3d_t<REAL>& other){
         max = other.max;
         min = other.min;
       }
@@ -25,8 +25,8 @@ namespace qpp{
         max += shift;
       }
 
-      const aabb_3d<REAL> shifted(const vector3<REAL> &shift){
-        aabb_3d<REAL> res_aabb = *this;
+      const aabb_3d_t<REAL> shifted(const vector3<REAL> &shift){
+        aabb_3d_t<REAL> res_aabb = *this;
         res_aabb.shift(shift);
         return res_aabb;
       }
@@ -73,19 +73,19 @@ namespace qpp{
       /// \param vSphCnt
       /// \return
       ///
-      bool test_sphere(const REAL fSphRad,
-                               const vector3<REAL> vSphCnt){
-        return squared_dist_point(vSphCnt) <= (fSphRad * fSphRad);
+      bool test_sphere(const REAL sph_r,
+                       const vector3<REAL> sph_cnt){
+        return squared_dist_point(sph_cnt) <= (sph_r * sph_r);
       }
 
       ///
       /// \brief fill_guess
       /// \param _fGuessVal
       ///
-      void fill_guess(const REAL _fGuessVal){
+      void fill_guess(const REAL _guess_val){
         for (unsigned int i = 0; i < DIM_RECT; i++){
-            this->min[i] = -_fGuessVal / 2;
-            this->max[i] =  _fGuessVal / 2;
+            this->min[i] = -_guess_val / 2;
+            this->max[i] =  _guess_val / 2;
           }
       }
 
@@ -109,8 +109,8 @@ namespace qpp{
       /// \param nh
       /// \param iAxis
       ///
-      void split(aabb_3d<REAL> &nl,
-                 aabb_3d<REAL> &nh,
+      void split(aabb_3d_t<REAL> &nl,
+                 aabb_3d_t<REAL> &nh,
                  const int iAxis = 0){
         for (uint i = 0; i < DIM_RECT; i++){
             REAL mid_point = (max[i] - min[i]) /2 ;
@@ -141,20 +141,20 @@ namespace qpp{
       ///
       /// \brief rtree_box_nd
       ///
-      aabb_3d(){
+      aabb_3d_t(){
         for (unsigned int i = 0; i < DIM_RECT; i++){
             max[i] = 0.0f;
             min[i] = 0.0f;
           }
       }
 
-      aabb_3d(const REAL x1, const REAL y1, const REAL z1,
+      aabb_3d_t(const REAL x1, const REAL y1, const REAL z1,
               const REAL x2, const REAL y2, const REAL z2){
         min[0] = x1; min[1] = y1; min[2] = z1;
         max[0] = x2; max[1] = y2; max[2] = z2;
       }
 
-      aabb_3d(const vector3<REAL> &shift,
+      aabb_3d_t(const vector3<REAL> &shift,
               const REAL x1, const REAL y1, const REAL z1,
               const REAL x2, const REAL y2, const REAL z2){
         min[0] = x1; min[1] = y1; min[2] = z1;
@@ -168,7 +168,7 @@ namespace qpp{
 
   template<typename REAL = float>
   std::ostream& operator << (std::ostream& stream,
-                             aabb_3d<REAL> &nh) {
+                             aabb_3d_t<REAL> &nh) {
     stream << "[ rmin = {";
     for (unsigned int i = 0; i < DIM_RECT; i++)
       stream << nh.min[i] << ",";
