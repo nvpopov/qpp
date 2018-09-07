@@ -1,5 +1,5 @@
-#ifndef _QPP_ptable_H
-#define _QPP_ptable_H
+#ifndef QPP_ptable_H
+#define QPP_ptable_H
 
 #include <iostream>
 #include <geom/lace3d.hpp>

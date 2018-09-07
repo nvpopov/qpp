@@ -1,5 +1,5 @@
-#ifndef _QPP_SHAPE_H
-#define _QPP_SHAPE_H
+#ifndef QPP_SHAPE_H
+#define QPP_SHAPE_H
 
 //#include <mathf/constants.hpp>
 //#include <data/qppdata.hpp>
@@ -27,9 +27,9 @@ namespace qpp{
   template <class VALTYPE> class shape_invert;
   template <class VALTYPE> class shape_xor;
 
-
-  // ------------------ 3D primitives prototype ------------------------
-
+  ///
+  /// \brief 3D primitives prototype
+  ///
   template <class VALTYPE>
   class shape{
 
@@ -45,26 +45,48 @@ namespace qpp{
       qpp_object(__name,__owner)
       {}*/
 
+    ///
+    /// \brief Answers the question whether the r point is situated within the shape
+    /// \param r
+    /// \return
+    ///
     virtual bool within(const v3d & r) const =0;
-    // Answers the question whether the r point is situated within the shape
 
     virtual void scale(VALTYPE s) =0;
     virtual void move(const v3d & v) =0;
     virtual void rotate(const matrix3<VALTYPE> & Rot) =0;
 
     // -------------------------------------
-    
+
     virtual VALTYPE volume() const =0;
+
+    ///
+    /// \brief Minimal cartesian coordinates of the shape
+    /// \return
+    ///
     virtual v3d rmin() const =0;
+
+    ///
+    /// \brief Maximal cartesian coordinates of the shape
+    /// \return
+    ///
     virtual v3d rmax() const =0;
-    // Minimal & maximal cartesian coordinates of the shape
 
+    ///
+    /// \brief Minimal fractional coordinates of the shape for given cell
+    /// \param v
+    /// \return
+    ///
     virtual v3d fmin(const periodic_cell<VALTYPE> &v) const =0;
-    virtual v3d fmax(const periodic_cell<VALTYPE> &v) const =0;
-    // Minimal and maximal fractional coordinates of the shape for given cell
 
-    virtual void write(std::basic_ostream<CHAR,TRAITS> &os,
-                       int offset=0) const =0;
+    ///
+    /// \brief Maximal fractional coordinates of the shape for given cell
+    /// \param v
+    /// \return
+    ///
+    virtual v3d fmax(const periodic_cell<VALTYPE> &v) const =0;
+
+    virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const =0;
 
     shape<VALTYPE> & operator|(shape<VALTYPE> & sh)
     {  return *new shape_union<VALTYPE>(*this,sh);}
@@ -152,7 +174,7 @@ namespace qpp{
       a[1] = a2;
       a[2] = a3;
     }
-    
+
     shape_box(VALTYPE a1, VALTYPE a2, VALTYPE a3, const STRING & __name = "") :
       shape<VALTYPE>(__name){
       crn = v3d::Zero();
@@ -191,7 +213,7 @@ namespace qpp{
         return false;
       return true;
     }
-    
+
     virtual v3d rmin() const{
       v3d corners[8];
       fill_corners(corners);
@@ -230,7 +252,7 @@ namespace qpp{
         for (int j=0; j<3; j++)
           if ( res(j) > corners[i](j))
             res(j) = corners[i](j);
-      
+
       return res;
     }
 
@@ -246,13 +268,15 @@ namespace qpp{
         for (int j=0; j<3; j++)
           if ( res(j) < corners[i](j))
             res(j) = corners[i](j);
-      
+
       return res;
     }
 
-    // Minimal & maximal fractional coordinates of the shape for given
-    // translation vectors v
-
+    ///
+    /// \brief Minimal & maximal fractional coordinates of the shape for given
+    /// translation vectors v
+    /// \return
+    ///
     virtual VALTYPE volume() const{
       matrix3<VALTYPE> m;
       m.row(0) = a[0];
@@ -280,12 +304,7 @@ namespace qpp{
     }
 
 #ifdef PY_EXPORT
-
-
     static void py_export(py::module m, const char * pyname){
-
-
-
     }
 
 #endif
@@ -304,7 +323,7 @@ namespace qpp{
   shape<VALTYPE> * py_shape_box2(const v3d& a, const v3d& b, const v3d& c){
     return new shape_box<VALTYPE>(a,b,c);
   }
-  
+
   template <class VALTYPE>
   shape<VALTYPE> * py_shape_box3(VALTYPE a, VALTYPE b, VALTYPE c){
     return new shape_box<VALTYPE>(a,b,c);
@@ -359,7 +378,7 @@ namespace qpp{
     virtual bool within(const v3d & r) const{
       return (r-r0).norm() <= R;
     }
-    
+
     virtual v3d rmin() const{
       return r0 - v3d(R,R,R);
     }
@@ -400,9 +419,11 @@ namespace qpp{
       return B*r0 + R*res;
     }
 
-    // Minimal & maximal fractional coordinates of the shape for given
-    // translation vectors v
-
+    ///
+    /// \brief Minimal & maximal fractional coordinates of the shape for given
+    /// translation vectors v
+    /// \return
+    ///
     virtual VALTYPE volume() const{
       return 4*qpp::pi*R*R*R/3;
     }
@@ -697,8 +718,7 @@ namespace qpp{
     virtual v3d fmax(const periodic_cell<VALTYPE> &v) const
     { return  {infty, infty, infty}; }
 
-    virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0)
-    const{
+    virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const {
       for (int i=0; i<offset; i++) os << " ";
       os << "invert";
       if (name != "")

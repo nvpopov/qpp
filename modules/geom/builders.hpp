@@ -1,5 +1,5 @@
-#ifndef _QPP_BUILDERS_H
-#define _QPP_BUILDERS_H
+#ifndef QPP_BUILDERS_H
+#define QPP_BUILDERS_H
 #pragma GCC diagnostic ignored "-Wnarrowing"
 #include <vector>
 #include <cmath>
@@ -49,7 +49,7 @@ namespace qpp{
   void treat_crowd(geometry<REAL,CELL> & geom, int mode){
     if (mode & crowd_ignore)
       return;
-    
+
     bonding_table<REAL> b;
     b.default_distance = geom.tol_geom;
     neighbours_table<REAL,CELL> n(geom,b);
@@ -62,7 +62,7 @@ namespace qpp{
         for (int j=0; j<n.n(i); j++)
           if (geom.atom(i)==geom.atom(j))
             todel[n(i,j)] = i;
-    
+
     xgeometry<REAL,CELL> *xgeom = dynamic_cast<xgeometry<REAL,CELL>*>(&geom);
     bool merge = (mode & crowd_merge) && xgeom!=NULL;
 
@@ -80,7 +80,7 @@ namespace qpp{
                         xgeom->template xfield<REAL>(k,i);
                 }
           }
-    
+
     for (int i=geom.nat()-1; i>=0; i--)
       if (todel[i]>-1)
         geom.erase(i);
@@ -115,7 +115,7 @@ namespace qpp{
           {type_string,type_real,type_real,type_real});
       }
   }
-  
+
 
   // ----------------------------------------------------------------------------
 
@@ -395,7 +395,7 @@ namespace qpp{
   {
     replicate(dst, src, cell, cell.begin(), cell.end(), mode);
   }
-  
+
   template<class REALDST, class CELLDST, class REALSRC, class CELLSRC>
   void py_replicate3(geometry<REALDST,CELLDST> & dst,  const geometry<REALSRC,CELLSRC> & src,
                      int mode = crowd_ignore)

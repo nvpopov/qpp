@@ -1,18 +1,12 @@
-#ifndef _QPP_VASP_IO_NATIVE
-#define _QPP_VASP_IO_NATIVE
+#ifndef QPP_VASP_IO_NATIVE
+#define QPP_VASP_IO_NATIVE
 #include <iostream>
 #include <fmt/format.h>
 #include <fmt/ostream.h>
 #include <io/strfun.hpp>
-
-//#include <lace/lace3d.hpp>
-//#include <lace/lace.hpp>
-//#include <symm/symm.hpp>
 #include <geom/geom.hpp>
 #include <geom/xgeom.hpp>
 #include <geom/ngbr.hpp>
-//#include <geom/geom_extras.hpp>
-//#include <geom/molecule.hpp>
 
 #include <vector>
 #include <cmath>
@@ -24,7 +18,6 @@
 #include <algorithm>
 
 namespace qpp{
-
 
   template<class REAL, class CELL>
   void read_vasp_poscar(
@@ -208,15 +201,15 @@ namespace qpp{
   }
 
   template< class REAL, class CELL >
-  void write_vasp_poscar(
-      std::basic_ostream<CHAR,TRAITS>  & out,
-      qpp::geometry<REAL,CELL> & geom){
+  void write_vasp_poscar(std::basic_ostream<CHAR,TRAITS>  & out, qpp::geometry<REAL,CELL> & geom){
+
     STRING poscar_comment = "";
 
     for (int i = 0; i < geom.n_types(); i++)
       poscar_comment += geom.atom_of_type(i) + " ";
     out << poscar_comment << std::endl;
     out << "1.00000000" << std::endl;
+
     for (int i = 0; i < 3; i++)
       out << fmt::format("{:15.8f} {:15.8f} {:15.8f}",
           geom.cell.v[i][0],
@@ -227,6 +220,7 @@ namespace qpp{
       out << geom.get_atom_count_by_type(i) << " ";
     out << std::endl;
     out << "cartesian" << std::endl;
+
     for (int i = 0; i < geom.n_types(); i++)
       for (int q = 0; q < geom.nat(); q++)
         if (geom.type_table(q) == i)

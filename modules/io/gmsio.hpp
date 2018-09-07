@@ -17,7 +17,7 @@
 #include <consts.hpp>
 
 namespace qpp{
-  
+
   template<qpp_bastype BT, class FREAL>
   void read_gms_basis(std::basic_istream<CHAR,
                       TRAITS> & inp,
@@ -136,7 +136,7 @@ namespace qpp{
     std::getline(inp,s);
 
     std::vector<STRING> sf = split(s);
-    
+
     if (sf.size()==1){
         name = sf[0];
         ecp = atomic_ecp<FREAL>();
@@ -147,11 +147,11 @@ namespace qpp{
         ecp = atomic_ecp<FREAL>();
         return;
       }
-    
+
     name = sf[0];
     if (!icompare(sf[1],"GEN"))
       SyntaxError("When reading GAMESS ECP: GEN expected");
-    
+
     int nelec,L;
     if ( !s2t<int>(sf[2],nelec) || ! s2t<int>(sf[3],L) )
       SyntaxError("When reading GAMESS ECP: integer expected");
@@ -175,7 +175,7 @@ namespace qpp{
           }
       }
   }
-  
+
   template<class FREAL>
   void write_gms_ecp(std::basic_ostream<CHAR,TRAITS>  & out,
                      const STRING & name,
@@ -206,7 +206,7 @@ namespace qpp{
     if (!geom.is_xgeometry())
       TypeError("Must be xgeometry with charges to be "
                 "printed as GAMESS data section");
-    
+
     xgeometry<REAL, CELL> *xgeom = (xgeometry<REAL, CELL>*)(&geom);
 
     out << " $DATA" << std::endl << geom.name << std::endl;

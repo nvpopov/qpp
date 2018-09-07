@@ -1,20 +1,13 @@
-#ifndef _QPP_GULP_IO_NATIVE
-#define _QPP_GULP_IO_NATIVE
+#ifndef QPP_GULP_IO_NATIVE
+#define QPP_GULP_IO_NATIVE
 
 #include <iostream>
 #include <fmt/format.h>
 #include <fmt/ostream.h>
 #include <io/strfun.hpp>
-
-//#include <lace/lace3d.hpp>
-//#include <lace/lace.hpp>
-//#include <symm/symm.hpp>
 #include <geom/geom.hpp>
 #include <geom/xgeom.hpp>
 #include <geom/ngbr.hpp>
-//#include <geom/geom_extras.hpp>
-//#include <geom/molecule.hpp>
-
 #include <vector>
 #include <cmath>
 #include <sstream>
@@ -27,9 +20,8 @@
 namespace qpp{
 
   template<class REAL, class CELL = periodic_cell<REAL> >
-  void read_gulp_simple_input(
-      std::basic_istream<CHAR,TRAITS> & inp,
-      geometry<REAL,CELL> & geom){
+  void read_gulp_simple_input(std::basic_istream<CHAR,TRAITS> & inp, geometry<REAL,CELL> & geom){
+
     STRING s;
 
     bool bParseGeometry = false;
@@ -79,8 +71,8 @@ namespace qpp{
   }
 
   template<class REAL, class CELL = periodic_cell<REAL> >
-  void write_gulp_simple_input(std::basic_ostream<CHAR,TRAITS>  & out,
-                               geometry<REAL, CELL> & geom){
+  void write_gulp_simple_input(std::basic_ostream<CHAR,TRAITS> &out, geometry<REAL, CELL> &geom){
+
     out << "opti prop conp relax" << std::endl;
     out << "vectors" << std::endl;
     for (int i = 0; i < 3; i++)
@@ -90,6 +82,7 @@ namespace qpp{
           geom.cell.v[i][1],
           geom.cell.v[i][2]) << std::endl;
     out << "frac" << std::endl;
+
     for (int q = 0; q < geom.nat(); q++ )
       std::cout << fmt::format("{} {} {} {} {} {}",
                                geom.atom(q),

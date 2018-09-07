@@ -1,5 +1,5 @@
-#ifndef _QPP_GEOM_EXTRAS_H
-#define _QPP_GEOM_EXTRAS_H
+#ifndef QPP_GEOM_EXTRAS_H
+#define QPP_GEOM_EXTRAS_H
 
 #include <data/types.hpp>
 #include <data/errors.hpp>
@@ -20,9 +20,10 @@ namespace py = pybind11;
 
 namespace qpp{
 
-  // ---------------- Geometry with extra fields - for storing any additional data -------------------
-
   template<class REAL, class CELL>
+  ///
+  /// \brief  Geometry with extra fields - for storing any additional data
+  ///
   class xgeometry : public geometry<REAL,CELL>{
 
     std::vector<std::vector<REAL> >   _xreal;
@@ -76,6 +77,15 @@ namespace qpp{
 
     // Constructors
 
+    ///
+    /// \brief xgeometry
+    /// \param __cell
+    /// \param __nxstring
+    /// \param __nxreal
+    /// \param __nxint
+    /// \param __nxbool
+    /// \param __name
+    ///
     xgeometry(CELL & __cell,
               int __nxstring, int __nxreal=0, int __nxint=0, int __nxbool=0,
               const STRING & __name = "") :
@@ -92,21 +102,41 @@ namespace qpp{
       _nxstring = __nxstring;
     }
 
+    ///
+    /// \brief xgeometry
+    /// \param __cell
+    /// \param __name
+    ///
     xgeometry(CELL & __cell,  const STRING & __name = "") :
       geometry<REAL,CELL>(__cell, __name){
       init_xdefault();
     }
 
+    ///
+    /// \brief xgeometry
+    /// \param dim
+    /// \param __name
+    ///
     xgeometry(int dim,  const STRING & __name = "") :
       geometry<REAL,CELL>(dim, __name){
       init_xdefault();
     }
 
+    ///
+    /// \brief get_format
+    /// \param fn
+    /// \param ft
+    ///
     void get_format(std::vector<STRING> & fn, std::vector<basic_types> & ft){
       fn = _field_name;
       ft = _field_type;
     }
 
+    ///
+    /// \brief set_format
+    /// \param fn
+    /// \param ft
+    ///
     void set_format(const std::vector<STRING> & fn,
                     const std::vector<basic_types> & ft){
       _field_name = fn;
@@ -209,6 +239,13 @@ namespace qpp{
 
     }
 
+    ///
+    /// \brief xgeometry
+    /// \param __cell
+    /// \param fn
+    /// \param ft
+    /// \param __name
+    ///
     xgeometry(CELL & __cell,  const std::vector<STRING> & fn,
               const std::vector<basic_types> & ft,
               const STRING & __name = "") : geometry<REAL,CELL>(__cell, __name){

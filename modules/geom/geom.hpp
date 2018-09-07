@@ -1,5 +1,5 @@
-#ifndef _QPP_GEOM_H
-#define _QPP_GEOM_H
+#ifndef QPP_GEOM_H
+#define QPP_GEOM_H
 
 #include <algorithm>
 #include <vector>
@@ -9,14 +9,16 @@
 #include <symm/index.hpp>
 #include <symm/cell.hpp>
 
-
 #ifdef PY_EXPORT
 #include <pybind11/pybind11.h>
 #include <pybind11/operators.h>
 #include <pyqpp/py_indexed_property.hpp>
 namespace py = pybind11;
 #endif
+
 namespace qpp{
+
+  const uint32_t GEOM_DEFAULT_RESERVE_AMOUNT = 128;
 
   template< class REAL = double, class CELL = periodic_cell<REAL> >
   class geometry;
@@ -393,7 +395,9 @@ The supercell concept generalization for the geometry class looks like:
       has_observers = false;
       default_symmetrize_radius = 0e0;
       tol_geom = tol_geom_default;
-
+      _atm.reserve(GEOM_DEFAULT_RESERVE_AMOUNT);
+      _crd.reserve(GEOM_DEFAULT_RESERVE_AMOUNT);
+      _shadow.reserve(GEOM_DEFAULT_RESERVE_AMOUNT);
 #ifdef PY_EXPORT
       py_atoms.bind(this);
       py_shadow.bind(this);
