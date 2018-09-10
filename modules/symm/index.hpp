@@ -1,5 +1,5 @@
-#ifndef _QPP_INDEX_H
-#define _QPP_INDEX_H
+#ifndef QPP_INDEX_H
+#define QPP_INDEX_H
 
 #include <ostream>
 #include <sstream>
@@ -17,119 +17,119 @@ namespace py = pybind11;
 #endif
 
 namespace qpp{
-  
+
   /*! \brief index is a general purpose complex index, having DIM integer components
    */
   class index{
-    int *idx;
-    bool del;
-    
-  public:
+      int *idx;
+      bool del;
 
-    //! The index dimension - number of components
-    int DIM;
+    public:
 
-    //! Typecast operator to int type returns the 0th component of the index
-    inline operator int() const {return idx[0];}
+      //! The index dimension - number of components
+      int DIM;
 
-    //! The d-th component of the index
-    inline int operator()(int d) const {return idx[d];} 
+      //! Typecast operator to int type returns the 0th component of the index
+      inline operator int() const {return idx[0];}
 
-    //! The d-th component of the index
-    inline int& operator()(int d) {return idx[d];} 
+      //! The d-th component of the index
+      inline int operator()(int d) const {return idx[d];}
 
-    //! Typecast from integer: the 0th component of index is set to i, the rest is set to 0
-    inline index& operator=(int i){
-      idx[0] = i;
-      for (int d=1; d<DIM; d++)
-	idx[d] = 0;
-      return *this;
-    }
+      //! The d-th component of the index
+      inline int& operator()(int d) {return idx[d];}
 
-    //! Assigment operator
-    inline index& operator=(const index & I){      
-      if (DIM != I.DIM){
-	  if (del)
-	    delete idx;
-	  DIM = I.DIM;
-	  idx = new int[DIM];
-	  del = true;
-	}
+      //! Typecast from integer: the 0th component of index is set to i, the rest is set to 0
+      inline index& operator=(int i){
+        idx[0] = i;
+        for (int d=1; d<DIM; d++)
+          idx[d] = 0;
+        return *this;
+      }
 
-      for (int d=0; d<DIM; d++)
-	idx[d] = I(d);
-      return *this;
-    }
+      //! Assigment operator
+      inline index& operator=(const index & I){
+        if (DIM != I.DIM){
+            if (del)
+              delete idx;
+            DIM = I.DIM;
+            idx = new int[DIM];
+            del = true;
+          }
 
-    //! The same as assigment operator in the form of explicitly called method
-    inline void set(const index & I){
-      *this = I;
-    }
+        for (int d=0; d<DIM; d++)
+          idx[d] = I(d);
+        return *this;
+      }
 
-    //! Componentwise addition of two indicies
-    inline index operator+(const index & I){
-      index res = D(DIM);
-      for (int d=0; d<DIM; d++)
-	res(d) = idx[d] + I(d);
-      return res;
-    }
-    
-    //! Componentwise subtraction of two indicies
-    inline index operator-(const index & I){
-      index res = D(DIM);
-      for (int d=0; d<DIM; d++)
-	res(d) = idx[d] - I(d);
-      return res;
-    }
-    
-    //! Index I is added to this index componentwise
-    inline index& operator+=(const index & I){
+      //! The same as assigment operator in the form of explicitly called method
+      inline void set(const index & I){
+        *this = I;
+      }
 
-      for (int d=0; d<DIM; d++)
-	idx[d] = idx[d] + I(d);
-      return *this;
-    }
+      //! Componentwise addition of two indicies
+      inline index operator+(const index & I){
+        index res = D(DIM);
+        for (int d=0; d<DIM; d++)
+          res(d) = idx[d] + I(d);
+        return res;
+      }
 
-    //! Index I is subtracted from this index componentwise
-    inline index& operator-=(const index & I){
+      //! Componentwise subtraction of two indicies
+      inline index operator-(const index & I){
+        index res = D(DIM);
+        for (int d=0; d<DIM; d++)
+          res(d) = idx[d] - I(d);
+        return res;
+      }
 
-      for (int d=0; d<DIM; d++)
-	idx[d] = idx[d] - I(d);
-      return *this;
-    }
+      //! Index I is added to this index componentwise
+      inline index& operator+=(const index & I){
 
-    /*! \brief Using std::initializer_list to set the components of this index. Example:
+        for (int d=0; d<DIM; d++)
+          idx[d] = idx[d] + I(d);
+        return *this;
+      }
+
+      //! Index I is subtracted from this index componentwise
+      inline index& operator-=(const index & I){
+
+        for (int d=0; d<DIM; d++)
+          idx[d] = idx[d] - I(d);
+        return *this;
+      }
+
+      /*! \brief Using std::initializer_list to set the components of this index. Example:
       qpp::index I({1,2,3,4,5});
       std::cout << I << std::endl; // (1,2,3,4,5)
       I.set({5,4,3,2,1});
       std::cout << I << std::endl; // (5,4,3,2,1)
       I.set({1,2,3}); // IndexError: Wrong number of index components
      */
-    inline void set(const std::initializer_list<int> &li){
+      inline void set(const std::initializer_list<int> &li){
 
-      if (li.size() != DIM) IndexError("Wrong number of index components");
-      int d=0;
-      for (int i : li)
-	idx[d++] = i;
-    }
+        if (li.size() != DIM) IndexError("Wrong number of index components");
+        int d=0;
+        for (int i : li)
+          idx[d++] = i;
+      }
 
-    /*
+      /*
     index(int dim)
-    { 
+    {
       DIM = dim;
       idx = new int[DIM];
       del = true;
     }
     */
 
-    index(){
+      index(){
 
-      DIM = 0;
-      idx=NULL;
-      del = false;
-    }
-    
-    /*
+        DIM = 0;
+        idx = nullptr;
+        del = false;
+      }
+
+      /*
     index(int i)
     {
       DIM=1;
@@ -139,168 +139,168 @@ namespace qpp{
     }
     */
 
-    index(const index & I){
+      index(const index & I){
 
-      DIM = I.DIM;
-      idx = new int[DIM];
-      for (int d=0; d<DIM; d++)
-	idx[d] = I(d);
-      del = true;
-    }
-
-    index(const index & I, int d1, int d2 = -1){
-
-      if (d2==-1) d2 = I.DIM-1;
-      DIM = d2-d1+1;
-      idx = & I.idx[d1];
-      del = false;
-    }
-
-    index(const std::initializer_list<int> &li){
-
-      DIM = li.size();
-      idx = new int[DIM];
-      set(li);
-      del = true;
-    }
-
-    ~index(){
-      if (del)
-	delete idx;
-    }
-
-    inline index sub(int d1,
-                     int d2 = -1) const{
-
-      return index(*this,d1,d2);
-    }
-
-    inline bool operator==(const index &I) const{
-
-      bool res = DIM == I.DIM;
-      if (res)
-	for (int d=0; d<DIM; d++)
-	  if (idx[d]!=I(d)){
-	      res = false;
-	      break;
-	    }
-      return res;
-    }
-
-    inline bool operator!=(const index &I) const{
-      return ! ((*this)==I);
-    }
-
-    struct factory{
-      int DIM;
-
-      factory(int dim){DIM=dim;}
-
-      index all(int a){
-
-	index t;
-	t.DIM = DIM;
-	t.del = true;
-	t.idx = new int[DIM];
-
-	for (int d=0; d<DIM; d++)
-	  t(d) = a;
-	return t;
+        DIM = I.DIM;
+        idx = new int[DIM];
+        for (int d=0; d<DIM; d++)
+          idx[d] = I(d);
+        del = true;
       }
 
-      index atom(int a){
+      index(const index & I, int d1, int d2 = -1){
 
-	index t = all(0);
-	t(0)=a;
-	return t;
+        if (d2==-1) d2 = I.DIM-1;
+        DIM = d2-d1+1;
+        idx = & I.idx[d1];
+        del = false;
       }
 
-      operator index(){return all(0);} 
+      index(const std::initializer_list<int> &li){
 
-    };
+        DIM = li.size();
+        idx = new int[DIM];
+        set(li);
+        del = true;
+      }
 
-    static factory D(int dim){
+      ~index(){
+        if (del)
+          delete idx;
+      }
 
-      return factory(dim);
-    }
-      
+      inline index sub(int d1,
+                       int d2 = -1) const{
+
+        return index(*this,d1,d2);
+      }
+
+      inline bool operator==(const index &I) const{
+
+        bool res = DIM == I.DIM;
+        if (res)
+          for (int d=0; d<DIM; d++)
+            if (idx[d]!=I(d)){
+                res = false;
+                break;
+              }
+        return res;
+      }
+
+      inline bool operator!=(const index &I) const{
+        return ! ((*this)==I);
+      }
+
+      struct factory{
+          int DIM;
+
+          factory(int dim){DIM=dim;}
+
+          index all(int a){
+
+            index t;
+            t.DIM = DIM;
+            t.del = true;
+            t.idx = new int[DIM];
+
+            for (int d=0; d<DIM; d++)
+              t(d) = a;
+            return t;
+          }
+
+          index atom(int a){
+
+            index t = all(0);
+            t(0)=a;
+            return t;
+          }
+
+          operator index(){return all(0);}
+
+      };
+
+      static factory D(int dim){
+
+        return factory(dim);
+      }
+
 #ifdef PY_EXPORT
 
-    // --------------- PYTHON -------------------------------
+      // --------------- PYTHON -------------------------------
 
-    int py_getitem(int d) const{
+      int py_getitem(int d) const{
 
-      return idx[d];
-    }
-    
-    void py_setitem(int d, int v){
+        return idx[d];
+      }
 
-      idx[d] = v;
-    }
+      void py_setitem(int d, int v){
 
-    inline index sub1(int d1){
+        idx[d] = v;
+      }
 
-      return sub(d1);
-    }    
+      inline index sub1(int d1){
 
-    index(const py::list &l){
+        return sub(d1);
+      }
 
-      // Assuming that type checks have been performed inside python code
-      DIM = py::len(l);
-      idx = new int[DIM];
-      for (int d=0; d<DIM; d++)
-        idx[d] =py::cast<int>(l[d]);
-      del = true;
-    }
+      index(const py::list &l){
 
-    index(const py::tuple &l){
+        // Assuming that type checks have been performed inside python code
+        DIM = py::len(l);
+        idx = new int[DIM];
+        for (int d=0; d<DIM; d++)
+          idx[d] =py::cast<int>(l[d]);
+        del = true;
+      }
 
-      // Assuming that type checks have been performed inside python code
-      DIM = py::len(l);
-      idx = new int[DIM];
-      for (int d=0; d<DIM; d++)
-        idx[d] = py::cast<int>(l[d]);
-      del = true;
-    }
+      index(const py::tuple &l){
 
-    std::string print(){
-      std::string _tmp = "{";
+        // Assuming that type checks have been performed inside python code
+        DIM = py::len(l);
+        idx = new int[DIM];
+        for (int d=0; d<DIM; d++)
+          idx[d] = py::cast<int>(l[d]);
+        del = true;
+      }
 
-      _tmp = "idx(" + t2s(idx[0]);
+      std::string print(){
+        std::string _tmp = "{";
 
-      for (int d=1; d<DIM; d++)
-        _tmp += "," + t2s(idx[d]);
-      _tmp += ")";
+        _tmp = "idx(" + t2s(idx[0]);
 
-      return _tmp;
+        for (int d=1; d<DIM; d++)
+          _tmp += "," + t2s(idx[d]);
+        _tmp += ")";
 
-    }
+        return _tmp;
 
-    static void py_export( py::module m, const char * pyname){
+      }
 
-      py::class_<index >(m, pyname)
-        .def(py::init<>())
-        .def(py::init<py::list&>())
-        .def(py::init<py::tuple&>())
-        .def(py::init<index const&>())
-         //TODO: last parameter is optional
-        .def(py::init<index const&, int, int >())
-        //.def(py::init<int>())
-	.def("__getitem__",&index::py_getitem)
-	.def("__setitem__",&index::py_setitem)
-	.def("sub",  &index::sub)
-	.def("sub",  &index::sub1)
-//	.def(py::str(py::self))
-//	.def(py::repr(py::self))
-	.def(py::self + py::self)
-	.def(py::self - py::self)
-	.def(py::self == py::self)
-	.def(py::self!= py::self)
-	.def("__str__", &index::print)
-	.def("__repr__", &index::print)
-	;
-    }
-    
+      static void py_export( py::module m, const char * pyname){
+
+        py::class_<index >(m, pyname)
+            .def(py::init<>())
+            .def(py::init<py::list&>())
+            .def(py::init<py::tuple&>())
+            .def(py::init<index const&>())
+            //TODO: last parameter is optional
+            .def(py::init<index const&, int, int >())
+            //.def(py::init<int>())
+            .def("__getitem__",&index::py_getitem)
+            .def("__setitem__",&index::py_setitem)
+            .def("sub",  &index::sub)
+            .def("sub",  &index::sub1)
+            //	.def(py::str(py::self))
+            //	.def(py::repr(py::self))
+            .def(py::self + py::self)
+            .def(py::self - py::self)
+            .def(py::self == py::self)
+            .def(py::self!= py::self)
+            .def("__str__", &index::print)
+            .def("__repr__", &index::print)
+            ;
+      }
+
 #endif
 
   };
@@ -317,13 +317,13 @@ namespace qpp{
     __s.flags(__os.flags());
     __s.imbue(__os.getloc());
     __s.precision(__os.precision());
-    
+
     if (I.DIM > 0){
 
-	__s  << "(" << I(0);
-	for (int d=1; d<I.DIM; d++)
-	  __s << "," << I(d);
-	__s << ")";
+        __s  << "(" << I(0);
+        for (int d=1; d<I.DIM; d++)
+          __s << "," << I(d);
+        __s << ")";
       }
     else
 
@@ -337,86 +337,86 @@ namespace qpp{
 
   bool compare_atindex(const index & at1,
                        const index & at2);
-    
+
   // ------------------- iterator class --------------------
   // Iterator allows you run through all (or some) atoms of this cell
   // and of surrounding cells
-    
+
   class iterator : public index{
-    
-  protected:
-    index a, b;
-    bool _end;
-    // a - from
-    // b - to
-    
-    //using index::idx;
-     
-    inline void inc(){
 
-      if (DIM==0){
+    protected:
+      index a, b;
+      bool _end;
+      // a - from
+      // b - to
 
-	  _end = true;
-	  return;
-	}
+      //using index::idx;
 
-      int d = 0;
+      inline void inc(){
 
-      while (++(*this)(d) > b(d)){
+        if (DIM==0){
 
-	  (*this)(d)=a(d);
-	  if (++d >= DIM) {
+            _end = true;
+            return;
+          }
 
-	      _end = true;
-	      break;
-	    }
-	}
-    }
-    
-  public:
+        int d = 0;
 
-    iterator(const index & _a, const index & _b) :
-      index(_a), a(_a), b(_b){
+        while (++(*this)(d) > b(d)){
 
-      _end = false;   
-    }
-    
-    inline void reset(){
+            (*this)(d)=a(d);
+            if (++d >= DIM) {
 
-      _end = false;
-      set(a);
-    }
+                _end = true;
+                break;
+              }
+          }
+      }
 
-    iterator & operator++(int){
+    public:
 
-      inc();
-      return *this;
-    }
+      iterator(const index & _a, const index & _b) :
+        index(_a), a(_a), b(_b){
 
-    inline bool end(){return _end;}
-    
+        _end = false;
+      }
+
+      inline void reset(){
+
+        _end = false;
+        set(a);
+      }
+
+      iterator & operator++(int){
+
+        inc();
+        return *this;
+      }
+
+      inline bool end(){return _end;}
+
 #ifdef PY_EXPORT
 
-    // --------------- PYTHON -------------------------------
+      // --------------- PYTHON -------------------------------
 
-    index py_next(){
+      index py_next(){
 
-      if (end())
-	StopIter();
-      index res = *this;
-      inc();
-      return res;
-    }
+        if (end())
+          StopIter();
+        index res = *this;
+        inc();
+        return res;
+      }
 
-    static void py_export(py::module m, const char * pyname){
+      static void py_export(py::module m, const char * pyname){
 
-      py::class_<iterator>(m, pyname)
-        .def(py::init<const index&, const index&>())
-        .def(py::init<py::list,py::list>())
-        .def(py::init<py::tuple,py::tuple>())
-	.def("next", & iterator::py_next)
-	;
-    }    
+        py::class_<iterator>(m, pyname)
+            .def(py::init<const index&, const index&>())
+            .def(py::init<py::list,py::list>())
+            .def(py::init<py::tuple,py::tuple>())
+            .def("next", & iterator::py_next)
+            ;
+      }
 
 #endif
 
@@ -426,33 +426,33 @@ namespace qpp{
 
   class index_range{
 
-    index a,b;
+      index a,b;
 
-  public:
-    index_range(const index & _a,
-                const index & _b) :
-      a(_a), b(_b) {}
+    public:
+      index_range(const index & _a,
+                  const index & _b) :
+        a(_a), b(_b) {}
 
-    index_range(const py::list & l1,
-                const py::list & l2) :
-      a(l1), b(l2){}
+      index_range(const py::list & l1,
+                  const py::list & l2) :
+        a(l1), b(l2){}
 
-    index_range(const py::tuple & l1,
-                const py::tuple & l2) :
-      a(l1), b(l2) {}
+      index_range(const py::tuple & l1,
+                  const py::tuple & l2) :
+        a(l1), b(l2) {}
 
-    iterator  __iter__()
-    { return iterator(a,b); }
+      iterator  __iter__()
+      { return iterator(a,b); }
 
-    static void py_export(py::module m,
-                          const char * pyname){
-      py::class_<index_range>(m, pyname)
-        .def(py::init<const index&, const index&>())
-        .def(py::init<const py::list&, const py::list&>())
-        .def(py::init<const py::tuple&, const py::tuple&>())
-	.def("__iter__", & index_range::__iter__)
-	;
-    }
+      static void py_export(py::module m,
+                            const char * pyname){
+        py::class_<index_range>(m, pyname)
+            .def(py::init<const index&, const index&>())
+            .def(py::init<const py::list&, const py::list&>())
+            .def(py::init<const py::tuple&, const py::tuple&>())
+            .def("__iter__", & index_range::__iter__)
+            ;
+      }
 
   };
 
