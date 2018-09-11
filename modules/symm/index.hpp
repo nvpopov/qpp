@@ -187,8 +187,9 @@ namespace qpp{
         return res;
       }
 
+
       inline bool operator!=(const index &I) const{
-        return ! ((*this)==I);
+        return ! ((*this) == I);
       }
 
       struct factory{

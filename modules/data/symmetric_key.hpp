@@ -1,5 +1,6 @@
 #ifndef _QPP_SYMMETRIC_INT_H
 #define _QPP_SYMMETRIC_INT_H
+#include <iterator>
 
 //TODO: rework to hash and unordered map
 namespace qpp {

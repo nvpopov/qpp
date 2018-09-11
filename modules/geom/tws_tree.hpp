@@ -172,11 +172,11 @@ namespace qpp{
       REAL guess_rect_size;
       REAL min_tws_volume;
       int DIM;
-      geometry<REAL, CELL>                       *geom;
-      tws_node_t<REAL>                           *root;
-      vector<tws_node_t<REAL>* >                 flat_view;
-      vector<imaginary_atom_t<REAL> >            img_atoms;
-      vector<vector<tws_node_content_t<REAL> > > ngb_table;
+      geometry<REAL, CELL>                         *geom;
+      tws_node_t<REAL>                             *root;
+      vector<tws_node_t<REAL>* >                   flat_view;
+      vector<imaginary_atom_t<REAL> >              img_atoms;
+      vector<vector<tws_node_content_t<REAL> > >   ngb_table;
       vector<vector<atom_node_lookup_t<REAL> > >   atom_node_lookup;
       unordered_map<qpp::sym_key<int>, REAL, sym_key_hash<int> > dist_map;
       map<int, REAL> max_dist_map;
