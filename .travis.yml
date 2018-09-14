@@ -1,8 +1,15 @@
 language: cpp
 dist: trusty
 sudo: required
-compiler:
- - gcc
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - gcc-7
+      - g++-7
 script:
+ - export CC=gcc-7 ;
+ - export CXX=g++-7 ;
  - mkdir build && cd build && cmake .. -DPYBIND11_PYTHON_VERSION=3 -DBUILD_QC=OFF -DPYTHON_BINDINGS=ON -DBUILD_EXAMPLES=ON && cmake --build .
- 
+
