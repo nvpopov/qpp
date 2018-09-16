@@ -159,10 +159,61 @@ namespace qpp{
   };
 
   template<typename REAL>
-  struct dist_table_record_t {
+  struct bonding_table_record_t {
       REAL m_bonding_dist{0.0f};
       bool m_override{false};
       bool m_enabled{false};
+  };
+
+  template<typename REAL, typename AINT>
+  struct bonding_table_t {
+      unordered_map<qpp::sym_key<AINT>, bonding_table_record_t<REAL>, sym_key_hash<AINT> > m_dist;
+      map<AINT, REAL> m_max_dist;
+
+      template<typename CELL>
+      void init_default(geometry<REAL, CELL> *geom){
+
+        for (AINT i = 0; i < geom->n_atom_types(); i++){
+            REAL max_bond_rad = 0.0;
+            for (AINT  j = 0; j <  geom->n_atom_types(); j++){
+                auto table_idx1  = ptable::number_by_symbol(geom->atom_of_type(i));
+                auto table_idx2  = ptable::number_by_symbol(geom->atom_of_type(j));
+                if (table_idx1 && table_idx2) {
+                    auto bond_rad_1 = ptable::cov_rad_by_number(*table_idx1);
+                    auto bond_rad_2 = ptable::cov_rad_by_number(*table_idx2);
+                    if (bond_rad_1 && bond_rad_2){
+                        m_dist[sym_key<AINT>(i,j)].m_bonding_dist =
+                            *bond_rad_1 + *bond_rad_2;
+                        max_bond_rad = std::max(max_bond_rad, *bond_rad_1 + *bond_rad_2);
+                        m_dist[sym_key<AINT>(i,j)].m_enabled = true;
+                      } else m_dist[sym_key<AINT>(i,j)].m_enabled = false;
+                  }
+              }
+            m_max_dist[i] = max_bond_rad;
+          }
+      }
+
+      void update_dist_for_pair(const AINT i, const AINT j, const REAL new_dist){
+        auto it = m_dist.find(sym_key<AINT>(i,j));
+        if (it != m_dist.end()){
+            it->second.m_bonding_dist = new_dist;
+            it->second.m_override = true;
+            if ( i < m_max_dist.size() && j < m_max_dist.size()){
+                m_max_dist[i] = std::max(m_max_dist[i], new_dist);
+                m_max_dist[j] = std::max(m_max_dist[j], new_dist);
+              }
+          }
+      }
+
+      void update_pair_max_dist(const AINT i, const AINT j){
+        auto it = m_dist.find(sym_key<AINT>(i,j));
+        if (it != m_dist.end())
+            if ( i < m_max_dist.size() && j < m_max_dist.size()){
+                REAL dist = it->second.m_bonding_dist;
+                m_max_dist[i] = std::max(m_max_dist[i], dist);
+                m_max_dist[j] = std::max(m_max_dist[j], dist);
+              }
+      }
   };
 
   ///
@@ -180,11 +231,7 @@ namespace qpp{
       vector<imaginary_atom_t<REAL, AINT> >                      m_img_atoms;
       vector<vector<tws_node_content_t<REAL, AINT> > >           m_ngb_table;
       vector<vector<atom_node_lookup_t<REAL> > >                 m_atom_node_lookup;
-
-      unordered_map<qpp::sym_key<int>, dist_table_record_t<REAL>, sym_key_hash<int> > m_dist_map;
-
-      map<AINT, REAL> m_max_dist_map;
-
+      bonding_table_t<REAL, AINT>                                m_bonding_table;
       bool m_make_dirty_dist_map;
       bool m_auto_bonding; /// \brief bAutoBonding
       bool m_auto_build; /// \brief bAutoBuild
@@ -240,6 +287,16 @@ namespace qpp{
       void clr_ntable(){
         for (auto &per_atom : m_ngb_table) per_atom.clear();
         m_ngb_table.clear();
+      }
+
+      void clr_img_atoms_ntable(){
+        for (auto &per_img_atom : m_img_atoms) per_img_atom.m_img_bonds.clear();
+      }
+
+      void clr_ngb_and_rebuild(){
+        clr_ntable();
+        if (geom->DIM > 0 || m_img_atoms.size() > 0) clr_img_atoms_ntable();
+        find_all_neighbours();
       }
 
       ///
@@ -420,26 +477,27 @@ namespace qpp{
                               const REAL scale_factor){
 
         if (ray_aabb_test(_ray, &(cur_node->m_bb))){
+
             if (cur_node->m_tot_childs > 0){
                 for (auto *ch_node : cur_node->m_sub_nodes)
                   if (ch_node)
                     traverse_query_ray<adding_result_policy>(ch_node, _ray, res, scale_factor);
-              } else
-              for (auto &nc : cur_node->m_content){
-                  int ap_idx = ptable::number_by_symbol(geom->atom(nc.m_atm));
+              }
+            else for (auto &nc : cur_node->m_content){
+                auto ap_idx = ptable::number_by_symbol(geom->atom(nc.m_atm));
 
-                  //TODO: move magic aRadius
-                  REAL atom_rad = ptable::get_inst()->arecs[ap_idx-1].aRadius * scale_factor;
-                  REAL stored_dist = 0.0;
-                  vector3<REAL> test_pos = geom->pos(nc.m_atm, nc.m_idx);
-                  REAL ray_hit_dist = ray_sphere_test( _ray, test_pos, atom_rad);
-                  bool ray_hit = ray_hit_dist > -1.0f;
+                //TODO: move magic aRadius
+                REAL atom_rad = 1.0f;
+                if (ap_idx) ptable::get_inst()->arecs[*ap_idx-1].aRadius * scale_factor;
+                REAL stored_dist = 0.0;
+                vector3<REAL> test_pos = geom->pos(nc.m_atm, nc.m_idx);
+                REAL ray_hit_dist = ray_sphere_test( _ray, test_pos, atom_rad);
+                bool ray_hit = ray_hit_dist > -1.0f;
 
-                  if (ray_hit) {
-                      if (adding_result_policy::can_add(test_pos, nc.m_idx, geom->DIM))
-                        res.push_back(tws_query_data_t<REAL, AINT>(nc.m_atm, nc.m_idx, ray_hit_dist));
-                    }
-                }
+                if (ray_hit && adding_result_policy::can_add(test_pos, nc.m_idx, geom->DIM))
+                  res.push_back(tws_query_data_t<REAL, AINT>(nc.m_atm, nc.m_idx, ray_hit_dist));
+
+              }
           }
         else return false;
       }
@@ -651,27 +709,6 @@ namespace qpp{
       index table_idx(AINT i, AINT j) const {return m_ngb_table[i][j].m_idx;}
       AINT  table_atm(AINT i, AINT j) const {return m_ngb_table[i][j].m_atm;}
 
-      void rebuild_dist_map(){
-        //TODO: make it more ellegant
-
-        for (int i = 0; i < geom->n_atom_types(); i++){
-            REAL max_bond_rad = 0.0;
-            for (int j = 0; j <  geom->n_atom_types(); j++){
-                int table_idx1  = ptable::number_by_symbol(geom->atom_of_type(i));
-                int table_idx2  = ptable::number_by_symbol(geom->atom_of_type(j));
-                optional<REAL> bond_rad_1 = ptable::cov_rad_by_number(table_idx1);
-                optional<REAL> bond_rad_2 = ptable::cov_rad_by_number(table_idx2);
-                if (bond_rad_1 && bond_rad_2){
-                    m_dist_map[sym_key<int>(i,j)].m_bonding_dist = *bond_rad_1 + *bond_rad_2;
-                    max_bond_rad = std::max(max_bond_rad, *bond_rad_1 + *bond_rad_2);
-                    m_dist_map[sym_key<int>(i,j)].m_enabled = true;
-                  } else m_dist_map[sym_key<int>(i,j)].m_enabled = false;
-              }
-            m_max_dist_map[i] = max_bond_rad;
-          }
-        m_make_dirty_dist_map = false;
-      }
-
       ///
       /// \brief add_ngbr
       /// \param ha
@@ -715,13 +752,10 @@ namespace qpp{
       ///
       void find_neighbours(AINT at_num, index idx, bool imaginary_pass = false){
         if (!root) return;
+        if (m_bonding_table.m_dist.size() == 0) m_bonding_table.init_default(geom);
+        if (m_ngb_table.size() < geom->nat()) m_ngb_table.resize(geom->nat());
 
-        if (m_make_dirty_dist_map) {
-            rebuild_dist_map();
-            if (m_ngb_table.size() < geom->nat()) m_ngb_table.resize(geom->nat());
-          }
-
-        REAL sph_r = m_max_dist_map[geom->type_table(at_num)];
+        REAL sph_r = m_bonding_table.m_max_dist[geom->type_table(at_num)];
         if ( sph_r > 0.0){
 
             vector<tws_node_content_t<REAL, AINT> > res;
@@ -731,12 +765,12 @@ namespace qpp{
                 vector3<REAL> pos1 = geom->pos(at_num, idx);
                 vector3<REAL> pos2 = geom->pos(r_el.m_atm, r_el.m_idx);
 
-                if (!m_dist_map[sym_key<int>(geom->type_table(at_num),
-                                            geom->type_table(r_el.m_atm))].m_enabled) continue;
+                if (!m_bonding_table.m_dist[sym_key<AINT>(geom->type_table(at_num),
+                                                         geom->type_table(r_el.m_atm))].m_enabled) continue;
 
                 REAL f_dr = (pos1 - pos2).norm();
 
-                REAL bond_len = m_dist_map[sym_key<int>(
+                REAL bond_len = m_bonding_table.m_dist[sym_key<AINT>(
                                   geom->type_table(at_num),
                                   geom->type_table(r_el.m_atm))].m_bonding_dist;
 
@@ -906,7 +940,6 @@ namespace qpp{
             clr_atom_bond_data(at);
             clr_atom_from_tree(at);
             insert_object_to_tree(at);
-            m_make_dirty_dist_map = true;
             find_neighbours(at);
           }
       }
