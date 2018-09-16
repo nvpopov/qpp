@@ -4,7 +4,7 @@
 #include <iostream>
 #include <geom/lace3d.hpp>
 #include <data/types.hpp>
-
+#include <optional>
 
 #ifdef PY_EXPORT
 #include <pybind11/pybind11.h>
@@ -13,6 +13,8 @@
 #include <pyqpp/py_indexed_property.hpp>
 namespace py = pybind11;
 #endif
+
+using namespace std;
 
 namespace qpp {
     const int PTABLE_ELEM_N = 100;
@@ -128,11 +130,11 @@ namespace qpp {
             else return 1.0f;
         }
 
-        static const double cov_rad_by_number(const int number){
+        static optional<float> cov_rad_by_number(const int number){
             ptable *table = ptable::get_inst();
             if ((number >= 1) && (number < PTABLE_ELEM_N))
-                return table->arecs[number-1].aCovRad_Slater;
-            else return 1.0f;
+                return optional<float>(table->arecs[number-1].aCovRad_Slater);
+            else return nullopt;
         }
 
         static const double vdw_rad_by_number(const int number){
