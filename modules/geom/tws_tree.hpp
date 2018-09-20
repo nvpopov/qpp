@@ -488,7 +488,7 @@ namespace qpp{
 
                 //TODO: move magic aRadius
                 REAL atom_rad = 1.0f;
-                if (ap_idx) ptable::get_inst()->arecs[*ap_idx-1].aRadius * scale_factor;
+                if (ap_idx) atom_rad = ptable::get_inst()->arecs[*ap_idx-1].aRadius * scale_factor;
                 REAL stored_dist = 0.0;
                 vector3<REAL> test_pos = geom->pos(nc.m_atm, nc.m_idx);
                 REAL ray_hit_dist = ray_sphere_test( _ray, test_pos, atom_rad);
