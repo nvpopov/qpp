@@ -222,43 +222,41 @@ namespace qpp{
   template <class REAL, class CELL = periodic_cell<REAL>, typename AINT = uint32_t >
   class tws_tree_t : public geometry_observer<REAL>{
     public:
-      REAL m_guess_rect_size;
-      REAL m_min_tws_volume;
+      REAL m_guess_rect_size{6.0};
+      REAL m_min_tws_volume{65.0};
 
-      geometry<REAL, CELL>                                       *geom;
-      tws_node_t<REAL, AINT>                                     *root;
+      geometry<REAL, CELL>                                       *geom{nullptr};
+      tws_node_t<REAL, AINT>                                     *root{nullptr};
       vector<tws_node_t<REAL, AINT>* >                           m_flat_view;
       vector<imaginary_atom_t<REAL, AINT> >                      m_img_atoms;
       vector<vector<tws_node_content_t<REAL, AINT> > >           m_ngb_table;
       vector<vector<atom_node_lookup_t<REAL> > >                 m_atom_node_lookup;
       bonding_table_t<REAL, AINT>                                m_bonding_table;
-      bool m_make_dirty_dist_map;
-      bool m_auto_bonding; /// \brief bAutoBonding
-      bool m_auto_build; /// \brief bAutoBuild
-      bool m_build_imaginary_atoms_bonds;/// \brief bBuildImaginaryAtomsBonds
+      bool m_make_dirty_dist_map{true};
+      bool m_auto_bonding{false}; /// \brief bAutoBonding
+      bool m_auto_build{true}; /// \brief bAutoBuild
+      bool m_build_imaginary_atoms_bonds{true};/// \brief bBuildImaginaryAtomsBonds
 
-      ///
       /// \brief aux_rtree constructor
       /// \param g
-      ///
       tws_tree_t( geometry<REAL, CELL> & g) {
         geom = & g;
         geom->add_observer(*this);
-        m_guess_rect_size = 6.0f;
-        m_min_tws_volume  = 65.0;
-        root = nullptr;
-        m_auto_bonding = false;
-        m_auto_build = true;
-        m_make_dirty_dist_map = true;
-        m_build_imaginary_atoms_bonds = true;
       }
 
-      ///
+      void freeze(){
+        m_auto_bonding = false;
+        m_auto_build = false;
+      }
+
+      void unfreeze(){
+        m_auto_bonding = true;
+        m_auto_build = true;
+      }
+
       /// \brief check_root
-      ///
       void check_root(){
-        if (root == nullptr){
-            //std::cout << "create root" << std::endl;
+        if (!root){
             root = new tws_node_t<REAL>();
             m_flat_view.push_back(root);
             root->m_bb.fill_guess(m_guess_rect_size);
@@ -281,9 +279,17 @@ namespace qpp{
         return nullopt;
       }
 
-      ///
-      /// \brief clear_bonds
-      ///
+      /// \brief clear_tree
+      void clr_tree(){
+        for (auto *node : m_flat_view){
+            if (node) delete node;
+            node = nullptr;
+          }
+        root = nullptr;
+        m_flat_view.clear();
+        m_atom_node_lookup.clear();
+      }
+
       void clr_ntable(){
         for (auto &per_atom : m_ngb_table) per_atom.clear();
         m_ngb_table.clear();
@@ -293,41 +299,40 @@ namespace qpp{
         for (auto &per_img_atom : m_img_atoms) per_img_atom.m_img_bonds.clear();
       }
 
+      void clr_img_atoms(){
+        m_img_atoms.clear();
+      }
+
       void clr_ngb_and_rebuild(){
         clr_ntable();
         if (geom->DIM > 0 || m_img_atoms.size() > 0) clr_img_atoms_ntable();
         find_all_neighbours();
       }
 
-      ///
       /// \brief clr_bond_real_im
       /// \param atm1
       /// \param atm2
       /// \param idx2
-      ///
       void clr_bond_real_im(const AINT atm1, const AINT atm2, const index idx2){
         for(auto it = m_ngb_table[atm1].begin(); it != m_ngb_table[atm1].end(); )
           if(it->m_atm == atm2 && it->m_idx == idx2) m_ngb_table[atm1].erase(it);
           else ++it;
       }
 
-      ///
+
       /// \brief clr_bond_im_real
       /// \param img_atom_id
       /// \param atm2
       /// \param idx2
-      ///
       void clr_bond_im_real(const AINT img_atom_id, const AINT atm2, const index idx2){
         for(auto it = m_img_atoms[img_atom_id].begin(); it != m_img_atoms[img_atom_id].end(); )
           if(it->m_atm == atm2 && it->m_idx == idx2) m_img_atoms[img_atom_id].erase(it);
           else ++it;
       }
 
-      ///
       /// \brief clr_bond_im_real
       /// \param img_atom_id
       /// \param atm2
-      ///
       void clr_bond_im_real(const AINT img_atom_id, const int atm2){
         for(auto it = m_img_atoms[img_atom_id].m_img_bonds.begin();
             it != m_img_atoms[img_atom_id].m_img_bonds.end(); )
@@ -335,10 +340,8 @@ namespace qpp{
           else ++it;
       }
 
-      ///
       /// \brief clear_atom_bonding_data
       /// \param atm
-      ///
       void clr_atom_bond_data(const AINT atm){
         for(auto &bond : m_ngb_table[atm])
           if (bond.m_idx == index::D(geom->DIM).all(0) || geom->DIM == 0)
@@ -350,11 +353,9 @@ namespace qpp{
         m_ngb_table[atm].clear();
       }
 
-      ///
       /// \brief clear_atom_pair_bonding_data
       /// \param atm1
       /// \param atm2
-      ///
       void clr_atom_pair_bond_data(const AINT atm1, const AINT atm2){
         if (m_ngb_table[atm1].size() > 0){
             auto new_end = std::remove_if(m_ngb_table[atm1].begin(), m_ngb_table[atm1].end(),
@@ -364,10 +365,8 @@ namespace qpp{
           }
       }
 
-      ///
       /// \brief clear_atom_from_tree
       /// \param atm
-      ///
       void clr_atom_from_tree(const AINT atm){
         if (geom->DIM == 0 && m_atom_node_lookup[atm].size() > 0)
           m_atom_node_lookup[atm][0].node->rm_cnt_by_id(atm);
@@ -409,22 +408,8 @@ namespace qpp{
         m_atom_node_lookup[atm].clear();
       }
 
-
-      ///
-      /// \brief clear_tree
-      ///
-      void clr_tree(){
-        for (auto *node : m_flat_view){
-            if (node) delete node;
-            node = nullptr;
-          }
-        m_flat_view.clear();
-      }
-
-      ///
       /// \brief apply_shift
       /// \param vShift
-      ///
       void apply_shift(const vector3<REAL> vec_shift){
         for (auto *node : m_flat_view){
             node->m_bb.min += vec_shift;
@@ -432,44 +417,38 @@ namespace qpp{
           }
       }
 
-      ///
       /// \brief apply_visitor
       /// \param f
-      ///
       void apply_visitor(function<void(tws_node_t<REAL, AINT>*, int)> f){
         traverse_apply_visitor(root, 0, f);
       }
 
-      ///
       /// \brief traverse_apply_visitor
       /// \param curNode
       /// \param f
-      ///
       void traverse_apply_visitor(tws_node_t<REAL, AINT> *cur_node, int deep_level,
                                   function<void(tws_node_t<REAL, AINT>*, int)> f){
+        if (!root) return;
         f(cur_node, deep_level);
         for(auto* child : cur_node->m_sub_nodes)
           if (child) traverse_apply_visitor(child, deep_level+1, f);
       }
 
-      ///
       /// \brief query_ray
       /// \param vRayStart
       /// \param vRayDir
-      ///
       template<typename adding_result_policy = query_ray_add_all<REAL> >
       void query_ray(ray_t<REAL> *_ray,
                      vector<tws_query_data_t<REAL, AINT> > &res,
                      REAL scale_factor = 0.25){
+        if (!root) return;
         traverse_query_ray<adding_result_policy>(root, _ray, res, scale_factor);
       }
 
-      ///
       /// \brief traverse_query_ray
       /// \param curNode
       /// \param vRayStart
       /// \param vRayDir
-      ///
       template<typename adding_result_policy>
       bool traverse_query_ray(tws_node_t<REAL, AINT> *cur_node,
                               ray_t<REAL> *_ray,
@@ -502,27 +481,22 @@ namespace qpp{
         else return false;
       }
 
-
-
-      ///
       /// \brief query_sphere
       /// \param fSphRad
       /// \param vSphCnt
       /// \param res
-      ///
       void query_sphere(const REAL sph_r,
                         const vector3<REAL> sph_cnt,
                         vector<tws_node_content_t<REAL, AINT> > &res){
+        if (!root) return;
         traverse_query_sphere(root, sph_r, sph_cnt, res);
       }
 
-      ///
       /// \brief traverse_query_sphere
       /// \param curNode
       /// \param fSphRad
       /// \param vSphCnt
       /// \param res
-      ///
       void traverse_query_sphere(
           tws_node_t<REAL, AINT> *cur_node,
           const REAL &sph_r,
@@ -549,11 +523,9 @@ namespace qpp{
             insert_object_to_tree(atm, i);
       }
 
-      ///
       /// \brief Insert oject to tree
       /// \param atm
       /// \param idx
-      ///
       void insert_object_to_tree(const AINT atm, const index idx){
         check_root();
         // int q = 0;
@@ -573,13 +545,11 @@ namespace qpp{
         traverse_insert_object_to_tree(root, atm, idx);
       }
 
-      ///
       /// \brief traverse_insert_object_to_tree
       /// \param curNode
       /// \param atm
       /// \param idx
       /// \return
-      ///
       bool traverse_insert_object_to_tree(tws_node_t<REAL, AINT> *cur_node, const AINT atm,
                                           const index & idx){
 
@@ -632,12 +602,10 @@ namespace qpp{
         return false;
       }
 
-      ///
       /// \brief push_data_to_tws_node
       /// \param curNode
       /// \param atm
       /// \param idx
-      ///
       void push_data_to_tws_node(tws_node_t<REAL, AINT> *cur_node, const AINT atm, const index idx){
         //pass any atom with any index to tws-tree
         cur_node->m_content.push_back(tws_node_content_t<REAL>(atm, idx));
@@ -651,11 +619,9 @@ namespace qpp{
       }
 
 
-      ///
       /// \brief grow_tws_root
       /// \param atm
       /// \param idx
-      ///
       void grow_tws_root( const AINT atm, const index & idx){
 
 #ifdef TWS_TREE_DEBUG
@@ -693,28 +659,23 @@ namespace qpp{
 #endif
       }
 
-      ///
       /// \brief n
       /// \param i
       /// \return
-      ///
       AINT n(AINT i) const {return m_ngb_table[i].size();}
 
-      ///
       /// \brief table
       /// \param i
       /// \param j
       /// \return
-      ///
+      /// TODO: move to optional
       index table_idx(AINT i, AINT j) const {return m_ngb_table[i][j].m_idx;}
       AINT  table_atm(AINT i, AINT j) const {return m_ngb_table[i][j].m_atm;}
 
-      ///
       /// \brief add_ngbr
       /// \param ha
       /// \param i
       /// \param j
-      ///
       void add_ngbr(AINT ha, AINT i, const index j){
         bool found = false;
         for (AINT k = 0; k < m_ngb_table[ha].size(); k++ )
@@ -725,19 +686,17 @@ namespace qpp{
         if (!found) m_ngb_table[ha].push_back(tws_node_content_t<REAL>(i, j));
       }
 
-      ///
+
       /// \brief find_all_neighbours
-      ///
       void find_all_neighbours(){
         for (AINT i = 0; i < geom->nat(); i++) find_neighbours(i, index::D(geom->DIM).all(0));
         if (m_build_imaginary_atoms_bonds)
           for (auto &img_atom : m_img_atoms) find_neighbours(img_atom.m_atm, img_atom.m_idx, true);
       }
 
-      ///
+
       /// \brief find_neighbours
       /// \param at_num
-      ///
       void find_neighbours(AINT at_num){
         find_neighbours(at_num, index::D(geom->DIM).all(0));
         if (m_build_imaginary_atoms_bonds)
@@ -746,10 +705,8 @@ namespace qpp{
               find_neighbours(m_img_atoms[i].m_atm, m_img_atoms[i].m_idx, true);
       }
 
-      ///
       /// \brief find_neighbours
       /// \param atNum
-      ///
       void find_neighbours(AINT at_num, index idx, bool imaginary_pass = false){
         if (!root) return;
         if (m_bonding_table.m_dist.size() == 0) m_bonding_table.init_default(geom);
@@ -765,14 +722,16 @@ namespace qpp{
                 vector3<REAL> pos1 = geom->pos(at_num, idx);
                 vector3<REAL> pos2 = geom->pos(r_el.m_atm, r_el.m_idx);
 
-                if (!m_bonding_table.m_dist[sym_key<AINT>(geom->type_table(at_num),
-                                                         geom->type_table(r_el.m_atm))].m_enabled) continue;
+                auto bonding_record = m_bonding_table.m_dist.find(sym_key<AINT>(
+                                                                    geom->type_table(at_num),
+                                                                    geom->type_table(r_el.m_atm)));
+
+                if (bonding_record == m_bonding_table.m_dist.end()) continue;
+                if (!bonding_record->second.m_enabled) continue;
 
                 REAL f_dr = (pos1 - pos2).norm();
 
-                REAL bond_len = m_bonding_table.m_dist[sym_key<AINT>(
-                                  geom->type_table(at_num),
-                                  geom->type_table(r_el.m_atm))].m_bonding_dist;
+                REAL bond_len = bonding_record->second.m_bonding_dist;
 
                 //cache comparison data
                 bool first_real      = idx == index::D(geom->DIM).all(0);
@@ -848,28 +807,22 @@ namespace qpp{
           }
       }
 
-      ///
       /// \brief manual_build
-      ///
       void manual_build(){
         for (AINT i = 0; i < geom->nat(); i++) insert_object_to_tree(i);
       }
 
-      ///
       /// \brief debug_print
-      ///
       void debug_print(){
         AINT totalEntries = 0;
         debug_print_traverse(root, 1, totalEntries);
         std::cout << "Total entries = " << totalEntries << std::endl;
       }
 
-      ///
       /// \brief debug_print_traverse
       /// \param node
       /// \param iDeepLevel
       /// \param totalEntries
-      ///
       void debug_print_traverse(tws_node_t<REAL, AINT> *node,
                                 AINT deep_level,
                                 AINT &tot_entries){
@@ -887,17 +840,17 @@ namespace qpp{
 
       }
 
-      ///
+
       /// \brief added
       /// \param st
       /// \param a
       /// \param r
-      ///
       void added( before_after st,
                   const STRING & a,
                   const vector3<REAL> & r) override {
         if (st == before_after::after){
             m_ngb_table.resize(geom->nat());
+            m_atom_node_lookup.resize(geom->nat());
             if (m_auto_build) insert_object_to_tree(geom->nat()-1, index::D(geom->DIM).all(0));
             if (m_auto_bonding) {
                 m_make_dirty_dist_map = true;
@@ -906,13 +859,12 @@ namespace qpp{
           }
       }
 
-      ///
+
       /// \brief inserted
       /// \param at
       /// \param st
       /// \param a
       /// \param r
-      ///
       void inserted(int at,
                     before_after st,
                     const STRING & a,
@@ -922,13 +874,11 @@ namespace qpp{
           }
       }
 
-      ///
       /// \brief changed
       /// \param at
       /// \param st
       /// \param a
       /// \param r
-      ///
       void changed(int at,
                    before_after st,
                    const STRING & a,
@@ -944,34 +894,37 @@ namespace qpp{
           }
       }
 
-      ///
       /// \brief erased
       /// \param at
       /// \param st
-      ///
       void erased(int at,
                   before_after st) override {
-        if (st == before_after::after){
+
+        if (st == before_after::before){
+            clr_ntable();
+            clr_img_atoms();
+            clr_tree();
+          } else {
             //std::cout << a << " added " << r << std::endl;
             m_ngb_table.resize(geom->nat());
+            m_atom_node_lookup.resize(geom->nat());
+
+            if (m_auto_build) manual_build();
+            if (m_auto_bonding) find_all_neighbours();
           }
       }
 
-      ///
       /// \brief shaded
       /// \param at
       /// \param st
       /// \param sh
-      ///
       void shaded(int at,
                   before_after st,
                   bool sh) override {
 
       }
 
-      ///
       /// \brief reordered
-      ///
       void reordered(const std::vector<int> &,
                      before_after) override {
 
