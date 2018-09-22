@@ -166,7 +166,7 @@ namespace qpp{
 
       ~index(){
         if (del)
-          delete idx;
+          delete [] idx;
       }
 
       inline index sub(int d1,

@@ -1,6 +1,6 @@
 #ifndef QPP_ptable_H
 #define QPP_ptable_H
-
+#include <string>
 #include <iostream>
 #include <geom/lace3d.hpp>
 #include <data/types.hpp>

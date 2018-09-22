@@ -851,10 +851,10 @@ namespace qpp{
         if (st == before_after::after){
             m_ngb_table.resize(geom->nat());
             m_atom_node_lookup.resize(geom->nat());
-            if (m_auto_build) insert_object_to_tree(geom->nat()-1, index::D(geom->DIM).all(0));
+            if (m_auto_build) insert_object_to_tree(geom->nat()-1);
             if (m_auto_bonding) {
                 m_make_dirty_dist_map = true;
-                find_neighbours(geom->nat()-1, index::D(geom->DIM).all(0));
+                find_neighbours(geom->nat()-1);
               }
           }
       }

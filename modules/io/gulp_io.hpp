@@ -64,7 +64,9 @@ namespace qpp{
                                                             iCoordStartIdx,
                                                             iCoordStartIdx+1,
                                                             iCoordStartIdx+2));
-                } else bParseGeometry = false;
+                } else {
+                  bParseGeometry = false;
+                }
             bLineChecked = true;
           }
       }

@@ -542,6 +542,7 @@ The supercell concept generalization for the geometry class looks like:
       _atm.insert(_atm.begin()+at,a);
       _crd.insert(_crd.begin()+at,r2);
       _shadow.insert(_shadow.begin()+at,(char)false);
+
       if (auto_update_types)
         _type_table.insert(_type_table.begin()+at,define_type(a));
 
@@ -556,6 +557,9 @@ The supercell concept generalization for the geometry class looks like:
           observers[i]->changed(at, before, a1, r1);
       _crd[at] = r1;
       _atm[at] = a1;
+
+      if (auto_update_types && at < _type_table.size())
+        _type_table[at] = define_type(a1);
 
       if (has_observers)
         for (int i = 0; i < observers.size(); i++)
