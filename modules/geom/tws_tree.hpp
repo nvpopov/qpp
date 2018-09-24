@@ -65,7 +65,7 @@ namespace qpp{
   struct tws_node_content_t {
       AINT m_atm;
       index m_idx;
-      tws_node_content_t(const AINT _atm, const index _idx){m_atm = _atm; m_idx = _idx;}
+      tws_node_content_t(const AINT _atm, const index _idx) noexcept {m_atm = _atm; m_idx = _idx;}
   };
 
   ///
@@ -75,10 +75,10 @@ namespace qpp{
   struct imaginary_atom_t {
       AINT m_atm;
       index m_idx;
-      tws_node_t<REAL, AINT> *parent;
+      //tws_node_t<REAL, AINT> *parent;
       vector<tws_node_content_t<REAL, AINT> > m_img_bonds;
-      imaginary_atom_t(const AINT _atm, const index _idx){m_atm = _atm; m_idx = _idx;}
-      ~imaginary_atom_t() = default;
+      imaginary_atom_t(const AINT _atm, const index _idx) noexcept {m_atm = _atm; m_idx = _idx;}
+
   };
 
   template<typename REAL = float, typename AINT = uint32_t>
@@ -86,8 +86,7 @@ namespace qpp{
       AINT m_atm;
       index m_idx;
       REAL m_dist;
-      tws_query_data_t(const AINT _atm, const index _idx,
-                       const REAL _dist = 1000.0f){
+      tws_query_data_t(const AINT _atm, const index _idx, const REAL _dist = 1000.0f) noexcept {
         m_atm = _atm; m_idx = _idx; m_dist = _dist;
       }
 
@@ -95,14 +94,14 @@ namespace qpp{
         return (m_idx == a.idx) && (m_atm == a.atm);
       }
 
-      tws_query_data_t<REAL, AINT>& operator =(const tws_query_data_t<REAL, AINT> &a){
-        m_idx = a.m_idx;
-        m_atm = a.m_atm;
-        m_dist = a.m_dist;
-        return *this;
-      }
+//      tws_query_data_t<REAL, AINT>& operator =(const tws_query_data_t<REAL, AINT> &a){
+//        m_idx = a.m_idx;
+//        m_atm = a.m_atm;
+//        m_dist = a.m_dist;
+//        return *this;
+//      }
 
-      tws_query_data_t<REAL, AINT>(const tws_query_data_t<REAL, AINT>& a){
+      tws_query_data_t<REAL, AINT>(const tws_query_data_t<REAL, AINT>& a) noexcept {
         m_idx = a.m_idx;
         m_atm = a.m_atm;
         m_dist = a.m_dist;
@@ -110,8 +109,8 @@ namespace qpp{
   };
 
   template<typename REAL = float>
-  bool tws_query_data_sort_by_dist(tws_query_data_t<REAL> &a, tws_query_data_t<REAL> &b){
-    return a.m_dist <= b.m_dist;
+  bool tws_query_data_sort_by_dist(tws_query_data_t<REAL> &a, tws_query_data_t<REAL> &b) {
+    return a.m_dist < b.m_dist;
   }
 
   ///
@@ -124,7 +123,7 @@ namespace qpp{
       vector<tws_node_content_t<REAL, AINT> > m_content;
       array<tws_node_t<REAL, AINT>*, 27> m_sub_nodes {};
       int m_tot_childs{0};
-      tws_node_t(){}
+      tws_node_t() noexcept {}
 
       void rm_cnt_by_id(const AINT atm){
         for (auto it = m_content.begin(); it != m_content.end();){
@@ -153,7 +152,8 @@ namespace qpp{
   struct atom_node_lookup_t {
       index m_idx;
       tws_node_t<REAL> *node;
-      atom_node_lookup_t(const index _idx, tws_node_t<REAL> *_node){
+      atom_node_lookup_t(const index _idx, tws_node_t<REAL> *_node) noexcept {
+        assert(_node);
         m_idx = _idx; node = _node;
       }
   };
@@ -454,7 +454,7 @@ namespace qpp{
                               ray_t<REAL> *_ray,
                               vector<tws_query_data_t<REAL, AINT> > &res,
                               const REAL scale_factor){
-
+        if (!cur_node) return false;
         if (ray_aabb_test(_ray, &(cur_node->m_bb))){
 
             if (cur_node->m_tot_childs > 0){
@@ -692,6 +692,8 @@ namespace qpp{
         for (AINT i = 0; i < geom->nat(); i++) find_neighbours(i, index::D(geom->DIM).all(0));
         if (m_build_imaginary_atoms_bonds)
           for (auto &img_atom : m_img_atoms) find_neighbours(img_atom.m_atm, img_atom.m_idx, true);
+
+        std::cout<<"TOTAL BONDS CREATED =" << m_ngb_table.size() << "\n";
       }
 
 
@@ -810,13 +812,16 @@ namespace qpp{
       /// \brief manual_build
       void manual_build(){
         for (AINT i = 0; i < geom->nat(); i++) insert_object_to_tree(i);
+#ifdef TWS_TREE_DEBUG
+        std::cout << "Total img.atoms for tree " << m_img_atoms.size() << "\n";
+#endif
       }
 
       /// \brief debug_print
       void debug_print(){
         AINT totalEntries = 0;
         debug_print_traverse(root, 1, totalEntries);
-        std::cout << "Total entries = " << totalEntries << std::endl;
+        std::cout << "Total entries = " << totalEntries << "\n";
       }
 
       /// \brief debug_print_traverse
@@ -849,11 +854,11 @@ namespace qpp{
                   const STRING & a,
                   const vector3<REAL> & r) override {
         if (st == before_after::after){
-            m_ngb_table.resize(geom->nat());
-            m_atom_node_lookup.resize(geom->nat());
+            if (m_ngb_table.size() != geom->nat()) m_ngb_table.resize(geom->nat());
+            if (m_atom_node_lookup.size() != geom->nat()) m_atom_node_lookup.resize(geom->nat());
             if (m_auto_build) insert_object_to_tree(geom->nat()-1);
             if (m_auto_bonding) {
-                m_make_dirty_dist_map = true;
+                //m_make_dirty_dist_map = true;
                 find_neighbours(geom->nat()-1);
               }
           }
@@ -870,7 +875,7 @@ namespace qpp{
                     const STRING & a,
                     const vector3<REAL> & r) override {
         if (st == before_after::after){
-            m_ngb_table.resize(geom->nat());
+            if (m_ngb_table.size() != geom->nat()) m_ngb_table.resize(geom->nat());
           }
       }
 
@@ -885,7 +890,7 @@ namespace qpp{
                    const vector3<REAL> & r) override {
         if (st == before_after::after){
             //std::cout << a << " added " << r << std::endl;
-            m_ngb_table.resize(geom->nat());
+            if (m_ngb_table.size() != geom->nat()) m_ngb_table.resize(geom->nat());
             //std::cout << fmt::format("atom {} changed", at) << std::endl;
             clr_atom_bond_data(at);
             clr_atom_from_tree(at);
@@ -906,8 +911,8 @@ namespace qpp{
             clr_tree();
           } else {
             //std::cout << a << " added " << r << std::endl;
-            m_ngb_table.resize(geom->nat());
-            m_atom_node_lookup.resize(geom->nat());
+            if (m_ngb_table.size() != geom->nat()) m_ngb_table.resize(geom->nat());
+            if (m_atom_node_lookup.size() != geom->nat()) m_atom_node_lookup.resize(geom->nat());
 
             if (m_auto_build) manual_build();
             if (m_auto_bonding) find_all_neighbours();
