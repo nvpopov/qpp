@@ -94,12 +94,12 @@ namespace qpp{
         return (m_idx == a.idx) && (m_atm == a.atm);
       }
 
-//      tws_query_data_t<REAL, AINT>& operator =(const tws_query_data_t<REAL, AINT> &a){
-//        m_idx = a.m_idx;
-//        m_atm = a.m_atm;
-//        m_dist = a.m_dist;
-//        return *this;
-//      }
+      //      tws_query_data_t<REAL, AINT>& operator =(const tws_query_data_t<REAL, AINT> &a){
+      //        m_idx = a.m_idx;
+      //        m_atm = a.m_atm;
+      //        m_dist = a.m_dist;
+      //        return *this;
+      //      }
 
       tws_query_data_t<REAL, AINT>(const tws_query_data_t<REAL, AINT>& a) noexcept {
         m_idx = a.m_idx;
@@ -205,14 +205,17 @@ namespace qpp{
           }
       }
 
-      void update_pair_max_dist(const AINT i, const AINT j){
+      void update_pair_max_dist (const AINT i, const AINT j) {
         auto it = m_dist.find(sym_key<AINT>(i,j));
-        if (it != m_dist.end())
-            if ( i < m_max_dist.size() && j < m_max_dist.size()){
-                REAL dist = it->second.m_bonding_dist;
-                m_max_dist[i] = std::max(m_max_dist[i], dist);
-                m_max_dist[j] = std::max(m_max_dist[j], dist);
-              }
+        if (it != m_dist.end()){
+            REAL dist = it->second.m_bonding_dist;
+            m_max_dist[i] = std::max(m_max_dist[i], dist);
+            m_max_dist[j] = std::max(m_max_dist[j], dist);
+          }
+      }
+
+      void update_pair_max_dist_all () {
+        for (auto&& [key, value] : m_dist) update_pair_max_dist(key.m_a, key.m_b);
       }
   };
 
@@ -693,7 +696,7 @@ namespace qpp{
         if (m_build_imaginary_atoms_bonds)
           for (auto &img_atom : m_img_atoms) find_neighbours(img_atom.m_atm, img_atom.m_idx, true);
 
-        std::cout<<"TOTAL BONDS CREATED =" << m_ngb_table.size() << "\n";
+        // std::cout<<"TOTAL BONDS CREATED =" << m_ngb_table.size() << "\n";
       }
 
 
