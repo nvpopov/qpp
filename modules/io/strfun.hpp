@@ -1,5 +1,5 @@
-#ifndef _QPP_STRFUN
-#define _QPP_STRFUN
+#ifndef QPP_STRFUN
+#define QPP_STRFUN
 
 #include <data/types.hpp>
 #include <vector>
@@ -206,8 +206,14 @@ namespace qpp{
     return qpp::vector3<REAL>(vx, vy, vz);
   }
 
+
+  //https://www.bfilipek.com/2018/07/string-view-perf-followup.html
+  std::vector<std::string_view> split_sv (std::string_view strv, std::string_view delims = " ");
+
   char *vec_str_to_char(const STRING & s);
   const char *vec_str_to_char_ref(const STRING & s);
+
+
 }
 
 #endif
