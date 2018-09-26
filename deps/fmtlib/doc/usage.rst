@@ -41,6 +41,10 @@ current directory. Now you can build the library by running :command:`make`.
 Once the library has been built you can invoke :command:`make test` to run
 the tests.
 
+You can control generation of the make ``test`` target with the ``FMT_TEST``
+CMake option. This can be useful if you include fmt as a subdirectory in
+your project but don't want to add fmt's tests to your ``test`` target.
+
 If you use Windows and have Visual Studio installed, a :file:`FORMAT.sln`
 file and several :file:`.vcproj` files will be created. You can then build them
 using Visual Studio or msbuild.
@@ -57,19 +61,22 @@ __ http://en.wikipedia.org/wiki/Library_%28computing%29#Shared_libraries
 Header-only usage with CMake
 ============================
 
-In order to add ``fmtlib`` into an existing ``CMakeLists.txt`` file, you can add the ``fmt`` library directory into your main project, which will enable the ``fmt`` library::
+You can add the ``fmt`` library directory into your project and include it in
+your ``CMakeLists.txt`` file::
 
    add_subdirectory(fmt)
-   
-If you have a project called ``foo`` that you would like to link against the fmt library in a header-only fashion, you can enable with with::
 
-   target_link_libraries(foo PRIVATE fmt::fmt-header-only)
-   
-And then to ensure that the ``fmt`` library does not always get built, you can modify the call to ``add_subdirectory`` to read ::
+or
+
+::
 
    add_subdirectory(fmt EXCLUDE_FROM_ALL)
-   
-This will ensure that the ``fmt`` library is exluded from calls to ``make``, ``make all``, or ``cmake --build .``.
+
+to exclude it from ``make``, ``make all``, or ``cmake --build .``.
+
+Settting up your target to use a header-only version of ``fmt`` is equaly easy::
+
+   target_link_libraries(<your-target> PRIVATE fmt-header-only)
 
 Building the documentation
 ==========================
