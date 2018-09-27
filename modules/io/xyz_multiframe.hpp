@@ -27,7 +27,7 @@ namespace qpp {
 
     int nat{0};
     bool bootstrap_geom{false};
-    geom_anim_record_t<float> animr, anim_static;
+    geom_anim_record_t<REAL> animr, anim_static;
 
     animr.m_anim_type = geom_anim_type::anim_generic;
     animr.m_anim_name = "animation1";

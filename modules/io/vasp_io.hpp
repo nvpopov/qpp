@@ -5,8 +5,8 @@
 #include <fmt/ostream.h>
 #include <io/strfun.hpp>
 #include <geom/geom.hpp>
-#include <geom/xgeom.hpp>
 #include <geom/ngbr.hpp>
+#include <geom/geom_anim.hpp>
 
 #include <vector>
 #include <cmath>
@@ -200,14 +200,17 @@ namespace qpp{
 
   }
 
+  ///
+  ///
+  ///
   template<class REAL, class CELL>
   void read_vasp_outcar_md_with_frames(
       std::basic_istream<CHAR,TRAITS> & inp,
       geometry<REAL, CELL> &geom,
-      std::vector<std::vector<vector3<REAL> > > &frames,
-      std::vector<std::vector<qpp::vector3<REAL> > > &vel_list,
-      std::vector<REAL> &toten,
-      std::vector<REAL> &temperature){
+      std::vector<geom_anim_record_t<REAL> > &anim
+      /*std::vector<std::vector<qpp::vector3<REAL> > > &vel_list,
+          std::vector<REAL> &toten,
+          std::vector<REAL> &temperature*/){
 
     STRING inps;
 
@@ -219,6 +222,15 @@ namespace qpp{
     std::vector<STRING> atom_types;
     std::vector<int> atom_count;
     std::vector<std::array<qpp::vector3<REAL>, 3 > > cells;
+
+    geom_anim_record_t<REAL> anim_static;
+    anim_static.m_anim_type = geom_anim_type::anim_static;
+    anim_static.m_anim_name = "static";
+    anim_static.frame_data.resize(1);
+
+    geom_anim_record_t<REAL> anim_md;
+    anim_md.m_anim_name = "md_outcar";
+    anim_md.m_anim_type = geom_anim_type::anim_md;
 
     int total_frames = 0;
     int local_atom_count = 0;
@@ -236,7 +248,7 @@ namespace qpp{
                 atom_types.push_back(atypes_l[i]);
             }
 
-        if (!bAtomNumFilled  && !bLineChecked)
+        if (!bAtomNumFilled && !bLineChecked)
           if (inps.find("ions per type") != std::string::npos){
               std::vector<STRING> acount_l = split(inps);
               for (int i = 4; i < acount_l.size(); i++){
@@ -253,12 +265,14 @@ namespace qpp{
                   atom_lookup_v.push_back(at_c);
             }
 
-        if (!bLineChecked &&
-            (inps.find("direct lattice vectors") != std::string::npos)){
+        if (!bLineChecked && inps.find("direct lattice vectors") != std::string::npos){
             std::array<qpp::vector3<REAL>, 3 > _cell;
             for(int i = 0; i < 3; i++){
                 std::getline(inp, inps);
-                _cell[i] = vec_from_string<REAL>(inps);
+                std::vector<std::string_view> splt = split_sv(inps, " ");
+                _cell[i][0] = std::stof(splt[0].data());
+                _cell[i][1] = std::stof(splt[1].data());
+                _cell[i][2] = std::stof(splt[2].data());
               }
             if (bFirstCellParsed) cells.push_back(_cell);
             else bFirstCellParsed = true;
@@ -276,8 +290,8 @@ namespace qpp{
                   cells[total_frames-1][2]);
 
               //geom_list.push_back(new qpp::geometry<REAL,decltype(cell)>(cell));
-              frames.resize(frames.size()+1);
-              vel_list.resize(vel_list.size()+1);
+              anim_md.frame_data.resize(anim_md.frame_data.size()+1);
+              // vel_list.resize(vel_list.size()+1);
               total_frames += 1;
 
               bParseGeomData = true;
@@ -286,11 +300,15 @@ namespace qpp{
 
         if (bParseGeomData && !bLineChecked){
             if (inps.find("------------------------") == std::string::npos){
-                qpp::vector3<REAL> pos = vec_from_string<REAL>(inps);
-                qpp::vector3<REAL> vel = vec_from_string<REAL>(inps, 3, 4, 5);
+                std::vector<std::string_view> splt = split_sv(inps, " ");
+                qpp::vector3<REAL> pos{std::stof(splt[0].data()),
+                      std::stof(splt[1].data()),
+                      std::stof(splt[2].data())};
+                //qpp::vector3<REAL> vel = vec_from_string<REAL>(inps, 3, 4, 5);
                 //geom_list[total_frames-1]->add(atom_types[atom_lookup_v[local_atom_count]],pos);
-                frames[frames.size()-1].push_back(pos);
-                vel_list[vel_list.size()-1].push_back(vel);
+                anim_md.frame_data[anim_md.frame_data.size()-1].push_back(std::move(pos));
+                //std::cout <<  anim_md.frame_data.size() << std::endl;
+                //  vel_list[vel_list.size()-1].push_back(vel);
                 local_atom_count += 1;
               }
             else bParseGeomData = false;
@@ -301,16 +319,16 @@ namespace qpp{
             std::vector<STRING> etotal = split(inps);
             REAL etotal_val = 0.0;
             //std::cout<<etotal[4]<<std::endl;
-            if (s2t(etotal[4], etotal_val))
-              toten.push_back(etotal_val);
+            //            if (s2t(etotal[4], etotal_val))
+            //              toten.push_back(etotal_val);
             bLineChecked = true;
           }
 
         if (inps.find("kin. lattice  EKIN_LAT=") != std::string::npos && !bLineChecked){
             std::vector<STRING> temp_l = split(inps);
             REAL temp_val = 0.0;
-            if (s2t(temp_l[5], temp_val))
-              temperature.push_back(temp_val);
+            //            if (s2t(temp_l[5], temp_val))
+            //              temperature.push_back(temp_val);
             bLineChecked = true;
           }
 
@@ -320,9 +338,35 @@ namespace qpp{
     geom.DIM = 3;
 
     for (uint i = 0; i < atom_lookup_v.size(); i++){
-        geom.add(atom_types[atom_lookup_v[i]], frames[0][i]);
+        geom.add(atom_types[atom_lookup_v[i]], anim_md.frame_data[0][i]);
+        anim_static.frame_data[0].push_back(anim_md.frame_data[0][i]);
       }
 
+    geom.cell.v[0] = cells[0][0];
+    geom.cell.v[1] = cells[0][1];
+    geom.cell.v[2] = cells[0][2];
+
+    //postproces animation to fight with riot atoms
+    for (size_t i = 1; i < anim_md.frame_data.size(); i++){
+        for (size_t ac = 0; ac < geom.nat(); ac++){
+            //index min_dist_index = index::D(geom.DIM).all(0);
+            float min_dist = 100.0f;
+            vector3<REAL> goal_vector = anim_md.frame_data[i][ac];
+            for (iterator idx(index::D(geom.DIM).all(-1),
+                            index::D(geom.DIM).all(1)); !idx.end(); idx++ ) {
+                vector3<REAL> t_pos_cf = geom.cell.transform(anim_md.frame_data[i][ac], idx);
+                REAL dist = (anim_md.frame_data[i-1][ac] - t_pos_cf).norm();
+                if (dist < min_dist) {
+                    min_dist = dist;
+                    //min_dist_index = i;
+                    goal_vector = t_pos_cf;
+                  }
+              }
+            anim_md.frame_data[i][ac] = std::move(goal_vector);
+          }
+      }
+    anim.push_back(std::move(anim_static));
+    anim.push_back(std::move(anim_md));
   }
 
   template< class REAL, class CELL >
@@ -337,7 +381,7 @@ namespace qpp{
 
     for (int i = 0; i < 3; i++)
       out << fmt::format("{:15.8f} {:15.8f} {:15.8f}",
-          geom.cell.v[i][0],
+                         geom.cell.v[i][0],
           geom.cell.v[i][1],
           geom.cell.v[i][2]) << std::endl;
     out << poscar_comment << std::endl;
@@ -350,9 +394,9 @@ namespace qpp{
       for (int q = 0; q < geom.nat(); q++)
         if (geom.type_table(q) == i)
           std::cout << fmt::format("{:15.8f} {:15.8f} {:15.8f}",
-               geom.pos(q)[0],
-               geom.pos(q)[1],
-               geom.pos(q)[2]) << std::endl;
+                                   geom.pos(q)[0],
+              geom.pos(q)[1],
+              geom.pos(q)[2]) << std::endl;
   }
 }
 #endif
