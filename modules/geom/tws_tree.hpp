@@ -219,9 +219,25 @@ namespace qpp{
       }
   };
 
-  ///
+
+  /// \brief action bitmask dor use in do_action
+  const uint16_t act_clear_tree        = 1 << 0;
+  const uint16_t act_clear_ntable      = 1 << 1;
+  const uint16_t act_clear_img_ntable  = 1 << 2;
+  const uint16_t act_clear_img         = 1 << 3;
+  const uint16_t act_clear_all         = 1 << 4;
+  const uint16_t act_rebuild_tree      = 1 << 5;
+  const uint16_t act_rebuild_ntable    = 1 << 6;
+  const uint16_t act_build_tree        = 1 << 7;
+  const uint16_t act_build_ntable      = 1 << 8;
+  const uint16_t act_rebuild_all       = 1 << 9;
+  const uint16_t act_build_all         = 1 << 10;
+  const uint16_t act_check_consistency = 1 << 11;
+  const uint16_t act_check_root        = 1 << 12;
+  const uint16_t act_lock              = 1 << 13;
+  const uint16_t act_unlock            = 1 << 14;
+
   /// aux tws tree implementation
-  ///
   template <class REAL, class CELL = periodic_cell<REAL>, typename AINT = uint32_t >
   class tws_tree_t : public geometry_observer<REAL> {
     public:
@@ -247,27 +263,6 @@ namespace qpp{
         geom->add_observer(*this);
       }
 
-      void freeze () {
-        m_auto_bonding = false;
-        m_auto_build = false;
-      }
-
-      void unfreeze () {
-        m_auto_bonding = true;
-        m_auto_build = true;
-      }
-
-      /// \brief check_root
-      void check_root () {
-        if (!root){
-            root = new tws_node_t<REAL>();
-            m_flat_view.push_back(root);
-            root->m_bb.fill_guess(m_guess_rect_size);
-            if (root->m_bb.volume() < m_min_tws_volume)
-              root->m_bb.fill_guess(pow(m_min_tws_volume, 1/3.0));
-          }
-      }
-
       optional<AINT> find_imaginary_atom (const AINT atm, const index idx) {
         for (AINT i = 0; i < m_img_atoms.size(); i++)
           if (m_img_atoms[i].m_atm == atm && m_img_atoms[i].m_idx == idx)
@@ -282,34 +277,90 @@ namespace qpp{
         return nullopt;
       }
 
-      /// \brief clear_tree
-      void clr_tree () {
-        for (auto *node : m_flat_view){
-            if (node) delete node;
-            node = nullptr;
+      /// \brief do_action
+      /// \param action bitmask for action
+      void do_action(const uint16_t action){
+
+        if (action & act_lock) {
+            m_auto_bonding = false;
+            m_auto_build = false;
           }
-        root = nullptr;
-        m_flat_view.clear();
-        m_atom_node_lookup.clear();
-      }
 
-      void clr_ntable () {
-        for (auto &per_atom : m_ngb_table) per_atom.clear();
-        m_ngb_table.clear();
-      }
+        if (action & act_unlock) {
+            m_auto_bonding = true;
+            m_auto_build = true;
+          }
 
-      void clr_img_atoms_ntable () {
-        for (auto &per_img_atom : m_img_atoms) per_img_atom.m_img_bonds.clear();
-      }
+        if (action & act_check_root) {
+            if (!root){
+                root = new tws_node_t<REAL>();
+                m_flat_view.push_back(root);
+                root->m_bb.fill_guess(m_guess_rect_size);
+                if (root->m_bb.volume() < m_min_tws_volume)
+                  root->m_bb.fill_guess(pow(m_min_tws_volume, 1/3.0));
+              }
+          }
 
-      void clr_img_atoms () {
-        m_img_atoms.clear();
-      }
+        if (action & act_check_consistency){
+            if (m_ngb_table.size() != geom->nat()) m_ngb_table.resize(geom->nat());
+            if (m_atom_node_lookup.size() != geom->nat()) m_atom_node_lookup.resize(geom->nat());
+          }
 
-      void clr_ngb_and_rebuild () {
-        clr_ntable();
-        if (geom->DIM > 0 || m_img_atoms.size() > 0) clr_img_atoms_ntable();
-        find_all_neighbours();
+        if (action & act_clear_ntable) {
+            for (auto &per_atom : m_ngb_table) per_atom.clear();
+            m_ngb_table.clear();
+          }
+
+        if (action & act_clear_img_ntable)
+          for (auto &per_img_atom : m_img_atoms) per_img_atom.m_img_bonds.clear();
+
+        if (action & act_clear_img) m_img_atoms.clear();
+
+        if (action & act_clear_tree) {
+            for (auto *node : m_flat_view){
+                if (node) delete node;
+                node = nullptr;
+              }
+            root = nullptr;
+            m_flat_view.clear();
+            m_atom_node_lookup.clear();
+          }
+
+        if (action & act_clear_all) {
+            do_action(act_clear_img);
+            do_action(act_clear_ntable);
+            do_action(act_clear_tree);
+          }
+
+        if (action & act_rebuild_tree){
+            do_action(act_clear_img);
+            do_action(act_clear_tree);
+            do_action(act_build_tree);
+          }
+
+        if (action & act_rebuild_ntable){
+            do_action(act_clear_img_ntable);
+            do_action(act_clear_ntable);
+            do_action(act_build_ntable);
+          }
+
+        if (action & act_build_tree){
+            manual_build();
+          }
+
+        if (action & act_build_ntable){
+            find_all_neighbours();
+          }
+
+        if (action & act_rebuild_all){
+            do_action(act_rebuild_tree);
+            do_action(act_rebuild_ntable);
+          }
+
+        if (action & act_build_all){
+            do_action(act_build_tree);
+            do_action(act_build_ntable);
+          }
       }
 
       /// \brief clr_bond_real_im
@@ -531,7 +582,9 @@ namespace qpp{
       /// \param atm
       /// \param idx
       void insert_object_to_tree (const AINT atm, const index idx) {
-        check_root();
+
+        do_action(act_check_root);
+
         if (m_atom_node_lookup.size() != geom->size()) m_atom_node_lookup.resize(geom->size());
         while (!(point_aabb_test(geom->pos(atm, idx), root->m_bb)) ) {
             grow_tws_root(atm, idx);
@@ -851,13 +904,9 @@ namespace qpp{
                   const STRING & a,
                   const vector3<REAL> & r) override {
         if (st == before_after::after) {
-            if (m_ngb_table.size() != geom->nat()) m_ngb_table.resize(geom->nat());
-            if (m_atom_node_lookup.size() != geom->nat()) m_atom_node_lookup.resize(geom->nat());
+            do_action(act_check_consistency);
             if (m_auto_build) insert_object_to_tree(geom->nat()-1);
-            if (m_auto_bonding) {
-                //m_make_dirty_dist_map = true;
-                find_neighbours(geom->nat()-1);
-              }
+            if (m_auto_bonding) find_neighbours(geom->nat()-1);
           }
       }
 
@@ -872,7 +921,7 @@ namespace qpp{
                      const STRING & a,
                      const vector3<REAL> & r) override {
         if (st == before_after::after) {
-            if (m_ngb_table.size() != geom->nat()) m_ngb_table.resize(geom->nat());
+            do_action(act_check_consistency);
           }
       }
 
@@ -886,9 +935,7 @@ namespace qpp{
                     const STRING & a,
                     const vector3<REAL> & r) override {
         if (st == before_after::after) {
-            //std::cout << a << " added " << r << std::endl;
-            if (m_ngb_table.size() != geom->nat()) m_ngb_table.resize(geom->nat());
-            //std::cout << fmt::format("atom {} changed", at) << std::endl;
+            do_action(act_check_consistency);
             clr_atom_bond_data(at);
             clr_atom_from_tree(at);
             insert_object_to_tree(at);
@@ -903,16 +950,9 @@ namespace qpp{
                    before_after st) override {
 
         if (st == before_after::before) {
-            clr_ntable();
-            clr_img_atoms();
-            clr_tree();
+            do_action(act_clear_all);
           } else {
-            //std::cout << a << " added " << r << std::endl;
-            if (m_ngb_table.size() != geom->nat()) m_ngb_table.resize(geom->nat());
-            if (m_atom_node_lookup.size() != geom->nat()) m_atom_node_lookup.resize(geom->nat());
-
-            if (m_auto_build) manual_build();
-            if (m_auto_bonding) find_all_neighbours();
+            do_action(act_check_consistency | act_rebuild_all);
           }
       }
 
