@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <cmath>
 #include <optional>
+#include <type_traits>
 
 #include <cassert>
 #include <string>
@@ -221,40 +222,47 @@ namespace qpp{
 
 
   /// \brief action bitmask dor use in do_action
-  const uint16_t act_clear_tree        = 1 << 0;
-  const uint16_t act_clear_ntable      = 1 << 1;
-  const uint16_t act_clear_img_ntable  = 1 << 2;
-  const uint16_t act_clear_img         = 1 << 3;
-  const uint16_t act_clear_all         = 1 << 4;
-  const uint16_t act_rebuild_tree      = 1 << 5;
-  const uint16_t act_rebuild_ntable    = 1 << 6;
-  const uint16_t act_build_tree        = 1 << 7;
-  const uint16_t act_build_ntable      = 1 << 8;
-  const uint16_t act_rebuild_all       = 1 << 9;
-  const uint16_t act_build_all         = 1 << 10;
-  const uint16_t act_check_consistency = 1 << 11;
-  const uint16_t act_check_root        = 1 << 12;
-  const uint16_t act_lock              = 1 << 13;
-  const uint16_t act_unlock            = 1 << 14;
+  const uint32_t act_clear_tree        = 1 << 0;
+  const uint32_t act_clear_ntable      = 1 << 1;
+  const uint32_t act_clear_img_ntable  = 1 << 2;
+  const uint32_t act_clear_img         = 1 << 3;
+  const uint32_t act_clear_all         = 1 << 4;
+  const uint32_t act_rebuild_tree      = 1 << 5;
+  const uint32_t act_rebuild_ntable    = 1 << 6;
+  const uint32_t act_build_tree        = 1 << 7;
+  const uint32_t act_build_ntable      = 1 << 8;
+  const uint32_t act_rebuild_all       = 1 << 9;
+  const uint32_t act_build_all         = 1 << 10;
+  const uint32_t act_check_consistency = 1 << 11;
+  const uint32_t act_check_root        = 1 << 12;
+  const uint32_t act_lock              = 1 << 13;
+  const uint32_t act_unlock            = 1 << 14;
+  const uint32_t act_lock_img          = 1 << 15;
+  const uint32_t act_unlock_img        = 1 << 16;
 
   /// aux tws tree implementation
   template <class REAL, class CELL = periodic_cell<REAL>, typename AINT = uint32_t >
   class tws_tree_t : public geometry_observer<REAL> {
-    public:
+    private:
       REAL m_guess_rect_size{6.0};
       REAL m_min_tws_volume{65.0};
 
       geometry<REAL, CELL>                                       *geom{nullptr};
       tws_node_t<REAL, AINT>                                     *root{nullptr};
       vector<tws_node_t<REAL, AINT>* >                           m_flat_view;
-      vector<imaginary_atom_t<REAL, AINT> >                      m_img_atoms;
-      vector<vector<tws_node_content_t<REAL, AINT> > >           m_ngb_table;
       vector<vector<atom_node_lookup_t<REAL> > >                 m_atom_node_lookup;
-      bonding_table_t<REAL, AINT>                                m_bonding_table;
+
       bool m_make_dirty_dist_map{true};
       bool m_auto_bonding{false}; /// \brief bAutoBonding
       bool m_auto_build{true}; /// \brief bAutoBuild
       bool m_build_imaginary_atoms_bonds{true};/// \brief bBuildImaginaryAtomsBonds
+      bool m_keep_img_atoms{false};
+
+    public:
+
+      vector<imaginary_atom_t<REAL, AINT> >                      m_img_atoms;
+      vector<vector<tws_node_content_t<REAL, AINT> > >           m_ngb_table;
+      bonding_table_t<REAL, AINT>                                m_bonding_table;
 
       /// \brief aux_rtree constructor
       /// \param g
@@ -279,7 +287,7 @@ namespace qpp{
 
       /// \brief do_action
       /// \param action bitmask for action
-      void do_action(const uint16_t action){
+      void do_action(const uint32_t action){
 
         if (action & act_lock) {
             m_auto_bonding = false;
@@ -289,6 +297,14 @@ namespace qpp{
         if (action & act_unlock) {
             m_auto_bonding = true;
             m_auto_build = true;
+          }
+
+        if (action & act_lock_img) {
+            m_keep_img_atoms = true;
+          }
+
+        if (action & act_unlock_img) {
+            m_keep_img_atoms = false;
           }
 
         if (action & act_check_root) {
@@ -421,12 +437,16 @@ namespace qpp{
 
       /// \brief clear_atom_from_tree
       /// \param atm
-      void clr_atom_from_tree (const AINT atm) {
+      template<bool RETURN_ENABLED = false>
+      typename std::conditional<RETURN_ENABLED, vector<index>, void>::type
+      clr_atom_from_tree (const AINT atm) {
+
+        vector<index> image_idx;
+
         if (geom->DIM == 0 && m_atom_node_lookup[atm].size() > 0)
           m_atom_node_lookup[atm][0].node->rm_cnt_by_id(atm);
 
         if (geom->DIM > 0){
-            vector<index> image_idx;
 
             //remove 0,0,0 and c1,c2,c3 atoms from tree
             for (auto& at_node : m_atom_node_lookup[atm])
@@ -460,6 +480,10 @@ namespace qpp{
           }
         //tws_node_t<REAL> *node = atom_node_lookup[]
         m_atom_node_lookup[atm].clear();
+
+        if constexpr (RETURN_ENABLED) {
+          return image_idx;
+        }
       }
 
       /// \brief apply_shift
@@ -574,7 +598,7 @@ namespace qpp{
         for (iterator i(index::D(geom->DIM).all(-1), index::D(geom->DIM).all(1)); !i.end(); i++ )
           if (i == index::D(geom->DIM).all(0))
             insert_object_to_tree(atm, i);
-          else if (geom->cell.within_epsilon_b(geom->pos(atm, i), 0.09f))
+          else if (geom->cell.within_epsilon_b(geom->pos(atm, i), 0.09f) || m_keep_img_atoms)
             insert_object_to_tree(atm, i);
       }
 
@@ -744,7 +768,7 @@ namespace qpp{
       void find_all_neighbours () {
         for (AINT i = 0; i < geom->nat(); i++) find_neighbours(i, index::D(geom->DIM).all(0));
         if (m_build_imaginary_atoms_bonds)
-          for (auto &img_atom : m_img_atoms) find_neighbours(img_atom.m_atm, img_atom.m_idx, true);
+          for (auto &img_atom : m_img_atoms) find_neighbours(img_atom.m_atm, img_atom.m_idx);
 
         // std::cout<<"TOTAL BONDS CREATED =" << m_ngb_table.size() << "\n";
       }
@@ -757,15 +781,17 @@ namespace qpp{
         if (m_build_imaginary_atoms_bonds)
           for (int i = 0; i < m_img_atoms.size(); i++)
             if (m_img_atoms[i].m_atm == at_num)
-              find_neighbours(m_img_atoms[i].m_atm, m_img_atoms[i].m_idx, true);
+              find_neighbours(m_img_atoms[i].m_atm, m_img_atoms[i].m_idx);
       }
 
       /// \brief find_neighbours
       /// \param atNum
-      void find_neighbours (AINT at_num, index idx, bool imaginary_pass = false) {
+      void find_neighbours (AINT at_num, index idx) {
         if (!root) return;
         if (m_bonding_table.m_dist.size() == 0) m_bonding_table.init_default(geom);
         if (m_ngb_table.size() < geom->nat()) m_ngb_table.resize(geom->nat());
+
+        bool imaginary_pass = idx != index::D(geom->DIM).all(0);
 
         REAL sph_r = m_bonding_table.m_max_dist[geom->type_table(at_num)];
         if ( sph_r > 0.0){
@@ -833,7 +859,6 @@ namespace qpp{
                             tws_node_content_t<REAL>(mx_at1_num, mx_at1_idx));
                   }
 
-
                 //two imaginary atoms
                 if (imaginary_pass && m_build_imaginary_atoms_bonds && f_dr < bond_len &&
                     both_atoms_im){
@@ -844,13 +869,10 @@ namespace qpp{
                     iat2 = find_imaginary_atom(r_el.m_atm, r_el.m_idx);
 
                     if (iat1 && iat2){
-
                         m_img_atoms[*iat1].m_img_bonds.push_back(
                               tws_node_content_t<REAL>(r_el.m_atm, r_el.m_idx));
-
                         m_img_atoms[*iat2].m_img_bonds.push_back(
                               tws_node_content_t<REAL>(at_num, idx));
-
                       }
                   }
 
@@ -935,11 +957,22 @@ namespace qpp{
                     const STRING & a,
                     const vector3<REAL> & r) override {
         if (st == before_after::after) {
-            do_action(act_check_consistency);
-            clr_atom_bond_data(at);
-            clr_atom_from_tree(at);
-            insert_object_to_tree(at);
-            find_neighbours(at);
+            if (m_auto_bonding && m_auto_build){
+                do_action(act_check_consistency);
+                clr_atom_bond_data(at);
+
+                if (m_keep_img_atoms) {
+                    vector<index> imgs = clr_atom_from_tree<true>(at);
+                    for (auto &idx : imgs) {
+                        insert_object_to_tree(at, idx);
+                        find_neighbours(at, idx);
+                      }
+                  } else {
+                    clr_atom_from_tree(at);
+                    insert_object_to_tree(at);
+                    find_neighbours(at);
+                  }
+              }
           }
       }
 
