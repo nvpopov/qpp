@@ -4,7 +4,15 @@
 #include <iostream>
 #include <geom/lace3d.hpp>
 #include <data/types.hpp>
-#include <optional>
+
+#if __cplusplus == 201500
+  #include <optional>
+#else
+  #include <experimental/optional>
+namespace std{
+    using std::experimental::optional;
+}
+#endif
 
 #ifdef PY_EXPORT
 #include <pybind11/pybind11.h>

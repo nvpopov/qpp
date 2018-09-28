@@ -7,7 +7,15 @@
 #include <algorithm>
 #include <iostream>
 #include <geom/lace3d.hpp>
-#include <string_view>
+#if __cplusplus == 201500
+  #include <string_view>
+
+#else
+  #include <experimental/string_view>
+namespace std{
+    using std::experimental::string_view;
+}
+#endif
 
 namespace qpp{
 
