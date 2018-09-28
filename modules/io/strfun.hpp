@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <iostream>
 #include <geom/lace3d.hpp>
+#include <string_view>
 
 namespace qpp{
 
