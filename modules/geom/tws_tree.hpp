@@ -8,7 +8,6 @@
 #include <set>
 #include <algorithm>
 #include <cmath>
-#include <optional>
 #include <type_traits>
 
 #include <cassert>
@@ -22,7 +21,7 @@
 #include <geom/ray.hpp>
 #include <geom/primitive_intersections.hpp>
 #include <data/ptable.hpp>
-#include <data/make_unique.hpp>
+#include <data/compiler_fallback.hpp>
 
 //#ifdef PY_EXPORT
 //#include <pybind11/pybind11.h>
@@ -38,8 +37,7 @@ using namespace std;
 namespace qpp{
 
   template<typename INT_TYPE>
-  inline INT_TYPE enc_tws_idx (const INT_TYPE a, const INT_TYPE b,
-                               const INT_TYPE c) {
+  inline INT_TYPE enc_tws_idx (const INT_TYPE a, const INT_TYPE b, const INT_TYPE c) {
     return a*9+b*3+c+13;
   }
 
@@ -221,7 +219,7 @@ namespace qpp{
   };
 
 
-  /// \brief action bitmask dor use in do_action
+  /// \brief action bitmask for use in do_action
   const uint32_t act_clear_tree        = 1 << 0;
   const uint32_t act_clear_ntable      = 1 << 1;
   const uint32_t act_clear_img_ntable  = 1 << 2;

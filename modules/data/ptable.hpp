@@ -4,7 +4,7 @@
 #include <iostream>
 #include <geom/lace3d.hpp>
 #include <data/types.hpp>
-#include <optional>
+#include <data/compiler_fallback.hpp>
 
 #ifdef PY_EXPORT
 #include <pybind11/pybind11.h>
