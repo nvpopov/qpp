@@ -79,6 +79,7 @@ namespace qpp{
       }
   }
 
+  //this version in deprecated
   //md means vector of geometries and velocities
   template<class REAL, class CELL>
   void read_vasp_outcar_md(
@@ -214,13 +215,13 @@ namespace qpp{
 
     STRING inps;
 
-    bool bAtomTypesFilled = false;
-    bool bAtomNumFilled = false;
-    bool bFirstCellParsed = false;
-    bool bParseGeomData = false;
+    bool state_atom_types_filled = false;
+    bool state_atom_num_filled   = false;
+    bool state_first_cell_parsed = false;
+    bool state_parse_geom_data   = false;
 
     std::vector<STRING> atom_types;
-    std::vector<int> atom_count;
+    std::vector<size_t> atom_count;
     std::vector<std::array<qpp::vector3<REAL>, 3 > > cells;
 
     geom_anim_record_t<REAL> anim_static;
@@ -237,35 +238,34 @@ namespace qpp{
     std::vector<int> atom_lookup_v;
 
     while(std::getline(inp, inps)){
-        bool bLineChecked = false;
+        bool state_line_checked = false;
 
-        if (!bAtomTypesFilled && !bLineChecked)
+        if (!state_atom_types_filled && !state_line_checked)
           if (inps.find("POSCAR") != std::string::npos){
-              std::vector<STRING> atypes_l = split(inps);
-              bAtomTypesFilled = true;
-              bLineChecked = true;
+              std::vector<std::string_view> atypes_l = split_sv(inps, " ");
+              state_atom_types_filled = true;
+              state_line_checked = true;
               for (int i = 1; i < atypes_l.size(); i++)
-                atom_types.push_back(atypes_l[i]);
+                atom_types.push_back(std::string(atypes_l[i]));
             }
 
-        if (!bAtomNumFilled && !bLineChecked)
+        if (!state_atom_num_filled && !state_line_checked)
           if (inps.find("ions per type") != std::string::npos){
-              std::vector<STRING> acount_l = split(inps);
-              for (int i = 4; i < acount_l.size(); i++){
-                  int _atc = 0;
-                  s2t(acount_l[i], _atc);
+              std::vector<std::string_view> acount_l = split_sv(inps, " ");
+              for (size_t i = 4; i < acount_l.size(); i++){
+                  size_t _atc = std::stoul(acount_l[i].data());
                   atom_count.push_back(_atc);
                 }
-              bAtomNumFilled = true;
-              bLineChecked = true;
+              state_atom_num_filled = true;
+              state_line_checked = true;
 
               //build atom lookup table
-              for(int at_c = 0; at_c < atom_types.size(); at_c++)
-                for(int ac_c = 0; ac_c< atom_count[at_c]; ac_c++)
+              for(size_t at_c = 0; at_c < atom_types.size(); at_c++)
+                for(size_t ac_c = 0; ac_c < atom_count[at_c]; ac_c++)
                   atom_lookup_v.push_back(at_c);
             }
 
-        if (!bLineChecked && inps.find("direct lattice vectors") != std::string::npos){
+        if (!state_line_checked && inps.find("direct lattice vectors") != std::string::npos){
             std::array<qpp::vector3<REAL>, 3 > _cell;
             for(int i = 0; i < 3; i++){
                 std::getline(inp, inps);
@@ -274,65 +274,55 @@ namespace qpp{
                 _cell[i][1] = std::stof(splt[1].data());
                 _cell[i][2] = std::stof(splt[2].data());
               }
-            if (bFirstCellParsed) cells.push_back(_cell);
-            else bFirstCellParsed = true;
-            bLineChecked = true;
+            if (state_first_cell_parsed) cells.push_back(_cell);
+            else state_first_cell_parsed = true;
+            state_line_checked = true;
           }
 
-        if (!bParseGeomData && !bLineChecked)
+        if (!state_parse_geom_data && !state_line_checked)
           if (inps.find("POSITION") != std::string::npos){
 
               std::getline(inp, inps);
               local_atom_count = 0;
 
-              qpp::periodic_cell<REAL> cell(cells[total_frames-1][0],
-                  cells[total_frames-1][1],
-                  cells[total_frames-1][2]);
+//              qpp::periodic_cell<REAL> cell(cells[total_frames-1][0],
+//                  cells[total_frames-1][1],
+//                  cells[total_frames-1][2]);
 
-              //geom_list.push_back(new qpp::geometry<REAL,decltype(cell)>(cell));
               anim_md.frame_data.resize(anim_md.frame_data.size()+1);
-              // vel_list.resize(vel_list.size()+1);
+              anim_md.frame_data[anim_md.frame_data.size()-1].reserve(atom_lookup_v.size());
               total_frames += 1;
 
-              bParseGeomData = true;
-              bLineChecked = true;
+              state_parse_geom_data = true;
+              state_line_checked = true;
             }
 
-        if (bParseGeomData && !bLineChecked){
+        if (state_parse_geom_data && !state_line_checked){
             if (inps.find("------------------------") == std::string::npos){
                 std::vector<std::string_view> splt = split_sv(inps, " ");
                 qpp::vector3<REAL> pos{std::stof(splt[0].data()),
                       std::stof(splt[1].data()),
                       std::stof(splt[2].data())};
-                //qpp::vector3<REAL> vel = vec_from_string<REAL>(inps, 3, 4, 5);
-                //geom_list[total_frames-1]->add(atom_types[atom_lookup_v[local_atom_count]],pos);
                 anim_md.frame_data[anim_md.frame_data.size()-1].push_back(std::move(pos));
-                //std::cout <<  anim_md.frame_data.size() << std::endl;
-                //  vel_list[vel_list.size()-1].push_back(vel);
                 local_atom_count += 1;
               }
-            else bParseGeomData = false;
-            bLineChecked = true;
+            else state_parse_geom_data = false;
+            state_line_checked = true;
           }
 
-        if (inps.find("total energy   ETOTAL =") != std::string::npos && !bLineChecked){
-            std::vector<STRING> etotal = split(inps);
-            REAL etotal_val = 0.0;
-            //std::cout<<etotal[4]<<std::endl;
-            //            if (s2t(etotal[4], etotal_val))
-            //              toten.push_back(etotal_val);
-            bLineChecked = true;
-          }
+//        if (inps.find("total energy   ETOTAL =") != std::string::npos && !state_line_checked){
+//            std::vector<STRING> etotal = split(inps);
+//            REAL etotal_val = 0.0;
+//            state_line_checked = true;
+//          }
 
-        if (inps.find("kin. lattice  EKIN_LAT=") != std::string::npos && !bLineChecked){
-            std::vector<STRING> temp_l = split(inps);
-            REAL temp_val = 0.0;
-            //            if (s2t(temp_l[5], temp_val))
-            //              temperature.push_back(temp_val);
-            bLineChecked = true;
-          }
+//        if (inps.find("kin. lattice  EKIN_LAT=") != std::string::npos && !state_line_checked){
+//            std::vector<STRING> temp_l = split(inps);
+//            REAL temp_val = 0.0;
+//            state_line_checked = true;
+//          }
 
-      }//end while
+      } //end while
 
     //loadout first frame into geometry
     geom.DIM = 3;
