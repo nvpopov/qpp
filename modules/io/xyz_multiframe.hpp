@@ -7,6 +7,7 @@
 
 #include <geom/geom.hpp>
 #include <geom/geom_anim.hpp>
+#include <io/pdb_name_reducer.hpp>
 
 #include <vector>
 #include <cmath>
@@ -22,7 +23,8 @@ namespace qpp {
   template<class REAL, class CELL>
   void read_xyz_multiframe (std::basic_istream<CHAR,TRAITS> & inp,
                             geometry<REAL, CELL> & geom,
-                            std::vector<geom_anim_record_t<float> > &anim) {
+                            std::vector<geom_anim_record_t<float> > &anim,
+                            bool keep_pdb_like_names = false ) {
     std::string s;
 
     int nat{0};
@@ -57,12 +59,12 @@ namespace qpp {
             vector3<float> displ{x, y, z};
 
             if(!bootstrap_geom){
-                geom.add(std::string(splt[0]), displ);
+                std::string at_name = std::string(splt[0]);
+                if (!keep_pdb_like_names) pbd_name_reducer::eval_change(at_name);
+                geom.add(at_name, displ);
                 anim_static.frame_data.back().push_back(displ);
               }
-
             animr.frame_data.back().push_back(std::move(displ));
-
           }
 
         if (!bootstrap_geom) bootstrap_geom = true;
