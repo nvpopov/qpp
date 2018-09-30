@@ -1,5 +1,5 @@
-#ifndef _QPP_CONSTS_H
-#define _QPP_CONSTS_H
+#ifndef QPP_CONSTS_H
+#define QPP_CONSTS_H
 
 #include<cmath>
 
