@@ -4,8 +4,11 @@
 
 //TODO: rework to hash and unordered map
 namespace qpp {
+
   template <typename TYPE>
+
   struct sym_key{
+
     TYPE m_a;
     TYPE m_b;
 
@@ -21,13 +24,16 @@ namespace qpp {
   };
 
   template<typename TYPE>
+
   struct sym_key_hash{
+
     std::size_t operator()(const sym_key<TYPE>& k) const{
       std::size_t res = 17;
       res = res * 31 + std::hash<TYPE>()( std::min(k.m_a, k.m_b) );
       res = res * 31 + std::hash<TYPE>()( std::max(k.m_a, k.m_b) );
       return res;
     }
+
   };
 
 }

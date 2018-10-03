@@ -214,7 +214,7 @@ namespace qpp{
       }
 
       void update_pair_max_dist_all () {
-        for (auto&& [key, value] : m_dist) update_pair_max_dist(key.m_a, key.m_b);
+        for (auto& record : m_dist) update_pair_max_dist(record.first.m_a, record.first.m_b);
       }
   };
 
@@ -435,9 +435,7 @@ namespace qpp{
 
       /// \brief clear_atom_from_tree
       /// \param atm
-      template<bool RETURN_ENABLED = false>
-      typename std::conditional<RETURN_ENABLED, vector<index>, void>::type
-      clr_atom_from_tree (const AINT atm) {
+      vector<index> clr_atom_from_tree (const AINT atm) {
 
         vector<index> image_idx;
 
@@ -479,9 +477,7 @@ namespace qpp{
         //tws_node_t<REAL> *node = atom_node_lookup[]
         m_atom_node_lookup[atm].clear();
 
-        if constexpr (RETURN_ENABLED) {
-          return image_idx;
-        }
+        return image_idx;
       }
 
       /// \brief apply_shift
@@ -954,24 +950,27 @@ namespace qpp{
                     before_after st,
                     const STRING & a,
                     const vector3<REAL> & r) override {
+
         if (st == before_after::after) {
+
             if (m_auto_bonding && m_auto_build){
+
                 do_action(act_check_consistency);
                 clr_atom_bond_data(at);
-
+                vector<index> imgs = clr_atom_from_tree(at);
                 if (m_keep_img_atoms) {
-                    vector<index> imgs = clr_atom_from_tree<true>(at);
                     for (auto &idx : imgs) {
                         insert_object_to_tree(at, idx);
                         find_neighbours(at, idx);
                       }
                   } else {
-                    clr_atom_from_tree(at);
                     insert_object_to_tree(at);
                     find_neighbours(at);
                   }
               }
+
           }
+
       }
 
       /// \brief erased
