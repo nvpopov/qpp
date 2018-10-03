@@ -238,24 +238,31 @@ namespace qpp{
     std::vector<int> atom_lookup_v;
 
     while(std::getline(inp, inps)){
+
         bool state_line_checked = false;
 
         if (!state_atom_types_filled && !state_line_checked)
-          if (inps.find("POSCAR") != std::string::npos){
-              std::vector<std::string_view> atypes_l = split_sv(inps, " ");
-              state_atom_types_filled = true;
+          if (inps.find("VRHFIN") != std::string::npos){
+              std::string_view atypes_l(inps);
+              auto start_name = atypes_l.find("=") + 1;
+              auto end_name = atypes_l.find(":");
+              std::string_view at_name_sv = atypes_l.substr(start_name , end_name - start_name );
+              std::string at_name(at_name_sv);
+              at_name.erase(std::remove(at_name.begin(), at_name.end(), ' '), at_name.end());
+              atom_types.push_back(at_name);
               state_line_checked = true;
-              for (int i = 1; i < atypes_l.size(); i++)
-                atom_types.push_back(std::string(atypes_l[i]));
             }
 
         if (!state_atom_num_filled && !state_line_checked)
           if (inps.find("ions per type") != std::string::npos){
+              state_atom_types_filled = true;
               std::vector<std::string_view> acount_l = split_sv(inps, " ");
+
               for (size_t i = 4; i < acount_l.size(); i++){
                   size_t _atc = std::stoul(acount_l[i].data());
                   atom_count.push_back(_atc);
                 }
+
               state_atom_num_filled = true;
               state_line_checked = true;
 
