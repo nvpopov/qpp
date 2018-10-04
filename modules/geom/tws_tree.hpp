@@ -100,15 +100,16 @@ namespace qpp{
       //        return *this;
       //      }
 
-      tws_query_data_t<REAL, AINT> (const tws_query_data_t<REAL, AINT>& a) noexcept {
-        m_idx = a.m_idx;
-        m_atm = a.m_atm;
-        m_dist = a.m_dist;
-      }
+//      tws_query_data_t<REAL, AINT> (const tws_query_data_t<REAL, AINT>& a) noexcept {
+//        m_idx = a.m_idx;
+//        m_atm = a.m_atm;
+//        m_dist = a.m_dist;
+//      }
   };
 
   template<typename REAL = float>
-  bool tws_query_data_sort_by_dist (tws_query_data_t<REAL> &a, tws_query_data_t<REAL> &b) {
+  bool tws_query_data_sort_by_dist (const tws_query_data_t<REAL> &a,
+                                    const tws_query_data_t<REAL> &b) {
     return a.m_dist < b.m_dist;
   }
 
@@ -120,7 +121,7 @@ namespace qpp{
       tws_node_t<REAL, AINT>* parent;
       aabb_3d_t<REAL> m_bb;
       vector<tws_node_content_t<REAL, AINT> > m_content;
-      array<tws_node_t<REAL, AINT>*, 27> m_sub_nodes {};
+      array<tws_node_t<REAL, AINT>*, 27> m_sub_nodes {{nullptr}};
       int m_tot_childs{0};
       tws_node_t () noexcept {}
 
@@ -141,9 +142,7 @@ namespace qpp{
           }
       }
 
-      bool operator == (const tws_node_t<REAL, AINT> &a){
-        return this == a;
-      }
+
   };
 
 
@@ -510,7 +509,7 @@ namespace qpp{
       /// \param vRayStart
       /// \param vRayDir
       template<typename adding_result_policy = query_ray_add_all<REAL> >
-      void query_ray (ray_t<REAL> *_ray,
+      void query_ray (ray_t<REAL> &_ray,
                       vector<tws_query_data_t<REAL, AINT> > &res,
                       REAL scale_factor = 0.25) {
         if (!root) return;
@@ -522,13 +521,13 @@ namespace qpp{
       /// \param vRayStart
       /// \param vRayDir
       template<typename adding_result_policy>
-      bool traverse_query_ray (tws_node_t<REAL, AINT> *cur_node,
-                               ray_t<REAL> *_ray,
+      void traverse_query_ray (tws_node_t<REAL, AINT> *cur_node,
+                               ray_t<REAL> &_ray,
                                vector<tws_query_data_t<REAL, AINT> > &res,
                                const REAL scale_factor) {
 
-        if (!cur_node) return false;
-        if (ray_aabb_test(_ray, &(cur_node->m_bb))){
+        if (!cur_node) return;
+        if (ray_aabb_test(_ray, cur_node->m_bb)){
 
             if (cur_node->m_tot_childs > 0){
                 for (auto *ch_node : cur_node->m_sub_nodes)
@@ -543,7 +542,7 @@ namespace qpp{
                 if (ap_idx) atom_rad = ptable::get_inst()->arecs[*ap_idx-1].aRadius * scale_factor;
                 REAL stored_dist = 0.0;
                 vector3<REAL> test_pos = geom->pos(nc.m_atm, nc.m_idx);
-                REAL ray_hit_dist = ray_sphere_test( _ray, test_pos, atom_rad);
+                REAL ray_hit_dist = ray_sphere_test(&_ray, test_pos, atom_rad);
                 bool ray_hit = ray_hit_dist > -1.0f;
 
                 if (ray_hit && adding_result_policy::can_add(test_pos, nc.m_idx, geom->DIM))
@@ -551,7 +550,7 @@ namespace qpp{
 
               }
           }
-        else return false;
+        else return ;
       }
 
       /// \brief query_sphere

@@ -35,25 +35,25 @@ namespace qpp {
   /// \return
   ///
   template <typename REAL>
-  bool ray_aabb_test(ray_t<REAL> *_ray, aabb_3d_t<REAL> *_aabb){
+  bool ray_aabb_test(ray_t<REAL> &_ray, aabb_3d_t<REAL> &_aabb){
+    //if (!_ray || !_aabb) return false;
+    REAL t1 = (_aabb.min[0] - _ray.start[0]) /
+        (cmp_eps(_ray.dir[0], 0.0f) ? 0.00001f : _ray.dir[0]);
 
-    REAL t1 = (_aabb->min[0] - _ray->start[0]) /
-        (cmp_eps(_ray->dir[0], 0.0f) ? 0.00001f : _ray->dir[0]);
+    REAL t2 = (_aabb.max[0] - _ray.start[0]) /
+        (cmp_eps(_ray.dir[0], 0.0f) ? 0.00001f : _ray.dir[0]);
 
-    REAL t2 = (_aabb->max[0] - _ray->start[0]) /
-        (cmp_eps(_ray->dir[0], 0.0f) ? 0.00001f : _ray->dir[0]);
+    REAL t3 = (_aabb.min[1] - _ray.start[1]) /
+        (cmp_eps(_ray.dir[1], 0.0f) ? 0.00001f : _ray.dir[1]);
 
-    REAL t3 = (_aabb->min[1] - _ray->start[1]) /
-        (cmp_eps(_ray->dir[1], 0.0f) ? 0.00001f : _ray->dir[1]);
+    REAL t4 = (_aabb.max[1] - _ray.start[1]) /
+        (cmp_eps(_ray.dir[1], 0.0f) ? 0.00001f : _ray.dir[1]);
 
-    REAL t4 = (_aabb->max[1] - _ray->start[1]) /
-        (cmp_eps(_ray->dir[1], 0.0f) ? 0.00001f : _ray->dir[1]);
+    REAL t5 = (_aabb.min[2] - _ray.start[2]) /
+        (cmp_eps(_ray.dir[2], 0.0f) ? 0.00001f : _ray.dir[2]);
 
-    REAL t5 = (_aabb->min[2] - _ray->start[2]) /
-        (cmp_eps(_ray->dir[2], 0.0f) ? 0.00001f : _ray->dir[2]);
-
-    REAL t6 = (_aabb->max[2] - _ray->start[2]) /
-        (cmp_eps(_ray->dir[2], 0.0f) ? 0.00001f : _ray->dir[2]);
+    REAL t6 = (_aabb.max[2] - _ray.start[2]) /
+        (cmp_eps(_ray.dir[2], 0.0f) ? 0.00001f : _ray.dir[2]);
 
     REAL tmin = std::max(std::max(std::min(t1, t2), std::min(t3, t4)),
                          std::min(t5, t6));
