@@ -4,6 +4,7 @@
 #include <iostream>
 #include <geom/lace3d.hpp>
 #include <data/types.hpp>
+#include <array>
 #include <data/compiler_fallback.hpp>
 
 #ifdef PY_EXPORT
@@ -17,17 +18,19 @@ namespace py = pybind11;
 using namespace std;
 
 namespace qpp {
+
     const uint PTABLE_ELEM_N = 100;
     const uint PTABLE_INT_NONE = -1;
     const float PTABLE_FLOAT_NONE = -1.0;
     const STRING PTABLE_NONE = "None";
 
-    struct ptable_atom_ionic_radii{
+    struct ptable_atom_ionic_radii {
         float charge;
         float radii;
     };
 
-    struct ptable_atom_record{
+    struct ptable_atom_record {
+
         uint aNumber;
         STRING       aName;
         STRING       aSymbol;
@@ -52,7 +55,8 @@ namespace qpp {
 
     };
 
-    class ptable{
+    class ptable {
+
     public:
 
         static ptable *instance;
@@ -60,12 +64,14 @@ namespace qpp {
         map<string, uint> cache_atom_idx;
         array<ptable_atom_record, PTABLE_ELEM_N> arecs;
 
-        static ptable* get_inst(){
-            if(!instance){
+        static ptable* get_inst () {
+
+            if (!instance) {
                     instance = new ptable();
                     instance->init_default();
                 }
             return instance;
+
         }
 
         void init_default();
@@ -82,31 +88,36 @@ namespace qpp {
 
         void init_cache_atom_idx();
 
-        ptable(){}
+        ptable () {}
 
-        static STRING symbol_by_number(const uint number){
+        static STRING symbol_by_number (const uint number) {
             ptable *table = ptable::get_inst();
             if ((number >= 1) && (number < PTABLE_ELEM_N))
                 return table->arecs[number-1].aSymbol;
             return PTABLE_NONE;
         }
 
-        static STRING name_by_number(const int number){
+        static STRING name_by_number (const int number) {
+
             ptable *table = ptable::get_inst();
-            if ((number >= 1) && (number < PTABLE_ELEM_N))
+            if (number >= 1 && number < PTABLE_ELEM_N)
                 return table->arecs[number-1].aName;
             return PTABLE_NONE;
+
         }
 
-        static optional<uint> number_by_name(const STRING& name){
+        static optional<uint> number_by_name (const STRING& name) {
+
             ptable *table = ptable::get_inst();
-            for(int i = 0; i < PTABLE_ELEM_N; i++)
-                if(table->arecs[i].aName == name)
+            for (int i = 0; i < PTABLE_ELEM_N; i++)
+                if (table->arecs[i].aName == name)
                     return optional<uint>(i+1);
             return nullopt;
+
         }
 
-        static optional<uint> number_by_symbol(const STRING& symbol){
+        static optional<uint> number_by_symbol (const STRING& symbol) {
+
             ptable *table = ptable::get_inst();
             if ( table->cache_atom_idx.find(symbol) ==
                  table->cache_atom_idx.end() ) {
@@ -115,43 +126,55 @@ namespace qpp {
               return optional<uint>(table->cache_atom_idx[symbol]);
             }
             return nullopt;
+
         }
 
-        static const optional<float> mass_by_number(const uint number){
+        static optional<float> mass_by_number (const uint number) {
+
             ptable *table = ptable::get_inst();
-            if ((number >= 1) && (number < PTABLE_ELEM_N))
+            if (number >= 1 && number < PTABLE_ELEM_N)
                 return optional<float>(table->arecs[number-1].aMass);
             else return nullopt;
 
         }
 
-        static const optional<float> ionic_rad_by_number(const uint number){
+        static optional<float> ionic_rad_by_number (const uint number) {
+
             ptable *table = ptable::get_inst();
-            if ((number >= 1) && (number < PTABLE_ELEM_N))
+            if (number >= 1 && number < PTABLE_ELEM_N)
                 return optional<float>(table->arecs[number-1].aIonicRadius);
             else return nullopt;
+
         }
 
-        static optional<float> cov_rad_by_number(const uint number){
+        static optional<float> cov_rad_by_number (const uint number) {
+
             ptable *table = ptable::get_inst();
-            if ((number >= 1) && (number < PTABLE_ELEM_N))
+            if (number >= 1 && number < PTABLE_ELEM_N)
                 return optional<float>(table->arecs[number-1].aCovRad_Slater);
             else return nullopt;
+
         }
 
-        static const optional<float>  vdw_rad_by_number(const uint number){
+        static optional<float> vdw_rad_by_number (const uint number) {
+
             ptable *table = ptable::get_inst();
-            if ((number >= 1) && (number < PTABLE_ELEM_N))
+            if (number >= 1 && number < PTABLE_ELEM_N)
                 return optional<float>(table->arecs[number-1].aVdWRadius);
             else return nullopt;
+
         }
 
-        static const uint nval_elec_by_number(const uint number){
+        static uint nval_elec_by_number (const uint number) {
+
             ptable *table = ptable::get_inst();
-            if ((number >= 1) && (number < PTABLE_ELEM_N))
+            if (number >= 1 && number < PTABLE_ELEM_N)
                 return table->arecs[number-1].aNValenceElec;
             else return 1.0f;
+
         }
+
     };
+
 }
 #endif
