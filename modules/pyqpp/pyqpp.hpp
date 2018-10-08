@@ -1,5 +1,5 @@
-#ifndef _PYQPP_H
-#define _PYQPP_H
+#ifndef PYQPP_H
+#define PYQPP_H
 
 #include <pybind11/pybind11.h>
 #include <pybind11/operators.h>

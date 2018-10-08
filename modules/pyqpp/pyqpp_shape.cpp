@@ -5,7 +5,8 @@
 #define v3d qpp::vector3<REAL>
 
 template<class REAL>
-void py_shape_export(py::module m, const char * pyname){
+void py_shape_export (py::module m, const char * pyname) {
+
   py::class_<qpp::shape<REAL>,qpp::py_shape<REAL> > ashape(m, pyname);
 
     ashape.def(py::init<>())
@@ -53,13 +54,16 @@ void py_shape_export(py::module m, const char * pyname){
       ;
 }
 
-void pyqpp_shape_export(py::module m){
+void pyqpp_shape_export (py::module m) {
 
   //qpp::shape<float>::py_export(m, "abstract_shape_f");
   //qpp::shape<double>::py_export(m, "abstract_shape_d");
 
   py_shape_export<float>(m, "shape_f");
+
+#ifdef PYTHON_EXP_EXT
   py_shape_export<double>(m, "shape_d");
+#endif
 
   /*
   def("shape_box_f", qpp::py_shape_box1<float>, return_value_policy<manage_new_object>());

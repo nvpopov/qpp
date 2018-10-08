@@ -785,6 +785,7 @@ namespace qpp{
         return py::cast(xfield<int>(i,j));
       else if (field_type(i)==type_bool)
         return py::cast(xfield<bool>(i,j));
+
     }
 
     void py_setfield(int i, int j, const py::object & o){

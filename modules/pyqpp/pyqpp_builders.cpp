@@ -39,26 +39,26 @@ void def_builders1(py::module m){
       qpp::rotrans<REALDST> > >(m);
 }
 
-void pyqpp_builders_export(py::module m){
-  m.def("treat_crowd", qpp::treat_crowd<float,  qpp::periodic_cell<float> >);
-  m.def("treat_crowd", qpp::treat_crowd<double, qpp::periodic_cell<double> >);
+void pyqpp_builders_export (py::module m) {
 
+  m.def("treat_crowd", qpp::treat_crowd<float,  qpp::periodic_cell<float> >);
   m.def("treat_crowd", qpp::treat_crowd<float,
                        qpp::generalized_cell<float,
                        qpp::matrix3<float> > >);
-
-  m.def("treat_crowd", qpp::treat_crowd<double,
-                       qpp::generalized_cell<double,
-                       qpp::matrix3<double> > >);
-
   m.def("treat_crowd", qpp::treat_crowd<float,
                        qpp::generalized_cell<float,
                        qpp::rotrans<float>  > >);
+  def_builders1<float>(m);
 
+#ifdef PYTHON_EXP_EXT
+  m.def("treat_crowd", qpp::treat_crowd<double, qpp::periodic_cell<double> >);
+  m.def("treat_crowd", qpp::treat_crowd<double,
+                       qpp::generalized_cell<double,
+                       qpp::matrix3<double> > >);
   m.def("treat_crowd", qpp::treat_crowd<double,
                        qpp::generalized_cell<double,
                        qpp::rotrans<double> > >);
-
-  def_builders1<float>(m);
   def_builders1<double>(m);
+#endif
+
 }

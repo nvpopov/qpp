@@ -256,8 +256,9 @@ namespace qpp{
       /*! \brief Brings r into Wigner-Zeitz unit cell
       fixme - not implemented yet!
     */
-      inline vector3<REAL> reduce_wz(vector3<REAL> r) const
-      {}
+      inline vector3<REAL> reduce_wz(vector3<REAL> r) const{
+        return vector3<REAL>::Zero();
+      }
 
 
       /*! \brief Answers the question whether r belongs to unit cell
@@ -275,11 +276,12 @@ namespace qpp{
       }
 
       /*! \brief Answers the question whether r belongs to Wigner-Zeitz
-     * unit cell
+      * unit cell
       fixme - not implemented yet!
-    */
-      inline bool within_wz(vector3<REAL> r) const
-      {}
+      */
+      inline bool within_wz(vector3<REAL> r) const {
+        return true;
+      }
 
       virtual void write(std::basic_ostream<CHAR,TRAITS> &os,
                          int offset=0) const{

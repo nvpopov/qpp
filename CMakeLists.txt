@@ -4,8 +4,6 @@ project(qpp CXX C)
 set (QPP_VERSION_MAJOR 0)
 set (QPP_VERSION_MINOR 1)
 add_definitions(-O3 -std=c++17 -fPIC -DFMT_HEADER_ONLY)
-set(CMAKE_CXX_FLAGS "-O3 -funroll-loops -ftree-vectorize \
-    ")
 #set(CMAKE_BUILD_TYPE "Debug")
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
@@ -25,6 +23,7 @@ set(LA_TYPE "MKL" CACHE STRING "Type of linear algebra library, (MKL,ACML)")
 
 # option declaration
 option(PYTHON_BINDINGS "build qpp python bindings" ON)
+option(PYTHON_EXPOSE_EXTENDED "build python wrappers not only for real=float" OFF)
 option(USE_SYSTEM_EIGEN3 "use system avaiable eigen3 or download as deps" OFF)
 option(BUILD_EXAMPLES "build examples" ON)
 option(BUILD_TESTS "build tests executable" OFF)
@@ -82,6 +81,10 @@ include_directories(${PROJECT_SOURCE_DIR}/deps/pybind11/include)
 #Python related stuff
 if(PYTHON_BINDINGS)
     message("-- Python bindings are enabled")
+    if(PYTHON_EXPOSE_EXTENDED)
+        message("-- Python interface for REAL=double")
+        add_definitions(-DPYTHON_EXP_EXT)
+    endif()
 endif()
 #end python stuff
 

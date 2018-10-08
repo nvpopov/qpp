@@ -105,23 +105,28 @@ void py_observer_export(py::module m, const char * pyname)
 }
 
 void pyqpp_geom_export(py::module m){
-  py_geom_export<float,qpp::periodic_cell<float> >(m, "geometry_f");
-  py_geom_export<double,qpp::periodic_cell<double> >(m, "geometry_d");
 
+  py_geom_export<float,qpp::periodic_cell<float> >(m, "geometry_f");
   py_geom_export<float, qpp::generalized_cell<
       float, qpp::matrix3<float>  > >(m, "geometry_pgf");
-  py_geom_export<double,qpp::generalized_cell<
-      double, qpp::matrix3<double> > >(m, "geometry_pgd");
   py_geom_export<float, qpp::generalized_cell<
       float, qpp::rotrans<float>   > >(m, "geometry_cgf");
+  py_observer_export<float>(m, "gobserver_f");
+
+#ifdef PYTHON_EXP_EXT
+  py_geom_export<double,qpp::periodic_cell<double> >(m, "geometry_d");
+  py_geom_export<double,qpp::generalized_cell<
+      double, qpp::matrix3<double> > >(m, "geometry_pgd");
   py_geom_export<double,qpp::generalized_cell<
       double,qpp::rotrans<double>  > >(m, "geometry_cgd");
+  py_observer_export<double>(m, "gobserver_d");
+#endif
 
   py::enum_<qpp::before_after>(m, "geom_change_state")
       .value("before", qpp::before)
       .value("after",  qpp::after)
       ;
 
-  py_observer_export<float>(m, "gobserver_f");
-  py_observer_export<double>(m, "gobserver_d");
+
+
 }
