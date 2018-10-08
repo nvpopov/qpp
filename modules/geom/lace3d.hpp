@@ -94,20 +94,20 @@ namespace qpp {
       return *this;
     }
 
-    inline const bool operator==(const generic_matrix<VALTYPE, N , M> & b) const{
+    inline bool operator==(const generic_matrix<VALTYPE, N , M> & b) const{
       return ((*this) - b).norm() <=  tol_equiv;
     }
 
-    inline const bool operator!=(const generic_matrix<VALTYPE, N , M> &b) const{
+    inline bool operator!=(const generic_matrix<VALTYPE, N , M> &b) const{
       return ! ((*this)==b);
     }
 
-    template<typename = std::enable_if<check_is_vector3<N , M>::value> >
+    //template<typename = std::enable_if<check_is_vector3<N , M>::value> >
     const STRING to_string_vec(){
       return fmt::format("[{}, {}, {}]", (*this)[0], (*this)[1], (*this)[2]);
     }
 
-    template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
+    //template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
     const STRING to_string_matr(){
       return fmt::format("[{},\n {},\n {}]",
                          (*this).row(0),
@@ -122,7 +122,7 @@ namespace qpp {
       return generic_matrix<VALTYPE, N , M>::Identity();
     }
 
-    template<typename = std::enable_if<check_is_vector3<N , M>::value> >
+   // template<typename = std::enable_if<check_is_vector3<N , M>::value> >
     const generic_matrix<VALTYPE, N , M> normalized_proxy(){
       return (*this).normalized();
     }
@@ -150,35 +150,29 @@ namespace qpp {
       return _tmv;
     }
 
-    template<typename = std::enable_if<check_is_vector3<N , M>::value> >
     const generic_matrix<VALTYPE, N , M> cross_product_proxy
     (const generic_matrix& other){
       return (*this).cross(other);
     }
 
-    template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
     const generic_matrix<VALTYPE, N , M> inverse_proxy(){
       return (*this).inverse();
     }
 
-    template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
     const generic_matrix<VALTYPE, 3 , 1> mv_mul_proxy
     (const generic_matrix<VALTYPE, 3 , 1> & other){
       return (*this)*other;
     }
 
-    template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
     const generic_matrix<VALTYPE, N , M> transpose_proxy(){
       return (*this).transpose();
     }
 
-    template<typename = std::enable_if<check_is_vector3<N , M>::value> >
     const VALTYPE dot_product_proxy(const generic_matrix<VALTYPE, N , M>& other){
       return (*this).dot(other);
     }
 
-    const generic_matrix<VALTYPE, N , M>
-    sub_proxy(const generic_matrix<VALTYPE, N , M>& other){
+    const generic_matrix<VALTYPE, N , M> sub_proxy(const generic_matrix<VALTYPE, N , M>& other){
       generic_matrix<VALTYPE, N , M> _tmv(
             this->Eigen::Matrix<VALTYPE, N , M >::operator-(other));
       return _tmv;
@@ -192,118 +186,116 @@ namespace qpp {
       return (*this) != b;
     }
 
-    template<typename = std::enable_if<check_is_vector3<N , M>::value> >
     generic_matrix(const py::list &l){
       //TOODO check
       for (int i=0; i<3; i++)
         (*this)[i] = py::cast<VALTYPE>(l[i]);
     }
 
-    template<typename = std::enable_if<check_is_vector3<N , M>::value> >
     generic_matrix(const py::tuple &l){
       //TOODO check
       for (int i=0; i<3; i++)
         (*this)[i] = py::cast<VALTYPE>(l[i]);
     }
 
-    template<typename = std::enable_if<check_is_vector3<N , M>::value> >
+    //template<typename = std::enable_if<check_is_vector3<N , M>::value> >
     inline VALTYPE py_getitem_v(int i) const
     { return (*this)[i]; }
 
-    template<typename = std::enable_if<check_is_vector3<N , M>::value> >
+    //template<typename = std::enable_if<check_is_vector3<N , M>::value> >
     inline void py_setitem_v(int i, VALTYPE v)
     { (*this)[i] = v;  }
 
-    template<typename = std::enable_if<check_is_vector3<N , M>::value> >
+    //template<typename = std::enable_if<check_is_vector3<N , M>::value> >
     inline VALTYPE py_getx(){return (*this)[0];}
 
-    template<typename = std::enable_if<check_is_vector3<N , M>::value> >
+    //template<typename = std::enable_if<check_is_vector3<N , M>::value> >
     inline VALTYPE py_gety(){return (*this)[1];}
 
-    template<typename = std::enable_if<check_is_vector3<N , M>::value> >
+    //template<typename = std::enable_if<check_is_vector3<N , M>::value> >
     inline VALTYPE py_getz(){return (*this)[2];}
 
-    template<typename = std::enable_if<check_is_vector3<N , M>::value> >
+    //template<typename = std::enable_if<check_is_vector3<N , M>::value> >
     inline void py_setx(VALTYPE v){ (*this)[0]=v;}
 
-    template<typename = std::enable_if<check_is_vector3<N , M>::value> >
+    //template<typename = std::enable_if<check_is_vector3<N , M>::value> >
     inline void py_sety(VALTYPE v){ (*this)[1]=v;}
 
-    template<typename = std::enable_if<check_is_vector3<N , M>::value> >
+    //template<typename = std::enable_if<check_is_vector3<N , M>::value> >
     inline void py_setz(VALTYPE v){ (*this)[2]=v;}
 
-    template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
+    //template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
     inline VALTYPE py_getxx() const {return (*this)(0,0);}
 
-    template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
+    //template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
     inline VALTYPE py_getxy() const {return (*this)(0,1);}
 
-    template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
+    //template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
     inline VALTYPE py_getxz() const {return (*this)(0,2);}
 
-    template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
+    //template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
     inline VALTYPE py_getyx() const {return (*this)(1,0);}
 
-    template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
+    //template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
     inline VALTYPE py_getyy() const {return (*this)(1,1);}
 
-    template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
+    //template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
     inline VALTYPE py_getyz() const {return (*this)(1,2);}
 
-    template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
+    //template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
     inline VALTYPE py_getzx() const {return (*this)(2,0);}
 
-    template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
+    //template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
     inline VALTYPE py_getzy() const {return (*this)(2,1);}
 
-    template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
+    //template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
     inline VALTYPE py_getzz() const {return (*this)(2,2);}
 
-    template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
+    //template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
     inline void py_setxx(VALTYPE v) {(*this)(0,0) = v;}
 
-    template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
+    //template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
     inline void py_setxy(VALTYPE v) {(*this)(0,1) = v;}
 
-    template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
+    //template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
     inline void py_setxz(VALTYPE v) {(*this)(0,2) = v;}
 
-    template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
+    //template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
     inline void py_setyx(VALTYPE v) {(*this)(1,0) = v;}
 
-    template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
+    //template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
     inline void py_setyy(VALTYPE v) {(*this)(1,1) = v;}
 
-    template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
+    //template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
     inline void py_setyz(VALTYPE v) {(*this)(1,2) = v;}
 
-    template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
+    //template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
     inline void py_setzx(VALTYPE v) {(*this)(2,0) = v;}
 
-    template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
+    //template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
     inline void py_setzy(VALTYPE v) {(*this)(2,1) = v;}
 
-    template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
+    //template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
     inline void py_setzz(VALTYPE v) {(*this)(2,2) = v;}
 
-    template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
+    //template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
     inline VALTYPE py_getitem(py::tuple I) const{
       int i = py::cast<int>(I[0]), j = py::cast<int>(I[1]);
       return (*this)(i,j);
     }
 
-    template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
+    //template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
     inline void py_setitem(py::tuple I, VALTYPE v){
       int i = py::cast<int>(I[0]), j = py::cast<int>(I[1]);
       (*this)(i,j) = v;
     }
 
-    template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
+   // template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
     inline generic_matrix<VALTYPE, 3, 1> py_getitemv(int i) const{
       return (*this)(i);
     }
 
-    template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
+    //template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
     inline void py_setitemv(int i, const generic_matrix<VALTYPE, 3, 1> & v){
       (*this).row(i) = v;
     }

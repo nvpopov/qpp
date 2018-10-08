@@ -105,6 +105,7 @@ namespace qpp{
         case type_float:  f = v.f; break;
         case type_double: d = v.d; break;
         case type_string: s = v.s; break;
+        default: break;
         }
     else
       switch(tp){
@@ -113,6 +114,7 @@ namespace qpp{
         case type_float:  pf = v.pf; break;
         case type_double: pd = v.pd; break;
         case type_string: ps = v.ps; break;
+        default: break;
         }
   }
 
