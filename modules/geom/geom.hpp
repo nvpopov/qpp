@@ -265,23 +265,30 @@ The supercell concept generalization for the geometry class looks like:
     /*! \brief The string name of atom of type number t
       @param t - the atomic type number
      */
-    inline STRING atom_of_type(int t) const{
+    inline STRING atom_of_type (int t) const {
       return _atm_types[t];
     }
 
+    inline STRING atom_name (int i) const {
+      return _atm_types[type_table(i)];
+    }
+
     //! Number of atomic type for atom named at
-    inline int type_of_atom(const STRING & at) const{
+    inline int type_of_atom (const STRING & at) const {
+
       for (int t=0; t < _atm_types.size(); t++)
         if ( _atm_types[t] == at )
           return t;
       return -1;
+
     }
 
     //! Synonim for type_of_atom(const STRING & at)
-    inline int type(const STRING & at) const
+    inline int type (const STRING & at) const
     { return type_of_atom(at); }
 
-    int define_type(const STRING & at){
+    int define_type (const STRING & at) {
+
       int t = type_of_atom(at);
       if (t==-1){
           t = _atm_types.size();
@@ -289,33 +296,36 @@ The supercell concept generalization for the geometry class looks like:
           _symm_rad.push_back(default_symmetrize_radius);
         }
       return t;
+
     }
 
     //unifficent - need to be cached
-    inline int get_atom_count_by_type(int atype){
+    inline int get_atom_count_by_type (int atype) {
       int retval = 0;
       for(int i = 0; i < _type_table.size(); i++)
         if(_type_table[i] == atype) retval+=1;
       return retval;
+
     }
 
     //! type of i-th atom in the geometry
-    inline int type_table(int i) const
+    inline int type_table (int i) const
     {return _type_table[i];}
 
     //! synonym
-    inline int type(int i) const
+    inline int type (int i) const
     { return type_table(i); }
 
     //! set type of i-th atom in the geometry
-    inline int & type(int i)
+    inline int & type (int i)
     {return _type_table[i];}
 
     //! synonym
-    inline int type_of_atom(int i) const
+    inline int type_of_atom (int i) const
     { return type_table(i); }
 
-    virtual void build_type_table(){
+    virtual void build_type_table (){
+
       _atm_types.clear();
       _symm_rad.clear();
       _type_table.resize(size());
@@ -332,9 +342,9 @@ The supercell concept generalization for the geometry class looks like:
       //      ngbr.resize_disttable();
     }
 
-    void build_types(){build_type_table();}
+    void build_types () {build_type_table();}
 
-    void clear_type_table(){
+    void clear_type_table () {
       _atm_types.clear();
       _type_table.resize(size());
     }
@@ -347,16 +357,16 @@ The supercell concept generalization for the geometry class looks like:
     bool auto_symmetrize;
     REAL default_symmetrize_radius;
 
-    REAL symmetrize_radius(int t) const{
+    REAL symmetrize_radius(int t) const {
       return _symm_rad[t];
     }
 
-    void set_symmetrize_radius(int t,
-                               REAL rad){
+    void set_symmetrize_radius (int t, REAL rad) {
       _symm_rad[t] = rad;
     }
 
-    REAL symmetrize_radius(const STRING & a) const{
+    REAL symmetrize_radius (const STRING & a) const {
+
       int t = type_of_atom(a);
 
       //std::cerr << "t= " << t << "\n";

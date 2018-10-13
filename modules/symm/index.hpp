@@ -16,11 +16,11 @@
 namespace py = pybind11;
 #endif
 
-namespace qpp{
+namespace qpp {
 
-  /*! \brief index is a general purpose complex index, having DIM integer components
-   */
-  class index{
+  /// \brief index is a general purpose complex index, having DIM integer components
+  class index {
+
       int *idx;
       bool del;
 
@@ -30,24 +30,27 @@ namespace qpp{
       int DIM;
 
       //! Typecast operator to int type returns the 0th component of the index
-      inline operator int() const {return idx[0];}
+      inline operator int () const {return idx[0];}
 
       //! The d-th component of the index
-      inline int operator()(int d) const {return idx[d];}
+      inline int operator () (int d) const {return idx[d];}
 
       //! The d-th component of the index
-      inline int& operator()(int d) {return idx[d];}
+      inline int& operator () (int d) {return idx[d];}
 
       //! Typecast from integer: the 0th component of index is set to i, the rest is set to 0
-      inline index& operator=(int i){
+      inline index& operator= (int i) {
+
         idx[0] = i;
         for (int d=1; d<DIM; d++)
           idx[d] = 0;
         return *this;
+
       }
 
       //! Assigment operator
-      inline index& operator=(const index & I){
+      inline index& operator= (const index & I) {
+
         if (DIM != I.DIM){
             if (del)
               delete idx;
@@ -59,43 +62,50 @@ namespace qpp{
         for (int d=0; d<DIM; d++)
           idx[d] = I(d);
         return *this;
+
       }
 
       //! The same as assigment operator in the form of explicitly called method
-      inline void set(const index & I){
+      inline void set (const index & I) {
         *this = I;
       }
 
       //! Componentwise addition of two indicies
-      inline index operator+(const index & I){
+      inline index operator+ (const index & I) {
+
         index res = D(DIM);
         for (int d=0; d<DIM; d++)
           res(d) = idx[d] + I(d);
         return res;
+
       }
 
       //! Componentwise subtraction of two indicies
-      inline index operator-(const index & I){
+      inline index operator- (const index & I) {
+
         index res = D(DIM);
         for (int d=0; d<DIM; d++)
           res(d) = idx[d] - I(d);
         return res;
+
       }
 
       //! Index I is added to this index componentwise
-      inline index& operator+=(const index & I){
+      inline index& operator+= (const index & I) {
 
         for (int d=0; d<DIM; d++)
           idx[d] = idx[d] + I(d);
         return *this;
+
       }
 
       //! Index I is subtracted from this index componentwise
-      inline index& operator-=(const index & I){
+      inline index& operator-= (const index & I){
 
         for (int d=0; d<DIM; d++)
           idx[d] = idx[d] - I(d);
         return *this;
+
       }
 
       /*! \brief Using std::initializer_list to set the components of this index. Example:
@@ -105,7 +115,7 @@ namespace qpp{
       std::cout << I << std::endl; // (5,4,3,2,1)
       I.set({1,2,3}); // IndexError: Wrong number of index components
      */
-      inline void set(const std::initializer_list<int> &li){
+      inline void set (const std::initializer_list<int> &li) {
 
         if (li.size() != DIM) IndexError("Wrong number of index components");
         int d=0;
@@ -122,11 +132,12 @@ namespace qpp{
     }
     */
 
-      index(){
+      index () {
 
         DIM = 0;
         idx = nullptr;
         del = false;
+
       }
 
       /*
@@ -139,43 +150,47 @@ namespace qpp{
     }
     */
 
-      index(const index & I){
+      index (const index & I) {
 
         DIM = I.DIM;
         idx = new int[DIM];
         for (int d=0; d<DIM; d++)
           idx[d] = I(d);
         del = true;
+
       }
 
-      index(const index & I, int d1, int d2 = -1){
+      index (const index & I, int d1, int d2 = -1) {
 
         if (d2==-1) d2 = I.DIM-1;
         DIM = d2-d1+1;
         idx = & I.idx[d1];
         del = false;
+
       }
 
-      index(const std::initializer_list<int> &li){
+      index (const std::initializer_list<int> &li) {
 
         DIM = li.size();
         idx = new int[DIM];
         set(li);
         del = true;
+
       }
 
-      ~index(){
+      ~index () {
+
         if (del)
           delete [] idx;
+
       }
 
-      inline index sub(int d1,
-                       int d2 = -1) const{
+      inline index sub (int d1, int d2 = -1) const {
 
         return index(*this,d1,d2);
       }
 
-      inline bool operator==(const index &I) const{
+      inline bool operator== (const index &I) const {
 
         bool res = DIM == I.DIM;
         if (res)
@@ -188,16 +203,17 @@ namespace qpp{
       }
 
 
-      inline bool operator!=(const index &I) const{
+      inline bool operator!= (const index &I) const {
         return ! ((*this) == I);
       }
 
-      struct factory{
+      struct factory {
+
           int DIM;
 
-          factory(int dim){DIM=dim;}
+          factory (int dim) {DIM=dim;}
 
-          index all(int a){
+          index all (int a) {
 
             index t;
             t.DIM = DIM;
@@ -207,20 +223,22 @@ namespace qpp{
             for (int d=0; d<DIM; d++)
               t(d) = a;
             return t;
+
           }
 
-          index atom(int a){
+          index atom (int a) {
 
             index t = all(0);
             t(0)=a;
             return t;
+
           }
 
-          operator index(){return all(0);}
+          operator index () {return all(0);}
 
       };
 
-      static factory D(int dim){
+      static factory D(int dim) {
 
         return factory(dim);
       }
@@ -343,7 +361,7 @@ namespace qpp{
   // Iterator allows you run through all (or some) atoms of this cell
   // and of surrounding cells
 
-  class iterator : public index{
+  class iterator : public index {
 
     protected:
       index a, b;
