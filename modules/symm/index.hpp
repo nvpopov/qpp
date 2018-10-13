@@ -346,7 +346,7 @@ namespace qpp {
       }
     else
 
-      __s << "()";
+      __s << "(0)";
     return __os << __s.str();
   }
 

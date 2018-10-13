@@ -210,15 +210,18 @@ namespace qpp{
       geometry<REAL, CELL> &geom,
       std::vector<geom_anim_record_t<REAL> > &anim
       /*std::vector<std::vector<qpp::vector3<REAL> > > &vel_list,
-          std::vector<REAL> &toten,
-          std::vector<REAL> &temperature*/){
+              std::vector<REAL> &toten,
+              std::vector<REAL> &temperature*/){
 
     STRING inps;
 
-    bool state_atom_types_filled = false;
-    bool state_atom_num_filled   = false;
-    bool state_first_cell_parsed = false;
-    bool state_parse_geom_data   = false;
+    bool state_atom_types_filled{false};
+    bool state_atom_num_filled{false};
+    bool state_first_cell_parsed{false};
+    bool state_parse_geom_data{false};
+    bool state_ibrion_parsed{false};
+
+
 
     std::vector<STRING> atom_types;
     std::vector<size_t> atom_count;
@@ -230,8 +233,6 @@ namespace qpp{
     anim_static.frame_data.resize(1);
 
     geom_anim_record_t<REAL> anim_md;
-    anim_md.m_anim_name = "md_outcar";
-    anim_md.m_anim_type = geom_anim_type::anim_md;
 
     int total_frames = 0;
     int local_atom_count = 0;
@@ -240,6 +241,22 @@ namespace qpp{
     while(std::getline(inp, inps)){
 
         bool state_line_checked = false;
+
+        if (!state_ibrion_parsed && !state_line_checked)
+          if (inps.find("IBRION") != std::string::npos) {
+              std::string_view ibrion_line(inps);
+              std::vector<std::string_view> ibrion_splt = split_sv(inps, " ");
+              uint8_t ibrion = std::atoi(ibrion_splt[2].data());
+              if (ibrion == 0) {
+                  anim_md.m_anim_name = "vasp_md";
+                  anim_md.m_anim_type = geom_anim_type::anim_md;
+                } else {
+                  anim_md.m_anim_name = "vasp_relax";
+                  anim_md.m_anim_type = geom_anim_type::anim_geo_opt;
+                }
+              state_ibrion_parsed = true;
+              state_line_checked = true;
+            }
 
         if (!state_atom_types_filled && !state_line_checked)
           if (inps.find("VRHFIN") != std::string::npos){
@@ -292,9 +309,9 @@ namespace qpp{
               std::getline(inp, inps);
               local_atom_count = 0;
 
-//              qpp::periodic_cell<REAL> cell(cells[total_frames-1][0],
-//                  cells[total_frames-1][1],
-//                  cells[total_frames-1][2]);
+              //              qpp::periodic_cell<REAL> cell(cells[total_frames-1][0],
+              //                  cells[total_frames-1][1],
+              //                  cells[total_frames-1][2]);
 
               anim_md.frame_data.resize(anim_md.frame_data.size()+1);
               anim_md.frame_data[anim_md.frame_data.size()-1].reserve(atom_lookup_v.size());
@@ -317,17 +334,17 @@ namespace qpp{
             state_line_checked = true;
           }
 
-//        if (inps.find("total energy   ETOTAL =") != std::string::npos && !state_line_checked){
-//            std::vector<STRING> etotal = split(inps);
-//            REAL etotal_val = 0.0;
-//            state_line_checked = true;
-//          }
+        //        if (inps.find("total energy   ETOTAL =") != std::string::npos && !state_line_checked){
+        //            std::vector<STRING> etotal = split(inps);
+        //            REAL etotal_val = 0.0;
+        //            state_line_checked = true;
+        //          }
 
-//        if (inps.find("kin. lattice  EKIN_LAT=") != std::string::npos && !state_line_checked){
-//            std::vector<STRING> temp_l = split(inps);
-//            REAL temp_val = 0.0;
-//            state_line_checked = true;
-//          }
+        //        if (inps.find("kin. lattice  EKIN_LAT=") != std::string::npos && !state_line_checked){
+        //            std::vector<STRING> temp_l = split(inps);
+        //            REAL temp_val = 0.0;
+        //            state_line_checked = true;
+        //          }
 
       } //end while
 
@@ -350,7 +367,7 @@ namespace qpp{
             float min_dist = 100.0f;
             vector3<REAL> goal_vector = anim_md.frame_data[i][ac];
             for (iterator idx(index::D(geom.DIM).all(-1),
-                            index::D(geom.DIM).all(1)); !idx.end(); idx++ ) {
+                              index::D(geom.DIM).all(1)); !idx.end(); idx++ ) {
                 vector3<REAL> t_pos_cf = geom.cell.transform(anim_md.frame_data[i][ac], idx);
                 REAL dist = (anim_md.frame_data[i-1][ac] - t_pos_cf).norm();
                 if (dist < min_dist) {
