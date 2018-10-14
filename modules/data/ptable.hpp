@@ -15,8 +15,6 @@
 namespace py = pybind11;
 #endif
 
-using namespace std;
-
 namespace qpp {
 
     const uint PTABLE_ELEM_N = 100;
@@ -51,7 +49,7 @@ namespace qpp {
         uint          aNValenceElec;
         vector3<float> aColorJmol, aColorGV, aColorCPK;
         //(1,"s",2),(2,"s",3)
-        vector<std::tuple<int,std::string,int> > aElecConf;
+        std::vector<std::tuple<int,std::string,int> > aElecConf;
 
     };
 
@@ -61,8 +59,8 @@ namespace qpp {
 
         static ptable *instance;
 
-        map<string, uint> cache_atom_idx;
-        array<ptable_atom_record, PTABLE_ELEM_N> arecs;
+        std::map<std::string, uint> cache_atom_idx;
+        std::array<ptable_atom_record, PTABLE_ELEM_N> arecs;
 
         static ptable* get_inst () {
 
@@ -106,62 +104,62 @@ namespace qpp {
 
         }
 
-        static optional<uint> number_by_name (const STRING& name) {
+        static std::optional<uint> number_by_name (const STRING& name) {
 
             ptable *table = ptable::get_inst();
             for (int i = 0; i < PTABLE_ELEM_N; i++)
                 if (table->arecs[i].aName == name)
-                    return optional<uint>(i+1);
-            return nullopt;
+                    return std::optional<uint>(i+1);
+            return std::nullopt;
 
         }
 
-        static optional<uint> number_by_symbol (const STRING& symbol) {
+        static std::optional<uint> number_by_symbol (const STRING& symbol) {
 
             ptable *table = ptable::get_inst();
             if ( table->cache_atom_idx.find(symbol) ==
                  table->cache_atom_idx.end() ) {
-              return nullopt;
+              return std::nullopt;
             } else {
-              return optional<uint>(table->cache_atom_idx[symbol]);
+              return std::optional<uint>(table->cache_atom_idx[symbol]);
             }
-            return nullopt;
+            return std::nullopt;
 
         }
 
-        static optional<float> mass_by_number (const uint number) {
+        static std::optional<float> mass_by_number (const uint number) {
 
             ptable *table = ptable::get_inst();
             if (number >= 1 && number < PTABLE_ELEM_N)
-                return optional<float>(table->arecs[number-1].aMass);
-            else return nullopt;
+                return std::optional<float>(table->arecs[number-1].aMass);
+            else return std::nullopt;
 
         }
 
-        static optional<float> ionic_rad_by_number (const uint number) {
+        static std::optional<float> ionic_rad_by_number (const uint number) {
 
             ptable *table = ptable::get_inst();
             if (number >= 1 && number < PTABLE_ELEM_N)
-                return optional<float>(table->arecs[number-1].aIonicRadius);
-            else return nullopt;
+                return std::optional<float>(table->arecs[number-1].aIonicRadius);
+            else return std::nullopt;
 
         }
 
-        static optional<float> cov_rad_by_number (const uint number) {
+        static std::optional<float> cov_rad_by_number (const uint number) {
 
             ptable *table = ptable::get_inst();
             if (number >= 1 && number < PTABLE_ELEM_N)
-                return optional<float>(table->arecs[number-1].aCovRad_Slater);
-            else return nullopt;
+                return std::optional<float>(table->arecs[number-1].aCovRad_Slater);
+            else return std::nullopt;
 
         }
 
-        static optional<float> vdw_rad_by_number (const uint number) {
+        static std::optional<float> vdw_rad_by_number (const uint number) {
 
             ptable *table = ptable::get_inst();
             if (number >= 1 && number < PTABLE_ELEM_N)
-                return optional<float>(table->arecs[number-1].aVdWRadius);
-            else return nullopt;
+                return std::optional<float>(table->arecs[number-1].aVdWRadius);
+            else return std::nullopt;
 
         }
 
