@@ -32,10 +32,11 @@ namespace qpp{
     short int iCoordStartIdx = -1;
 
     while((std::getline(inp, s)) || (bFinishParsing)){
+
         STRING lower_s = tolower(s);
         bLineChecked = false;
 
-        if ((lower_s.find("vectors") != std::string::npos) && (!bLineChecked)){
+        if (lower_s.find("vectors") != std::string::npos && !bLineChecked) {
             for (int i = 0; i<3; i++){
                 std::getline(inp, s);
                 qpp::vector3<REAL> cellv = vec_from_string<REAL>(s);
@@ -44,22 +45,24 @@ namespace qpp{
             bLineChecked = true;
           }
 
-        if ((lower_s.find("frac") != std::string::npos) && (!bLineChecked)){
+        if (lower_s.find("frac") != std::string::npos && !bLineChecked) {
             bParseGeometry = true;
             bLineChecked = true;
             geom.frac = true;
           }
 
-        if ((bParseGeometry) && (!bLineChecked)){
+        if (bParseGeometry && !bLineChecked){
             std::vector<STRING> geom_l = split(s);
             if (iSavedARecordSize == -1) iSavedARecordSize = geom_l.size();
             if (iSavedARecordSize != -1)
               if (iSavedARecordSize == geom_l.size()) {
                   //Determine coordinate index
                   if ((geom_l[1].find("core") != std::string::npos) ||
-                      (geom_l[1].find("shell") != std::string::npos))
-                    iCoordStartIdx = 2;
-                  else iCoordStartIdx = 1;
+                      (geom_l[1].find("shell") != std::string::npos)) {
+                      iCoordStartIdx = 2;
+                    }
+                  else { iCoordStartIdx = 1;
+                    }
                   geom.add(geom_l[0], vec_from_string<REAL>(s,
                                                             iCoordStartIdx,
                                                             iCoordStartIdx+1,
@@ -91,8 +94,8 @@ namespace qpp{
                                "core",
                                2.0,
                                geom.pos(q)[0],
-                               geom.pos(q)[1],
-                               geom.pos(q)[2]) << std::endl;
+          geom.pos(q)[1],
+          geom.pos(q)[2]) << std::endl;
   }
 }
 

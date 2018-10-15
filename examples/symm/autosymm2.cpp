@@ -26,13 +26,13 @@ int main(){
   std::cout << "inv= ";
   std::cin >> inv;
   inv /= std::abs(inv);
-  
+
   R = RotMtrx(n,phi)*inv;
 
   std::cout << "R = " << R << " T= " << T << "\n";
 
-  linear3d_subspace<double> L = invariant_subspace(rotrans<double>(T,R));
+  std::optional<linear3d_subspace<double> > L = invariant_subspace(rotrans<double>(T,R));
 
-  std::cout << "dim= " << L.dim << " pt= " << L.pt << " n= " << L.n << "\n";
+  if (L) std::cout << "dim= " << (*L).dim << " pt= " << (*L).pt << " n= " << (*L).n << "\n";
 }
 

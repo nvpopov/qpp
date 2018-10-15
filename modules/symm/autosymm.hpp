@@ -1,5 +1,5 @@
-#ifndef _QPP_AUTOSYMM_H
-#define _QPP_AUTOSYMM_H
+#ifndef QPP_AUTOSYMM_H
+#define QPP_AUTOSYMM_H
 
 #include <geom/geom.hpp>
 #include <geom/ngbr.hpp>
@@ -8,6 +8,7 @@
 #include <symm/transform.hpp>
 #include <symm/group_theory.hpp>
 #include <symm/spgw.hpp>
+#include <data/compiler_fallback.hpp>
 #include <Eigen/Dense>
 #include <algorithm>
 #include <iomanip>
@@ -20,21 +21,21 @@ namespace py = pybind11;
 #endif
 
 namespace qpp{
-  
+
   template<class REAL, class CELL>
-  bool equiv_geoms( std::vector<int> & ord,
+  bool equiv_geoms (std::vector<int> & ord,
                     const geometry<REAL,CELL> & g1,
                     const geometry<REAL,CELL> & g2,
-                    REAL R = geometry<REAL,CELL>::tol_geom_default)
-  {
+                    REAL R = geometry<REAL,CELL>::tol_geom_default) {
+
     if (g1.nat() != g2.nat() )
       return false;
 
     int N = g1.nat();
-    
+
     // fixme - inefficient for large molecules, N^2 scaling
     ord.clear();
-    
+
     for (int i = 0; i < N; i++){
         bool found = false;
         for (int j = 0; j < N; j++)
@@ -53,16 +54,17 @@ namespace qpp{
   }
 
   template<class REAL, class CELL>
-  bool equiv_geoms( const geometry<REAL,CELL> & g1,
+  bool equiv_geoms (const geometry<REAL,CELL> & g1,
                     const geometry<REAL,CELL> & g2,
-                    REAL R = geometry<REAL,CELL>::tol_geom_default){
+                    REAL R = geometry<REAL,CELL>::tol_geom_default) {
     std::vector<int> ord;
     return equiv_geoms(ord,g1,g2,R);
   }
 
   template<class REAL, class CELL>
-  bool has_symmetry( geometry<REAL,CELL> & geom, CELL & symm,
-                     REAL R = geometry<REAL,CELL>::tol_geom_default){
+  bool has_symmetry (geometry<REAL,CELL> & geom, CELL & symm,
+                     REAL R = geometry<REAL,CELL>::tol_geom_default) {
+
     CELL cell = geom.cell;
     geom.cell = symm;
     geom.DIM = symm.DIM;
@@ -70,7 +72,7 @@ namespace qpp{
     bonding_table<REAL> b;
     b.default_distance = R;
     neighbours_table<REAL,CELL> ngbr(geom,b);
-    
+
     ngbr.build();
 
     bool res = true;
@@ -106,16 +108,16 @@ namespace qpp{
             //break;
           }
       }
-    
+
     geom.cell = cell;
     geom.DIM = cell.DIM;
     return res;
   }
 
   template<class REAL>
-  bool best_transform( matrix3<REAL> & res,
+  bool best_transform (matrix3<REAL> & res,
                        const std::vector<vector3<REAL> > &a,
-                       const std::vector<vector3<REAL> > &b){
+                       const std::vector<vector3<REAL> > &b) {
     REAL eps = tol_equiv;
 
     matrix3<REAL> C = matrix3<REAL>::Zero();
@@ -162,19 +164,22 @@ namespace qpp{
   }
 
   template<class REAL>
-  void rotate_pair( matrix3<REAL> & R,
+  void rotate_pair (matrix3<REAL> & R,
                     const vector3<REAL> & a1, const vector3<REAL> & a2,
-                    const vector3<REAL> & b1, const vector3<REAL> & b2){
+                    const vector3<REAL> & b1, const vector3<REAL> & b2) {
+
     vector3<REAL> a3 = a1.cross(a2), b3 = b1.cross(b2);
     a3 *= std::sqrt(a1.norm()*a2.norm())/(a3.norm());
     b3 *= std::sqrt(b1.norm()*b2.norm())/(b3.norm());
-    
+
     best_transform(R,{a1,a2,a3},{b1,b2,b3});
+
   }
 
   template<class REAL>
-  void analyze_transform(vector3<REAL> & axis, REAL & phi, bool & inversion,
-                         const matrix3<REAL> & R){
+  void analyze_transform (vector3<REAL> & axis, REAL & phi, bool & inversion,
+                          const matrix3<REAL> & R) {
+
     REAL eps = tol_equiv;
     vector3<typename numeric_type<REAL>::complex> e, nax;
     matrix3<typename numeric_type<REAL>::complex> n;
@@ -196,7 +201,7 @@ namespace qpp{
     int i0 = 3 - i1 - i2;
 
     // std::cout << " i0, i1, i2= " << i0 << " " << i1 << " " << i2 << " eigvals= " << e << "\n";
-    
+
     if (i1==i2){
         i0=0;
         for (int i=0; i<3; i++)
@@ -208,12 +213,12 @@ namespace qpp{
           }
         i2 = 3 - i1 - i0;
       }
-    
+
 
     //std::cout << " i0, i1, i2= " << i0 << " " << i1 << " " << i2 << " eigvals= " << e << "\n";
 
     nax = n.row(i0);
-    
+
     int i=0;
     if ( std::abs(nax(i))<std::abs(nax(1))) i=1;
     if ( std::abs(nax(i))<std::abs(nax(2))) i=2;
@@ -228,7 +233,7 @@ namespace qpp{
     axis(0) = nax(0).real();
     axis(1) = nax(1).real();
     axis(2) = nax(2).real();
-    
+
     REAL cos = e[i1].real();
     if (cos > REAL(1))
       phi = 0;
@@ -243,216 +248,219 @@ namespace qpp{
     if ( (R1-_m1).norm() > (R1-_m2).norm() )
       axis *= -REAL(1);
   }
-  
+
 
 
   // ------------------------------------------------------
   class permutation{
-    std::vector<int> p;
-    
-  public:
-    
-    int N;
-    
-    //static permutation unity;
-    
-    permutation(int _N){
-      N = _N;
-      for (int i=0; i<N; i++)
-        p.push_back(i);
-    }
 
-    permutation(const permutation & b){
-      //std::cout << "copy constructor\n";
-      N = b.N;
-      for (int i : b.p)
-        p.push_back(i);
-    }
+      std::vector<int> p;
 
-    permutation(const std::vector<int> & li){
-      //std::cout << "list constructor\n";
-      N = li.size();
-      for (int j : li)
-        p.push_back(j);
+    public:
 
-      /*
+      int N;
+
+      //static permutation unity;
+
+      permutation(int _N){
+        N = _N;
+        for (int i=0; i<N; i++)
+          p.push_back(i);
+      }
+
+      permutation(const permutation & b){
+        //std::cout << "copy constructor\n";
+        N = b.N;
+        for (int i : b.p)
+          p.push_back(i);
+      }
+
+      permutation(const std::vector<int> & li){
+        //std::cout << "list constructor\n";
+        N = li.size();
+        for (int j : li)
+          p.push_back(j);
+
+        /*
         for (int j=0; j<N; j++)
         std::cout << p[j] << " ";
         std::cout << std::endl;
       */
-    }
-    
-    inline int operator[](int i) const
-    { return p[i];}
-    
-    inline int & operator[](int i)
-    { return p[i];}
-    
-    inline int size() const
-    {return p.size();}
-    
-    inline permutation operator*(const permutation & b) const{
-      /*
+      }
+
+      inline int operator[](int i) const
+      { return p[i];}
+
+      inline int & operator[](int i)
+      { return p[i];}
+
+      inline int size() const
+      {return p.size();}
+
+      inline permutation operator*(const permutation & b) const{
+        /*
     print();
     std::cout << "*";
     b.print();
     std::cout << "\n";
       */
-      if (N!=b.N)
-        IndexError("Permutations have different dimensions");
-      permutation res(N);
-      for (int i=0; i<N; i++)
-        res[i] = p[b[i]];
-      return res;
-    }
+        if (N != b.N) IndexError("Permutations have different dimensions");
+        permutation res(N);
+        for (int i=0; i<N; i++) res[i] = p[b[i]];
+        return res;
+      }
 
-    inline bool operator==(const permutation & b) const{
-      if (N!=b.N)
-        return false;
-      bool res=true;
-      for (int i=0; i<N; i++)
-        if (p[i] != b[i])
-          {
-            res = false;
-            break;
-          }
-      return res;
-    }
+      inline bool operator== (const permutation & b) const {
 
-    inline bool operator!=(const permutation & b) const{
-      return ! ((*this)==b);
-    }
+        if (N!=b.N) return false;
+        bool res=true;
+        for (int i=0; i<N; i++)
+          if (p[i] != b[i]) {
+              res = false;
+              break;
+            }
+        return res;
 
-    int order(){
-      int n=1;
-      permutation P = (*this)*(*this);
-      while (*this != P) n++;
-      return n;
-    }
+      }
 
-    void print() const{
-      std::cout << "(";
-      for (int i:p)
-        std::cout << i << " ";
-      std::cout <<")";
-    }
-    
+      inline bool operator!= (const permutation & b) const {
+        return ! ((*this) == b);
+      }
+
+      int order () {
+        int n=1;
+        permutation P = (*this)*(*this);
+        while (*this != P) n++;
+        return n;
+      }
+
+      void print () const {
+        std::cout << "(";
+        for (int i:p) std::cout << i << " ";
+        std::cout <<")";
+      }
+
   };
 
   // -------------------------------------------------------------
 
   template <class REAL>
-  struct linear3d_subspace{
+  struct linear3d_subspace {
 
-    int dim;
-    vector3<REAL> pt, n;
+      int dim;
+      vector3<REAL> pt, n;
 
-    linear3d_subspace(int __dim, const vector3<REAL> & __pt,
-                      const vector3<REAL> & __n = vector3<REAL>(0)){
-      dim = __dim;
-      pt = __pt;
-      n = __n.normalized();
-    }
+      linear3d_subspace (int __dim, const vector3<REAL> & __pt,
+                         const vector3<REAL> & __n = vector3<REAL>(0)) {
+        dim = __dim;
+        pt = __pt;
+        n = __n.normalized();
+      }
 
-    bool within(const vector3<REAL> & x) const{
-      if (dim == -1)
-        return false;
-      else if (dim == 0)
-        return (pt - x).norm() < tol_equiv;
-      else if (dim == 1){
-          vector3<REAL> y = x - pt;
-          y = y - n*(y.dot(n));
-          return y.norm() < tol_equiv;
-        }
-      else if (dim == 2){
-          vector3<REAL>  y = x - pt;
-          return std::abs(y.dot(n)) < tol_equiv;
-        }
-      else if (dim == 3)
-        return true;
-    }
+      bool within (const vector3<REAL> & x) const {
+        if (dim == -1) return false;
+        else if (dim == 0)
+          return (pt - x).norm() < tol_equiv;
+        else if (dim == 1) {
+            vector3<REAL> y = x - pt;
+            y = y - n*(y.dot(n));
+            return y.norm() < tol_equiv;
+          }
+        else if (dim == 2){
+            vector3<REAL>  y = x - pt;
+            return std::abs(y.dot(n)) < tol_equiv;
+          }
+        else if (dim == 3)
+          return true;
+      }
 
-    bool operator==(const linear3d_subspace<REAL> & L ) const{
-      if (L.dim != dim)
-        return false;
-      if (dim == 0)
-        return (pt-L.pt).norm() < tol_equiv;
-      else if ( dim == 1 or dim == 2)
-        return ((n-L.n).norm() < tol_equiv ) and within(L.pt);
-      else if (dim == -1 or dim == 3)
-        return true;
-    }
+      bool operator== (const linear3d_subspace<REAL> & L ) const {
+        if (L.dim != dim)
+          return false;
+        if (dim == 0)
+          return (pt-L.pt).norm() < tol_equiv;
+        else if ( dim == 1 or dim == 2)
+          return ((n-L.n).norm() < tol_equiv ) and within(L.pt);
+        else if (dim == -1 or dim == 3)
+          return true;
+      }
 
-    bool operator!=(const linear3d_subspace<REAL> & L ) const{
-      return !(*this == L);
-    }
+      bool operator!= (const linear3d_subspace<REAL> & L ) const {
+        return !(*this == L);
+      }
 
-    linear3d_subspace<REAL> operator&(const linear3d_subspace<REAL> & L) const{
-      int d1,d2;
-      vector3<REAL> p1,p2,n1,n2;
+      linear3d_subspace<REAL> operator& (const linear3d_subspace<REAL> & L) const {
 
-      if ( dim > L.dim ){
-          d1 = dim; d2 = L.dim;
-          p1 = pt;  p2 = L.pt;
-          n1 = n;   n2 = L.n;
-        }
-      else{
-          d1 = L.dim; d2 = dim;
-          p1 = L.pt;  p2 = pt;
-          n1 = L.n;   n2 = n;
-        }
+        int d1,d2;
+        vector3<REAL> p1,p2,n1,n2;
 
-      if (d1 == 3)
-        return linear3d_subspace<REAL>(d2,p2,n2);
-      if (d2 == -1)
-        return linear3d_subspace<REAL>(-1,vector3<REAL>(0,0,0));
-      if  (d2 == 0){
-          if ( linear3d_subspace(d1,p1,n1).within(p2) )
-            return linear3d_subspace<REAL>(0,p2);
-          else
-            return linear3d_subspace<REAL>(-1,vector3<REAL>(0,0,0));
-        }
-      if ( d1==1 and d2==1){
-          if  ( (n1-n2).norm() < tol_equiv or (n1+n2).norm() < tol_equiv){
-              if (linear3d_subspace<REAL>(d1,p1,n1).within(p2))
-                return *this;
-              else
-                return linear3d_subspace<REAL>(-1,vector3<REAL>(0,0,0));
-            }
-          else if (std::abs((p2-p1).dot(n1.cross(n2))) < tol_equiv){
-              REAL s = n1.dot(n2);
-              REAL x1 = ((n1 - s*n2).dot(p2-p1))/(1-s*s);
-              return linear3d_subspace<REAL>(0,p1+x1*n1);
-            }
-          else
-            return linear3d_subspace<REAL>(-1,vector3<REAL>(0,0,0));
-        }
-      if (d1==2 and d2==1){
-          if (std::abs(n1.dot(n2)) < tol_equiv){
-              if (std::abs(n1.dot(p2-p1)) < tol_equiv)
-                return linear3d_subspace<REAL>(1,p2,n2);
-              else
-                return linear3d_subspace<REAL>(-1,vector3<REAL>(0,0,0));
-            }
-          else
-            return  linear3d_subspace(0,p2+n2*n1.dot(p1-p2)/n1.dot(n2));
-        }
-      if (d1==2 and d2==2){
-          if ((n1-n2).norm() < tol_equiv or (n1+n2).norm() < tol_equiv){
-              if (std::abs(n1.dot(p1-p2)) < tol_equiv)
-                return *this;
-              else
-                return linear3d_subspace<REAL>(-1,vector3<REAL>(0,0,0));
-            }
-          else{
-              REAL s = n1.dot(n2);
-              vector3<REAL> nn = n1.cross(n2);
-              REAL x1 = (p1.dot(n1)-s*p2.dot(n2))/(1-s*s);
-              REAL x2 = (p2.dot(n2)-s*p1.dot(n1))/(1-s*s);
-              return linear3d_subspace<REAL>(1,x1*n1+x2*n2,nn);
-            }
-        }
-    }
+        if ( dim > L.dim ){
+            d1 = dim; d2 = L.dim;
+            p1 = pt;  p2 = L.pt;
+            n1 = n;   n2 = L.n;
+          }
+        else{
+            d1 = L.dim; d2 = dim;
+            p1 = L.pt;  p2 = pt;
+            n1 = L.n;   n2 = n;
+          }
+
+        if (d1 == 3)
+          return linear3d_subspace<REAL>(d2,p2,n2);
+
+        if (d2 == -1)
+          return linear3d_subspace<REAL>(-1,vector3<REAL>(0,0,0));
+
+        if  (d2 == 0){
+            if ( linear3d_subspace(d1,p1,n1).within(p2) )
+              return linear3d_subspace<REAL>(0,p2);
+            else
+              return linear3d_subspace<REAL>(-1,vector3<REAL>(0,0,0));
+          }
+
+        if ( d1 == 1 and d2 == 1) {
+            if ((n1-n2).norm() < tol_equiv or (n1+n2).norm() < tol_equiv) {
+                if (linear3d_subspace<REAL>(d1,p1,n1).within(p2))
+                  return *this;
+                else
+                  return linear3d_subspace<REAL>(-1,vector3<REAL>(0,0,0));
+              }
+            else if (std::abs((p2-p1).dot(n1.cross(n2))) < tol_equiv) {
+                REAL s = n1.dot(n2);
+                REAL x1 = ((n1 - s*n2).dot(p2-p1))/(1-s*s);
+                return linear3d_subspace<REAL>(0,p1+x1*n1);
+              }
+            else
+              return linear3d_subspace<REAL>(-1,vector3<REAL>(0,0,0));
+          }
+
+        if (d1 == 2 and d2 == 1) {
+            if (std::abs(n1.dot(n2)) < tol_equiv){
+                if (std::abs(n1.dot(p2-p1)) < tol_equiv)
+                  return linear3d_subspace<REAL>(1,p2,n2);
+                else
+                  return linear3d_subspace<REAL>(-1,vector3<REAL>(0,0,0));
+              }
+            else
+              return  linear3d_subspace(0,p2+n2*n1.dot(p1-p2)/n1.dot(n2));
+          }
+
+        if (d1 == 2 and d2 == 2) {
+            if ((n1-n2).norm() < tol_equiv or (n1+n2).norm() < tol_equiv){
+                if (std::abs(n1.dot(p1-p2)) < tol_equiv)
+                  return *this;
+                else
+                  return linear3d_subspace<REAL>(-1,vector3<REAL>(0,0,0));
+              }
+            else {
+                REAL s = n1.dot(n2);
+                vector3<REAL> nn = n1.cross(n2);
+                REAL x1 = (p1.dot(n1)-s*p2.dot(n2))/(1-s*s);
+                REAL x2 = (p2.dot(n2)-s*p1.dot(n1))/(1-s*s);
+                return linear3d_subspace<REAL>(1,x1*n1+x2*n2,nn);
+              }
+          }
+      }
 
   };
 
@@ -468,7 +476,7 @@ namespace qpp{
   // -------------------------------------------------------------
 
   template<class REAL>
-  linear3d_subspace<REAL> invariant_subspace(const rotrans<REAL,false> & R){
+  std::optional<linear3d_subspace<REAL> > invariant_subspace(const rotrans<REAL,false> & R){
     matrix3<typename numeric_type<REAL>::complex> n;
     vector3<typename numeric_type<REAL>::complex> lmb;
     diagon3d(lmb,n,R.R);
@@ -477,15 +485,16 @@ namespace qpp{
         T(R.T[0],R.T[1],R.T[2]),
         t(n.row(0).dot(T), n.row(1).dot(T), n.row(2).dot(T)),
         x(0,0,0);
+
     int d = 0, ni[3];
+
     for (int i=0; i<3; i++)
-      if ( abs(lmb[i]-REAL(1)) < tol_equiv){
-          if (abs(t[i]) < tol_equiv){
+      if (abs(lmb[i]-REAL(1)) < tol_equiv) {
+          if (abs(t[i]) < tol_equiv) {
               ni[d] = i;
               d++;
             }
-          else
-            return linear3d_subspace<REAL>(-1,vector3<REAL>(0,0,0));
+          else return std::optional<linear3d_subspace<REAL> >({ -1, vector3<REAL>(0,0,0) });
         }
       else
         x[i] = t[i]/(REAL(1)-lmb[i]);
@@ -495,17 +504,18 @@ namespace qpp{
     vector3<REAL> rc = vecreal(c);
 
     if (d==0)
-      return linear3d_subspace<REAL>(0,rc);
+      return std::optional<linear3d_subspace<REAL> >({ 0, rc});
     else if (d==1)
-      return linear3d_subspace<REAL>(1,rc,
-                                     vecreal<typename numeric_type<REAL>::complex>(
-                                       n.row(ni[0])));
+      return std::optional<linear3d_subspace<REAL> >({ 1, rc,
+                                     vecreal<typename numeric_type<REAL>::complex>(n.row(ni[0])) });
     else if (d==2)
-      return linear3d_subspace<REAL>(2,rc,
+      return std::optional<linear3d_subspace<REAL> >({ 2, rc,
                                      vecreal<typename numeric_type<REAL>::complex>(
-                                       n.row(ni[0]).cross(n.row(ni[1]))));
+                                       n.row(ni[0]).cross(n.row(ni[1]))) });
     else if (d==3)
-      return linear3d_subspace<REAL>(3,rc);
+      return std::optional<linear3d_subspace<REAL> >({ 3, rc });
+
+    return std::nullopt;
   }
 
 
@@ -518,7 +528,7 @@ namespace qpp{
                     const std::vector<rotrans<REAL,false> > &g){
     int i=0;
     while (i<subspaces.size() && subspaces[i] != s) i++;
-    
+
     //std::cout << "i= " << i << "\n";
 
     if (i<subspaces.size())
@@ -597,7 +607,7 @@ namespace qpp{
       }
 
     int M = same_axis.size();
-    
+
     // Correcting rotation angles
 
     phi[0] = REAL(0);
@@ -610,7 +620,7 @@ namespace qpp{
           phi[j] = REAL(pi)*2*k/A.order(j);
           //std::cout << " after " << phi[j] << "\n";
         }
-    
+
     // Correcting axes
 
     REAL eps = tol_equiv;
@@ -726,7 +736,7 @@ namespace qpp{
                 RotMtrx(exact_axis[i],phi[j])*gen_matrix<REAL>(1));
         }
 
-    
+
     /*
     for (int i=0; i<M; i++)
       {
@@ -754,13 +764,13 @@ namespace qpp{
       return true;
 
     REAL alp = std::acos(a1.dot(b1)/(aa1*bb1)), bet = std::acos(a2.dot(b2)
-                                                                 /(aa2*bb2)),
+                                                                /(aa2*bb2)),
         alp1 = std::acos((aa1*aa1+bb1*bb1-R*R)/(2*aa1*bb1)),
         alp2 = std::acos((aa2*aa2+bb2*bb2-R*R)/(2*aa2*bb2));
 
     if ( std::abs(alp-bet) > alp1 + alp2 )
       return false;
-    
+
     return true;
   }
 
@@ -939,7 +949,7 @@ namespace qpp{
           rj = g.pos(j);
 
           REAL cos_t = (g.pos(i).dot(g.pos(j))) /
-              (g.pos(i).norm() * g.pos(j).norm());
+                       (g.pos(i).norm() * g.pos(j).norm());
           if ( cos_t < REAL(-1) )
             cos_t = -REAL(1);
           if (cos_t > REAL(1) )
@@ -1027,7 +1037,7 @@ FOUND:
                 std::cout << "\n";
               }
         }
-    
+
     //   finitize_point_group(G.group,P,angle_error);
   }
 
@@ -1168,7 +1178,7 @@ FOUND:
                       //   if (j1 <= j)
 
                       REAL s1 = scal(g.pos(i1),g.pos(j1))/
-                          (norm(g.pos(i1))*norm(g.pos(j1)));
+                                (norm(g.pos(i1))*norm(g.pos(j1)));
 
                       if ( s1 > REAL(1) )  s1 = REAL(1);
                       if ( s1 < REAL(-1) ) s1 = REAL(-1);
@@ -1216,7 +1226,7 @@ FOUND:
                         }
                     }
             }
-    
+
     //finitize_point_group(G.group,P,angle_error);
 
   }
@@ -1285,7 +1295,7 @@ FOUND:
     for (int i=0; i<t1.size(); i++)
       if (t1[t].size()>t1[i].size())
         t=i;
-    
+
     //std::cout << "t= " << t << "\n";
 
     for (int i=0; i<t1[t].size(); i++){
@@ -1325,19 +1335,19 @@ FOUND:
                     goto FOUND;
                   }
 FOUND:
-	    if (!found){
-		is_transl = false;
-		break;
-	      }
-	  }
-	if (is_transl){
-	    vector3<REAL> dv = vector3<REAL>::Zero();
-	    for (int j=0; j < g.nat(); j++)
-	      dv += g2.pos(j) - g.pos(j);
-	    dv /= g.nat();
-	    transl.push_back(v+dv);
-	    perm.push_back(P);
-	  }
+            if (!found){
+                is_transl = false;
+                break;
+              }
+          }
+        if (is_transl){
+            vector3<REAL> dv = vector3<REAL>::Zero();
+            for (int j=0; j < g.nat(); j++)
+              dv += g2.pos(j) - g.pos(j);
+            dv /= g.nat();
+            transl.push_back(v+dv);
+            perm.push_back(P);
+          }
       }
 
     //debug
@@ -1416,7 +1426,7 @@ valid, if the displacement of atom due to
             G.add(S);
           }
       }
-    
+
   }
 
   /*! \brief Find the crystalline symmetry group
@@ -1447,10 +1457,10 @@ valid, if the displacement of atom due to
                             std::vector<vector3<REAL> > &cntrs,
                             std::vector<int> & dims,
                             const generated_group<rotrans<REAL,false> > & G){
-    
+
     std::vector<linear3d_subspace<REAL> > subspaces;
     std::vector<std::vector<rotrans<REAL,false> > > elements;
-    
+
     //std::cout << "find_point_subs:\n";
 
     for (const auto & g : G.group){
@@ -1465,7 +1475,7 @@ valid, if the displacement of atom due to
     for (int i=0; i<subspaces.size(); i++)
       std::cout << i << " d= " << subspaces[i].dim << " pt= " << subspaces[i].pt << " n= " << subspaces[i].n
                 << " ng= " << elements[i].size() << "\n";
-    
+
 
     for (int i=0; i<subspaces.size(); i++)
       if ( subspaces[i].dim == 0)
@@ -1477,13 +1487,13 @@ valid, if the displacement of atom due to
                 elements[i].push_back(gg);
 
     //debug
-    
+
     std::cout << "\n\n";
     for (int i=0; i<subspaces.size(); i++)
       std::cout << i << "d= " << subspaces[i].dim << " pt= "
                 << subspaces[i].pt << " n= " << subspaces[i].n
                 << " ng= " << elements[i].size() << "\n";
-    
+
     /*
     for (int i=0; i<subspaces.size(); i++)
       {
@@ -1546,7 +1556,7 @@ valid, if the displacement of atom due to
   bool py_best_transform( matrix3<REAL> & res,
                           const py::list &A, const py::list &B){
     std::vector<vector3<REAL> > a,b;
-    
+
     if (py::len(A) != py::len(B))
       IndexError("find_rotation:: different number of items int two lists");
 
@@ -1588,7 +1598,7 @@ valid, if the displacement of atom due to
     REAL phi;
     bool inversion;
     analyze_transform(axis,phi,inversion,R);
-    
+
     py::list res;
     res.append(axis);
     res.append(phi);

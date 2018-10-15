@@ -81,7 +81,7 @@ namespace qpp{
     generalized_cell(const generators_pack<TRANSFORM> & G) :
       generators_pack<TRANSFORM>(G)
     { init_default(); }
-    
+
     generalized_cell(const generalized_cell<REAL,TRANSFORM> & G) :
       generators_pack<TRANSFORM>(G)
     { init_default();}
@@ -96,7 +96,7 @@ namespace qpp{
       // Does not make sense for generalized_cell
       return true;
     }
-    
+
     /*
     // Brings the point r into the volume of unit cell
     // by translations
@@ -143,6 +143,7 @@ namespace qpp{
       // orthogonal to both translation vectors
 
       // Does not make sense for generalized_cell
+      return vector3<REAL>::Zero();
     }
 
     vector3<REAL> cart2frac(const vector3<REAL> & r) const{
@@ -152,6 +153,7 @@ namespace qpp{
       // orthogonal to both translation vectors
 
       // Does not make sense for generalized_cell
+      return vector3<REAL>::Zero();
     }
 
     virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const{
@@ -167,7 +169,7 @@ namespace qpp{
                      generators_pack<TRANSFORM>(){
 
       init_default();
-      
+
       DIM = py::len(G);
       for (int i=0; i<DIM; i++){
           /*  if (!py::cast<TRANSFORM>(G[i])())
@@ -182,7 +184,7 @@ namespace qpp{
     generalized_cell(const py::list & G):
       generators_pack<TRANSFORM>(){
       init_default();
-      
+
       DIM = py::len(G);
       for (int i=0; i<DIM; i++)
         {

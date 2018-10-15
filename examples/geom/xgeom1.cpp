@@ -5,10 +5,10 @@ using namespace qpp;
 
 int main()
 {
-  
+
   periodic_cell<float> cl(0);
 
-  xgeometry<float, periodic_cell<float> > 
+  xgeometry<float, periodic_cell<float> >
     G(cl,
       {"atom",      "number","charge",   "x","y","z",                    "optx","opty","optz",            "fullname"},
       {type_string, type_int, type_real, type_real, type_real, type_real,type_bool, type_bool, type_bool, type_string },
@@ -50,14 +50,15 @@ int main()
     {
       auto x = G[i];
       for (int j=0; j<x.size(); j++)
-	switch(x[j].type())
-	  {
-	  case type_int: std::cout << "(int)" << x[j].get<int>(); break;
-	  case type_float: std::cout << "(flt)" << x[j].get<float>(); break;
-	  case type_double: std::cout << "(dbl)" << x[j].get<double>(); break;
-	  case type_bool: std::cout << "(bool)" << x[j].get<bool>(); break;
-	  case type_string: std::cout << "(str)" << x[j].get<STRING>(); break;
-	  }
+  switch(x[j].type())
+    {
+    case type_int: std::cout << "(int)" << x[j].get<int>(); break;
+    case type_float: std::cout << "(flt)" << x[j].get<float>(); break;
+    case type_double: std::cout << "(dbl)" << x[j].get<double>(); break;
+    case type_bool: std::cout << "(bool)" << x[j].get<bool>(); break;
+    case type_string: std::cout << "(str)" << x[j].get<STRING>(); break;
+    default: break;
+    }
       std::cout << "\n";
     }
 }
