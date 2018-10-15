@@ -18,6 +18,7 @@ namespace qpp{
       aabb_3d_t<REAL>& operator=(const aabb_3d_t<REAL>& other){
         max = other.max;
         min = other.min;
+        return *this;
       }
 
       void shift(const vector3<REAL> &shift){
