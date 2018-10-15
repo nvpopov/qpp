@@ -513,7 +513,7 @@ namespace qpp{
                                      vecreal<typename numeric_type<REAL>::complex>(
                                        n.row(ni[0]).cross(n.row(ni[1]))) });
     else if (d==3)
-      return std::optional<linear3d_subspace<REAL> >({ 3, rc });
+      return std::optional<linear3d_subspace<REAL> >({ 3, rc});
 
     return std::nullopt;
   }
@@ -1466,7 +1466,7 @@ valid, if the displacement of atom due to
     for (const auto & g : G.group){
         auto s = invariant_subspace(g);
         //std::cout << "g= " << g << " s= " << "(" << s.dim << "," << s.pt << "," << s.n << ")\n";
-        add_subspace(subspaces,elements,s,{g});
+        add_subspace(subspaces,elements, *s,{g});
       }
 
     //debug
