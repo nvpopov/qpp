@@ -82,7 +82,7 @@ The supercell concept generalization for the geometry class looks like:
   */
 
   template <class REAL>
-  struct geometry_observer{
+  struct geometry_observer {
 
       virtual void added (before_after, const STRING &,
                           const vector3<REAL> &) =0;
@@ -105,7 +105,7 @@ The supercell concept generalization for the geometry class looks like:
   */
 
   template< class REAL, class CELL>
-  class geometry{
+  class geometry {
 
     public:
 

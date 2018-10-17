@@ -221,8 +221,6 @@ namespace qpp{
     bool state_parse_geom_data{false};
     bool state_ibrion_parsed{false};
 
-
-
     std::vector<STRING> atom_types;
     std::vector<size_t> atom_count;
     std::vector<std::array<qpp::vector3<REAL>, 3 > > cells;

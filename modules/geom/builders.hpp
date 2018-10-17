@@ -125,7 +125,8 @@ namespace qpp{
                  const CELLSRC & cell,
                  const index & begin,
                  const index & end,
-                 int mode = crowd_ignore){
+                 int mode = crowd_ignore) {
+
     bool xcopy = dst.is_xgeometry() && src.is_xgeometry();
 
     copy_header(dst,src);
@@ -136,7 +137,7 @@ namespace qpp{
 
     int ix,iy,iz;
     if (xsrc!=NULL)
-      for (int i=0; i<xsrc->nfields(); i++){
+      for (int i=0; i < xsrc->nfields(); i++) {
           STRING fn = xsrc -> field_name(i);
           if (fn=="x")
             ix = i;
@@ -145,12 +146,12 @@ namespace qpp{
           else if (fn=="z")
             iz = i;
         }
-    else{
+    else {
         ix = 1; iy=2; iz=3;
       }
 
-    for (int at = 0; at<src.nat(); at++)
-      if (!src.shadow(at)){
+    for (int at = 0; at < src.nat(); at++)
+      if (!src.shadow(at)) {
           std::vector<datum> v;
           src.get_fields(at,v);
           const vector3<REALSRC> & r = src.coord(at);

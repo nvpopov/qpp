@@ -61,7 +61,8 @@ namespace qpp{
                       (geom_l[1].find("shell") != std::string::npos)) {
                       iCoordStartIdx = 2;
                     }
-                  else { iCoordStartIdx = 1;
+                  else {
+                      iCoordStartIdx = 1;
                     }
                   geom.add(geom_l[0], vec_from_string<REAL>(s,
                                                             iCoordStartIdx,
