@@ -54,24 +54,25 @@ namespace qpp{
         if (bParseGeometry && !bLineChecked){
             std::vector<STRING> geom_l = split(s);
             if (iSavedARecordSize == -1) iSavedARecordSize = geom_l.size();
-            if (iSavedARecordSize != -1)
-              if (iSavedARecordSize == geom_l.size()) {
-                  //Determine coordinate index
-                  if ((geom_l[1].find("core") != std::string::npos) ||
-                      (geom_l[1].find("shell") != std::string::npos)) {
-                      iCoordStartIdx = 2;
-                    }
-                  else {
-                      iCoordStartIdx = 1;
-                    }
-                  geom.add(geom_l[0], vec_from_string<REAL>(s,
-                                                            iCoordStartIdx,
-                                                            iCoordStartIdx+1,
-                                                            iCoordStartIdx+2));
-                } else {
-                  bParseGeometry = false;
-                }
-            bLineChecked = true;
+            if (iSavedARecordSize != -1) {
+                if (iSavedARecordSize == geom_l.size()) {
+                    //Determine coordinate index
+                    if ((geom_l[1].find("core") != std::string::npos) ||
+                        (geom_l[1].find("shell") != std::string::npos)) {
+                        iCoordStartIdx = 2;
+                      }
+                    else {
+                        iCoordStartIdx = 1;
+                      }
+                    geom.add(geom_l[0], vec_from_string<REAL>(s,
+                                                              iCoordStartIdx,
+                                                              iCoordStartIdx+1,
+                                                              iCoordStartIdx+2));
+                  } else {
+                    bParseGeometry = false;
+                  }
+                bLineChecked = true;
+              }
           }
       }
   }

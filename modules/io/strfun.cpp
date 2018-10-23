@@ -118,7 +118,8 @@ namespace qpp{
      return pc;
   }
 
-  std::vector<std::string_view> split_sv (std::string_view strv, std::string_view delims){
+  std::vector<std::string_view> split_sv (std::string_view strv, std::string_view delims) {
+
       std::vector<std::string_view> output;
       size_t first = 0;
 

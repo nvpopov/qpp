@@ -214,7 +214,24 @@ namespace qpp{
   char *vec_str_to_char(const STRING & s);
   const char *vec_str_to_char_ref(const STRING & s);
 
+  template<typename charT>
+  struct ci_equal {
+      ci_equal( const std::locale& loc ) : loc_(loc) {}
+      bool operator() (charT ch1, charT ch2) {
+          return std::tolower(ch1, loc_) == std::tolower(ch2, loc_);
+      }
+  private:
+      const std::locale& loc_;
+  };
 
+  template<typename T>
+  bool find_string_ci( const T& str1, const T& str2, const std::locale& loc = std::locale()) {
+      typename T::const_iterator it = std::search( str1.begin(), str1.end(),
+          str2.begin(), str2.end(), ci_equal<typename T::value_type>(loc) );
+      if ( it != str1.end() ) return true/*it - str1.begin()*/;
+      else return false/*-1*/; // not found
+      return false;
+  }
 }
 
 #endif
