@@ -860,10 +860,10 @@ namespace qpp{
 
       py::class_<xgeometry<REAL,CELL>, geometry<REAL,CELL> >
           (m, pyname)
-          .def(py::init<int,   const STRING&>(),
-               py::arg("dim"), py::arg("__name") = "")
-          .def(py::init<CELL&, const STRING&>(),
-               py::arg("CELL"), py::arg("__name") = "")
+//          .def(py::init<int,   const STRING&>(),
+//               py::arg("dim"), py::arg("__name") = "")
+          .def(py::init<CELL&, const py::list &, const STRING&>(),
+               py::arg("CELL"), py::arg("f"), py::arg("__name") = "")
           .def_readwrite("field", & SELF::py_fields)
           .def_readwrite("additive", & SELF::py_add)
           .def("nfields", & SELF::nfields)
