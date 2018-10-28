@@ -39,7 +39,7 @@ namespace qpp {
     anim_static.frame_data.resize(1);
 
     std::getline(inp, s);
-    while (!inp.eof()){
+    while (!inp.eof()) {
         //std::cout << s << std::endl;
         nat = std::stoi(s);
         std::getline(inp, s);
@@ -58,7 +58,7 @@ namespace qpp {
 
             vector3<float> displ{x, y, z};
 
-            if(!bootstrap_geom){
+            if (!bootstrap_geom) {
                 std::string at_name = std::string(splt[0]);
                 if (!keep_pdb_like_names) pbd_name_reducer::eval_change(at_name);
                 geom.add(at_name, displ);

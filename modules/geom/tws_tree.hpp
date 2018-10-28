@@ -243,8 +243,8 @@ namespace qpp{
 
     private:
 
-      REAL m_guess_rect_size{6.0};
-      REAL m_min_tws_volume{65.0};
+      REAL m_guess_rect_size{12.0};
+      REAL m_min_tws_volume{265.0};
 
       geometry<REAL, CELL>                                       *geom{nullptr};
       tws_node_t<REAL, AINT>                                     *root{nullptr};
@@ -777,7 +777,7 @@ namespace qpp{
       void find_neighbours (AINT at_num) {
         find_neighbours(at_num, index::D(geom->DIM).all(0));
         if (m_build_imaginary_atoms_bonds)
-          for (int i = 0; i < m_img_atoms.size(); i++)
+          for (AINT i = 0; i < m_img_atoms.size(); i++)
             if (m_img_atoms[i].m_atm == at_num)
               find_neighbours(m_img_atoms[i].m_atm, m_img_atoms[i].m_idx);
       }
