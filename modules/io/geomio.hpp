@@ -66,9 +66,6 @@ namespace qpp {
 
     for (int i = 0; i < nat; i++) {
         std::getline(inp,s);
-        if (i == 0) {
-            // Analise the line, recognize .xyz type
-          }
         //	char s1[max_atomic_name_length];
         std::vector<std::string_view> splt = split_sv(s, " ");
         geom.add(
