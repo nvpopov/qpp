@@ -1,4 +1,4 @@
-from qpp_cpp import *
+from pyqpp import *
 from aux import overloader, tbl2clms, tbl2raws
 from symm import symm_add, build_multab, symm_order, symm_invert, is_symm_group, \
     is_normal_subgroup, mul_groups, idx2grp, grp2idx, abelian_sub, find_generators
@@ -121,7 +121,7 @@ def xgeometry_from_list(real,cell,fields,name=''):
 
     xgeom = gtypes[t](cell,fields,name)
 
-    for f in xrange(xgeom.nfields()):
+    for f in range(xgeom.nfields()):
         fname = xgeom.field_name(f)
         if not fname in ['atom','x','y','z']:
             setattr(xgeom,fname, xgeometry_field_attr(xgeom,f))
