@@ -11,18 +11,18 @@ namespace py = pybind11;
 #endif
 
 namespace qpp{
-  
+
   /*!\brief The generators_pack class implements
    * Positionary Generator Form (PGF) for arbitrary finite group.
   */
   template <class TRANSFORM>
   class generators_pack{
   public:
-    
+
     std::vector<TRANSFORM> generators;
     index _begin, _end;
     int DIM;
-    
+
     generators_pack(int dim=0){
       DIM=dim;
       generators.resize(DIM);
@@ -52,7 +52,7 @@ namespace qpp{
       _begin = index::D(DIM);
       _end   = index::D(DIM);
     }
-    
+
     generators_pack(const generators_pack<TRANSFORM> & G) :
       DIM(G.DIM), generators(G.generators), _begin(G._begin), _end(G._end)
     {}
@@ -62,7 +62,7 @@ namespace qpp{
     void set_dim(int D){
       DIM = D;
       generators.resize(DIM);
-      
+
       _begin = index::D(DIM);
       _end   = index::D(DIM);
     }
@@ -109,7 +109,7 @@ namespace qpp{
 
     inline index end() const
     { return _end;}
-    
+
   };
 
   // ------------------------------------------------------------------------
@@ -131,7 +131,7 @@ namespace qpp{
   template<class TRANSFORM>
   class generated_group{
   public:
-    
+
     std::vector<TRANSFORM> group;
 
     int index(const TRANSFORM & g){
@@ -185,8 +185,8 @@ namespace qpp{
                 TRANSFORM h2 = group[ig2]*group[ig1];
 
                 //std::cout << "h2= " << h2 << "\n";
-
-                if (!(h2 == h1) && index(h2)==-1)
+                //if (!(h2 == h1) && index(h2)==-1)
+                if ((h2 != h1) && index(h2) == -1)
                   group.push_back(h2);
               }
           //std::cout << inew << " " << inewest << "\n";
@@ -231,9 +231,9 @@ namespace qpp{
     }
 
 #endif
-    
+
   };
-  
+
 }
 
 #endif

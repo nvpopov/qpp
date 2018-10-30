@@ -143,7 +143,7 @@ namespace qpp{
       // orthogonal to both translation vectors
 
       // Does not make sense for generalized_cell
-      return vector3<REAL>::Zero();
+      return r;
     }
 
     vector3<REAL> cart2frac(const vector3<REAL> & r) const{
@@ -153,7 +153,7 @@ namespace qpp{
       // orthogonal to both translation vectors
 
       // Does not make sense for generalized_cell
-      return vector3<REAL>::Zero();
+      return r;
     }
 
     virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const{

@@ -1,5 +1,5 @@
-#ifndef _QPP_CELL_H
-#define _QPP_CELL_H
+#ifndef QPP_CELL_H
+#define QPP_CELL_H
 
 #include <geom/lace3d.hpp>
 #include <symm/index.hpp>
@@ -59,7 +59,7 @@ namespace qpp{
 
       //! \brief Create periodic cell of dimension dim with zero
       //!  translation vectors
-      periodic_cell(int dim){
+      periodic_cell (int dim) {
         DIM = dim;
         v = new vector3<REAL>[DIM];
         for (int d=0; d<DIM; d++)
@@ -67,7 +67,7 @@ namespace qpp{
       }
 
       //! \brief Copy constructor for periodic cell
-      periodic_cell(const periodic_cell<REAL> & cl){
+      periodic_cell (const periodic_cell<REAL> & cl) {
         DIM = cl.DIM;
         v = new vector3<REAL>[DIM];
         for(int i=0; i<DIM; i++)
@@ -80,7 +80,7 @@ namespace qpp{
         @param a,b,c - lattice constants
         @param alpha, beta, gamma - angles are in degrees!
     */
-      periodic_cell(REAL a, REAL b, REAL c, REAL alpha, REAL beta, REAL gamma){
+      periodic_cell (REAL a, REAL b, REAL c, REAL alpha, REAL beta, REAL gamma) {
         DIM = 3;
         v = new vector3<REAL>[DIM];
         alpha *= pi/180;
@@ -100,13 +100,12 @@ namespace qpp{
         DIM==1, if two provided, then DIM==2, and if all
         three provided, you get DIM==3 periodic cell
     */
-      periodic_cell(vector3<REAL > a,
-                    vector3<REAL > b=0,
-                    vector3<REAL > c=0 ){
+      periodic_cell (vector3<REAL> a, vector3<REAL > b = 0, vector3<REAL> c = 0 ) {
+
         DIM = 1;
-        if ((b - vector3<REAL>::Zero()).isMuchSmallerThan(tol_equiv))
+        if ( !(b - vector3<REAL>::Zero()).isMuchSmallerThan(tol_equiv) )
           DIM = 2;
-        if ((c - vector3<REAL>::Zero()).isMuchSmallerThan(tol_equiv))
+        if ( !(c - vector3<REAL>::Zero()).isMuchSmallerThan(tol_equiv) )
           DIM = 3;
 
         v = new vector3<REAL>[DIM];
@@ -233,7 +232,7 @@ namespace qpp{
       inline vector3<REAL> operator()(int i) const
       { return v[i]; }
 
-      inline periodic_cell<REAL> & operator=(const periodic_cell<REAL> & cl){
+      inline periodic_cell<REAL> & operator=(const periodic_cell<REAL> & cl) {
         for(int i=0; i<DIM; i++)
           v[i] = cl.v[i];
         return *this;
@@ -244,7 +243,7 @@ namespace qpp{
        unit cell is defined as parallelepiped CENTRED in the
        coordinate origin
     */
-      inline vector3<REAL> reduce_cntr(const vector3<REAL> & r) const{
+      inline vector3<REAL> reduce_cntr(const vector3<REAL> & r) const {
         vector3<REAL> f = cart2frac(r);
         for (int i=0; i<DIM; i++){
             f(i) -= int(f(i));
@@ -256,7 +255,7 @@ namespace qpp{
       /*! \brief Brings r into Wigner-Zeitz unit cell
       fixme - not implemented yet!
     */
-      inline vector3<REAL> reduce_wz(vector3<REAL> r) const{
+      inline vector3<REAL> reduce_wz(vector3<REAL> r) const {
         return vector3<REAL>::Zero();
       }
 
@@ -264,7 +263,7 @@ namespace qpp{
       /*! \brief Answers the question whether r belongs to unit cell
      * centred at the coordinate origin
      */
-      inline bool within_centered(vector3<REAL> r) const{
+      inline bool within_centered(vector3<REAL> r) const {
         vector3<REAL> f = cart2frac(r);
         bool res = true;
         for (int d=0; d<DIM; d++)
@@ -367,8 +366,8 @@ namespace qpp{
 
   template<typename _CharT, class _Traits, class REAL>
   std::basic_ostream<_CharT, _Traits>&
-  operator<<(std::basic_ostream<_CharT, _Traits>& __os,
-             const periodic_cell<REAL> &cl){
+  operator<< (std::basic_ostream<_CharT, _Traits>& __os, const periodic_cell<REAL> &cl) {
+
     std::basic_ostringstream<_CharT, _Traits> __s;
     __s.flags(__os.flags());
     __s.imbue(__os.getloc());
@@ -378,6 +377,7 @@ namespace qpp{
       __s << "," << cl(d);
     __s << ")";
     return __os << __s.str();
+
   }
 
 }

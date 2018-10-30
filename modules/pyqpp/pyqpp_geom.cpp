@@ -1,11 +1,12 @@
 #include <pyqpp/pyqpp.hpp>
 #include <geom/geom.hpp>
 #include <symm/gcell.hpp>
+
 template<class REAL,class CELL>
-void py_geom_export(py::module m, const char * pyname)
-{
+void py_geom_export(py::module m, const char * pyname) {
+
   qpp::geometry<REAL,CELL>::py_props(m, pyname);
-  py::class_<qpp::geometry<REAL,CELL> >(m, pyname)
+  py::class_<qpp::geometry<REAL,CELL> >(m, pyname, py::dynamic_attr())
       .def(py::init<int,   const STRING&>(),
            py::arg("dim"), py::arg("__name") = "")
       .def(py::init<CELL&, const STRING&>(),
@@ -91,8 +92,7 @@ void py_geom_export(py::module m, const char * pyname)
 
 
 template<class REAL>
-void py_observer_export(py::module m, const char * pyname)
-{
+void py_observer_export(py::module m, const char * pyname) {
   py::class_<qpp::geometry_observer<REAL>,
       qpp::py_geometry_observer<REAL> >(m, pyname)
       .def(py::init<>())
@@ -104,7 +104,7 @@ void py_observer_export(py::module m, const char * pyname)
       ;
 }
 
-void pyqpp_geom_export(py::module m){
+void pyqpp_geom_export(py::module m) {
 
   py_geom_export<float,qpp::periodic_cell<float> >(m, "geometry_f");
   py_geom_export<float, qpp::generalized_cell<
@@ -126,7 +126,5 @@ void pyqpp_geom_export(py::module m){
       .value("before", qpp::before)
       .value("after",  qpp::after)
       ;
-
-
 
 }

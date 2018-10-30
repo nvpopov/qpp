@@ -859,7 +859,7 @@ namespace qpp{
           &SELF::py_setadd >::py_export(m, sPropNameAdd.c_str());
 
       py::class_<xgeometry<REAL,CELL>, geometry<REAL,CELL> >
-          (m, pyname)
+          (m, pyname, py::dynamic_attr())
 //          .def(py::init<int,   const STRING&>(),
 //               py::arg("dim"), py::arg("__name") = "")
           .def(py::init<CELL&, const py::list &, const STRING&>(),

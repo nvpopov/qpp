@@ -37,27 +37,27 @@ namespace qpp {
 
 
   template<int FIXED_N, int FIXED_M>
-  struct check_is_vector3{
+  struct check_is_vector3 {
     static const bool value = false;
   };
 
   template<>
-  struct check_is_vector3<3, 1>{
+  struct check_is_vector3<3, 1> {
     static const bool value = true;
   };
 
   template<int FIXED_N, int FIXED_M>
-  struct check_is_matrix3{
+  struct check_is_matrix3 {
     static const bool value = false;
   };
 
   template<>
-  struct check_is_matrix3<3, 3>{
+  struct check_is_matrix3<3, 3> {
     static const bool value = true;
   };
 
   template <typename VALTYPE, int N, int M>
-  class generic_matrix : public Eigen::Matrix<VALTYPE, N , M >{
+  class generic_matrix : public Eigen::Matrix<VALTYPE, N , M > {
   public:
     static typename numeric_type<VALTYPE>::norm tol_equiv;
     static generic_matrix unity;
@@ -66,49 +66,51 @@ namespace qpp {
 
     template<typename = std::enable_if<check_is_vector3<N , M>::value> >
     generic_matrix(VALTYPE x, VALTYPE y, VALTYPE z):
-      Eigen::Matrix<VALTYPE, N , M >(){
-      *this<<x,y,z;
+      Eigen::Matrix<VALTYPE, N , M >() {
+       (*this)(0) = x;
+       (*this)(1) = y;
+       (*this)(2) = z;
     }
 
     template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
     generic_matrix(const generic_matrix<VALTYPE, 3, 1> &v1,
                    const generic_matrix<VALTYPE, 3, 1> &v2,
                    const generic_matrix<VALTYPE, 3, 1> &v3):
-      Eigen::Matrix<VALTYPE, N , M >(){
+      Eigen::Matrix<VALTYPE, N , M >() {
       (*this).row(0) = v1;
       (*this).row(1) = v2;
       (*this).row(2) = v3;
     }
 
-    generic_matrix(VALTYPE xyz):Eigen::Matrix<VALTYPE, N , M >(){
+    generic_matrix(VALTYPE xyz):Eigen::Matrix<VALTYPE, N , M >() {
       (*this) = generic_matrix<VALTYPE, N , M>::Constant(N, M, xyz);
     }
 
     template<typename OtherDerived>
     generic_matrix(const Eigen::MatrixBase<OtherDerived>& other)
-      :Eigen::Matrix<VALTYPE, N , M >(other){ }
+      :Eigen::Matrix<VALTYPE, N , M >(other) { }
 
     template<typename OtherDerived>
-    generic_matrix& operator=(const Eigen::MatrixBase <OtherDerived>& other){
+    generic_matrix& operator=(const Eigen::MatrixBase <OtherDerived>& other) {
       this->Eigen::Matrix<VALTYPE, N , M >::operator=(other);
       return *this;
     }
 
-    inline bool operator==(const generic_matrix<VALTYPE, N , M> & b) const{
-      return ((*this) - b).norm() <=  tol_equiv;
+    inline bool operator==(const generic_matrix<VALTYPE, N , M> & b) const {
+      return (*this).isApprox(b, tol_equiv);
     }
 
-    inline bool operator!=(const generic_matrix<VALTYPE, N , M> &b) const{
+    inline bool operator!=(const generic_matrix<VALTYPE, N , M> &b) const {
       return ! ((*this)==b);
     }
 
     //template<typename = std::enable_if<check_is_vector3<N , M>::value> >
-    const STRING to_string_vec(){
+     STRING to_string_vec() const {
       return fmt::format("[{}, {}, {}]", (*this)[0], (*this)[1], (*this)[2]);
     }
 
     //template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
-    const STRING to_string_matr(){
+     STRING to_string_matr() const {
       return fmt::format("[{},\n {},\n {}]",
                          (*this).row(0),
                          (*this).row(1),
@@ -311,6 +313,16 @@ namespace qpp {
   template<class VALTYPE>
   using matrix3 = generic_matrix<VALTYPE, 3, 3>;
 
+//  template <typename VALTYPE>
+//  std::ostream& operator<< (std::ostream& stream, const vector3<VALTYPE> &gm) {
+//    stream << gm.to_string_vec();
+//  }
+
+//  template <typename VALTYPE>
+//  std::ostream& operator<< (std::ostream& stream, const matrix3<VALTYPE> &gm) {
+//    stream << gm.to_string_matr();
+//  }
+
   template<class VALTYPE>
   matrix3<VALTYPE> mat4_to_mat3(const matrix4<VALTYPE> _inmat){
     matrix3<VALTYPE> _res;
@@ -323,7 +335,9 @@ namespace qpp {
   template<class VALTYPE>
   vector3<VALTYPE> gen_vec3(VALTYPE x, VALTYPE y, VALTYPE z){
     vector3<VALTYPE> retvec;
-    retvec << x, y, z;
+    retvec(0) = x;
+    retvec(1) = y;
+    retvec(2) = z;
     return retvec;
   }
 
@@ -343,20 +357,33 @@ namespace qpp {
     matrix3<VALTYPE> m1 = Eigen::AngleAxis<VALTYPE>(phi, n).toRotationMatrix();
     return m1;
   }
+
   template<class VALTYPE>
   matrix3<VALTYPE> gen_matrix(const VALTYPE value){
     matrix3<VALTYPE> retm;
-    for (int i = 0; i < 9; i++) retm << value;
+    for (int i = 0; i < 3; i++)
+      for (int q = 0; q < 3; q++)
+        retm(i,q) = value;
     return retm;
   }
 
   template<class VALTYPE>
-  matrix3<VALTYPE> Sigma(const vector3<VALTYPE> & nn){
+  matrix3<VALTYPE> Sigma(const vector3<VALTYPE> & nn) {
+
     vector3<VALTYPE> n = nn.normalized();
     matrix3<VALTYPE> retm;
-    retm << 1e0 - 2*n(0)*n(0), -2*n(0)*n(1),      -2*n(0)*n(2),
-        -2*n(0)*n(1),      1e0 - 2*n(1)*n(1), -2*n(1)*n(2),
-        -2*n(0)*n(2),      -2*n(1)*n(2),      1e0 - 2*n(2)*n(2) ;
+    retm.row(0)[0] = 1e0 - 2*n(0)*n(0);
+    retm.row(0)[1] = -2*n(0)*n(1);
+    retm.row(0)[2] = -2*n(0)*n(2);
+
+    retm.row(1)[0] = -2*n(0)*n(1);
+    retm.row(1)[1] = 1e0 - 2*n(1)*n(1);
+    retm.row(1)[2] = -2*n(1)*n(2);
+
+    retm.row(2)[0] = -2*n(0)*n(2);
+    retm.row(2)[1] = -2*n(1)*n(2);
+    retm.row(2)[2] =  1e0 - 2*n(2)*n(2) ;
+
     return retm;
   }
 

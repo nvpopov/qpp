@@ -8,10 +8,9 @@
 using namespace qpp;
 
 void prnmtr(const matrix3<double> & M){
-  for (int i=0; i<3; i++)
-    {
+  for (int i=0; i<3; i++){
       for (int j=0; j<3; j++)
-        std::cout << fmt::format("{10.6f }", M(i,j));
+        std::cout << fmt::format("{} ", M(i,j));
       std::cout << std::endl;
     }
 }
@@ -20,15 +19,15 @@ int main(){
   auto C3 = RotMtrx({0,0,1},2*pi/3);
   auto Sig = Sigma<double>({0,1,0});
 
-  std::cout << "C3 = " << C3 << " Sig= " << Sig << "\n";
+  std::cout << "C3 = \n"<< C3.to_string_matr() << "\n Sig= \n" << Sig.to_string_matr()  << "\n";
 
   generators_pack<matrix3<double> > G({C3,Sig});
   std::vector<matrix3<double> > g;
 
   G.generate(g);
 
-  for (auto t : g)
-    std::cout << t << std::endl;
+  for (auto &t : g)
+    std::cout << t.to_string_matr() << std::endl;
 
   std::cout << "--------------------------------" << std::endl;
 
@@ -38,7 +37,7 @@ int main(){
   T.add( RotMtrx({1,-1,-1}, 2*pi/3) );
   T.add( RotMtrx({1,1,0}, pi) );
 
-  for (int i=0; i<T.size(); i++){
+  for (int i=0; i<T.size(); i++) {
       std::cout << i << std::endl;
       prnmtr(T[i]);
     }
@@ -51,17 +50,17 @@ int main(){
 
   std::cout << "Multiplication table:\n";
 
-  for (int i=0; i<g.size(); i++){
-      std::cout << fmt::format("{3i} |", i);
-      for (int j=0; j<g.size(); j++)
-        std::cout << fmt::format("{3i}  ", A.multab(i,j));
+  for (int i=0; i < g.size(); i++) {
+      std::cout << fmt::format("{} |", i);
+      for (int j=0; j < g.size(); j++)
+        std::cout << fmt::format("{}  ", A.multab(i,j));
       std::cout << std::endl;
     }
 
   std::cout << "N classes = " << A.n_classes() << "\n";
-  for (int c=0; c < A.n_classes(); c++){
+  for (int c=0; c < A.n_classes(); c++) {
       for (int j=0; j < A.class_size(c); j++)
-	std::cout << A.class_element(c,j) << " ";
+        std::cout << A.class_element(c,j) << " ";
       std::cout << std::endl;
     }
 }
