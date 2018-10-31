@@ -38,269 +38,269 @@ namespace qpp {
 
   template<int FIXED_N, int FIXED_M>
   struct check_is_vector3 {
-    static const bool value = false;
+      static const bool value = false;
   };
 
   template<>
   struct check_is_vector3<3, 1> {
-    static const bool value = true;
+      static const bool value = true;
   };
 
   template<int FIXED_N, int FIXED_M>
   struct check_is_matrix3 {
-    static const bool value = false;
+      static const bool value = false;
   };
 
   template<>
   struct check_is_matrix3<3, 3> {
-    static const bool value = true;
+      static const bool value = true;
   };
 
   template <typename VALTYPE, int N, int M>
   class generic_matrix : public Eigen::Matrix<VALTYPE, N , M > {
-  public:
-    static typename numeric_type<VALTYPE>::norm tol_equiv;
-    static generic_matrix unity;
+    public:
+      static typename numeric_type<VALTYPE>::norm tol_equiv;
+      static generic_matrix unity;
 
-    generic_matrix(void):Eigen::Matrix<VALTYPE, N , M >() {}
+      generic_matrix(void):Eigen::Matrix<VALTYPE, N , M >() {}
 
-    template<typename = std::enable_if<check_is_vector3<N , M>::value> >
-    generic_matrix(VALTYPE x, VALTYPE y, VALTYPE z):
-      Eigen::Matrix<VALTYPE, N , M >() {
-       (*this)(0) = x;
-       (*this)(1) = y;
-       (*this)(2) = z;
-    }
+      template<typename = std::enable_if<check_is_vector3<N , M>::value> >
+      generic_matrix(VALTYPE x, VALTYPE y, VALTYPE z):
+        Eigen::Matrix<VALTYPE, N , M >() {
+        (*this)(0) = x;
+        (*this)(1) = y;
+        (*this)(2) = z;
+      }
 
-    template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
-    generic_matrix(const generic_matrix<VALTYPE, 3, 1> &v1,
-                   const generic_matrix<VALTYPE, 3, 1> &v2,
-                   const generic_matrix<VALTYPE, 3, 1> &v3):
-      Eigen::Matrix<VALTYPE, N , M >() {
-      (*this).row(0) = v1;
-      (*this).row(1) = v2;
-      (*this).row(2) = v3;
-    }
+      template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
+      generic_matrix(const generic_matrix<VALTYPE, 3, 1> &v1,
+                     const generic_matrix<VALTYPE, 3, 1> &v2,
+                     const generic_matrix<VALTYPE, 3, 1> &v3):
+        Eigen::Matrix<VALTYPE, N , M >() {
+        (*this).row(0) = v1;
+        (*this).row(1) = v2;
+        (*this).row(2) = v3;
+      }
 
-    generic_matrix(VALTYPE xyz):Eigen::Matrix<VALTYPE, N , M >() {
-      (*this) = generic_matrix<VALTYPE, N , M>::Constant(N, M, xyz);
-    }
+      generic_matrix(VALTYPE xyz):Eigen::Matrix<VALTYPE, N , M >() {
+        (*this) = generic_matrix<VALTYPE, N , M>::Constant(N, M, xyz);
+      }
 
-    template<typename OtherDerived>
-    generic_matrix(const Eigen::MatrixBase<OtherDerived>& other)
-      :Eigen::Matrix<VALTYPE, N , M >(other) { }
+      template<typename OtherDerived>
+      generic_matrix(const Eigen::MatrixBase<OtherDerived>& other)
+        :Eigen::Matrix<VALTYPE, N , M >(other) { }
 
-    template<typename OtherDerived>
-    generic_matrix& operator=(const Eigen::MatrixBase <OtherDerived>& other) {
-      this->Eigen::Matrix<VALTYPE, N , M >::operator=(other);
-      return *this;
-    }
+      template<typename OtherDerived>
+      generic_matrix& operator=(const Eigen::MatrixBase <OtherDerived>& other) {
+        this->Eigen::Matrix<VALTYPE, N , M >::operator=(other);
+        return *this;
+      }
 
-    inline bool operator==(const generic_matrix<VALTYPE, N , M> & b) const {
-      return (*this).isApprox(b, tol_equiv);
-    }
+      inline bool operator==(const generic_matrix<VALTYPE, N , M> & b) const {
+        return (*this).isApprox(b, tol_equiv);
+      }
 
-    inline bool operator!=(const generic_matrix<VALTYPE, N , M> &b) const {
-      return ! ((*this)==b);
-    }
+      inline bool operator!=(const generic_matrix<VALTYPE, N , M> &b) const {
+        return ! ((*this)==b);
+      }
 
-    //template<typename = std::enable_if<check_is_vector3<N , M>::value> >
-     STRING to_string_vec() const {
-      return fmt::format("[{}, {}, {}]", (*this)[0], (*this)[1], (*this)[2]);
-    }
+      //template<typename = std::enable_if<check_is_vector3<N , M>::value> >
+      STRING to_string_vec() const {
+        return fmt::format("[{}, {}, {}]", (*this)[0], (*this)[1], (*this)[2]);
+      }
 
-    //template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
-     STRING to_string_matr() const {
-      return fmt::format("[{},\n {},\n {}]",
-                         (*this).row(0),
-                         (*this).row(1),
-                         (*this).row(2));
-    }
+      //template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
+      STRING to_string_matr() const {
+        return fmt::format("[{},\n {},\n {}]",
+                           (*this).row(0),
+                           (*this).row(1),
+                           (*this).row(2));
+      }
 
 
 
 #ifdef PY_EXPORT
-    static const generic_matrix<VALTYPE, N , M> identity_proxy(){
-      return generic_matrix<VALTYPE, N , M>::Identity();
-    }
+      static const generic_matrix<VALTYPE, N , M> identity_proxy(){
+        return generic_matrix<VALTYPE, N , M>::Identity();
+      }
 
-   // template<typename = std::enable_if<check_is_vector3<N , M>::value> >
-    const generic_matrix<VALTYPE, N , M> normalized_proxy(){
-      return (*this).normalized();
-    }
+      // template<typename = std::enable_if<check_is_vector3<N , M>::value> >
+      const generic_matrix<VALTYPE, N , M> normalized_proxy(){
+        return (*this).normalized();
+      }
 
-    const generic_matrix<VALTYPE, N , M> mul_proxy(const VALTYPE& other){
-      generic_matrix<VALTYPE, N , M> _tmv(
-            this->Eigen::Matrix<VALTYPE, N , M >::operator*(other));
-      return _tmv;
-    }
+      const generic_matrix<VALTYPE, N , M> mul_proxy(const VALTYPE& other){
+        generic_matrix<VALTYPE, N , M> _tmv(
+              this->Eigen::Matrix<VALTYPE, N , M >::operator*(other));
+        return _tmv;
+      }
 
-    const generic_matrix<VALTYPE, N , M> div_proxy(const VALTYPE& other){
-      generic_matrix<VALTYPE, N , M> _tmv(
-            this->Eigen::Matrix<VALTYPE, N , M >::operator/(other));
-      return _tmv;
-    }
+      const generic_matrix<VALTYPE, N , M> div_proxy(const VALTYPE& other){
+        generic_matrix<VALTYPE, N , M> _tmv(
+              this->Eigen::Matrix<VALTYPE, N , M >::operator/(other));
+        return _tmv;
+      }
 
-    const generic_matrix<VALTYPE, N , M> pow_proxy(const VALTYPE& other){
-      return (*this).pow(other);
-    }
+      const generic_matrix<VALTYPE, N , M> pow_proxy(const VALTYPE& other){
+        return (*this).pow(other);
+      }
 
-    const generic_matrix<VALTYPE, N , M> sum_proxy
-    (const generic_matrix<VALTYPE, N , M>& other){
-      generic_matrix<VALTYPE, N , M> _tmv(
-            this->Eigen::Matrix<VALTYPE, N , M >::operator+(other));
-      return _tmv;
-    }
+      const generic_matrix<VALTYPE, N , M> sum_proxy
+      (const generic_matrix<VALTYPE, N , M>& other){
+        generic_matrix<VALTYPE, N , M> _tmv(
+              this->Eigen::Matrix<VALTYPE, N , M >::operator+(other));
+        return _tmv;
+      }
 
-    const generic_matrix<VALTYPE, N , M> cross_product_proxy
-    (const generic_matrix& other){
-      return (*this).cross(other);
-    }
+      const generic_matrix<VALTYPE, N , M> cross_product_proxy
+      (const generic_matrix& other){
+        return (*this).cross(other);
+      }
 
-    const generic_matrix<VALTYPE, N , M> inverse_proxy(){
-      return (*this).inverse();
-    }
+      const generic_matrix<VALTYPE, N , M> inverse_proxy(){
+        return (*this).inverse();
+      }
 
-    const generic_matrix<VALTYPE, 3 , 1> mv_mul_proxy
-    (const generic_matrix<VALTYPE, 3 , 1> & other){
-      return (*this)*other;
-    }
+      const generic_matrix<VALTYPE, 3 , 1> mv_mul_proxy
+      (const generic_matrix<VALTYPE, 3 , 1> & other){
+        return (*this)*other;
+      }
 
-    const generic_matrix<VALTYPE, N , M> transpose_proxy(){
-      return (*this).transpose();
-    }
+      const generic_matrix<VALTYPE, N , M> transpose_proxy(){
+        return (*this).transpose();
+      }
 
-    const VALTYPE dot_product_proxy(const generic_matrix<VALTYPE, N , M>& other){
-      return (*this).dot(other);
-    }
+      const VALTYPE dot_product_proxy(const generic_matrix<VALTYPE, N , M>& other){
+        return (*this).dot(other);
+      }
 
-    const generic_matrix<VALTYPE, N , M> sub_proxy(const generic_matrix<VALTYPE, N , M>& other){
-      generic_matrix<VALTYPE, N , M> _tmv(
-            this->Eigen::Matrix<VALTYPE, N , M >::operator-(other));
-      return _tmv;
-    }
+      const generic_matrix<VALTYPE, N , M> sub_proxy(const generic_matrix<VALTYPE, N , M>& other){
+        generic_matrix<VALTYPE, N , M> _tmv(
+              this->Eigen::Matrix<VALTYPE, N , M >::operator-(other));
+        return _tmv;
+      }
 
-    bool equal_proxy(const generic_matrix<VALTYPE, N , M> & b){
-      return (*this) == b;
-    }
+      bool equal_proxy(const generic_matrix<VALTYPE, N , M> & b){
+        return (*this) == b;
+      }
 
-    bool nequal_proxy(const generic_matrix<VALTYPE, N , M> &b){
-      return (*this) != b;
-    }
+      bool nequal_proxy(const generic_matrix<VALTYPE, N , M> &b){
+        return (*this) != b;
+      }
 
-    generic_matrix(const py::list &l){
-      //TOODO check
-      for (int i=0; i<3; i++)
-        (*this)[i] = py::cast<VALTYPE>(l[i]);
-    }
+      generic_matrix(const py::list &l){
+        //TOODO check
+        for (int i=0; i<3; i++)
+          (*this)[i] = py::cast<VALTYPE>(l[i]);
+      }
 
-    generic_matrix(const py::tuple &l){
-      //TOODO check
-      for (int i=0; i<3; i++)
-        (*this)[i] = py::cast<VALTYPE>(l[i]);
-    }
+      generic_matrix(const py::tuple &l){
+        //TOODO check
+        for (int i=0; i<3; i++)
+          (*this)[i] = py::cast<VALTYPE>(l[i]);
+      }
 
-    //template<typename = std::enable_if<check_is_vector3<N , M>::value> >
-    inline VALTYPE py_getitem_v(int i) const
-    { return (*this)[i]; }
+      //template<typename = std::enable_if<check_is_vector3<N , M>::value> >
+      inline VALTYPE py_getitem_v(int i) const
+      { return (*this)[i]; }
 
-    //template<typename = std::enable_if<check_is_vector3<N , M>::value> >
-    inline void py_setitem_v(int i, VALTYPE v)
-    { (*this)[i] = v;  }
+      //template<typename = std::enable_if<check_is_vector3<N , M>::value> >
+      inline void py_setitem_v(int i, VALTYPE v)
+      { (*this)[i] = v;  }
 
-    //template<typename = std::enable_if<check_is_vector3<N , M>::value> >
-    inline VALTYPE py_getx(){return (*this)[0];}
+      //template<typename = std::enable_if<check_is_vector3<N , M>::value> >
+      inline VALTYPE py_getx(){return (*this)[0];}
 
-    //template<typename = std::enable_if<check_is_vector3<N , M>::value> >
-    inline VALTYPE py_gety(){return (*this)[1];}
+      //template<typename = std::enable_if<check_is_vector3<N , M>::value> >
+      inline VALTYPE py_gety(){return (*this)[1];}
 
-    //template<typename = std::enable_if<check_is_vector3<N , M>::value> >
-    inline VALTYPE py_getz(){return (*this)[2];}
+      //template<typename = std::enable_if<check_is_vector3<N , M>::value> >
+      inline VALTYPE py_getz(){return (*this)[2];}
 
-    //template<typename = std::enable_if<check_is_vector3<N , M>::value> >
-    inline void py_setx(VALTYPE v){ (*this)[0]=v;}
+      //template<typename = std::enable_if<check_is_vector3<N , M>::value> >
+      inline void py_setx(VALTYPE v){ (*this)[0]=v;}
 
-    //template<typename = std::enable_if<check_is_vector3<N , M>::value> >
-    inline void py_sety(VALTYPE v){ (*this)[1]=v;}
+      //template<typename = std::enable_if<check_is_vector3<N , M>::value> >
+      inline void py_sety(VALTYPE v){ (*this)[1]=v;}
 
-    //template<typename = std::enable_if<check_is_vector3<N , M>::value> >
-    inline void py_setz(VALTYPE v){ (*this)[2]=v;}
+      //template<typename = std::enable_if<check_is_vector3<N , M>::value> >
+      inline void py_setz(VALTYPE v){ (*this)[2]=v;}
 
-    //template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
-    inline VALTYPE py_getxx() const {return (*this)(0,0);}
+      //template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
+      inline VALTYPE py_getxx() const {return (*this)(0,0);}
 
-    //template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
-    inline VALTYPE py_getxy() const {return (*this)(0,1);}
+      //template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
+      inline VALTYPE py_getxy() const {return (*this)(0,1);}
 
-    //template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
-    inline VALTYPE py_getxz() const {return (*this)(0,2);}
+      //template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
+      inline VALTYPE py_getxz() const {return (*this)(0,2);}
 
-    //template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
-    inline VALTYPE py_getyx() const {return (*this)(1,0);}
+      //template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
+      inline VALTYPE py_getyx() const {return (*this)(1,0);}
 
-    //template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
-    inline VALTYPE py_getyy() const {return (*this)(1,1);}
+      //template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
+      inline VALTYPE py_getyy() const {return (*this)(1,1);}
 
-    //template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
-    inline VALTYPE py_getyz() const {return (*this)(1,2);}
+      //template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
+      inline VALTYPE py_getyz() const {return (*this)(1,2);}
 
-    //template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
-    inline VALTYPE py_getzx() const {return (*this)(2,0);}
+      //template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
+      inline VALTYPE py_getzx() const {return (*this)(2,0);}
 
-    //template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
-    inline VALTYPE py_getzy() const {return (*this)(2,1);}
+      //template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
+      inline VALTYPE py_getzy() const {return (*this)(2,1);}
 
-    //template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
-    inline VALTYPE py_getzz() const {return (*this)(2,2);}
+      //template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
+      inline VALTYPE py_getzz() const {return (*this)(2,2);}
 
-    //template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
-    inline void py_setxx(VALTYPE v) {(*this)(0,0) = v;}
+      //template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
+      inline void py_setxx(VALTYPE v) {(*this)(0,0) = v;}
 
-    //template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
-    inline void py_setxy(VALTYPE v) {(*this)(0,1) = v;}
+      //template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
+      inline void py_setxy(VALTYPE v) {(*this)(0,1) = v;}
 
-    //template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
-    inline void py_setxz(VALTYPE v) {(*this)(0,2) = v;}
+      //template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
+      inline void py_setxz(VALTYPE v) {(*this)(0,2) = v;}
 
-    //template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
-    inline void py_setyx(VALTYPE v) {(*this)(1,0) = v;}
+      //template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
+      inline void py_setyx(VALTYPE v) {(*this)(1,0) = v;}
 
-    //template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
-    inline void py_setyy(VALTYPE v) {(*this)(1,1) = v;}
+      //template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
+      inline void py_setyy(VALTYPE v) {(*this)(1,1) = v;}
 
-    //template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
-    inline void py_setyz(VALTYPE v) {(*this)(1,2) = v;}
+      //template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
+      inline void py_setyz(VALTYPE v) {(*this)(1,2) = v;}
 
-    //template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
-    inline void py_setzx(VALTYPE v) {(*this)(2,0) = v;}
+      //template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
+      inline void py_setzx(VALTYPE v) {(*this)(2,0) = v;}
 
-    //template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
-    inline void py_setzy(VALTYPE v) {(*this)(2,1) = v;}
+      //template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
+      inline void py_setzy(VALTYPE v) {(*this)(2,1) = v;}
 
-    //template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
-    inline void py_setzz(VALTYPE v) {(*this)(2,2) = v;}
+      //template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
+      inline void py_setzz(VALTYPE v) {(*this)(2,2) = v;}
 
-    //template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
-    inline VALTYPE py_getitem(py::tuple I) const{
-      int i = py::cast<int>(I[0]), j = py::cast<int>(I[1]);
-      return (*this)(i,j);
-    }
+      //template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
+      inline VALTYPE py_getitem(py::tuple I) const{
+        int i = py::cast<int>(I[0]), j = py::cast<int>(I[1]);
+        return (*this)(i,j);
+      }
 
-    //template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
-    inline void py_setitem(py::tuple I, VALTYPE v){
-      int i = py::cast<int>(I[0]), j = py::cast<int>(I[1]);
-      (*this)(i,j) = v;
-    }
+      //template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
+      inline void py_setitem(py::tuple I, VALTYPE v){
+        int i = py::cast<int>(I[0]), j = py::cast<int>(I[1]);
+        (*this)(i,j) = v;
+      }
 
-   // template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
-    inline generic_matrix<VALTYPE, 3, 1> py_getitemv(int i) const{
-      return (*this)(i);
-    }
+      // template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
+      inline generic_matrix<VALTYPE, 3, 1> py_getitemv(int i) const{
+        return (*this)(i);
+      }
 
-    //template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
-    inline void py_setitemv(int i, const generic_matrix<VALTYPE, 3, 1> & v){
-      (*this).row(i) = v;
-    }
+      //template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
+      inline void py_setitemv(int i, const generic_matrix<VALTYPE, 3, 1> & v){
+        (*this).row(i) = v;
+      }
 
 
 #endif
@@ -313,15 +313,15 @@ namespace qpp {
   template<class VALTYPE>
   using matrix3 = generic_matrix<VALTYPE, 3, 3>;
 
-//  template <typename VALTYPE>
-//  std::ostream& operator<< (std::ostream& stream, const vector3<VALTYPE> &gm) {
-//    stream << gm.to_string_vec();
-//  }
+  //  template <typename VALTYPE>
+  //  std::ostream& operator<< (std::ostream& stream, const vector3<VALTYPE> &gm) {
+  //    stream << gm.to_string_vec();
+  //  }
 
-//  template <typename VALTYPE>
-//  std::ostream& operator<< (std::ostream& stream, const matrix3<VALTYPE> &gm) {
-//    stream << gm.to_string_matr();
-//  }
+  //  template <typename VALTYPE>
+  //  std::ostream& operator<< (std::ostream& stream, const matrix3<VALTYPE> &gm) {
+  //    stream << gm.to_string_matr();
+  //  }
 
   template<class VALTYPE>
   matrix3<VALTYPE> mat4_to_mat3(const matrix4<VALTYPE> _inmat){
@@ -390,7 +390,13 @@ namespace qpp {
   template<class VALTYPE>
   vector3<VALTYPE> solve3(const matrix3<VALTYPE> & A,
                           const vector3<VALTYPE> & b){
-    return A.inverse()*b;
+    VALTYPE
+        D = A.determinant(),
+        X = matrix3<VALTYPE>(b,    A(1), A(2)).determinant(),
+        Y = matrix3<VALTYPE>(A(0), b,    A(2)).determinant(),
+        Z = matrix3<VALTYPE>(A(0), A(1), b).determinant();
+
+    return vector3<VALTYPE>(X, Y, Z)/D;
   }
 
   template<class VALTYPE>
@@ -403,24 +409,294 @@ namespace qpp {
   }
 
   template<class VALTYPE>
+  vector3<typename numeric_type<VALTYPE>::complex> solve_cubeq(VALTYPE a, VALTYPE b, VALTYPE c,
+                                                               VALTYPE d) {
+    // Solves ax^3 + bx^2 + cx + d = 0, a is assumed to be nonzero
+
+    typename numeric_type<VALTYPE>::complex I(0,1);
+    VALTYPE s32 = .5*std::sqrt(3.);
+    VALTYPE eps = vector3<VALTYPE>::tol_equiv;
+    vector3<typename numeric_type<VALTYPE>::complex> res(0);
+
+    b /= a;
+    c /= a;
+    d /= a;
+    VALTYPE Q = (b*b-3*c)/9, R = d/2 - b*c/6 + b*b*b/27;
+    int sgnr = (R>0) ? 1 : -1;
+
+    if ( std::abs(Q) < eps ) {
+        VALTYPE R13 = std::pow(2*std::abs(R),1./3)*sgnr;
+        res = {-1, VALTYPE(.5) + s32*I, VALTYPE(.5) - s32*I };
+        res *= R13;
+        for (int i=0; i<3; i++)
+          res(i) -= b/3;
+      }
+
+    else if (R*R<Q*Q*Q) {
+        // three real roots
+        VALTYPE SQ = std::sqrt(Q);
+        VALTYPE theta = std::acos(R/(Q*SQ));
+        res = {-2*SQ*std::cos(theta/3)-b/3,
+               -2*SQ*std::cos((theta+2*pi)/3)-b/3,
+               -2*SQ*std::cos((theta+4*pi)/3)-b/3};
+      }
+
+    else {
+        VALTYPE A = -std::pow(std::abs(R)+std::sqrt(R*R-Q*Q*Q), 1./3)*sgnr;
+        VALTYPE B=0;
+        if ( std::abs(A)>eps) B = Q/A;
+        res = { -b/3 + A + B,
+                -b/3 - (A + B)/2 + I*s32*(A - B),
+                -b/3 - (A + B)/2 - I*s32*(A - B)};
+      }
+
+    return res;
+  }
+
+  template<class VALTYPE>
   vector3<VALTYPE> diagon3d(const matrix3<VALTYPE> & A){
-    Eigen::ComplexEigenSolver<Eigen::Matrix<VALTYPE, 3 , 3> > ces;
-    ces.compute(A);
-    Eigen::Array<typename numeric_type<VALTYPE>::complex, Eigen::Dynamic, 1> lbd;
+    VALTYPE b = A.row(0)[0] + A.row(1)[1] + A.row(2)[2];
+    VALTYPE c = A.row(0)[1]*A.row(1)[0] + A.row(1)[2]*A.row(2)[1] + A.row(2)[0]*A.row(0)[2] -
+                A.row(0)[0]*A.row(1)[1] - A.row(1)[1]*A.row(2)[2] - A.row(2)[2]*A.row(0)[0];
+    VALTYPE d = A.determinant();
+
+    vector3<typename numeric_type<VALTYPE>::complex> lbd = solve_cubeq(-VALTYPE(1e0),b,c,d);
     vector3<VALTYPE> lbd_re;
-    for (int i = 0; i < 3; i++)
-      lbd_re(i) = lbd(i,0).real();
+    for (int i=0; i<3; i++)
+      lbd_re(i) = lbd(i).real();
     return lbd_re;
   }
 
   template<class VALTYPE>
   void diagon3d(vector3<typename numeric_type<VALTYPE>::complex> & eigvals,
                 matrix3<typename numeric_type<VALTYPE>::complex> & eigvecs,
-                const matrix3<VALTYPE> & A){
-    Eigen::ComplexEigenSolver<Eigen::Matrix<VALTYPE, 3 , 3>> ces;
-    ces.compute(A);
-    eigvals = ces.eigenvalues();
-    eigvecs = ces.eigenvectors();
+                const matrix3<VALTYPE> & A) {
+
+    typename numeric_type<VALTYPE>::real eps = vector3<VALTYPE>::tol_equiv;
+
+    VALTYPE offd = A(0,1)*A(0,1) + A(1,0)*A(1,0) + A(1,2)*A(1,2) +
+                   A(2,1)*A(2,1) + A(2,0)*A(2,0) + A(0,2)*A(0,2);
+
+    if ( offd < eps*eps ) {
+        // Already diagonal
+        eigvals = { A(0,0), A(1,1), A(2,2)};
+        eigvecs = { {1,0,0}, {0,1,0}, {0,0,1} };
+        return;
+      }
+
+
+    VALTYPE b = A(0,0) + A(1,1) + A(2,2);
+    VALTYPE c = A(0,1)*A(1,0) + A(1,2)*A(2,1) + A(2,0)*A(0,2) -
+                A(0,0)*A(1,1) - A(1,1)*A(2,2) - A(2,2)*A(0,0);
+    VALTYPE d = A.determinant();
+
+    eigvals = solve_cubeq(-VALTYPE(1),b,c,d);
+    typename numeric_type<VALTYPE>::complex e0 = eigvals(0),
+        e1 = eigvals(1), e2=eigvals(2), e;
+
+    int ndiff;
+
+    /*
+       std::cout << "eigvals= " << eigvals << "\n";
+       std::cout << " diffs: " << std::abs(e0-e1) << " "  << std::abs(e1-e2) << " " << std::abs(e2-e0) <<
+         " eps= " << eps << "\n";
+       */
+
+    if ( std::abs(e0-e1)>eps &&  std::abs(e1-e2)>eps &&  std::abs(e2-e0)>eps)
+      ndiff = 3;
+    else if ( std::abs(e0-e1) <= eps &&  std::abs(e1-e2) <= eps &&  std::abs(e2-e0) <= eps)
+      ndiff = 1;
+    else {
+        ndiff = 2;
+        if ( std::abs(e1-e2) <= eps ) {
+            e=e2; e2=e0; e0=e;
+          }
+        else if ( std::abs(e2-e0) <= eps ) {
+            e=e2; e2=e1; e1=e;
+          }
+        eigvals = {e0,e1,e2};
+      }
+
+    //std::cout << "eigvals after sorting = " << eigvals << "\n";
+
+    matrix3<typename numeric_type<VALTYPE>::complex> AA, B, E;
+    vector3<typename numeric_type<VALTYPE>::complex> n0,n1,n2;
+    vector3<typename numeric_type<VALTYPE>::complex> B0, B1, B2, Bi;
+
+    for (int i=0; i<3; i++)
+      for (int j=0; j<3; j++)
+        AA(i,j)=A(i,j);
+
+    E.setZero();
+    E(0,0) = 1;
+    E(1,1) = 1;
+    E(2,2) = 1;
+
+    if (ndiff==1) {
+        // e0, e1 and e2
+        //std::cout << "e0==e1==e2\n";
+        n0 = {1,0,0};
+        n1 = {0,1,0};
+        n2 = {0,0,1};
+      }
+    else if (ndiff==2)  {
+        // e0 == e1 != e2
+
+        //std::cout << "e0==e1!=e2\n";
+        B = AA - e2*E;
+        B /= B.norm();
+        //B = B.T();
+
+        int i=0;
+
+        B0 = B.row(0);
+        B1 = B.row(1);
+        B2 = B.row(2);
+        Bi = B.row(i);
+
+        if (B1.norm() > B1.norm()) i=1;
+        if (B2.norm() > Bi.norm()) i=2;
+        n0 = Bi / Bi.norm();
+
+        i=0;
+
+        Bi = B.row(i);
+        if ((B1 - (n0 * (n0.dot(B1))) ).norm() > (B0 - (n0 * (n0.dot(B0))) ).norm()) {
+            i=1;
+            Bi = B.row(i);
+          }
+
+        if ((B2-n0 * n0.dot(B2) ).norm() > (Bi-n0 * n0.dot(Bi)).norm()) {
+            i=2;
+            Bi = B.row(i);
+          }
+
+        n1 = Bi-n0 * n0.dot(Bi);
+        n1 /= n1.norm();
+
+        /*
+     B = (AA - e0*E);
+     B /= B.norm();
+     B = B*(AA - e0*E);
+     B /= B.norm();
+     //B = B.T();
+     i=0;
+     if ( norm(B(1))>norm(B(0)) )
+       i=1;
+     if (norm(B(2))>norm(B(i)))
+       i=2;
+     n2 = B(i)/norm(B(i));
+     */
+
+        n2 = n0.cross(n1);
+
+      }
+    else
+      // e0 != e1 != e2
+      {
+        //std::cout << "e0!=e1!=e2\n";
+
+        B = (AA - e1*E);
+        B /= B.norm();
+        B = B*(AA - e2*E);
+        B /= B.norm();
+        //B = B.T();
+
+        int i=0;
+        B0 = B.row(0);
+        B1 = B.row(1);
+        B2 = B.row(2);
+        Bi = B.row(i);
+
+        if (B1.norm() > B0.norm()) {
+            i=1;
+            Bi = B.row(i);
+          }
+
+        if (B2.norm() > Bi.norm()) {
+            i=2;
+            Bi = B.row(i);
+          }
+
+        n0 = Bi / Bi.norm();
+
+        B = (AA - e0*E);
+        B /= B.norm();
+        B = B*(AA - e2*E);
+        B /= B.norm();
+        //B = B.T();
+
+        i=0;
+
+        B0 = B.row(0);
+        B1 = B.row(1);
+        B2 = B.row(2);
+        Bi = B.row(i);
+
+        if ( (B1-n0 * n0.dot(B1)).norm() > (B0-n0 * n0.dot(B1)).norm() ) {
+            i=1;
+            Bi = B.row(i);
+          }
+
+
+        if ( (B2-n0 * n0.dot(B2)).norm() > (Bi-n0 * n0.dot(Bi)).norm() ) {
+            i=2;
+            Bi = B.row(i);
+          }
+
+        n1 = Bi - n0*n0.dot(Bi);
+        n1 /= n1.norm();
+
+        //n1 = B(i)/norm(B(i));
+
+        B = (AA - e0*E);
+        B /= B.norm();
+        B = B*(AA - e1*E);
+        B /= B.norm();
+        //B = B.T();
+
+        i=0;
+        B0 = B.row(0);
+        B1 = B.row(1);
+        B2 = B.row(2);
+        Bi = B.row(i);
+
+        if ((B1-n0*n0.dot(B1)-n1*n1.dot(B1)).norm() > (B0-n0*n0.dot(B0)-n1*n1.dot(B0)).norm() ) {
+            i=1;
+            Bi = B.row(i);
+          }
+
+        if ( (B2-n0*n0.dot(B2)-n1*n1.dot(B2)).norm() >
+             (Bi-n0*n0.dot(Bi)-n1*n1.dot(Bi)).norm() ) {
+            i=2;
+            Bi = B.row(i);
+          }
+
+        n2 = Bi-n0*n0.dot(Bi)-n1*n1.dot(Bi);
+        n2 /= n2.norm();
+        //n2 = B(i)/norm(B(i));
+      }
+
+    int i=0;
+    if (std::abs(n0(i))<std::abs(n0(1))) i=1;
+    if (std::abs(n0(i))<std::abs(n0(2))) i=2;
+    n0 *= std::abs(n0(i))/n0(i);
+
+    i=0;
+    if (std::abs(n1(i))<std::abs(n1(1))) i=1;
+    if (std::abs(n1(i))<std::abs(n1(2))) i=2;
+    n1 *= std::abs(n1(i))/n1(i);
+
+    i=0;
+    if (std::abs(n2(i))<std::abs(n2(1))) i=1;
+    if (std::abs(n2(i))<std::abs(n2(2))) i=2;
+    n2 *= std::abs(n2(i))/n2(i);
+
+    for (int i=0; i<3; i++) {
+        eigvecs(i,0) = n0(i);
+        eigvecs(i,1) = n1(i);
+        eigvecs(i,2) = n2(i);
+      }
   }
 
   template<class VALTYPE>

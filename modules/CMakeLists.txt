@@ -51,7 +51,7 @@ if(PYTHON_BINDINGS)
     set_target_properties(pyqpp PROPERTIES COMPILE_FLAGS "-DPY_EXPORT")
     set_target_properties(pyqpp PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
     set_target_properties(pyqpp PROPERTIES PREFIX "")
-    add_dependencies(pyqpp spglib-imp)
+   #add_dependencies(pyqpp spglib-imp)
    #add_library(qpp_cpp SHARED
   #  python/qppython.cpp data/errors.cpp data/types.cpp data/data.cpp
    # io/strfun.cpp symm/index.cpp python/qppcpp1.cpp python/qppcpp2.cpp

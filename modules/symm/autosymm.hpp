@@ -7,7 +7,7 @@
 #include <symm/gcell.hpp>
 #include <symm/transform.hpp>
 #include <symm/group_theory.hpp>
-#include <symm/spgw.hpp>
+//#include <symm/spgw.hpp>
 #include <data/compiler_fallback.hpp>
 #include <Eigen/Dense>
 #include <algorithm>
@@ -551,7 +551,7 @@ namespace qpp{
     // find and appropriately place unity element
     int N = G.size();
     int i0;
-    for (i0=0; i0<G.size(); i0++){
+    for (i0=0; i0<G.size(); i0++) {
         bool thatsit=true;
         for (int j=0; j<P[i0].N; j++)
           if (P[i0][j]!=j){
@@ -578,7 +578,7 @@ namespace qpp{
 
     int inversion = -1;
 
-    for (int i=0; i<N; i++){
+    for (int i=0; i<N; i++) {
         analyze_transform(axis[i],phi[i],*((bool*)&inv[i]),G[i]);
         if (A.order(i)==2 && inv[i] && phi[i] < pi/2)
           inversion = i;
@@ -586,17 +586,16 @@ namespace qpp{
 
     std::vector<std::vector<int> > same_axis;
 
-    for (int i=1; i<N; i++){
-        if (i==inversion)
-          continue;
+    for (int i=1; i<N; i++) {
+        if (i==inversion) continue;
         bool found = false;
-        for (int j=0; j<same_axis.size(); j++){
-            if ( (axis[i]+axis[same_axis[j][0]]).norm() < delta ){
+        for (int j=0; j<same_axis.size(); j++) {
+            if ( (axis[i]+axis[same_axis[j][0]]).norm() < delta ) {
                 axis[i] = -axis[i];
                 phi[i]  = -phi[i];
               }
             if ( (axis[i]-axis[same_axis[j][0]]).norm() < delta ||
-                 (axis[i]+axis[same_axis[j][0]]).norm() < delta){
+                 (axis[i]+axis[same_axis[j][0]]).norm() < delta) {
                 found=true;
                 same_axis[j].push_back(i);
                 break;
@@ -612,9 +611,8 @@ namespace qpp{
 
     phi[0] = REAL(0);
     for (int j=1; j<N; j++)
-      if (j==inversion)
-        phi[j] = REAL(0);
-      else{
+      if (j==inversion) phi[j] = REAL(0);
+      else {
           //std::cout << j << " before " << phi[j];
           int k = round(phi[j]*A.order(j)/(2*pi));
           phi[j] = REAL(pi)*2*k/A.order(j);
@@ -626,15 +624,14 @@ namespace qpp{
     REAL eps = tol_equiv;
     std::vector<vector3<REAL> > exact_axis(M);
 
-    if (M>1){
+    if (M>1) {
 
         Eigen::Matrix<REAL, Eigen::Dynamic, Eigen::Dynamic>  S(M,M);
 
         for (int i=0; i<M; i++)
           for (int j=0; j<=i; j++)
-            if (i==j)
-              S(i,j)=1;
-            else{
+            if (i==j) S(i,j)=1;
+            else {
                 int i1 = same_axis[i][0], j1 = same_axis[j][0];
                 int k1 = A.multab(i1,j1);
 
@@ -686,54 +683,44 @@ namespace qpp{
         std::vector<vector3<REAL> > p0,p1;
 
         for (int i=0; i<M; i++)
-          for (int j:same_axis[i]){
+          for (int j:same_axis[i]) {
               p0.push_back(exact_axis[i]);
               p1.push_back(axis[j]);
             }
 
         bool complanar = true;
         for (int i=2; i<M; i++)
-          if (
-              std::abs(
-                (exact_axis[0],
-                 exact_axis[1],
-                 exact_axis[i]).determinant()) > eps ){
+          if (std::abs(matrix3<REAL>(exact_axis[0], exact_axis[1], exact_axis[i]).determinant()) > eps ){
               complanar = false;
               break;
             }
 
-        if (complanar){
+        if (complanar) {
             p0.push_back(exact_axis[0].cross(exact_axis[1]));
             p1.push_back(axis[same_axis[0][0]].cross(axis[same_axis[1][0]]));
           }
 
         matrix3<REAL> U;
-
         best_transform(U,p0,p1);
-
         for (int i=0; i<M; i++)
           exact_axis[i] = U*exact_axis[i];
 
       }
-    else{
+    else {
         exact_axis[0] = vector3<REAL>::Zero();
-        for (int i : same_axis[0])
-          exact_axis[0] += axis[i];
+        for (int i : same_axis[0]) exact_axis[0] += axis[i];
         exact_axis[0] /= (exact_axis[0]).norm();
       }
 
     // Reconstruct the group
     G.clear();
     G.push_back(gen_matrix<REAL>(1));
-    if (inversion>=0)
-      G.push_back(gen_matrix<REAL>(-1));
+    if (inversion>=0) G.push_back(gen_matrix<REAL>(-1));
 
     for (int i=0; i<M; i++)
-      for (int j:same_axis[i]){
-          if (inv[i]) G.push_back(
-                RotMtrx(exact_axis[i],phi[j])*gen_matrix<REAL>(-1));
-          else G.push_back(
-                RotMtrx(exact_axis[i],phi[j])*gen_matrix<REAL>(1));
+      for (int j:same_axis[i]) {
+          if (inv[i]) G.push_back(RotMtrx(exact_axis[i],phi[j])*gen_matrix<REAL>(-1));
+          else G.push_back(RotMtrx(exact_axis[i],phi[j])*gen_matrix<REAL>(1));
         }
 
 
@@ -879,13 +866,12 @@ namespace qpp{
 
     std::vector<permutation> Gperm;
 
-    for (const auto & g : Gapprox){
+    for (const auto & g : Gapprox) {
         std::vector<int> p;
-        for (int i=0; i<points.size(); i++){
+        for (int i=0; i<points.size(); i++) {
             vector3<REAL> r = g*points[i];
             for (int j=0; j<points.size(); j++)
-              if ((points[j]-r).norm()<R)
-                {
+              if ((points[j]-r).norm()<R) {
                   p.push_back(j);
                   break;
                 }

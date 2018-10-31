@@ -41,12 +41,6 @@ set(SOURCES ${PROJECT_SOURCE_DIR}/src/arithmetic.c
             ${PROJECT_SOURCE_DIR}/src/spin.c
             ${PROJECT_SOURCE_DIR}/src/symmetry.c)
 
-# Shared library
-add_library(symspg SHARED ${SOURCES})
-set_property(TARGET symspg PROPERTY VERSION ${serial})
-set_property(TARGET symspg PROPERTY SOVERSION ${soserial})
-install(TARGETS symspg LIBRARY DESTINATION ${PROJECT_SOURCE_DIR}/lib)
-
 # Static link library
 add_library(symspg_static STATIC ${SOURCES})
 set_property(TARGET symspg_static PROPERTY VERSION ${serial})
