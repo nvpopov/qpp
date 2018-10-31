@@ -881,7 +881,7 @@ namespace qpp{
 
     REAL angle_error = std::asin(R/amax);
 
-    finitize_point_group(Gapprox,Gperm,angle_error);
+    //    finitize_point_group(Gapprox,Gperm,angle_error);
 
     for (const auto & g : Gapprox)
       G.add(g);

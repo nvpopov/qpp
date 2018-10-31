@@ -219,7 +219,7 @@ namespace qpp{
 
     static void py_export(py::module m, const char * pyname){
       py::class_<generated_group<TRANSFORM> >(m, pyname)
-          .def(py::init<>())
+  	  .def(py::init<TRANSFORM>(), py::arg("E") = TRANSFORM::unity )
           .def(py::init<const generated_group<TRANSFORM> &>())
           .def("index", & generated_group<TRANSFORM>::index )
           .def("add",   & generated_group<TRANSFORM>::add )
