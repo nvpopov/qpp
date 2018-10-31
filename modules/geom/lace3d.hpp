@@ -118,7 +118,6 @@ namespace qpp {
       }
 
 
-
 #ifdef PY_EXPORT
       static const generic_matrix<VALTYPE, N , M> identity_proxy(){
         return generic_matrix<VALTYPE, N , M>::Identity();
@@ -313,15 +312,17 @@ namespace qpp {
   template<class VALTYPE>
   using matrix3 = generic_matrix<VALTYPE, 3, 3>;
 
-  //  template <typename VALTYPE>
-  //  std::ostream& operator<< (std::ostream& stream, const vector3<VALTYPE> &gm) {
-  //    stream << gm.to_string_vec();
-  //  }
+    template <typename VALTYPE>
+    std::ostream& operator<< (std::ostream& stream, const vector3<VALTYPE> &gm) {
+      stream << gm.to_string_vec();
+      return stream;
+    }
 
-  //  template <typename VALTYPE>
-  //  std::ostream& operator<< (std::ostream& stream, const matrix3<VALTYPE> &gm) {
-  //    stream << gm.to_string_matr();
-  //  }
+    template <typename VALTYPE>
+    std::ostream& operator<< (std::ostream& stream, const matrix3<VALTYPE> &gm) {
+      stream << gm.to_string_matr();
+      return stream;
+    }
 
   template<class VALTYPE>
   matrix3<VALTYPE> mat4_to_mat3(const matrix4<VALTYPE> _inmat){

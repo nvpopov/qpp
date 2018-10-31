@@ -76,7 +76,6 @@ if (LA_TYPE EQUAL "MKL")
 endif()
 
 add_subdirectory(deps)
-add_subdirectory(deps/spglib)
 include_directories(${PROJECT_SOURCE_DIR}/deps/fmtlib)
 include_directories(${PROJECT_SOURCE_DIR}/deps/pybind11/include)
 #add_subdirectory(${CMAKE_SOURCE_DIR}/deps/fmtlib)
@@ -118,13 +117,6 @@ add_custom_target(ideheaders SOURCES ${ide_headers} ${ide_headersc}
 
 #Global includes
 include_directories(modules/)
-
-#spglib
-include_directories(${PROJECT_SOURCE_DIR}/deps/spglib/src)
-add_library(spglib-imp STATIC IMPORTED)
-set_target_properties(spglib-imp PROPERTIES IMPORTED_LOCATION
-    "${PROJECT_BINARY_DIR}/deps/spglib-prefix/src/spglib-build/libsymspg.a")
-#end spglib
 
 add_subdirectory(modules)
 
