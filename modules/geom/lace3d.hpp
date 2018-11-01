@@ -111,7 +111,7 @@ namespace qpp {
 
       //template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
       STRING to_string_matr() const {
-        return fmt::format("[{},\n {},\n {}]",
+        return fmt::format("[{}, {}, {}]",
                            (*this).row(0),
                            (*this).row(1),
                            (*this).row(2));
