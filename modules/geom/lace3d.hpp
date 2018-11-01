@@ -391,13 +391,7 @@ namespace qpp {
   template<class VALTYPE>
   vector3<VALTYPE> solve3(const matrix3<VALTYPE> & A,
                           const vector3<VALTYPE> & b){
-    VALTYPE
-        D = A.determinant(),
-        X = matrix3<VALTYPE>(b,    A(1), A(2)).determinant(),
-        Y = matrix3<VALTYPE>(A(0), b,    A(2)).determinant(),
-        Z = matrix3<VALTYPE>(A(0), A(1), b).determinant();
-
-    return vector3<VALTYPE>(X, Y, Z)/D;
+    return A.inverse() * b;
   }
 
   template<class VALTYPE>
