@@ -140,6 +140,7 @@ TEST_CASE( "Basic matrix3<T> tests", "[vector3<T>]" ) {
     REQUIRE(sec_a[0] == Approx(v_a_l_answ[0]));
     REQUIRE(sec_a[1] == Approx(v_a_l_answ[1]));
     REQUIRE(sec_a[2] == Approx(v_a_l_answ[2]));
+    REQUIRE(sec_a == v_a_l_answ);
 
     v3f ma_r0 = {2, 1, 3};
     v3f ma_r1 = {2, 6, 8};
@@ -149,6 +150,53 @@ TEST_CASE( "Basic matrix3<T> tests", "[vector3<T>]" ) {
     REQUIRE(sec_a2[0] == Approx(v_a_l_answ[0]));
     REQUIRE(sec_a2[1] == Approx(v_a_l_answ[1]));
     REQUIRE(sec_a2[2] == Approx(v_a_l_answ[2]));
+
+  }
+
+  SECTION("Testing rotation matrices") {
+
+    m3f rot_m_x = {
+      {1.0f, 0.0f,           0.0f},
+      {0.0f, cos(pi / 4.0f), -sin(pi/4.0f)},
+      {0,    sin(pi/4.0f),   cos(pi / 4.0f)}
+    };
+    v3f rot_m_x_a = v3f(1.0f, 0.0f, 0.0f);
+    m3f rot_m_x_i = RotMtrx<float>(rot_m_x_a, pi/4.0f);
+    REQUIRE( rot_m_x == rot_m_x_i);
+
+    m3f rot_m_y = {
+      {cos(pi / 4.0f), 0.0f, sin(pi/4.0f)},
+      {0.0f,           1.0f, 0.0f},
+      {-sin(pi/4.0f), 0.0f, cos(pi / 4.0f)}
+    };
+    v3f rot_m_y_a = v3f(0.0f, 1.0f, 0.0f);
+    m3f rot_m_y_i = RotMtrx<float>(rot_m_y_a, pi/4.0f);
+    REQUIRE( rot_m_y == rot_m_y_i);
+
+    m3f rot_m_z = {
+      {cos(pi / 4.0f), -sin(pi/4.0f),  0.0f},
+      {sin(pi/4.0f),   cos(pi / 4.0f), 0.0f},
+      {0.0,            0.0f,           1.0f}
+    };
+    v3f rot_m_z_a = v3f(0.0f, 0.0f, 1.0f);
+    m3f rot_m_z_i = RotMtrx<float>(rot_m_z_a, pi/4.0f);
+    REQUIRE( rot_m_z == rot_m_z_i);
+  }
+
+  SECTION("Testing sigma matrices") {
+
+    m3f s_m_u = m3f::unity;
+
+    m3f s_m_y = {
+      { 1,  0,  0},
+      { 0, -1,  0},
+      { 0,  0,  1}
+    };
+
+    v3f s_m_ay(0.0f, 1.0f, 0.0f);
+    m3f s_m_y_g = Sigma(s_m_ay);
+
+    REQUIRE(s_m_y_g == s_m_y);
 
   }
 

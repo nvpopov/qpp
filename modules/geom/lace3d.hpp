@@ -97,7 +97,7 @@ namespace qpp {
       }
 
       inline bool operator==(const generic_matrix<VALTYPE, N , M> & b) const {
-        return (*this).isApprox(b, tol_equiv);
+        return (*this-b).norm() < generic_matrix::tol_equiv;
       }
 
       inline bool operator!=(const generic_matrix<VALTYPE, N , M> &b) const {
@@ -721,7 +721,7 @@ namespace qpp {
   }
 
   template<class VALTYPE, int N, int M>
-  typename numeric_type<VALTYPE>::norm generic_matrix<VALTYPE, N, M>::tol_equiv = 1e-8;
+  typename numeric_type<VALTYPE>::norm generic_matrix<VALTYPE, N, M>::tol_equiv = 1e-6;
 
   template<class VALTYPE, int N, int M>
   generic_matrix<VALTYPE, N, M> generic_matrix<VALTYPE, N, M>::unity =
