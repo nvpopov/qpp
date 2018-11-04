@@ -2,22 +2,23 @@
 #define QPP_GENERAL_QC_OUTPUT_H
 
 #include <vector>
+#include <geom/lace3d.hpp>
 
 namespace qpp {
 
-    enum qc_prgr_run_t {
-      rt_unknown,
-      rt_energy,
-      rt_grad,
-      rt_geo_opt,
-      rt_md,
-      rt_vib,
-      rt_tddft,
-      rt_spectrum
+    enum comp_chem_program_run_t {
+      unknown,
+      energy,
+      grad,
+      geo_opt,
+      md,
+      vib,
+      tddft,
+      spectrum
     };
 
     template <class REAL>
-    struct qc_prgr_scf_step_info{
+    struct comp_chem_program_scf_step_info_t{
             int iter{0};
             int ex{0};
             int dem{0};
@@ -25,16 +26,20 @@ namespace qpp {
             REAL e_change{REAL(0)};
             REAL d_change{REAL(0)};
             REAL orb_grad{REAL(0)};
+
     };
 
     template <class REAL>
-    struct qc_prgr_step_t {
-        std::vector<qc_prgr_scf_step_info<REAL> > scf_steps;
+    struct comp_chem_program_step_t {
+        std::vector<comp_chem_program_scf_step_info_t<REAL> > scf_steps;
         REAL total_energy{REAL(0)};
+        std::vector<vector3<REAL> > pos;
+        std::vector<vector3<REAL> > grad;
+        std::vector<vector3<REAL> > vels;
     };
 
     template <class REAL>
-    struct qc_program_output {
+    struct comp_chem_program_output_t {
             int tot_num_atoms{0};
             int tot_num_electrons{0};
             REAL tot_charge{0};
@@ -42,8 +47,11 @@ namespace qpp {
             bool is_unrestricted{false};
             int n_alpha{0};
             int n_beta{0};
-            qc_prgr_run_t run_t{qc_prgr_run_t::rt_unknown};
-            std::vector<qc_prgr_step_t<REAL> > steps;
+            bool m_is_terminated_normally{false};
+            comp_chem_program_run_t run_t{comp_chem_program_run_t::unknown};
+            std::vector<comp_chem_program_step_t<REAL> > steps;
+            std::vector<vector3<REAL> > init_pos;
+            std::vector<std::string> init_atom_names;
     };
 
 
