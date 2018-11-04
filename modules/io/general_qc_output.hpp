@@ -25,8 +25,7 @@ namespace qpp {
             REAL total_energy{REAL(0)};
             REAL e_change{REAL(0)};
             REAL d_change{REAL(0)};
-            REAL orb_grad{REAL(0)};
-
+            REAL orb_grad_or_diis_error{REAL(0)};
     };
 
     template <class REAL>
@@ -36,6 +35,7 @@ namespace qpp {
         std::vector<vector3<REAL> > pos;
         std::vector<vector3<REAL> > grad;
         std::vector<vector3<REAL> > vels;
+        std::vector<REAL> eigen_values;
     };
 
     template <class REAL>
@@ -52,6 +52,7 @@ namespace qpp {
             std::vector<comp_chem_program_step_t<REAL> > steps;
             std::vector<vector3<REAL> > init_pos;
             std::vector<std::string> init_atom_names;
+            std::vector<REAL> init_charges;
     };
 
 
