@@ -7,9 +7,10 @@ int main () {
 
   geometry<float> g(0);
 
-  std::ifstream ifile("../examples/io/ref_data/firefly/water_mp2.out");
+  //std::ifstream ifile("../examples/io/ref_data/firefly/1Ca10F20.outp");
+  //std::ifstream ifile("../examples/io/ref_data/firefly/water_mp2.out");
   //std::ifstream ifile("../examples/io/ref_data/firefly/dvb_gopt_a.out");
-
+  std::ifstream ifile("../examples/io/ref_data/firefly/dvb_ir.out");
   comp_chem_program_output_t<float> cc_o;
   read_firefly_output(ifile, g, cc_o);
 
@@ -67,6 +68,25 @@ int main () {
           for (size_t sp_i = 0; sp_i < cc_o.steps[i].eigen_values.size(); sp_i++)
             fmt::print(std::cout, "{:15} {:15}\n", sp_i, cc_o.steps[i].eigen_values[sp_i]);
         }
+
+      //write pop analysis
+      if (!cc_o.steps[i].mulliken_pop_per_atom.empty()) {
+          fmt::print(std::cout, "\n{:>15} {:>15}\n", "mulliken_pop", "charge");
+          for (size_t p = 0; p < cc_o.steps[i].mulliken_pop_per_atom.size(); p++)
+            fmt::print(std::cout, "{:15} {:15}\n", cc_o.steps[i].mulliken_pop_per_atom[p].first,
+                       cc_o.steps[i].mulliken_pop_per_atom[p].second);
+        }
+
+      if (!cc_o.steps[i].lowdin_pop_per_atom.empty()) {
+          fmt::print(std::cout, "\n{:>15} {:>15}\n", "lowdin_pop", "charge");
+          for (size_t p = 0; p < cc_o.steps[i].lowdin_pop_per_atom.size(); p++)
+            fmt::print(std::cout, "{:15} {:15}\n", cc_o.steps[i].lowdin_pop_per_atom[p].first,
+                       cc_o.steps[i].lowdin_pop_per_atom[p].second);
+        }
+
+      //write dipole moment
+      if (cc_o.steps[i].dipole_moment)
+        fmt::print(std::cout, "\nDipole moment = {}\n", *(cc_o.steps[i].dipole_moment));
 
       //write atom coordinates and gradients
       if (!cc_o.steps[i].pos.empty() && !cc_o.steps[i].grad.empty()) {
