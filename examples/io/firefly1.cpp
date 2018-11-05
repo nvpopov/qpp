@@ -107,4 +107,11 @@ int main () {
       fmt::print(std::cout, "Final step energy: {}\n", cc_o.steps[i].total_energy);
 
     }
+
+  if (!cc_o.vibs.empty()) {
+      fmt::print(std::cout, "\nVibration analysis:\n");
+      for (int v = 0; v < cc_o.vibs.size(); v++)
+        fmt::print(std::cout, "{:15} {:15} {:15}\n",
+                   v, cc_o.vibs[v].frequency, cc_o.vibs[v].intensity);
+    }
 }

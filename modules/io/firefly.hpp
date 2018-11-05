@@ -104,8 +104,11 @@ namespace qpp {
   const std::string s_electrostatic_moments_str =
       "          ELECTROSTATIC MOMENTS";
 
-  const std::string s_vib_general_str =
+  const std::string s_vib_header_str =
       "     FREQUENCIES IN CM**-1, IR INTENSITIES IN DEBYE**2/AMU-ANGSTROM**2";
+
+  const std::string s_vib_displ_stop_str =
+      "REFERENCE ON SAYVETZ CONDITIONS";
 
   template<class REAL, class CELL>
   void read_firefly_output(std::basic_istream<CHAR,TRAITS> & inp,
@@ -120,6 +123,7 @@ namespace qpp {
     bool b_init_parsed{false};
     size_t cur_step{0};
     bool b_atoms_bootstraped{false};
+    int vib_line_size{0};
 
     output.DIM = 0;
 
@@ -380,6 +384,71 @@ namespace qpp {
             p_state = pcg_ff_p_state::s_none;
             continue;
           }
+
+        //parsing vibrations
+        if (s.find(s_vib_header_str) != std::string::npos) {
+            std::getline(inp, s); //read empty line
+            p_state = pcg_ff_p_state::s_vib_general;
+            continue;
+          }
+
+        if (p_state == pcg_ff_p_state::s_vib_general) {
+            if (s.find(s_vib_displ_stop_str) != std::string::npos) {
+                p_state = pcg_ff_p_state::s_none;
+                continue;
+              }
+            //like this:
+            //            1           2           3           4           5
+            //FREQUENCY:         5.89        1.44        0.01        0.01        0.01
+            //REDUCED MASS:      3.94009     4.46293     6.50413     6.50391     6.50391
+            //IR INTENSITY:      0.00000     0.00000     0.00000     0.00000     0.00000
+            std::vector<std::string_view> splt_s0 = split_sv(s, " ");
+            vib_line_size = splt_s0.size();
+            //allocate new vibrations
+            output.vibs.resize(output.vibs.size() + vib_line_size);
+            int tv = output.vibs.size();
+
+            std::getline(inp,s);
+            std::vector<std::string_view> splt_s1 = split_sv(s, " ");
+            for (size_t i = 1; i < vib_line_size + 1; i++) {
+                output.vibs[tv-vib_line_size+i-1].frequency = std::stod(splt_s1[i].data());
+              }
+
+            std::getline(inp,s);
+            std::vector<std::string_view> splt_s2 = split_sv(s, " ");
+            for (size_t i = 1; i < vib_line_size + 1; i++) {
+                output.vibs[tv-vib_line_size+i-1].reduced_mass =
+                    std::stod(splt_s2[i+1].data());
+              }
+
+            std::getline(inp,s);
+            std::vector<std::string_view> splt_s3 = split_sv(s, " ");
+            for (size_t i = 1; i < vib_line_size + 1; i++) {
+                output.vibs[tv-vib_line_size+i-1].intensity = std::stod(splt_s3[i+1].data());
+              }
+
+            //read empty line
+            std::getline(inp, s);
+            p_state = pcg_ff_p_state::s_vib_displ;
+            continue;
+
+          }
+
+        if (p_state == pcg_ff_p_state::s_vib_displ) {
+            //std::cout << s << std::endl;
+
+            //empty line
+            if (s.length() == 1) {
+
+                for (int i = 0; i < 10; i++) std::getline(inp,s);
+
+                p_state = pcg_ff_p_state::s_vib_general;
+                continue;
+              }
+            continue;
+          }
+
+        //end parsing of vibrations
 
         //found COORDINATES OF ALL ATOMS
         if (s.find(s_coordinates_header_str) != std::string::npos) {
