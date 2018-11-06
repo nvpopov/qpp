@@ -51,7 +51,7 @@ namespace qpp {
   };
 
   template <class REAL>
-  struct comp_chem_program_output_t {
+  struct comp_chem_program_data_t {
       int DIM{0};
       int tot_num_atoms{0};
       int tot_num_electrons{0};
@@ -69,6 +69,11 @@ namespace qpp {
       std::vector<comp_chem_program_vibration_info_t<REAL> > vibs;
   };
 
+
+  template <class REAL>
+  bool validate_ccd(comp_chem_program_data_t<REAL> &ccd_inst, uint32_t flags) {
+    return true;
+  }
 
 }
 

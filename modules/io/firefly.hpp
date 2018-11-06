@@ -112,7 +112,7 @@ namespace qpp {
 
   template<class REAL>
   void read_ccd_from_firefly_output(std::basic_istream<CHAR,TRAITS> & inp,
-                                    comp_chem_program_output_t<REAL> &output) {
+                                    comp_chem_program_data_t<REAL> &output) {
 
     std::locale loc1("C");
     std::string s;
@@ -438,21 +438,17 @@ namespace qpp {
           }
 
         if (p_state == pcg_ff_p_state::s_vib_displ) {
-            //
 
-            //empty line
             if (s.length() == 1) {
                 for (int i = 0; i < 10; i++) std::getline(inp,s);
                 p_state = pcg_ff_p_state::s_vib_general;
                 continue;
               }
 
-            //std::cout << s << std::endl;
             std::vector<std::string_view> splt = split_sv(s, " ");
             int total_elems = splt.size() - vib_line_size;
 
             if (total_elems == 3) {
-
                 //X LINE
                 for (int i = 0 ; i < vib_line_size; i++) {
                     output.vibs[output.vibs.size() - vib_line_size + i].disp[vib_line_seek][0] =
@@ -460,22 +456,16 @@ namespace qpp {
                     continue;
                   }
               }
+
             if (total_elems == 1) {
                 //Y OR Z LINE
-                if (splt[0] == "Y") {
-//                    fmt::print(std::cout, "total_elemes={}, vib_line_size={}\n",
-//                               total_elems, vib_line_size);
-                    for (int i = 0 ; i < vib_line_size; i++)
-                      output.vibs[output.vibs.size() - vib_line_size + i].disp[vib_line_seek][1] =
-                          std::stod(splt[i+1].data());
-                  }
+                size_t i_stride = ( splt[0] == "Y" ) ? 1 : 2;
 
-                if (splt[0] == "Z") {
-                    for (int i = 0 ; i < vib_line_size; i++)
-                      output.vibs[output.vibs.size() - vib_line_size + i].disp[vib_line_seek][2] =
-                          std::stod(splt[i+1].data());
-                    vib_line_seek +=1;
-                  }
+                for (int i = 0 ; i < vib_line_size; i++)
+                  output.vibs[output.vibs.size() - vib_line_size + i].disp[vib_line_seek][i_stride] =
+                      std::stod(splt[i+1].data());
+
+                if (i_stride == 2) vib_line_seek +=1;
                 continue;
               }
             //non empty line
