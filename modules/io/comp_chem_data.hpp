@@ -21,8 +21,8 @@ namespace qpp {
   template <class REAL>
   struct comp_chem_program_vibration_info_t {
       std::vector<vector3<REAL> > disp;
-      REAL frequency{REAL(0)};;
-      REAL intensity{REAL(0)};;
+      REAL frequency{REAL(0)};
+      REAL intensity{REAL(0)};
       REAL reduced_mass{REAL(0)};
   };
 

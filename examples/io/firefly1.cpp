@@ -5,14 +5,14 @@ using namespace qpp;
 
 int main () {
 
-  geometry<float> g(0);
+  //geometry<float> g(0);
 
   //std::ifstream ifile("../examples/io/ref_data/firefly/1Ca10F20.outp");
   //std::ifstream ifile("../examples/io/ref_data/firefly/water_mp2.out");
   //std::ifstream ifile("../examples/io/ref_data/firefly/dvb_gopt_a.out");
   std::ifstream ifile("../examples/io/ref_data/firefly/dvb_ir.out");
   comp_chem_program_output_t<float> cc_o;
-  read_firefly_output(ifile, g, cc_o);
+  read_ccd_from_firefly_output(ifile, cc_o);
 
   fmt::print(std::cout, "Total number of atoms: {}\n", cc_o.tot_num_atoms);
   fmt::print(std::cout, "Total number of electrons: {}\n", cc_o.tot_num_electrons);
@@ -44,7 +44,6 @@ int main () {
 
       if (i == cc_o.steps.size()-1) fmt::print(std::cout, "\nFinal step:\n");
       else fmt::print(std::cout, "\nCalculation step {}:\n",i);
-
 
       //write scf info header
       fmt::print(std::cout, "Total scf-steps: {}\n", cc_o.steps[i].scf_steps.size());
@@ -113,5 +112,11 @@ int main () {
       for (int v = 0; v < cc_o.vibs.size(); v++)
         fmt::print(std::cout, "{:15} {:15} {:15}\n",
                    v, cc_o.vibs[v].frequency, cc_o.vibs[v].intensity);
+
+      fmt::print(std::cout, "\nDisplacement for vibration mode {}:\n", 23);
+      for (size_t i = 0; i < cc_o.vibs[29].disp.size(); i++)
+        fmt::print(std::cout, "{}\n", cc_o.vibs[29].disp[i]);
     }
+
+
 }

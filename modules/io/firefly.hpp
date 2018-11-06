@@ -110,10 +110,9 @@ namespace qpp {
   const std::string s_vib_displ_stop_str =
       "REFERENCE ON SAYVETZ CONDITIONS";
 
-  template<class REAL, class CELL>
-  void read_firefly_output(std::basic_istream<CHAR,TRAITS> & inp,
-                           geometry<REAL, CELL> & geom,
-                           comp_chem_program_output_t<REAL> &output) {
+  template<class REAL>
+  void read_ccd_from_firefly_output(std::basic_istream<CHAR,TRAITS> & inp,
+                                    comp_chem_program_output_t<REAL> &output) {
 
     std::locale loc1("C");
     std::string s;
@@ -124,6 +123,7 @@ namespace qpp {
     size_t cur_step{0};
     bool b_atoms_bootstraped{false};
     int vib_line_size{0};
+    int vib_line_seek{0};
 
     output.DIM = 0;
 
@@ -406,6 +406,8 @@ namespace qpp {
             vib_line_size = splt_s0.size();
             //allocate new vibrations
             output.vibs.resize(output.vibs.size() + vib_line_size);
+            for (int i = 0; i < vib_line_size; i++)
+              output.vibs[output.vibs.size() - i - 1].disp.resize(output.tot_num_atoms);
             int tv = output.vibs.size();
 
             std::getline(inp,s);
@@ -429,24 +431,58 @@ namespace qpp {
 
             //read empty line
             std::getline(inp, s);
+            vib_line_seek = 0;
             p_state = pcg_ff_p_state::s_vib_displ;
             continue;
 
           }
 
         if (p_state == pcg_ff_p_state::s_vib_displ) {
-            //std::cout << s << std::endl;
+            //
 
             //empty line
             if (s.length() == 1) {
-
                 for (int i = 0; i < 10; i++) std::getline(inp,s);
-
                 p_state = pcg_ff_p_state::s_vib_general;
                 continue;
               }
+
+            //std::cout << s << std::endl;
+            std::vector<std::string_view> splt = split_sv(s, " ");
+            int total_elems = splt.size() - vib_line_size;
+
+            if (total_elems == 3) {
+
+                //X LINE
+                for (int i = 0 ; i < vib_line_size; i++) {
+                    output.vibs[output.vibs.size() - vib_line_size + i].disp[vib_line_seek][0] =
+                        std::stod(splt[i+3].data());
+                    continue;
+                  }
+              }
+            if (total_elems == 1) {
+                //Y OR Z LINE
+                if (splt[0] == "Y") {
+//                    fmt::print(std::cout, "total_elemes={}, vib_line_size={}\n",
+//                               total_elems, vib_line_size);
+                    for (int i = 0 ; i < vib_line_size; i++)
+                      output.vibs[output.vibs.size() - vib_line_size + i].disp[vib_line_seek][1] =
+                          std::stod(splt[i+1].data());
+                  }
+
+                if (splt[0] == "Z") {
+                    for (int i = 0 ; i < vib_line_size; i++)
+                      output.vibs[output.vibs.size() - vib_line_size + i].disp[vib_line_seek][2] =
+                          std::stod(splt[i+1].data());
+                    vib_line_seek +=1;
+                  }
+                continue;
+              }
+            //non empty line
+
             continue;
           }
+
 
         //end parsing of vibrations
 
