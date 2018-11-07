@@ -104,3 +104,17 @@ TEST_CASE( "Computational chemistry data parsing : PC Gamess Firefly" ) {
   }
 
 }
+
+TEST_CASE( "Compilation of ccd model" ) {
+
+  SECTION( " Compile 0d models") {
+    std::ifstream isec("../examples/io/ref_data/firefly/dvb_sp.out");
+    comp_chem_program_data_t<double> cc_o;
+    read_ccd_from_firefly_output(isec, cc_o);
+    geometry<double, periodic_cell<double> > g(0);
+    bool succes = compile_geometry(cc_o, g);
+    REQUIRE( succes == true);
+    REQUIRE( g.nat() == cc_o.tot_num_atoms);
+  }
+
+}
