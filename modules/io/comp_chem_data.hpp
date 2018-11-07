@@ -115,8 +115,52 @@ namespace qpp {
 
   template <class REAL>
   bool compile_animation(comp_chem_program_data_t<REAL> &ccd_inst,
-                         geom_anim_record_t<REAL> &anim_rec) {
+                         std::vector<geom_anim_record_t<REAL> > &anim_rec) {
+
+    geom_anim_record_t<REAL> anim;
+
+    if (ccd_inst.run_t != comp_chem_program_run_t::geo_opt &&
+        ccd_inst.run_t != comp_chem_program_run_t::md &&
+        ccd_inst.run_t != comp_chem_program_run_t::vib) return false;
+
+    bool copy_steps_content = false;
+
+    switch (ccd_inst.run_t) {
+      case comp_chem_program_run_t::geo_opt :
+        anim.m_anim_type = geom_anim_type::anim_geo_opt;
+        anim.m_anim_name = "geo_opt";
+        copy_steps_content = true;
+        break;
+      case comp_chem_program_run_t::md :
+        anim.m_anim_type = geom_anim_type::anim_md;
+        anim.m_anim_name = "mol_dyn";
+        copy_steps_content = true;
+        break;
+      case comp_chem_program_run_t::vib :
+        anim.m_anim_type = geom_anim_type::anim_vib;
+        anim.m_anim_name = "vibrations";
+        copy_steps_content = false;
+        break;
+      default:
+        return false;
+        break;
+      };
+
+    if (copy_steps_content) {
+        anim.frame_data.resize(ccd_inst.steps.size());
+        for (size_t i = 0; i < ccd_inst.steps.size(); i++) {
+            anim.frame_data[i].resize(ccd_inst.steps[i].pos.size());
+            for (size_t q = 0; q < ccd_inst.steps[i].pos.size(); q++)
+              anim.frame_data[i][q] = ccd_inst.steps[i].pos[q];
+          }
+      }
+    else {
+
+      }
+
+    anim_rec.push_back(std::move(anim));
     return true;
+
   }
 
 }

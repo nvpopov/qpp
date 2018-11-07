@@ -108,6 +108,7 @@ TEST_CASE( "Computational chemistry data parsing : PC Gamess Firefly" ) {
 TEST_CASE( "Compilation of ccd model" ) {
 
   SECTION( " Compile 0d models") {
+
     std::ifstream isec("../examples/io/ref_data/firefly/dvb_sp.out");
     comp_chem_program_data_t<double> cc_o;
     read_ccd_from_firefly_output(isec, cc_o);
@@ -115,6 +116,26 @@ TEST_CASE( "Compilation of ccd model" ) {
     bool succes = compile_geometry(cc_o, g);
     REQUIRE( succes == true);
     REQUIRE( g.nat() == cc_o.tot_num_atoms);
+    bool all_atoms_the_same = true;
+    for (size_t i = 0; i < g.nat(); i++)
+      if (g.pos(i) != cc_o.init_pos[i]) all_atoms_the_same = false;
+    REQUIRE(all_atoms_the_same);
+
+  }
+
+  SECTION( "Compile 0d models - animation[geo_opt]") {
+
+    std::ifstream isec("../examples/io/ref_data/firefly/dvb_gopt_a.out");
+    comp_chem_program_data_t<double> cc_o;
+    read_ccd_from_firefly_output(isec, cc_o);
+    geometry<double, periodic_cell<double> > g(0);
+    std::vector<geom_anim_record_t<double> > anim_rec;
+    bool succes = compile_geometry(cc_o, g);
+    bool succes_anims = compile_animation(cc_o, anim_rec);
+    REQUIRE(succes);
+    REQUIRE(succes_anims);
+    REQUIRE(anim_rec[0].frame_data.size() == cc_o.steps.size());
+
   }
 
 }
