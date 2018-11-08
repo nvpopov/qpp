@@ -80,6 +80,8 @@ namespace qpp {
   const uint32_t ccd_cf_allow_null_init_geom           = 1 << 0;
   const uint32_t ccd_cf_allow_different_size_pos_names = 1 << 1;
   const uint32_t ccd_cf_apply_pdb_name_reducer         = 1 << 2;
+  const uint32_t ccd_cf_autocenter_geometry            = 1 << 3;
+  const uint32_t ccd_cf_autocenter_steps_geometry      = 1 << 4;
 
   template <class REAL>
   bool validate_ccd(comp_chem_program_data_t<REAL> &ccd_inst, uint32_t flags) {
@@ -114,10 +116,25 @@ namespace qpp {
   }
 
   template <class REAL>
-  bool compile_animation(comp_chem_program_data_t<REAL> &ccd_inst,
+  bool compile_static_animation(comp_chem_program_data_t<REAL> &ccd_inst,
                          std::vector<geom_anim_record_t<REAL> > &anim_rec) {
 
     geom_anim_record_t<REAL> anim;
+
+    anim.m_anim_type = geom_anim_type::anim_static;
+    anim.m_anim_name = "static";
+    anim.frame_data.resize(1);
+    anim.frame_data[0].resize(ccd_inst.init_pos.size());
+    for (size_t i = 0; i < ccd_inst.init_pos.size(); i++)
+      anim.frame_data[0][i] = ccd_inst.init_pos[i];
+
+    anim_rec.push_back(std::move(anim));
+    return true;
+  }
+
+  template <class REAL>
+  bool compile_animation(comp_chem_program_data_t<REAL> &ccd_inst,
+                         std::vector<geom_anim_record_t<REAL> > &anim_rec) {
 
     if (ccd_inst.run_t != comp_chem_program_run_t::geo_opt &&
         ccd_inst.run_t != comp_chem_program_run_t::md &&
@@ -125,21 +142,24 @@ namespace qpp {
 
     bool copy_steps_content = false;
 
+    geom_anim_type stored_anim_type{geom_anim_type::anim_static};
+    std::string stored_anim_name;
+
     switch (ccd_inst.run_t) {
       case comp_chem_program_run_t::geo_opt :
-        anim.m_anim_type = geom_anim_type::anim_geo_opt;
-        anim.m_anim_name = "geo_opt";
+        stored_anim_type = geom_anim_type::anim_geo_opt;
         copy_steps_content = true;
+        stored_anim_name = "geo_opt";
         break;
       case comp_chem_program_run_t::md :
-        anim.m_anim_type = geom_anim_type::anim_md;
-        anim.m_anim_name = "mol_dyn";
+        stored_anim_type = geom_anim_type::anim_md;
         copy_steps_content = true;
+        stored_anim_name = "mol_dyn";
         break;
       case comp_chem_program_run_t::vib :
-        anim.m_anim_type = geom_anim_type::anim_vib;
-        anim.m_anim_name = "vibrations";
+        stored_anim_type = geom_anim_type::anim_vib;
         copy_steps_content = false;
+        stored_anim_name = "vib";
         break;
       default:
         return false;
@@ -147,18 +167,47 @@ namespace qpp {
       };
 
     if (copy_steps_content) {
+        geom_anim_record_t<REAL> anim;
+        anim.m_anim_type = stored_anim_type;
+        anim.m_anim_name = stored_anim_name;
         anim.frame_data.resize(ccd_inst.steps.size());
         for (size_t i = 0; i < ccd_inst.steps.size(); i++) {
             anim.frame_data[i].resize(ccd_inst.steps[i].pos.size());
             for (size_t q = 0; q < ccd_inst.steps[i].pos.size(); q++)
               anim.frame_data[i][q] = ccd_inst.steps[i].pos[q];
           }
+        anim_rec.push_back(std::move(anim));
+        return true;
       }
     else {
 
+        if (ccd_inst.run_t == comp_chem_program_run_t::vib)
+          for (size_t v = 0; v < ccd_inst.vibs.size(); v++) {
+              geom_anim_record_t<REAL> anim;
+              anim.m_anim_type = stored_anim_type;
+              anim.m_anim_name = fmt::format("vibration {}", v);
+
+              const int total_frames_upwards = 10;
+              const int total_frames = total_frames_upwards * 2 + 1;
+              anim.frame_data.resize(total_frames);
+
+              for (int i = 0; i < total_frames; i++) {
+                  anim.frame_data[i].resize(ccd_inst.tot_num_atoms);
+                  //transform index
+                  int tf_index = i;
+                  if (i > total_frames_upwards) tf_index = total_frames - (i+1);
+                  for (size_t q = 0; q < ccd_inst.vibs[v].disp.size(); q++) {
+                      anim.frame_data[i][q] = ccd_inst.init_pos[q] +
+                                          ccd_inst.vibs[v].disp[q] *
+                                          (REAL(tf_index) / total_frames_upwards);
+                    }
+                }
+
+              anim_rec.push_back(std::move(anim));
+            }
+
       }
 
-    anim_rec.push_back(std::move(anim));
     return true;
 
   }

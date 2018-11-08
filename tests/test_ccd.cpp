@@ -136,6 +136,24 @@ TEST_CASE( "Compilation of ccd model" ) {
     REQUIRE(succes_anims);
     REQUIRE(anim_rec[0].frame_data.size() == cc_o.steps.size());
 
+    std::vector<geom_anim_record_t<double> > anim_rec_ws;
+    bool succes_static = compile_static_animation(cc_o, anim_rec_ws);
+    bool succes_static_with_steps = compile_animation(cc_o, anim_rec_ws);
+    REQUIRE(succes_static);
+    REQUIRE(succes_static_with_steps);
+    REQUIRE(anim_rec_ws.size() == 2);
+    REQUIRE(anim_rec_ws[0].m_anim_type == geom_anim_type::anim_static);
+
+    std::ifstream isecv("../examples/io/ref_data/firefly/dvb_ir.out");
+    comp_chem_program_data_t<double> cc_ov;
+    read_ccd_from_firefly_output(isecv, cc_ov);
+    std::vector<geom_anim_record_t<double> > anim_recv;
+    bool succes_static_v = compile_static_animation(cc_ov, anim_recv);
+    bool succes_static_with_v = compile_animation(cc_ov, anim_recv);
+    REQUIRE(succes_static_v);
+    REQUIRE(succes_static_with_v);
+    REQUIRE(anim_recv.size() == (cc_ov.vibs.size()+1));
+
   }
 
 }
