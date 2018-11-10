@@ -1,6 +1,13 @@
-add_executable(test-qc1 test-qc1.cpp)
-add_test(target_test-qc1 test-qc1)
+add_executable(test_lace3d test_lace3d.cpp)
+add_executable(test_ccd test_ccd.cpp)
+target_link_libraries(test_ccd qpp)
 
-add_executable(test-lace3d test-lace3d.cpp)
-add_test(target_test-lace3d test-lace3d)
+add_test(NAME test_lace3d
+    COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_lace3d -o report.xml -r junit
+    WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+
+
+add_test(NAME test_ccd
+    COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_ccd -o report.xml -r junit
+    WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 

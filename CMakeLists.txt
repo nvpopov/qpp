@@ -29,7 +29,7 @@ option(PYTHON_BINDINGS "build qpp python bindings" ON)
 option(PYTHON_EXPOSE_EXTENDED "build python wrappers not only for real=float" ON)
 option(USE_SYSTEM_EIGEN3 "use system avaiable eigen3 or download as deps" OFF)
 option(BUILD_EXAMPLES "build examples" ON)
-option(BUILD_TESTS "build tests executable" OFF)
+option(BUILD_TESTS "build tests executable" ON)
 option(BUILD_QC "build qc stuff")
 option(BUILD_DOCS "build documentation")
 option(BUILD_TOOLS  "build tools" OFF)
@@ -76,7 +76,6 @@ if (LA_TYPE EQUAL "MKL")
 endif()
 
 add_subdirectory(deps)
-add_subdirectory(deps/spglib)
 include_directories(${PROJECT_SOURCE_DIR}/deps/fmtlib)
 include_directories(${PROJECT_SOURCE_DIR}/deps/pybind11/include)
 #add_subdirectory(${CMAKE_SOURCE_DIR}/deps/fmtlib)
@@ -118,13 +117,6 @@ add_custom_target(ideheaders SOURCES ${ide_headers} ${ide_headersc}
 
 #Global includes
 include_directories(modules/)
-
-#spglib
-include_directories(${PROJECT_SOURCE_DIR}/deps/spglib/src)
-add_library(spglib-imp STATIC IMPORTED)
-set_target_properties(spglib-imp PROPERTIES IMPORTED_LOCATION
-    "${PROJECT_BINARY_DIR}/deps/spglib-prefix/src/spglib-build/libsymspg.a")
-#end spglib
 
 add_subdirectory(modules)
 

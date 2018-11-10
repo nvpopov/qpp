@@ -97,7 +97,7 @@ namespace qpp {
       }
 
       inline bool operator==(const generic_matrix<VALTYPE, N , M> & b) const {
-        return (*this).isApprox(b, tol_equiv);
+        return (*this-b).norm() < generic_matrix::tol_equiv;
       }
 
       inline bool operator!=(const generic_matrix<VALTYPE, N , M> &b) const {
@@ -111,12 +111,11 @@ namespace qpp {
 
       //template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
       STRING to_string_matr() const {
-        return fmt::format("[{},\n {},\n {}]",
+        return fmt::format("[{}, {}, {}]",
                            (*this).row(0),
                            (*this).row(1),
                            (*this).row(2));
       }
-
 
 
 #ifdef PY_EXPORT
@@ -313,15 +312,17 @@ namespace qpp {
   template<class VALTYPE>
   using matrix3 = generic_matrix<VALTYPE, 3, 3>;
 
-  //  template <typename VALTYPE>
-  //  std::ostream& operator<< (std::ostream& stream, const vector3<VALTYPE> &gm) {
-  //    stream << gm.to_string_vec();
-  //  }
+    template <typename VALTYPE>
+    std::ostream& operator<< (std::ostream& stream, const vector3<VALTYPE> &gm) {
+      stream << gm.to_string_vec();
+      return stream;
+    }
 
-  //  template <typename VALTYPE>
-  //  std::ostream& operator<< (std::ostream& stream, const matrix3<VALTYPE> &gm) {
-  //    stream << gm.to_string_matr();
-  //  }
+    template <typename VALTYPE>
+    std::ostream& operator<< (std::ostream& stream, const matrix3<VALTYPE> &gm) {
+      stream << gm.to_string_matr();
+      return stream;
+    }
 
   template<class VALTYPE>
   matrix3<VALTYPE> mat4_to_mat3(const matrix4<VALTYPE> _inmat){
@@ -390,13 +391,7 @@ namespace qpp {
   template<class VALTYPE>
   vector3<VALTYPE> solve3(const matrix3<VALTYPE> & A,
                           const vector3<VALTYPE> & b){
-    VALTYPE
-        D = A.determinant(),
-        X = matrix3<VALTYPE>(b,    A(1), A(2)).determinant(),
-        Y = matrix3<VALTYPE>(A(0), b,    A(2)).determinant(),
-        Z = matrix3<VALTYPE>(A(0), A(1), b).determinant();
-
-    return vector3<VALTYPE>(X, Y, Z)/D;
+    return A.inverse() * b;
   }
 
   template<class VALTYPE>
@@ -726,7 +721,7 @@ namespace qpp {
   }
 
   template<class VALTYPE, int N, int M>
-  typename numeric_type<VALTYPE>::norm generic_matrix<VALTYPE, N, M>::tol_equiv = 1e-8;
+  typename numeric_type<VALTYPE>::norm generic_matrix<VALTYPE, N, M>::tol_equiv = 1e-6;
 
   template<class VALTYPE, int N, int M>
   generic_matrix<VALTYPE, N, M> generic_matrix<VALTYPE, N, M>::unity =

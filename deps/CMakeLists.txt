@@ -26,12 +26,12 @@ endif()
 
 
 #spglib for crystal symmetry handling
-    ExternalProject_Add(spglib
-        SOURCE_DIR "${PROJECT_SOURCE_DIR}/deps/spglib"
-        INSTALL_COMMAND ""
-        UPDATE_COMMAND ""
-        CMAKE_ARGS ""
-        )
+#    ExternalProject_Add(spglib
+#        SOURCE_DIR "${PROJECT_SOURCE_DIR}/deps/spglib"
+#        INSTALL_COMMAND ""
+#        UPDATE_COMMAND ""
+#        CMAKE_ARGS ""
+#        )
 
 if(BUILD_QC)
     #libint

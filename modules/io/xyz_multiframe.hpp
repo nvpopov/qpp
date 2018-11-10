@@ -25,6 +25,9 @@ namespace qpp {
                             geometry<REAL, CELL> & geom,
                             std::vector<geom_anim_record_t<float> > &anim,
                             bool keep_pdb_like_names = false ) {
+
+    std::locale loc1("C");
+
     std::string s;
 
     int nat{0};
@@ -60,8 +63,16 @@ namespace qpp {
 
             if (!bootstrap_geom) {
                 std::string at_name = std::string(splt[0]);
+
                 if (!keep_pdb_like_names) pbd_name_reducer::eval_change(at_name);
+                else
+                  if (at_name.length() == 2) {
+                      std::transform(at_name.begin()+1, at_name.end(), at_name.begin()+1, ::tolower);
+                      std::transform(at_name.begin(), at_name.begin()+1, at_name.begin(), ::toupper);
+                    }
+
                 geom.add(at_name, displ);
+
                 anim_static.frame_data.back().push_back(displ);
               }
             animr.frame_data.back().push_back(std::move(displ));

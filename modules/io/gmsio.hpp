@@ -1,5 +1,5 @@
-#ifndef _QPP_GMSIO_H
-#define _QPP_GMSIO_H
+#ifndef QPP_GMSIO_H
+#define QPP_GMSIO_H
 
 #include <iostream>
 #include <fmt/format.h>
