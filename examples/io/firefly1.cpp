@@ -1,4 +1,4 @@
-#include <io/firefly.hpp>
+#include <io/ccd_firefly.hpp>
 #include <fstream>
 
 using namespace qpp;

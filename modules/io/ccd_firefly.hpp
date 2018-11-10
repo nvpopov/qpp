@@ -233,6 +233,7 @@ namespace qpp {
 
                 if (splt[0] == "SCFTYP=RHF") output.is_unrestricted = false;
                 if (splt[0] == "SCFTYP=UHF") output.is_unrestricted = true;
+
                 if (splt[1] == "RUNTYP=OPTIMIZE")
                   output.run_t = comp_chem_program_run_t::geo_opt;
                 if (splt[1] == "RUNTYP=ENERGY")
@@ -241,6 +242,8 @@ namespace qpp {
                   output.run_t = comp_chem_program_run_t::grad;
                 if (splt[1] == "RUNTYP=HESSIAN")
                   output.run_t = comp_chem_program_run_t::vib;
+                if (splt[1] == "RUNTYP=RAMAN")
+                  output.run_t = comp_chem_program_run_t::raman;
 
                 b_init_parsed = true;
                 p_state = pcg_ff_p_state::s_none;
@@ -387,6 +390,18 @@ namespace qpp {
 
         //parsing vibrations
         if (s.find(s_vib_header_str) != std::string::npos) {
+            //header scenario
+            //run type == vib:
+            //    FREQUENCIES IN CM**-1, IR INTENSITIES IN DEBYE**2/AMU-ANGSTROM**2
+            //newline
+            //
+            //run type == raman:
+            //FREQUENCIES IN CM**-1, IR INTENSITIES IN DEBYE**2/AMU-ANGSTROM**2
+            //RAMAN ACTIVITIES  IN ANGSTROM**4/AMU, DEPOLARIZATIONS ARE DIMENSIONLESS
+            //newline
+            //
+
+            if (output.run_t == comp_chem_program_run_t::raman) std::getline(inp, s);
             std::getline(inp, s); //read empty line
             p_state = pcg_ff_p_state::s_vib_general;
             continue;
@@ -397,11 +412,22 @@ namespace qpp {
                 p_state = pcg_ff_p_state::s_none;
                 continue;
               }
+
+            // for rt = vib
             //like this:
             //            1           2           3           4           5
             //FREQUENCY:         5.89        1.44        0.01        0.01        0.01
             //REDUCED MASS:      3.94009     4.46293     6.50413     6.50391     6.50391
             //IR INTENSITY:      0.00000     0.00000     0.00000     0.00000     0.00000
+            //
+            // for rt = raman
+            //            1           2           3           4           5
+            //FREQUENCY:         5.89        1.46        0.04        0.03        0.01
+            //REDUCED MASS:      3.93944     4.46292     6.50391     6.50391     6.50439
+            //IR INTENSITY:      0.00000     0.00000     0.00000     0.00000     0.00000
+            //RAMAN ACTIVITY:       12.675       1.828       0.000       0.000       0.000
+            //DEPOLARIZATION:        0.750       0.749       0.009       0.238       0.749
+
             std::vector<std::string_view> splt_s0 = split_sv(s, " ");
             vib_line_size = splt_s0.size();
             //allocate new vibrations
@@ -427,6 +453,22 @@ namespace qpp {
             std::vector<std::string_view> splt_s3 = split_sv(s, " ");
             for (size_t i = 1; i < vib_line_size + 1; i++) {
                 output.vibs[tv-vib_line_size+i-1].intensity = std::stod(splt_s3[i+1].data());
+              }
+
+            if (output.run_t == comp_chem_program_run_t::raman) {
+                std::getline(inp,s);
+                std::vector<std::string_view> splt_ram_act = split_sv(s, " ");
+                for (size_t i = 1; i < vib_line_size + 1; i++) {
+                    output.vibs[tv-vib_line_size+i-1].raman_activity =
+                        std::stod(splt_ram_act[i+1].data());
+                  }
+
+                std::getline(inp,s);
+                std::vector<std::string_view> splt_depol = split_sv(s, " ");
+                for (size_t i = 1; i < vib_line_size + 1; i++) {
+                    output.vibs[tv-vib_line_size+i-1].depolarization =
+                        std::stod(splt_depol[i].data());
+                  }
               }
 
             //read empty line

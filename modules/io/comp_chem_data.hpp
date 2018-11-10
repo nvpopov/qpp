@@ -16,6 +16,7 @@ namespace qpp {
     geo_opt,
     md,
     vib,
+    raman,
     tddft,
     spectrum
   };
@@ -26,6 +27,8 @@ namespace qpp {
       REAL frequency{REAL(0)};
       REAL intensity{REAL(0)};
       REAL reduced_mass{REAL(0)};
+      REAL raman_activity{REAL(0)};
+      REAL depolarization{REAL(0)};
   };
 
   template <class REAL>
@@ -77,11 +80,14 @@ namespace qpp {
 
 
   //Compile geometry flags
-  const uint32_t ccd_cf_allow_null_init_geom           = 1 << 0;
-  const uint32_t ccd_cf_allow_different_size_pos_names = 1 << 1;
-  const uint32_t ccd_cf_apply_pdb_name_reducer         = 1 << 2;
-  const uint32_t ccd_cf_autocenter_geometry            = 1 << 3;
-  const uint32_t ccd_cf_autocenter_steps_geometry      = 1 << 4;
+  const uint32_t ccd_cf_default_flags                  = 0;
+  const uint32_t ccd_cf_allow_null_init_geom           = 1 << 1;
+  const uint32_t ccd_cf_allow_different_size_pos_names = 1 << 2;
+  const uint32_t ccd_cf_apply_pdb_name_reducer         = 1 << 3;
+  const uint32_t ccd_cf_apply_up_low_atom_name_scheme  = 1 << 4;
+  const uint32_t ccd_cf_autocenter_geometry            = 1 << 5;
+  const uint32_t ccd_cf_autocenter_steps_geometry      = 1 << 6;
+  const uint32_t ccd_cf_check_cell_consistency         = 1 << 7;
 
   template <class REAL>
   bool validate_ccd(comp_chem_program_data_t<REAL> &ccd_inst, uint32_t flags) {
@@ -90,7 +96,8 @@ namespace qpp {
 
   template <class REAL>
   bool compile_geometry(comp_chem_program_data_t<REAL> &ccd_inst,
-                        geometry<REAL, periodic_cell<REAL> > &g, uint32_t compile_flags = 0) {
+                        geometry<REAL, periodic_cell<REAL> > &g,
+                        uint32_t compile_flags = ccd_cf_default_flags) {
 
     if ((ccd_inst.init_pos.empty() || ccd_inst.init_atom_names.empty())
         || (compile_flags & ccd_cf_allow_null_init_geom)) return false;
@@ -117,7 +124,8 @@ namespace qpp {
 
   template <class REAL>
   bool compile_static_animation(comp_chem_program_data_t<REAL> &ccd_inst,
-                         std::vector<geom_anim_record_t<REAL> > &anim_rec) {
+                                std::vector<geom_anim_record_t<REAL> > &anim_rec,
+                                uint32_t compile_flags = ccd_cf_default_flags) {
 
     geom_anim_record_t<REAL> anim;
 
@@ -134,7 +142,8 @@ namespace qpp {
 
   template <class REAL>
   bool compile_animation(comp_chem_program_data_t<REAL> &ccd_inst,
-                         std::vector<geom_anim_record_t<REAL> > &anim_rec) {
+                         std::vector<geom_anim_record_t<REAL> > &anim_rec,
+                         uint32_t compile_flags = ccd_cf_default_flags) {
 
     if (ccd_inst.run_t != comp_chem_program_run_t::geo_opt &&
         ccd_inst.run_t != comp_chem_program_run_t::md &&
@@ -161,6 +170,11 @@ namespace qpp {
         copy_steps_content = false;
         stored_anim_name = "vib";
         break;
+      case comp_chem_program_run_t::raman :
+        stored_anim_type = geom_anim_type::anim_vib;
+        copy_steps_content = false;
+        stored_anim_name = "vib";
+        break;
       default:
         return false;
         break;
@@ -180,8 +194,8 @@ namespace qpp {
         return true;
       }
     else {
-
-        if (ccd_inst.run_t == comp_chem_program_run_t::vib)
+        if (ccd_inst.run_t == comp_chem_program_run_t::vib ||
+            ccd_inst.run_t == comp_chem_program_run_t::raman)
           for (size_t v = 0; v < ccd_inst.vibs.size(); v++) {
               geom_anim_record_t<REAL> anim;
               anim.m_anim_type = stored_anim_type;
@@ -198,14 +212,12 @@ namespace qpp {
                   if (i > total_frames_upwards) tf_index = total_frames - (i+1);
                   for (size_t q = 0; q < ccd_inst.vibs[v].disp.size(); q++) {
                       anim.frame_data[i][q] = ccd_inst.init_pos[q] +
-                                          ccd_inst.vibs[v].disp[q] *
-                                          (REAL(tf_index) / total_frames_upwards);
+                                              ccd_inst.vibs[v].disp[q] *
+                                              (REAL(tf_index) / total_frames_upwards);
                     }
                 }
-
               anim_rec.push_back(std::move(anim));
             }
-
       }
 
     return true;
