@@ -25,7 +25,7 @@ TEST_CASE( "Computational chemistry data parsing : PC Gamess Firefly" ) {
     REQUIRE(cc_o.n_alpha == 35);
     REQUIRE(cc_o.n_beta == 35);
     REQUIRE(cc_o.tot_num_atoms == 20);
-    REQUIRE(cc_o.run_t == comp_chem_program_run_t::energy);
+    REQUIRE(cc_o.run_t == comp_chem_program_run_t::rt_energy);
     REQUIRE(cc_o.steps.back().scf_steps.size() == 9);
     REQUIRE(cc_o.steps.back().scf_steps.front().total_energy == Approx(-379.453243734));
     REQUIRE(cc_o.steps.back().scf_steps.back().total_energy == Approx(-379.777955008));
@@ -58,7 +58,7 @@ TEST_CASE( "Computational chemistry data parsing : PC Gamess Firefly" ) {
     REQUIRE(cc_o.n_alpha == 35);
     REQUIRE(cc_o.n_beta == 35);
     REQUIRE(cc_o.tot_num_atoms == 20);
-    REQUIRE(cc_o.run_t == comp_chem_program_run_t::geo_opt);
+    REQUIRE(cc_o.run_t == comp_chem_program_run_t::rt_geo_opt);
     REQUIRE(cc_o.init_pos.size() == 20);
     REQUIRE(cc_o.init_atom_names.size() == 20);
     REQUIRE(cc_o.steps.size() == 24);
@@ -84,7 +84,7 @@ TEST_CASE( "Computational chemistry data parsing : PC Gamess Firefly" ) {
     REQUIRE(cc_o.n_alpha == 35 );
     REQUIRE(cc_o.n_beta == 35 );
     REQUIRE(cc_o.tot_num_atoms == 20);
-    REQUIRE(cc_o.run_t == comp_chem_program_run_t::vib);
+    REQUIRE(cc_o.run_t == comp_chem_program_run_t::rt_vib);
     REQUIRE(cc_o.init_pos.size() == 20);
     REQUIRE(cc_o.init_atom_names.size() == 20);
     REQUIRE(cc_o.vibs.size() == 60 );
@@ -115,7 +115,7 @@ TEST_CASE( "Computational chemistry data parsing : PC Gamess Firefly" ) {
     REQUIRE(cc_o.n_alpha == 35 );
     REQUIRE(cc_o.n_beta == 35 );
     REQUIRE(cc_o.tot_num_atoms == 20);
-    REQUIRE(cc_o.run_t == comp_chem_program_run_t::raman);
+    REQUIRE(cc_o.run_t == comp_chem_program_run_t::rt_raman);
     REQUIRE(cc_o.init_pos.size() == 20);
     REQUIRE(cc_o.init_atom_names.size() == 20);
 

@@ -10,15 +10,46 @@
 namespace qpp {
 
   enum comp_chem_program_run_t {
-    unknown,
-    energy,
-    grad,
-    geo_opt,
-    md,
-    vib,
-    raman,
-    tddft,
-    spectrum
+    rt_unknown,
+    rt_energy,
+    rt_grad,
+    rt_geo_opt,
+    rt_md,
+    rt_vib,
+    rt_raman,
+    rt_tddft,
+    rt_spectrum
+  };
+
+  enum comp_chem_program_t {
+    pr_unknown,
+    pr_vasp,
+    pr_firefly,
+    pr_pc_gamess,
+    pr_cp2k,
+    pr_orca,
+    pr_molcas
+  };
+
+  static std::map<comp_chem_program_t, std::string> ccdprog2str = {
+    std::make_pair(pr_unknown, "Unknown"),
+    std::make_pair(pr_vasp,    "VASP"),
+    std::make_pair(pr_firefly, "PC Gamess Firefly"),
+    std::make_pair(pr_cp2k,    "CP2K"),
+    std::make_pair(pr_orca,    "Orca"),
+    std::make_pair(pr_molcas,  "OpenMolcas"),
+  };
+
+  static std::map<comp_chem_program_run_t, std::string> ccdrt2str = {
+    std::make_pair(rt_unknown,  "Unknown"),
+    std::make_pair(rt_energy,   "Single-point energy"),
+    std::make_pair(rt_grad,     "Gradients calculation"),
+    std::make_pair(rt_geo_opt,  "Geometry optimization"),
+    std::make_pair(rt_md,       "Molecular dynamics"),
+    std::make_pair(rt_vib,      "Vibrations calculation"),
+    std::make_pair(rt_raman,    "Raman spectrum calculation"),
+    std::make_pair(rt_tddft,    "TDDFT energy calculation"),
+    std::make_pair(rt_spectrum, "Generic spectrum calculation")
   };
 
   template <class REAL>
@@ -65,6 +96,7 @@ namespace qpp {
       std::optional<vector3<REAL> > cell_v0;
       std::optional<vector3<REAL> > cell_v1;
       std::optional<vector3<REAL> > cell_v2;
+      comp_chem_program_t comp_chem_program{comp_chem_program_t::pr_unknown};
       uint32_t ccd_flags;
       int DIM{0};
       int tot_num_atoms{0};
@@ -75,7 +107,7 @@ namespace qpp {
       int n_alpha{0};
       int n_beta{0};
       bool m_is_terminated_normally{false};
-      comp_chem_program_run_t run_t{comp_chem_program_run_t::unknown};
+      comp_chem_program_run_t run_t{comp_chem_program_run_t::rt_unknown};
   };
 
 
@@ -145,9 +177,10 @@ namespace qpp {
                          std::vector<geom_anim_record_t<REAL> > &anim_rec,
                          uint32_t compile_flags = ccd_cf_default_flags) {
 
-    if (ccd_inst.run_t != comp_chem_program_run_t::geo_opt &&
-        ccd_inst.run_t != comp_chem_program_run_t::md &&
-        ccd_inst.run_t != comp_chem_program_run_t::vib) return false;
+    if (ccd_inst.run_t != comp_chem_program_run_t::rt_geo_opt &&
+        ccd_inst.run_t != comp_chem_program_run_t::rt_md &&
+        ccd_inst.run_t != comp_chem_program_run_t::rt_vib &&
+        ccd_inst.run_t != comp_chem_program_run_t::rt_raman) return false;
 
     bool copy_steps_content = false;
 
@@ -155,22 +188,22 @@ namespace qpp {
     std::string stored_anim_name;
 
     switch (ccd_inst.run_t) {
-      case comp_chem_program_run_t::geo_opt :
+      case comp_chem_program_run_t::rt_geo_opt :
         stored_anim_type = geom_anim_type::anim_geo_opt;
         copy_steps_content = true;
         stored_anim_name = "geo_opt";
         break;
-      case comp_chem_program_run_t::md :
+      case comp_chem_program_run_t::rt_md :
         stored_anim_type = geom_anim_type::anim_md;
         copy_steps_content = true;
         stored_anim_name = "mol_dyn";
         break;
-      case comp_chem_program_run_t::vib :
+      case comp_chem_program_run_t::rt_vib :
         stored_anim_type = geom_anim_type::anim_vib;
         copy_steps_content = false;
         stored_anim_name = "vib";
         break;
-      case comp_chem_program_run_t::raman :
+      case comp_chem_program_run_t::rt_raman :
         stored_anim_type = geom_anim_type::anim_vib;
         copy_steps_content = false;
         stored_anim_name = "vib";
@@ -194,8 +227,8 @@ namespace qpp {
         return true;
       }
     else {
-        if (ccd_inst.run_t == comp_chem_program_run_t::vib ||
-            ccd_inst.run_t == comp_chem_program_run_t::raman)
+        if (ccd_inst.run_t == comp_chem_program_run_t::rt_vib ||
+            ccd_inst.run_t == comp_chem_program_run_t::rt_raman)
           for (size_t v = 0; v < ccd_inst.vibs.size(); v++) {
               geom_anim_record_t<REAL> anim;
               anim.m_anim_type = stored_anim_type;

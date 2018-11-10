@@ -62,6 +62,7 @@ namespace qpp {
 
   const std::string s_init_tot_num_occup_alpha =
       "NUMBER OF OCCUPIED ORBITALS (ALPHA) =";
+
   const std::string s_init_tot_num_occup_beta =
       "NUMBER OF OCCUPIED ORBITALS (BETA ) =";
 
@@ -126,6 +127,7 @@ namespace qpp {
     int vib_line_seek{0};
 
     output.DIM = 0;
+    output.comp_chem_program = comp_chem_program_t::pr_firefly;
 
     while (!inp.eof()) {
 
@@ -235,15 +237,15 @@ namespace qpp {
                 if (splt[0] == "SCFTYP=UHF") output.is_unrestricted = true;
 
                 if (splt[1] == "RUNTYP=OPTIMIZE")
-                  output.run_t = comp_chem_program_run_t::geo_opt;
+                  output.run_t = comp_chem_program_run_t::rt_geo_opt;
                 if (splt[1] == "RUNTYP=ENERGY")
-                  output.run_t = comp_chem_program_run_t::energy;
+                  output.run_t = comp_chem_program_run_t::rt_energy;
                 if (splt[1] == "RUNTYP=GRADIENT")
-                  output.run_t = comp_chem_program_run_t::grad;
+                  output.run_t = comp_chem_program_run_t::rt_grad;
                 if (splt[1] == "RUNTYP=HESSIAN")
-                  output.run_t = comp_chem_program_run_t::vib;
+                  output.run_t = comp_chem_program_run_t::rt_vib;
                 if (splt[1] == "RUNTYP=RAMAN")
-                  output.run_t = comp_chem_program_run_t::raman;
+                  output.run_t = comp_chem_program_run_t::rt_raman;
 
                 b_init_parsed = true;
                 p_state = pcg_ff_p_state::s_none;
@@ -401,7 +403,7 @@ namespace qpp {
             //newline
             //
 
-            if (output.run_t == comp_chem_program_run_t::raman) std::getline(inp, s);
+            if (output.run_t == comp_chem_program_run_t::rt_raman) std::getline(inp, s);
             std::getline(inp, s); //read empty line
             p_state = pcg_ff_p_state::s_vib_general;
             continue;
@@ -455,7 +457,7 @@ namespace qpp {
                 output.vibs[tv-vib_line_size+i-1].intensity = std::stod(splt_s3[i+1].data());
               }
 
-            if (output.run_t == comp_chem_program_run_t::raman) {
+            if (output.run_t == comp_chem_program_run_t::rt_raman) {
                 std::getline(inp,s);
                 std::vector<std::string_view> splt_ram_act = split_sv(s, " ");
                 for (size_t i = 1; i < vib_line_size + 1; i++) {
