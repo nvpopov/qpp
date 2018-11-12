@@ -6,6 +6,7 @@
 #include <data/types.hpp>
 #include <array>
 #include <data/compiler_fallback.hpp>
+#include <data/case_icomp.hpp>
 
 #ifdef PY_EXPORT
 #include <pybind11/pybind11.h>
@@ -21,6 +22,7 @@ namespace qpp {
     const uint PTABLE_INT_NONE = -1;
     const float PTABLE_FLOAT_NONE = -1.0;
     const STRING PTABLE_NONE = "None";
+
 
     struct ptable_atom_ionic_radii {
         float charge;
@@ -59,7 +61,7 @@ namespace qpp {
 
         static ptable *instance;
 
-        std::map<std::string, uint> cache_atom_idx;
+        std::map<std::string, uint, case_icomp<std::string> > cache_atom_idx;
         std::array<ptable_atom_record, PTABLE_ELEM_N> arecs;
 
         static ptable* get_inst () {

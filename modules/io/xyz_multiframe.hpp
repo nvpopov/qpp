@@ -67,8 +67,10 @@ namespace qpp {
                 if (!keep_pdb_like_names) pbd_name_reducer::eval_change(at_name);
                 else
                   if (at_name.length() == 2) {
-                      std::transform(at_name.begin()+1, at_name.end(), at_name.begin()+1, ::tolower);
-                      std::transform(at_name.begin(), at_name.begin()+1, at_name.begin(), ::toupper);
+                      std::transform(at_name.begin()+1, at_name.end(),
+                                     at_name.begin()+1, ::tolower);
+                      std::transform(at_name.begin(), at_name.begin()+1,
+                                     at_name.begin(), ::toupper);
                     }
 
                 geom.add(at_name, displ);
