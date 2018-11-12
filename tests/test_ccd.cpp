@@ -2,6 +2,7 @@
 #include "catch.hpp"
 #include <geom/lace3d.hpp>
 #include <io/ccd_firefly.hpp>
+#include <io/ccd_xyz.hpp>
 #include <fstream>
 
 using namespace qpp;
@@ -123,9 +124,9 @@ TEST_CASE( "Computational chemistry data parsing : PC Gamess Firefly" ) {
 
 }
 
-TEST_CASE( "Compilation of ccd model" ) {
+TEST_CASE("Compilation of ccd model" ) {
 
-  SECTION( " Compile 0d models") {
+  SECTION("Compile 0d models") {
 
     std::ifstream isec("../examples/io/ref_data/firefly/dvb_sp.out");
     comp_chem_program_data_t<double> cc_o;
@@ -141,7 +142,7 @@ TEST_CASE( "Compilation of ccd model" ) {
 
   }
 
-  SECTION( "Compile 0d models - animation[geo_opt]") {
+  SECTION("Compile 0d models - animation[geo_opt]") {
 
     std::ifstream isec("../examples/io/ref_data/firefly/dvb_gopt_a.out");
     comp_chem_program_data_t<double> cc_o;
@@ -173,5 +174,33 @@ TEST_CASE( "Compilation of ccd model" ) {
     REQUIRE(anim_recv.size() == (cc_ov.vibs.size()+1));
 
   }
+
+}
+
+TEST_CASE("Testing parsing xyz files with ccd approach") {
+
+  SECTION("Parsing single geometry - 0d") {
+    std::ifstream isec("../examples/io/ref_data/xyz/zoloft.xyz");
+    comp_chem_program_data_t<double> cc_o;
+    read_ccd_from_xyz_file(isec, cc_o);
+    REQUIRE(cc_o.tot_num_atoms == 37);
+  }
+
+  SECTION("Parsing multiframe geometry - 0d") {
+    std::ifstream isec("../examples/io/ref_data/xyz/23elim.xyz");
+    comp_chem_program_data_t<double> cc_o;
+    read_ccd_from_xyz_file(isec, cc_o);
+    REQUIRE(cc_o.tot_num_atoms == 22);
+    REQUIRE(cc_o.steps.size() == 22);
+  }
+
+  SECTION("Parsing single geometry with big amount of atoms - 0d") {
+    std::ifstream isec("../examples/io/ref_data/xyz/relax.xyz");
+    comp_chem_program_data_t<double> cc_o;
+    read_ccd_from_xyz_file(isec, cc_o);
+    REQUIRE(cc_o.tot_num_atoms == 49651);
+  }
+
+
 
 }
