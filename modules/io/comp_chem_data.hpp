@@ -6,6 +6,7 @@
 #include <geom/lace3d.hpp>
 #include <geom/geom.hpp>
 #include <geom/geom_anim.hpp>
+#include <io/pdb_name_reducer.hpp>
 
 namespace qpp {
 
@@ -148,8 +149,13 @@ namespace qpp {
     if (ccd_inst.DIM > 1 && ccd_inst.cell_v1) g.cell.v[1] = *(ccd_inst.cell_v1);
     if (ccd_inst.DIM > 2 && ccd_inst.cell_v2) g.cell.v[2] = *(ccd_inst.cell_v2);
 
-    for (size_t i = 0; i < ccd_inst.init_atom_names.size(); i++)
-      g.add(ccd_inst.init_atom_names[i], ccd_inst.init_pos[i]);
+    for (size_t i = 0; i < ccd_inst.init_atom_names.size(); i++) {
+        if (compile_flags & ccd_cf_apply_pdb_name_reducer)
+          pbd_name_reducer::eval_change(ccd_inst.init_atom_names[i]);
+        //if (compile_flags & ccd_cf_apply_up_low_atom_name_scheme)
+
+        g.add(ccd_inst.init_atom_names[i], ccd_inst.init_pos[i]);
+      }
 
     return true;
   }

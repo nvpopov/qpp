@@ -207,6 +207,8 @@ namespace qpp{
     return qpp::vector3<REAL>(vx, vy, vz);
   }
 
+  void replace_string_inplace(std::string& subject, const std::string& search,
+                            const std::string& replace);
 
   //https://www.bfilipek.com/2018/07/string-view-perf-followup.html
   std::vector<std::string_view> split_sv (std::string_view strv, std::string_view delims = " ");
