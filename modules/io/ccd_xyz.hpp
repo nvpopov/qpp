@@ -88,7 +88,7 @@ namespace qpp {
                   std::stod(splt[3].data()));
 
             if (!init_filled) {
-                output.init_atom_names[atom_c] = std::string(splt[0].data());
+                output.init_atom_names[atom_c] = std::string(splt[0]);
                 output.init_pos[atom_c] = pos;
               } else {
                  output.steps[frame_idx].pos[atom_c] = pos;
@@ -109,6 +109,8 @@ namespace qpp {
           }
 
       }
+
+    if (output.steps.size() > 0) output.run_t = comp_chem_program_run_t::rt_geo_opt;
 
   }
 
