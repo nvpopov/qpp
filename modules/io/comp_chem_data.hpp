@@ -11,29 +11,29 @@
 
 namespace qpp {
 
-  template <typename REAL = float, typename STR_CLASS = std::string>
-  class comp_chem_data_entry_t {
-    private:
-      std::variant<int, REAL, bool, STR_CLASS, std::vector<comp_chem_data_entry_t>,
-      std::map<STR_CLASS, comp_chem_data_entry_t> > p_data;
+//  template <typename REAL = float, typename STR_CLASS = std::string>
+//  class comp_chem_data_entry_t {
+//    private:
+//      std::variant<int, REAL, bool, STR_CLASS, std::vector<comp_chem_data_entry_t>,
+//      std::map<STR_CLASS, comp_chem_data_entry_t> > p_data;
 
-    public:
-      template <typename T>
-      T get() {
-        return std::get<T>(p_data);
-      }
+//    public:
+//      template <typename T>
+//      T get() {
+//        return std::get<T>(p_data);
+//      }
 
-      template <typename T>
-      T get_if() {
-        return std::get_if<T>(p_data);
-      }
+//      template <typename T>
+//      T get_if() {
+//        return std::get_if<T>(p_data);
+//      }
 
-      template <typename T>
-      void set(T t_inst) {
-        p_data = t_inst;
-      }
+//      template <typename T>
+//      void set(T t_inst) {
+//        p_data = t_inst;
+//      }
 
-  };
+//  };
 
   enum comp_chem_program_run_t {
     rt_unknown,
@@ -107,6 +107,8 @@ namespace qpp {
       std::vector<vector3<REAL> > grad;
       std::vector<vector3<REAL> > vels;
       std::vector<REAL> eigen_values;
+      std::vector<REAL> eigen_values_spin_1;
+      std::vector<REAL> eigen_values_spin_2;
       std::vector<std::pair<REAL, REAL> > mulliken_pop_per_atom;
       std::vector<std::pair<REAL, REAL> > lowdin_pop_per_atom;
       std::optional<vector3<REAL> >dipole_moment{std::nullopt};
@@ -147,9 +149,23 @@ namespace qpp {
   const uint32_t ccd_cf_autocenter_geometry            = 1 << 5;
   const uint32_t ccd_cf_autocenter_steps_geometry      = 1 << 6;
   const uint32_t ccd_cf_check_cell_consistency         = 1 << 7;
+  const uint32_t ccd_cf_remove_empty_geom_steps        = 1 << 8;
 
   template <class REAL>
   bool validate_ccd(comp_chem_program_data_t<REAL> &ccd_inst, uint32_t flags) {
+    return true;
+  }
+
+  template <class REAL>
+  bool compile_ccd(comp_chem_program_data_t<REAL> &ccd_inst, uint32_t flags) {
+
+    if (flags & ccd_cf_remove_empty_geom_steps) {
+        for (auto it = ccd_inst.steps.begin(); it != ccd_inst.steps.end();) {
+            if(it->pos.empty()) it = ccd_inst.steps.erase(it);
+            else ++it;
+          }
+      }
+
     return true;
   }
 
@@ -237,18 +253,32 @@ namespace qpp {
       };
 
     if (copy_steps_content) {
+
         geom_anim_record_t<REAL> anim;
         anim.m_anim_type = stored_anim_type;
         anim.m_anim_name = stored_anim_name;
-        anim.frame_data.resize(ccd_inst.steps.size());
+
+        int non_empty_steps_count = std::count_if(ccd_inst.steps.begin(), ccd_inst.steps.end(),
+                                                  [](comp_chem_program_step_t<REAL> &step) {
+                                                    return !step.pos.empty();
+                                                  });
+
+        anim.frame_data.resize(non_empty_steps_count);
+        int steps_c = -1;
+
         for (size_t i = 0; i < ccd_inst.steps.size(); i++) {
-            anim.frame_data[i].resize(ccd_inst.steps[i].pos.size());
-            for (size_t q = 0; q < ccd_inst.steps[i].pos.size(); q++)
-              anim.frame_data[i][q] = ccd_inst.steps[i].pos[q];
+            if (!ccd_inst.steps[i].pos.empty()) {
+                steps_c += 1;
+                anim.frame_data[steps_c].resize(ccd_inst.steps[i].pos.size());
+                for (size_t q = 0; q < ccd_inst.steps[i].pos.size(); q++)
+                  anim.frame_data[steps_c][q] = ccd_inst.steps[i].pos[q];
+              }
           }
+
         anim_rec.push_back(std::move(anim));
         return true;
       }
+
     else {
         if (ccd_inst.run_t == comp_chem_program_run_t::rt_vib ||
             ccd_inst.run_t == comp_chem_program_run_t::rt_raman)

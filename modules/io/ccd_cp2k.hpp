@@ -46,6 +46,16 @@ namespace qpp {
 
         if (!is_init_parsed) {
 
+//            if (s.find(" DFT| Spin restricted") != std::string::npos) {
+//                output.is_unrestricted = false;
+//                continue;
+//              }
+
+//            if (s.find(" DFT| Spin unrestricted") != std::string::npos) {
+//                output.is_unrestricted = true;
+//                continue;
+//              }
+
             //Parse run type
             if (s.find("GLOBAL| Run type") != std::string::npos) {
                 if (s.find("GEO_OPT") != std::string::npos)
@@ -96,6 +106,8 @@ namespace qpp {
             if (s.find("DFT| Number of spin states") != std::string::npos) {
                 std::vector<std::string_view> splt = split_sv(s, " ");
                 output.n_spin_states = std::stoi(splt[5].data());
+                if (output.n_spin_states == 1) output.is_unrestricted = false;
+                else output.is_unrestricted = true;
                 continue;
               }
 
@@ -155,7 +167,7 @@ namespace qpp {
 
                 if (s.find("P_Mix") != std::string::npos || s.find("Diag.") != std::string::npos ||
                     s.find("OT") != std::string::npos || s.find("DIIS") != std::string::npos) {
-                    fmt::print(std::cout, "{}\n", s);
+                    //fmt::print(std::cout, "{}\n", s);
                     std::vector<std::string_view> splt = split_sv(s, " ");
                     size_t tot_l = splt.size();
 
@@ -170,9 +182,35 @@ namespace qpp {
                   }
               }
 
-            if (s.find(" i =") != std::string::npos) {
-
+            //mulliken pop per atom
+            if (s.find("Mulliken Population Analysis") != std::string::npos) {
+                for (auto i = 0; i < 2; i++) std::getline(inp, s); //read two common lines
+                output.steps.back().mulliken_pop_per_atom.reserve(output.tot_num_atoms);
+                for (size_t i = 0; i < output.tot_num_atoms; i++) {
+                    std::getline(inp, s);
+                    std::vector<std::string_view> splt = split_sv(s, " "); // 3 - pop 4 - charge
+                    std::pair<REAL, REAL> mr{std::stod(splt[3].data()), std::stod(splt[4].data())};
+                    output.steps.back().mulliken_pop_per_atom.push_back(std::move(mr));
+                  }
+                continue;
               }
+            //end mulliken pop per atom
+
+            // start of parsing trajectory and gradient
+            if (s.find(" i =") != std::string::npos) {
+                bool add_to_pos = output.steps.back().pos.empty();
+                for (size_t i = 0; i < output.tot_num_atoms; i++) {
+                    std::getline(inp, s);
+                    std::vector<std::string_view> splt = split_sv(s, " ");
+                    REAL x = std::stod(splt[1].data());
+                    REAL y = std::stod(splt[2].data());
+                    REAL z = std::stod(splt[3].data());
+                    vector3<REAL> pg{x, y, z};
+                    if (add_to_pos) output.steps.back().pos.push_back(std::move(pg));
+                    else output.steps.back().grad.push_back(std::move(pg));
+                  }
+              } //end of parsing trajectory and gradient
+
           } // end of is_init_parsed == true
 
       }

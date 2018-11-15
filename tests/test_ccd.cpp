@@ -210,6 +210,11 @@ TEST_CASE( "Computational chemistry data parsing : CP2K Output" ) {
     std::ifstream isec("../examples/io/ref_data/cp2k/baf2_gopt.cp2k_out");
     comp_chem_program_data_t<double> cc_o;
     read_ccd_from_cp2k_output(isec, cc_o);
+    geometry<double, periodic_cell<double> > g(3);
+    std::vector<geom_anim_record_t<double> > anim_rec;
+    bool succes = compile_geometry(cc_o, g);
+    bool succes_anims = compile_animation(cc_o, anim_rec);
+
     REQUIRE(cc_o.run_t == comp_chem_program_run_t::rt_geo_opt);
     REQUIRE(cc_o.DIM == 3);
     REQUIRE(cc_o.cell_v.size() == 3);
@@ -226,6 +231,15 @@ TEST_CASE( "Computational chemistry data parsing : CP2K Output" ) {
     REQUIRE(cc_o.mult == 1);
     REQUIRE(cc_o.tot_charge == Approx(0));
     REQUIRE(cc_o.steps.size() == 13);
+
+    REQUIRE(succes);
+    REQUIRE(succes_anims);
+    REQUIRE(anim_rec.front().frame_data.size() == 5 );
+
+    bool succes_ccd_compilation = compile_ccd(cc_o, ccd_cf_default_flags |
+                                              ccd_cf_remove_empty_geom_steps);
+    REQUIRE(succes_ccd_compilation);
+    REQUIRE(cc_o.steps.size() == 5);
   }
 
 }
