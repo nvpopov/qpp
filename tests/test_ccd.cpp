@@ -3,6 +3,7 @@
 #include <geom/lace3d.hpp>
 #include <io/ccd_firefly.hpp>
 #include <io/ccd_xyz.hpp>
+#include <io/ccd_cp2k.hpp>
 #include <fstream>
 
 using namespace qpp;
@@ -201,6 +202,30 @@ TEST_CASE("Testing parsing xyz files with ccd approach") {
     REQUIRE(cc_o.tot_num_atoms == 49651);
   }
 
+}
 
+TEST_CASE( "Computational chemistry data parsing : CP2K Output" ) {
+
+  SECTION ("Parsing results of geometry optimization [CP2K]") {
+    std::ifstream isec("../examples/io/ref_data/cp2k/baf2_gopt.cp2k_out");
+    comp_chem_program_data_t<double> cc_o;
+    read_ccd_from_cp2k_output(isec, cc_o);
+    REQUIRE(cc_o.run_t == comp_chem_program_run_t::rt_geo_opt);
+    REQUIRE(cc_o.DIM == 3);
+    REQUIRE(cc_o.cell_v.size() == 3);
+    REQUIRE(cc_o.cell_v[0] == v3d(12.566, 0.000,  0.000 ));
+    REQUIRE(cc_o.cell_v[1] == v3d(0.000,  12.566, 0.000 ));
+    REQUIRE(cc_o.cell_v[2] == v3d(0.000,  0.000,  12.566 ));
+
+    REQUIRE(cc_o.tot_num_atoms == 96);
+    REQUIRE(cc_o.init_atom_names.size() == 96);
+    REQUIRE(cc_o.init_pos.size() == 96);
+    REQUIRE(std::count(cc_o.init_atom_names.begin(), cc_o.init_atom_names.end(), "Ba") == 32);
+    REQUIRE(std::count(cc_o.init_atom_names.begin(), cc_o.init_atom_names.end(), "F") == 64);
+    REQUIRE(cc_o.n_spin_states == 1);
+    REQUIRE(cc_o.mult == 1);
+    REQUIRE(cc_o.tot_charge == Approx(0));
+    REQUIRE(cc_o.steps.size() == 13);
+  }
 
 }

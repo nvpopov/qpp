@@ -3,11 +3,37 @@
 
 #include <data/compiler_fallback.hpp>
 #include <vector>
+#include <variant>
+#include <map>
 #include <geom/lace3d.hpp>
 #include <geom/geom.hpp>
 #include <geom/geom_anim.hpp>
 
 namespace qpp {
+
+  template <typename REAL = float, typename STR_CLASS = std::string>
+  class comp_chem_data_entry_t {
+    private:
+      std::variant<int, REAL, bool, STR_CLASS, std::vector<comp_chem_data_entry_t>,
+      std::map<STR_CLASS, comp_chem_data_entry_t> > p_data;
+
+    public:
+      template <typename T>
+      T get() {
+        return std::get<T>(p_data);
+      }
+
+      template <typename T>
+      T get_if() {
+        return std::get_if<T>(p_data);
+      }
+
+      template <typename T>
+      void set(T t_inst) {
+        p_data = t_inst;
+      }
+
+  };
 
   enum comp_chem_program_run_t {
     rt_unknown,
@@ -93,9 +119,7 @@ namespace qpp {
       std::vector<std::string> init_atom_names;
       std::vector<REAL> init_charges;
       std::vector<comp_chem_program_vibration_info_t<REAL> > vibs;
-      std::optional<vector3<REAL> > cell_v0;
-      std::optional<vector3<REAL> > cell_v1;
-      std::optional<vector3<REAL> > cell_v2;
+      std::vector<vector3<REAL> > cell_v;
       comp_chem_program_t comp_chem_program{comp_chem_program_t::pr_unknown};
       uint32_t ccd_flags;
       int DIM{0};
@@ -106,8 +130,11 @@ namespace qpp {
       bool is_unrestricted{false};
       int n_alpha{0};
       int n_beta{0};
+      int n_spin_states{-1};
       bool m_is_terminated_normally{false};
       comp_chem_program_run_t run_t{comp_chem_program_run_t::rt_unknown};
+
+      //comp_chem_data_entry_t<REAL> root;
   };
 
 
@@ -137,16 +164,12 @@ namespace qpp {
     if ((ccd_inst.init_pos.size() != ccd_inst.init_atom_names.size())
         || (compile_flags & ccd_cf_allow_different_size_pos_names)) return false;
 
-    if (ccd_inst.DIM > 0 && !ccd_inst.cell_v0) return false;
-    if (ccd_inst.DIM > 1 && !ccd_inst.cell_v0 && !ccd_inst.cell_v1) return false;
-    if (ccd_inst.DIM > 2 && !ccd_inst.cell_v0 && !ccd_inst.cell_v1 && !ccd_inst.cell_v2)
-      return false;
+    if (ccd_inst.DIM != ccd_inst.cell_v.size()) return false;
 
     g.DIM = ccd_inst.DIM;
 
-    if (ccd_inst.DIM > 0 && ccd_inst.cell_v0) g.cell.v[0] = *(ccd_inst.cell_v0);
-    if (ccd_inst.DIM > 1 && ccd_inst.cell_v1) g.cell.v[1] = *(ccd_inst.cell_v1);
-    if (ccd_inst.DIM > 2 && ccd_inst.cell_v2) g.cell.v[2] = *(ccd_inst.cell_v2);
+    if (g.DIM > 0)
+      for (size_t i = 0; i < ccd_inst.DIM; i++) g.cell.v[i] = ccd_inst.cell_v[i];
 
     for (size_t i = 0; i < ccd_inst.init_atom_names.size(); i++)
       g.add(ccd_inst.init_atom_names[i], ccd_inst.init_pos[i]);
