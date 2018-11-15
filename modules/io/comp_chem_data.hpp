@@ -106,9 +106,11 @@ namespace qpp {
       std::vector<vector3<REAL> > m_atoms_pos;
       std::vector<vector3<REAL> > m_atoms_grads;
       std::vector<vector3<REAL> > m_atoms_vels;
-      std::vector<REAL> m_eigen_values;
-      std::vector<REAL> m_eigen_values_spin_1;
-      std::vector<REAL> m_eigen_values_spin_2;
+      //std::vector<REAL> m_eigen_values;
+      std::vector<REAL> m_eigen_values_spin_1_occ;
+      std::vector<REAL> m_eigen_values_spin_1_unocc;
+      std::vector<REAL> m_eigen_values_spin_2_occ;
+      std::vector<REAL> m_eigen_values_spin_2_unocc;
       REAL m_energy_gap_spin_1;
       REAL m_energy_gap_spin_2;
       std::vector<std::pair<REAL, REAL> > m_mulliken_pop_per_atom;

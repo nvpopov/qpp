@@ -62,11 +62,12 @@ int main () {
         }
 
       //write single particle energies
-      if (!cc_o.m_steps[i].m_eigen_values.empty()) {
+      if (!cc_o.m_steps[i].m_eigen_values_spin_1_occ.empty()) {
           fmt::print("\nEigen-values of single-particle states:\n");
           fmt::print(std::cout, "{:>15} {:>15}\n", "state_idx", "state_energy");
-          for (size_t sp_i = 0; sp_i < cc_o.m_steps[i].m_eigen_values.size(); sp_i++)
-            fmt::print(std::cout, "{:15} {:15}\n", sp_i, cc_o.m_steps[i].m_eigen_values[sp_i]);
+          for (size_t sp_i = 0; sp_i < cc_o.m_steps[i].m_eigen_values_spin_1_occ.size(); sp_i++)
+            fmt::print(std::cout, "{:15} {:15}\n", sp_i,
+                       cc_o.m_steps[i].m_eigen_values_spin_1_occ[sp_i]);
         }
 
       //write pop analysis

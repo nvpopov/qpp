@@ -321,7 +321,7 @@ namespace qpp {
         if (p_state == pcg_ff_p_state::s_eigen_vectors_section_parsing_energy) {
             std::vector<std::string_view> splt = split_sv(s, " ");
             for (const auto &sv : splt)
-              output.m_steps.back().m_eigen_values.push_back(std::stod(sv.data()));
+              output.m_steps.back().m_eigen_values_spin_1_occ.push_back(std::stod(sv.data()));
             p_state = pcg_ff_p_state::s_eigen_vectors_section_parsing_sym;
             continue;
           }

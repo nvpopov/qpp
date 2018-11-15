@@ -23,7 +23,9 @@ namespace qpp {
   enum cp2k_output_parser_state {
     cp2k_op_state_none,
     cp2k_op_parse_scf,
-    cp2k_op_parse_explicit_step_data
+    cp2k_op_parse_explicit_step_data,
+    cp2k_op_parse_eigen_values_occ,
+    cp2k_op_parse_eigen_values_unocc
   };
 
   template<class REAL>
@@ -38,6 +40,7 @@ namespace qpp {
 
     output.m_DIM = 0;
     output.m_comp_chem_program = comp_chem_program_t::pr_cp2k;
+    bool is_fisrt_spin_subspace{false};
 
     while (!inp.eof()) {
 
@@ -125,9 +128,9 @@ namespace qpp {
 
             if (s.find("MODULE QUICKSTEP:  ATOMIC COORDINATES IN angstrom") != std::string::npos) {
 //                  MODULE QUICKSTEP:  ATOMIC COORDINATES IN angstrom
-
+//
 //                   Atom  Kind  Element       X           Y           Z          Z(eff)       Mass
-
+//
 //                        1     1 Ba  56    0.000000    0.000000    0.000000     10.00     137.3270
 //  idx                   0     1 2   3     4           5           6            7         8
 
@@ -195,6 +198,61 @@ namespace qpp {
                 continue;
               }
             //end mulliken pop per atom
+
+            //start eigenvalues parsing
+            if (s.find("Eigenvalues of the occupied subspace spin") != std::string::npos) {
+                is_fisrt_spin_subspace = s.find("1") != std::string::npos;//determine spin subspace
+                std::getline(inp, s); //read common line --------
+                p_state = cp2k_output_parser_state::cp2k_op_parse_eigen_values_occ;
+                continue;
+              }
+
+            if (s.find("Lowest Eigenvalues of the unoccupied subspace") != std::string::npos) {
+                is_fisrt_spin_subspace = s.find("1") != std::string::npos;//determine spin subspace
+                std::getline(inp, s);//read common line --------
+                p_state = cp2k_output_parser_state::cp2k_op_parse_eigen_values_unocc;
+                continue;
+              }
+
+            if (p_state == cp2k_output_parser_state::cp2k_op_parse_eigen_values_occ ||
+                p_state == cp2k_output_parser_state::cp2k_op_parse_eigen_values_unocc) {
+
+                if (s.find("Fermi") != std::string::npos || s.length() == 1 ||
+                    s.length() == 2) {
+                    p_state = cp2k_output_parser_state::cp2k_op_state_none;
+                    continue;
+                  }
+
+                if (s.find("iter") != std::string::npos) {
+                    continue;
+                  }
+
+                std::vector<std::string_view> splt = split_sv(s, " ");
+                //fmt::print(std::cout, "{}\n", s);
+                for (size_t i = 0; i < splt.size(); i++) {
+                    REAL sp_eigen_value = std::stod(splt[i].data());
+
+                    if (p_state == cp2k_output_parser_state::cp2k_op_parse_eigen_values_occ) {
+                        if (is_fisrt_spin_subspace)
+                          output.m_steps.back().m_eigen_values_spin_1_occ.push_back(sp_eigen_value);
+                        else
+                          output.m_steps.back().m_eigen_values_spin_2_occ.push_back(sp_eigen_value);
+                      }
+
+                    if (p_state == cp2k_output_parser_state::cp2k_op_parse_eigen_values_unocc) {
+                        if (is_fisrt_spin_subspace)
+                          output.m_steps.back().m_eigen_values_spin_1_unocc.push_back(
+                                sp_eigen_value);
+                        else
+                          output.m_steps.back().m_eigen_values_spin_2_unocc.push_back(
+                                sp_eigen_value);
+                      }
+
+                  }
+                continue;
+              }
+
+            //end eigenvalues parsing
 
             // start of parsing trajectory and gradient
             if (s.find(" i =") != std::string::npos) {

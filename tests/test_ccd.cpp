@@ -31,8 +31,8 @@ TEST_CASE( "Computational chemistry data parsing : PC Gamess Firefly" ) {
     REQUIRE(cc_o.m_steps.back().m_scf_steps.size() == 9);
     REQUIRE(cc_o.m_steps.back().m_scf_steps.front().m_toten == Approx(-379.453243734));
     REQUIRE(cc_o.m_steps.back().m_scf_steps.back().m_toten == Approx(-379.777955008));
-    REQUIRE(cc_o.m_steps.back().m_eigen_values.front() == Approx(-11.0409));
-    REQUIRE(cc_o.m_steps.back().m_eigen_values.back() == Approx(1.1646));
+    REQUIRE(cc_o.m_steps.back().m_eigen_values_spin_1_occ.front() == Approx(-11.0409));
+    REQUIRE(cc_o.m_steps.back().m_eigen_values_spin_1_occ.back() == Approx(1.1646));
     REQUIRE(cc_o.m_init_atoms_pos.size() == 20);
     REQUIRE(cc_o.m_init_atoms_names.size() == 20);
     REQUIRE(cc_o.m_init_atoms_pos[0] ==
@@ -241,6 +241,8 @@ TEST_CASE( "Computational chemistry data parsing : CP2K Output" ) {
                                               ccd_cf_remove_empty_geom_steps);
     REQUIRE(succes_ccd_compilation);
     REQUIRE(cc_o.m_steps.size() == 5);
+    REQUIRE(cc_o.m_steps.back().m_eigen_values_spin_1_unocc.size() == 3);
+    REQUIRE(cc_o.m_steps.back().m_eigen_values_spin_1_occ.size() == 384);
   }
 
 }
