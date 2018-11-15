@@ -80,61 +80,63 @@ namespace qpp {
 
   template <class REAL>
   struct comp_chem_program_vibration_info_t {
-      std::vector<vector3<REAL> > disp;
-      REAL frequency{REAL(0)};
-      REAL intensity{REAL(0)};
-      REAL reduced_mass{REAL(0)};
-      REAL raman_activity{REAL(0)};
-      REAL depolarization{REAL(0)};
+      std::vector<vector3<REAL> > m_disp;
+      REAL m_frequency{REAL(0)};
+      REAL m_intensity{REAL(0)};
+      REAL m_reduced_mass{REAL(0)};
+      REAL m_raman_activity{REAL(0)};
+      REAL m_depolarization{REAL(0)};
   };
 
   template <class REAL>
   struct comp_chem_program_scf_step_info_t {
-      int iter{0};
-      int ex{0};
-      int dem{0};
-      REAL total_energy{REAL(0)};
-      REAL e_change{REAL(0)};
-      REAL d_change{REAL(0)};
-      REAL orb_grad_or_diis_error{REAL(0)};
+      int m_iter{0};
+      int m_ex{0};
+      int m_dem{0};
+      REAL m_toten{REAL(0)};
+      REAL m_e_change{REAL(0)};
+      REAL m_d_change{REAL(0)};
+      REAL m_orb_grad_or_diis_error{REAL(0)};
   };
 
   template <class REAL>
   struct comp_chem_program_step_t {
-      std::vector<comp_chem_program_scf_step_info_t<REAL> > scf_steps;
-      REAL total_energy{REAL(0)};
-      std::vector<vector3<REAL> > pos;
-      std::vector<vector3<REAL> > grad;
-      std::vector<vector3<REAL> > vels;
-      std::vector<REAL> eigen_values;
-      std::vector<REAL> eigen_values_spin_1;
-      std::vector<REAL> eigen_values_spin_2;
-      std::vector<std::pair<REAL, REAL> > mulliken_pop_per_atom;
-      std::vector<std::pair<REAL, REAL> > lowdin_pop_per_atom;
-      std::optional<vector3<REAL> >dipole_moment{std::nullopt};
+      std::vector<comp_chem_program_scf_step_info_t<REAL> > m_scf_steps;
+      REAL m_toten{REAL(0)};
+      std::vector<vector3<REAL> > m_atoms_pos;
+      std::vector<vector3<REAL> > m_atoms_grads;
+      std::vector<vector3<REAL> > m_atoms_vels;
+      std::vector<REAL> m_eigen_values;
+      std::vector<REAL> m_eigen_values_spin_1;
+      std::vector<REAL> m_eigen_values_spin_2;
+      REAL m_energy_gap_spin_1;
+      REAL m_energy_gap_spin_2;
+      std::vector<std::pair<REAL, REAL> > m_mulliken_pop_per_atom;
+      std::vector<std::pair<REAL, REAL> > m_lowdin_pop_per_atom;
+      std::optional<vector3<REAL> > m_dipole_moment{std::nullopt};
   };
 
   template <class REAL>
   struct comp_chem_program_data_t {
-      std::vector<comp_chem_program_step_t<REAL> > steps;
-      std::vector<vector3<REAL> > init_pos;
-      std::vector<std::string> init_atom_names;
-      std::vector<REAL> init_charges;
-      std::vector<comp_chem_program_vibration_info_t<REAL> > vibs;
-      std::vector<vector3<REAL> > cell_v;
-      comp_chem_program_t comp_chem_program{comp_chem_program_t::pr_unknown};
-      uint32_t ccd_flags;
-      int DIM{0};
-      int tot_num_atoms{0};
-      int tot_num_electrons{0};
-      REAL tot_charge{0};
-      int mult{0};
-      bool is_unrestricted{false};
-      int n_alpha{0};
-      int n_beta{0};
-      int n_spin_states{-1};
+      std::vector<comp_chem_program_step_t<REAL> > m_steps;
+      std::vector<vector3<REAL> > m_init_atoms_pos;
+      std::vector<std::string> m_init_atoms_names;
+      std::vector<REAL> m_init_atoms_charges;
+      std::vector<comp_chem_program_vibration_info_t<REAL> > m_vibs;
+      std::vector<vector3<REAL> > m_cell_v;
+      comp_chem_program_t m_comp_chem_program{comp_chem_program_t::pr_unknown};
+      uint32_t m_ccd_flags;
+      int m_DIM{0};
+      int m_tot_nat{0};
+      int m_tot_nelec{0};
+      REAL m_tot_charge{0};
+      int m_mult{0};
+      bool m_is_unrestricted{false};
+      int m_n_alpha{0};
+      int m_n_beta{0};
+      int m_n_spin_states{-1};
       bool m_is_terminated_normally{false};
-      comp_chem_program_run_t run_t{comp_chem_program_run_t::rt_unknown};
+      comp_chem_program_run_t m_run_t{comp_chem_program_run_t::rt_unknown};
 
       //comp_chem_data_entry_t<REAL> root;
   };
@@ -160,8 +162,8 @@ namespace qpp {
   bool compile_ccd(comp_chem_program_data_t<REAL> &ccd_inst, uint32_t flags) {
 
     if (flags & ccd_cf_remove_empty_geom_steps) {
-        for (auto it = ccd_inst.steps.begin(); it != ccd_inst.steps.end();) {
-            if(it->pos.empty()) it = ccd_inst.steps.erase(it);
+        for (auto it = ccd_inst.m_steps.begin(); it != ccd_inst.m_steps.end();) {
+            if(it->m_atoms_pos.empty()) it = ccd_inst.m_steps.erase(it);
             else ++it;
           }
       }
@@ -174,21 +176,21 @@ namespace qpp {
                         geometry<REAL, periodic_cell<REAL> > &g,
                         uint32_t compile_flags = ccd_cf_default_flags) {
 
-    if ((ccd_inst.init_pos.empty() || ccd_inst.init_atom_names.empty())
+    if ((ccd_inst.m_init_atoms_pos.empty() || ccd_inst.m_init_atoms_names.empty())
         || (compile_flags & ccd_cf_allow_null_init_geom)) return false;
 
-    if ((ccd_inst.init_pos.size() != ccd_inst.init_atom_names.size())
+    if ((ccd_inst.m_init_atoms_pos.size() != ccd_inst.m_init_atoms_names.size())
         || (compile_flags & ccd_cf_allow_different_size_pos_names)) return false;
 
-    if (ccd_inst.DIM != ccd_inst.cell_v.size()) return false;
+    if (ccd_inst.m_DIM != ccd_inst.m_cell_v.size()) return false;
 
-    g.DIM = ccd_inst.DIM;
+    g.DIM = ccd_inst.m_DIM;
 
     if (g.DIM > 0)
-      for (size_t i = 0; i < ccd_inst.DIM; i++) g.cell.v[i] = ccd_inst.cell_v[i];
+      for (size_t i = 0; i < ccd_inst.m_DIM; i++) g.cell.v[i] = ccd_inst.m_cell_v[i];
 
-    for (size_t i = 0; i < ccd_inst.init_atom_names.size(); i++)
-      g.add(ccd_inst.init_atom_names[i], ccd_inst.init_pos[i]);
+    for (size_t i = 0; i < ccd_inst.m_init_atoms_names.size(); i++)
+      g.add(ccd_inst.m_init_atoms_names[i], ccd_inst.m_init_atoms_pos[i]);
 
     return true;
   }
@@ -203,9 +205,9 @@ namespace qpp {
     anim.m_anim_type = geom_anim_type::anim_static;
     anim.m_anim_name = "static";
     anim.frame_data.resize(1);
-    anim.frame_data[0].resize(ccd_inst.init_pos.size());
-    for (size_t i = 0; i < ccd_inst.init_pos.size(); i++)
-      anim.frame_data[0][i] = ccd_inst.init_pos[i];
+    anim.frame_data[0].resize(ccd_inst.m_init_atoms_pos.size());
+    for (size_t i = 0; i < ccd_inst.m_init_atoms_pos.size(); i++)
+      anim.frame_data[0][i] = ccd_inst.m_init_atoms_pos[i];
 
     anim_rec.push_back(std::move(anim));
     return true;
@@ -216,17 +218,17 @@ namespace qpp {
                          std::vector<geom_anim_record_t<REAL> > &anim_rec,
                          uint32_t compile_flags = ccd_cf_default_flags) {
 
-    if (ccd_inst.run_t != comp_chem_program_run_t::rt_geo_opt &&
-        ccd_inst.run_t != comp_chem_program_run_t::rt_md &&
-        ccd_inst.run_t != comp_chem_program_run_t::rt_vib &&
-        ccd_inst.run_t != comp_chem_program_run_t::rt_raman) return false;
+    if (ccd_inst.m_run_t != comp_chem_program_run_t::rt_geo_opt &&
+        ccd_inst.m_run_t != comp_chem_program_run_t::rt_md &&
+        ccd_inst.m_run_t != comp_chem_program_run_t::rt_vib &&
+        ccd_inst.m_run_t != comp_chem_program_run_t::rt_raman) return false;
 
     bool copy_steps_content = false;
 
     geom_anim_type stored_anim_type{geom_anim_type::anim_static};
     std::string stored_anim_name;
 
-    switch (ccd_inst.run_t) {
+    switch (ccd_inst.m_run_t) {
       case comp_chem_program_run_t::rt_geo_opt :
         stored_anim_type = geom_anim_type::anim_geo_opt;
         copy_steps_content = true;
@@ -258,20 +260,20 @@ namespace qpp {
         anim.m_anim_type = stored_anim_type;
         anim.m_anim_name = stored_anim_name;
 
-        int non_empty_steps_count = std::count_if(ccd_inst.steps.begin(), ccd_inst.steps.end(),
+        int non_empty_steps_count = std::count_if(ccd_inst.m_steps.begin(), ccd_inst.m_steps.end(),
                                                   [](comp_chem_program_step_t<REAL> &step) {
-                                                    return !step.pos.empty();
+                                                    return !step.m_atoms_pos.empty();
                                                   });
 
         anim.frame_data.resize(non_empty_steps_count);
         int steps_c = -1;
 
-        for (size_t i = 0; i < ccd_inst.steps.size(); i++) {
-            if (!ccd_inst.steps[i].pos.empty()) {
+        for (size_t i = 0; i < ccd_inst.m_steps.size(); i++) {
+            if (!ccd_inst.m_steps[i].m_atoms_pos.empty()) {
                 steps_c += 1;
-                anim.frame_data[steps_c].resize(ccd_inst.steps[i].pos.size());
-                for (size_t q = 0; q < ccd_inst.steps[i].pos.size(); q++)
-                  anim.frame_data[steps_c][q] = ccd_inst.steps[i].pos[q];
+                anim.frame_data[steps_c].resize(ccd_inst.m_steps[i].m_atoms_pos.size());
+                for (size_t q = 0; q < ccd_inst.m_steps[i].m_atoms_pos.size(); q++)
+                  anim.frame_data[steps_c][q] = ccd_inst.m_steps[i].m_atoms_pos[q];
               }
           }
 
@@ -280,9 +282,9 @@ namespace qpp {
       }
 
     else {
-        if (ccd_inst.run_t == comp_chem_program_run_t::rt_vib ||
-            ccd_inst.run_t == comp_chem_program_run_t::rt_raman)
-          for (size_t v = 0; v < ccd_inst.vibs.size(); v++) {
+        if (ccd_inst.m_run_t == comp_chem_program_run_t::rt_vib ||
+            ccd_inst.m_run_t == comp_chem_program_run_t::rt_raman)
+          for (size_t v = 0; v < ccd_inst.m_vibs.size(); v++) {
               geom_anim_record_t<REAL> anim;
               anim.m_anim_type = stored_anim_type;
               anim.m_anim_name = fmt::format("vibration {}", v);
@@ -292,13 +294,13 @@ namespace qpp {
               anim.frame_data.resize(total_frames);
 
               for (int i = 0; i < total_frames; i++) {
-                  anim.frame_data[i].resize(ccd_inst.tot_num_atoms);
+                  anim.frame_data[i].resize(ccd_inst.m_tot_nat);
                   //transform index
                   int tf_index = i;
                   if (i > total_frames_upwards) tf_index = total_frames - (i+1);
-                  for (size_t q = 0; q < ccd_inst.vibs[v].disp.size(); q++) {
-                      anim.frame_data[i][q] = ccd_inst.init_pos[q] +
-                                              ccd_inst.vibs[v].disp[q] *
+                  for (size_t q = 0; q < ccd_inst.m_vibs[v].m_disp.size(); q++) {
+                      anim.frame_data[i][q] = ccd_inst.m_init_atoms_pos[q] +
+                                              ccd_inst.m_vibs[v].m_disp[q] *
                                               (REAL(tf_index) / total_frames_upwards);
                     }
                 }

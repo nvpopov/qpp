@@ -20,31 +20,32 @@ TEST_CASE( "Computational chemistry data parsing : PC Gamess Firefly" ) {
     std::ifstream isec("../examples/io/ref_data/firefly/dvb_sp.out");
     comp_chem_program_data_t<double> cc_o;
     read_ccd_from_firefly_output(isec, cc_o);
-    REQUIRE(cc_o.tot_num_electrons == 70) ;
-    REQUIRE(cc_o.tot_charge == Approx(0)) ;
-    REQUIRE(cc_o.DIM == 0);
-    REQUIRE(cc_o.mult == 1);
-    REQUIRE(cc_o.n_alpha == 35);
-    REQUIRE(cc_o.n_beta == 35);
-    REQUIRE(cc_o.tot_num_atoms == 20);
-    REQUIRE(cc_o.run_t == comp_chem_program_run_t::rt_energy);
-    REQUIRE(cc_o.steps.back().scf_steps.size() == 9);
-    REQUIRE(cc_o.steps.back().scf_steps.front().total_energy == Approx(-379.453243734));
-    REQUIRE(cc_o.steps.back().scf_steps.back().total_energy == Approx(-379.777955008));
-    REQUIRE(cc_o.steps.back().eigen_values.front() == Approx(-11.0409));
-    REQUIRE(cc_o.steps.back().eigen_values.back() == Approx(1.1646));
-    REQUIRE(cc_o.init_pos.size() == 20);
-    REQUIRE(cc_o.init_atom_names.size() == 20);
-    REQUIRE(cc_o.init_pos[0] == v3d(2.6342558126*bohr_to_angs, -0.4183391645*bohr_to_angs, 0.000));
-    REQUIRE(cc_o.steps.back().mulliken_pop_per_atom.front().first == Approx(5.997223));
-    REQUIRE(cc_o.steps.back().mulliken_pop_per_atom.front().second == Approx(0.002777));
-    REQUIRE(cc_o.steps.back().mulliken_pop_per_atom.back().first == Approx(0.935496));
-    REQUIRE(cc_o.steps.back().mulliken_pop_per_atom.back().second == Approx(0.064504));
-    REQUIRE(cc_o.steps.back().lowdin_pop_per_atom.front().first == Approx(5.989834));
-    REQUIRE(cc_o.steps.back().lowdin_pop_per_atom.front().second == Approx(0.010166));
-    REQUIRE(cc_o.steps.back().lowdin_pop_per_atom.back().first == Approx(0.966150));
-    REQUIRE(cc_o.steps.back().lowdin_pop_per_atom.back().second == Approx(0.033850));
-    REQUIRE(*(cc_o.steps.back().dipole_moment) == v3d(v3d::Zero()));
+    REQUIRE(cc_o.m_tot_nelec == 70) ;
+    REQUIRE(cc_o.m_tot_charge == Approx(0)) ;
+    REQUIRE(cc_o.m_DIM == 0);
+    REQUIRE(cc_o.m_mult == 1);
+    REQUIRE(cc_o.m_n_alpha == 35);
+    REQUIRE(cc_o.m_n_beta == 35);
+    REQUIRE(cc_o.m_tot_nat == 20);
+    REQUIRE(cc_o.m_run_t == comp_chem_program_run_t::rt_energy);
+    REQUIRE(cc_o.m_steps.back().m_scf_steps.size() == 9);
+    REQUIRE(cc_o.m_steps.back().m_scf_steps.front().m_toten == Approx(-379.453243734));
+    REQUIRE(cc_o.m_steps.back().m_scf_steps.back().m_toten == Approx(-379.777955008));
+    REQUIRE(cc_o.m_steps.back().m_eigen_values.front() == Approx(-11.0409));
+    REQUIRE(cc_o.m_steps.back().m_eigen_values.back() == Approx(1.1646));
+    REQUIRE(cc_o.m_init_atoms_pos.size() == 20);
+    REQUIRE(cc_o.m_init_atoms_names.size() == 20);
+    REQUIRE(cc_o.m_init_atoms_pos[0] ==
+        v3d(2.6342558126*bohr_to_angs, -0.4183391645*bohr_to_angs, 0.000));
+    REQUIRE(cc_o.m_steps.back().m_mulliken_pop_per_atom.front().first == Approx(5.997223));
+    REQUIRE(cc_o.m_steps.back().m_mulliken_pop_per_atom.front().second == Approx(0.002777));
+    REQUIRE(cc_o.m_steps.back().m_mulliken_pop_per_atom.back().first == Approx(0.935496));
+    REQUIRE(cc_o.m_steps.back().m_mulliken_pop_per_atom.back().second == Approx(0.064504));
+    REQUIRE(cc_o.m_steps.back().m_lowdin_pop_per_atom.front().first == Approx(5.989834));
+    REQUIRE(cc_o.m_steps.back().m_lowdin_pop_per_atom.front().second == Approx(0.010166));
+    REQUIRE(cc_o.m_steps.back().m_lowdin_pop_per_atom.back().first == Approx(0.966150));
+    REQUIRE(cc_o.m_steps.back().m_lowdin_pop_per_atom.back().second == Approx(0.033850));
+    REQUIRE(*(cc_o.m_steps.back().m_dipole_moment) == v3d(v3d::Zero()));
 
   }
 
@@ -53,24 +54,24 @@ TEST_CASE( "Computational chemistry data parsing : PC Gamess Firefly" ) {
     std::ifstream isec("../examples/io/ref_data/firefly/dvb_gopt_a.out");
     comp_chem_program_data_t<double> cc_o;
     read_ccd_from_firefly_output(isec, cc_o);
-    REQUIRE(cc_o.tot_num_electrons == 70) ;
-    REQUIRE(cc_o.tot_charge == Approx(0)) ;
-    REQUIRE(cc_o.DIM == 0);
-    REQUIRE(cc_o.mult == 1);
-    REQUIRE(cc_o.n_alpha == 35);
-    REQUIRE(cc_o.n_beta == 35);
-    REQUIRE(cc_o.tot_num_atoms == 20);
-    REQUIRE(cc_o.run_t == comp_chem_program_run_t::rt_geo_opt);
-    REQUIRE(cc_o.init_pos.size() == 20);
-    REQUIRE(cc_o.init_atom_names.size() == 20);
-    REQUIRE(cc_o.steps.size() == 24);
+    REQUIRE(cc_o.m_tot_nelec == 70) ;
+    REQUIRE(cc_o.m_tot_charge == Approx(0)) ;
+    REQUIRE(cc_o.m_DIM == 0);
+    REQUIRE(cc_o.m_mult == 1);
+    REQUIRE(cc_o.m_n_alpha == 35);
+    REQUIRE(cc_o.m_n_beta == 35);
+    REQUIRE(cc_o.m_tot_nat == 20);
+    REQUIRE(cc_o.m_run_t == comp_chem_program_run_t::rt_geo_opt);
+    REQUIRE(cc_o.m_init_atoms_pos.size() == 20);
+    REQUIRE(cc_o.m_init_atoms_names.size() == 20);
+    REQUIRE(cc_o.m_steps.size() == 24);
     REQUIRE(cc_o.m_is_terminated_normally == true);
-    REQUIRE(cc_o.steps.front().pos.size() == cc_o.init_pos.size());
-    REQUIRE(cc_o.steps.back().pos.size() == cc_o.init_pos.size());
-    REQUIRE(cc_o.steps.back().pos[0] == v3d(0.2292900177, 1.3927230046, 0.0));
-    REQUIRE(cc_o.steps.back().pos.back() == v3d(-0.0328883188, 4.8736185925, 0.0));
-    REQUIRE(cc_o.steps.back().grad.front() == v3d(-0.0000150, -0.0000011, 0.0000000));
-    REQUIRE(cc_o.steps.back().grad.back() == v3d(-0.0000191, 0.0000149, 0.0000000));
+    REQUIRE(cc_o.m_steps.front().m_atoms_pos.size() == cc_o.m_init_atoms_pos.size());
+    REQUIRE(cc_o.m_steps.back().m_atoms_pos.size() == cc_o.m_init_atoms_pos.size());
+    REQUIRE(cc_o.m_steps.back().m_atoms_pos[0] == v3d(0.2292900177, 1.3927230046, 0.0));
+    REQUIRE(cc_o.m_steps.back().m_atoms_pos.back() == v3d(-0.0328883188, 4.8736185925, 0.0));
+    REQUIRE(cc_o.m_steps.back().m_atoms_grads.front() == v3d(-0.0000150, -0.0000011, 0.0000000));
+    REQUIRE(cc_o.m_steps.back().m_atoms_grads.back() == v3d(-0.0000191, 0.0000149, 0.0000000));
 
   }
 
@@ -79,29 +80,29 @@ TEST_CASE( "Computational chemistry data parsing : PC Gamess Firefly" ) {
     std::ifstream isec("../examples/io/ref_data/firefly/dvb_ir.out");
     comp_chem_program_data_t<double> cc_o;
     read_ccd_from_firefly_output(isec, cc_o);
-    REQUIRE(cc_o.tot_num_electrons == 70) ;
-    REQUIRE(cc_o.tot_charge == Approx(0)) ;
-    REQUIRE(cc_o.DIM == 0 );
-    REQUIRE(cc_o.mult == 1 );
-    REQUIRE(cc_o.n_alpha == 35 );
-    REQUIRE(cc_o.n_beta == 35 );
-    REQUIRE(cc_o.tot_num_atoms == 20);
-    REQUIRE(cc_o.run_t == comp_chem_program_run_t::rt_vib);
-    REQUIRE(cc_o.init_pos.size() == 20);
-    REQUIRE(cc_o.init_atom_names.size() == 20);
-    REQUIRE(cc_o.vibs.size() == 60 );
-    REQUIRE(cc_o.vibs[0].frequency == Approx(5.89) );
-    REQUIRE(cc_o.vibs[0].intensity == Approx(0.00000) );
-    REQUIRE(cc_o.vibs[6].frequency == Approx(38.65) );
-    REQUIRE(cc_o.vibs[6].intensity == Approx(0.00004) );
-    REQUIRE(cc_o.vibs[15].frequency == Approx(528.44) );
-    REQUIRE(cc_o.vibs[15].intensity == Approx(0.05468) );
-    REQUIRE(cc_o.vibs[59].frequency == Approx(3816.56) );
-    REQUIRE(cc_o.vibs[59].intensity == Approx(0.00000) );
-    REQUIRE(cc_o.vibs[25].disp[0] == v3d(0, 0, 0.00328228));
-    REQUIRE(cc_o.vibs[25].disp[1] == v3d(0, 0, -0.00328228));
-    REQUIRE(cc_o.vibs[25].disp[18] == v3d(0, 0, -0.39977811));
-    REQUIRE(cc_o.vibs[25].disp[19] == v3d(0, 0, 0.39977811));
+    REQUIRE(cc_o.m_tot_nelec == 70) ;
+    REQUIRE(cc_o.m_tot_charge == Approx(0)) ;
+    REQUIRE(cc_o.m_DIM == 0 );
+    REQUIRE(cc_o.m_mult == 1 );
+    REQUIRE(cc_o.m_n_alpha == 35 );
+    REQUIRE(cc_o.m_n_beta == 35 );
+    REQUIRE(cc_o.m_tot_nat == 20);
+    REQUIRE(cc_o.m_run_t == comp_chem_program_run_t::rt_vib);
+    REQUIRE(cc_o.m_init_atoms_pos.size() == 20);
+    REQUIRE(cc_o.m_init_atoms_names.size() == 20);
+    REQUIRE(cc_o.m_vibs.size() == 60 );
+    REQUIRE(cc_o.m_vibs[0].m_frequency == Approx(5.89) );
+    REQUIRE(cc_o.m_vibs[0].m_intensity == Approx(0.00000) );
+    REQUIRE(cc_o.m_vibs[6].m_frequency == Approx(38.65) );
+    REQUIRE(cc_o.m_vibs[6].m_intensity == Approx(0.00004) );
+    REQUIRE(cc_o.m_vibs[15].m_frequency == Approx(528.44) );
+    REQUIRE(cc_o.m_vibs[15].m_intensity == Approx(0.05468) );
+    REQUIRE(cc_o.m_vibs[59].m_frequency == Approx(3816.56) );
+    REQUIRE(cc_o.m_vibs[59].m_intensity == Approx(0.00000) );
+    REQUIRE(cc_o.m_vibs[25].m_disp[0] == v3d(0, 0, 0.00328228));
+    REQUIRE(cc_o.m_vibs[25].m_disp[1] == v3d(0, 0, -0.00328228));
+    REQUIRE(cc_o.m_vibs[25].m_disp[18] == v3d(0, 0, -0.39977811));
+    REQUIRE(cc_o.m_vibs[25].m_disp[19] == v3d(0, 0, 0.39977811));
 
   }
 
@@ -110,16 +111,16 @@ TEST_CASE( "Computational chemistry data parsing : PC Gamess Firefly" ) {
     std::ifstream isec("../examples/io/ref_data/firefly/dvb_raman.out");
     comp_chem_program_data_t<double> cc_o;
     read_ccd_from_firefly_output(isec, cc_o);
-    REQUIRE(cc_o.tot_num_electrons == 70) ;
-    REQUIRE(cc_o.tot_charge == Approx(0)) ;
-    REQUIRE(cc_o.DIM == 0 );
-    REQUIRE(cc_o.mult == 1 );
-    REQUIRE(cc_o.n_alpha == 35 );
-    REQUIRE(cc_o.n_beta == 35 );
-    REQUIRE(cc_o.tot_num_atoms == 20);
-    REQUIRE(cc_o.run_t == comp_chem_program_run_t::rt_raman);
-    REQUIRE(cc_o.init_pos.size() == 20);
-    REQUIRE(cc_o.init_atom_names.size() == 20);
+    REQUIRE(cc_o.m_tot_nelec == 70) ;
+    REQUIRE(cc_o.m_tot_charge == Approx(0)) ;
+    REQUIRE(cc_o.m_DIM == 0 );
+    REQUIRE(cc_o.m_mult == 1 );
+    REQUIRE(cc_o.m_n_alpha == 35 );
+    REQUIRE(cc_o.m_n_beta == 35 );
+    REQUIRE(cc_o.m_tot_nat == 20);
+    REQUIRE(cc_o.m_run_t == comp_chem_program_run_t::rt_raman);
+    REQUIRE(cc_o.m_init_atoms_pos.size() == 20);
+    REQUIRE(cc_o.m_init_atoms_names.size() == 20);
 
   }
 
@@ -135,10 +136,10 @@ TEST_CASE("Compilation of ccd model" ) {
     geometry<double, periodic_cell<double> > g(0);
     bool succes = compile_geometry(cc_o, g);
     REQUIRE(succes == true);
-    REQUIRE(g.nat() == cc_o.tot_num_atoms);
+    REQUIRE(g.nat() == cc_o.m_tot_nat);
     bool all_atoms_the_same = true;
     for (size_t i = 0; i < g.nat(); i++)
-      if (g.pos(i) != cc_o.init_pos[i]) all_atoms_the_same = false;
+      if (g.pos(i) != cc_o.m_init_atoms_pos[i]) all_atoms_the_same = false;
     REQUIRE(all_atoms_the_same);
 
   }
@@ -154,7 +155,7 @@ TEST_CASE("Compilation of ccd model" ) {
     bool succes_anims = compile_animation(cc_o, anim_rec);
     REQUIRE(succes);
     REQUIRE(succes_anims);
-    REQUIRE(anim_rec[0].frame_data.size() == cc_o.steps.size());
+    REQUIRE(anim_rec[0].frame_data.size() == cc_o.m_steps.size());
 
     std::vector<geom_anim_record_t<double> > anim_rec_ws;
     bool succes_static = compile_static_animation(cc_o, anim_rec_ws);
@@ -172,7 +173,7 @@ TEST_CASE("Compilation of ccd model" ) {
     bool succes_static_with_v = compile_animation(cc_ov, anim_recv);
     REQUIRE(succes_static_v);
     REQUIRE(succes_static_with_v);
-    REQUIRE(anim_recv.size() == (cc_ov.vibs.size()+1));
+    REQUIRE(anim_recv.size() == (cc_ov.m_vibs.size()+1));
 
   }
 
@@ -184,22 +185,22 @@ TEST_CASE("Testing parsing xyz files with ccd approach") {
     std::ifstream isec("../examples/io/ref_data/xyz/zoloft.xyz");
     comp_chem_program_data_t<double> cc_o;
     read_ccd_from_xyz_file(isec, cc_o);
-    REQUIRE(cc_o.tot_num_atoms == 37);
+    REQUIRE(cc_o.m_tot_nat == 37);
   }
 
   SECTION("Parsing multiframe geometry - 0d") {
     std::ifstream isec("../examples/io/ref_data/xyz/23elim.xyz");
     comp_chem_program_data_t<double> cc_o;
     read_ccd_from_xyz_file(isec, cc_o);
-    REQUIRE(cc_o.tot_num_atoms == 22);
-    REQUIRE(cc_o.steps.size() == 22);
+    REQUIRE(cc_o.m_tot_nat == 22);
+    REQUIRE(cc_o.m_steps.size() == 22);
   }
 
   SECTION("Parsing single geometry with big amount of atoms - 0d") {
     std::ifstream isec("../examples/io/ref_data/xyz/relax.xyz");
     comp_chem_program_data_t<double> cc_o;
     read_ccd_from_xyz_file(isec, cc_o);
-    REQUIRE(cc_o.tot_num_atoms == 49651);
+    REQUIRE(cc_o.m_tot_nat == 49651);
   }
 
 }
@@ -215,22 +216,22 @@ TEST_CASE( "Computational chemistry data parsing : CP2K Output" ) {
     bool succes = compile_geometry(cc_o, g);
     bool succes_anims = compile_animation(cc_o, anim_rec);
 
-    REQUIRE(cc_o.run_t == comp_chem_program_run_t::rt_geo_opt);
-    REQUIRE(cc_o.DIM == 3);
-    REQUIRE(cc_o.cell_v.size() == 3);
-    REQUIRE(cc_o.cell_v[0] == v3d(12.566, 0.000,  0.000 ));
-    REQUIRE(cc_o.cell_v[1] == v3d(0.000,  12.566, 0.000 ));
-    REQUIRE(cc_o.cell_v[2] == v3d(0.000,  0.000,  12.566 ));
+    REQUIRE(cc_o.m_run_t == comp_chem_program_run_t::rt_geo_opt);
+    REQUIRE(cc_o.m_DIM == 3);
+    REQUIRE(cc_o.m_cell_v.size() == 3);
+    REQUIRE(cc_o.m_cell_v[0] == v3d(12.566, 0.000,  0.000 ));
+    REQUIRE(cc_o.m_cell_v[1] == v3d(0.000,  12.566, 0.000 ));
+    REQUIRE(cc_o.m_cell_v[2] == v3d(0.000,  0.000,  12.566 ));
 
-    REQUIRE(cc_o.tot_num_atoms == 96);
-    REQUIRE(cc_o.init_atom_names.size() == 96);
-    REQUIRE(cc_o.init_pos.size() == 96);
-    REQUIRE(std::count(cc_o.init_atom_names.begin(), cc_o.init_atom_names.end(), "Ba") == 32);
-    REQUIRE(std::count(cc_o.init_atom_names.begin(), cc_o.init_atom_names.end(), "F") == 64);
-    REQUIRE(cc_o.n_spin_states == 1);
-    REQUIRE(cc_o.mult == 1);
-    REQUIRE(cc_o.tot_charge == Approx(0));
-    REQUIRE(cc_o.steps.size() == 13);
+    REQUIRE(cc_o.m_tot_nat == 96);
+    REQUIRE(cc_o.m_init_atoms_names.size() == 96);
+    REQUIRE(cc_o.m_init_atoms_pos.size() == 96);
+    REQUIRE(std::count(cc_o.m_init_atoms_names.begin(), cc_o.m_init_atoms_names.end(), "Ba") == 32);
+    REQUIRE(std::count(cc_o.m_init_atoms_names.begin(), cc_o.m_init_atoms_names.end(), "F") == 64);
+    REQUIRE(cc_o.m_n_spin_states == 1);
+    REQUIRE(cc_o.m_mult == 1);
+    REQUIRE(cc_o.m_tot_charge == Approx(0));
+    REQUIRE(cc_o.m_steps.size() == 13);
 
     REQUIRE(succes);
     REQUIRE(succes_anims);
@@ -239,7 +240,7 @@ TEST_CASE( "Computational chemistry data parsing : CP2K Output" ) {
     bool succes_ccd_compilation = compile_ccd(cc_o, ccd_cf_default_flags |
                                               ccd_cf_remove_empty_geom_steps);
     REQUIRE(succes_ccd_compilation);
-    REQUIRE(cc_o.steps.size() == 5);
+    REQUIRE(cc_o.m_steps.size() == 5);
   }
 
 }

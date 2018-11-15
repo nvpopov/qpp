@@ -36,8 +36,8 @@ namespace qpp {
     cp2k_output_parser_state p_state{cp2k_output_parser_state::cp2k_op_state_none};
     bool is_init_parsed{false};
 
-    output.DIM = 0;
-    output.comp_chem_program = comp_chem_program_t::pr_cp2k;
+    output.m_DIM = 0;
+    output.m_comp_chem_program = comp_chem_program_t::pr_cp2k;
 
     while (!inp.eof()) {
 
@@ -59,11 +59,11 @@ namespace qpp {
             //Parse run type
             if (s.find("GLOBAL| Run type") != std::string::npos) {
                 if (s.find("GEO_OPT") != std::string::npos)
-                  output.run_t = comp_chem_program_run_t::rt_geo_opt;
+                  output.m_run_t = comp_chem_program_run_t::rt_geo_opt;
                 if (s.find("ENERGY") != std::string::npos)
-                  output.run_t = comp_chem_program_run_t::rt_energy;
+                  output.m_run_t = comp_chem_program_run_t::rt_energy;
                 if (s.find("GRADIENT") != std::string::npos)
-                  output.run_t = comp_chem_program_run_t::rt_grad;
+                  output.m_run_t = comp_chem_program_run_t::rt_grad;
                 continue;
               } // End of Parse run type
 
@@ -72,14 +72,14 @@ namespace qpp {
                 std::vector<std::string_view> splt = split_sv(s, " ");
                 //int cell_v_idx = 0;
 
-                if (splt[2] == "a") output.DIM = 1;
-                if (splt[2] == "b") output.DIM = 2;
-                if (splt[2] == "c") output.DIM = 3;
+                if (splt[2] == "a") output.m_DIM = 1;
+                if (splt[2] == "b") output.m_DIM = 2;
+                if (splt[2] == "c") output.m_DIM = 3;
 
                 vector3<REAL> cell_v{std::stod(splt[4].data()), std::stod(splt[5].data()),
                       std::stod(splt[6].data())};
 
-                output.cell_v.push_back(std::move(cell_v));
+                output.m_cell_v.push_back(std::move(cell_v));
 
                 continue;
               } // End of parse cell info
@@ -96,30 +96,30 @@ namespace qpp {
                 std::getline(inp, s); //read next line "- Atoms:"
                 if (s.find("Atoms:") != std::string::npos) {
                     std::vector<std::string_view> splt = split_sv(s, " ");
-                    output.tot_num_atoms = std::stoi(splt[2].data());
-                    output.init_atom_names.reserve(output.tot_num_atoms);
-                    output.init_pos.reserve(output.tot_num_atoms);
+                    output.m_tot_nat = std::stoi(splt[2].data());
+                    output.m_init_atoms_names.reserve(output.m_tot_nat);
+                    output.m_init_atoms_pos.reserve(output.m_tot_nat);
                   }
                 continue;
               }
 
             if (s.find("DFT| Number of spin states") != std::string::npos) {
                 std::vector<std::string_view> splt = split_sv(s, " ");
-                output.n_spin_states = std::stoi(splt[5].data());
-                if (output.n_spin_states == 1) output.is_unrestricted = false;
-                else output.is_unrestricted = true;
+                output.m_n_spin_states = std::stoi(splt[5].data());
+                if (output.m_n_spin_states == 1) output.m_is_unrestricted = false;
+                else output.m_is_unrestricted = true;
                 continue;
               }
 
             if (s.find("DFT| Multiplicity") != std::string::npos) {
                 std::vector<std::string_view> splt = split_sv(s, " ");
-                output.mult = std::stoi(splt[2].data());
+                output.m_mult = std::stoi(splt[2].data());
                 continue;
               }
 
             if (s.find("DFT| Charge") != std::string::npos) {
                 std::vector<std::string_view> splt = split_sv(s, " ");
-                output.tot_charge = std::stod(splt[2].data());
+                output.m_tot_charge = std::stod(splt[2].data());
                 continue;
               }
 
@@ -132,13 +132,13 @@ namespace qpp {
 //  idx                   0     1 2   3     4           5           6            7         8
 
                 for (int i = 0; i < 3; i++) std::getline(inp, s); //read 3 lines
-                for (int i = 0; i < output.tot_num_atoms; i++) {
+                for (int i = 0; i < output.m_tot_nat; i++) {
                     std::getline(inp, s);
                     std::vector<std::string_view> splt = split_sv(s, " ");
-                    output.init_atom_names.push_back(std::string(splt[2]));
+                    output.m_init_atoms_names.push_back(std::string(splt[2]));
                     vector3<REAL> pos{std::stod(splt[4].data()), std::stod(splt[5].data()),
                           std::stod(splt[6].data())};
-                    output.init_pos.push_back(std::move(pos));
+                    output.m_init_atoms_pos.push_back(std::move(pos));
                   }
                 is_init_parsed = true;
                 continue;
@@ -149,7 +149,7 @@ namespace qpp {
         // start of is_init_parsed == true
         if (is_init_parsed) {
             if (s.find("SCF WAVEFUNCTION OPTIMIZATION") != std::string::npos) {
-                output.steps.resize(output.steps.size()+1);
+                output.m_steps.resize(output.m_steps.size() + 1);
                 p_state = cp2k_output_parser_state::cp2k_op_parse_scf;
                 continue;
               }
@@ -173,10 +173,10 @@ namespace qpp {
 
                     if (splt[1] == "OT") {
                         comp_chem_program_scf_step_info_t<REAL> scf_info;
-                        scf_info.iter = std::stoi(splt[0].data());
-                        if (tot_l == 8) scf_info.total_energy = std::stod(splt[6].data());
-                        if (tot_l == 6) scf_info.total_energy = std::stod(splt[5].data());
-                        output.steps.back().scf_steps.push_back(std::move(scf_info));
+                        scf_info.m_iter = std::stoi(splt[0].data());
+                        if (tot_l == 8) scf_info.m_toten = std::stod(splt[6].data());
+                        if (tot_l == 6) scf_info.m_toten = std::stod(splt[5].data());
+                        output.m_steps.back().m_scf_steps.push_back(std::move(scf_info));
                       }
                     continue;
                   }
@@ -185,12 +185,12 @@ namespace qpp {
             //mulliken pop per atom
             if (s.find("Mulliken Population Analysis") != std::string::npos) {
                 for (auto i = 0; i < 2; i++) std::getline(inp, s); //read two common lines
-                output.steps.back().mulliken_pop_per_atom.reserve(output.tot_num_atoms);
-                for (size_t i = 0; i < output.tot_num_atoms; i++) {
+                output.m_steps.back().m_mulliken_pop_per_atom.reserve(output.m_tot_nat);
+                for (size_t i = 0; i < output.m_tot_nat; i++) {
                     std::getline(inp, s);
                     std::vector<std::string_view> splt = split_sv(s, " "); // 3 - pop 4 - charge
                     std::pair<REAL, REAL> mr{std::stod(splt[3].data()), std::stod(splt[4].data())};
-                    output.steps.back().mulliken_pop_per_atom.push_back(std::move(mr));
+                    output.m_steps.back().m_mulliken_pop_per_atom.push_back(std::move(mr));
                   }
                 continue;
               }
@@ -198,16 +198,16 @@ namespace qpp {
 
             // start of parsing trajectory and gradient
             if (s.find(" i =") != std::string::npos) {
-                bool add_to_pos = output.steps.back().pos.empty();
-                for (size_t i = 0; i < output.tot_num_atoms; i++) {
+                bool add_to_pos = output.m_steps.back().m_atoms_pos.empty();
+                for (size_t i = 0; i < output.m_tot_nat; i++) {
                     std::getline(inp, s);
                     std::vector<std::string_view> splt = split_sv(s, " ");
                     REAL x = std::stod(splt[1].data());
                     REAL y = std::stod(splt[2].data());
                     REAL z = std::stod(splt[3].data());
                     vector3<REAL> pg{x, y, z};
-                    if (add_to_pos) output.steps.back().pos.push_back(std::move(pg));
-                    else output.steps.back().grad.push_back(std::move(pg));
+                    if (add_to_pos) output.m_steps.back().m_atoms_pos.push_back(std::move(pg));
+                    else output.m_steps.back().m_atoms_grads.push_back(std::move(pg));
                   }
               } //end of parsing trajectory and gradient
 

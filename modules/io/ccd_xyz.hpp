@@ -35,8 +35,8 @@ namespace qpp {
     std::locale loc1("C");
     std::string s;
 
-    output.DIM == 0;
-    output.comp_chem_program = comp_chem_program_t::pr_unknown;
+    output.m_DIM == 0;
+    output.m_comp_chem_program = comp_chem_program_t::pr_unknown;
 
     xyz_parser_state p_state{state_atom_count};
 
@@ -51,7 +51,7 @@ namespace qpp {
 
         if (p_state == xyz_parser_state::state_atom_count) {
 
-            output.tot_num_atoms = std::stoi(s);
+            output.m_tot_nat = std::stoi(s);
             p_state = xyz_parser_state::state_comment;
             continue;
           }
@@ -61,18 +61,18 @@ namespace qpp {
             p_state = xyz_parser_state::state_atom_data;
             atom_c = 0;
             if (!init_filled) {
-                output.init_pos.resize(output.tot_num_atoms);
-                output.init_atom_names.resize(output.tot_num_atoms);
+                output.m_init_atoms_pos.resize(output.m_tot_nat);
+                output.m_init_atoms_names.resize(output.m_tot_nat);
               } else {
                 //if multiframe file -> copy content from init geom to first frame
                 if (frame_idx == 0) {
-                    output.steps.resize(output.steps.size()+1);
+                    output.m_steps.resize(output.m_steps.size()+1);
                     //output.steps[frame_idx].pos.resize(output.tot_num_atoms);
-                    output.steps[frame_idx].pos = output.init_pos;
+                    output.m_steps[frame_idx].m_atoms_pos = output.m_init_atoms_pos;
                     frame_idx +=1;
                   }
-                output.steps.resize(output.steps.size()+1);
-                output.steps[frame_idx].pos.resize(output.tot_num_atoms);
+                output.m_steps.resize(output.m_steps.size()+1);
+                output.m_steps[frame_idx].m_atoms_pos.resize(output.m_tot_nat);
               }
             continue;
           }
@@ -88,14 +88,14 @@ namespace qpp {
                   std::stod(splt[3].data()));
 
             if (!init_filled) {
-                output.init_atom_names[atom_c] = std::string(splt[0]);
-                output.init_pos[atom_c] = pos;
+                output.m_init_atoms_names[atom_c] = std::string(splt[0]);
+                output.m_init_atoms_pos[atom_c] = pos;
               } else {
-                 output.steps[frame_idx].pos[atom_c] = pos;
+                 output.m_steps[frame_idx].m_atoms_pos[atom_c] = pos;
               }
 
             atom_c+=1;
-            if (atom_c == output.tot_num_atoms) {
+            if (atom_c == output.m_tot_nat) {
                 atom_c = 0;
                 if (!init_filled) {
                     init_filled = true;
@@ -110,7 +110,7 @@ namespace qpp {
 
       }
 
-    if (output.steps.size() > 0) output.run_t = comp_chem_program_run_t::rt_geo_opt;
+    if (output.m_steps.size() > 0) output.m_run_t = comp_chem_program_run_t::rt_geo_opt;
 
   }
 
