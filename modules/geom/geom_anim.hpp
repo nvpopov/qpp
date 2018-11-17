@@ -16,10 +16,16 @@ namespace qpp {
   };
 
   template<typename REAL>
+  struct geom_anim_record_frame_t {
+    std::vector<vector3<REAL> > atom_pos;
+    std::vector<vector3<REAL> > atom_color;
+  };
+
+  template<typename REAL>
   struct geom_anim_record_t {
       std::string m_anim_name;
       geom_anim_type m_anim_type{anim_generic};
-      std::vector< std::vector<vector3<REAL> > > frame_data;
+      std::vector<geom_anim_record_frame_t<REAL> > frame_data;
   };
 }
 

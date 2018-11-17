@@ -22,7 +22,7 @@ int main(){
       std::cout << "Total frames " << anim[i].frame_data.size() << std::endl;
       for (auto q = 0; q < anim[i].frame_data.size(); q++){
           std::cout << "Total atoms in frame " << q << " = "
-                    << anim[i].frame_data[q].size() << std::endl;
+                    << anim[i].frame_data[q].atom_pos.size() << std::endl;
         }
     }
 }

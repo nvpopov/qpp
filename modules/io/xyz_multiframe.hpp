@@ -75,9 +75,9 @@ namespace qpp {
 
                 geom.add(at_name, displ);
 
-                anim_static.frame_data.back().push_back(displ);
+                anim_static.frame_data.back().atom_pos.push_back(displ);
               }
-            animr.frame_data.back().push_back(std::move(displ));
+            animr.frame_data.back().atom_pos.push_back(std::move(displ));
           }
 
         if (!bootstrap_geom) bootstrap_geom = true;
