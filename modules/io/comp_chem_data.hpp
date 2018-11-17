@@ -4,6 +4,7 @@
 #include <data/compiler_fallback.hpp>
 #include <vector>
 #include <variant>
+#include <numeric>
 #include <map>
 #include <geom/lace3d.hpp>
 #include <geom/geom.hpp>
@@ -116,6 +117,12 @@ namespace qpp {
       std::vector<std::pair<REAL, REAL> > m_mulliken_pop_per_atom;
       std::vector<std::pair<REAL, REAL> > m_lowdin_pop_per_atom;
       std::optional<vector3<REAL> > m_dipole_moment{std::nullopt};
+      vector3<REAL> m_gradient_min{0,0,0};
+      vector3<REAL> m_gradient_max{0,0,0};
+      vector3<REAL> m_gradient_average{0,0,0};
+      REAL m_gradient_norm_min{10};
+      REAL m_gradient_norm_max{0};
+      REAL m_gradient_norm_average{0};
   };
 
   template <class REAL>
@@ -139,7 +146,12 @@ namespace qpp {
       int m_n_spin_states{-1};
       bool m_is_terminated_normally{false};
       comp_chem_program_run_t m_run_t{comp_chem_program_run_t::rt_unknown};
-
+      vector3<REAL> m_global_gradient_min{0,0,0};
+      vector3<REAL> m_global_gradient_max{0,0,0};
+      vector3<REAL> m_global_gradient_average{0,0,0};
+      REAL m_global_gradient_norm_min{0};
+      REAL m_global_gradient_norm_max{0};
+      REAL m_global_gradient_norm_average{0};
       //comp_chem_data_entry_t<REAL> root;
   };
 
@@ -168,6 +180,32 @@ namespace qpp {
             if(it->m_atoms_pos.empty()) it = ccd_inst.m_steps.erase(it);
             else ++it;
           }
+      }
+
+    if (ccd_inst.m_run_t == comp_chem_program_run_t::rt_geo_opt && !ccd_inst.m_steps.empty()) {
+
+        int total_valid_steps = 0;
+
+        //calculate extremal gradient values for each step
+        for (auto &step : ccd_inst.m_steps)
+          if (!step.m_atoms_grads.empty()) {
+              total_valid_steps += 1;
+              for (size_t i = 0; i < step.m_atoms_grads.size(); i++) {
+                  REAL grad_norm = step.m_atoms_grads[i].norm();
+                  if (grad_norm > step.m_gradient_norm_max) {
+                      step.m_gradient_norm_max = grad_norm;
+                      step.m_gradient_max = step.m_atoms_grads[i];
+                    }
+                  if (grad_norm < step.m_gradient_norm_min) {
+                      step.m_gradient_norm_min = grad_norm;
+                      step.m_gradient_min = step.m_atoms_grads[i];
+                    }
+                  step.m_gradient_average += step.m_atoms_grads[i];
+                  step.m_gradient_norm_average += grad_norm;
+                }
+              step.m_gradient_average /= step.m_atoms_grads.size();
+              step.m_gradient_norm_average /= step.m_atoms_grads.size();
+            }
       }
 
     return true;
