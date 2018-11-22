@@ -149,9 +149,8 @@ namespace qpp {
       vector3<REAL> m_global_gradient_min{0,0,0};
       vector3<REAL> m_global_gradient_max{0,0,0};
       vector3<REAL> m_global_gradient_average{0,0,0};
-      REAL m_global_gradient_norm_min{0};
+      REAL m_global_gradient_norm_min{10};
       REAL m_global_gradient_norm_max{0};
-      REAL m_global_gradient_norm_average{0};
       //comp_chem_data_entry_t<REAL> root;
   };
 
@@ -191,20 +190,32 @@ namespace qpp {
           if (!step.m_atoms_grads.empty()) {
               total_valid_steps += 1;
               for (size_t i = 0; i < step.m_atoms_grads.size(); i++) {
+
                   REAL grad_norm = step.m_atoms_grads[i].norm();
+
                   if (grad_norm > step.m_gradient_norm_max) {
                       step.m_gradient_norm_max = grad_norm;
                       step.m_gradient_max = step.m_atoms_grads[i];
                     }
+
                   if (grad_norm < step.m_gradient_norm_min) {
                       step.m_gradient_norm_min = grad_norm;
                       step.m_gradient_min = step.m_atoms_grads[i];
                     }
+
+                  if (grad_norm > ccd_inst.m_global_gradient_norm_max)
+                    ccd_inst.m_global_gradient_norm_max = grad_norm;
+
+                  if (grad_norm < ccd_inst.m_global_gradient_norm_min)
+                    ccd_inst.m_global_gradient_norm_min = grad_norm;
+
                   step.m_gradient_average += step.m_atoms_grads[i];
                   step.m_gradient_norm_average += grad_norm;
                 }
+
               step.m_gradient_average /= step.m_atoms_grads.size();
               step.m_gradient_norm_average /= step.m_atoms_grads.size();
+
             }
       }
 

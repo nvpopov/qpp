@@ -407,7 +407,7 @@ namespace qpp{
     for (int i = 0; i < geom.n_types(); i++)
       for (int q = 0; q < geom.nat(); q++)
         if (geom.type_table(q) == i)
-          std::cout << fmt::format("{:15.8f} {:15.8f} {:15.8f}",
+          out << fmt::format("{:15.8f} {:15.8f} {:15.8f}",
                                    geom.pos(q)[0],
               geom.pos(q)[1],
               geom.pos(q)[2]) << std::endl;
