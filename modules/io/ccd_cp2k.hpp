@@ -43,7 +43,7 @@ namespace qpp {
     bool is_fisrt_spin_subspace{false};
 
     while (!inp.eof()) {
-
+        //std::cout<<p_state<<")"<<s<<std::endl;
         std::getline(inp, s);
         if (inp.eof()) continue;
 
@@ -164,7 +164,8 @@ namespace qpp {
                     continue;
                   }
 
-                if (s.find("HFX_") != std::string::npos || s.find("-----") != std::string::npos) {
+                if (s.find("HFX_") != std::string::npos || s.find("-----") != std::string::npos ||
+                    s.find("POWELL|")) {
                     continue;
                   }
 
@@ -223,7 +224,8 @@ namespace qpp {
                     continue;
                   }
 
-                if (s.find("iter") != std::string::npos) {
+                if (s.find("iter") != std::string::npos || s.find("WARNING") != std::string::npos ||
+                    s.find("current gradient /") != std::string::npos) {
                     continue;
                   }
 
@@ -243,9 +245,8 @@ namespace qpp {
                         if (is_fisrt_spin_subspace)
                           output.m_steps.back().m_eigen_values_spin_1_unocc.push_back(
                                 sp_eigen_value);
-                        else
-                          output.m_steps.back().m_eigen_values_spin_2_unocc.push_back(
-                                sp_eigen_value);
+                        else output.m_steps.back().m_eigen_values_spin_2_unocc.push_back(
+                              sp_eigen_value);
                       }
 
                   }

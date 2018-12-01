@@ -245,4 +245,24 @@ TEST_CASE( "Computational chemistry data parsing : CP2K Output" ) {
     REQUIRE(cc_o.m_steps.back().m_eigen_values_spin_1_occ.size() == 384);
   }
 
+  SECTION ("Parsing results of geometry optimization [CP2K] - file 2") {
+    std::ifstream isec("../examples/io/ref_data/cp2k/baf2_c3v_o.cp2k_out");
+    comp_chem_program_data_t<double> cc_o;
+    read_ccd_from_cp2k_output(isec, cc_o);
+    geometry<double, periodic_cell<double> > g(3);
+    std::vector<geom_anim_record_t<double> > anim_rec;
+    bool succes = compile_geometry(cc_o, g);
+    bool succes_anims = compile_animation(cc_o, anim_rec);
+
+    REQUIRE(succes);
+    REQUIRE(succes_anims);
+    REQUIRE(cc_o.m_steps.size() == 37);
+    REQUIRE(cc_o.m_mult == 4);
+
+    bool succes_ccd_compilation = compile_ccd(cc_o, ccd_cf_default_flags |
+                                              ccd_cf_remove_empty_geom_steps);
+    REQUIRE(succes_ccd_compilation);
+    REQUIRE(cc_o.m_steps.size() == 24);
+
+  }
 }
