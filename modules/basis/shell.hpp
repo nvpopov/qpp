@@ -1,5 +1,5 @@
 template <class FREAL>
-class qpp_shell<QBAS, FREAL>{ //: public qpp_object{
+class qpp_shell<QBAS, FREAL> { //: public qpp_object{
 
   int _nprim, _nl;
   int * _l;
@@ -10,7 +10,7 @@ class qpp_shell<QBAS, FREAL>{ //: public qpp_object{
   const static FREAL eps;
 
   void init_props(){
-#ifdef PY_EXPORT
+#if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
     py_label.bind(this);
     py_l.bind(this);
     py_alpha.bind(this);
@@ -228,7 +228,7 @@ public:
       return new qpp_shell<QBAS,FREAL>(*this);
       }*/
 
-#ifdef PY_EXPORT
+#if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
 
   typedef qpp_shell<QBAS,FREAL> SELF;
 

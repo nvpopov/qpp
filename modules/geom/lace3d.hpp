@@ -1,5 +1,6 @@
 #ifndef LACE3D_H
 #define LACE3D_H
+
 #pragma GCC diagnostic ignored "-Wnarrowing"
 #include <cmath>
 #include <complex>
@@ -10,14 +11,16 @@
 #include <unsupported/Eigen/MatrixFunctions>
 #include <data/types.hpp>
 #include <consts.hpp>
-//#include <lace/complex.hpp>
 
-#ifdef PY_EXPORT
+#if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
+#pragma push_macro("slots")
+#undef slots
 #include <pybind11/pybind11.h>
 #include <pybind11/operators.h>
 #include <pybind11/stl.h>
 #include <pybind11/iostream.h>
 namespace py = pybind11;
+#pragma pop_macro("slots")
 #endif
 
 namespace qpp {
@@ -118,62 +121,62 @@ namespace qpp {
       }
 
 
-#ifdef PY_EXPORT
-      static const generic_matrix<VALTYPE, N , M> identity_proxy(){
+#if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
+      static generic_matrix<VALTYPE, N , M> identity_proxy(){
         return generic_matrix<VALTYPE, N , M>::Identity();
       }
 
       // template<typename = std::enable_if<check_is_vector3<N , M>::value> >
-      const generic_matrix<VALTYPE, N , M> normalized_proxy(){
+      generic_matrix<VALTYPE, N , M> normalized_proxy(){
         return (*this).normalized();
       }
 
-      const generic_matrix<VALTYPE, N , M> mul_proxy(const VALTYPE& other){
+      generic_matrix<VALTYPE, N , M> mul_proxy(const VALTYPE& other){
         generic_matrix<VALTYPE, N , M> _tmv(
               this->Eigen::Matrix<VALTYPE, N , M >::operator*(other));
         return _tmv;
       }
 
-      const generic_matrix<VALTYPE, N , M> div_proxy(const VALTYPE& other){
+      generic_matrix<VALTYPE, N , M> div_proxy(const VALTYPE& other){
         generic_matrix<VALTYPE, N , M> _tmv(
               this->Eigen::Matrix<VALTYPE, N , M >::operator/(other));
         return _tmv;
       }
 
-      const generic_matrix<VALTYPE, N , M> pow_proxy(const VALTYPE& other){
+      generic_matrix<VALTYPE, N , M> pow_proxy(const VALTYPE& other){
         return (*this).pow(other);
       }
 
-      const generic_matrix<VALTYPE, N , M> sum_proxy
+      generic_matrix<VALTYPE, N , M> sum_proxy
       (const generic_matrix<VALTYPE, N , M>& other){
         generic_matrix<VALTYPE, N , M> _tmv(
               this->Eigen::Matrix<VALTYPE, N , M >::operator+(other));
         return _tmv;
       }
 
-      const generic_matrix<VALTYPE, N , M> cross_product_proxy
+      generic_matrix<VALTYPE, N , M> cross_product_proxy
       (const generic_matrix& other){
         return (*this).cross(other);
       }
 
-      const generic_matrix<VALTYPE, N , M> inverse_proxy(){
+      generic_matrix<VALTYPE, N , M> inverse_proxy(){
         return (*this).inverse();
       }
 
-      const generic_matrix<VALTYPE, 3 , 1> mv_mul_proxy
+      generic_matrix<VALTYPE, 3 , 1> mv_mul_proxy
       (const generic_matrix<VALTYPE, 3 , 1> & other){
         return (*this)*other;
       }
 
-      const generic_matrix<VALTYPE, N , M> transpose_proxy(){
+      generic_matrix<VALTYPE, N , M> transpose_proxy(){
         return (*this).transpose();
       }
 
-      const VALTYPE dot_product_proxy(const generic_matrix<VALTYPE, N , M>& other){
+      VALTYPE dot_product_proxy(const generic_matrix<VALTYPE, N , M>& other){
         return (*this).dot(other);
       }
 
-      const generic_matrix<VALTYPE, N , M> sub_proxy(const generic_matrix<VALTYPE, N , M>& other){
+      generic_matrix<VALTYPE, N , M> sub_proxy(const generic_matrix<VALTYPE, N , M>& other){
         generic_matrix<VALTYPE, N , M> _tmv(
               this->Eigen::Matrix<VALTYPE, N , M >::operator-(other));
         return _tmv;
@@ -312,17 +315,17 @@ namespace qpp {
   template<class VALTYPE>
   using matrix3 = generic_matrix<VALTYPE, 3, 3>;
 
-    template <typename VALTYPE>
-    std::ostream& operator<< (std::ostream& stream, const vector3<VALTYPE> &gm) {
-      stream << gm.to_string_vec();
-      return stream;
-    }
+  template <typename VALTYPE>
+  std::ostream& operator<< (std::ostream& stream, const vector3<VALTYPE> &gm) {
+    stream << gm.to_string_vec();
+    return stream;
+  }
 
-    template <typename VALTYPE>
-    std::ostream& operator<< (std::ostream& stream, const matrix3<VALTYPE> &gm) {
-      stream << gm.to_string_matr();
-      return stream;
-    }
+  template <typename VALTYPE>
+  std::ostream& operator<< (std::ostream& stream, const matrix3<VALTYPE> &gm) {
+    stream << gm.to_string_matr();
+    return stream;
+  }
 
   template<class VALTYPE>
   matrix3<VALTYPE> mat4_to_mat3(const matrix4<VALTYPE> _inmat){
@@ -727,7 +730,7 @@ namespace qpp {
   generic_matrix<VALTYPE, N, M> generic_matrix<VALTYPE, N, M>::unity =
       generic_matrix<VALTYPE, N, M>::Identity();
 
-#ifdef PY_EXPORT
+#if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
 
   template<class VALTYPE>
   inline vector3<VALTYPE> py_diagon3dv(const matrix3<VALTYPE> & A)
@@ -788,4 +791,5 @@ namespace qpp {
 #endif
 
 }
+
 #endif

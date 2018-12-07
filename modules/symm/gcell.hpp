@@ -1,5 +1,5 @@
-#ifndef _QPP_GCELL_H
-#define _QPP_GCELL_H
+#ifndef QPP_GCELL_H
+#define QPP_GCELL_H
 
 #include <geom/lace3d.hpp>
 #include <symm/index.hpp>
@@ -9,11 +9,14 @@
 #include <stdexcept>
 #include <cmath>
 
-#ifdef PY_EXPORT
+#if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
+#pragma push_macro("slots")
+#undef slots
 #include <pybind11/pybind11.h>
 #include <pybind11/operators.h>
 #include <pyqpp/py_indexed_property.hpp>
 namespace py = pybind11;
+#pragma pop_macro("slots")
 #endif
 
 namespace qpp{
@@ -61,7 +64,7 @@ namespace qpp{
 
     void init_default()
     {
-#ifdef PY_EXPORT
+#if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
       py_gen.bind(this);
 #endif
     }
@@ -161,7 +164,7 @@ namespace qpp{
       // fixme - implement this
     }
 
-#ifdef PY_EXPORT
+#if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
 
     generalized_cell(const py::list & G,
                      const index & __begin,

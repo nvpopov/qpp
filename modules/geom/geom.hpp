@@ -9,11 +9,14 @@
 #include <symm/index.hpp>
 #include <symm/cell.hpp>
 
-#ifdef PY_EXPORT
+#if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
+#pragma push_macro("slots")
+#undef slots
 #include <pybind11/pybind11.h>
 #include <pybind11/operators.h>
 #include <pyqpp/py_indexed_property.hpp>
 namespace py = pybind11;
+#pragma pop_macro("slots")
 #endif
 
 namespace qpp{
@@ -408,7 +411,7 @@ The supercell concept generalization for the geometry class looks like:
         _atm.reserve(GEOM_DEFAULT_RESERVE_AMOUNT);
         _crd.reserve(GEOM_DEFAULT_RESERVE_AMOUNT);
         _shadow.reserve(GEOM_DEFAULT_RESERVE_AMOUNT);
-#ifdef PY_EXPORT
+#if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
         py_atoms.bind(this);
         py_shadow.bind(this);
         py_x.bind(this);
@@ -723,7 +726,7 @@ The supercell concept generalization for the geometry class looks like:
 
       }
 
-#ifdef PY_EXPORT
+#if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
 
       /*
     inline CELL & py_getcell()
@@ -1090,7 +1093,7 @@ The supercell concept generalization for the geometry class looks like:
   template< class REAL, class CELL>
   REAL geometry<REAL,CELL>::tol_geom_default = 1e-5;
 
-#ifdef PY_EXPORT
+#if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
   /*
   template <class REAL>
   struct py_geometry_observer : geometry_observer<REAL>,

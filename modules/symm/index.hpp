@@ -9,11 +9,14 @@
 #include <data/errors.hpp>
 #include <io/strfun.hpp>
 
-#ifdef PY_EXPORT
+#if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
+#pragma push_macro("slots")
+#undef slots
 #include <pybind11/pybind11.h>
 #include <pybind11/operators.h>
 #include <pyqpp/py_indexed_property.hpp>
 namespace py = pybind11;
+#pragma pop_macro("slots")
 #endif
 
 namespace qpp {
@@ -243,7 +246,7 @@ namespace qpp {
         return factory(dim);
       }
 
-#ifdef PY_EXPORT
+#if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
 
       // --------------- PYTHON -------------------------------
 
@@ -414,7 +417,7 @@ namespace qpp {
 
       inline bool end(){return _end;}
 
-#ifdef PY_EXPORT
+#if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
 
       // --------------- PYTHON -------------------------------
 
@@ -441,7 +444,7 @@ namespace qpp {
 
   };
 
-#ifdef PY_EXPORT
+#if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
 
   class index_range{
 

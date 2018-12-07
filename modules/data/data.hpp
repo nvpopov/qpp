@@ -1,5 +1,5 @@
-#ifndef _QPPDATA_H
-#define _QPPDATA_H
+#ifndef QPPDATA_H
+#define QPPDATA_H
 
 #include <vector>
 #include <set>

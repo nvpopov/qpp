@@ -13,11 +13,14 @@
 #include <algorithm>
 #include <iomanip>
 
-#ifdef PY_EXPORT
+#if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
+#pragma push_macro("slots")
+#undef slots
 #include <pybind11/pybind11.h>
 #include <pybind11/operators.h>
 #include <pyqpp/py_indexed_property.hpp>
 namespace py = pybind11;
+#pragma pop_macro("slots")
 #endif
 
 namespace qpp{
@@ -83,17 +86,17 @@ namespace qpp{
     //std::cout << "Group orders: " << symm.begin() << symm.end() << "\n";
     //std::cout << "Group size = " << Ng << "\n";
 
-    for (int i=0; i<geom.nat(); i++){
+    for (int i=0; i<geom.nat(); i++) {
         int found = 0;
 
         //std::cout << "atom " << i;
 
-        for (int j=0; j<ngbr.n(i); j++){
+        for (int j=0; j<ngbr.n(i); j++) {
             index J = ngbr(i,j);
             //std::cout << " " << J;
 
             if ( geom.atom(i) == geom.atom(J) &&
-                 J != index::D(symm.DIM).atom(J(0))){
+                 J != index::D(symm.DIM).atom(J(0))) {
                 found++;
                 //std::cout << "EQ";
               }
@@ -152,8 +155,7 @@ namespace qpp{
           SS(i,j) += std::conj(dv(i,k))*dv(j,k)/std::sqrt(de(k).real());
 
     for (int i=0; i<3; i++)
-      for (int j=0; j<3; j++)
-        {
+      for (int j=0; j<3; j++) {
           S(i,j) = SS(i,j).real();
           //std::cout << SS(i,j).imag() << " ";
         }
@@ -1536,7 +1538,7 @@ valid, if the displacement of atom due to
   }
 
 
-#ifdef PY_EXPORT
+#if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
 
   template<class REAL>
   bool py_best_transform( matrix3<REAL> & res,

@@ -1,11 +1,11 @@
-set(M_IO_SRC  io/strfun.cpp)
-set(M_DATA_SRC
-    data/types.cpp
+set(M_SRC
     data/errors.cpp
     data/data.cpp
-    data/ptable.cpp)
-set(M_SYMM_SRC symm/index.cpp)
-set(M_SRC ${M_IO_SRC} ${M_DATA_SRC} ${M_SYMM_SRC})
+    data/types.cpp
+    data/ptable.cpp
+    symm/index.cpp
+    io/strfun.cpp)
+
 add_library(qpp ${M_SRC})
 
 set(QPP_DEPS fmtlib)

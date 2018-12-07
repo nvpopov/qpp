@@ -1,16 +1,19 @@
-#ifndef _QPP_SYMM_H
-#define _QPP_SYMM_H
+#ifndef QPP_SYMM_H
+#define QPP_SYMM_H
 #include <data/types.hpp>
 #include <symm/index.hpp>
 #include <vector>
 
-#ifdef PY_EXPORT
+#if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
+#pragma push_macro("slots")
+#undef slots
 #include <pybind11/pybind11.h>
 #include <pybind11/operators.h>
 namespace py = pybind11;
+#pragma pop_macro("slots")
 #endif
 
-namespace qpp{
+namespace qpp {
 
   /*!\brief The generators_pack class implements
    * Positionary Generator Form (PGF) for arbitrary finite group.
@@ -114,7 +117,7 @@ namespace qpp{
 
   // ------------------------------------------------------------------------
   /*
-#ifdef PY_EXPORT
+#if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
 
   template<class TRANSFORM> class generated_group;
 
@@ -199,7 +202,7 @@ namespace qpp{
       // fixme
     }
 
-#ifdef PY_EXPORT
+#if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
 
     inline TRANSFORM py_getitem(int i){
       if (i<0)

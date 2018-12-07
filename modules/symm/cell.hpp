@@ -8,9 +8,15 @@
 #include <stdexcept>
 #include <cmath>
 
-#ifdef PY_EXPORT
+#if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
+#pragma push_macro("slots")
+#undef slots
 #include <pybind11/pybind11.h>
+#include <pybind11/operators.h>
+#include <pybind11/stl.h>
+#include <pybind11/iostream.h>
 namespace py = pybind11;
+#pragma pop_macro("slots")
 #endif
 
 namespace qpp{
@@ -302,7 +308,7 @@ namespace qpp{
         os << "}\n";
       }
 
-#ifdef PY_EXPORT
+#if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
 
       // --------------- PYTHON -------------------------------
 

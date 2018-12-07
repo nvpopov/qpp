@@ -1,15 +1,18 @@
 #include "errors.hpp"
 #include <stdexcept>
 
-#ifdef PY_EXPORT
+#if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
+#pragma push_macro("slots")
+#undef slots
 #include <pybind11/pybind11.h>
 #include <pybind11/operators.h>
 namespace py = pybind11;
+#pragma pop_macro("slots")
 #endif
 
 namespace qpp{
 
-#ifdef PY_EXPORT
+#if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
 
   void PyIndexError(const char * msg)
   {
@@ -49,45 +52,40 @@ namespace qpp{
 
 #endif
 
-  void IndexError(const char * msg)
-  {
-#ifdef PY_EXPORT
+  void IndexError(const char * msg) {
+#if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
     PyIndexError(msg);
 #else
     throw std::out_of_range(msg);
 #endif
   }
 
-  void TypeError(const char * msg)
-  {
-#ifdef PY_EXPORT
+  void TypeError(const char * msg) {
+#if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
     PyTypeError(msg);
 #else
     throw std::invalid_argument(msg);
 #endif
   }
 
-  void KeyError(const char * msg)
-  {
-#ifdef PY_EXPORT
+  void KeyError(const char * msg) {
+#if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
     PyKeyError(msg);
 #else
     throw std::range_error(msg);
 #endif
   }
 
-  void ValueError(const char * msg)
-  {
-#ifdef PY_EXPORT
+  void ValueError(const char * msg) {
+#if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
     PyValueError(msg);
 #else
     throw std::domain_error(msg);
 #endif
   }
 
-  void SyntaxError(const char * msg)
-  {
-#ifdef PY_EXPORT
+  void SyntaxError(const char * msg) {
+#if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
     PySyntaxError(msg);
 #else
     throw std::runtime_error(msg);

@@ -1,17 +1,20 @@
-#ifndef _QPP_ECP_H
-#define _QPP_ECP_H
+#ifndef QPP_ECP_H
+#define QPP_ECP_H
 
-#ifdef PY_EXPORT
+#if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
+#pragma push_macro("slots")
+#undef slots
 #include <pybind11/pybind11.h>
 #include <pybind11/operators.h>
 #include <pyqpp/py_indexed_property.hpp>
 namespace py = pybind11;
+#pragma pop_macro("slots")
 #endif
 
 namespace qpp{
 
   template <class FREAL>
-  class atomic_ecp{
+  class atomic_ecp {
 
     std::vector<std::vector<FREAL> > _coeff, _alpha;
     std::vector<std::vector<int> > _n;
@@ -22,7 +25,7 @@ namespace qpp{
     int nelec;
 
     void init_props(){
-#ifdef PY_EXPORT
+#if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
       py_n.bind(this);
       py_nprim.bind(this);
       py_coeff.bind(this);
@@ -85,7 +88,7 @@ namespace qpp{
     inline FREAL & alpha(int l, int i)
     { return _alpha[l][i]; }
 
-#ifdef PY_EXPORT
+#if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
 
     typedef atomic_ecp<FREAL> SELF;
 

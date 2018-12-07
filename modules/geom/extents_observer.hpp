@@ -10,25 +10,29 @@
 #include <geom/aabb.hpp>
 #include <string>
 
-#ifdef PY_EXPORT
+#if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
+#pragma push_macro("slots")
+#undef slots
 #include <pybind11/pybind11.h>
 #include <pybind11/operators.h>
 #include <pybind11/stl.h>
 #include <pyqpp/py_indexed_property.hpp>
 namespace py = pybind11;
+#pragma pop_macro("slots")
 #endif
+
 
 namespace qpp{
 
   template <class REAL, class CELL = periodic_cell<REAL> >
-  class extents_observer_t : public geometry_observer<REAL>{
+  class extents_observer_t : public geometry_observer<REAL> {
     public:
 
       aabb_3d_t<REAL> aabb;
       geometry<REAL, CELL> * geom;
       bool first_data;
 
-      extents_observer_t( geometry<REAL, CELL> & g){
+      extents_observer_t( geometry<REAL, CELL> & g) {
         geom = &g;
         geom->add_observer(*this);
         first_data = true;
@@ -36,7 +40,7 @@ namespace qpp{
         aabb.min = vector3<REAL>(0.0, 0.0, 0.0);
       }
 
-      void cmp_pos(const vector3<REAL> &pos_cmp_val){
+      void cmp_pos(const vector3<REAL> &pos_cmp_val) {
         if (first_data){
             aabb.max = pos_cmp_val;
             aabb.min = pos_cmp_val;

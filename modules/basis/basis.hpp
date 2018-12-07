@@ -1,5 +1,5 @@
-#ifndef _QPP_BASIS_H
-#define _QPP_BASIS_H
+#ifndef QPP_BASIS_H
+#define QPP_BASIS_H
 
 //#include <data/data.hpp>
 #include <geom/geom.hpp>
@@ -9,12 +9,15 @@
 #include <fmt/format.h>
 #include <fmt/ostream.h>
 
-#ifdef PY_EXPORT
+#if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
+#pragma push_macro("slots")
+#undef slots
 #include <pybind11/pybind11.h>
 #include <pybind11/operators.h>
 #include <pybind11/stl.h>
 #include <pyqpp/py_indexed_property.hpp>
 namespace py = pybind11;
+#pragma pop_macro("slots")
 #endif
 
 namespace qpp{
@@ -27,18 +30,18 @@ namespace qpp{
   class basis //: public qpp_object{
   {
 
-  public:
+    public:
 
-    // Number of basis functions
-    int nfun;
+      // Number of basis functions
+      int nfun;
 
-    // Text label for i-th basis function
-    virtual STRING label(int i) =0;
+      // Text label for i-th basis function
+      virtual STRING label(int i) =0;
 
-    // Calculate the values of basis functions on a grid
+      // Calculate the values of basis functions on a grid
 
-    virtual Eigen::Matrix<FREAL, Eigen::Dynamic, 1> &
-                  values(const std::vector<vector3<CREAL> > & grid) =0;
+      virtual Eigen::Matrix<FREAL, Eigen::Dynamic, 1> &
+      values(const std::vector<vector3<CREAL> > & grid) =0;
 
   };
 
@@ -79,33 +82,32 @@ namespace qpp{
 
   template <qpp_bastype BT, class FREAL=double>
   class atomic_basis{
-  public:
+    public:
 
-    STRING atom, basis_name;
-    std::vector<qpp_shell<BT, FREAL> > shells;
-    atomic_ecp<FREAL> ecp;
-    
-    bool empty(){
-      return shells.size() == 0 && basis_name == "";
-    }  
+      STRING atom, basis_name;
+      std::vector<qpp_shell<BT, FREAL> > shells;
+      atomic_ecp<FREAL> ecp;
 
-#ifdef PY_EXPORT
+      bool empty(){
+        return shells.size() == 0 && basis_name == "";
+      }
 
-    static void py_export(py::module m, const char * pyname)
-    {
-      //*py::class_< std::vector<qpp_shell<BT,FREAL> > >(m, pyname)
-      //.def(bp::vector_indexing_suite<std::vector<qpp_shell<BT,FREAL> > >() );
+#if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
 
-      py::class_<atomic_basis<BT,FREAL> >(m, pyname)
-        //TODO: Why init didnt be here in original bp bindings?
-        .def(py::init<>())
-        //TODO: cannot add
-        .def_readwrite("shells", &atomic_basis<BT,FREAL>::shells )
-	.def_readwrite("ecp",    &atomic_basis<BT,FREAL>::ecp)
-	.def_readwrite("atom",   &atomic_basis<BT,FREAL>::atom )
-	.def_readwrite("basis_name",   &atomic_basis<BT,FREAL>::basis_name )
-	;
-    }
+      static void py_export(py::module m, const char * pyname){
+        //*py::class_< std::vector<qpp_shell<BT,FREAL> > >(m, pyname)
+        //.def(bp::vector_indexing_suite<std::vector<qpp_shell<BT,FREAL> > >() );
+
+        py::class_<atomic_basis<BT,FREAL> >(m, pyname)
+            //TODO: Why init didnt be here in original bp bindings?
+            .def(py::init<>())
+            //TODO: cannot add
+            .def_readwrite("shells", &atomic_basis<BT,FREAL>::shells )
+            .def_readwrite("ecp",    &atomic_basis<BT,FREAL>::ecp)
+            .def_readwrite("atom",   &atomic_basis<BT,FREAL>::atom )
+            .def_readwrite("basis_name",   &atomic_basis<BT,FREAL>::basis_name )
+            ;
+      }
 
 #endif
 
@@ -115,7 +117,7 @@ namespace qpp{
   /*
   template <qpp_bastype ST, class FREAL=double>
   class qpp_basis_data : public qpp_declaration{
-    
+
     std::vector<std::vector<STRING> > labels;
     std::vector<std::vector<int> > numbers;
     std::vector<atomic_basis<ST,FREAL> > _atbasis;
@@ -123,10 +125,10 @@ namespace qpp{
   public:
 
     qpp_basis_data(const STRING & __name = "", qpp_object * __owner = NULL,
-		   qpp_param_array * __parm = NULL, 
-		   int __line=-1, const STRING & __file="") : 
+       qpp_param_array * __parm = NULL,
+       int __line=-1, const STRING & __file="") :
       qpp_declaration("basis",__name,__owner,__parm,__line,__file)
-    {}    
+    {}
 
     qpp_basis_data(const qpp_basis_data<ST,FREAL> & bas) :
       qpp_declaration(bas)
@@ -135,39 +137,39 @@ namespace qpp{
 
     qpp_basis_data(qpp_declaration * q) :
       qpp_declaration(*q)
-    { 
+    {
       // debug
       //std::cerr << "Basis constructor from declaration called\n";
 
       for (int i=0; i<n_decl(); i++)
-	if (decl(i)->category()=="center" && (decl(i)->gettype() & qtype_declaration ))
-	  {
-	    qpp_declaration * center = (qpp_declaration*)decl(i);
-	    for (int j=0; j<center->n_decl(); j++)
-	      insert_decl(i+j+1,*center->decl(j));
-	    while (center->n_decl()>0)
-	      center->erase_decl(0);
-	  }
+  if (decl(i)->category()=="center" && (decl(i)->gettype() & qtype_declaration ))
+    {
+      qpp_declaration * center = (qpp_declaration*)decl(i);
+      for (int j=0; j<center->n_decl(); j++)
+        insert_decl(i+j+1,*center->decl(j));
+      while (center->n_decl()>0)
+        center->erase_decl(0);
+    }
       /*
       for (int i=0; i<n_decl(); i++)
-	if (decl(i)->category()=="center" && (decl(i)->gettype() & qtype_parameter ) )
-	  {
-	    if (decl(i)->gettype & qtype_data_int)
-	      qpp_declaration * dcl = new qpp_declaration("center","",this,);
-	      }*/
-      //debug
-      /*
+  if (decl(i)->category()=="center" && (decl(i)->gettype() & qtype_parameter ) )
+    {
+      if (decl(i)->gettype & qtype_data_int)
+        qpp_declaration * dcl = new qpp_declaration("center","",this,);
+        }*/
+  //debug
+  /*
       std::cerr << "After moving up alive\n=====================================\n";
       qpp_declaration::write(std::cerr);
 
       for (int i=0; i<n_decl(); i++)
-	{
-	  std::cerr << "=== type = " << std::hex << decl(i)->gettype() << " ===\n";
-	  decl(i)->write(std::cerr);
-	  std::cerr << "\n\n";
-	}
+  {
+    std::cerr << "=== type = " << std::hex << decl(i)->gettype() << " ===\n";
+    decl(i)->write(std::cerr);
+    std::cerr << "\n\n";
+  }
       std::cerr << "=====================================\n";
-    
+
 
       new_atbasis();
 
@@ -175,57 +177,57 @@ namespace qpp{
       //std::cerr << "alive0.1\n";
 
       for (int i=0; i<n_decl(); i++)
-	{
-	  //debug
-	  //std::cerr << "alive1\n";
-	  
-	  if (decl(i)->category()=="shell")
-	    {
-	      //debug
-	      //std::cerr << "alive2\n";
+  {
+    //debug
+    //std::cerr << "alive1\n";
 
-	      if (decl(i)->gettype() == qtype_shell + 
-		  qtype_data<FREAL>::type + qtype_bastype(ST))
-		add_shell(*((qpp_shell<ST,FREAL>*)decl(i)) );
-	      else 
-		owner()->error("Wrong basis shell type", decl(i)->line(), decl(i)->file());
-	    }
-	  else if (decl(i)->category()=="center")
-	    {
-	      //debug
-	      //std::cerr << "alive4\n";
+    if (decl(i)->category()=="shell")
+      {
+        //debug
+        //std::cerr << "alive2\n";
 
-	      qpp_declaration * dcl = (qpp_declaration*)decl(i);
-	      new_atbasis();
-	      for (int j=0; j<dcl->n_param(); j++)
-		if (dcl->param(j)->gettype()==qtype_parameter+qtype_data_int)
-		  add_number( ((qpp_parameter<int>*)(dcl->param(j))) -> value());
-		else if (dcl->param(j)->gettype()==qtype_parameter+qtype_data_string)
-		  add_label( ((qpp_parameter<STRING>*)(dcl->param(j))) -> value());
-	    }
-	  else if (decl(i)->category()=="parameter")
-	    {
-	      //debug
-	      //std::cerr << "alive3\n";
+        if (decl(i)->gettype() == qtype_shell +
+      qtype_data<FREAL>::type + qtype_bastype(ST))
+    add_shell(*((qpp_shell<ST,FREAL>*)decl(i)) );
+        else
+    owner()->error("Wrong basis shell type", decl(i)->line(), decl(i)->file());
+      }
+    else if (decl(i)->category()=="center")
+      {
+        //debug
+        //std::cerr << "alive4\n";
 
-	      if (decl(i)->name() == "basis" && 
-		  decl(i)->gettype() == qtype_parameter + qtype_data_string)
-		add_import( ((qpp_parameter<STRING>*)decl(i))->value() );
-	      else
-		owner()->error("Wrong external basis request", decl(i)->line(), decl(i)->file());
-	    }
-	  else
-	    owner()->error("Only declaration of shell, external basis and \"center\" are allowed inside basis definition", 
-		  decl(i)->line(), decl(i)->file());
-	
-	  //debug
-	  // std::cerr << "alive5\n";
+        qpp_declaration * dcl = (qpp_declaration*)decl(i);
+        new_atbasis();
+        for (int j=0; j<dcl->n_param(); j++)
+    if (dcl->param(j)->gettype()==qtype_parameter+qtype_data_int)
+      add_number( ((qpp_parameter<int>*)(dcl->param(j))) -> value());
+    else if (dcl->param(j)->gettype()==qtype_parameter+qtype_data_string)
+      add_label( ((qpp_parameter<STRING>*)(dcl->param(j))) -> value());
+      }
+    else if (decl(i)->category()=="parameter")
+      {
+        //debug
+        //std::cerr << "alive3\n";
 
-	}
+        if (decl(i)->name() == "basis" &&
+      decl(i)->gettype() == qtype_parameter + qtype_data_string)
+    add_import( ((qpp_parameter<STRING>*)decl(i))->value() );
+        else
+    owner()->error("Wrong external basis request", decl(i)->line(), decl(i)->file());
+      }
+    else
+      owner()->error("Only declaration of shell, external basis and \"center\" are allowed inside basis definition",
+      decl(i)->line(), decl(i)->file());
+
+    //debug
+    // std::cerr << "alive5\n";
+
+  }
 
       if (_atbasis[0].empty())
-      	_atbasis.erase(_atbasis.begin());
-	
+        _atbasis.erase(_atbasis.begin());
+
     }
 
     inline int n_atbasis() const
@@ -265,14 +267,14 @@ namespace qpp{
     {
       bool found = false;
       for (int i=0; i<_atbasis[r].shells.size(); i++)
-	if ( _atbasis[r].shells[i].same_alpha(sh))
-	  {
-	    _atbasis[r].shells[i].merge(sh);
-	    found = true;
-	    break;
-	  }
+  if ( _atbasis[r].shells[i].same_alpha(sh))
+    {
+      _atbasis[r].shells[i].merge(sh);
+      found = true;
+      break;
+    }
       if (!found)
-	_atbasis[r].shells.push_back(sh);
+  _atbasis[r].shells.push_back(sh);
     }
 
     void add_shell(const qpp_shell<ST,FREAL> & sh)
@@ -305,37 +307,37 @@ namespace qpp{
     virtual void write_g98(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const
     {
       for (int i=0; i<offset; i++)
-	os << " ";
+  os << " ";
       if ( name() != "")
-	os << "basis " << name();
+  os << "basis " << name();
       else
-	os << "basis";
+  os << "basis";
       os << "(g98)";
 
       for (int i=0; i<offset+2; i++)
-	os << " ";
+  os << " ";
       os << "{\n";
 
       for (int j=0; j<n_atbasis(); j++)
-	{
-	  for (int i=0; i<offset+4; i++) os << " ";
-	  for (int k=0; k<labels[j].size(); k++)
-	    os << labels[j][k] << " ";
-	  for (int k=0; k<numbers[j].size(); k++)
-	    os << numbers[j][k] << " ";
-	  os << "0\n";
-	  for (int k=0; k<_atbasis[j].shells.size(); k++)
-	    {
-	      //debug
-	      os << "shell number " << k << "\n";
-	      _atbasis[j].shells[k].write_g98(os,offset+4);
-	    }
-	  for (int i=0; i<offset+4; i++) os << " ";
-	  os << "****\n";
-	}
+  {
+    for (int i=0; i<offset+4; i++) os << " ";
+    for (int k=0; k<labels[j].size(); k++)
+      os << labels[j][k] << " ";
+    for (int k=0; k<numbers[j].size(); k++)
+      os << numbers[j][k] << " ";
+    os << "0\n";
+    for (int k=0; k<_atbasis[j].shells.size(); k++)
+      {
+        //debug
+        os << "shell number " << k << "\n";
+        _atbasis[j].shells[k].write_g98(os,offset+4);
+      }
+    for (int i=0; i<offset+4; i++) os << " ";
+    os << "****\n";
+  }
 
       for (int i=0; i<offset+2; i++)
-	os << " ";
+  os << " ";
       os << "}\n";
     }
 
@@ -349,56 +351,56 @@ namespace qpp{
       for (int k=0; k<offset; k++) os << " ";
       os << "basis";
       if (name()!="")
-	os << " " << name() << "(";
+  os << " " << name() << "(";
       os << "( real=";
       if (qtype_data<FREAL>::type == qtype_data_double)
-	os << "double";
+  os << "double";
       else
-	os << "float";
+  os << "float";
       os << ", bastype=";
       if (ST==qbas_gauss)
-	os << "gaussian";
+  os << "gaussian";
       else if (ST==qbas_slater)
-	os << "slater";
+  os << "slater";
       else if (ST==qbas_siesta)
-	os << "siesta";
+  os << "siesta";
       else if (ST==qbas_pw)
-	os << "plane_waves";
+  os << "plane_waves";
       os << ")\n";
       for (int k=0; k<offset+2; k++) os << " ";
       os << "{\n";
       for (int i=0; i<n_atbasis(); i++)
-	{
+  {
 
-	  //debug
-	  //os << "--- record " << i << "----\n";
+    //debug
+    //os << "--- record " << i << "----\n";
 
-	  if (labels[i].size()>0 || numbers[i].size()>0)
-	    {
-	      for (int k=0; k<offset+4; k++) os << " ";
-	      os << "center(";
-	      int p=0;
-	      for (int k=0; k<labels[i].size(); k++)
-		os << (p++>0? ", " : "") << labels[i][k];
-	      for (int k=0; k<numbers[i].size(); k++)
-		os << (p++>0? ", " : "") << numbers[i][k];
-	      os << ");\n";
-	    }
-	  if (_atbasis[i].basis_import!="")
-	    {
-	      for (int k=0; k<offset+4; k++) os << " ";
-	      os << "basis = " << _atbasis[i].basis_import << ";\n";
-	    }
-	  for (int j=0; j<_atbasis[i].shells.size(); j++)
-	    _atbasis[i].shells[j].write(os,offset+4);
-	}
+    if (labels[i].size()>0 || numbers[i].size()>0)
+      {
+        for (int k=0; k<offset+4; k++) os << " ";
+        os << "center(";
+        int p=0;
+        for (int k=0; k<labels[i].size(); k++)
+    os << (p++>0? ", " : "") << labels[i][k];
+        for (int k=0; k<numbers[i].size(); k++)
+    os << (p++>0? ", " : "") << numbers[i][k];
+        os << ");\n";
+      }
+    if (_atbasis[i].basis_import!="")
+      {
+        for (int k=0; k<offset+4; k++) os << " ";
+        os << "basis = " << _atbasis[i].basis_import << ";\n";
+      }
+    for (int j=0; j<_atbasis[i].shells.size(); j++)
+      _atbasis[i].shells[j].write(os,offset+4);
+  }
       for (int k=0; k<offset+2; k++) os << " ";
       os << "}\n";
 
       //debug
       //os << "nrcrd = " << _rcrd.size() << "\n";
     }
-  
+
   };
           */
   // ----------------------------------------------------------------------
@@ -406,25 +408,25 @@ namespace qpp{
   const int Lmax = 3;
 
   const int nanglf[] = {1,3,6,10};
-  
-  // g98 ordering of cartesian atomic orbitals
-  const int 
-  manglf[][10][3] = {{{0,0,0}},
-		     {{1,0,0}, {0,1,0}, {0,0,1}},
-		     {{2,0,0}, {0,2,0}, {0,0,2}, {1,1,0}, {1,0,1}, {0,1,1}},
-		     {{3,0,0}, {0,3,0}, {0,0,3}, {1,2,0}, {2,1,0}, {1,0,2}, {2,0,1}, {0,1,2}, {0,2,1}, {1,1,1}}};
-  
 
-  const STRING 
+  // g98 ordering of cartesian atomic orbitals
+  const int
+  manglf[][10][3] = {{{0,0,0}},
+                     {{1,0,0}, {0,1,0}, {0,0,1}},
+                     {{2,0,0}, {0,2,0}, {0,0,2}, {1,1,0}, {1,0,1}, {0,1,1}},
+                     {{3,0,0}, {0,3,0}, {0,0,3}, {1,2,0}, {2,1,0}, {1,0,2}, {2,0,1}, {0,1,2}, {0,2,1}, {1,1,1}}};
+
+
+  const STRING
   anglf_label[][10] = {{"S"},
-		       {"PX","PY","PZ"},
-		       {"DXX","DYY","DZZ","DXY","DXZ","DYZ"},
-		       {"FXXX","FYYY","FZZZ","FXYY","FXXY","FXZZ","FXXZ","FYZZ","FYYZ","FXYZ"}};
-  
+                       {"PX","PY","PZ"},
+                       {"DXX","DYY","DZZ","DXY","DXZ","DYZ"},
+                       {"FXXX","FYYY","FZZZ","FXYY","FXXY","FXZZ","FXXZ","FYZZ","FYYZ","FXYZ"}};
+
   // ----------------------------------------------------------------------
   /*
-  template <class FREAL=double, int DIM=0 , class CREAL=double, 
-	    class TRANSFORM = periodic_cell<DIM,CREAL> >
+  template <class FREAL=double, int DIM=0 , class CREAL=double,
+      class TRANSFORM = periodic_cell<DIM,CREAL> >
   class gauss_cart_basis{
 
     gencon_shell<FREAL> * _shells;
@@ -446,12 +448,12 @@ namespace qpp{
       return geom == NULL ? 0 : 1;
     }
 
-    virtual qpp_object * next(int i) 
+    virtual qpp_object * next(int i)
     {
       if (i==0)
-	return geom;
-      else 
-	return NULL;
+  return geom;
+      else
+  return NULL;
     }
 
     virtual STRING category() const
@@ -461,7 +463,7 @@ namespace qpp{
 
     virtual STRING name() const
     {
-      
+
     }
 
     virtual qppobject_type gettype() const=0;
@@ -470,7 +472,7 @@ namespace qpp{
 
     virtual STRING error() =0;
 
-    virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const =0;    
+    virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const =0;
 
   };
     */
@@ -478,29 +480,28 @@ namespace qpp{
   // -----------------------------------------------------------------
 
   template<class REAL, class BASIS1, class BASIS2>
-  class integrator_1e{
+  class integrator_1e {
 
-  protected:
+    protected:
 
-    bool _do_overlap, _do_d1_ovelap, _do_dipole, _do_coulomb, _do_d1_coulomb;
+      bool _do_overlap, _do_d1_ovelap, _do_dipole, _do_coulomb, _do_d1_coulomb;
 
-    
-    Eigen::Matrix<REAL, Eigen::Dynamic, Eigen::Dynamic> * overlap;
 
-  public:
+      Eigen::Matrix<REAL, Eigen::Dynamic, Eigen::Dynamic> * overlap;
 
-    void no_overlap()
-    { _do_overlap = false; }
+    public:
 
-    void do_overlap(Eigen::Matrix<REAL, Eigen::Dynamic, Eigen::Dynamic> & S)
-    { 
-      _do_overlap = true;
-      overlap = & S;
-    }
+      void no_overlap()
+      { _do_overlap = false; }
 
-    // ..............................
+      void do_overlap(Eigen::Matrix<REAL, Eigen::Dynamic, Eigen::Dynamic> & S) {
+        _do_overlap = true;
+        overlap = & S;
+      }
 
-    virtual void calculate() =0;
+      // ..............................
+
+      virtual void calculate() =0;
 
   };
 

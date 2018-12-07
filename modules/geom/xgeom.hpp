@@ -11,11 +11,14 @@
 #include <initializer_list>
 #include <stdexcept>
 
-#ifdef PY_EXPORT
+#if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
+#pragma push_macro("slots")
+#undef slots
 #include <pybind11/pybind11.h>
 #include <pybind11/operators.h>
 #include <pyqpp/py_indexed_property.hpp>
 namespace py = pybind11;
+#pragma pop_macro("slots")
 #endif
 
 namespace qpp{
@@ -49,7 +52,7 @@ namespace qpp{
 
     void init_xdefault(){
       _nxreal = _nxstring = _nxint = _nxbool = 0;
-#ifdef PY_EXPORT
+#if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
       py_fields.bind(this);
       py_add.bind(this);
 #endif
@@ -191,7 +194,7 @@ namespace qpp{
       std::cout << ix_atom << " " << ix_x << " " << ix_y << " " << ix_z << "\n";
       */
 
-      if (ix_atom == -1 && ix_x == -1 && ix_y==-1 && ix_z==-1){
+      if (ix_atom == -1 && ix_x == -1 && ix_y==-1 && ix_z==-1) {
           ix_atom = 0;
           ix_x = 1; ix_y = 2; ix_z = 3;
           if (ix_charge >= 0) ix_charge += 4;
@@ -227,7 +230,7 @@ namespace qpp{
       if (ix_charge>=0)
         _field_additive[ix_charge] = true;
 
-      if (ix_atom == -1 || ix_x == -1 || ix_y == -1 || ix_z == -1){
+      if (ix_atom == -1 || ix_x == -1 || ix_y == -1 || ix_z == -1) {
           KeyError("xgeometry::format: the geometry does not have either atom names, x, y, or z coordinates");
         }
 
@@ -248,7 +251,7 @@ namespace qpp{
     ///
     xgeometry(CELL & __cell,  const std::vector<STRING> & fn,
               const std::vector<basic_types> & ft,
-              const STRING & __name = "") : geometry<REAL,CELL>(__cell, __name){
+              const STRING & __name = "") : geometry<REAL,CELL>(__cell, __name) {
       init_xdefault();
       set_format(fn,ft);
     }
@@ -677,7 +680,7 @@ namespace qpp{
         throw std::runtime_error("\"mass\" field is requested for the geometry which does not have masses");
     }
 
-#ifdef PY_EXPORT
+#if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
 
     xgeometry(CELL & __cell, const py::list f, const STRING & __name = "") :
       geometry<REAL,CELL>(__cell, __name){

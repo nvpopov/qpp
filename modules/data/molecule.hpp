@@ -1,5 +1,5 @@
-#ifndef _QPP_MOLECULE_H
-#define _QPP_MOLECULE_H
+#ifndef QPP_MOLECULE_H
+#define QPP_MOLECULE_H
 
 //#include <data/atom.hpp>
 #include <classic/potentials.hpp>
@@ -7,68 +7,72 @@
 #include <basis/basis.hpp>
 #include <basis/ecp.hpp>
 
-#ifdef PY_EXPORT
+#if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
+#pragma push_macro("slots")
+#undef slots
 #include <pybind11/pybind11.h>
 #include <pybind11/operators.h>
 #include <pybind11/stl.h>
 #include <pyqpp/py_indexed_property.hpp>
 namespace py = pybind11;
+#pragma pop_macro("slots")
 #endif
 
-namespace qpp{
+namespace qpp {
 
   typedef std::set<int> qselection;
 
   template<class REAL, class CELL>
-  class molecule{
+  class molecule {
 
-    std::vector<STRING> atoms;
-    std::vector<int> attypes;
+      std::vector<STRING> atoms;
+      std::vector<int> attypes;
 
-  public:
-    STRING name;
-    CELL * cell;
-    geometry<REAL,CELL> * geom;
+    public:
+      STRING name;
+      CELL * cell;
+      geometry<REAL,CELL> * geom;
 
-    //std::vector<qpp_atom<FREAL>*> atoms;
+      //std::vector<qpp_atom<FREAL>*> atoms;
 
-    //! \brief Gives the name of atomic type number t. For correct
-    //! work of molecule::atom the type table of molecule::geom
-    //! must be correctly built
-    STRING atom(int t) const{
-      return geom->atom_of_type(t);
-    }
+      //! \brief Gives the name of atomic type number t. For correct
+      //! work of molecule::atom the type table of molecule::geom
+      //! must be correctly built
+      STRING atom(int t) const {
+        return geom->atom_of_type(t);
+      }
 
-    int type(const STRING & at) const{
-      return geom->type_of_atom(at);
-    }
+      int type(const STRING & at) const {
+        return geom->type_of_atom(at);
+      }
 
-    int define_type(const STRING & at){
-      geom -> define_type(at);
-    }
+      int define_type(const STRING & at) {
+        geom -> define_type(at);
+      }
 
   };
 
   template<class REAL, class CELL>
-  class mm_molecule : public molecule<REAL,CELL>{
+  class mm_molecule : public molecule<REAL,CELL> {
 
-  public:
+    public:
 
-    int pot;
-    //std::vector<classical_potential<REAL> > pot;
-    
+      int pot;
+      //std::vector<classical_potential<REAL> > pot;
+
   };
-  
-  template<class REAL, class CELL = periodic_cell<REAL>, qpp_bastype BT = qbas_gauss, class FREAL = REAL>
+
+  template<class REAL, class CELL = periodic_cell<REAL>,
+           qpp_bastype BT = qbas_gauss, class FREAL = REAL>
   class qmmm_molecule : public mm_molecule<REAL,CELL> {
 
-  public:
-    qselection qmatoms,clsatoms,fixedatoms;
-    std::vector<atomic_basis<BT,FREAL> > basis;
-    std::vector<atomic_ecp<FREAL> > ecp;
-    
+    public:
+      qselection qmatoms,clsatoms,fixedatoms;
+      std::vector<atomic_basis<BT,FREAL> > basis;
+      std::vector<atomic_ecp<FREAL> > ecp;
+
   };
-  
+
 }
 
 #endif

@@ -5,7 +5,7 @@
 #include <io/fdstream.hpp>
 #include <io/vasp_io.hpp>
 
-#ifdef PY_EXPORT
+#if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
 
 //vasp io start
 template<class REAL, class CELL>

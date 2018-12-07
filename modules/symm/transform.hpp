@@ -14,7 +14,7 @@ namespace qpp{
     @param BOUND boolean parameter specifying if the rotrans should be "bound" to certain periodic cell. The need for "bound rotrans" is the following: a symmetry group consisting of rotrans operations is, generally speaking, infinite. "Bound rotrans" makes it finite by reducing the symmetry operation result (a vector, a point) to 3d-periodic cell with given translation vectors. Such periodic cell must be the same for all ""bound rotranses" comprising the group.
    */
   template<class REAL, bool BOUND = false>
-  struct rotrans{
+  struct rotrans {
       typedef periodic_cell<REAL>  BOUNDARY;
 
       //!\brief the threshhold to consider two translation vectors equal
@@ -43,7 +43,7 @@ namespace qpp{
       }
 
       //!\brief copy constructor
-      rotrans(const rotrans<REAL,BOUND> & a){
+      rotrans(const rotrans<REAL,BOUND> & a) {
         T = a.T;
         R = a.R;
         if (BOUND)
@@ -53,7 +53,7 @@ namespace qpp{
       }
 
       //!\brief creates translation operation with _T vector
-      rotrans(const vector3<REAL> &_T, BOUNDARY * _cell = NULL){
+      rotrans(const vector3<REAL> &_T, BOUNDARY * _cell = NULL) {
         T=_T;
         R = matrix3<REAL>::unity;
         if (BOUND)
@@ -63,7 +63,7 @@ namespace qpp{
       }
 
       //!\brief creates rotation operation with _R matrix
-      rotrans(const matrix3<REAL> & _R, BOUNDARY * _cell = NULL){
+      rotrans(const matrix3<REAL> & _R, BOUNDARY * _cell = NULL) {
         T = vector3<REAL>(0);
         R = _R;
         if (BOUND)
@@ -84,7 +84,7 @@ namespace qpp{
       }
 
       //!\brief Multiplication of two rotrans operations
-      inline rotrans<REAL,BOUND> operator*(const rotrans<REAL,BOUND> & b) const{
+      inline rotrans<REAL,BOUND> operator*(const rotrans<REAL,BOUND> & b) const {
         vector3<REAL> t = T + R*b.T;
         if (BOUND){
             vector3<REAL> f =  cell -> cart2frac(t);
@@ -102,7 +102,7 @@ namespace qpp{
       if their translations differ by less than translation_tolerance and their
       rotation matricies differ by less than rotation_tolerance.
     */
-      inline bool operator==(const rotrans<REAL, BOUND> & b) const{
+      inline bool operator==(const rotrans<REAL, BOUND> & b) const {
         if (!BOUND) {
             return (T - b.T).norm()<= translation_tolerance &&
                 (R - b.R).norm() <= rotation_tolerance;
@@ -125,13 +125,13 @@ namespace qpp{
 
 
       //!\brief Inequality operator. Simply !(a==b).
-      inline bool operator!=(const rotrans<REAL, BOUND> & b) const{
+      inline bool operator!=(const rotrans<REAL, BOUND> & b) const {
         return !(*this == b);
       }
 
       //!\brief Rotrans times vector multiplication means that rotrans
       //!  acts on this vector
-      inline vector3<REAL> operator*(const vector3<REAL> & v) const{
+      inline vector3<REAL> operator*(const vector3<REAL> & v) const {
         vector3<REAL> res = T+R*v;
         if (BOUND)
           res = cell -> reduce(res);
@@ -173,7 +173,7 @@ namespace qpp{
       }
 
 
-#ifdef PY_EXPORT
+#if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
 
       inline vector3<REAL> py_mulv(const vector3<REAL> & v) const
       {return (*this)*v; }
@@ -215,7 +215,7 @@ namespace qpp{
 
 
   // ----------------------------------------------------------------
-#ifdef PY_EXPORT
+#if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
 
   //  template<class REAL,bool BOUND>
   //  inline rotrans<REAL,BOUND> py_invert_rt(const rotrans<REAL,BOUND> & R) {

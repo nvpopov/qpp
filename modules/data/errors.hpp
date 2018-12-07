@@ -1,9 +1,9 @@
-#ifndef _QPPERRORS_H
-#define _QPPERRORS_H
+#ifndef QPP_ERRORS_H
+#define QPP_ERRORS_H
 
-namespace qpp{
+namespace qpp {
 
-#ifdef PY_EXPORT
+#if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
 
   void PyIndexError(const char *);
   void PyTypeError(const char *);

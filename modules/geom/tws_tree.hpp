@@ -23,16 +23,17 @@
 #include <data/ptable.hpp>
 #include <data/compiler_fallback.hpp>
 
-//#ifdef PY_EXPORT
+//#if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
+//#pragma push_macro("slots")
 //#include <pybind11/pybind11.h>
 //#include <pybind11/operators.h>
 //#include <pybind11/stl.h>
 //#include <pyqpp/py_indexed_property.hpp>
 //namespace py = pybind11;
+//#pragma pop_macro("slots")
 //#endif
 
 #define TWS_TREE_DEBUG
-
 
 namespace qpp{
 
@@ -532,14 +533,14 @@ namespace qpp{
                                const REAL scale_factor) {
 
         if (!cur_node) return;
-        if (ray_aabb_test(_ray, cur_node->m_bb)){
+        if (ray_aabb_test(_ray, cur_node->m_bb)) {
 
-            if (cur_node->m_tot_childs > 0){
+            if (cur_node->m_tot_childs > 0) {
                 for (auto *ch_node : cur_node->m_sub_nodes)
                   if (ch_node)
                     traverse_query_ray<adding_result_policy>(ch_node, _ray, res, scale_factor);
               }
-            else for (auto &nc : cur_node->m_content){
+            else for (auto &nc : cur_node->m_content) {
                 auto ap_idx = ptable::number_by_symbol(geom->atom(nc.m_atm));
 
                 //TODO: move magic aRadius
@@ -608,7 +609,7 @@ namespace qpp{
         do_action(act_check_root);
 
         if (m_atom_node_lookup.size() != geom->size()) m_atom_node_lookup.resize(geom->size());
-        while (!(point_aabb_test(geom->pos(atm, idx), root->m_bb)) ) {
+        while (!(point_aabb_test(geom->pos(atm, idx), root->m_bb))) {
             grow_tws_root(atm, idx);
 #ifdef TWS_TREE_DEBUG
             std::cout<<fmt::format("rootgrow p = {}, {}, {}\n",
@@ -635,7 +636,7 @@ namespace qpp{
         bool in_cur_rect = point_aabb_test(p, cur_node->m_bb);
         if (!in_cur_rect) return false;
 
-        if (in_cur_rect){
+        if (in_cur_rect) {
             // point in box and we reach minimum volume
             if (cur_node->m_bb.volume() / 27.0 <= m_min_tws_volume){
                 push_data_to_tws_node(cur_node, atm, idx);
@@ -797,7 +798,7 @@ namespace qpp{
             std::vector<tws_node_content_t<REAL, AINT> > res;
             query_sphere(sph_r, geom->pos(at_num, idx), res);
 
-            for (auto &r_el : res){
+            for (auto &r_el : res) {
                 vector3<REAL> pos1 = geom->pos(at_num, idx);
                 vector3<REAL> pos2 = geom->pos(r_el.m_atm, r_el.m_idx);
 

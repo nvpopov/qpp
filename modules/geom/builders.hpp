@@ -10,11 +10,15 @@
 #include <geom/xgeom.hpp>
 #include <geom/shape.hpp>
 #include <geom/ngbr.hpp>
-#ifdef PY_EXPORT
+
+#if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
+#pragma push_macro("slots")
+#undef slots
 #include <pybind11/pybind11.h>
 #include <pybind11/operators.h>
 #include <pyqpp/py_indexed_property.hpp>
 namespace py = pybind11;
+#pragma pop_macro("slots")
 #endif
 
 namespace qpp{
@@ -295,14 +299,14 @@ namespace qpp{
   template<class REAL, class CELL>
   std::set<int> select( const geometry<REAL,CELL> & geom,
                         const shape<REAL> & shp){
-
+    return std::set<int>();
   }
 
   template<class REAL, class CELL, class REAL1, class CELL1>
   std::set<int> select( const geometry<REAL,CELL> & geom,
                         const geometry<REAL1,CELL1> & frag,
                         const bonding_table<REAL> & b){
-
+    return std::set<int>();
   }
 
   template<class REAL, class CELL, class REAL1, class CELL1>
@@ -310,7 +314,7 @@ namespace qpp{
                         const geometry<REAL1,CELL1> & frag, REAL R){
     bonding_table<REAL> b;
     b.default_distance = R;
-    select(geom,frag,b);
+    return select(geom,frag,b);
   }
 
   template<class REAL, class CELL>
@@ -349,7 +353,7 @@ namespace qpp{
 
   */
 
-#ifdef PY_EXPORT
+#if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
 
   template<class REALDST, class CELLDST, class REALSRC, class CELLSRC>
   void py_replicate1(geometry<REALDST,CELLDST> & dst,
