@@ -186,7 +186,7 @@ namespace qpp {
     py_indexed_property<SELF, REAL, const STRING &,
     &SELF::covrad, &SELF::set_covrad> py_covrad;
 
-    REAL py_getpair(const STRING  ){}
+    REAL py_getpair(const STRING  ){ return -1;}
     void py_setpair(const STRING  , const REAL &){}
 
     REAL py_getpair2(const STRING  at1, const STRING  at2){

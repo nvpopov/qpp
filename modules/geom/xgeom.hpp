@@ -765,6 +765,7 @@ namespace qpp{
 
     py::object py_getfield1(int i){
       KeyError("xgeometry::field accepts 2 indicies");
+      return py::none();
     }
 
     void py_setfield1(int i, const py::object & o){

@@ -34,27 +34,25 @@ namespace qpp {
 
     struct ptable_atom_record {
 
-        uint aNumber;
-        STRING       aName;
-        STRING       aSymbol;
-        float       aRadius; // A
-        float       aMass;
+        vector3<float> m_color_jmol;
+        vector3<float> m_color_gv;
+        vector3<float> m_color_cpk;
 
-        float       aCovRad_Slater;// A
-        float       aCovRad_Bragg;// A
-        float       aCovRad_Cordero;// A
-        float       aCovRad_Pyykko;// A
-        float       aCovRad_Pyykko_D;// A
-        float       aCovRad_Pyykko_T;// A
+        std::vector<std::tuple<int,std::string,int> > m_elec_conf;
 
-        float       aVdWRadius;// A
-        float       aVdWRadius_Alvarez;// A
-        float       aIonicRadius;// A
+        STRING       m_name;
+        STRING       m_symbol;
 
-        uint          aNValenceElec;
-        vector3<float> aColorJmol, aColorGV, aColorCPK;
-        //(1,"s",2),(2,"s",3)
-        std::vector<std::tuple<int,std::string,int> > aElecConf;
+        uint         m_number;
+        uint         m_n_val_elec;
+        float        m_radius; // A
+        float        m_mass;
+        float        m_covrad_slater;// A
+        float        m_covrad_bragg;// A
+        float        m_vdw_radius;// A
+        float        m_vdw_radius_alvarez;// A
+        float        m_ionic_radius;// A
+        bool         m_redefined{false};
 
     };
 
@@ -96,7 +94,7 @@ namespace qpp {
         static STRING symbol_by_number (const uint number) {
             ptable *table = ptable::get_inst();
             if ((number >= 1) && (number < PTABLE_ELEM_N))
-                return table->arecs[number-1].aSymbol;
+                return table->arecs[number-1].m_symbol;
             return PTABLE_NONE;
         }
 
@@ -104,7 +102,7 @@ namespace qpp {
 
             ptable *table = ptable::get_inst();
             if (number >= 1 && number < PTABLE_ELEM_N)
-                return table->arecs[number-1].aName;
+                return table->arecs[number-1].m_name;
             return PTABLE_NONE;
 
         }
@@ -113,7 +111,7 @@ namespace qpp {
 
             ptable *table = ptable::get_inst();
             for (int i = 0; i < PTABLE_ELEM_N; i++)
-                if (table->arecs[i].aName == name)
+                if (table->arecs[i].m_name == name)
                     return std::optional<uint>(i+1);
             return std::nullopt;
 
@@ -136,7 +134,7 @@ namespace qpp {
 
             ptable *table = ptable::get_inst();
             if (number >= 1 && number < PTABLE_ELEM_N)
-                return std::optional<float>(table->arecs[number-1].aMass);
+                return std::optional<float>(table->arecs[number-1].m_mass);
             else return std::nullopt;
 
         }
@@ -145,7 +143,7 @@ namespace qpp {
 
             ptable *table = ptable::get_inst();
             if (number >= 1 && number < PTABLE_ELEM_N)
-                return std::optional<float>(table->arecs[number-1].aIonicRadius);
+                return std::optional<float>(table->arecs[number-1].m_ionic_radius);
             else return std::nullopt;
 
         }
@@ -154,7 +152,7 @@ namespace qpp {
 
             ptable *table = ptable::get_inst();
             if (number >= 1 && number < PTABLE_ELEM_N)
-                return std::optional<float>(table->arecs[number-1].aCovRad_Slater);
+                return std::optional<float>(table->arecs[number-1].m_covrad_slater);
             else return std::nullopt;
 
         }
@@ -163,7 +161,7 @@ namespace qpp {
 
             ptable *table = ptable::get_inst();
             if (number >= 1 && number < PTABLE_ELEM_N)
-                return std::optional<float>(table->arecs[number-1].aVdWRadius);
+                return std::optional<float>(table->arecs[number-1].m_vdw_radius);
             else return std::nullopt;
 
         }
@@ -172,7 +170,7 @@ namespace qpp {
 
             ptable *table = ptable::get_inst();
             if (number >= 1 && number < PTABLE_ELEM_N)
-                return table->arecs[number-1].aNValenceElec;
+                return table->arecs[number-1].m_n_val_elec;
             else return 1.0f;
 
         }
