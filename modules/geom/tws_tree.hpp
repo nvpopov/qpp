@@ -50,7 +50,7 @@ namespace qpp{
   };
 
   template<typename POL_REAL = float>
-  struct query_ray_add_ignore_images {
+  struct query_ray_add_ignore_img {
       static bool can_add (vector3<POL_REAL> &pos, index &idx, const int DIM = 0) {
         return idx == index::D(DIM).all(0);
       }
@@ -72,12 +72,12 @@ namespace qpp{
   /// \brief The imaginary_atom struct
   ///
   template<typename REAL, typename AINT = uint32_t>
-  struct imaginary_atom_t {
+  struct img_atom_t {
       AINT m_atm;
       index m_idx;
       //tws_node_t<REAL, AINT> *parent;
       std::vector<tws_node_content_t<REAL, AINT> > m_img_bonds;
-      imaginary_atom_t (const AINT _atm, const index _idx) noexcept {m_atm = _atm; m_idx = _idx;}
+      img_atom_t (const AINT _atm, const index _idx) noexcept {m_atm = _atm; m_idx = _idx;}
 
   };
 
@@ -260,7 +260,7 @@ namespace qpp{
 
     public:
 
-      std::vector<imaginary_atom_t<REAL, AINT> >                      m_img_atoms;
+      std::vector<img_atom_t<REAL, AINT> >                      m_img_atoms;
       std::vector<std::vector<tws_node_content_t<REAL, AINT> > >      m_ngb_table;
       bonding_table_t<REAL, AINT>                                     m_bonding_table;
 
@@ -271,14 +271,14 @@ namespace qpp{
         geom->add_observer(*this);
       }
 
-      std::optional<AINT> find_imaginary_atom (const AINT atm, const index idx) {
+      std::optional<AINT> find_img_atom (const AINT atm, const index idx) {
         for (AINT i = 0; i < m_img_atoms.size(); i++)
           if (m_img_atoms[i].m_atm == atm && m_img_atoms[i].m_idx == idx)
             return std::optional<AINT>(i);
         return std::nullopt;
       }
 
-      std::optional<AINT> find_imaginary_atom_by_id (const AINT atm) {
+      std::optional<AINT> find_img_atom_by_id (const AINT atm) {
         for (AINT i = 0; i < m_img_atoms.size(); i++)
           if (m_img_atoms[i].atm == atm)
             return std::optional<AINT>(i);
@@ -383,7 +383,7 @@ namespace qpp{
       /// \param atm1
       /// \param atm2
       /// \param idx2
-      void clr_bond_real_im (const AINT atm1, const AINT atm2, const index idx2) {
+      void clr_bond_real_img (const AINT atm1, const AINT atm2, const index idx2) {
         for(auto it = m_ngb_table[atm1].begin(); it != m_ngb_table[atm1].end(); )
           if(it->m_atm == atm2 && it->m_idx == idx2) m_ngb_table[atm1].erase(it);
           else ++it;
@@ -394,7 +394,7 @@ namespace qpp{
       /// \param img_atom_id
       /// \param atm2
       /// \param idx2
-      void clr_bond_im_real (const AINT img_atom_id, const AINT atm2, const index idx2) {
+      void clr_bond_img_real (const AINT img_atom_id, const AINT atm2, const index idx2) {
         for(auto it = m_img_atoms[img_atom_id].begin(); it != m_img_atoms[img_atom_id].end(); )
           if(it->m_atm == atm2 && it->m_idx == idx2) m_img_atoms[img_atom_id].erase(it);
           else ++it;
@@ -403,7 +403,7 @@ namespace qpp{
       /// \brief clr_bond_im_real
       /// \param img_atom_id
       /// \param atm2
-      void clr_bond_im_real (const AINT img_atom_id, const int atm2) {
+      void clr_bond_img_real (const AINT img_atom_id, const int atm2) {
         for(auto it = m_img_atoms[img_atom_id].m_img_bonds.begin();
             it != m_img_atoms[img_atom_id].m_img_bonds.end(); )
           if(it->m_atm == atm2) m_img_atoms[img_atom_id].m_img_bonds.erase(it);
@@ -417,8 +417,8 @@ namespace qpp{
           if (bond.m_idx == index::D(geom->DIM).all(0) || geom->DIM == 0)
             clr_atom_pair_bond_data(bond.m_atm, atm);
           else {
-              std::optional<AINT> img_id = find_imaginary_atom(bond.m_atm, bond.m_idx);
-              if (img_id) clr_bond_im_real(*img_id, atm);
+              std::optional<AINT> img_id = find_img_atom(bond.m_atm, bond.m_idx);
+              if (img_id) clr_bond_img_real(*img_id, atm);
             }
         m_ngb_table[atm].clear();
       }
@@ -458,14 +458,14 @@ namespace qpp{
                       if (nc.m_idx != index::D(geom->DIM).all(0)) {
                           pair_img_atoms.push_back(std::tuple<AINT, index>(nc.m_atm, nc.m_idx));
                         }
-                      else clr_bond_real_im(nc.m_atm, it->m_atm, it->m_idx);
+                      else clr_bond_real_img(nc.m_atm, it->m_atm, it->m_idx);
                     }
                   it = m_img_atoms.erase(it);
                 } else ++it;
 
             //delete bonds from paired imaginary atoms
             for (auto &pair : pair_img_atoms){
-                std::optional<AINT> paired_img_id = find_imaginary_atom(std::get<0>(pair),
+                std::optional<AINT> paired_img_id = find_img_atom(std::get<0>(pair),
                                                                         std::get<1>(pair));
                 if (paired_img_id){
                     for (auto it = m_img_atoms[*paired_img_id].m_img_bonds.begin();
@@ -692,7 +692,7 @@ namespace qpp{
         m_atom_node_lookup[atm].push_back(atom_node_lookup_t<REAL>(idx, cur_node));
 
         if ( geom->DIM > 0 && idx != index::D(geom->DIM).all(0))
-          m_img_atoms.push_back(imaginary_atom_t<REAL>(atm, idx));
+          m_img_atoms.push_back(img_atom_t<REAL>(atm, idx));
 
       }
 
@@ -852,7 +852,7 @@ namespace qpp{
                     add_ngbr(mx_at1_num, mx_at2_num, mx_at2_idx);
 
                     // add imaginary bond
-                    std::optional<AINT> iat = find_imaginary_atom(mx_at2_num, mx_at2_idx);
+                    std::optional<AINT> iat = find_img_atom(mx_at2_num, mx_at2_idx);
                     if (iat)
                       m_img_atoms[*iat].m_img_bonds.push_back(
                             tws_node_content_t<REAL>(mx_at1_num, mx_at1_idx));
@@ -864,8 +864,8 @@ namespace qpp{
 
                     std::optional<AINT> iat1, iat2;
 
-                    iat1 = find_imaginary_atom(at_num, idx);
-                    iat2 = find_imaginary_atom(r_el.m_atm, r_el.m_idx);
+                    iat1 = find_img_atom(at_num, idx);
+                    iat2 = find_img_atom(r_el.m_atm, r_el.m_idx);
 
                     if (iat1 && iat2){
                         m_img_atoms[*iat1].m_img_bonds.push_back(
