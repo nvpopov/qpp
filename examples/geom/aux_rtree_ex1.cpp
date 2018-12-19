@@ -43,7 +43,7 @@ int main(){
 
 
   qpp::periodic_cell<float> cell({4,0,0},{0,6,0},{0,0,4});
-  qpp::geometry<float,decltype(cell)> g(cell);
+  qpp::xgeometry<float,decltype(cell)> g(cell);
   qpp::tws_tree_t<float> artree(g);
 
   std::ifstream si2("../examples/io/ref_data/dna.xyz");

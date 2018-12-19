@@ -13,7 +13,7 @@
 #include <cassert>
 #include <string>
 
-#include <geom/geom.hpp>
+#include <geom/xgeom.hpp>
 #include <geom/ngbr.hpp>
 #include <data/symmetric_key.hpp>
 #include <data/ptable.hpp>
@@ -247,7 +247,7 @@ namespace qpp{
       REAL m_guess_rect_size{12.0};
       REAL m_min_tws_volume{265.0};
 
-      geometry<REAL, CELL>                                       *geom{nullptr};
+      xgeometry<REAL, CELL>                                       *geom{nullptr};
       tws_node_t<REAL, AINT>                                     *root{nullptr};
       std::vector<tws_node_t<REAL, AINT>* >                      m_flat_view;
       std::vector<std::vector<atom_node_lookup_t<REAL> > >       m_atom_node_lookup;
@@ -260,13 +260,13 @@ namespace qpp{
 
     public:
 
-      std::vector<img_atom_t<REAL, AINT> >                      m_img_atoms;
+      std::vector<img_atom_t<REAL, AINT> >                            m_img_atoms;
       std::vector<std::vector<tws_node_content_t<REAL, AINT> > >      m_ngb_table;
       bonding_table_t<REAL, AINT>                                     m_bonding_table;
 
       /// \brief aux_rtree constructor
       /// \param g
-      tws_tree_t (geometry<REAL, CELL> & g) {
+      tws_tree_t (xgeometry<REAL, CELL> & g) {
         geom = & g;
         geom->add_observer(*this);
       }
@@ -517,9 +517,11 @@ namespace qpp{
       template<typename adding_result_policy = query_ray_add_all<REAL> >
       void query_ray (ray_t<REAL> &_ray,
                       std::vector<tws_query_data_t<REAL, AINT> > &res,
-                      REAL scale_factor = 0.25) {
+                      REAL scale_factor = 0.25, bool hide_by_field = false,
+                      int xgeom_hide_field_id = 6) {
         if (!root) return;
-        traverse_query_ray<adding_result_policy>(root, _ray, res, scale_factor);
+        traverse_query_ray<adding_result_policy>(root, _ray, res, scale_factor, hide_by_field,
+                                                 xgeom_hide_field_id);
       }
 
       /// \brief traverse_query_ray
@@ -530,7 +532,8 @@ namespace qpp{
       void traverse_query_ray (tws_node_t<REAL, AINT> *cur_node,
                                ray_t<REAL> &_ray,
                                std::vector<tws_query_data_t<REAL, AINT> > &res,
-                               const REAL scale_factor) {
+                               const REAL scale_factor, bool hide_by_field,
+                               int xgeom_hide_field_id) {
 
         if (!cur_node) return;
         if (ray_aabb_test(_ray, cur_node->m_bb)) {
@@ -538,20 +541,24 @@ namespace qpp{
             if (cur_node->m_tot_childs > 0) {
                 for (auto *ch_node : cur_node->m_sub_nodes)
                   if (ch_node)
-                    traverse_query_ray<adding_result_policy>(ch_node, _ray, res, scale_factor);
+                    traverse_query_ray<adding_result_policy>(ch_node, _ray, res, scale_factor,
+                                                             hide_by_field, xgeom_hide_field_id);
               }
             else for (auto &nc : cur_node->m_content) {
                 auto ap_idx = ptable::number_by_symbol(geom->atom(nc.m_atm));
 
                 //TODO: move magic aRadius
                 REAL atom_rad = 1.0f;
-                if (ap_idx) atom_rad = ptable::get_inst()->arecs[*ap_idx-1].m_radius * scale_factor;
+                if (ap_idx)
+                  atom_rad = ptable::get_inst()->arecs[*ap_idx-1].m_radius * scale_factor;
                 REAL stored_dist = 0.0;
                 vector3<REAL> test_pos = geom->pos(nc.m_atm, nc.m_idx);
                 REAL ray_hit_dist = ray_sphere_test(&_ray, test_pos, atom_rad);
                 bool ray_hit = ray_hit_dist > -1.0f;
 
-                if (ray_hit && adding_result_policy::can_add(test_pos, nc.m_idx, geom->DIM))
+                if (ray_hit && adding_result_policy::can_add(test_pos, nc.m_idx, geom->DIM) &&
+                    (!geom->template xfield<bool>(xgeom_hide_field_id, nc.m_atm) ||
+                     !xgeom_hide_field_id))
                   res.push_back(tws_query_data_t<REAL, AINT>(nc.m_atm, nc.m_idx, ray_hit_dist));
 
               }
@@ -608,7 +615,7 @@ namespace qpp{
 
         do_action(act_check_root);
 
-        if (m_atom_node_lookup.size() != geom->size()) m_atom_node_lookup.resize(geom->size());
+        if (m_atom_node_lookup.size() != geom->nat()) m_atom_node_lookup.resize(geom->nat());
         while (!(point_aabb_test(geom->pos(atm, idx), root->m_bb))) {
             grow_tws_root(atm, idx);
 #ifdef TWS_TREE_DEBUG
