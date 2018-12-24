@@ -13,7 +13,6 @@
 
 template<typename MatrixType> void basicStuff(const MatrixType& m)
 {
-  typedef typename MatrixType::Index Index;
   typedef typename MatrixType::Scalar Scalar;
   typedef Matrix<Scalar, MatrixType::RowsAtCompileTime, 1> VectorType;
   typedef Matrix<Scalar, MatrixType::RowsAtCompileTime, MatrixType::RowsAtCompileTime> SquareMatrixType;
@@ -48,22 +47,6 @@ template<typename MatrixType> void basicStuff(const MatrixType& m)
   VERIFY_IS_APPROX(x, v1(r));
   v1[r] = x;
   VERIFY_IS_APPROX(x, v1[r]);
-
-  // test fetching with various index types.
-  Index r1 = internal::random<Index>(0, numext::mini(Index(127),rows-1));
-  x = v1(static_cast<char>(r1));
-  x = v1(static_cast<signed char>(r1));
-  x = v1(static_cast<unsigned char>(r1));
-  x = v1(static_cast<signed short>(r1));
-  x = v1(static_cast<unsigned short>(r1));
-  x = v1(static_cast<signed int>(r1));
-  x = v1(static_cast<unsigned int>(r1));
-  x = v1(static_cast<signed long>(r1));
-  x = v1(static_cast<unsigned long>(r1));
-#if EIGEN_HAS_CXX11
-  x = v1(static_cast<long long int>(r1));
-  x = v1(static_cast<unsigned long long int>(r1));
-#endif
 
   VERIFY_IS_APPROX(               v1,    v1);
   VERIFY_IS_NOT_APPROX(           v1,    2*v1);
@@ -160,7 +143,6 @@ template<typename MatrixType> void basicStuff(const MatrixType& m)
 
 template<typename MatrixType> void basicStuffComplex(const MatrixType& m)
 {
-  typedef typename MatrixType::Index Index;
   typedef typename MatrixType::Scalar Scalar;
   typedef typename NumTraits<Scalar>::Real RealScalar;
   typedef Matrix<RealScalar, MatrixType::RowsAtCompileTime, MatrixType::ColsAtCompileTime> RealMatrixType;

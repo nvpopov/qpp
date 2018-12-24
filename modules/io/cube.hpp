@@ -7,7 +7,6 @@
 
 #include <geom/geom.hpp>
 #include <geom/xgeom.hpp>
-#include <geom/ngbr.hpp>
 
 #include <assert.h>
 #include <vector>
@@ -19,8 +18,8 @@
 #include <ios>
 #include <algorithm>
 #include <numeric>
+#include <unsupported/Eigen/CXX11/Tensor>
 #include <data/ptable.hpp>
-
 
 namespace qpp {
   template<class REAL>

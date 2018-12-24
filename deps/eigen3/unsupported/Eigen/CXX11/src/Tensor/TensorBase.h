@@ -22,7 +22,9 @@ namespace Eigen {
   * This class is the common parent of the Tensor and TensorMap class, thus
   * making it possible to use either class interchangably in expressions.
   */
-
+#ifndef EIGEN_PARSED_BY_DOXYGEN
+// FIXME Doxygen does not like the inheritance with different template parameters
+// Since there is no doxygen documentation inside, we disable it for now
 template<typename Derived>
 class TensorBase<Derived, ReadOnlyAccessors>
 {
@@ -183,12 +185,6 @@ class TensorBase<Derived, ReadOnlyAccessors>
     EIGEN_STRONG_INLINE const TensorCwiseUnaryOp<internal::scalar_exp_op<Scalar>, const Derived>
     exp() const {
       return unaryExpr(internal::scalar_exp_op<Scalar>());
-    }
-
-    EIGEN_DEVICE_FUNC
-    EIGEN_STRONG_INLINE const TensorCwiseUnaryOp<internal::scalar_expm1_op<Scalar>, const Derived>
-    expm1() const {
-      return unaryExpr(internal::scalar_expm1_op<Scalar>());
     }
 
     EIGEN_DEVICE_FUNC
@@ -619,7 +615,7 @@ class TensorBase<Derived, ReadOnlyAccessors>
       const array<Index, NumDimensions>, const Derived>
     argmax() const {
       array<Index, NumDimensions> in_dims;
-      for (Index d = 0; d < NumDimensions; ++d) in_dims[d] = d;
+      for (int d = 0; d < NumDimensions; ++d) in_dims[d] = d;
       return TensorTupleReducerOp<
         internal::ArgMaxTupleReducer<Tuple<Index, CoeffReturnType> >,
         const array<Index, NumDimensions>,
@@ -632,7 +628,7 @@ class TensorBase<Derived, ReadOnlyAccessors>
       const array<Index, NumDimensions>, const Derived>
     argmin() const {
       array<Index, NumDimensions> in_dims;
-      for (Index d = 0; d < NumDimensions; ++d) in_dims[d] = d;
+      for (int d = 0; d < NumDimensions; ++d) in_dims[d] = d;
       return TensorTupleReducerOp<
         internal::ArgMinTupleReducer<Tuple<Index, CoeffReturnType> >,
         const array<Index, NumDimensions>,
@@ -643,7 +639,7 @@ class TensorBase<Derived, ReadOnlyAccessors>
     const TensorTupleReducerOp<
       internal::ArgMaxTupleReducer<Tuple<Index, CoeffReturnType> >,
       const array<Index, 1>, const Derived>
-    argmax(const Index return_dim) const {
+    argmax(const int return_dim) const {
       array<Index, 1> in_dims;
       in_dims[0] = return_dim;
       return TensorTupleReducerOp<
@@ -656,7 +652,7 @@ class TensorBase<Derived, ReadOnlyAccessors>
     const TensorTupleReducerOp<
       internal::ArgMinTupleReducer<Tuple<Index, CoeffReturnType> >,
       const array<Index, 1>, const Derived>
-    argmin(const Index return_dim) const {
+    argmin(const int return_dim) const {
       array<Index, 1> in_dims;
       in_dims[0] = return_dim;
       return TensorTupleReducerOp<
@@ -1010,7 +1006,7 @@ class TensorBase : public TensorBase<Derived, ReadOnlyAccessors> {
     EIGEN_DEVICE_FUNC
     EIGEN_STRONG_INLINE const Derived& derived() const { return *static_cast<const Derived*>(this); }
 };
-
+#endif // EIGEN_PARSED_BY_DOXYGEN
 } // end namespace Eigen
 
 #endif // EIGEN_CXX11_TENSOR_TENSOR_BASE_H
