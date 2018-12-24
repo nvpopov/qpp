@@ -101,6 +101,7 @@ if(USE_SYSTEM_EIGEN3)
 else()
     message("-- Internal Eigen3 will be used")
     include_directories(${PROJECT_SOURCE_DIR}/deps/eigen3)
+    include_directories(${PROJECT_SOURCE_DIR}/deps/eigen3/Eigen)
 endif()
 #end eigen3
 
