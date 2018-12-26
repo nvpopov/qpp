@@ -26,11 +26,9 @@
 
 namespace qpp {
 
-  ///
   /// \brief function for reading simple xyz format into geometry object
   /// \param inp
   /// \param geom
-  ///
   template<class REAL, class CELL>
   void read_xyz(std::basic_istream<CHAR,TRAITS> & inp, geometry<REAL, CELL> & geom) {
 
@@ -77,48 +75,69 @@ namespace qpp {
       }
   }
 
-  ///
   /// \brief function for reading xyz with charges format into geometry object
   /// \param inp
   /// \param geom
-  ///
   template<class REAL, class CELL>
   void read_xyzq(std::basic_istream<CHAR,TRAITS> & inp,
-                 xgeometry<REAL,CELL> & geom){
+                 xgeometry<REAL,CELL> & geom,
+                 bool preserve_geom = false) {
+
     STRING s;
     std::getline(inp,s);
     int nat;
     std::basic_stringstream<CHAR,TRAITS>(s) >> nat;
     std::getline(inp,s);
     // fixme - check these are numbers!
-    if (geom.DIM==3){
-        int nf = strnf(s);
-        if ( nf==9 || nf == 6 ){
-            REAL vv[nf];
-            std::basic_stringstream<CHAR,TRAITS> ss(s);
-            for (int i=0; i<nf; i++) ss >> vv[i];
-            if (nf==9) {
+    if (geom.DIM==3) {
+
+        std::vector<std::string_view> splt = split_sv(s, " ");
+
+        int nf = int(splt.size());
+
+        if ( nf == 9 || nf == 6 ) {
+
+            std::vector<REAL> vv;
+            for (int i = 0; i < nf; i++)
+              vv.push_back(std::stod(splt[i].data()));
+
+            if (nf == 9) {
                 geom.cell(0) = vector3<REAL>(vv[0],vv[1],vv[2]);
                 geom.cell(1) = vector3<REAL>(vv[3],vv[4],vv[5]);
                 geom.cell(2) = vector3<REAL>(vv[6],vv[7],vv[8]);
               }
             else geom.cell = periodic_cell<REAL>(vv[0],vv[1],vv[2],vv[3],vv[4],vv[5]);
+
+          }
+
+        if ( nf == 1) {
+            REAL cell_c_magn = std::stod(s);
+            geom.cell(0) = vector3<REAL>(cell_c_magn, 0, 0);
+            geom.cell(1) = vector3<REAL>(0, cell_c_magn, 0);
+            geom.cell(2) = vector3<REAL>(0, 0, cell_c_magn);
           }
       }
 
-    geom.clear();
-    geom.set_format({"charge"},{type_real});
+    if (!preserve_geom) {
+        geom.clear();
+        geom.set_format({"charge"},{type_real});
+      }
 
-    for (int i = 0; i<nat; i++){
+    for (int i = 0; i<nat; i++) {
+
         std::getline(inp,s);
-        if (i==0){
+        if (i==0) {
             // Analyze the line, recognize .xyz type
           }
-        //	char s1[max_atomic_name_length];
-        STRING s1;
-        REAL x,y,z,q;
-        std::basic_stringstream<CHAR,TRAITS> tmps(s);
-        tmps >> s1 >> x >> y >> z >> q;
+
+        std::vector<std::string_view> splt = split_sv(s, " ");
+
+        std::string s1(splt[0]);
+        REAL x = std::stod(splt[1].data());
+        REAL y = std::stod(splt[2].data());
+        REAL z = std::stod(splt[3].data());
+        REAL q = std::stod(splt[4].data());
+
         geom.xadd(s1,x,y,z,q);
       }
   }
