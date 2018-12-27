@@ -68,9 +68,9 @@ namespace qpp {
         std::vector<std::string_view> splt = split_sv(s, " ");
         geom.add(
               std::string(splt[0]),
-              std::stof(splt[1].data()),
-              std::stof(splt[2].data()),
-              std::stof(splt[3].data())
+            std::stof(splt[1].data()),
+            std::stof(splt[2].data()),
+            std::stof(splt[3].data())
             );
       }
   }
@@ -81,7 +81,7 @@ namespace qpp {
   template<class REAL, class CELL>
   void read_xyzq(std::basic_istream<CHAR,TRAITS> & inp,
                  xgeometry<REAL,CELL> & geom,
-                 bool preserve_geom = false) {
+                 bool preserve_geom = false, int xgeom_charge_field_idx = 4) {
 
     STRING s;
     std::getline(inp,s);
@@ -126,19 +126,17 @@ namespace qpp {
     for (int i = 0; i<nat; i++) {
 
         std::getline(inp,s);
-        if (i==0) {
-            // Analyze the line, recognize .xyz type
+        std::vector<std::string_view> splt = split_sv(s);
+
+        if (splt.size() == 5) {
+            std::string s1 = std::string(splt[0]);
+            REAL x = std::stod(splt[1].data());
+            REAL y = std::stod(splt[2].data());
+            REAL z = std::stod(splt[3].data());
+            REAL q = std::stod(splt[4].data());
+            geom.add(s1,x,y,z);
+            geom.template xfield<REAL>(xgeom_charge_field_idx, i) = q;
           }
-
-        std::vector<std::string_view> splt = split_sv(s, " ");
-
-        std::string s1(splt[0]);
-        REAL x = std::stod(splt[1].data());
-        REAL y = std::stod(splt[2].data());
-        REAL z = std::stod(splt[3].data());
-        REAL q = std::stod(splt[4].data());
-
-        geom.xadd(s1,x,y,z,q);
       }
   }
   /*

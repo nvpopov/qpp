@@ -25,7 +25,7 @@ int main() {
   fmt::print(std::cout, "b = {}\n", g.cell.v[1]);
   fmt::print(std::cout, "c = {}\n", g.cell.v[2]);
 
-  shape_sphere<double> sp(30, vector3<double>(0, 0, 0));
+  shape_sphere<double> sp(26, vector3<double>(0, 0, 0));
   shape_sphere<double> sp_q(11, vector3<double>(0, 0, 0));
   qpp::shape<double> & sh = sp - sp_q;
 
