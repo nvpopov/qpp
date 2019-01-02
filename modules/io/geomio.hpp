@@ -214,7 +214,7 @@ namespace qpp {
     if (geom.DIM>0)
       for (int d = 0; d<geom.DIM; d++)
         for (int i=0; i<3; i++)
-          out << fmt::format("{:12.6f}\n", geom.cell(d)(i));
+          out << fmt::format("{:4.3f} ", geom.cell(d)(i));
     //out << geom.name();
     out << std::endl;
     for (int i=0; i<geom.nat(); i++)
