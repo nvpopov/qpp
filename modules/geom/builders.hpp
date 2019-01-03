@@ -26,27 +26,31 @@ namespace qpp{
   //!\brief the flags regulating the details of building procedures
   enum build_mode{
 
-    //!\brief ignore the situation when two or more atoms are put too close ("crowded") - simply put them into crowd
-    crowd_ignore  = 0x00001,
+    //!\brief ignore the situation when two or more atoms are put too close ("crowded") - simply
+    //! put them into crowd
+    crowd_ignore  = 1,
 
     //!\brief do not put another atom too close to already existing atom
     //! - omit it
-    crowd_exclude = 0x00002,
+    crowd_exclude = 2,
 
     /*!\brief merge atoms of the same type placed in same point into one atom
       by summation of their electric charges and masses,
       i.e. atoms are considered as "fractions"
     */
-    crowd_merge   = 0x00004,
+    crowd_merge   = 4,
 
     //!\brief When filling a volume of certain geometric shape, omit all
     //!  atoms outside that volume
-    fill_atoms    = 0x00008,
+    fill_atoms    = 8,
 
-    /*!\brief When filling a volume of certain geometric shape, put all atoms unit cell if the centre of
-      this cell is inside that volume (even if some atoms are outside)
+    /*!\brief When filling a volume of certain geometric shape, put all atoms unit cell if
+     * the centre of this cell is inside that volume (even if some atoms are outside)
     */
-    fill_cells    = 0x00010
+    fill_cells    = 16,
+
+    // !\brief use periodic pattern for legacy uc files
+    legacy_fill   = 32
   };
 
   template<class REAL, class CELL>
@@ -217,21 +221,38 @@ namespace qpp{
       }
 
     std::cout << "fill alive 2\n";
+    std::cout << "idx begin " << begin << "\n";
+    std::cout << "idx end " << end << "\n";
 
     bool fillcells = mode & fill_cells;
 
-    for (iterator I(begin,end); !I.end(); I++){
+    for (iterator I(begin,end); !I.end(); I++) {
+
         bool allcell = false, something = false;
         bool * inside = new bool[src.nat()];
-        for (int at=0; at<src.nat(); at++){
+
+        for (int at=0; at<src.nat(); at++) {
+
             r1[at] = cell.transform(src.coord(at),I);
             bool insd = !src.shadow(at) && shp.within(r1[at]);
             inside[at] = insd;
-            if (insd)
-              something = true;
-            if (fillcells && insd)
-              allcell = true;
+
+            if (insd) something = true;
+            if (fillcells && insd) allcell = true;
+
+            if (mode & legacy_fill) {
+
+                int i = abs(I(0));
+                int j = abs(I(1));
+                int k = abs(I(2));
+
+                bool even_catch = (k % 2 == 0) && (i % 2 == j % 2);
+                bool odd_catch = (k % 2 != 0) && (i % 2 != j % 2);
+                if (!(even_catch || odd_catch)) something = false;
+
+              }
           }
+
         if (something)
           for (int at=0; at<src.nat(); at++)
             if (!src.shadow(at) && (allcell || inside[at])){
