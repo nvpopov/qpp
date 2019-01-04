@@ -7,7 +7,7 @@
 
 namespace qpp {
 
-  enum geom_anim_type {
+  enum geom_anim_t {
     anim_static,
     anim_generic,
     anim_geo_opt,
@@ -24,8 +24,8 @@ namespace qpp {
   template<typename REAL>
   struct geom_anim_record_t {
       std::string m_anim_name;
-      geom_anim_type m_anim_type{anim_generic};
-      std::vector<geom_anim_record_frame_t<REAL> > frame_data;
+      geom_anim_t m_anim_type{anim_generic};
+      std::vector<geom_anim_record_frame_t<REAL> > frames;
   };
 }
 

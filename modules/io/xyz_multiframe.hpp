@@ -34,12 +34,12 @@ namespace qpp {
     bool bootstrap_geom{false};
     geom_anim_record_t<REAL> animr, anim_static;
 
-    animr.m_anim_type = geom_anim_type::anim_generic;
+    animr.m_anim_type = geom_anim_t::anim_generic;
     animr.m_anim_name = "animation1";
 
-    anim_static.m_anim_type = geom_anim_type::anim_static;
+    anim_static.m_anim_type = geom_anim_t::anim_static;
     anim_static.m_anim_name = "static";
-    anim_static.frame_data.resize(1);
+    anim_static.frames.resize(1);
 
     std::getline(inp, s);
     while (!inp.eof()) {
@@ -47,7 +47,7 @@ namespace qpp {
         nat = std::stoi(s);
         std::getline(inp, s);
 
-        animr.frame_data.resize(animr.frame_data.size()+1);
+        animr.frames.resize(animr.frames.size()+1);
 
         for (int i = 0; i < nat; i++){
             std::getline(inp, s);
@@ -75,17 +75,17 @@ namespace qpp {
 
                 geom.add(at_name, displ);
 
-                anim_static.frame_data.back().atom_pos.push_back(displ);
+                anim_static.frames.back().atom_pos.push_back(displ);
               }
-            animr.frame_data.back().atom_pos.push_back(std::move(displ));
+            animr.frames.back().atom_pos.push_back(std::move(displ));
           }
 
         if (!bootstrap_geom) bootstrap_geom = true;
         std::getline(inp, s);
       }
 
-    if (!anim_static.frame_data.empty()) anim.push_back(std::move(anim_static));
-    if (!animr.frame_data.empty()) anim.push_back(std::move(animr));
+    if (!anim_static.frames.empty()) anim.push_back(std::move(anim_static));
+    if (!animr.frames.empty()) anim.push_back(std::move(animr));
 
   }
 }

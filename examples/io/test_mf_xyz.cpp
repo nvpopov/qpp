@@ -19,10 +19,10 @@ int main(){
   for (auto i = 0 ; i < anim.size(); i++){
       std::cout << "Animations " << i << " data :" << std::endl;
       std::cout << "Anim type " << anim[i].m_anim_type << std::endl;
-      std::cout << "Total frames " << anim[i].frame_data.size() << std::endl;
-      for (auto q = 0; q < anim[i].frame_data.size(); q++){
+      std::cout << "Total frames " << anim[i].frames.size() << std::endl;
+      for (auto q = 0; q < anim[i].frames.size(); q++){
           std::cout << "Total atoms in frame " << q << " = "
-                    << anim[i].frame_data[q].atom_pos.size() << std::endl;
+                    << anim[i].frames[q].atom_pos.size() << std::endl;
         }
     }
 }

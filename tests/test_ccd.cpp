@@ -155,7 +155,7 @@ TEST_CASE("Compilation of ccd model" ) {
     bool succes_anims = compile_animation(cc_o, anim_rec);
     REQUIRE(succes);
     REQUIRE(succes_anims);
-    REQUIRE(anim_rec[0].frame_data.size() == cc_o.m_steps.size());
+    REQUIRE(anim_rec[0].frames.size() == cc_o.m_steps.size());
 
     std::vector<geom_anim_record_t<double> > anim_rec_ws;
     bool succes_static = compile_static_animation(cc_o, anim_rec_ws);
@@ -163,7 +163,7 @@ TEST_CASE("Compilation of ccd model" ) {
     REQUIRE(succes_static);
     REQUIRE(succes_static_with_steps);
     REQUIRE(anim_rec_ws.size() == 2);
-    REQUIRE(anim_rec_ws[0].m_anim_type == geom_anim_type::anim_static);
+    REQUIRE(anim_rec_ws[0].m_anim_type == geom_anim_t::anim_static);
 
     std::ifstream isecv("../examples/io/ref_data/firefly/dvb_ir.out");
     comp_chem_program_data_t<double> cc_ov;
@@ -235,7 +235,7 @@ TEST_CASE( "Computational chemistry data parsing : CP2K Output" ) {
 
     REQUIRE(succes);
     REQUIRE(succes_anims);
-    REQUIRE(anim_rec.front().frame_data.size() == 5 );
+    REQUIRE(anim_rec.front().frames.size() == 5 );
 
     bool succes_ccd_compilation = compile_ccd(cc_o, ccd_cf_default_flags |
                                               ccd_cf_remove_empty_geom_steps);

@@ -226,9 +226,9 @@ namespace qpp{
     std::vector<std::array<qpp::vector3<REAL>, 3 > > cells;
 
     geom_anim_record_t<REAL> anim_static;
-    anim_static.m_anim_type = geom_anim_type::anim_static;
+    anim_static.m_anim_type = geom_anim_t::anim_static;
     anim_static.m_anim_name = "static";
-    anim_static.frame_data.resize(1);
+    anim_static.frames.resize(1);
 
     geom_anim_record_t<REAL> anim_md;
 
@@ -247,10 +247,10 @@ namespace qpp{
               uint8_t ibrion = std::atoi(ibrion_splt[2].data());
               if (ibrion == 0) {
                   anim_md.m_anim_name = "vasp_md";
-                  anim_md.m_anim_type = geom_anim_type::anim_md;
+                  anim_md.m_anim_type = geom_anim_t::anim_md;
                 } else {
                   anim_md.m_anim_name = "vasp_relax";
-                  anim_md.m_anim_type = geom_anim_type::anim_geo_opt;
+                  anim_md.m_anim_type = geom_anim_t::anim_geo_opt;
                 }
               state_ibrion_parsed = true;
               state_line_checked = true;
@@ -311,8 +311,8 @@ namespace qpp{
               //                  cells[total_frames-1][1],
               //                  cells[total_frames-1][2]);
 
-              anim_md.frame_data.resize(anim_md.frame_data.size()+1);
-              anim_md.frame_data[anim_md.frame_data.size()-1].atom_pos.reserve(
+              anim_md.frames.resize(anim_md.frames.size()+1);
+              anim_md.frames[anim_md.frames.size()-1].atom_pos.reserve(
                     atom_lookup_v.size());
               total_frames += 1;
 
@@ -326,7 +326,7 @@ namespace qpp{
                 qpp::vector3<REAL> pos{std::stof(splt[0].data()),
                       std::stof(splt[1].data()),
                       std::stof(splt[2].data())};
-                anim_md.frame_data[anim_md.frame_data.size()-1].atom_pos.push_back(std::move(pos));
+                anim_md.frames[anim_md.frames.size()-1].atom_pos.push_back(std::move(pos));
                 local_atom_count += 1;
               }
             else state_parse_geom_data = false;
@@ -351,8 +351,8 @@ namespace qpp{
     geom.DIM = 3;
 
     for (uint i = 0; i < atom_lookup_v.size(); i++){
-        geom.add(atom_types[atom_lookup_v[i]], anim_md.frame_data[0].atom_pos[i]);
-        anim_static.frame_data[0].atom_pos.push_back(anim_md.frame_data[0].atom_pos[i]);
+        geom.add(atom_types[atom_lookup_v[i]], anim_md.frames[0].atom_pos[i]);
+        anim_static.frames[0].atom_pos.push_back(anim_md.frames[0].atom_pos[i]);
       }
 
     geom.cell.v[0] = cells[0][0];
@@ -360,23 +360,23 @@ namespace qpp{
     geom.cell.v[2] = cells[0][2];
 
     //postproces animation to fight with riot atoms
-    for (size_t i = 1; i < anim_md.frame_data.size(); i++){
+    for (size_t i = 1; i < anim_md.frames.size(); i++){
         for (size_t ac = 0; ac < geom.nat(); ac++){
             //index min_dist_index = index::D(geom.DIM).all(0);
             float min_dist = 100.0f;
-            vector3<REAL> goal_vector = anim_md.frame_data[i].atom_pos[ac];
+            vector3<REAL> goal_vector = anim_md.frames[i].atom_pos[ac];
             for (iterator idx(index::D(geom.DIM).all(-1),
                               index::D(geom.DIM).all(1)); !idx.end(); idx++ ) {
                 vector3<REAL> t_pos_cf = geom.cell.transform(
-                                           anim_md.frame_data[i].atom_pos[ac], idx);
-                REAL dist = (anim_md.frame_data[i-1].atom_pos[ac] - t_pos_cf).norm();
+                                           anim_md.frames[i].atom_pos[ac], idx);
+                REAL dist = (anim_md.frames[i-1].atom_pos[ac] - t_pos_cf).norm();
                 if (dist < min_dist) {
                     min_dist = dist;
                     //min_dist_index = i;
                     goal_vector = t_pos_cf;
                   }
               }
-            anim_md.frame_data[i].atom_pos[ac] = std::move(goal_vector);
+            anim_md.frames[i].atom_pos[ac] = std::move(goal_vector);
           }
       }
     anim.push_back(std::move(anim_static));

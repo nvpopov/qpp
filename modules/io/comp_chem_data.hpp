@@ -253,12 +253,12 @@ namespace qpp {
 
     geom_anim_record_t<REAL> anim;
 
-    anim.m_anim_type = geom_anim_type::anim_static;
+    anim.m_anim_type = geom_anim_t::anim_static;
     anim.m_anim_name = "static";
-    anim.frame_data.resize(1);
-    anim.frame_data[0].atom_pos.resize(ccd_inst.m_init_atoms_pos.size());
+    anim.frames.resize(1);
+    anim.frames[0].atom_pos.resize(ccd_inst.m_init_atoms_pos.size());
     for (size_t i = 0; i < ccd_inst.m_init_atoms_pos.size(); i++)
-      anim.frame_data[0].atom_pos[i] = ccd_inst.m_init_atoms_pos[i];
+      anim.frames[0].atom_pos[i] = ccd_inst.m_init_atoms_pos[i];
 
     anim_rec.push_back(std::move(anim));
     return true;
@@ -276,27 +276,27 @@ namespace qpp {
 
     bool copy_steps_content = false;
 
-    geom_anim_type stored_anim_type{geom_anim_type::anim_static};
+    geom_anim_t stored_anim_type{geom_anim_t::anim_static};
     std::string stored_anim_name;
 
     switch (ccd_inst.m_run_t) {
       case comp_chem_program_run_t::rt_geo_opt :
-        stored_anim_type = geom_anim_type::anim_geo_opt;
+        stored_anim_type = geom_anim_t::anim_geo_opt;
         copy_steps_content = true;
         stored_anim_name = "geo_opt";
         break;
       case comp_chem_program_run_t::rt_md :
-        stored_anim_type = geom_anim_type::anim_md;
+        stored_anim_type = geom_anim_t::anim_md;
         copy_steps_content = true;
         stored_anim_name = "mol_dyn";
         break;
       case comp_chem_program_run_t::rt_vib :
-        stored_anim_type = geom_anim_type::anim_vib;
+        stored_anim_type = geom_anim_t::anim_vib;
         copy_steps_content = false;
         stored_anim_name = "vib";
         break;
       case comp_chem_program_run_t::rt_raman :
-        stored_anim_type = geom_anim_type::anim_vib;
+        stored_anim_type = geom_anim_t::anim_vib;
         copy_steps_content = false;
         stored_anim_name = "vib";
         break;
@@ -316,15 +316,15 @@ namespace qpp {
                                                     return !step.m_atoms_pos.empty();
                                                   });
 
-        anim.frame_data.resize(non_empty_steps_count);
+        anim.frames.resize(non_empty_steps_count);
         int steps_c = -1;
 
         for (size_t i = 0; i < ccd_inst.m_steps.size(); i++) {
             if (!ccd_inst.m_steps[i].m_atoms_pos.empty()) {
                 steps_c += 1;
-                anim.frame_data[steps_c].atom_pos.resize(ccd_inst.m_steps[i].m_atoms_pos.size());
+                anim.frames[steps_c].atom_pos.resize(ccd_inst.m_steps[i].m_atoms_pos.size());
                 for (size_t q = 0; q < ccd_inst.m_steps[i].m_atoms_pos.size(); q++)
-                  anim.frame_data[steps_c].atom_pos[q] = ccd_inst.m_steps[i].m_atoms_pos[q];
+                  anim.frames[steps_c].atom_pos[q] = ccd_inst.m_steps[i].m_atoms_pos[q];
               }
           }
 
@@ -342,15 +342,15 @@ namespace qpp {
 
               const int total_frames_upwards = 10;
               const int total_frames = total_frames_upwards * 2 + 1;
-              anim.frame_data.resize(total_frames);
+              anim.frames.resize(total_frames);
 
               for (int i = 0; i < total_frames; i++) {
-                  anim.frame_data[i].atom_pos.resize(ccd_inst.m_tot_nat);
+                  anim.frames[i].atom_pos.resize(ccd_inst.m_tot_nat);
                   //transform index
                   int tf_index = i;
                   if (i > total_frames_upwards) tf_index = total_frames - (i+1);
                   for (size_t q = 0; q < ccd_inst.m_vibs[v].m_disp.size(); q++) {
-                      anim.frame_data[i].atom_pos[q] = ccd_inst.m_init_atoms_pos[q] +
+                      anim.frames[i].atom_pos[q] = ccd_inst.m_init_atoms_pos[q] +
                                               ccd_inst.m_vibs[v].m_disp[q] *
                                               (REAL(tf_index) / total_frames_upwards);
                     }
