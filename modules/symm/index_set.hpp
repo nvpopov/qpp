@@ -3,11 +3,20 @@
 #include <symm/index.hpp>
 
 namespace qpp {
+
   struct atom_index_set_key {
       int m_atm;
       index m_idx;
-      atom_index_set_key(const int atm, const index idx){
+      atom_index_set_key(const int atm, const index idx) {
         m_atm = atm; m_idx = idx;
+      }
+
+      atom_index_set_key(const atom_index_set_key & other) {
+        m_atm = other.m_atm; m_idx = other.m_idx;
+      }
+
+      atom_index_set_key() {
+
       }
 
       bool operator==(const atom_index_set_key &other) const {
