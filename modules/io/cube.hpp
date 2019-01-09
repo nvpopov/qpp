@@ -18,6 +18,7 @@
 #include <ios>
 #include <algorithm>
 #include <numeric>
+#include <consts.hpp>
 #include <unsupported/Eigen/CXX11/Tensor>
 #include <data/ptable.hpp>
 
@@ -79,7 +80,8 @@ namespace qpp {
             cube_header.tot_atoms = num_voxels;
           } else {
             cube_header.steps[i-1] = num_voxels;
-            cube_header.axis[i-1] = vector3<REAL>(vx, vy, vz);
+            cube_header.axis[i-1] =
+                vector3<REAL>(vx * bohr_to_angs, vy * bohr_to_angs, vz * bohr_to_angs);
           }
         //                f_col.push_back(num_voxels);
         //                f_sec.push_back(vector3<REAL>(vx, vy, vz));
@@ -102,7 +104,7 @@ namespace qpp {
           s2t(lsp[4], vz);
 
           std::string at_name = ptable::get_inst()->symbol_by_number(at_num);
-          geom.add(at_name, vector3<REAL>(vx, vy, vz));
+          geom.add(at_name, vector3<REAL>(vx * bohr_to_angs, vy * bohr_to_angs, vz * bohr_to_angs));
         }
 
     uint32_t total_step = std::accumulate(cube_header.steps.begin(),

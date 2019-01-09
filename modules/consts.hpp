@@ -9,6 +9,8 @@ namespace qpp {
   const double ang_to_bohr = 1.88973e0; // 1 Angstrom to 1 Bohr
   const double bohr_to_angs = 1 / ang_to_bohr;
   const float infty = HUGE_VALF;
+  const float def_isovalue_mo = 0.02f; // (electrons/(bohr)^3)^2
+  const float def_isovalue_dens = 0.004f; // electrons/(bohr)^3
 }
 
 #endif
