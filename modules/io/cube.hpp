@@ -23,15 +23,6 @@
 #include <data/ptable.hpp>
 
 namespace qpp {
-  template<class REAL>
-  const REAL get_field_value_at(const uint32_t ix,
-                                const uint32_t iy,
-                                const uint32_t iz,
-                                const uint32_t ix_size,
-                                const uint32_t iy_size,
-                                std::vector<REAL> &field){
-    return field[ix * ix_size * iy_size + iy_size * iy + iz];
-  }
 
   template<class REAL>
   struct cube_header_t {
@@ -40,11 +31,21 @@ namespace qpp {
       uint16_t tot_atoms;
   };
 
+  template<class REAL>
+  const REAL get_field_value_at(const uint32_t ix,
+                                const uint32_t iy,
+                                const uint32_t iz,
+                                cube_header_t<REAL> &cube_header,
+                                std::vector<REAL> &field) {
+    //return field[ix * ix_size * iy_size + iy_size * iy + iz];
+    return field[iz + cube_header.steps[2] *( iy +  cube_header.steps[1] * ix )];
+  }
+
   template<class REAL, class CELL>
   void read_cube(std::basic_istream<CHAR,TRAITS> & inp,
                  geometry<REAL, CELL> &geom,
                  cube_header_t<REAL> &cube_header,
-                 std::vector<REAL> &field){
+                 std::vector<REAL> &field) {
     std::string s;
 
     //comment line 1
@@ -55,70 +56,60 @@ namespace qpp {
     std::getline(inp, s);
     std::string c2 = s;
 
-    //        //4 line data
-    //        std::vector<int>   f_col;
-    //        std::vector<vector3<REAL> > f_sec;
-
-    for (uint8_t i = 0; i < 4; i++){
+    for (uint8_t i = 0; i < 4; i++) {
         std::string _s;
         std::getline(inp, _s);
         std::vector<std::string> lsp = split(_s);
 
         int num_voxels = 0;
-        s2t((lsp[0]), num_voxels);
+        s2t((lsp[0].data()), num_voxels);
 
         REAL vx = 0.0f;
         REAL vy = 0.0f;
         REAL vz = 0.0f;
-        s2t(lsp[1], vx);
-        s2t(lsp[2], vy);
-        s2t(lsp[3], vz);
+        s2t(lsp[1].data(), vx);
+        s2t(lsp[2].data(), vy);
+        s2t(lsp[3].data(), vz);
 
-        //std::cout << fmt::format("{} {} {} {}\n", num_voxels, vx, vy, vz);
-
-        if (i == 0){
+        if (i == 0) {
             cube_header.tot_atoms = num_voxels;
           } else {
             cube_header.steps[i-1] = num_voxels;
             cube_header.axis[i-1] =
                 vector3<REAL>(vx * bohr_to_angs, vy * bohr_to_angs, vz * bohr_to_angs);
           }
-        //                f_col.push_back(num_voxels);
-        //                f_sec.push_back(vector3<REAL>(vx, vy, vz));
       }
 
     if (cube_header.tot_atoms > 0)
-      for (uint16_t i = 0; i < cube_header.tot_atoms; i++){
+      for (uint16_t i = 0; i < cube_header.tot_atoms; i++) {
           std::string _s;
           std::getline(inp, _s);
           std::vector<std::string> lsp = split(_s);
 
           int at_num = 0;
-          s2t((lsp[0]), at_num);
+          s2t((lsp[0].data()), at_num);
 
           REAL vx = 0.0f;
           REAL vy = 0.0f;
           REAL vz = 0.0f;
-          s2t(lsp[2], vx);
-          s2t(lsp[3], vy);
-          s2t(lsp[4], vz);
+          s2t(lsp[2].data(), vx);
+          s2t(lsp[3].data(), vy);
+          s2t(lsp[4].data(), vz);
 
           std::string at_name = ptable::get_inst()->symbol_by_number(at_num);
           geom.add(at_name, vector3<REAL>(vx * bohr_to_angs, vy * bohr_to_angs, vz * bohr_to_angs));
         }
 
-    uint32_t total_step = std::accumulate(cube_header.steps.begin(),
-                                          cube_header.steps.end(), 0);
+    uint32_t total_step = std::accumulate(cube_header.steps.begin(), cube_header.steps.end(), 0);
 
     std::vector<std::string> lsp;
 
     field.reserve(total_step);
-
-    while(std::getline(inp, s)){
+    REAL v0;
+    while(std::getline(inp, s)) {
         lsp = split(s);
-        for(auto &elem : lsp){
-            REAL v0 = 0.0f;
-            s2t(elem, v0);
+        for(auto &elem : lsp) {
+            v0 = std::stod(elem.data());
             field.push_back(v0);
           }
       }

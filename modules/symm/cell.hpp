@@ -154,6 +154,16 @@ namespace qpp{
         return res;
       }
 
+      bool within_already_frac(const vector3<REAL> & r) const{
+        bool res = true;
+        for (int d=0; d<DIM; d++)
+          if ( r(d)<REAL(0) || r(d) >= REAL(1) ){
+              res = false;
+              break;
+            }
+        return res;
+      }
+
       bool within_epsilon_b(const vector3<REAL> & r, const REAL eps) const{
         vector3<REAL> f = cart2frac(r);
         bool res = true;
