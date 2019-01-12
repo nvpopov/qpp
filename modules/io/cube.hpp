@@ -25,27 +25,27 @@
 namespace qpp {
 
   template<class REAL>
-  struct cube_header_t {
-      std::array<vector3<REAL>,3> axis;
-      std::array<uint16_t, 3> steps;
-      uint16_t tot_atoms;
+  struct scalar_volume_t {
+      std::array<vector3<REAL>,3> m_axis;
+      std::array<uint16_t, 3> m_steps;
+      uint16_t m_tot_atoms;
+      std::vector<REAL> m_field;
   };
+
 
   template<class REAL>
   const REAL get_field_value_at(const uint32_t ix,
                                 const uint32_t iy,
                                 const uint32_t iz,
-                                cube_header_t<REAL> &cube_header,
-                                std::vector<REAL> &field) {
+                                scalar_volume_t<REAL> &volume) {
     //return field[ix * ix_size * iy_size + iy_size * iy + iz];
-    return field[iz + cube_header.steps[2] *( iy +  cube_header.steps[1] * ix )];
+    return volume.m_field[iz + volume.m_steps[2] * (iy +  volume.m_steps[1] * ix)];
   }
 
   template<class REAL, class CELL>
   void read_cube(std::basic_istream<CHAR,TRAITS> & inp,
                  geometry<REAL, CELL> &geom,
-                 cube_header_t<REAL> &cube_header,
-                 std::vector<REAL> &field) {
+                 scalar_volume_t<REAL> &volume) {
     std::string s;
 
     //comment line 1
@@ -72,16 +72,16 @@ namespace qpp {
         s2t(lsp[3].data(), vz);
 
         if (i == 0) {
-            cube_header.tot_atoms = num_voxels;
+            volume.m_tot_atoms = num_voxels;
           } else {
-            cube_header.steps[i-1] = num_voxels;
-            cube_header.axis[i-1] =
+            volume.m_steps[i-1] = num_voxels;
+            volume.m_axis[i-1] =
                 vector3<REAL>(vx * bohr_to_angs, vy * bohr_to_angs, vz * bohr_to_angs);
           }
       }
 
-    if (cube_header.tot_atoms > 0)
-      for (uint16_t i = 0; i < cube_header.tot_atoms; i++) {
+    if (volume.m_tot_atoms > 0)
+      for (uint16_t i = 0; i < volume.m_tot_atoms; i++) {
           std::string _s;
           std::getline(inp, _s);
           std::vector<std::string> lsp = split(_s);
@@ -100,17 +100,17 @@ namespace qpp {
           geom.add(at_name, vector3<REAL>(vx * bohr_to_angs, vy * bohr_to_angs, vz * bohr_to_angs));
         }
 
-    uint32_t total_step = std::accumulate(cube_header.steps.begin(), cube_header.steps.end(), 0);
+    uint32_t total_step = std::accumulate(volume.m_steps.begin(), volume.m_steps.end(), 0);
 
     std::vector<std::string> lsp;
 
-    field.reserve(total_step);
+    volume.m_field.reserve(total_step);
     REAL v0;
     while(std::getline(inp, s)) {
         lsp = split(s);
         for(auto &elem : lsp) {
             v0 = std::stod(elem.data());
-            field.push_back(v0);
+            volume.m_field.push_back(v0);
           }
       }
 
