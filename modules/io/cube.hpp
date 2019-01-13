@@ -30,16 +30,21 @@ namespace qpp {
       std::array<uint16_t, 3> m_steps;
       uint16_t m_tot_atoms;
       std::vector<REAL> m_field;
+      bool m_has_negative_values{false};
   };
 
 
   template<class REAL>
-  const REAL get_field_value_at(const uint32_t ix,
-                                const uint32_t iy,
-                                const uint32_t iz,
+  const REAL get_field_value_at(const int ix,
+                                const int iy,
+                                const int iz,
                                 scalar_volume_t<REAL> &volume) {
     //return field[ix * ix_size * iy_size + iy_size * iy + iz];
-    return volume.m_field[iz + volume.m_steps[2] * (iy +  volume.m_steps[1] * ix)];
+    if (ix < 0 || iy < 0 || iz < 0 ||
+        ix >= volume.m_steps[0] ||
+        iy >= volume.m_steps[1] ||
+        iz >= volume.m_steps[2]) return 0;
+    else return volume.m_field[iz + volume.m_steps[2] * (iy +  volume.m_steps[1] * ix)];
   }
 
   template<class REAL, class CELL>
@@ -110,6 +115,10 @@ namespace qpp {
         lsp = split(s);
         for(auto &elem : lsp) {
             v0 = std::stod(elem.data());
+            if (v0 < -0.01) {
+                volume.m_has_negative_values = true;
+                //std::cout << "!" << v0 << std::endl;
+              }
             volume.m_field.push_back(v0);
           }
       }
