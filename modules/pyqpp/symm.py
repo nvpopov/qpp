@@ -26,10 +26,10 @@ def symm_add(group,op):
 def build_multab(group):
     N = len(group)
     tab = []
-    for i in xrange(N): tab.append(list([0]*N))
+    for i in range(N): tab.append(list([0]*N))
     #print tab
-    for i in xrange(N):
-        for j in xrange(N):
+    for i in range(N):
+        for j in range(N):
             #print i,j,group.index(group[i]*group[j])
             tab[i][j] = group.index(group[i]*group[j])
     return tab
@@ -69,7 +69,7 @@ def symm_order(*args,**kwds):
 
 def symm_invert_by_multab(multab,i):
     if (type(multab) is list) and (type(multab[0]) is list) and (type(multab[0][0]) is int):
-        for j in xrange(len(multab)):
+        for j in range(len(multab)):
             if (multab[i][j]==0):
                 return j
     else:
@@ -78,7 +78,7 @@ def symm_invert_by_multab(multab,i):
 def symm_invert_by_element(A):
     n=symm_order(A)   
     B = A
-    for i in xrange(n-2):
+    for i in range(n-2):
         B = B*A
     return B
 
@@ -112,7 +112,7 @@ def is_normal_subgroup_by_multab(multab,H):
         raise TypeError()
     if (not type(H) is list) or (not type(H[0]) is int):
         raise TypeError()
-    for g in xrange(len(multab)):
+    for g in range(len(multab)):
         for h in H:
             gh = multab[g][h]
             ghg = multab[gh][symm_invert(multab,g)]
@@ -242,7 +242,7 @@ def class_left_by_multab(multab,H):
         N = len(multab)
         classes=[H]
         used = H
-        for g in xrange(N):
+        for g in range(N):
             if not g in used:
                 newclass = []
                 for h in H:
@@ -279,7 +279,7 @@ def class_right_by_multab(multab,H):
         N = len(multab)
         classes=[H]
         used = H
-        for g in xrange(N):
+        for g in range(N):
             if not g in used:
                 newclass = []
                 for h in H:
@@ -392,7 +392,7 @@ def orthogonal_subgroups(multab,group):
     lidx = [0]*len(multab)
     ridx = [0]*len(multab)
     n = len(lcls)
-    for i in xrange(n):
+    for i in range(n):
         for g in lcls[i]: lidx[g] = i
         for g in rcls[i]: ridx[g] = i
     lused = [False]*n
@@ -409,7 +409,7 @@ def maximal_subgroups_by_multab(multab):
         done = [False]*len(multab)
         done[0] = True
         res = set()
-        for g in xrange(len(multab)):
+        for g in range(len(multab)):
             if not done[g]:
                 a = abelian_sub(multab,g)
 #                print " a= " , a
@@ -436,9 +436,9 @@ def maximal_subgroups(*args,**kwds):
 def submultab(multab,sub):
     N = len(sub)
     stab = []
-    for i in xrange(N):
+    for i in range(N):
         stab.append(list([0]*N))
-        for j in xrange(N):
+        for j in range(N):
             m = multab[sub[i]][sub[j]]
 #            print i,j,sub[i],sub[j],multab[sub[i]][sub[j]]
             k=0

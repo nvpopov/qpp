@@ -4,7 +4,7 @@
 #include <geom/lace3d.hpp>
 #include <symm/index.hpp>
 #include <symm/transform.hpp>
-#include <symm/symm.hpp>
+#include <symm/groups.hpp>
 #include <consts.hpp>
 #include <stdexcept>
 #include <cmath>
@@ -49,15 +49,15 @@ namespace qpp{
   */
 
   template<class REAL, class TRANSFORM>
-  struct generalized_cell : public generators_pack<TRANSFORM>{
+  struct gen_cell : public genform_group<TRANSFORM>{
 
-    using generators_pack<TRANSFORM>::_begin;
-    using generators_pack<TRANSFORM>::_end;
-    using generators_pack<TRANSFORM>::DIM;
-    using generators_pack<TRANSFORM>::generators;
-    using generators_pack<TRANSFORM>::generate;
+    using genform_group<TRANSFORM>::_begin;
+    using genform_group<TRANSFORM>::_end;
+    using genform_group<TRANSFORM>::DIM;
+    using genform_group<TRANSFORM>::generators;
+    using genform_group<TRANSFORM>::generate;
 
-    typedef generalized_cell<REAL,TRANSFORM> SELF;
+    typedef gen_cell<REAL,TRANSFORM> SELF;
 
     void init_default()
     {
@@ -66,24 +66,24 @@ namespace qpp{
 #endif
     }
 
-    generalized_cell(int dim=0) : generators_pack<TRANSFORM>(dim)
+    gen_cell(int dim=0) : genform_group<TRANSFORM>(dim)
     { init_default(); }
 
-    generalized_cell(const std::vector<TRANSFORM> & g,const index & __begin,
+    gen_cell(const std::vector<TRANSFORM> & g,const index & __begin,
                      const index & __end) :
-      generators_pack<TRANSFORM>(g, __begin, __end)
+      genform_group<TRANSFORM>(g, __begin, __end)
     { init_default();}
 
-    generalized_cell(const std::vector<TRANSFORM> & g) :
-      generators_pack<TRANSFORM>(g)
+    gen_cell(const std::vector<TRANSFORM> & g) :
+      genform_group<TRANSFORM>(g)
     { init_default();}
 
-    generalized_cell(const generators_pack<TRANSFORM> & G) :
-      generators_pack<TRANSFORM>(G)
+    gen_cell(const genform_group<TRANSFORM> & G) :
+      genform_group<TRANSFORM>(G)
     { init_default(); }
 
-    generalized_cell(const generalized_cell<REAL,TRANSFORM> & G) :
-      generators_pack<TRANSFORM>(G)
+    gen_cell(const gen_cell<REAL,TRANSFORM> & G) :
+      genform_group<TRANSFORM>(G)
     { init_default();}
 
     inline vector3<REAL> transform(const vector3<REAL> & r,
@@ -93,7 +93,7 @@ namespace qpp{
 
     inline bool within(const vector3<REAL> & r) const{
     // Answers the question whether r belongs to the unit cell
-      // Does not make sense for generalized_cell
+      // Does not make sense for gen_cell
       return true;
     }
 
@@ -104,7 +104,7 @@ namespace qpp{
     // the coordinate origin
     // the others are pointed by v[0],v[1],v[2] vectors
 
-    // Does not make sense for generalized_cell */
+    // Does not make sense for gen_cell */
     inline vector3<REAL> reduce(const vector3<REAL> & r) const{
       return r;
     }
@@ -142,7 +142,7 @@ namespace qpp{
       // In the case DIM==2 the third coordinate ( z=r(2) ) is
       // orthogonal to both translation vectors
 
-      // Does not make sense for generalized_cell
+      // Does not make sense for gen_cell
       return r;
     }
 
@@ -152,7 +152,7 @@ namespace qpp{
       // In the case DIM==2 the third coordinate ( z=r(2) ) is
       // orthogonal to both translation vectors
 
-      // Does not make sense for generalized_cell
+      // Does not make sense for gen_cell
       return r;
     }
 
@@ -163,17 +163,17 @@ namespace qpp{
 
 #ifdef PY_EXPORT
 
-    generalized_cell(const py::list & G,
+    gen_cell(const py::list & G,
                      const index & __begin,
                      const index & __end):
-                     generators_pack<TRANSFORM>(){
+                     genform_group<TRANSFORM>(){
 
       init_default();
 
       DIM = py::len(G);
       for (int i=0; i<DIM; i++){
           /*  if (!py::cast<TRANSFORM>(G[i])())
-            TypeError("generalized_cell constructor: expected
+            TypeError("gen_cell constructor: expected
             symmetry operation");*/
           generators.push_back(py::cast<TRANSFORM>(G[i]));
         }
@@ -181,15 +181,15 @@ namespace qpp{
       _end   = __end;
     }
 
-    generalized_cell(const py::list & G):
-      generators_pack<TRANSFORM>(){
+    gen_cell(const py::list & G):
+      genform_group<TRANSFORM>(){
       init_default();
 
       DIM = py::len(G);
       for (int i=0; i<DIM; i++)
         {
           /*  if (!py::cast<TRANSFORM>(G[i])())
-            TypeError("generalized_cell constructor:
+            TypeError("gen_cell constructor:
             expected symmetry operation");*/
           generators.push_back(py::cast<TRANSFORM>(G[i]));
         }
@@ -198,13 +198,13 @@ namespace qpp{
 
     TRANSFORM py_getgen(int i) {
       if (i<0) i+=DIM;
-      if (i<0 || i>=DIM) IndexError("generalized_cell::index out of range");
+      if (i<0 || i>=DIM) IndexError("gen_cell::index out of range");
       return generators[i];
     }
 
     void py_setgen(int i, const TRANSFORM & t) {
       if (i<0) i+=DIM;
-      if (i<0 || i>=DIM) IndexError("generalized_cell::index out of range");
+      if (i<0 || i>=DIM) IndexError("gen_cell::index out of range");
       generators[i] = t;
     }
 
@@ -233,8 +233,8 @@ namespace qpp{
       std::string indexPropName = fmt::format("{0}_{1}",pyname,"indexed_property");
       py_indexed_property<SELF, TRANSFORM, int, & SELF::py_getgen,
           &SELF::py_setgen>::py_export(m, indexPropName.c_str());
-      py::class_<generalized_cell<REAL,TRANSFORM> >(m, pyname)
-          .def(py::init<const generalized_cell<REAL,TRANSFORM> >())
+      py::class_<gen_cell<REAL,TRANSFORM> >(m, pyname)
+          .def(py::init<const gen_cell<REAL,TRANSFORM> >())
           .def(py::init<const py::list &, const index &, const index&>())
           .def(py::init<const py::list &>())
           .def("begin",  & SELF::begin )

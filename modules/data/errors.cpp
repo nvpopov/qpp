@@ -35,6 +35,12 @@ namespace qpp{
     throw  py::error_already_set();
   }
 
+  void PyOverflowError(const char * msg)
+  {
+    PyErr_SetString(PyExc_OverflowError, msg);
+    throw  py::error_already_set();
+  }
+
   void PySyntaxError(const char * msg)
   {
     PyErr_SetString(PyExc_SyntaxError, msg);
@@ -82,6 +88,15 @@ namespace qpp{
     PyValueError(msg);
 #else
     throw std::domain_error(msg);
+#endif
+  }
+
+  void OverflowError(const char * msg)
+  {
+#ifdef PY_EXPORT
+    PyOverflowError(msg);
+#else
+    throw std::overflow_error(msg);
 #endif
   }
 

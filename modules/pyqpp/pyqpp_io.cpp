@@ -1,7 +1,7 @@
 #include <pyqpp/pyqpp.hpp>
 
 #include <io/geomio.hpp>
-#include <symm/gcell.hpp>
+#include <symm/gen_cell.hpp>
 #include <io/fdstream.hpp>
 #include <io/vasp_io.hpp>
 

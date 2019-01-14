@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <complex>
 #include <data/types.hpp>
+#include <data/data.hpp>
 #include <Eigen/Dense>
 
 namespace qpp{
@@ -15,9 +16,6 @@ namespace qpp{
       // All group elements are stored here
       const ARRAY & G;
 
-      // Multiplication table
-      int * mtab;
-
       // Orders
       int * ordr;
 
@@ -27,13 +25,20 @@ namespace qpp{
       std::vector<int> classof;
 
       // where in mtab is the record for i-th times j-th element
+    /*
       inline int mtidx(int i, int j) const
       {
         return i*G.size()+j;
       }
-
+    */
+    
     public:
-      // --------------------------------------------
+
+    // Multiplication table
+    //  int * mtab;
+    static_table<int> multab;
+
+    // --------------------------------------------
       // Finds element g of the group and returns its index
       int index(const TRANSFORM & g) const {
         int i;
@@ -50,12 +55,14 @@ namespace qpp{
 
       // Construction of the group multiplication table
       void build_multab() {
-        if (mtab!=NULL) delete mtab;
-        mtab = new int[G.size()*G.size()];
+	//        if (mtab!=NULL) delete mtab;
+        //mtab = new int[G.size()*G.size()];
 
+	multab.resize(G.size(),G.size());
+	
         for (int i = 0; i<G.size(); i++)
           for (int j = 0; j<G.size(); j++)
-            mtab[mtidx(i,j)] = index(G[i]*G[j]);
+            multab(i,j) = index(G[i]*G[j]);
       }
 
       // Find orders of all elements
@@ -122,9 +129,11 @@ namespace qpp{
       }
 
       // multiplication table
+    /*
       inline int multab(int i, int j) const {
         return mtab[mtidx(i,j)];
       }
+    */
 
       // order of the element
       inline int order(int i) const {
@@ -234,7 +243,7 @@ namespace qpp{
 
       // Constructors
       group_analyzer(const ARRAY & _G) : G(_G){
-        mtab = NULL;
+        //mtab = NULL;
         ordr = NULL;
 
         //std::cout << "alive1\n";
@@ -254,12 +263,12 @@ namespace qpp{
   // -------------------------------------------------------------------------------
 
   template <class TRANSFORM, class ARRAY = std::vector<TRANSFORM> >
-  void generator_form(generators_pack<TRANSFORM> & R, ARRAY & G){
+  void generator_form(genform_group<TRANSFORM> & R, ARRAY & G){
     group_analyzer<TRANSFORM,ARRAY> A(G);
     std::vector<int> ee = {0}, gg = A.find_generators(ee);
     int DIM = gg.size();
 
-    //generators_pack<TRANSFORM> R(DIM);
+    //genform_group<TRANSFORM> R(DIM);
     R.set_dim(DIM);
     for (int d = 0; d<DIM; d++)
       R.generators[d] = G[gg[d]];

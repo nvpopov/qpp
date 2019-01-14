@@ -1,6 +1,6 @@
-#include <symm/symm.hpp>
+#include <symm/groups.hpp>
 #include <symm/autosymm.hpp>
-#include <symm/gcell.hpp>
+#include <symm/gen_cell.hpp>
 #include <symm/group_theory.hpp>
 #include <iostream>
 
@@ -31,8 +31,8 @@ int main(){
 
   std::cout << "R = " << R << " T= " << T << "\n";
 
-  //std::optional<linear3d_subspace<double> > L = invariant_subspace(rotrans<double>(T,R));
+  std::optional<linear3d_subspace<double> > L = invariant_subspace(rotrans<double>(T,R));
 
- // if (L) std::cout << "dim= " << (*L).dim << " pt= " << (*L).pt << " n= " << (*L).n << "\n";
+  if (L) std::cout << "dim= " << (*L).dim << " pt= " << (*L).pt << " n= " << (*L).n << "\n";
 }
 

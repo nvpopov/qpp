@@ -11,3 +11,4 @@ add_test(NAME test_ccd
     COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_ccd -o report.xml -r junit
     WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
+add_subdirectory(test-symm)

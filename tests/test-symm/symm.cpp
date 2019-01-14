@@ -1,7 +1,7 @@
 #include <fmt/format.h>
 #include <iostream>
 #include <geom/lace3d.hpp>
-#include <symm/symm.hpp>
+#include <symm/groups.hpp>
 #include <symm/group_theory.hpp>
 //#include <boost/format.hpp>
 
@@ -21,7 +21,7 @@ int main(){
 
   std::cout << "C3 = \n"<< C3.to_string_matr() << "\n Sig= \n" << Sig.to_string_matr()  << "\n";
 
-  generators_pack<matrix3<double> > G({C3,Sig});
+  genform_group<matrix3<double> > G({C3,Sig});
   std::vector<matrix3<double> > g;
 
   G.generate(g);
@@ -31,11 +31,11 @@ int main(){
 
   std::cout << "--------------------------------" << std::endl;
 
-  generated_group<matrix3<double> > T;
+  array_group<matrix3<double> > T;
 
-  T.add( RotMtrx({1,1,1}, 2*pi/3) );
-  T.add( RotMtrx({1,-1,-1}, 2*pi/3) );
-  T.add( RotMtrx({1,1,0}, pi) );
+  T.generate( RotMtrx({1,1,1}, 2*pi/3) );
+  T.generate( RotMtrx({1,-1,-1}, 2*pi/3) );
+  T.generate( RotMtrx({1,1,0}, pi) );
 
   for (int i=0; i<T.size(); i++) {
       std::cout << i << std::endl;

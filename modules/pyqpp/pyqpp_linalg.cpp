@@ -89,6 +89,9 @@ void py_matrix3_export (py::module m, const char * pyname) {
       .def("__mul__", [](qpp::matrix3<VALTYPE> &self, qpp::vector3<VALTYPE> &vec)
         {return self.mv_mul_proxy(vec);})
 
+      .def("__mul__", [](qpp::matrix3<VALTYPE> &self, qpp::matrix3<VALTYPE> &mtr)
+        {return self.mm_mul_proxy(mtr);})
+
       .def("__rmul__", [](qpp::matrix3<VALTYPE> &self, const VALTYPE ns)
         {return self.mul_proxy(ns);})
 

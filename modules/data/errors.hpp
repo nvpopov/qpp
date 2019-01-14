@@ -9,6 +9,7 @@ namespace qpp{
   void PyTypeError(const char *);
   void PyKeyError(const char *);
   void PyValueError(const char *);
+  void PyOverflowError(const char *);
   void PySyntaxError(const char *);
   void StopIter();
 
@@ -18,6 +19,7 @@ namespace qpp{
   void TypeError(const char *);
   void KeyError(const char *);
   void ValueError(const char *);
+  void OverflowError(const char *);
   void SyntaxError(const char *);
 
 };

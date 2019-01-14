@@ -1,4 +1,4 @@
-#include <symm/symm.hpp>
+#include <symm/groups.hpp>
 #include <symm/group_theory.hpp>
 #include <iostream>
 
@@ -20,11 +20,11 @@ int main(){
   matrix3<double> C4y = RotMtrx({0,1,0},pi/2);
   matrix3<double> I = matrix3<double>::Identity()*-1.0;
 
-  generated_group<matrix3<double> > OH;
+  array_group<matrix3<double> > OH;
 
-  OH.add(C4x);
-  OH.add(C4y);
-  OH.add(I);
+  OH.generate(C4x);
+  OH.generate(C4y);
+  OH.generate(I);
   
   for (int i=0; i<OH.size(); i++){
       std::cout << i << std::endl;
