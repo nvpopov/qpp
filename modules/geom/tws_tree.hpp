@@ -39,7 +39,7 @@ namespace qpp{
 
   template<typename INT_TYPE>
   inline INT_TYPE enc_tws_idx (const INT_TYPE a, const INT_TYPE b, const INT_TYPE c) {
-    return a*9+b*3+c+13;
+    return (a * 9)+ (b * 3) + c + 13;
   }
 
   template<typename POL_REAL = float>
@@ -68,9 +68,7 @@ namespace qpp{
       tws_node_content_t (const AINT _atm, const index _idx) noexcept {m_atm = _atm; m_idx = _idx;}
   };
 
-  ///
   /// \brief The imaginary_atom struct
-  ///
   template<typename REAL, typename AINT = uint32_t>
   struct img_atom_t {
       AINT m_atm;
@@ -94,18 +92,6 @@ namespace qpp{
         return (m_idx == a.idx) && (m_atm == a.atm);
       }
 
-      //      tws_query_data_t<REAL, AINT>& operator =(const tws_query_data_t<REAL, AINT> &a){
-      //        m_idx = a.m_idx;
-      //        m_atm = a.m_atm;
-      //        m_dist = a.m_dist;
-      //        return *this;
-      //      }
-
-//      tws_query_data_t<REAL, AINT> (const tws_query_data_t<REAL, AINT>& a) noexcept {
-//        m_idx = a.m_idx;
-//        m_atm = a.m_atm;
-//        m_dist = a.m_dist;
-//      }
   };
 
   template<typename REAL = float>
@@ -114,11 +100,10 @@ namespace qpp{
     return a.m_dist < b.m_dist;
   }
 
-  ///
   /// \brief The tws_node struct
-  ///
   template<typename REAL = float, typename AINT = uint32_t>
   struct tws_node_t {
+
       tws_node_t<REAL, AINT>* parent;
       aabb_3d_t<REAL> m_bb;
       std::vector<tws_node_content_t<REAL, AINT> > m_content;
@@ -143,9 +128,7 @@ namespace qpp{
           }
       }
 
-
   };
-
 
   template<typename REAL>
   struct atom_node_lookup_t {
@@ -166,7 +149,10 @@ namespace qpp{
 
   template<typename REAL, typename AINT>
   struct bonding_table_t {
-      std::unordered_map<qpp::sym_key<AINT>, bonding_table_record_t<REAL>, sym_key_hash<AINT> > m_dist;
+
+      std::unordered_map<
+      qpp::sym_key<AINT>, bonding_table_record_t<REAL>, sym_key_hash<AINT> > m_dist;
+
       std::map<AINT, REAL> m_max_dist;
 
       template<typename CELL>
@@ -287,7 +273,7 @@ namespace qpp{
 
       /// \brief do_action
       /// \param action bitmask for action
-      void do_action(const uint32_t action){
+      void do_action(const uint32_t action) {
 
         if (action & act_lock) {
             m_auto_bonding = false;
@@ -317,7 +303,7 @@ namespace qpp{
               }
           }
 
-        if (action & act_check_consistency){
+        if (action & act_check_consistency) {
             if (m_ngb_table.size() != geom->nat()) m_ngb_table.resize(geom->nat());
             if (m_atom_node_lookup.size() != geom->nat()) m_atom_node_lookup.resize(geom->nat());
           }
@@ -333,7 +319,7 @@ namespace qpp{
         if (action & act_clear_img) m_img_atoms.clear();
 
         if (action & act_clear_tree) {
-            for (auto *node : m_flat_view){
+            for (auto *node : m_flat_view) {
                 if (node) delete node;
                 node = nullptr;
               }
@@ -348,32 +334,32 @@ namespace qpp{
             do_action(act_clear_tree);
           }
 
-        if (action & act_rebuild_tree){
+        if (action & act_rebuild_tree) {
             do_action(act_clear_img);
             do_action(act_clear_tree);
             do_action(act_build_tree);
           }
 
-        if (action & act_rebuild_ntable){
+        if (action & act_rebuild_ntable) {
             do_action(act_clear_img_ntable);
             do_action(act_clear_ntable);
             do_action(act_build_ntable);
           }
 
-        if (action & act_build_tree){
+        if (action & act_build_tree) {
             manual_build();
           }
 
-        if (action & act_build_ntable){
+        if (action & act_build_ntable) {
             find_all_neighbours();
           }
 
-        if (action & act_rebuild_all){
+        if (action & act_rebuild_all) {
             do_action(act_rebuild_tree);
             do_action(act_rebuild_ntable);
           }
 
-        if (action & act_build_all){
+        if (action & act_build_all) {
             do_action(act_build_tree);
             do_action(act_build_ntable);
           }
@@ -384,8 +370,8 @@ namespace qpp{
       /// \param atm2
       /// \param idx2
       void clr_bond_real_img (const AINT atm1, const AINT atm2, const index idx2) {
-        for(auto it = m_ngb_table[atm1].begin(); it != m_ngb_table[atm1].end(); )
-          if(it->m_atm == atm2 && it->m_idx == idx2) m_ngb_table[atm1].erase(it);
+        for (auto it = m_ngb_table[atm1].begin(); it != m_ngb_table[atm1].end(); )
+          if (it->m_atm == atm2 && it->m_idx == idx2) m_ngb_table[atm1].erase(it);
           else ++it;
       }
 
@@ -395,8 +381,8 @@ namespace qpp{
       /// \param atm2
       /// \param idx2
       void clr_bond_img_real (const AINT img_atom_id, const AINT atm2, const index idx2) {
-        for(auto it = m_img_atoms[img_atom_id].begin(); it != m_img_atoms[img_atom_id].end(); )
-          if(it->m_atm == atm2 && it->m_idx == idx2) m_img_atoms[img_atom_id].erase(it);
+        for (auto it = m_img_atoms[img_atom_id].begin(); it != m_img_atoms[img_atom_id].end(); )
+          if (it->m_atm == atm2 && it->m_idx == idx2) m_img_atoms[img_atom_id].erase(it);
           else ++it;
       }
 
@@ -404,9 +390,9 @@ namespace qpp{
       /// \param img_atom_id
       /// \param atm2
       void clr_bond_img_real (const AINT img_atom_id, const int atm2) {
-        for(auto it = m_img_atoms[img_atom_id].m_img_bonds.begin();
+        for (auto it = m_img_atoms[img_atom_id].m_img_bonds.begin();
             it != m_img_atoms[img_atom_id].m_img_bonds.end(); )
-          if(it->m_atm == atm2) m_img_atoms[img_atom_id].m_img_bonds.erase(it);
+          if (it->m_atm == atm2) m_img_atoms[img_atom_id].m_img_bonds.erase(it);
           else ++it;
       }
 
@@ -466,11 +452,12 @@ namespace qpp{
             //delete bonds from paired imaginary atoms
             for (auto &pair : pair_img_atoms){
                 std::optional<AINT> paired_img_id = find_img_atom(std::get<0>(pair),
-                                                                        std::get<1>(pair));
+                                                                  std::get<1>(pair));
                 if (paired_img_id){
                     for (auto it = m_img_atoms[*paired_img_id].m_img_bonds.begin();
-                         it != m_img_atoms[*paired_img_id].m_img_bonds.end();){
-                        if (it->m_atm == atm) it = m_img_atoms[*paired_img_id].m_img_bonds.erase(it);
+                         it != m_img_atoms[*paired_img_id].m_img_bonds.end();) {
+                        if (it->m_atm == atm)
+                          it = m_img_atoms[*paired_img_id].m_img_bonds.erase(it);
                         else ++it;
                       }
                   }
@@ -486,7 +473,7 @@ namespace qpp{
       /// \brief apply_shift
       /// \param vShift
       void apply_shift (const vector3<REAL> vec_shift) {
-        for (auto *node : m_flat_view){
+        for (auto *node : m_flat_view) {
             node->m_bb.min += vec_shift;
             node->m_bb.max += vec_shift;
           }
@@ -507,7 +494,7 @@ namespace qpp{
         if (!root) return;
         f(cur_node, deep_level);
         for(auto* child : cur_node->m_sub_nodes)
-          if (child) traverse_apply_visitor(child, deep_level+1, f);
+          if (child) traverse_apply_visitor(child, deep_level + 1, f);
 
       }
 
@@ -520,8 +507,8 @@ namespace qpp{
                       REAL scale_factor = 0.25, bool hide_by_field = false,
                       int xgeom_hide_field_id = 6) {
         if (!root) return;
-        traverse_query_ray<adding_result_policy>(root, _ray, res, scale_factor, hide_by_field,
-                                                 xgeom_hide_field_id);
+        traverse_query_ray<adding_result_policy>(root, _ray, res, scale_factor,
+                                                 hide_by_field, xgeom_hide_field_id);
       }
 
       /// \brief traverse_query_ray
@@ -536,6 +523,7 @@ namespace qpp{
                                int xgeom_hide_field_id) {
 
         if (!cur_node) return;
+
         if (ray_aabb_test(_ray, cur_node->m_bb)) {
 
             if (cur_node->m_tot_childs > 0) {
@@ -664,13 +652,11 @@ namespace qpp{
                 vector3<REAL> z_min = cur_node->m_bb.min + cn_size / 3;
                 vector3<REAL> z_max = cur_node->m_bb.max - cn_size / 3;
 
-                newNode->m_bb.min = z_min +
-                                    vector3<REAL>(i_x * cn_size[0]/ 3,
+                newNode->m_bb.min = z_min + vector3<REAL>(i_x * cn_size[0]/ 3,
                     i_y * cn_size[1]/ 3,
                     i_z * cn_size[2]/ 3);
 
-                newNode->m_bb.max = z_max +
-                                    vector3<REAL>(i_x * cn_size[0]/ 3,
+                newNode->m_bb.max = z_max + vector3<REAL>(i_x * cn_size[0]/ 3,
                     i_y * cn_size[1]/ 3,
                     i_z * cn_size[2]/ 3);
 
@@ -678,8 +664,7 @@ namespace qpp{
                 cur_node->m_tot_childs+=1;
               }
 
-            traverse_insert_object_to_tree(cur_node->m_sub_nodes[nidx],
-                                           atm, idx);
+            traverse_insert_object_to_tree(cur_node->m_sub_nodes[nidx], atm, idx);
           }
 
         return false;
