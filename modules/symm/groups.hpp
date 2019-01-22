@@ -37,7 +37,7 @@ namespace qpp {
 
     genform_group(const std::vector<TRANSFORM> & g,
                     const index & __begin, const index & __end
-		  , const STRING & _name = ""){
+      , const STRING & _name = ""){
       DIM = g.size();
       generators.resize(DIM);
       int d=0;
@@ -157,7 +157,7 @@ namespace qpp {
       return result? i : -1;
     }
 
-    array_group(const STRING & _name="", TRANSFORM E = TRANSFORM::unity){
+    array_group(const STRING _name="", TRANSFORM E = TRANSFORM::unity){
       name = _name;
       group.push_back(E);
       lim_size = default_lim_size;
@@ -175,12 +175,12 @@ namespace qpp {
 
     inline int size() const
     { return group.size(); }
-    
+
     void add(const TRANSFORM & g){
       if ( index(g) >= 0 )
         return;
       group.push_back(g);
-    }    
+    }
 
     void erase(int i){
       group.erase(group.begin()+i);
@@ -213,8 +213,8 @@ namespace qpp {
                 if ((h2 != h1) && index(h2) == -1)
                   group.push_back(h2);
 
-		if (size() > lim_size)
-		  OverflowError("array_group size exceeded the size limit\nWhat you can do:\n 1) Set larger lim_size value;\n 2) Check if the group is indeed finite;\n");
+    if (size() > lim_size)
+      OverflowError("array_group size exceeded the size limit\nWhat you can do:\n 1) Set larger lim_size value;\n 2) Check if the group is indeed finite;\n");
               }
           //std::cout << inew << " " << inewest << "\n";
 
@@ -246,19 +246,19 @@ namespace qpp {
 
     static void py_export(py::module m, const char * pyname){
       py::class_<array_group<TRANSFORM> >(m, pyname)
-	.def(py::init<const STRING &, TRANSFORM>(), py::arg("_name") = "", py::arg("E") = TRANSFORM::unity )
-	.def(py::init<const array_group<TRANSFORM> &>())
-	.def("index",  & array_group<TRANSFORM>::index )
-	.def("add",    & array_group<TRANSFORM>::add )
-	.def("generate", & array_group<TRANSFORM>::generate )
-	.def("erase",  & array_group<TRANSFORM>::erase )
-	.def("__getitem__",  & array_group<TRANSFORM>::py_getitem)
-	.def("__setitem__",  & array_group<TRANSFORM>::py_setitem)
-	.def("__len__", & array_group<TRANSFORM>::size)
-	.def_readwrite("name", & array_group<TRANSFORM>::name)
-	.def_readwrite("lim_size", & array_group<TRANSFORM>::lim_size)
-	.def_readwrite_static("default_lim_size", & array_group<TRANSFORM>::default_lim_size)
-	;
+  .def(py::init<const STRING &, TRANSFORM>(), py::arg("_name") = "", py::arg("E") = TRANSFORM::unity )
+  .def(py::init<const array_group<TRANSFORM> &>())
+  .def("index",  & array_group<TRANSFORM>::index )
+  .def("add",    & array_group<TRANSFORM>::add )
+  .def("generate", & array_group<TRANSFORM>::generate )
+  .def("erase",  & array_group<TRANSFORM>::erase )
+  .def("__getitem__",  & array_group<TRANSFORM>::py_getitem)
+  .def("__setitem__",  & array_group<TRANSFORM>::py_setitem)
+  .def("__len__", & array_group<TRANSFORM>::size)
+  .def_readwrite("name", & array_group<TRANSFORM>::name)
+  .def_readwrite("lim_size", & array_group<TRANSFORM>::lim_size)
+  .def_readwrite_static("default_lim_size", & array_group<TRANSFORM>::default_lim_size)
+  ;
       // bp::def("len", py_group_len<TRANSFORM>);
     }
 

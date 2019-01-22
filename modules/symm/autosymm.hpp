@@ -99,7 +99,7 @@ namespace qpp{
       }
 
       bool within (const vector3<REAL> & x) const {
-  REAL tol_equiv = vector3<REAL>::tol_equiv;
+        REAL tol_equiv = vector3<REAL>::tol_equiv;
         if (dim == -1) return false;
         else if (dim == 0)
           return (pt - x).norm() < tol_equiv;
@@ -161,7 +161,7 @@ namespace qpp{
           }
 
         if ( d1 == 1 and d2 == 1) {
-    if ((n1-n2).norm() < vector3<REAL>::tol_equiv or (n1+n2).norm() <  vector3<REAL>::tol_equiv) {
+            if ((n1-n2).norm() < vector3<REAL>::tol_equiv or (n1+n2).norm() <  vector3<REAL>::tol_equiv) {
                 if (linear3d_subspace<REAL>(d1,p1,n1).within(p2))
                   return *this;
                 else
@@ -249,11 +249,11 @@ namespace qpp{
       return std::optional<linear3d_subspace<REAL> >({ 0, rc});
     else if (d==1)
       return std::optional<linear3d_subspace<REAL> >({ 1, rc,
-                                     vecreal<typename numeric_type<REAL>::complex>(n.row(ni[0])) });
+                                                       vecreal<typename numeric_type<REAL>::complex>(n.row(ni[0])) });
     else if (d==2)
       return std::optional<linear3d_subspace<REAL> >({ 2, rc,
-                                     vecreal<typename numeric_type<REAL>::complex>(
-                                       n.row(ni[0]).cross(n.row(ni[1]))) });
+                                                       vecreal<typename numeric_type<REAL>::complex>(
+                                                       n.row(ni[0]).cross(n.row(ni[1]))) });
     else if (d==3)
       return std::optional<linear3d_subspace<REAL> >({ 3, rc});
 
@@ -310,7 +310,7 @@ namespace qpp{
     @param[in] R tolerance radius
    */
   template<class REAL>
-  int bravais_point_group(array_group<matrix3<REAL> > & G,
+  void bravais_point_group(array_group<matrix3<REAL> > & G,
                           const periodic_cell<REAL> & cell,
                           REAL R = geometry<REAL,periodic_cell<REAL> >::tol_geom){
     if (cell.DIM != 3)
@@ -324,21 +324,21 @@ namespace qpp{
     shape_sphere<REAL> S(amax+R);
     vector3<REAL> fmax = S.fmax(cell);
     int fx = int(fmax(0))+1,
-      fy = int(fmax(1))+1,
-      fz = int(fmax(2))+1;
+        fy = int(fmax(1))+1,
+        fz = int(fmax(2))+1;
     for (iterator I({-fx,-fy,-fz}, {fx,fy,fz}); !I.end(); I++){
-      vector3<REAL> r = cell.transform({0.,0.,0.},I);
-      if (S.within(r))
-  points.add("point",r);
-    }
+        vector3<REAL> r = cell.transform({0.,0.,0.},I);
+        if (S.within(r))
+          points.add(std::string("point"), r);
+      }
 
     find_point_symm(G, points, R);
   }
 
   template<class REAL>
   int bravais_point_group1(array_group<matrix3<REAL> > & G,
-                          periodic_cell<REAL> & cell,
-                          REAL R = geometry<REAL,periodic_cell<REAL> >::tol_geom){
+                           periodic_cell<REAL> & cell,
+                           REAL R = geometry<REAL,periodic_cell<REAL> >::tol_geom){
     if (cell.DIM != 3)
       IndexError("bravais_point_group:: works only for 3d-periodic lattice");
 

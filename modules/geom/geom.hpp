@@ -431,7 +431,7 @@ The supercell concept generalization for the geometry class looks like:
         name = __name;
       }
 
-      geometry (int dim, const STRING & __name = "") : cell(dim) {
+      geometry (int dim, const STRING __name = "") : cell(dim) {
         init_default();
         DIM = dim;
         name = __name;

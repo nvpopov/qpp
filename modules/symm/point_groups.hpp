@@ -49,7 +49,7 @@ namespace qpp{
 
     return true;
   }
-  
+
   // -----------------------------------------------------------------------
 
   template<class REAL, class CELL>
@@ -61,61 +61,61 @@ namespace qpp{
   }
 
   // -----------------------------------------------------------------------
-  
+
   template<class REAL>
   bool best_transform (matrix3<REAL> & res,
                        const std::vector<vector3<REAL> > &a,
                        const std::vector<vector3<REAL> > &b) {
     REAL eps = vector3<REAL>::tol_equiv;
-    
+
     matrix3<REAL> C = matrix3<REAL>::Zero();
     for (int i=0; i<3; i++)
       for (int j=0; j<3; j++)
         for (int k=0; k<a.size(); k++)
           C(i,j) += a[k](j)*b[k](i);
-    
+
     matrix3<typename numeric_type<REAL>::complex> dv,
-      SS( matrix3<typename numeric_type<REAL>::complex>::Zero());
+        SS( matrix3<typename numeric_type<REAL>::complex>::Zero());
     matrix3<REAL> D = C*C.transpose(), S(matrix3<REAL>::Zero());
     vector3<typename numeric_type<REAL>::complex> de;
 
     diagon3d(de,dv,D);
-    
+
     for (int i=0; i<3; i++)
       if (std::abs(de(i))<eps)
         return false;
-    
+
     for (int i=0; i<3; i++)
       for (int j=0; j<3; j++)
         for (int k=0; k<3; k++)
           SS(i,j) += std::conj(dv(i,k))*dv(j,k)/std::sqrt(de(k).real());
-    
+
     for (int i=0; i<3; i++)
       for (int j=0; j<3; j++)
-	S(i,j) = SS(i,j).real();
+        S(i,j) = SS(i,j).real();
 
     res = S*C;
     return true;
   }
-  
+
   // -----------------------------------------------------------------------
 
   template<class REAL>
   void best_axes(matrix3<REAL> & axes, vector3<REAL> & lambda,
-		 const geometry<REAL, periodic_cell<REAL> > & g)
+                 const geometry<REAL, periodic_cell<REAL> > & g)
   {
     matrix3<REAL> S = matrix3<REAL>::Zero();
 
     for (int i=0; i<g.size(); i++)
       for (int j=0; j<3; j++)
-	for (int k=0; k<3; k++)
-	  S(j,k) += g.pos(i)(j)*g.pos(i)(k);
+        for (int k=0; k<3; k++)
+          S(j,k) += g.pos(i)(j)*g.pos(i)(k);
 
     std::cout << "S= " << S << "\n";
 
-    diagon3d(lambda,axes,S);    
+    diagon3d(lambda,axes,S);
   }
-  
+
   /*
   template<class REAL>
   void rotate_pair (matrix3<REAL> & R,
@@ -174,7 +174,7 @@ namespace qpp{
   }
   */
   // -----------------------------------------------------------------------
-  
+
   template<class REAL>
   void analyze_transform (vector3<REAL> & axis, REAL & phi, bool & inversion,
                           const matrix3<REAL> & R) {
@@ -185,7 +185,7 @@ namespace qpp{
     inversion = R.determinant() < 0;
     if (inversion)
       R1 *= -1;
-    
+
     matrix3<REAL> A = 0.5*(R1 - R1.transpose());
     REAL trace = R1(0,0) + R1(1,1) + R1(2,2);
     REAL cos = 0.5*(trace - 1);
@@ -205,13 +205,13 @@ namespace qpp{
       axis = {0,0,1};
     else
       {
-	R1 += matrix3<REAL>::Identity();
-	axis = R1.row(0);
-	if (axis.norm() < R1.row(1).norm() )
-	  axis = R1.row(1);
-	if (axis.norm() < R1.row(2).norm() )
-	  axis = R1.row(2);
-	axis /= axis.norm();
+        R1 += matrix3<REAL>::Identity();
+        axis = R1.row(0);
+        if (axis.norm() < R1.row(1).norm() )
+          axis = R1.row(1);
+        if (axis.norm() < R1.row(2).norm() )
+          axis = R1.row(2);
+        axis /= axis.norm();
       }
 
   }
@@ -229,15 +229,15 @@ namespace qpp{
 
     for(int i=0; i<3; i++)
       for (int j=0; j<3; j++)
-	for (int k=0; k<3; k++)
-	  S(i,k) += ss(j,i)*ss(j,k)/std::sqrt(sig(j));
-    
+  for (int k=0; k<3; k++)
+    S(i,k) += ss(j,i)*ss(j,k)/std::sqrt(sig(j));
+
     U = S*U;
     */
     matrix3<REAL> S = U*U.transpose();
     U = S.pow(-0.5)*U;
   }
-  
+
   // -----------------------------------------------------------------------
 
   template<class REAL>
@@ -249,22 +249,22 @@ namespace qpp{
 
     for (int i=0; i<G.size(); i++)
       if ( (G[i] - M).norm() < err ) {
-	err = (G[i] - M).norm();
-	i0 = i;
-      }
+          err = (G[i] - M).norm();
+          i0 = i;
+        }
 
     return (err > norm_error) ? -1 : i0;
   }
-  
+
   // -------------------------------------------------------------
 
   template<class REAL>
-  void pg_approx_multab(std::vector<std::vector<int> > & multab, const array_group<matrix3<REAL> > & G, 
-			REAL angle_error){
+  void pg_approx_multab(std::vector<std::vector<int> > & multab, const array_group<matrix3<REAL> > & G,
+                        REAL angle_error){
     for (int i=0; i<G.size(); i++)
       for (int j=0; j<G.size(); j++)
-	if (multab[i][j] == -1)
-	  multab[i][j] = pg_approx_find(G, matrix3<REAL>(G[i]*G[j]), angle_error);
+        if (multab[i][j] == -1)
+          multab[i][j] = pg_approx_find(G, matrix3<REAL>(G[i]*G[j]), angle_error);
   }
 
   // -------------------------------------------------------------
@@ -280,14 +280,14 @@ namespace qpp{
     REAL phi_min = 2*pi;
     for (int i=0; i<G.size(); i++)
       if (i!=i0 and i!=i1){
-	vector3<REAL> ax;
-	REAL phi;
-	bool inv;
-	analyze_transform(ax,phi,inv,G[i]);
-	if (inv) phi = pi - phi;
-	if ( phi > angle_error and phi < phi_min)
-	  phi_min = phi;
-      }
+          vector3<REAL> ax;
+          REAL phi;
+          bool inv;
+          analyze_transform(ax,phi,inv,G[i]);
+          if (inv) phi = pi - phi;
+          if ( phi > angle_error and phi < phi_min)
+            phi_min = phi;
+        }
 
     int n = int(2*pi/phi_min + 0.5);
     if (2*pi/n < angle_error)
@@ -303,14 +303,14 @@ namespace qpp{
                             std::vector<permutation> & P){
     for (int i=0; i<P.size(); i++)
       for (int j=0; j<=i; j++){
-	permutation p = P[i]*P[j];
-	auto idx = std::find(P.begin(),P.end(),p);
-	if (idx==P.end()){
-	  P.push_back(p);
-	  G.add(G[i]*G[j]);
-	}
-      }
-	
+          permutation p = P[i]*P[j];
+          auto idx = std::find(P.begin(),P.end(),p);
+          if (idx==P.end()){
+              P.push_back(p);
+              G.add(G[i]*G[j]);
+            }
+        }
+
   }
 
   // -------------------------------------------------------------------------------
@@ -319,53 +319,53 @@ namespace qpp{
   void fix4_point_group(array_group<matrix3<REAL> > & G, const static_table<int> & M){
     int N = G.size();
     static_table<matrix3<REAL> > F(N,N);
-    
+
     //std::cout << "fix4: alive 1\n";
-    
+
     for (int i=0; i<N; i++)
       for (int j=0; j<N; j++){
-	F(i,j) = G[i]*G[j] - G[M(i,j)];
-	//std::cout << "Fij " << i << " " << j << " " << F(i,j) << "\n";
-      }
+          F(i,j) = G[i]*G[j] - G[M(i,j)];
+          //std::cout << "Fij " << i << " " << j << " " << F(i,j) << "\n";
+        }
 
     std::vector<matrix3<REAL> > Ginv(N);
 
     for (int j=0; j<N; j++){
-      Ginv[j] = G[j].inverse();
-      //std::cout << j << " inv " << Ginv[j] << "\n";
-    }
-    
+        Ginv[j] = G[j].inverse();
+        //std::cout << j << " inv " << Ginv[j] << "\n";
+      }
+
     //std::cout << "fix4: alive 2\n";
 
     std::vector<matrix3<REAL> > Di(N);
     for (int i=0; i<N; i++){
 
-      //std::cout << "Di " << i << "\n";
-      
-      matrix3<REAL> D(REAL(0));
-      for (int j=0; j<N; j++)
-	D += Ginv[j]*F(j,i) + F(i,j)*Ginv[j];
-      D /= 2*N;
-      Di[i] = D;
+        //std::cout << "Di " << i << "\n";
 
-      //std::cout << i << " Di " << Di[i] << "\n";
-      
-    }
+        matrix3<REAL> D(REAL(0));
+        for (int j=0; j<N; j++)
+          D += Ginv[j]*F(j,i) + F(i,j)*Ginv[j];
+        D /= 2*N;
+        Di[i] = D;
+
+        //std::cout << i << " Di " << Di[i] << "\n";
+
+      }
 
     //std::cout << "fix4: alive 3\n";
-    
+
     for (int i=0; i<N; i++){
 
-      //std::cout << "unitarize " << i << "\n";
-      
-      G[i] = G[i] - Di[i];
+        //std::cout << "unitarize " << i << "\n";
 
-      //std::cout << "new Gi " << i << " " << G[i] << "\n";
-      
-      unitarize(G[i]);
+        G[i] = G[i] - Di[i];
 
-      //std::cout << "unitarized "  << G[i] << "\n";
-    }      
+        //std::cout << "new Gi " << i << " " << G[i] << "\n";
+
+        unitarize(G[i]);
+
+        //std::cout << "unitarized "  << G[i] << "\n";
+      }
     //std::cout << "fix4: alive 4\n";
   }
 
@@ -381,44 +381,44 @@ namespace qpp{
     REAL err;
 
     //std::cout << "Befor cycle\n";
-    
+
     while (true) {
 
-      /*
+        /*
       std::cout << "multab:\n";
       for (int i=0; i<N; i++){
-	std::cout << i << "[";
-	for (int j=0; j<N; j++)
-	  std::cout << M(i,j)<< ",";
-	std::cout << "]\n";
-      } 
-      */     
-      
-      err = REAL(0);
-      for (int i=0; i<N; i++)
-	for (int j=0; j<N; j++){
+  std::cout << i << "[";
+  for (int j=0; j<N; j++)
+    std::cout << M(i,j)<< ",";
+  std::cout << "]\n";
+      }
+      */
 
-	  //std::cout << "Sij calc " << i << " " << j << "\n";
-	  
-	  matrix3<REAL> F = G[i]*G[j]-G[M(i,j)];
-	  REAL s(0);
-	  for (int k=0; k<3; k++)
-	    for (int l=0; l<3; l++)
-	      s += F(k,l)*F(k,l);	  
-	  err += s;
-	}
-      err = std::sqrt(err);
+        err = REAL(0);
+        for (int i=0; i<N; i++)
+          for (int j=0; j<N; j++){
 
-      std::cout << "fix_point_group: iteration = " << it << " error = " << err << "\n";
-      
-      if (err < eps) break;
-      fix4_point_group(G,M);
-      
-      if (++it > maxit) OverflowError("Too many iterations in fix_point_group");
+              //std::cout << "Sij calc " << i << " " << j << "\n";
 
-      //break;
-    }
-    
+              matrix3<REAL> F = G[i]*G[j]-G[M(i,j)];
+              REAL s(0);
+              for (int k=0; k<3; k++)
+                for (int l=0; l<3; l++)
+                  s += F(k,l)*F(k,l);
+              err += s;
+            }
+        err = std::sqrt(err);
+
+        std::cout << "fix_point_group: iteration = " << it << " error = " << err << "\n";
+
+        if (err < eps) break;
+        fix4_point_group(G,M);
+
+        if (++it > maxit) OverflowError("Too many iterations in fix_point_group");
+
+        //break;
+      }
+
   }
 
   // -------------------------------------------------------------------------------
@@ -426,7 +426,7 @@ namespace qpp{
   template <class REAL>
   void finitize_point_group(array_group<matrix3<REAL> > & G,
                             std::vector<permutation> & P, REAL angle_error){
-    
+
     // find and appropriately place unity element
 
     matrix3<REAL> E = matrix3<REAL>::Identity();
@@ -441,62 +441,62 @@ namespace qpp{
     }
 
     std::cout << "found E in position " << i0 << "\n";
-      
+
     // complete the group and construct multiplication table
     int N = G.size();
     std::vector<std::vector<int> > mtab(N);
-  
+
     for (int i=0; i<N; i++)
       for (int j=0; j<N; j++)
-	mtab[i].push_back(-1);
+  mtab[i].push_back(-1);
 
     while(true){
       pg_approx_multab(mtab,G,angle_error);
-    
+
       for (int i=0; i<N; i++)
-	for (int j=0; j<N; j++)
-	  if (mtab[i][j]==-1)
-	    {
-	      G.add(G[i]*G[j]);
-	      P.push_back(P[i]*P[j]);
-	      std::cout << "added " << i << " x " << j << "\n";
-	      std::cout << "G size = " << G.size() << " P size = " << P.size() << "\n";
-	      goto ADDED;
-	    }
+  for (int j=0; j<N; j++)
+    if (mtab[i][j]==-1)
+      {
+        G.add(G[i]*G[j]);
+        P.push_back(P[i]*P[j]);
+        std::cout << "added " << i << " x " << j << "\n";
+        std::cout << "G size = " << G.size() << " P size = " << P.size() << "\n";
+        goto ADDED;
+      }
     ADDED:
       if (N==G.size()) break;
-      if (G.size()>G.lim_size) 
-	OverflowError("Failed to complete approximate group. The number of elements exceeded lim_size");
+      if (G.size()>G.lim_size)
+  OverflowError("Failed to complete approximate group. The number of elements exceeded lim_size");
 
       for (int i=0; i<N; i++)
-	mtab[i].push_back(-1);
+  mtab[i].push_back(-1);
 
       std::cout << "here1\n";
-      
+
       mtab.push_back(std::vector<int>());
       for (int j=0; j<G.size(); j++)
-	mtab[N].push_back(-1);
+  mtab[N].push_back(-1);
 
       N++;
 
       std::cout << "here2\n";
     }
-    
+
     // check the validity of mtab
     for (int i=0; i<N; i++){
       std::set<int> s1, s2;
       for (int j=0; j<G.size(); j++){
-	s1.insert(mtab[i][j]);
-	s2.insert(mtab[j][i]);
+  s1.insert(mtab[i][j]);
+  s2.insert(mtab[j][i]);
       }
       if (s1.size() != N or s2.size() != N)
-	IndexError("Failed to complete approximate group. Duplicate elements in multiplication table");
+  IndexError("Failed to complete approximate group. Duplicate elements in multiplication table");
     }
-    
+
     for (int i=0; i<N; i++)
       for (int j=0; j<G.size(); j++)
-	if ( P[i]*P[j] != P[mtab[i][j]] )
-	  IndexError("Failed to complete approximate group. The group is inconsistent with atom permutations");
+  if ( P[i]*P[j] != P[mtab[i][j]] )
+    IndexError("Failed to complete approximate group. The group is inconsistent with atom permutations");
 
     // Determine what group is it
   }
@@ -511,14 +511,14 @@ namespace qpp{
       return;
 
     if (geom.nat()==1){
-      G = shnfl<REAL>::Oh();
-      G.name = "SO3";
-      return;
-    }
+        G = shnfl<REAL>::Oh();
+        G.name = "SO3";
+        return;
+      }
 
     // make a copy of geometry
     geometry<REAL, periodic_cell<REAL> > g(geom);
-    
+
     // find geometric centre
     vector3<REAL> cntr(0);
 
@@ -545,67 +545,67 @@ namespace qpp{
     std::cout << " linaxis = " <<  naxis << "\n";
 
     for (int i=0; i<g.nat(); i++) {
-      vector3<REAL> r = g.pos(i);
+        vector3<REAL> r = g.pos(i);
 
-      std::cout << "i= " << i << " r= " << r << " r*n= " << naxis.dot(r)
-		<< " r-n(r*n) = " << r - naxis*naxis.dot(r) << "\n";
-      
-      if ( (r - naxis*naxis.dot(r)).norm() > R ) {
-	linear = false;
-	break;
+        std::cout << "i= " << i << " r= " << r << " r*n= " << naxis.dot(r)
+                  << " r-n(r*n) = " << r - naxis*naxis.dot(r) << "\n";
+
+        if ( (r - naxis*naxis.dot(r)).norm() > R ) {
+            linear = false;
+            break;
+          }
       }
-    }
 
     nplane = axes.col(0);
 
     std::cout << " planaxis = " <<  nplane << "\n";
 
     for (int i=0; i<g.nat(); i++) {
-      vector3<REAL> r = g.pos(i);
-      if ( nplane.dot(r) > R ) {
-	planar = false;
-	break;
+        vector3<REAL> r = g.pos(i);
+        if ( nplane.dot(r) > R ) {
+            planar = false;
+            break;
+          }
       }
-    }
-    
-    
+
+
     if (linear){
-            
-      matrix3<REAL> U = axes;
-      matrix3<REAL> U2 = RotMtrx(nplane,REAL(pi));
-      geometry<REAL, periodic_cell<REAL> > g1(g);
-      for (int i=0; i<g.size(); i++)
-	g1.coord(i) = U2*g.coord(i);
 
-      bool dnh = equiv_geoms(g,g1,R);
-      
-      if (dnh){
-	G = shnfl<REAL>::Dnh(4);
-	G.name = "D_inf_h";
+        matrix3<REAL> U = axes;
+        matrix3<REAL> U2 = RotMtrx(nplane,REAL(pi));
+        geometry<REAL, periodic_cell<REAL> > g1(g);
+        for (int i=0; i<g.size(); i++)
+          g1.coord(i) = U2*g.coord(i);
 
-	std::cout << "linear molecule with Dh\n";
+        bool dnh = equiv_geoms(g,g1,R);
+
+        if (dnh){
+            G = shnfl<REAL>::Dnh(4);
+            G.name = "D_inf_h";
+
+            std::cout << "linear molecule with Dh\n";
+          }
+        else{
+            G = shnfl<REAL>::Cnv(4);
+            G.name = "C_inf_v";
+
+            std::cout << "linear molecule with Cv\n";
+          }
+
+        for (int j=0; j < G.size(); j++)
+          G[j] = U*G[j]*U.transpose();
+        return;
       }
-      else{
-	G = shnfl<REAL>::Cnv(4);
-	G.name = "C_inf_v";
-
-	std::cout << "linear molecule with Cv\n";
-      }
-
-      for (int j=0; j < G.size(); j++)
-	G[j] = U*G[j]*U.transpose();      
-      return;
-    }
 
     if (planar){
-      // add two reference points on both sides of the symmetry plane
-      REAL h = std::sqrt(lmb[2]/g.nat());
-      g.add("refpoint",  nplane*h);
-      g.add("refpoint", -nplane*h);
+        // add two reference points on both sides of the symmetry plane
+        REAL h = std::sqrt(lmb[2]/g.nat());
+        g.add("refpoint",  nplane*h);
+        g.add("refpoint", -nplane*h);
 
-      std::cout << "Planar molecule\n";
-    }
-    
+        std::cout << "Planar molecule\n";
+      }
+
     // sort atoms in reverse order by the distance from centre
     g.sort(
           [](const geometry<REAL> & gg, int ii)->REAL
@@ -673,7 +673,7 @@ FOUND:
     for (auto k:img_j) std::cout << " "<< k;
     std::cout << "\n";
     */
-    
+
     // initialize permutations array to have the group in atom permutations form
     // for further 'finitiztion'
 
@@ -710,14 +710,14 @@ FOUND:
           std::vector<int> pp;
           if (equiv_geoms(pp,g,g1,R))
             if (std::find(P.begin(),P.end(),permutation(pp)) == P.end())
-	      {
+              {
                 P.push_back(permutation(pp));
                 G.add(U);
 
-		/*
-		std::cout << permutation(pp).to_string();
+                /*
+    std::cout << permutation(pp).to_string();
                 std::cout << "\n";
-		*/
+    */
               }
 
           best_transform(U,{ri,rj,ri.cross(rj)/sqrt(Ri*Rj)},
@@ -728,14 +728,14 @@ FOUND:
 
           if (equiv_geoms(pp,g,g1,R))
             if (std::find(P.begin(),P.end(),permutation(pp))==P.end())
-	      {
-		P.push_back(permutation(pp));
-		G.add(U);
+              {
+                P.push_back(permutation(pp));
+                G.add(U);
 
-		/*
-		std::cout << permutation(pp).to_string();
+                /*
+    std::cout << permutation(pp).to_string();
                 std::cout << "\n";
-		*/
+    */
               }
         }
 
@@ -746,48 +746,48 @@ FOUND:
     group_analyzer<permutation> AP(P);
 
     // Correct point group according to the multiplication table
-    fix_point_group(G,AP.multab);    
+    fix_point_group(G,AP.multab);
 
     // Define the maximum order
     int maxord=1;
     for (int i=0; i<P.size(); i++){
-      if (AP.order(i)>maxord)
-	maxord=AP.order(i);
-    }
+        if (AP.order(i)>maxord)
+          maxord=AP.order(i);
+      }
     std::vector<STRING> cand_groups = shnfl<REAL>::groups_by_order(maxord);
 
     for (int i=cand_groups.size()-1; i>=0; i--)
       {
-	std::cout << cand_groups[i] << " " << shnfl<REAL>::group(cand_groups[i]).size() << "\n";
-	if (shnfl<REAL>::group(cand_groups[i]).size() != P.size() )
-	  cand_groups.erase(cand_groups.begin()+i);
+        std::cout << cand_groups[i] << " " << shnfl<REAL>::group(cand_groups[i]).size() << "\n";
+        if (shnfl<REAL>::group(cand_groups[i]).size() != P.size() )
+          cand_groups.erase(cand_groups.begin()+i);
       }
 
     REAL fpeps = matrix3<REAL>::tol_equiv*G.size();
-    
+
     typename shnfl<REAL>::fingerprint FG(G,fpeps);
     STRING Gname;
     found = false;
-    
+
     for (const STRING &s:cand_groups)
       if ( typename shnfl<REAL>::fingerprint(shnfl<REAL>::group(s),fpeps)
-	   .compare(FG, fpeps) )
-	{
-	  found = true;
-	  Gname = s;
-	  break;
-	}
+           .compare(FG, fpeps) )
+        {
+          found = true;
+          Gname = s;
+          break;
+        }
 
     std::cout << " group= " << Gname << " found= " << found << "\n";
 
-    G.name = Gname;   
-    
+    G.name = Gname;
+
   }
 
   // ----------------------------------------------------------------------------------------
 
 #ifdef PY_EXPORT
-  
+
   template<class REAL>
   bool py_best_transform( matrix3<REAL> & res,
                           const py::list &A, const py::list &B){
@@ -850,27 +850,27 @@ FOUND:
     if (py::len(M)!=N)
       IndexError("Wrong multiplication table size in fix_point_group");
     for (int i=0; i<N; i++){
-      if (!py::isinstance<py::list>(M[i]))
-	TypeError("Bad multiplication table in fix_point_group");
-      py::list L = py::cast<py::list>(M[i]);
-      if (py::len(L)!=N)
-	IndexError("Wrong multiplication table size in fix_point_group 1");
-      for (int j=0; j<N; j++){
-	/*
-	if (!py::isinstance<int>(L[j]))
-	  TypeError("Bad multiplication table in fix_point_group 1");
-	*/
-	multab(i,j) = py::cast<int>(L[j]);
+        if (!py::isinstance<py::list>(M[i]))
+          TypeError("Bad multiplication table in fix_point_group");
+        py::list L = py::cast<py::list>(M[i]);
+        if (py::len(L)!=N)
+          IndexError("Wrong multiplication table size in fix_point_group 1");
+        for (int j=0; j<N; j++){
+            /*
+  if (!py::isinstance<int>(L[j]))
+    TypeError("Bad multiplication table in fix_point_group 1");
+  */
+            multab(i,j) = py::cast<int>(L[j]);
+          }
+
       }
-	
-    }
 
     fix_point_group(G,multab);
   }
 
 
 #endif
-  
+
 };
 
 #endif
