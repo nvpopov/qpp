@@ -1,6 +1,6 @@
 #include <pyqpp/pyqpp.hpp>
 #include <io/gmsio.hpp>
-#include <symm/gcell.hpp>
+#include <symm/gen_cell.hpp>
 #include <io/fdstream.hpp>
 
 template<qpp::qpp_bastype BT, class FREAL>
@@ -128,13 +128,13 @@ void pyqpp_gmsio_export (pybind11::module m) {
   py_gmsio_export1<float>(io);
   py_gmsio_export2<float, qpp::periodic_cell<float> >(io);
   py_gmsio_export2<float,
-      qpp::generalized_cell<float,  qpp::matrix3<float> > >(io);
+      qpp::gen_cell<float,  qpp::matrix3<float> > >(io);
 
 #ifdef PYTHON_EXP_EXT
   py_gmsio_export1<double>(io);
   py_gmsio_export2<double, qpp::periodic_cell<double> >(io);
   py_gmsio_export2<double,
-      qpp::generalized_cell<double,  qpp::matrix3<double> > >(io);
+      qpp::gen_cell<double,  qpp::matrix3<double> > >(io);
 #endif
 
 }

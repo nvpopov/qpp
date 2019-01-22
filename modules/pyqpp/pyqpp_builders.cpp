@@ -1,7 +1,7 @@
 #include <pyqpp/pyqpp.hpp>
 #include <geom/builders.hpp>
 #include <geom/ngbr.hpp>
-#include <symm/gcell.hpp>
+#include <symm/gen_cell.hpp>
 
 
 template<class REALDST, class CELLDST, class REALSRC, class CELLSRC>
@@ -17,10 +17,10 @@ template<class REALDST, class CELLDST, class REALSRC>
 void def_builders3(py::module m){
   def_builders4< REALDST, CELLDST, REALSRC, qpp::periodic_cell<REALSRC> >(m);
   def_builders4< REALDST, CELLDST, REALSRC,
-      qpp::generalized_cell<REALSRC,
+      qpp::gen_cell<REALSRC,
       qpp::matrix3<REALSRC> > >(m);
   def_builders4< REALDST, CELLDST, REALSRC,
-      qpp::generalized_cell<REALSRC,
+      qpp::gen_cell<REALSRC,
       qpp::rotrans<REALSRC> > >(m);
 }
 
@@ -33,9 +33,9 @@ void def_builders2(py::module m){
 template<class REALDST>
 void def_builders1(py::module m){
   def_builders2< REALDST, qpp::periodic_cell<REALDST> >(m);
-  def_builders2< REALDST, qpp::generalized_cell<REALDST,
+  def_builders2< REALDST, qpp::gen_cell<REALDST,
       qpp::matrix3<REALDST> > >(m);
-  def_builders2< REALDST, qpp::generalized_cell<REALDST,
+  def_builders2< REALDST, qpp::gen_cell<REALDST,
       qpp::rotrans<REALDST> > >(m);
 }
 
@@ -43,20 +43,20 @@ void pyqpp_builders_export (py::module m) {
 
   m.def("treat_crowd", qpp::treat_crowd<float,  qpp::periodic_cell<float> >);
   m.def("treat_crowd", qpp::treat_crowd<float,
-                       qpp::generalized_cell<float,
+                       qpp::gen_cell<float,
                        qpp::matrix3<float> > >);
   m.def("treat_crowd", qpp::treat_crowd<float,
-                       qpp::generalized_cell<float,
+                       qpp::gen_cell<float,
                        qpp::rotrans<float>  > >);
   def_builders1<float>(m);
 
 #ifdef PYTHON_EXP_EXT
   m.def("treat_crowd", qpp::treat_crowd<double, qpp::periodic_cell<double> >);
   m.def("treat_crowd", qpp::treat_crowd<double,
-                       qpp::generalized_cell<double,
+                       qpp::gen_cell<double,
                        qpp::matrix3<double> > >);
   m.def("treat_crowd", qpp::treat_crowd<double,
-                       qpp::generalized_cell<double,
+                       qpp::gen_cell<double,
                        qpp::rotrans<double> > >);
   def_builders1<double>(m);
 #endif

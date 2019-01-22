@@ -1,4 +1,4 @@
-#include <symm/symm.hpp>
+#include <symm/groups.hpp>
 #include <symm/cell.hpp>
 #include <symm/transform.hpp>
 #include <symm/group_theory.hpp>
@@ -21,28 +21,28 @@ int main()
     C4x(RotMtrx({1,0,0},qpp::pi/2),&cl),
     C4y(RotMtrx({0,1,0},qpp::pi/2),&cl);
 
-  generated_group<decltype(T1)> cbc(E);
+  array_group<decltype(T1)> cbc("",E);
 
   std::cout << clock() << " " << CLOCKS_PER_SEC << " " << 1e0*clock()/ CLOCKS_PER_SEC << std::endl;
   std::cout << T1 << std::endl;
-  cbc.add(T1);
+  cbc.generate(T1);
 
   std::cout << clock() << " " << CLOCKS_PER_SEC << " " << 1e0*clock()/ CLOCKS_PER_SEC << std::endl;
-  cbc.add(T2);
+  cbc.generate(T2);
 
   std::cout << clock() << " " << CLOCKS_PER_SEC << " " << 1e0*clock()/ CLOCKS_PER_SEC << std::endl;
-  cbc.add(T3);
+  cbc.generate(T3);
 
   std::cout << clock() << " " << CLOCKS_PER_SEC << " " << 1e0*clock()/ CLOCKS_PER_SEC << std::endl;
-  cbc.add(C4x);
+  cbc.generate(C4x);
 
   std::cout << clock() << " " << CLOCKS_PER_SEC << " " << 1e0*clock()/ CLOCKS_PER_SEC << std::endl;
-  cbc.add(C4y);
+  cbc.generate(C4y);
 
   std::cout << clock() << " " << CLOCKS_PER_SEC << " " << 1e0*clock()/ CLOCKS_PER_SEC << std::endl;
   std::cout << "multab\n";
 
-  group_analyzer<rotrans<double,true>,  generated_group<rotrans<double,true> > > acbc(cbc);
+  group_analyzer<rotrans<double,true>,  array_group<rotrans<double,true> > > acbc(cbc);
   std::cout << clock() << " " << CLOCKS_PER_SEC << " " << 1e0*clock()/ CLOCKS_PER_SEC << std::endl;
 
 
@@ -74,7 +74,7 @@ int main()
   std::cout << std::endl;
 
   group_characters<std::complex<double>,
-      rotrans<double,true>,  generated_group<rotrans<double,true> > > chi(cbc,acbc);
+      rotrans<double,true>,  array_group<rotrans<double,true> > > chi(cbc,acbc);
 
   std::cout << clock() << " " << CLOCKS_PER_SEC << " " << 1e0*clock()/ CLOCKS_PER_SEC << std::endl;
   std::cout << "N IRREP = " << chi.nirrep << std::endl;

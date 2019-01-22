@@ -1,6 +1,6 @@
-#include <symm/symm.hpp>
+#include <symm/groups.hpp>
 #include <symm/autosymm.hpp>
-#include <symm/gcell.hpp>
+#include <symm/gen_cell.hpp>
 #include <symm/cell.hpp>
 #include <symm/group_theory.hpp>
 #include <iostream>
@@ -17,6 +17,6 @@ int main () {
   read_xyzq(uc_io, uc);
   std::cout << uc.cell.v[0].to_string_vec()
       << uc.cell.v[1].to_string_vec() << uc.cell.v[2].to_string_vec() << std::endl;
-  generated_group<rotrans<double,true> > cg;
+  array_group<rotrans<double,true> > cg;
   find_cryst_symm<double>(cg, uc, 0.0001);
 }

@@ -1,6 +1,6 @@
 #include <fmt/format.h>
 #include <iostream>
-#include <symm/gcell.hpp>
+#include <symm/gen_cell.hpp>
 #include <geom/lace3d.hpp>
 #include <geom/geom.hpp>
 #include <geom/builders.hpp>
@@ -21,7 +21,7 @@ int main()
   generalized_cell<4,double,decltype(C4)> G({C4,C3,C31,Inv});
   geometry<4,double,decltype(G)> geom(G);
   */
-  generalized_cell<double,decltype(C4)> G({C4,S6});
+  gen_cell<double,decltype(C4)> G({C4,S6});
   G.auto_orders();
 
 

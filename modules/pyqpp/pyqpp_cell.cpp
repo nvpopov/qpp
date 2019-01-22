@@ -1,6 +1,6 @@
 #include <pyqpp/pyqpp.hpp>
 #include <symm/cell.hpp>
-#include <symm/gcell.hpp>
+#include <symm/gen_cell.hpp>
 #include <symm/group_theory.hpp>
 #include <fmt/format.h>
 #include <fmt/ostream.h>
@@ -46,44 +46,44 @@ void py_cell_export (py::module m, const char * pyname) {
 }
 
 template <class REAL, class TRANSFORM, class ARRAY = std::vector<TRANSFORM> >
-void py_generator_form (qpp::generalized_cell<REAL,TRANSFORM> & R, ARRAY & G) {
+void py_generator_form (qpp::gen_cell<REAL,TRANSFORM> & R, ARRAY & G) {
   qpp::generator_form(R,G);
 }
 
 void pyqpp_cell_export (py::module m) {
 
   py_cell_export<float>(m, "periodic_cell_f");
-  qpp::generalized_cell<float,  qpp::matrix3<float> >::py_export(
+  qpp::gen_cell<float,  qpp::matrix3<float> >::py_export(
         m, "point_group_f");
-  qpp::generalized_cell<float,  qpp::rotrans<float,false> >::py_export(
+  qpp::gen_cell<float,  qpp::rotrans<float,false> >::py_export(
         m, "crystal_group_f");
-  qpp::generalized_cell<float,  qpp::rotrans<float,true> >::py_export(
+  qpp::gen_cell<float,  qpp::rotrans<float,true> >::py_export(
         m, "finite_crystal_group_f");
-  qpp::generated_group<qpp::matrix3<float> >::py_export(
+  qpp::array_group<qpp::matrix3<float> >::py_export(
         m, "array_point_group_f");
-  qpp::generated_group<qpp::rotrans<float,true> >::py_export(
+  qpp::array_group<qpp::rotrans<float,true> >::py_export(
         m, "array_fincryst_group_f");
   m.def("generator_form", py_generator_form<float,  qpp::matrix3<float>,
-        qpp::generated_group<qpp::matrix3<float> > > );
+        qpp::array_group<qpp::matrix3<float> > > );
   m.def("generator_form", py_generator_form<float,  qpp::rotrans<float,true>,
-        qpp::generated_group<qpp::rotrans<float,true> > >);
+        qpp::array_group<qpp::rotrans<float,true> > >);
 
 #ifdef PYTHON_EXP_EXT
   py_cell_export<double>(m, "periodic_cell_d");
-  qpp::generalized_cell<double, qpp::matrix3<double> >::py_export(
+  qpp::gen_cell<double, qpp::matrix3<double> >::py_export(
         m, "point_group_d");
-  qpp::generalized_cell<double, qpp::rotrans<double,false> >::py_export(
+  qpp::gen_cell<double, qpp::rotrans<double,false> >::py_export(
         m, "crystal_group_d");
-  qpp::generalized_cell<double, qpp::rotrans<double,true> >::py_export(
+  qpp::gen_cell<double, qpp::rotrans<double,true> >::py_export(
         m, "finite_crystal_group_d");
-  qpp::generated_group<qpp::matrix3<double> >::py_export(
+  qpp::array_group<qpp::matrix3<double> >::py_export(
         m, "array_point_group_d");
-  qpp::generated_group<qpp::rotrans<double,true> >::py_export(
+  qpp::array_group<qpp::rotrans<double,true> >::py_export(
         m, "array_fincryst_group_d");
   m.def("generator_form", py_generator_form<double, qpp::matrix3<double>,
-        qpp::generated_group<qpp::matrix3<double> > >);
+        qpp::array_group<qpp::matrix3<double> > >);
   m.def("generator_form", py_generator_form<double, qpp::rotrans<double,true>,
-        qpp::generated_group<qpp::rotrans<double,true> > >);
+        qpp::array_group<qpp::rotrans<double,true> > >);
 #endif
 
 }

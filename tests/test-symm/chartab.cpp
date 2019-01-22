@@ -1,5 +1,5 @@
 #include <geom/lace3d.hpp>
-#include <symm/symm.hpp>
+#include <symm/groups.hpp>
 #include <symm/group_theory.hpp>
 #include <iostream>
 //#include <boost/format.hpp>
@@ -21,9 +21,9 @@ int main()
   auto C4 = RotMtrx({1,0,0},pi/2);
   auto C3 = RotMtrx({1,1,1},2*pi/3);
   auto C31 = RotMtrx({1,-1,-1},2*pi/3);
-  generated_group<matrix3<double> > T;
-  T.add(C4);
-  T.add(C3);
+  array_group<matrix3<double> > T;
+  T.generate(C4);
+  T.generate(C3);
   // T.generator(C31);
 
   std::cout << "Group size = " << T.size() << std::endl;

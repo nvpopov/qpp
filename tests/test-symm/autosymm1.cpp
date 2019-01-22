@@ -1,11 +1,11 @@
 
-#include <symm/symm.hpp>
+#include <symm/groups.hpp>
 #include <symm/autosymm.hpp>
-#include <symm/gcell.hpp>
+#include <symm/gen_cell.hpp>
 #include <symm/group_theory.hpp>
 #include <iostream>
 #include <fmt/format.h>
-
+ 
 using namespace qpp;
 
 void prnmtr(const matrix3<double> & M){
@@ -23,15 +23,15 @@ int main()
   matrix3<double> C4y = RotMtrx({0,1,0},pi/2);
   matrix3<double> I = matrix3<double>::Identity()*-1;
 
-  generated_group<matrix3<double> > OH;
+  array_group<matrix3<double> > OH;
 
-  OH.add(C4x);
-  OH.add(C4y);
-  OH.add(I);
+  OH.generate(C4x);
+  OH.generate(C4y);
+  OH.generate(I);
 
   //matrix3d<double>::tol_equiv = 1e-6;
 
-  generalized_cell<double,matrix3<double> > Oh;
+  gen_cell<double,matrix3<double> > Oh;
   generator_form(Oh,OH);
 
   for (int d=0; d < Oh.DIM; d++)

@@ -309,7 +309,7 @@ namespace qpp {
   // ------------------- Neighbours table -----------------------
 
   template <class REAL, class CELL = periodic_cell<REAL> >
-  class neighbours_table : public geometry_observer<REAL>{
+  class neighbours_table : public geometry_observer<REAL> {
 
     typedef neighbours_table<REAL,CELL> SELF;
 
@@ -323,7 +323,7 @@ namespace qpp {
     bonding_table<REAL> *btbl;
 
     // Internal bonding distances table
-    REAL *_disttable;
+    std::vector<REAL> _disttable;
 
     // Number of atomic types
     int ntp;
@@ -332,18 +332,18 @@ namespace qpp {
     inline REAL distance(int i, int j) {return _disttable[i*ntp+j];}
 
     inline void resize_disttable(){
-      if (_disttable!=NULL)
-        delete _disttable;
       ntp = geom->n_atom_types();
-      _disttable = new REAL[ntp*ntp];
+      _disttable.resize(ntp*ntp);
     }
 
     void build_disttable(){
       resize_disttable();
       for (int i=0; i<ntp; i++)
-        for (int j=0; j<=i; j++)
-          _disttable[ntp*i+j] = _disttable[ntp*j+i] =
-              btbl->distance(geom->atom_of_type(i),geom->atom_of_type(j));
+        for (int j=0; j<=i; j++) {
+            _disttable[ntp*i+j] = btbl->distance(geom->atom_of_type(i),geom->atom_of_type(j));
+            _disttable[ntp*j+i] = btbl->distance(geom->atom_of_type(i),geom->atom_of_type(j));
+
+          }
     }
     // ------------------------------------------
 
@@ -547,7 +547,7 @@ namespace qpp {
       btbl = &t;
       geom = & g;
       DIM = geom -> DIM;
-      _disttable = NULL;
+      //_disttable.clear();
       build_disttable();
       reference_mode = false;
       transl_mode = true;

@@ -4,7 +4,7 @@
 #include <vector>
 #include <cmath>
 #include <symm/index.hpp>
-#include <symm/symm.hpp>
+#include <symm/groups.hpp>
 #include <symm/cell.hpp>
 #include <geom/geom.hpp>
 #include <geom/xgeom.hpp>

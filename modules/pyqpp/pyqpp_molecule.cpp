@@ -1,6 +1,6 @@
 #include <pyqpp/pyqpp.hpp>
 #include <data/molecule.hpp>
-#include <symm/gcell.hpp>
+#include <symm/gen_cell.hpp>
 
 template<class REAL, class CELL>
 void py_molecule_export (py::module m, const char * pyname) {
@@ -30,20 +30,20 @@ void py_molecule_export (py::module m, const char * pyname) {
 void pyqpp_molecule_export (pybind11::module m) {
 
   py_molecule_export<float, qpp::periodic_cell<float> >(m, "molecule_f");
-  py_molecule_export<float, qpp::generalized_cell<float,
+  py_molecule_export<float, qpp::gen_cell<float,
       qpp::matrix3<float> > >(m, "molecule_pgf");
-  py_molecule_export<float, qpp::generalized_cell<float,
+  py_molecule_export<float, qpp::gen_cell<float,
       qpp::rotrans<float, false> > >(m, "molecule_cgf");
-  py_molecule_export<float, qpp::generalized_cell<float,
+  py_molecule_export<float, qpp::gen_cell<float,
       qpp::rotrans<float, true> > >(m, "molecule_fcgf");
 
 #ifdef PYTHON_EXP_EXT
   py_molecule_export<double, qpp::periodic_cell<double> >(m, "molecule_d");
-  py_molecule_export<double, qpp::generalized_cell<double,
+  py_molecule_export<double, qpp::gen_cell<double,
       qpp::matrix3<double> > >(m, "molecule_pgd");
-  py_molecule_export<double, qpp::generalized_cell<double,
+  py_molecule_export<double, qpp::gen_cell<double,
       qpp::rotrans<double, false> > >(m, "molecule_cgd");
-  py_molecule_export<double, qpp::generalized_cell<double,
+  py_molecule_export<double, qpp::gen_cell<double,
       qpp::rotrans<double, true> > >(m, "molecule_fcgd");
 #endif
 

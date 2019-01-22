@@ -15,26 +15,29 @@ namespace py = pybind11;
 
 namespace qpp {
 
-  /*!\brief The generators_pack class implements
-   * Positionary Generator Form (PGF) for arbitrary finite group.
+  /*!\brief The genform_group class implements
+    Positionary Generator Form (PGF) for arbitrary finite group.
   */
   template <class TRANSFORM>
-  class generators_pack{
+  class genform_group{
   public:
 
     std::vector<TRANSFORM> generators;
     index _begin, _end;
     int DIM;
+    STRING name;
 
-    generators_pack(int dim=0){
+    genform_group(int dim=0, const STRING & _name = ""){
       DIM=dim;
       generators.resize(DIM);
       _begin = index::D(DIM);
       _end   = index::D(DIM);
+      name = _name;
     }
 
-    generators_pack(const std::vector<TRANSFORM> & g,
-                    const index & __begin, const index & __end){
+    genform_group(const std::vector<TRANSFORM> & g,
+                    const index & __begin, const index & __end
+		  , const STRING & _name = ""){
       DIM = g.size();
       generators.resize(DIM);
       int d=0;
@@ -42,9 +45,10 @@ namespace qpp {
         generators[d++]=t;
       _begin = __begin;
       _end   = __end;
+      name = _name;
     }
 
-    generators_pack(const std::vector<TRANSFORM> & g){
+    genform_group(const std::vector<TRANSFORM> & g, const STRING & _name = ""){
       DIM = g.size();
       generators.resize(DIM);
 
@@ -54,10 +58,11 @@ namespace qpp {
 
       _begin = index::D(DIM);
       _end   = index::D(DIM);
+      name = _name;
     }
 
-    generators_pack(const generators_pack<TRANSFORM> & G) :
-      DIM(G.DIM), generators(G.generators), _begin(G._begin), _end(G._end)
+    genform_group(const genform_group<TRANSFORM> & G) :
+      DIM(G.DIM), generators(G.generators), _begin(G._begin), _end(G._end), name(G.name)
     {}
 
     int get_dim(){return DIM;}
@@ -119,10 +124,10 @@ namespace qpp {
   /*
 #if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
 
-  template<class TRANSFORM> class generated_group;
+  template<class TRANSFORM> class array_group;
 
   template <class TRANSFORM>
-  int py_group_len(const generated_group<TRANSFORM> & G)
+  int py_group_len(const array_group<TRANSFORM> & G)
   {
     return G.size();
   }
@@ -132,8 +137,12 @@ namespace qpp {
   // ------------------------------------------------------------------------
 
   template<class TRANSFORM>
-  class generated_group{
+  class array_group{
   public:
+
+    static int default_lim_size;
+    int lim_size;
+    STRING name;
 
     std::vector<TRANSFORM> group;
 
@@ -148,12 +157,14 @@ namespace qpp {
       return result? i : -1;
     }
 
-    generated_group(TRANSFORM E = TRANSFORM::unity){
+    array_group(const STRING & _name="", TRANSFORM E = TRANSFORM::unity){
+      name = _name;
       group.push_back(E);
+      lim_size = default_lim_size;
     }
 
-    generated_group(const generated_group<TRANSFORM> & G):
-      group(G.group)
+    array_group(const array_group<TRANSFORM> & G):
+      group(G.group), lim_size(G.lim_size), name(G.name)
     {}
 
     inline TRANSFORM & operator[](int i)
@@ -164,8 +175,18 @@ namespace qpp {
 
     inline int size() const
     { return group.size(); }
-
+    
     void add(const TRANSFORM & g){
+      if ( index(g) >= 0 )
+        return;
+      group.push_back(g);
+    }    
+
+    void erase(int i){
+      group.erase(group.begin()+i);
+    }
+
+    void generate(const TRANSFORM & g){
       if ( index(g) >= 0 )
         return;
       int inew = size();
@@ -191,6 +212,9 @@ namespace qpp {
                 //if (!(h2 == h1) && index(h2)==-1)
                 if ((h2 != h1) && index(h2) == -1)
                   group.push_back(h2);
+
+		if (size() > lim_size)
+		  OverflowError("array_group size exceeded the size limit\nWhat you can do:\n 1) Set larger lim_size value;\n 2) Check if the group is indeed finite;\n");
               }
           //std::cout << inew << " " << inewest << "\n";
 
@@ -221,21 +245,29 @@ namespace qpp {
     }
 
     static void py_export(py::module m, const char * pyname){
-      py::class_<generated_group<TRANSFORM> >(m, pyname)
-          .def(py::init<>())
-          .def(py::init<const generated_group<TRANSFORM> &>())
-          .def("index", & generated_group<TRANSFORM>::index )
-          .def("add",   & generated_group<TRANSFORM>::add )
-          .def("__getitem__",  & generated_group<TRANSFORM>::py_getitem)
-          .def("__setitem__",  & generated_group<TRANSFORM>::py_setitem)
-          .def("__len__", & generated_group<TRANSFORM>::size)
-          ;
+      py::class_<array_group<TRANSFORM> >(m, pyname)
+	.def(py::init<const STRING &, TRANSFORM>(), py::arg("_name") = "", py::arg("E") = TRANSFORM::unity )
+	.def(py::init<const array_group<TRANSFORM> &>())
+	.def("index",  & array_group<TRANSFORM>::index )
+	.def("add",    & array_group<TRANSFORM>::add )
+	.def("generate", & array_group<TRANSFORM>::generate )
+	.def("erase",  & array_group<TRANSFORM>::erase )
+	.def("__getitem__",  & array_group<TRANSFORM>::py_getitem)
+	.def("__setitem__",  & array_group<TRANSFORM>::py_setitem)
+	.def("__len__", & array_group<TRANSFORM>::size)
+	.def_readwrite("name", & array_group<TRANSFORM>::name)
+	.def_readwrite("lim_size", & array_group<TRANSFORM>::lim_size)
+	.def_readwrite_static("default_lim_size", & array_group<TRANSFORM>::default_lim_size)
+	;
       // bp::def("len", py_group_len<TRANSFORM>);
     }
 
 #endif
 
   };
+
+  template<class TRANSFORM>
+  int array_group<TRANSFORM>::default_lim_size = 1024;
 
 }
 
