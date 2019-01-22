@@ -28,7 +28,7 @@ namespace qpp{
     struct _covrad_record{
       STRING at;
       REAL d;
-      
+
       _covrad_record(const STRING & _at, REAL _d){
         at = _at;
         d = _d;
@@ -54,7 +54,7 @@ namespace qpp{
     struct _ngbr_record{
       STRING at1, at2;
       REAL d;
-      
+
       _ngbr_record(const STRING & _at1, const STRING & _at2, REAL _d){
         at1 = _at1;
         at2 = _at2;
@@ -110,7 +110,7 @@ namespace qpp{
       else
         _records.push_back(_ngbr_record(at1,at2,d));
     }
-    
+
     REAL distance(const STRING & at1, const STRING   at2){
       int i = _find_record(at1,at2);
       if (i>-1)
@@ -121,7 +121,7 @@ namespace qpp{
 
       if ( i>-1 && j>-1 )
         return _covrads[i].d + _covrads[j].d;
-      
+
       return default_distance;
     }
 
@@ -155,7 +155,7 @@ namespace qpp{
       for (int k=0; k<offset; k++) os << " ";
       os << "}\n";
     }
-    
+
     void merge(const bonding_table<REAL> & bt){
       default_distance = std::max(default_distance, bt.default_distance);
       for (int i=0; i<bt._records.size(); i++){
@@ -201,7 +201,7 @@ namespace qpp{
     py::dict to_dict(){
       py::dict d;
       d["default"] = default_distance;
-      
+
       for (auto i = _covrads.begin(); i!=_covrads.end(); i++)
         d[i->at.c_str()] = i->d;
 
@@ -212,7 +212,7 @@ namespace qpp{
     }
 
     void from_dict( py::dict & d){
-      
+
       for(auto p : d){
           //std::vector p = py::cast<std::vector>(pnc);
           REAL val = this->default_distance;
@@ -249,7 +249,7 @@ namespace qpp{
                       "key can be \'default\', an atom, or a pair of atoms");
         }
     }
-    
+
     static void py_export(py::module m, const char * pyname){
       std::string sPropNameCovRad =
           fmt::format("{0}_{1}",pyname,"idx_prop_covrad");
@@ -306,8 +306,8 @@ namespace qpp{
   // ------------------- Neighbours table -----------------------
 
   template <class REAL, class CELL = periodic_cell<REAL> >
-  class neighbours_table : public geometry_observer<REAL>{
-    
+  class neighbours_table : public geometry_observer<REAL> {
+
     typedef neighbours_table<REAL,CELL> SELF;
 
     // The periodicity the geometry
@@ -320,27 +320,27 @@ namespace qpp{
     bonding_table<REAL> *btbl;
 
     // Internal bonding distances table
-    REAL *_disttable;
+    std::vector<REAL> _disttable;
 
     // Number of atomic types
     int ntp;
-    
+
     // Bonding distance between i-th and j-th atomic types
     inline REAL distance(int i, int j) {return _disttable[i*ntp+j];}
-    
+
     inline void resize_disttable(){
-      if (_disttable!=NULL)
-        delete _disttable;
       ntp = geom->n_atom_types();
-      _disttable = new REAL[ntp*ntp];
+      _disttable.resize(ntp*ntp);
     }
-    
+
     void build_disttable(){
       resize_disttable();
       for (int i=0; i<ntp; i++)
-        for (int j=0; j<=i; j++)
-          _disttable[ntp*i+j] = _disttable[ntp*j+i] =
-              btbl->distance(geom->atom_of_type(i),geom->atom_of_type(j));
+        for (int j=0; j<=i; j++) {
+            _disttable[ntp*i+j] = btbl->distance(geom->atom_of_type(i),geom->atom_of_type(j));
+            _disttable[ntp*j+i] = btbl->distance(geom->atom_of_type(i),geom->atom_of_type(j));
+
+          }
     }
     // ------------------------------------------
 
@@ -446,11 +446,11 @@ namespace qpp{
       const REAL alpha = 1, beta = 0;
       REAL Vol = (Rmax(0)-Rmin(0))*(Rmax(1)-Rmin(1))*(Rmax(2)-Rmin(2));
       return std::pow(Vol,1./3)*std::pow(alpha/geom->nat(), 1./(3*(beta+1)));
-      
+
     }
 
     void grain_setup(){
-      
+
       if (auto_grainsize){
           grainsize = REAL(0);
           int ntp = geom->n_atom_types();
@@ -462,7 +462,7 @@ namespace qpp{
       translational_grain_setup();
 
       REAL opt_gs = optimal_grainsize();
-      
+
       //std::cout << "gs= " << grainsize << " opt_gs= " << opt_gs << "\n";
 
       if (auto_grainsize && grainsize < opt_gs ){
@@ -470,7 +470,7 @@ namespace qpp{
           for (int i=0; i<3; i++)
             ngrain(i) = int( (Rmax(i)-Rmin(i))/grainsize ) + 1;
         }
-      
+
     }
 
     inline int gidx(int i, int j, int k){
@@ -507,8 +507,8 @@ namespace qpp{
         grains[i].clear();
       grains.clear();
       grains.resize(ngrain(0)*ngrain(1)*ngrain(2));
-      
-      
+
+
       for (int at=0; at<geom->nat(); at++)
         if (! geom->shadow(at) )
           for ( iterator I(geom->cell.begin(),geom->cell.end()); !I.end(); I++)
@@ -544,7 +544,7 @@ namespace qpp{
       btbl = &t;
       geom = & g;
       DIM = geom -> DIM;
-      _disttable = NULL;
+      //_disttable.clear();
       build_disttable();
       reference_mode = false;
       transl_mode = true;
@@ -561,7 +561,7 @@ namespace qpp{
     void reference_build(){
 
       //std::cout << "reference build\n";
-      
+
       for (int i=0; i<geom->nat(); i++)
         if (!geom->shadow(i))
           for (int k=0; k<geom->nat(); k++)
@@ -583,7 +583,7 @@ namespace qpp{
           for (int k=-1; k<=-i || k<=-j; k++)
             dirray[n++] = {i,j,k};
 
-      
+
       // debug
       /*
       std::cout << "after dirray alive\n";
@@ -591,7 +591,7 @@ namespace qpp{
         std::cout << DI;
       std::cout << "\n";
       */
-      
+
 
       //index shift1 = {1,1,1}, shift2={2,2,2};
       //index shift1 = {1,1,1}, shift2={1,1,1};
@@ -699,7 +699,7 @@ namespace qpp{
           translational_build();
           return;
         }
-      
+
       std::set<std::pair<int,int> > gpairs;
       std::vector<char> marked(ngrain(0)*ngrain(1)*ngrain(2), false);
 
@@ -741,7 +741,7 @@ namespace qpp{
       auto last = std::unique(gpairs.begin(),gpairs.end());
       gpairs.resize( std::distance(gpairs.begin(),last) );
       */
-      
+
       for (const auto & gp : gpairs){
           int g1 = gp.first, g2 = gp.second;
           for (int c1 = 0; c1 < grains[g1].size(); c1++)
@@ -772,7 +772,7 @@ namespace qpp{
 
               }
         }
-      
+
       //      for (auto gp:gpairs)
       //	std::cout << gp.first << " " << gp.second << "\n";
     }
@@ -926,7 +926,7 @@ namespace qpp{
 
       return table(i,j);
     }
-    
+
     static void py_export(py::module m, const char * pyname){
       py::class_<neighbours_table<REAL,CELL> >(m, pyname)
           .def(py::init< geometry<REAL, CELL> &, bonding_table<REAL> & >())

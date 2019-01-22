@@ -19,10 +19,10 @@ int main(){
 
   init_rand();
 
-  qpp::shape_box<double> p1(v3d(2,0,0),v3d(0,1,0),v3d(0,0,1),"abc"), 
+  qpp::shape_box<double> p1(v3d(2,0,0),v3d(0,1,0),v3d(0,0,1),"abc"),
     p2({1,0,0},{0,2,0},{0,0,1});
 
-  qpp::shape_sphere<double> s1(1),s2(1,v3d(1.5,0,0));    
+  qpp::shape_sphere<double> s1(1),s2(1,v3d(1.5,0,0));
 
   qpp::shape<double> & sh = s1 ^ s2;
 
@@ -38,9 +38,9 @@ int main(){
     {
       qpp::vector3<double> r;
       for (int j=0; j<3; j++)
-	r(j) = r1(j) + rnd()*(r2(j)-r1(j));
+        r(j) = r1(j) + rnd()*(r2(j)-r1(j));
       if (sh.within(r)) N1++;
-	//	g.add("H",r);
+  //	g.add("H",r);
     }
 
   double V = (r2(0)-r1(0))*(r2(1)-r1(1))*(r2(2)-r1(2))*N1/N;

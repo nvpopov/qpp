@@ -74,7 +74,9 @@ namespace qpp{
           v[i] = cl.v[i];
       }
 
-
+      ~periodic_cell() {
+        delete [] v;
+      }
       /*! \brief Creates periodic cell of DIM==3 with given lattice
      * constants and angles
         @param a,b,c - lattice constants

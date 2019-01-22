@@ -12,91 +12,91 @@ namespace qpp {
   // simple and dirty table
   template <class ITEM>
   class static_table{
-    int N,M;
-    ITEM * tbl;
-    //std::vector<std::vector<ITEM> > tbl;
-    
-    inline int idx(int i, int j) const{
-      return i*N+j;
-    }
-    
-  public:
+      int N,M;
+      ITEM * tbl;
+      //std::vector<std::vector<ITEM> > tbl;
 
-    void resize(int _N, int _M){
-      N = _N;
-      M = _M;
-      /*
+      inline int idx(int i, int j) const{
+        return i*N+j;
+      }
+
+    public:
+
+      void resize(int _N, int _M){
+        N = _N;
+        M = _M;
+        /*
       tbl.resize(N);
       for (int i=0; i<N; i++)
-	tbl[i].resize(M);
+  tbl[i].resize(M);
       */
-      if (tbl != NULL)
-	delete tbl;
-      if (N*M>0)
-	tbl = new ITEM[N*M];
-      else
-	tbl = NULL;
-    }
-
-    static_table(int _N, int _M){
-      N = _N;
-      M = _M;
-      if (N*M>0)
-	tbl = new ITEM[N*M];
-      else
-	tbl = NULL;
-    }
-
-    static_table(){
-      N = M = 0;
-      tbl = NULL;
-    }
-
-    static_table(const static_table<ITEM> & T){
-      N = T.N;
-      M = T.M;
-      if (T.tbl==NULL)
-	tbl = NULL;
-      else {
-	tbl = new ITEM[N*M];
-	for (int i=0; i<N*M; i++)
-	  tbl[i] = T.tbl[i];
+        if (tbl != NULL)
+          delete tbl;
+        if (N*M>0)
+          tbl = new ITEM[N*M];
+        else
+          tbl = NULL;
       }
-    }
 
-    inline int size(int d) const{
-      if (d==0) return N;
-      else if (d==1) return M;
-      else IndexError("Illegal dimension in static_table");
-    }
+      static_table(int _N, int _M){
+        N = _N;
+        M = _M;
+        if (N*M>0)
+          tbl = new ITEM[N*M];
+        else
+          tbl = NULL;
+      }
 
-    inline ITEM operator()(int i, int j) const{
-      if (i<0) i+=N;
-      if (i<0 or i>=N)
-	IndexError("Index 0 out of range in static_table");
-      if (j<0) j+=M;
-      if (j<0 or j>=M)
-	IndexError("Index 1 out of range in static_table");
-      return tbl[idx(i,j)];
-    }
+      static_table(){
+        N = M = 0;
+        tbl = NULL;
+      }
 
-    inline ITEM & operator()(int i, int j){
-      if (i<0) i+=N;
-      if (i<0 or i>=N)
-	IndexError("Index 0 out of range in static_table");
-      if (j<0) j+=M;
-      if (j<0 or j>=M)
-	IndexError("Index 1 out of range in static_table");
-      return tbl[idx(i,j)];
-    }
+      static_table(const static_table<ITEM> & T){
+        N = T.N;
+        M = T.M;
+        if (T.tbl==NULL)
+          tbl = NULL;
+        else {
+            tbl = new ITEM[N*M];
+            for (int i=0; i<N*M; i++)
+              tbl[i] = T.tbl[i];
+          }
+      }
 
-    ~static_table(){
-      if (tbl != NULL)
-	delete tbl;
-    }
-    
+      inline int size(int d) const{
+        if (d==0) return N;
+        else if (d==1) return M;
+        else IndexError("Illegal dimension in static_table");
+      }
+
+      inline ITEM operator()(int i, int j) const{
+        if (i<0) i+=N;
+        if (i<0 or i>=N)
+          IndexError("Index 0 out of range in static_table");
+        if (j<0) j+=M;
+        if (j<0 or j>=M)
+          IndexError("Index 1 out of range in static_table");
+        return tbl[idx(i,j)];
+      }
+
+      inline ITEM & operator()(int i, int j){
+        if (i<0) i+=N;
+        if (i<0 or i>=N)
+          IndexError("Index 0 out of range in static_table");
+        if (j<0) j+=M;
+        if (j<0 or j>=M)
+          IndexError("Index 1 out of range in static_table");
+        return tbl[idx(i,j)];
+      }
+
+      ~static_table(){
+        if (tbl != NULL)
+          delete [] tbl;
+      }
+
   };
-  
+
   // Really ugly implementation of variable data container,
   // but we don't want boost::variant neither boost::any!
   class datum {
