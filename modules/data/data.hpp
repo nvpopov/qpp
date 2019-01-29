@@ -31,7 +31,7 @@ namespace qpp {
 	tbl[i].resize(M);
       */
       if (tbl != NULL)
-	delete tbl;
+	delete [] tbl;
       if (N*M>0)
 	tbl = new ITEM[N*M];
       else
@@ -92,8 +92,43 @@ namespace qpp {
 
     ~static_table(){
       if (tbl != NULL)
-	delete tbl;
+	delete [] tbl;
     }
+    
+  };
+
+  /*
+   */
+  template<class T, class INT>
+  void reorder(std::vector<T> & data, std::vector<INT> & idx){
+    std::vector<INT> ridx(idx.size());
+    for (INT i=0; i<idx.size(); i++)
+      ridx[idx[i]] = i;
+    bool done;
+    do{
+      done = true;
+      for (INT i=0; i<idx.size(); i++)
+	if (ridx[i]!=i){
+	  INT j = ridx[i];
+	  std::swap(data[i],data[j]);
+	  std::swap(ridx[i],ridx[j]);
+	  done = false;
+	}
+    } while (!done);
+  }
+
+  // ----------------------------------------------------------------------------------------
+  // Class Bool to use std::vector<Bool> instead of std::vector<bool>
+  
+  class Bool{
+  private:
+    bool m_value;
+  public:
+    
+    Bool(): m_value(){}
+    Bool( bool value ) : m_value(value){}
+    inline operator bool() const { return m_value;}
+    inline operator bool&() { return m_value;}
     
   };
   

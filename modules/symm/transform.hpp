@@ -18,10 +18,10 @@ namespace qpp{
       typedef periodic_cell<REAL>  BOUNDARY;
 
       //!\brief the threshhold to consider two translation vectors equal
-      static REAL translation_tolerance;
+      static REAL tol_trans;
 
       //!\brief the threshhold to consider two rotation matricies equal
-      static REAL rotation_tolerance;
+      static REAL tol_rot;
 
       static rotrans<REAL,BOUND> unity;
 
@@ -90,7 +90,7 @@ namespace qpp{
             vector3<REAL> f =  cell -> cart2frac(t);
             for (int d=0; d<cell->DIM; d++){
                 f(d) -= floor(f(d));
-                if (std::abs(f(d)-REAL(1))<translation_tolerance)
+                if (std::abs(f(d)-REAL(1))<tol_trans)
                   f(d)=REAL(0);
               }
             t = cell -> frac2cart(f);
@@ -99,16 +99,16 @@ namespace qpp{
       }
 
       /*!\brief Comparison of two rotrans operations. They are considered equal
-      if their translations differ by less than translation_tolerance and their
-      rotation matricies differ by less than rotation_tolerance.
+      if their translations differ by less than tol_trans and their
+      rotation matricies differ by less than tol_rot.
     */
       inline bool operator==(const rotrans<REAL, BOUND> & b) const{
         if (!BOUND) {
-            return (T - b.T).norm()<= translation_tolerance &&
-                (R - b.R).norm() <= rotation_tolerance;
+            return (T - b.T).norm()<= tol_trans &&
+                (R - b.R).norm() <= tol_rot;
           }
         else {
-            if ( (R - b.R).norm() > rotation_tolerance) return false;
+            if ( (R - b.R).norm() > tol_rot) return false;
             vector3<REAL> f =  cell -> cart2frac(T - b.T);
 
             //debug
@@ -119,7 +119,7 @@ namespace qpp{
 
             //std::cout << " t= " << f << "\n";
 
-            return (f).norm() <= translation_tolerance;
+            return (f).norm() <= tol_trans;
           }
       }
 
@@ -193,10 +193,10 @@ namespace qpp{
 
 
   template<class REAL, bool BOUND>
-  REAL rotrans<REAL,BOUND>::translation_tolerance = 1e-8;
+  REAL rotrans<REAL,BOUND>::tol_trans = vector3<REAL>::tol_equiv;
 
   template<class REAL, bool BOUND>
-  REAL rotrans<REAL,BOUND>::rotation_tolerance = 1e-8;
+  REAL rotrans<REAL,BOUND>::tol_rot = matrix3<REAL>::tol_equiv;
 
   template<class REAL, bool BOUND>
   rotrans<REAL,BOUND>
@@ -235,7 +235,7 @@ namespace qpp{
   struct translation
   {
     //typedef typename BOUNDARY::real real;
-    static REAL translation_tolerance;
+    static REAL tol_trans;
 
     static translation<REAL> unity;
 
@@ -262,12 +262,12 @@ namespace qpp{
 
     inline bool operator==(const translation<REAL> & b) const
     {
-      return norm(T - b.T) <= translation_tolerance;
+      return norm(T - b.T) <= tol_trans;
     }
 
     inline bool operator!=(const translation<REAL> & b) const
     {
-      return norm(T - b.T) > translation_tolerance;
+      return norm(T - b.T) > tol_trans;
     }
 
     inline vector3<REAL> operator*(const vector3<REAL> & v) const
@@ -284,7 +284,7 @@ namespace qpp{
   };
 
   template<class REAL>
-  REAL translation<REAL>::translation_tolerance = 1e-10;
+  REAL translation<REAL>::tol_trans = 1e-10;
 
   template<class REAL>
   translation<REAL>  translation<REAL>::unity(vector3<REAL>(0e0));

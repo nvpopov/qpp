@@ -154,7 +154,7 @@ namespace qpp{
       return result? i : -1;
     }
 
-    array_group(const STRING & _name="", TRANSFORM E = TRANSFORM::unity){
+    array_group( const STRING & _name="", TRANSFORM E = TRANSFORM::unity){
       name = _name;
       group.push_back(E);
       lim_size = default_lim_size;

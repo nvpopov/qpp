@@ -66,7 +66,7 @@ namespace qpp {
       if constexpr(std::is_same<VALTYPE,float>::value){
 	  return 1e-5;	}
       if constexpr(std::is_same<VALTYPE,double>::value){
-	  return 1e-10;	}
+	  return 1e-8;	}
     }
 
       generic_matrix(void):Eigen::Matrix<VALTYPE, N , M >() {}

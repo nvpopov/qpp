@@ -46,13 +46,13 @@ int main(){
 
   //  analyse_group<matrix3d<double>, decltype(T) > A(T);
   //group_analyzer< matrix3d<double>, decltype(G) > A(G);
-  group_analyzer< matrix3<double>, decltype(g) > A(g);
+  group_analyzer< matrix3<double>, decltype(T) > A(T);
 
   std::cout << "Multiplication table:\n";
 
-  for (int i=0; i < g.size(); i++) {
+  for (int i=0; i < T.size(); i++) {
       std::cout << fmt::format("{} |", i);
-      for (int j=0; j < g.size(); j++)
+      for (int j=0; j < T.size(); j++)
         std::cout << fmt::format("{}  ", A.multab(i,j));
       std::cout << std::endl;
     }

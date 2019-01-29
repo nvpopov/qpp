@@ -53,7 +53,7 @@ namespace qpp {
 
         if (DIM != I.DIM){
             if (del)
-              delete idx;
+              delete [] idx;
             DIM = I.DIM;
             idx = new int[DIM];
             del = true;

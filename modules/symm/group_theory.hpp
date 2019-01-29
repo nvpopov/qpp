@@ -68,7 +68,7 @@ namespace qpp{
       // Find orders of all elements
       void build_orders() {
 
-        if (ordr!=NULL) delete ordr;
+        if (ordr!=NULL) delete [] ordr;
         ordr = new int [G.size()];
 
         for (int g = 0; g < G.size(); g++) {
@@ -257,6 +257,10 @@ namespace qpp{
 
         //std::cout << "alive4\n";
       }
+
+    ~group_analyzer(){
+      if (ordr!=NULL) delete [] ordr;
+    }
 
   };
 

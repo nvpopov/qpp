@@ -330,7 +330,7 @@ namespace qpp{
     
     inline void resize_disttable(){
       if (_disttable!=NULL)
-        delete _disttable;
+        delete []_disttable;
       ntp = geom->n_atom_types();
       _disttable = new REAL[ntp*ntp];
     }
@@ -550,6 +550,10 @@ namespace qpp{
       transl_mode = true;
       auto_grainsize = true;
       auto_update = false;
+    }
+
+    ~neighbours_table(){
+      if (_disttable!=NULL) delete []_disttable;
     }
 
     REAL get_grain_size(){return grainsize;}
