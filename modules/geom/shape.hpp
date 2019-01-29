@@ -44,7 +44,7 @@ namespace qpp{
       {  name = __name; }
 
       /*
-    shape(const STRING & __name = "", qpp_object * __owner = NULL):
+    shape(const STRING & __name = "", qpp_object * __owner = nullptr):
       qpp_object(__name,__owner)
       {}*/
 

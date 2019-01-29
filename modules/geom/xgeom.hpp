@@ -38,7 +38,7 @@ namespace qpp{
     std::vector<basic_types>  _field_type;
 
     std::vector<int>          _field_idx;
-    std::vector<char>         _field_additive;
+    std::vector<Bool>         _field_additive;
 
     int _nxreal, _nxint, _nxbool, _nxstring, _nfields;
     int ix_charge, ix_x, ix_y, ix_z, ix_atom, ix_mass, ix_number;
@@ -264,9 +264,9 @@ namespace qpp{
 
     int nfields_bool() const{ return _nxbool;}
 
-    bool additive(int i) const{ return (bool)_field_additive[i]; }
+    bool additive(int i) const{ return _field_additive[i]; }
 
-    bool & additive(int i){ return *((bool*)(&_field_additive[i])); }
+    bool & additive(int i){ return _field_additive[i]; }
 
     template<class T>
     T & xfield(int i, int j){

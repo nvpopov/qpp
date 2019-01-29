@@ -65,12 +65,17 @@ namespace qpp {
       static typename numeric_type<VALTYPE>::norm tol_equiv;
       static generic_matrix unity;
 
-    static typename numeric_type<VALTYPE>::norm tol_equiv_default(){
-      if constexpr(std::is_same<VALTYPE,float>::value){
-    return 1e-5;	}
-      if constexpr(std::is_same<VALTYPE,double>::value){
-    return 1e-10;	}
-    }
+      static typename numeric_type<VALTYPE>::norm tol_equiv_default(){
+
+        if constexpr(std::is_same<VALTYPE,float>::value) {
+          return 1e-5;
+        }
+        if constexpr(std::is_same<VALTYPE,double>::value) {
+          return 1e-8;
+        }
+
+        return 1e-8;
+      }
 
       generic_matrix(void):Eigen::Matrix<VALTYPE, N , M >() {}
 
@@ -175,7 +180,7 @@ namespace qpp {
         return (*this)*other;
       }
 
-    const generic_matrix<VALTYPE, 3 , 3> mm_mul_proxy
+      const generic_matrix<VALTYPE, 3 , 3> mm_mul_proxy
       (const generic_matrix<VALTYPE, 3 , 3> & other){
         return (*this)*other;
       }
@@ -488,26 +493,26 @@ namespace qpp {
                    A(2,1)*A(2,1) + A(2,0)*A(2,0) + A(0,2)*A(0,2);
 
     if ( offd < eps*eps ) {
-      // Already diagonal
+        // Already diagonal
 
-      int i0=0,i1,i2=2;
+        int i0=0,i1,i2=2;
 
-      for (int i=0; i<3; i++){
-  if ( A(i,i) < A(i0,i0) )
-    i0 = i;
-  if ( A(i,i) > A(i2,i2) )
-    i2 = i;
+        for (int i=0; i<3; i++){
+            if ( A(i,i) < A(i0,i0) )
+              i0 = i;
+            if ( A(i,i) > A(i2,i2) )
+              i2 = i;
+          }
+        for (int i=0; i<3; i++)
+          if (i!=i0 and i!=i2) i1 = i;
+
+        eigvals = { A(i0,i0), A(i1,i1), A(i2,i2)};
+        eigvecs = { {0,0,0}, {0,0,0}, {0,0,0} };
+        eigvecs(i0,0) = VALTYPE(1);
+        eigvecs(i1,1) = VALTYPE(1);
+        eigvecs(i2,2) = VALTYPE(1);
+        return;
       }
-      for (int i=0; i<3; i++)
-  if (i!=i0 and i!=i2) i1 = i;
-
-      eigvals = { A(i0,i0), A(i1,i1), A(i2,i2)};
-      eigvecs = { {0,0,0}, {0,0,0}, {0,0,0} };
-      eigvecs(i0,0) = VALTYPE(1);
-      eigvecs(i1,1) = VALTYPE(1);
-      eigvecs(i2,2) = VALTYPE(1);
-      return;
-    }
 
 
     VALTYPE b = A(0,0) + A(1,1) + A(2,2);
@@ -730,11 +735,11 @@ namespace qpp {
     int i0=0,i1,i2=0;
 
     for (int i=0; i<3; i++){
-      if ( eigvals(i).real() < eigvals(i0).real() )
-  i0 = i;
-      if ( eigvals(i).real() > eigvals(i2).real() )
-  i2 = i;
-    }
+        if ( eigvals(i).real() < eigvals(i0).real() )
+          i0 = i;
+        if ( eigvals(i).real() > eigvals(i2).real() )
+          i2 = i;
+      }
     for (int i=0; i<3; i++)
       if (i!=i0 and i!=i2) i1 = i;
 
@@ -743,10 +748,10 @@ namespace qpp {
     eigvals(2) = eigvals1(i2);
 
     for (int i=0; i<3; i++) {
-      eigvecs(i,0) = eigvecs1(i,i0);
-      eigvecs(i,1) = eigvecs1(i,i1);
-      eigvecs(i,2) = eigvecs1(i,i2);
-    }
+        eigvecs(i,0) = eigvecs1(i,i0);
+        eigvecs(i,1) = eigvecs1(i,i1);
+        eigvecs(i,2) = eigvecs1(i,i2);
+      }
 
   }
 
@@ -781,7 +786,7 @@ namespace qpp {
 
   template<class VALTYPE, int N, int M>
   typename numeric_type<VALTYPE>::norm generic_matrix<VALTYPE, N, M>::tol_equiv =
-    generic_matrix<VALTYPE, N, M>::tol_equiv_default();
+      generic_matrix<VALTYPE, N, M>::tol_equiv_default();
 
   /*
   template<int N, int M>

@@ -21,7 +21,7 @@ namespace qpp{
 
       OWNER * owner;
 
-      py_indexed_property(){  owner = NULL;}
+      py_indexed_property(){  owner = nullptr;}
       py_indexed_property(OWNER * _owner){ owner = _owner;}
       void bind(OWNER * _owner){owner = _owner;}
 
@@ -93,7 +93,7 @@ namespace qpp{
           }
       }
 
-      py_2indexed_property(){ owner = NULL;}
+      py_2indexed_property(){ owner = nullptr;}
       py_2indexed_property(OWNER * _owner){
         owner = _owner;
       }

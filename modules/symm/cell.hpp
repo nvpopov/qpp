@@ -65,9 +65,12 @@ namespace qpp{
 
       //! \brief Create periodic cell of dimension dim with zero
       //!  translation vectors
-      periodic_cell (int dim) {
+      periodic_cell (int dim = 0) {
         DIM = dim;
-        v = new vector3<REAL>[DIM];
+        if (DIM>0)
+          v = new vector3<REAL>[DIM];
+        else
+          v = nullptr;
         for (int d=0; d<DIM; d++)
           v[d] = vector3<REAL>::Zero();
       }
@@ -75,7 +78,10 @@ namespace qpp{
       //! \brief Copy constructor for periodic cell
       periodic_cell (const periodic_cell<REAL> & cl) {
         DIM = cl.DIM;
-        v = new vector3<REAL>[DIM];
+        if (DIM>0)
+          v = new vector3<REAL>[DIM];
+        else
+          v = nullptr;
         for(int i=0; i<DIM; i++)
           v[i] = cl.v[i];
       }

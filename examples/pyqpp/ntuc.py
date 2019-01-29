@@ -27,6 +27,9 @@ line = input('Use fractional coordinates(y/n)? ')
 uc.frac = ( line.lower()[0]=='y' )
 eps = 0.001
 
+bound_rotrans_d.tol_trans=1e-8
+bound_rotrans_d.tol_rot=1e-8
+
 io.write_xyzq(1,uc)
 
 CG=array_fincryst_group_d()
@@ -38,7 +41,7 @@ find_cryst_symm(CG,uc,eps)
 # Double the group
 cell = CG[0].cell
 cell_x8 = periodic_cell_d(cell[0]*2,cell[1]*2,cell[2]*2)
-CG_x8 = array_fincryst_group_d(bound_rotrans_d(vector3d(0,0,0),cell_x8))
+CG_x8 = array_fincryst_group_d("cellx8", bound_rotrans_d(vector3d(0,0,0),cell_x8))
 for C in CG:
     CG_x8.add(bound_rotrans_d(C.T,C.R,cell_x8))
 
@@ -46,18 +49,18 @@ T=[bound_rotrans_d(v,cell_x8) for v in cell]
 for t in T:
     CG_x8.add(t)
 
-s=[]
-p=[]
-d=[]
-find_point_subgroups(s,p,d,CG_x8)
+S=[]
+G=[]
+find_point_subgroups(G,S,CG_x8)
 
 print('High symmetry sites in the unit cell:')
-for i in xrange(len(p)):
-    if d[i]>0:
-        break
-    f = uc.cell.cart2frac(p[i])
-    print('site #{:d} cartesian= {:10.5f} {:10.5f} {:10.5f} fractional= {:10.5f} {:10.5f} {:10.5f} '.format(i,p[i][0],p[i][1],p[i][2],f[0],f[1],f[2]))
-    for X in s[i]:
+for i in range(len(S)):
+    p = S[i].point
+    f = uc.cell.cart2frac(p)
+    n = S[i].axis
+    print('site #{:d} cartesian= {:10.5f} {:10.5f} {:10.5f} fractional= {:10.5f} {:10.5f} {:10.5f} '.format(i,p[0],p[1],p[2],f[0],f[1],f[2]))
+    print(' dim = {:d} axis= {:10.5f} {:10.5f} {:10.5f}'.format(S[i].dim, n[0], n[1], n[2]))
+    for X in G[i]:
         a = analyze_transform(X)
         print('    axis= ',a[0],' angle(deg)= ', a[1]*180/pi, ' inversion= ', a[2])
     print

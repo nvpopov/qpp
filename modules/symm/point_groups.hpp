@@ -784,6 +784,116 @@ FOUND:
 
   }
 
+
+  //----------------------------------------------------
+  
+  template<class REAL>
+  struct point_group_axes{
+
+    vector3<REAL> center;
+    bool inversion;
+
+    int naxes, nplanes;
+    std::vector<vector3<REAL> > axes, planes;
+    std::vector<int> orders;
+    std::vector<Bool> rotoinversion;
+
+    point_group_axes(){}
+
+    point_group_axes(const point_group_axes & A):
+      center(A.center), inversion(A.inversion), naxes(A.naxes), nplanes(A.nplanes),
+      axes(A.axes), planes(A.planes), orders(A.orders), rotoinversion(A.rotoinversion)
+    {}
+    
+    point_group_axes(const array_group< matrix3<REAL> > & G){
+      inversion = false;
+      REAL eps = matrix3<REAL>::tol_equiv;
+      REAL epscos = std::sqrt(eps);
+      std::vector<std::vector<int> > same_ax;
+
+      int N = G.size();
+      std::vector<REAL> phi(N);
+      std::vector<vector3<REAL> > n(N);
+      std::vector<Bool> inv(N);
+      
+      for (int i = 0; i<G.size(); i++)
+	analyze_transform(n[i], phi[i], inv[i],G[i]);
+      
+      for (int i = 0; i<G.size(); i++){
+	if (phi[i] < epscos){
+	  if (inv[i])
+	    inversion = true;
+	  continue;
+	}
+	
+	bool found = false;
+	for (int j=0; j < axes.size(); j++)
+	  if ( (n[i]-axes[j]).norm()<eps or (n[i]+axes[j]).norm()<eps ){
+	    found = true;
+	    same_ax[j].push_back(i);
+	  }
+	if ( not found ){
+	  axes.push_back(n[i]);
+	  same_ax.push_back({i});
+	}
+      }
+
+      /*
+      std::cout << axes.size() << " " << same_ax.size() << "\n";
+      for (int i=0; i<axes.size(); i++){
+	std::cout << i << axes[i];
+	for (int j=0; j<same_ax[i].size(); j++)
+	  std::cout << same_ax[i][j] << " ";
+	std::cout << "\n";
+      }
+      */
+      
+      // find and separate mirror planes
+      for (int i=axes.size()-1; i>=0; i--){
+	bool pln = false;
+	for (int j : same_ax[i])
+	  if ( pi - phi[j] < epscos and inv[j]  ) {
+	    pln = true;
+	    break;
+	  }
+	if (pln) {
+	  planes.push_back(axes[i]);
+	  for (int j = same_ax[i].size()-1; j>=0; j--)
+	    if (inv[same_ax[i][j]])
+	      same_ax[i].erase(same_ax[i].begin()+j);	  
+	}
+	if (same_ax[i].size()==0){	  
+	  same_ax.erase(same_ax.begin()+i);
+	  axes.erase(axes.begin()+i);
+	}
+      }
+
+      nplanes = planes.size();
+      naxes = axes.size();
+      rotoinversion.resize(naxes);
+      orders.resize(naxes);
+
+      for (int i=0; i<axes.size(); i++){
+	
+	std::sort(same_ax[i].begin(), same_ax[i].end(),
+		  [&phi,&inv] (int i1, int i2) -> bool
+		  { return (inv[i1]? pi-phi[i1]:phi[i1]) < (inv[i2]? pi-phi[i2]:phi[i2]); }
+		  );
+	/*
+	std::cout << "axes " << i << "\n";
+	for (int j=0; j<same_ax[i].size(); j++)
+	  std::cout << same_ax[i][j] << " ";
+	std::cout << "\n";
+	*/
+	int j = same_ax[i][0];
+	rotoinversion[i] = inv[j];
+
+	orders[i] = int( 2*pi/( inv[j]? pi-phi[j] : phi[j] ) + 0.5 );
+      }
+    }
+    
+  };
+  
   // ----------------------------------------------------------------------------------------
 
 #ifdef PY_EXPORT

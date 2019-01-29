@@ -72,7 +72,7 @@ namespace qpp{
             todel[n(i,j)] = i;
 
     xgeometry<REAL,CELL> *xgeom = dynamic_cast<xgeometry<REAL,CELL>*>(&geom);
-    bool merge = (mode & crowd_merge) && xgeom!=NULL;
+    bool merge = (mode & crowd_merge) && xgeom != nullptr;
 
     if (merge)
       for (int i=geom.nat()-1; i>=0; i--)
@@ -102,8 +102,8 @@ namespace qpp{
   void copy_header(geometry<REALDST,CELLDST> & dst,
                    const geometry<REALSRC,CELLSRC> & src){
 
-    xgeometry<REALDST,CELLDST> *xdst = NULL;
-    xgeometry<REALSRC,CELLSRC> *xsrc = NULL;
+    xgeometry<REALDST,CELLDST> *xdst = nullptr;
+    xgeometry<REALSRC,CELLSRC> *xsrc = nullptr;
 
     std::vector<STRING> fn;
     std::vector<basic_types> ft;
@@ -139,13 +139,13 @@ namespace qpp{
 
     copy_header(dst,src);
 
-    xgeometry<REALSRC,CELLSRC> *xsrc = NULL;
+    xgeometry<REALSRC,CELLSRC> *xsrc = nullptr;
     if (src.is_xgeometry())
       xsrc = (xgeometry<REALSRC,CELLSRC>*)(&src);
 
     int ix,iy,iz;
-    if (xsrc!=NULL)
-      for (int i=0; i < xsrc->nfields(); i++) {
+    if (xsrc != nullptr)
+      for (int i = 0; i < xsrc->nfields(); i++) {
           STRING fn = xsrc -> field_name(i);
           if (fn=="x")
             ix = i;
@@ -186,17 +186,17 @@ namespace qpp{
              const shape<REALSRC> & shp,
              const CELLSRC & cell,
              const index & begin, const index & end,
-             int mode = crowd_ignore | fill_atoms){
+             int mode = crowd_ignore | fill_atoms) {
     bool xcopy = dst.is_xgeometry() && src.is_xgeometry();
 
     copy_header(dst,src);
-    xgeometry<REALSRC,CELLSRC> *xsrc = NULL;
+    xgeometry<REALSRC,CELLSRC> *xsrc = nullptr;
     if (src.is_xgeometry())
       xsrc = (xgeometry<REALSRC,CELLSRC>*)(&src);
 
     int ix,iy,iz;
-    if (xsrc!=NULL)
-      for (int i=0; i<xsrc->nfields(); i++){
+    if (xsrc != nullptr)
+      for (int i=0; i<xsrc->nfields(); i++) {
           STRING fn = xsrc -> field_name(i);
           if (fn=="x")
             ix = i;
@@ -205,7 +205,7 @@ namespace qpp{
           else if (fn=="z")
             iz = i;
         }
-    else{
+    else {
         ix = 1; iy=2; iz=3;
       }
 

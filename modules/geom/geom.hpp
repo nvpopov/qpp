@@ -119,7 +119,7 @@ The supercell concept generalization for the geometry class looks like:
       std::vector<vector3<REAL> > _crd;
 
       //! Special logical array allows to "hide" or "shadow" some atoms
-      std::vector<char> _shadow;
+      std::vector<Bool> _shadow;
 
     protected:
       // The dependent objects array
@@ -431,7 +431,8 @@ The supercell concept generalization for the geometry class looks like:
         name = __name;
       }
 
-      geometry (int dim, const STRING __name = "") : cell(dim) {
+
+      geometry (int dim = 0, const STRING & __name = "") : cell(dim) {
         init_default();
         DIM = dim;
         name = __name;
@@ -522,7 +523,7 @@ The supercell concept generalization for the geometry class looks like:
 
         _atm.push_back(a);
         _crd.push_back(r2);
-        _shadow.push_back((char)false);
+        _shadow.push_back(false);
 
         if (auto_update_types)
           _type_table.push_back(define_type(a));
@@ -559,7 +560,7 @@ The supercell concept generalization for the geometry class looks like:
 
         _atm.insert(_atm.begin()+at,a);
         _crd.insert(_crd.begin()+at,r2);
-        _shadow.insert(_shadow.begin()+at,(char)false);
+        _shadow.insert(_shadow.begin()+at,false);
 
         if (auto_update_types)
           _type_table.insert(_type_table.begin()+at,define_type(a));
@@ -622,7 +623,7 @@ The supercell concept generalization for the geometry class looks like:
 
         std::vector<STRING> __atm(_atm);
         std::vector<vector3<REAL> > __crd(_crd);
-        std::vector<char> __shadow(_shadow);
+        std::vector<Bool> __shadow(_shadow);
         std::vector<int> __type_table(_type_table);
         bool reorder_types = (_type_table.size() == size());
 

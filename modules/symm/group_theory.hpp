@@ -17,7 +17,7 @@ namespace qpp{
       const ARRAY & G;
 
       // Orders
-      std::vector<int> ordr;
+      int* ordr{nullptr};
 
       // The elements of the classes
       // cltab[i][j] is the j-th element of i-th class
@@ -25,7 +25,7 @@ namespace qpp{
       std::vector<int> classof;
 
       // where in mtab is the record for i-th times j-th element
-    /*
+      /*
       inline int mtidx(int i, int j) const
       {
         return i*G.size()+j;
@@ -34,11 +34,11 @@ namespace qpp{
 
     public:
 
-    // Multiplication table
-    //  int * mtab;
-    static_table<int> multab;
+      // Multiplication table
+      //  int * mtab;
+      static_table<int> multab;
 
-    // --------------------------------------------
+      // --------------------------------------------
       // Finds element g of the group and returns its index
       int index(const TRANSFORM & g) const {
         int i;
@@ -55,7 +55,7 @@ namespace qpp{
 
       // Construction of the group multiplication table
       void build_multab() {
-  //        if (mtab!=NULL) delete mtab;
+        //        if (mtab!=NULL) delete mtab;
         //mtab = new int[G.size()*G.size()];
 
         multab.resize(G.size(),G.size());
@@ -68,8 +68,9 @@ namespace qpp{
       // Find orders of all elements
       void build_orders() {
 
-        ordr.clear();
-        ordr.resize(G.size());
+        //        if (ordr != nullptr) delete [] ordr;
+        delete [] ordr;
+        ordr = new int [G.size()];
 
         for (int g = 0; g < G.size(); g++) {
             int n = 0, h = g;
@@ -129,7 +130,7 @@ namespace qpp{
       }
 
       // multiplication table
-    /*
+      /*
       inline int multab(int i, int j) const {
         return mtab[mtidx(i,j)];
       }
@@ -256,6 +257,11 @@ namespace qpp{
         build_classes();
 
         //std::cout << "alive4\n";
+      }
+
+      ~group_analyzer(){
+        //      if (ordr != nullptr) delete [] ordr;
+        delete [] ordr;
       }
 
   };
