@@ -66,26 +66,26 @@ namespace qpp {
       inline int size(int d) const{
         if (d==0) return N;
         else if (d==1) return M;
-        else IndexError("Illegal dimension in static_table");
+        else throw std::range_error("Illegal dimension in static_table");
       }
 
       inline ITEM operator()(int i, int j) const{
         if (i<0) i+=N;
         if (i<0 or i>=N)
-          IndexError("Index 0 out of range in static_table");
+          throw std::range_error("Index 0 out of range in static_table");
         if (j<0) j+=M;
         if (j<0 or j>=M)
-          IndexError("Index 1 out of range in static_table");
+          throw std::range_error("Index 1 out of range in static_table");
         return tbl[idx(i,j)];
       }
 
       inline ITEM & operator()(int i, int j){
         if (i<0) i+=N;
         if (i<0 or i>=N)
-          IndexError("Index 0 out of range in static_table");
+          throw std::range_error("Index 0 out of range in static_table");
         if (j<0) j+=M;
         if (j<0 or j>=M)
-          IndexError("Index 1 out of range in static_table");
+          throw std::range_error("Index 1 out of range in static_table");
         return tbl[idx(i,j)];
       }
 

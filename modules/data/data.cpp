@@ -18,7 +18,7 @@ namespace qpp{
         else return d;
       }
     else
-      TypeError("Type mismatch in datum conversion to float");
+      throw std::invalid_argument("Type mismatch in datum conversion to float");
   }
 
   template<> double datum::get<double>() const {
@@ -31,17 +31,17 @@ namespace qpp{
         else return d;
       }
     else
-      TypeError("Type mismatch in datum conversion to double");
+      throw std::invalid_argument("Type mismatch in datum conversion to double");
   }
 
   template<> bool datum::get<bool>() const {
-    if (tp!=type_bool) TypeError("Type mismatch in datum conversion to bool");
+    if (tp!=type_bool) throw std::invalid_argument("Type mismatch in datum conversion to bool");
     if (ptr) return *pb;
     else return b;
   }
 
   template<> STRING datum::get<STRING>() const {
-    if (tp!=type_string) TypeError("Type mismatch in datum conversion to STRING");
+    if (tp!=type_string) throw std::invalid_argument("Type mismatch in datum conversion to STRING");
     if (ptr) return *ps;
     else return s;
   }
@@ -49,31 +49,31 @@ namespace qpp{
   // -------------------------------------------------------------------
 
   template<> int& datum::ref<int>() {
-    if (tp!=type_int) TypeError("Type mismatch in datum conversion to int");
+    if (tp!=type_int) throw std::invalid_argument("Type mismatch in datum conversion to int");
     if (ptr) return *pi;
     else return i;
   }
 
   template<> float& datum::ref<float>() {
-    if (tp!=type_float) TypeError("Type mismatch in datum conversion to float");
+    if (tp!=type_float) throw std::invalid_argument("Type mismatch in datum conversion to float");
     if (ptr) return *pf;
     else return f;
   }
 
   template<> double& datum::ref<double>() {
-    if (tp!=type_double) TypeError("Type mismatch in datum conversion to double");
+    if (tp!=type_double) throw std::invalid_argument("Type mismatch in datum conversion to double");
     if (ptr) return *pd;
     else return d;
   }
 
   template<> bool& datum::ref<bool>() {
-    if (tp!=type_bool) TypeError("Type mismatch in datum conversion to bool");
+    if (tp!=type_bool) throw std::invalid_argument("Type mismatch in datum conversion to bool");
     if (ptr) return *pb;
     else return b;
   }
 
   template<> STRING& datum::ref<STRING>() {
-    if (tp!=type_string) TypeError("Type mismatch in datum conversion to STRING");
+    if (tp!=type_string) throw std::invalid_argument("Type mismatch in datum conversion to STRING");
     if (ptr) return *ps;
     else return s;
   }
