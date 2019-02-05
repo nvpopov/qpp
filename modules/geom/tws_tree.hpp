@@ -1,5 +1,5 @@
-#ifndef QPP_RTREE_H
-#define QPP_RTREE_H
+#ifndef QPP_TWS_TREE_H
+#define QPP_TWS_TREE_H
 
 #include <ostream>
 #include <unordered_map>
@@ -120,7 +120,7 @@ namespace qpp{
 
       void rm_cnt_idx_store (const AINT atm, std::vector<index> &idx_vec) {
         for (auto it = m_content.begin(); it != m_content.end();){
-            if(it->m_atm == atm){
+            if(it->m_atm == atm) {
                 idx_vec.push_back(it->m_idx);
                 it = m_content.erase(it);
               }
@@ -180,7 +180,7 @@ namespace qpp{
 
       void update_dist_for_pair (const AINT i, const AINT j, const REAL new_dist) {
         auto it = m_dist.find(sym_key<AINT>(i,j));
-        if (it != m_dist.end()){
+        if (it != m_dist.end()) {
             it->second.m_bonding_dist = new_dist;
             it->second.m_override = true;
             if ( i < m_max_dist.size() && j < m_max_dist.size()){
@@ -192,7 +192,7 @@ namespace qpp{
 
       void update_pair_max_dist (const AINT i, const AINT j) {
         auto it = m_dist.find(sym_key<AINT>(i,j));
-        if (it != m_dist.end()){
+        if (it != m_dist.end()) {
             REAL dist = it->second.m_bonding_dist;
             m_max_dist[i] = std::max(m_max_dist[i], dist);
             m_max_dist[j] = std::max(m_max_dist[j], dist);
@@ -320,8 +320,7 @@ namespace qpp{
 
         if (action & act_clear_tree) {
             for (auto *node : m_flat_view) {
-                if (node) delete node;
-                node = nullptr;
+                delete node;
               }
             root = nullptr;
             m_flat_view.clear();
@@ -415,8 +414,9 @@ namespace qpp{
       void clr_atom_pair_bond_data (const AINT atm1, const AINT atm2) {
         if (m_ngb_table[atm1].size() > 0){
             auto new_end = std::remove_if(m_ngb_table[atm1].begin(), m_ngb_table[atm1].end(),
-                                          [&atm2](tws_node_content_t<REAL> & bonds)
-            { return bonds.m_atm == atm2; });
+                                          [&atm2](tws_node_content_t<REAL> & bonds) {
+                                            return bonds.m_atm == atm2;
+                                          });
             m_ngb_table[atm1].erase(new_end);
           }
       }
@@ -430,7 +430,7 @@ namespace qpp{
         if (geom->DIM == 0 && m_atom_node_lookup[atm].size() > 0)
           m_atom_node_lookup[atm][0].node->rm_cnt_by_id(atm);
 
-        if (geom->DIM > 0){
+        if (geom->DIM > 0) {
 
             //remove 0,0,0 and c1,c2,c3 atoms from tree
             for (auto& at_node : m_atom_node_lookup[atm])
@@ -646,21 +646,21 @@ namespace qpp{
 
             if (cur_node->m_sub_nodes[nidx] == nullptr){
 
-                tws_node_t<REAL, AINT> *newNode = new tws_node_t<REAL, AINT>();
-                m_flat_view.push_back(newNode);
+                tws_node_t<REAL, AINT> *new_node = new tws_node_t<REAL, AINT>();
+                m_flat_view.push_back(new_node);
                 //define the 0,0,0 max min
                 vector3<REAL> z_min = cur_node->m_bb.min + cn_size / 3;
                 vector3<REAL> z_max = cur_node->m_bb.max - cn_size / 3;
 
-                newNode->m_bb.min = z_min + vector3<REAL>(i_x * cn_size[0]/ 3,
+                new_node->m_bb.min = z_min + vector3<REAL>(i_x * cn_size[0]/ 3,
                     i_y * cn_size[1]/ 3,
                     i_z * cn_size[2]/ 3);
 
-                newNode->m_bb.max = z_max + vector3<REAL>(i_x * cn_size[0]/ 3,
+                new_node->m_bb.max = z_max + vector3<REAL>(i_x * cn_size[0]/ 3,
                     i_y * cn_size[1]/ 3,
                     i_z * cn_size[2]/ 3);
 
-                cur_node->m_sub_nodes[nidx] = newNode;
+                cur_node->m_sub_nodes[nidx] = new_node;
                 cur_node->m_tot_childs+=1;
               }
 

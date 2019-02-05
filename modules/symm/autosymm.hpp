@@ -448,7 +448,8 @@ namespace qpp{
           points.add(std::string("point"), r);
       }
 
-    find_point_symm(G, points, R);
+    vector3<REAL> new_centre;
+    find_point_symm(G, points, new_centre, R);
   }
 
   // ------------------------------------------------------------------------------------------

@@ -509,11 +509,12 @@ namespace qpp{
   template<class REAL>
   void find_point_symm(array_group<matrix3<REAL> > & G,
                        const geometry<REAL, periodic_cell<REAL> > & geom,
-                       REAL R = geometry<REAL,periodic_cell<REAL> >::tol_geom_default){
-    if (geom.nat()==0)
+                       vector3<REAL> &new_centre,
+                       REAL R = geometry<REAL,periodic_cell<REAL> >::tol_geom_default) {
+    if (geom.nat() == 0)
       return;
 
-    if (geom.nat()==1){
+    if (geom.nat() == 1) {
         G = shnfl<REAL>::Oh();
         G.name = "SO3";
         return;
@@ -526,12 +527,14 @@ namespace qpp{
     vector3<REAL> cntr(0);
 
     // subtract the coordinates of centre
-    for (int i=0; i<g.nat(); i++)
+    for (int i = 0; i < g.nat(); i++)
       cntr += g.coord(i);
     cntr /= g.nat();
 
-    for (int i=0; i<g.nat(); i++)
-      g.change(i,g.atom(i),g.coord(i)-cntr);
+    new_centre = cntr;
+
+    for (int i = 0; i < g.nat(); i++)
+      g.change(i, g.atom(i), g.coord(i) - cntr);
 
     // Check if molecule is linear or planar
 
@@ -542,7 +545,6 @@ namespace qpp{
     best_axes(axes,lmb,g);
 
     std::cout << "lmb= " << lmb << " axes= " << axes << "\n";
-
 
     naxis = axes.col(2);
     std::cout << " linaxis = " <<  naxis << "\n";
@@ -571,8 +573,7 @@ namespace qpp{
           }
       }
 
-
-    if (linear){
+    if (linear) {
 
         matrix3<REAL> U = axes;
         matrix3<REAL> U2 = RotMtrx(nplane,REAL(pi));
