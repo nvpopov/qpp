@@ -3,6 +3,7 @@
 #pragma GCC diagnostic ignored "-Wnarrowing"
 #include <vector>
 #include <cmath>
+#include <functional>
 #include <symm/index.hpp>
 #include <symm/groups.hpp>
 #include <symm/cell.hpp>
@@ -17,6 +18,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/operators.h>
 #include <pyqpp/py_indexed_property.hpp>
+#include <pybind11/stl.h>
 namespace py = pybind11;
 #pragma pop_macro("slots")
 #endif
@@ -339,13 +341,13 @@ namespace qpp{
   }
 
   template<class REAL, class CELL>
-  void extend( std::set<int> & selection,
-               const neighbours_table<REAL,CELL> & ngbr){
+  void selection_grow( std::set<int> & selection,
+	     const neighbours_table<REAL,CELL> & ngbr){
 
   }
 
   template<class REAL, class CELL>
-  void shrink( std::set<int> & selection,
+  void selection_shrink( std::set<int> & selection,
                const neighbours_table<REAL,CELL> & ngbr){
 
   }
@@ -373,6 +375,106 @@ namespace qpp{
   }
 
   */
+
+  // -----------------------------------------------------------------------------
+  
+  template<class REAL, class UCELL, class NUCELL>
+  void unique(std::vector<int> & n_images,
+	      geometry<REAL,UCELL> & ugeom,
+	      const geometry<REAL,NUCELL> & nugeom,
+	      const UCELL & group,
+	      const index & begin,
+	      const index & end,
+	      const std::function<REAL(const geometry<REAL,NUCELL> &, int)> & key,
+	      //[](const geometry<REAL,NUCELL> &g, int i) -> REAL
+	      //{ return std::sqrt(g.y[i]*g.y[i]+g.z[i]*g.z[i]); },
+	      REAL eps)
+  {
+    n_images.clear();
+    ugeom.clear();
+    std::vector<Bool> marked(nugeom.nat(), false);
+    for (int i=0; i<nugeom.nat(); i++)
+      if (not marked[i]){
+	std::set<int> images = {i};
+	marked[i] = true;
+
+	for (iterator I(begin,end); not I.end(); I++){
+	  vector3<REAL> r = group.transform(nugeom.pos(i),I);
+	  for (int j = 0; j<nugeom.nat(); j++)
+	    if (not marked[j])
+	      if ( nugeom.atom(i)==nugeom.atom(j) and (r - nugeom.pos(j)).norm() < eps ){
+		images.insert(j);
+		marked[j] = true;
+	      }
+	}
+	int iuniq = i;
+	for (int j : images)
+	  if ( key(nugeom,j) < key(nugeom, iuniq) )
+	    iuniq = j;
+	ugeom.add(nugeom.atom(iuniq), nugeom.pos(iuniq));
+	n_images.push_back(images.size());
+      }
+
+    std::cout << "n_images: ";
+    for (int j: n_images)
+      std::cout << " " << j;
+    std::cout << "\n";
+  }
+
+  // -----------------------------------------------------------------------------
+
+  template<class REAL, class UCELL, class NUCELL>
+  void unique(std::vector<int> & n_images,
+	      geometry<REAL,UCELL> & ugeom,
+	      const geometry<REAL,NUCELL> & nugeom,
+	      const UCELL & group,
+	      const std::function<REAL(const geometry<REAL,NUCELL> &, int)> & key =
+	      [](const geometry<REAL,NUCELL> &g, int i) -> REAL
+		{return std::sqrt(std::pow(g.pos(i)(1),2) + std::pow(g.pos(i)(2),2)); },
+	      REAL eps = geometry<REAL,NUCELL>::tol_geom_default)
+  {
+    unique(n_images, ugeom, nugeom, group, group.begin(), group.end(), key, eps);
+  }
+
+  template<class REAL, class UCELL, class NUCELL>
+  void unique(std::vector<int> & n_images,
+	      geometry<REAL,UCELL> & ugeom,
+	      const geometry<REAL,NUCELL> & nugeom,
+	      const std::function<REAL(const geometry<REAL,NUCELL> &, int)> & key =
+	      [](const geometry<REAL,NUCELL> &g, int i) -> REAL
+		{return std::sqrt(std::pow(g.pos(i)(1),2) + std::pow(g.pos(i)(2),2)); },
+	      REAL eps = geometry<REAL,NUCELL>::tol_geom_default)
+  {
+    unique(n_images, ugeom, nugeom, ugeom.cell, ugeom.cell.begin(), ugeom.cell.end(), key, eps );
+  }
+
+  template<class REAL, class UCELL, class NUCELL>
+  void unique(geometry<REAL,UCELL> & ugeom,
+	      const geometry<REAL,NUCELL> & nugeom,
+	      const UCELL & group,
+	      const std::function<REAL(const geometry<REAL,NUCELL> &, int)> & key =
+	      [](const geometry<REAL,NUCELL> &g, int i) -> REAL
+		{ return std::sqrt(g.y[i]*g.y[i]+g.z[i]*g.z[i]); },
+	      REAL eps = geometry<REAL,NUCELL>::tol_geom)
+  {
+    std::vector<int> n_images;
+    unique(n_images, ugeom, nugeom, group, group.begin(), group.end(), key, eps );
+  }
+
+  template<class REAL, class UCELL, class NUCELL>
+  void unique(geometry<REAL,UCELL> & ugeom,
+	      const geometry<REAL,NUCELL> & nugeom,
+	      const std::function<REAL(const geometry<REAL,NUCELL> &, int)> & key =
+	      [](const geometry<REAL,NUCELL> &g, int i) -> REAL
+		{return std::sqrt(std::pow(g.pos(i)(1),2) + std::pow(g.pos(i)(2),2)); },
+	      REAL eps = geometry<REAL,NUCELL>::tol_geom_default)
+  {
+    std::vector<int> n_images;
+    unique(n_images, ugeom, nugeom, ugeom.cell, ugeom.cell.begin(), ugeom.cell.end(), key, eps );
+  }
+
+  // -----------------------------------------------------------------------------
+
 
 #if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
 
@@ -412,6 +514,67 @@ namespace qpp{
                  const shape<REALSRC> & shp)
   {  fill(dst,src,shp); }
 
+  template<class REAL, class UCELL, class NUCELL>
+  void py_unique1(py::list & images,
+		  geometry<REAL,UCELL> & ugeom,
+		  const geometry<REAL,NUCELL> & nugeom,
+		  const UCELL & group,
+		  const index & begin,
+		  const index & end,
+		  const std::function<REAL(const geometry<REAL,NUCELL> &, int)> & key,
+		  REAL eps)
+  {
+    std::vector<int>  n_images;
+    unique(n_images, ugeom, nugeom, group, begin, end, key, eps);
+    images.attr("clear")();
+    for (const auto & n : n_images)
+      images.append(n);
+  }
+  
+  template<class REAL, class UCELL, class NUCELL>
+  void py_unique2(py::list & images,
+		  geometry<REAL,UCELL> & ugeom,
+		  const geometry<REAL,NUCELL> & nugeom,
+		  const UCELL & group,
+		  const std::function<REAL(const geometry<REAL,NUCELL> &, int)> & key,
+		  REAL eps)
+  {
+    std::vector<int>  n_images;
+    unique(n_images, ugeom, nugeom, group, key, eps);
+    images.attr("clear")();
+    for (const auto & n : n_images)
+      images.append(n);
+  }
+   
+  template<class REAL, class UCELL, class NUCELL>
+  void py_unique3(py::list & images,
+		  geometry<REAL,UCELL> & ugeom,
+		  const geometry<REAL,NUCELL> & nugeom,
+		  const std::function<REAL(const geometry<REAL,NUCELL> &, int)> & key, 
+		  REAL eps)
+  {
+    std::vector<int>  n_images;
+    unique(n_images, ugeom, nugeom, key, eps);
+    images.attr("clear")();
+    for (const auto & n : n_images)
+      images.append(n);
+  }
+
+  template<class REAL, class UCELL, class NUCELL>
+  void py_unique4(geometry<REAL,UCELL> & ugeom,
+		  const geometry<REAL,NUCELL> & nugeom,
+		  const UCELL & group,
+		  const std::function<REAL(const geometry<REAL,NUCELL> &, int)> & key,
+		  REAL eps)
+  { unique(ugeom, nugeom, group, key, eps); }
+
+  template<class REAL, class UCELL, class NUCELL>
+  void py_unique5(geometry<REAL,UCELL> & ugeom,
+		  const geometry<REAL,NUCELL> & nugeom,
+		  const std::function<REAL(const geometry<REAL,NUCELL> &, int)> & key,
+		  REAL eps)
+  { unique(ugeom, nugeom, key, eps); }
+  
   /*
   template<class REALDST, class CELLDST, class REALSRC, class CELLSRC>
   void py_replicate3(geometry<REALDST,CELLDST> & dst,

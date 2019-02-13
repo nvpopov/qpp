@@ -74,7 +74,7 @@ namespace qpp {
       }
 
       //! Componentwise addition of two indicies
-      inline index operator+ (const index & I) {
+      inline index operator+(const index & I) const {
 
         index res = D(DIM);
         for (int d=0; d<DIM; d++)
@@ -84,7 +84,7 @@ namespace qpp {
       }
 
       //! Componentwise subtraction of two indicies
-      inline index operator- (const index & I) {
+      inline index operator-(const index & I) const {
 
         index res = D(DIM);
         for (int d=0; d<DIM; d++)
@@ -298,6 +298,12 @@ namespace qpp {
 
       }
 
+      index py_add(const index &I2) const
+      { return (*this)+I2; }
+
+      index py_sub(const index &I2) const
+      { return (*this)-I2; }
+
       static void py_export( py::module m, const char * pyname){
 
         py::class_<index >(m, pyname)
@@ -314,8 +320,10 @@ namespace qpp {
             .def("sub",  &index::sub1)
             //	.def(py::str(py::self))
             //	.def(py::repr(py::self))
-            .def(py::self + py::self)
-            .def(py::self - py::self)
+      .def(py::self + py::self)
+      .def(py::self - py::self)
+      //.def("__add__", & index::py_add )
+      //.def("__sub__", & index::py_sub )
             .def(py::self == py::self)
             .def(py::self!= py::self)
             .def("__str__", &index::print)
@@ -437,6 +445,7 @@ namespace qpp {
             .def(py::init<py::list,py::list>())
             .def(py::init<py::tuple,py::tuple>())
             .def("next", & iterator::py_next)
+            .def("__next__", & iterator::py_next)
             ;
       }
 

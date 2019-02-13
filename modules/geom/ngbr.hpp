@@ -556,8 +556,10 @@ namespace qpp {
         auto_update = false;
       }
 
-      ~neighbours_table(){
-        if (_disttable != nullptr) delete [] _disttable;
+      ~neighbours_table() {
+        //        if (_disttable != nullptr)
+        //          delete [] _disttable;
+        delete [] _disttable;
       }
 
       REAL get_grain_size(){return grainsize;}

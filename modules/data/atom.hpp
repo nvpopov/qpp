@@ -47,19 +47,19 @@ namespace qpp{
   public:
 
     bool has_classic()
-    { return pclassic != NULL; }
+    { return pclassic != nullptr; }
 
     bool has_polar()
-    { return ppolar != NULL; }
+    { return ppolar != nullptr; }
 
     bool has_basis()
-    { return pbasis != NULL; }
+    { return pbasis != nullptr; }
 
     bool has_pseudo()
-    { return ppseudo != NULL; }
+    { return ppseudo != nullptr; }
 
     bool has_visible()
-    { return pvisible != NULL; }
+    { return pvisible != nullptr; }
 
     classical_block   & classic;
     polarizible_block & polar;
@@ -67,11 +67,11 @@ namespace qpp{
     pseudo_block      & pseudo;
     visible_block     & visible;
 
-    atom(const STRING & _name, int _number, bool _classic = false, bool _polar = false, 
-	 bool _basis = false, bool _pseudo = false, bool _visible = false) :
-      pclassic( _classic ? new classical_block : NULL), ppolar(_polar ? new polarizible_block : NULL), 
-      pbasis( _basis ? new basis_block : NULL), ppseudo( _pseudo ? new pseudo_block : NULL), 
-      pvisible( _visible ? new visible_block : NULL),
+    atom(const STRING & _name, int _number, bool _classic = false, bool _polar = false,
+   bool _basis = false, bool _pseudo = false, bool _visible = false) :
+      pclassic( _classic ? new classical_block : nullptr), ppolar(_polar ? new polarizible_block : nullptr),
+      pbasis( _basis ? new basis_block : nullptr), ppseudo( _pseudo ? new pseudo_block : nullptr),
+      pvisible( _visible ? new visible_block : nullptr),
       classic(*pclassic), polar(*ppolar), basis(*pbasis), pseudo(*ppseudo), visible(*pvisible)
     {
       name = _name;
