@@ -18,8 +18,9 @@ int main(){
 
   array_group<matrix3<float> > G;
 
-  
+
   float eps = .1;
-  find_point_symm(G,g,eps);
+  vector3<float> new_centre;
+  find_point_symm(G, g, new_centre, eps);
 }
 

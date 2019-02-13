@@ -28,6 +28,7 @@ namespace qpp {
   struct scalar_volume_t {
       std::array<vector3<REAL>,3> m_axis;
       std::array<uint16_t, 3> m_steps;
+      vector3<REAL> m_offset{0, 0, 0};
       uint16_t m_tot_atoms;
       std::vector<REAL> m_field;
       bool m_has_negative_values{false};
@@ -51,7 +52,9 @@ namespace qpp {
   void read_cube(std::basic_istream<CHAR,TRAITS> & inp,
                  geometry<REAL, CELL> &geom,
                  scalar_volume_t<REAL> &volume) {
+
     std::string s;
+    bool has_odd_field{false};
 
     //comment line 1
     std::getline(inp, s);
@@ -77,7 +80,11 @@ namespace qpp {
         s2t(lsp[3].data(), vz);
 
         if (i == 0) {
-            volume.m_tot_atoms = num_voxels;
+            has_odd_field = num_voxels < 0;
+            volume.m_tot_atoms = std::abs(num_voxels);
+            volume.m_offset[0] = vx * bohr_to_angs;
+            volume.m_offset[1] = vy * bohr_to_angs;
+            volume.m_offset[2] = vz * bohr_to_angs;
           } else {
             volume.m_steps[i-1] = num_voxels;
             volume.m_axis[i-1] =
@@ -105,6 +112,9 @@ namespace qpp {
           geom.add(at_name, vector3<REAL>(vx * bohr_to_angs, vy * bohr_to_angs, vz * bohr_to_angs));
         }
 
+    //read odd line
+    if (has_odd_field) std::getline(inp, s);
+
     uint32_t total_step = std::accumulate(volume.m_steps.begin(), volume.m_steps.end(), 0);
 
     std::vector<std::string> lsp;
@@ -117,7 +127,6 @@ namespace qpp {
             v0 = std::stod(elem.data());
             if (v0 < -0.01) {
                 volume.m_has_negative_values = true;
-                //std::cout << "!" << v0 << std::endl;
               }
             volume.m_field.push_back(v0);
           }

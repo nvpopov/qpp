@@ -131,6 +131,7 @@ namespace qpp{
       }
 
       static array_group<matrix3<REAL> > group(const STRING & _name) {
+
         STRING name  = tolower(_name), error = "Nonexisting point group "+_name;
         int n;
         size_t sz;
@@ -151,7 +152,7 @@ namespace qpp{
         else if (spec.length() == 1)
           last = spec[0];
         else
-          KeyError(error.c_str());
+          throw std::invalid_argument(error.c_str());
 
         //std::cout << "F= " << first << " L= " << last << "\n";
 
@@ -161,40 +162,42 @@ namespace qpp{
             else if (last == 'h' && n>0 ) return Cnh(n);
             else if (last == 's' && n==0 ) return Cs();
             else if (last == 'i' && n==0 ) return Ci();
-            else KeyError(error.c_str());
+            else throw std::invalid_argument(error.c_str());
           }
         else if (first == 's') {
-            if (last != ' ') KeyError(error.c_str());
+            if (last != ' ') throw std::invalid_argument(error.c_str());
             if ( n % 2 == 0 ) return S2n(n/2);
             else return Cnh(n);
           }
         else if (first == 'd') {
-            if (n==0) KeyError(error.c_str());
+            if (n==0) throw std::invalid_argument(error.c_str());
             if (last == ' ') return Dn(n);
             else if (last == 'h') return Dnh(n);
             else if (last == 'd') return Dnd(n);
-            else KeyError(error.c_str());
+            else throw std::invalid_argument(error.c_str());
           }
         else if (first == 't') {
-            if (n>0) KeyError(error.c_str());
+            if (n>0) throw std::invalid_argument(error.c_str());
             if (last == ' ') return T();
             else if (last == 'd') return Td();
             else if (last == 'h') return Th();
-            else KeyError(error.c_str());
+            else throw std::invalid_argument(error.c_str());
           }
         else if (first == 'o') {
-            if (n>0) KeyError(error.c_str());
+            if (n>0) throw std::invalid_argument(error.c_str());
             if (last == ' ') return O();
             else if (last == 'h') return Oh();
-            else KeyError(error.c_str());
+            else throw std::invalid_argument(error.c_str());
           }
         else if (first == 'i') {
-            if (n>0) KeyError(error.c_str());
+            if (n>0) throw std::invalid_argument(error.c_str());
             if (last == ' ') return I();
             else if (last == 'h') return Ih();
-            else KeyError(error.c_str());
+            else throw std::invalid_argument(error.c_str());
           }
-        else KeyError(error.c_str());
+
+        throw std::invalid_argument(error.c_str());
+
       }
 
       static std::vector<STRING> groups_by_order(int n) {
