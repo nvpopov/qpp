@@ -61,7 +61,7 @@ namespace qpp{
   struct tws_node_t;
 
   /// data to store in rtree                                                ///
-  template<typename REAL = float, typename AINT = uint32_t>
+  template<typename REAL = float, typename AINT = size_t>
   struct tws_node_content_t {
       AINT m_atm;
       index m_idx;
@@ -69,7 +69,7 @@ namespace qpp{
   };
 
   /// \brief The imaginary_atom struct
-  template<typename REAL, typename AINT = uint32_t>
+  template<typename REAL, typename AINT = size_t>
   struct img_atom_t {
       AINT m_atm;
       index m_idx;
@@ -79,7 +79,7 @@ namespace qpp{
 
   };
 
-  template<typename REAL = float, typename AINT = uint32_t>
+  template<typename REAL = float, typename AINT = size_t>
   struct tws_query_data_t {
       AINT m_atm;
       index m_idx;
@@ -101,7 +101,7 @@ namespace qpp{
   }
 
   /// \brief The tws_node struct
-  template<typename REAL = float, typename AINT = uint32_t>
+  template<typename REAL = float, typename AINT = size_t>
   struct tws_node_t {
 
       tws_node_t<REAL, AINT>* parent;
@@ -225,7 +225,7 @@ namespace qpp{
   const uint32_t act_unlock_img        = 1 << 16;
 
   /// aux tws tree implementation
-  template <class REAL, class CELL = periodic_cell<REAL>, typename AINT = uint32_t >
+  template <class REAL, class CELL = periodic_cell<REAL>, typename AINT = size_t >
   class tws_tree_t : public geometry_observer<REAL> {
 
     private:
@@ -504,11 +504,18 @@ namespace qpp{
       template<typename adding_result_policy = query_ray_add_all<REAL> >
       void query_ray (ray_t<REAL> &_ray,
                       std::vector<tws_query_data_t<REAL, AINT> > &res,
-                      REAL scale_factor = 0.25, bool hide_by_field = false,
+                      const std::set<size_t> &hidden_types,
+                      REAL scale_factor = 0.25,
+                      bool hide_by_field = false,
                       int xgeom_hide_field_id = 6) {
         if (!root) return;
-        traverse_query_ray<adding_result_policy>(root, _ray, res, scale_factor,
-                                                 hide_by_field, xgeom_hide_field_id);
+        traverse_query_ray<adding_result_policy>(root,
+                                                 _ray,
+                                                 res,
+                                                 hidden_types,
+                                                 scale_factor,
+                                                 hide_by_field,
+                                                 xgeom_hide_field_id);
       }
 
       /// \brief traverse_query_ray
@@ -519,7 +526,9 @@ namespace qpp{
       void traverse_query_ray (tws_node_t<REAL, AINT> *cur_node,
                                ray_t<REAL> &_ray,
                                std::vector<tws_query_data_t<REAL, AINT> > &res,
-                               const REAL scale_factor, bool hide_by_field,
+                               const std::set<size_t> &hidden_types,
+                               const REAL scale_factor,
+                               bool hide_by_field,
                                int xgeom_hide_field_id) {
 
         if (!cur_node) return;
@@ -529,8 +538,13 @@ namespace qpp{
             if (cur_node->m_tot_childs > 0) {
                 for (auto *ch_node : cur_node->m_sub_nodes)
                   if (ch_node)
-                    traverse_query_ray<adding_result_policy>(ch_node, _ray, res, scale_factor,
-                                                             hide_by_field, xgeom_hide_field_id);
+                    traverse_query_ray<adding_result_policy>(ch_node,
+                                                             _ray,
+                                                             res,
+                                                             hidden_types,
+                                                             scale_factor,
+                                                             hide_by_field,
+                                                             xgeom_hide_field_id);
               }
             else for (auto &nc : cur_node->m_content) {
                 auto ap_idx = ptable::number_by_symbol(geom->atom(nc.m_atm));
@@ -544,14 +558,26 @@ namespace qpp{
                 REAL ray_hit_dist = ray_sphere_test(&_ray, test_pos, atom_rad);
                 bool ray_hit = ray_hit_dist > -1.0f;
 
-                if (ray_hit && adding_result_policy::can_add(test_pos, nc.m_idx, geom->DIM) &&
+                bool atom_hidden = false;
+                if (!hidden_types.empty()) {
+                    auto it = hidden_types.find(geom->type_of_atom(nc.m_atm));
+                    if (it != hidden_types.end()) atom_hidden = true;
+                  }
+
+                if (
+                    ray_hit &&
+                    adding_result_policy::can_add(test_pos, nc.m_idx, geom->DIM) &&
+                    !atom_hidden &&
                     (!geom->template xfield<bool>(xgeom_hide_field_id, nc.m_atm) ||
-                     !xgeom_hide_field_id))
+                     !xgeom_hide_field_id)
+                    )
                   res.push_back(tws_query_data_t<REAL, AINT>(nc.m_atm, nc.m_idx, ray_hit_dist));
 
               }
           }
+
         else return ;
+
       }
 
       /// \brief query_sphere
