@@ -230,8 +230,8 @@ namespace qpp{
 
     private:
 
-      REAL m_guess_rect_size{12.0};
-      REAL m_min_tws_volume{265.0};
+      REAL m_guess_rect_size{8.0};
+      REAL m_min_tws_volume{150.0};
 
       xgeometry<REAL, CELL>                                       *geom{nullptr};
       tws_node_t<REAL, AINT>                                     *root{nullptr};

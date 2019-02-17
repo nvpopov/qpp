@@ -19,7 +19,6 @@
 #include <algorithm>
 #include <numeric>
 #include <consts.hpp>
-#include <unsupported/Eigen/CXX11/Tensor>
 #include <data/ptable.hpp>
 
 namespace qpp {
