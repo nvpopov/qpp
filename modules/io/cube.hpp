@@ -31,8 +31,9 @@ namespace qpp {
       uint16_t m_tot_atoms;
       std::vector<REAL> m_field;
       bool m_has_negative_values{false};
+      std::string m_name;
+      int m_addr_mode{0};
   };
-
 
   template<class REAL>
   const REAL get_field_value_at(const int ix,
@@ -45,6 +46,19 @@ namespace qpp {
         iy >= volume.m_steps[1] ||
         iz >= volume.m_steps[2]) return 0;
     else return volume.m_field[iz + volume.m_steps[2] * (iy +  volume.m_steps[1] * ix)];
+  }
+
+  template<class REAL>
+  const REAL get_field_value_at_v2(const int ix,
+                                   const int iy,
+                                   const int iz,
+                                   scalar_volume_t<REAL> &volume) {
+    //return field[ix * ix_size * iy_size + iy_size * iy + iz];
+    if (ix < 0 || iy < 0 || iz < 0 ||
+        ix >= volume.m_steps[0] ||
+        iy >= volume.m_steps[1] ||
+        iz >= volume.m_steps[2]) return 0;
+    else return volume.m_field[iy + volume.m_steps[1] * (ix +  volume.m_steps[0] * iz)];
   }
 
   template<class REAL, class CELL>

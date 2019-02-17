@@ -31,11 +31,13 @@ namespace qpp {
     for (size_t i = 0; i < natom; i++) {
         std::getline(inp, s);
         splt = split_sv(s, " ");
-        std::string atom_name = std::string(splt[0]);
+        std::string an = std::string(splt[0]);
+        an.erase(remove_if(an.begin(), an.end(),[](char c){return !isalpha(c);}), an.end());
         REAL x = std::stod(splt[1].data());
         REAL y = std::stod(splt[2].data());
         REAL z = std::stod(splt[3].data());
-        //fmt::print(std::cout, "DEBUG MGRID ATOM {} {} {} {}\n", atom_name, x, y, z);
+        geom.add(an, x, y, z);
+        fmt::print(std::cout, "DEBUG MGRID ATOM {} {} {} {}\n", an, x, y, z);
       }
 
     //    Typical control block for gv
@@ -126,20 +128,25 @@ namespace qpp {
 
     std::vector<std::string> grid_names;
     grid_names.resize(n_of_grids);
+    volumes.resize(n_of_grids);
+
     for (size_t i = 0; i < n_of_grids; i++) {
         std::getline(inp, s); splt = split_sv(s, "=");
-        grid_names[i] = std::string(splt[1]);
+        volumes[i].m_name = std::string(splt[1]);
       }
 
-
     //prepare volume data
-    volumes.resize(n_of_grids);
     for (auto &volume : volumes) {
+
         volume.m_field.reserve(n_of_points);
         volume.m_offset = vector3<REAL>{org_x, org_y, org_z};
         volume.m_axis[0] = (vector3<REAL>{ax0_x, ax0_y, ax0_z} / net_0);
         volume.m_axis[1] = (vector3<REAL>{ax1_x, ax1_y, ax1_z} / net_1);
         volume.m_axis[2] = (vector3<REAL>{ax2_x, ax2_y, ax2_z} / net_2);
+        volume.m_steps[0] = net_0;
+        volume.m_steps[1] = net_1;
+        volume.m_steps[2] = net_2;
+        volume.m_addr_mode = 1;
       }
 
     //read data chunks
@@ -154,6 +161,7 @@ namespace qpp {
 //      }
 
     size_t current_grid = 0;
+    REAL v0;
 
     while(std::getline(inp, s)) {
        //fmt::print(std::cout, "{}\n", s);
@@ -163,7 +171,9 @@ namespace qpp {
             current_grid += 1;
             if (current_grid >= n_of_grids) current_grid = 0;
           } else { // emit point
-            volumes[current_grid].m_field.push_back(std::stod(s));
+            v0 = std::stod(s);
+            volumes[current_grid].m_field.push_back(v0);
+            if (v0 < -0.01) volumes[current_grid].m_has_negative_values = true;
           }
       }
 
