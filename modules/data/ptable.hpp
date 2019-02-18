@@ -24,7 +24,7 @@ namespace qpp {
     const uint PTABLE_ELEM_N = 100;
     const uint PTABLE_INT_NONE = -1;
     const float PTABLE_FLOAT_NONE = -1.0;
-    const STRING PTABLE_NONE = "None";
+    const STRING PTABLE_NONE = "X";
 
 
     struct ptable_atom_ionic_radii {

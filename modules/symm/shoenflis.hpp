@@ -6,9 +6,14 @@
 #include <symm/gen_cell.hpp>
 #include <cmath>
 
-#ifdef PY_EXPORT
+#if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
+#pragma push_macro("slots")
+#undef slots
 #include <pybind11/pybind11.h>
+#include <pybind11/operators.h>
+#include <pyqpp/py_indexed_property.hpp>
 namespace py = pybind11;
+#pragma pop_macro("slots")
 #endif
 
 namespace qpp{
@@ -284,7 +289,7 @@ namespace qpp{
           }
 
 
-#ifdef PY_EXPORT
+#if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
 
           static void py_export(py::module &m, const char * pyname){
             py::class_<shnfl<REAL>::fingerprint>(m, pyname)

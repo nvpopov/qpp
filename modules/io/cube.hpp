@@ -58,7 +58,8 @@ namespace qpp {
         ix >= volume.m_steps[0] ||
         iy >= volume.m_steps[1] ||
         iz >= volume.m_steps[2]) return 0;
-    else return volume.m_field[iy + volume.m_steps[1] * (ix +  volume.m_steps[0] * iz)];
+    else return volume.m_field[iz + volume.m_steps[2] * volume.m_steps[1] * ix +
+        volume.m_steps[2] * iy ];
   }
 
   template<class REAL, class CELL>

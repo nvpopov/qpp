@@ -217,7 +217,7 @@ namespace qpp{
           }
       }
 
-#ifdef PY_EXPORT
+#if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
 
       static void py_export(py::module m, const char * pyname){
         py::class_<subspace_of3d<REAL> >(m, pyname)

@@ -89,33 +89,52 @@ namespace qpp {
     std::basic_stringstream<CHAR,TRAITS>(s) >> nat;
     std::getline(inp,s);
     // fixme - check these are numbers!
-    if (geom.DIM==3) {
 
-        std::vector<std::string_view> splt = split_sv(s, " ");
+    std::vector<std::string_view> splt = split_sv(s, " ");
 
-        int nf = int(splt.size());
+    int nf = int(splt.size());
 
-        if ( nf == 9 || nf == 6 ) {
+    std::vector<REAL> vv;
 
-            std::vector<REAL> vv;
-            for (int i = 0; i < nf; i++)
-              vv.push_back(std::stod(splt[i].data()));
+    bool no_conversion_errors{true};
+    bool force3d{false};
 
-            if (nf == 9) {
-                geom.cell(0) = vector3<REAL>(vv[0],vv[1],vv[2]);
-                geom.cell(1) = vector3<REAL>(vv[3],vv[4],vv[5]);
-                geom.cell(2) = vector3<REAL>(vv[6],vv[7],vv[8]);
-              }
-            else geom.cell = periodic_cell<REAL>(vv[0],vv[1],vv[2],vv[3],vv[4],vv[5]);
+    try {
+      for (int i = 0; i < nf; i++) vv.push_back(std::stod(splt[i].data()));
+    }
+    catch (...) {
+      no_conversion_errors = false;
+    }
 
+    if (no_conversion_errors) {
+        switch (nf) {
+          case 9: {
+              geom.cell(0) = vector3<REAL>(vv[0],vv[1],vv[2]);
+              geom.cell(1) = vector3<REAL>(vv[3],vv[4],vv[5]);
+              geom.cell(2) = vector3<REAL>(vv[6],vv[7],vv[8]);
+              force3d = true;
+              break;
+            }
+          case 6: {
+              geom.cell = periodic_cell<REAL>(vv[0],vv[1],vv[2],vv[3],vv[4],vv[5]);
+              force3d = true;
+              break;
+            }
+          case 1 : {
+              geom.cell(0) = vector3<REAL>(vv[0], 0, 0);
+              geom.cell(1) = vector3<REAL>(0, vv[0], 0);
+              geom.cell(2) = vector3<REAL>(0, 0, vv[0]);
+              force3d = true;
+              break;
+            }
+          default:
+            break;
           }
+      }
 
-        if ( nf == 1) {
-            REAL cell_c_magn = std::stod(s);
-            geom.cell(0) = vector3<REAL>(cell_c_magn, 0, 0);
-            geom.cell(1) = vector3<REAL>(0, cell_c_magn, 0);
-            geom.cell(2) = vector3<REAL>(0, 0, cell_c_magn);
-          }
+    if (force3d) {
+        geom.DIM = 3;
+        geom.cell.DIM = 3;
       }
 
     if (!preserve_geom) {
