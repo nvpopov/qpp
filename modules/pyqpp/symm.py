@@ -205,13 +205,13 @@ def find_generators_by_multab(multab,H):
         N = len(multab)
         if len(H) == N:
             return []
-        print('fg by multab H= ',H)
+        #print('fg by multab H= ',H)
         for g in sorted(range(N), key = lambda x: -symm_order(multab,x)):
             if (not g in H) and N % (len(H)*symm_order(multab,g)) == 0:
-                print('trying ',g, ' ord= ', symm_order(multab,g))
+                #print('trying ',g, ' ord= ', symm_order(multab,g))
                 H1 = mul_groups(multab, H, abelian_sub(multab,g))
-                H2 = [multab[i][j] for i in H for j in abelian_sub(multab,g)]
-                print(sorted(H2))                
+                #H2 = [multab[i][j] for i in H for j in abelian_sub(multab,g)]
+                #print(sorted(H2))                
                 if len(H1) == len(H)*symm_order(multab,g):
                     gg = find_generators_by_multab(multab,H1)
                     if type(gg) is list:
@@ -224,14 +224,14 @@ def find_all_generators_by_multab(multab,H):
         N = len(multab)
         if len(H) == N:
             return [[]]
-        print('fg by multab H= ',H)
+        #print('fg by multab H= ',H)
         res = []
         for g in sorted(range(N), key = lambda x: -symm_order(multab,x)):
             if (not g in H) and N % (len(H)*symm_order(multab,g)) == 0:
-                print('trying ',g, ' ord= ', symm_order(multab,g))
+                #print('trying ',g, ' ord= ', symm_order(multab,g))
                 H1 = mul_groups(multab, H, abelian_sub(multab,g))
-                H2 = [multab[i][j] for i in H for j in abelian_sub(multab,g)]
-                print(sorted(H2))                
+                #H2 = [multab[i][j] for i in H for j in abelian_sub(multab,g)]
+                #print(sorted(H2))                
                 if len(H1) == len(H)*symm_order(multab,g):
                     gg = find_all_generators_by_multab(multab,H1)
                     #if type(gg) is list:
