@@ -125,15 +125,18 @@ namespace qpp{
 
     static void py_export(py::module m){
       py::class_<permutation>(m,"permutation")
-  .def(py::init<int>())
-  .def(py::init<const permutation &>())
-  .def(py::init<const py::list &>())
-  .def("__mul__", [] (const permutation & p1, const permutation & p2) -> permutation {return p1*p2;} )
-  .def("__str__", & permutation::to_string )
-  .def("__len__", & permutation::size )
-  .def("__getitem__", &permutation::py_get)
-  .def("__setitem__", &permutation::py_set)
-  ;
+	.def(py::init<int>())
+	.def(py::init<const permutation &>())
+	.def(py::init<const py::list &>())
+	.def("__mul__", [] (const permutation & p1, const permutation & p2) -> permutation {return p1*p2;} )
+	.def("__str__", & permutation::to_string )
+	.def("__repr__", & permutation::to_string )
+	.def("__len__", & permutation::size )
+	.def("__getitem__", &permutation::py_get)
+	.def("__setitem__", &permutation::py_set)
+	.def(py::self==py::self)
+	.def(py::self!=py::self)
+	;
     }
 
 #endif

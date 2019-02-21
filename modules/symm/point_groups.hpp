@@ -380,7 +380,7 @@ namespace qpp{
   // -------------------------------------------------------------------------------
 
   template<class REAL>
-  void fix_point_group(array_group<matrix3<REAL> > & G, const static_table<int> & M){
+  void reconstruct_point_group(array_group<matrix3<REAL> > & G, const static_table<int> & M){
 
     int maxit = 100;
     int N = G.size();
@@ -430,85 +430,44 @@ namespace qpp{
   }
 
   // -------------------------------------------------------------------------------
-  /*
-  template <class REAL>
-  void finitize_point_group(array_group<matrix3<REAL> > & G,
-                            std::vector<permutation> & P, REAL angle_error){
 
-    // find and appropriately place unity element
-
-    matrix3<REAL> E = matrix3<REAL>::Identity();
-    int i0 = pg_approx_find(G, E, angle_error);
-
-    if (P[i0] != permutation(P[0].size()))
-      IndexError("No identity matrix in the group");
-
-    if (i0!=0){
-      std::swap(G[0],G[i0]);
-      std::swap(P[0],P[i0]);
+  template<class REAL>
+  STRING point_group_symbol(const array_group<matrix3<REAL> > & G)
+  {
+    group_analyzer<matrix3<REAL>, array_group<matrix3<REAL> > > A(G);
+    
+    // Define the maximum order
+    int maxord=1;
+    for (int i=0; i<G.size(); i++){
+      if (A.order(i)>maxord)
+	maxord=A.order(i);
     }
+    std::vector<STRING> cand_groups = shnfl<REAL>::groups_by_order(maxord);
 
-    std::cout << "found E in position " << i0 << "\n";
-
-    // complete the group and construct multiplication table
-    int N = G.size();
-    std::vector<std::vector<int> > mtab(N);
-
-    for (int i=0; i<N; i++)
-      for (int j=0; j<N; j++)
-  mtab[i].push_back(-1);
-
-    while(true){
-      pg_approx_multab(mtab,G,angle_error);
-
-      for (int i=0; i<N; i++)
-  for (int j=0; j<N; j++)
-    if (mtab[i][j]==-1)
+    for (int i=cand_groups.size()-1; i>=0; i--)
       {
-        G.add(G[i]*G[j]);
-        P.push_back(P[i]*P[j]);
-        std::cout << "added " << i << " x " << j << "\n";
-        std::cout << "G size = " << G.size() << " P size = " << P.size() << "\n";
-        goto ADDED;
+	//std::cout << cand_groups[i] << " " << shnfl<REAL>::group(cand_groups[i]).size() << "\n";
+	if (shnfl<REAL>::group(cand_groups[i]).size() != G.size() )
+	  cand_groups.erase(cand_groups.begin()+i);
       }
-    ADDED:
-      if (N==G.size()) break;
-      if (G.size()>G.lim_size)
-  OverflowError("Failed to complete approximate group. The number of elements exceeded lim_size");
-
-      for (int i=0; i<N; i++)
-  mtab[i].push_back(-1);
-
-      std::cout << "here1\n";
-
-      mtab.push_back(std::vector<int>());
-      for (int j=0; j<G.size(); j++)
-  mtab[N].push_back(-1);
-
-      N++;
-
-      std::cout << "here2\n";
-    }
-
-    // check the validity of mtab
-    for (int i=0; i<N; i++){
-      std::set<int> s1, s2;
-      for (int j=0; j<G.size(); j++){
-  s1.insert(mtab[i][j]);
-  s2.insert(mtab[j][i]);
-      }
-      if (s1.size() != N or s2.size() != N)
-  IndexError("Failed to complete approximate group. Duplicate elements in multiplication table");
-    }
-
-    for (int i=0; i<N; i++)
-      for (int j=0; j<G.size(); j++)
-  if ( P[i]*P[j] != P[mtab[i][j]] )
-    IndexError("Failed to complete approximate group. The group is inconsistent with atom permutations");
-
-    // Determine what group is it
+    
+    REAL fpeps = matrix3<REAL>::tol_equiv*G.size();
+    
+    typename shnfl<REAL>::fingerprint FG(G,fpeps);
+    bool found = false;
+    STRING res = "";
+    
+    for (const STRING &s:cand_groups)
+      if ( typename shnfl<REAL>::fingerprint(shnfl<REAL>::group(s),fpeps)
+	   .compare(FG, fpeps) )
+	{
+	  found = true;
+	  res = s;
+	  break;
+	}
+    return res;
   }
-  */
+
   // -------------------------------------------------------------------------------
 
   template<class REAL>
@@ -752,41 +711,14 @@ FOUND:
     complete_point_group(G, P);
 
     // Construct multiplication table
-    group_analyzer<permutation> AP(P);
+  group_analyzer<permutation> AP(P);
 
     // Correct point group according to the multiplication table
-    fix_point_group(G,AP.multab);
 
-    // Define the maximum order
-    int maxord=1;
-    for (int i=0; i<P.size(); i++){
-        if (AP.order(i)>maxord)
-          maxord=AP.order(i);
-      }
-    std::vector<STRING> cand_groups = shnfl<REAL>::groups_by_order(maxord);
+  reconstruct_point_group(G,AP.multab);    
 
-    for (int i=cand_groups.size()-1; i>=0; i--)
-      {
-        std::cout << cand_groups[i] << " " << shnfl<REAL>::group(cand_groups[i]).size() << "\n";
-        if (shnfl<REAL>::group(cand_groups[i]).size() != P.size() )
-          cand_groups.erase(cand_groups.begin()+i);
-      }
-
-    REAL fpeps = matrix3<REAL>::tol_equiv*G.size();
-
-    typename shnfl<REAL>::fingerprint FG(G,fpeps);
-    STRING Gname;
-    found = false;
-
-    for (const STRING &s:cand_groups)
-      if ( typename shnfl<REAL>::fingerprint(shnfl<REAL>::group(s),fpeps)
-           .compare(FG, fpeps) )
-        {
-          found = true;
-          Gname = s;
-          break;
-        }
-
+    STRING Gname = point_group_symbol(G);    
+    
     std::cout << " group= " << Gname << " found= " << found << "\n";
 
     G.name = Gname;
@@ -963,7 +895,7 @@ FOUND:
   }
 
   template<class REAL>
-  void py_fix_point_group(array_group<matrix3<REAL> > & G, const py::list & M){
+  void py_reconstruct_point_group(array_group<matrix3<REAL> > & G, const py::list & M){
     int N = G.size();
     static_table<int> multab(N,N);
     if (py::len(M)!=N)
@@ -984,7 +916,7 @@ FOUND:
 
       }
 
-    fix_point_group(G,multab);
+    reconstruct_point_group(G,multab);
   }
 
 

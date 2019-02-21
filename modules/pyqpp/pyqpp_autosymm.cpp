@@ -23,8 +23,9 @@ void def_autosymm (py::module m, const char * pyname) {
   //m.def("find_point_subgroups", &qpp::py_find_point_subgroups2<REAL,false>);
   m.def("find_translations", &qpp::py_find_translations<REAL>);
   //m.def("finitize_point_group", &qpp::finitize_point_group<REAL>);
-  m.def("fix_point_group", &qpp::py_fix_point_group<REAL>);
+  m.def("reconstruct_point_group", &qpp::py_reconstruct_point_group<REAL>);
   m.def("complete_point_group", &qpp::complete_point_group<REAL>);
+  m.def("point_group_symbol", &qpp::point_group_symbol<REAL>);
 
   std::string shname = fmt::format("{0}_{1}","shnfl",pyname);
   

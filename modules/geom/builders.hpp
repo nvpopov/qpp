@@ -232,10 +232,8 @@ namespace qpp{
 
         bool allcell = false, something = false;
         bool * inside = new bool[src.nat()];
-
-        for (int at=0; at<src.nat(); at++) {
-
-            r1[at] = cell.transform(src.coord(at),I);
+        for (int at=0; at<src.nat(); at++){
+            r1[at] = cell.transform(src.pos(at),I);
             bool insd = !src.shadow(at) && shp.within(r1[at]);
             inside[at] = insd;
 
