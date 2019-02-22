@@ -27,7 +27,7 @@ namespace qpp{
   ///
   /// \brief  Geometry with extra fields - for storing any additional data
   ///
-  class xgeometry : public geometry<REAL,CELL>{
+  class xgeometry : public geometry<REAL,CELL> {
 
     std::vector<std::vector<REAL> >   _xreal;
     std::vector<std::vector<int> >    _xint;
@@ -50,7 +50,7 @@ namespace qpp{
     using geometry<REAL,CELL>::observers;
     //using geometry<DIM,REAL,CELL>::error;
 
-    void init_xdefault(){
+    void init_xdefault() {
       _nxreal = _nxstring = _nxint = _nxbool = 0;
 #if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
       py_fields.bind(this);
@@ -879,7 +879,8 @@ namespace qpp{
       py_indexed_property<SELF, bool, int, &SELF::py_getadd,
           &SELF::py_setadd >::py_export(m, sPropNameAdd.c_str());
 
-      py::class_<xgeometry<REAL,CELL>, geometry<REAL,CELL> >
+      py::class_<xgeometry<REAL,CELL>, geometry<REAL,CELL>,
+          std::shared_ptr<xgeometry<REAL,CELL>> >
           (m, pyname, py::dynamic_attr())
 //          .def(py::init<int,   const STRING&>(),
 //               py::arg("dim"), py::arg("__name") = "")
