@@ -882,14 +882,15 @@ namespace qpp{
       py::class_<xgeometry<REAL,CELL>, geometry<REAL,CELL>,
           std::shared_ptr<xgeometry<REAL,CELL>> >
           (m, pyname, py::dynamic_attr())
-//          .def(py::init<int,   const STRING&>(),
-//               py::arg("dim"), py::arg("__name") = "")
+          .def(py::init<int,   const STRING&>(),
+               py::arg("dim"), py::arg("__name") = "")
           .def(py::init<CELL&, const py::list &, const STRING&>(),
                py::arg("CELL"), py::arg("f"), py::arg("__name") = "")
           .def_readwrite("field", & SELF::py_fields)
           .def_readwrite("additive", & SELF::py_add)
           .def("nfields", & SELF::nfields)
-          .def("field_name", & SELF::field_name);
+          .def("field_name", & SELF::field_name)
+          .def("set_format", &SELF::set_format);
     }
 
 #endif

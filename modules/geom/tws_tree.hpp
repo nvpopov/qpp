@@ -228,7 +228,7 @@ namespace qpp{
   template <class REAL, class CELL = periodic_cell<REAL>, typename AINT = size_t >
   class tws_tree_t : public geometry_observer<REAL> {
 
-    private:
+    public:
 
       REAL m_guess_rect_size{8.0};
       REAL m_min_tws_volume{150.0};
@@ -243,8 +243,6 @@ namespace qpp{
       bool m_auto_build{true}; /// \brief bAutoBuild
       bool m_build_imaginary_atoms_bonds{true};/// \brief bBuildImaginaryAtomsBonds
       bool m_keep_img_atoms{false};
-
-    public:
 
       std::vector<img_atom_t<REAL, AINT> >                            m_img_atoms;
       std::vector<std::vector<tws_node_content_t<REAL, AINT> > >      m_ngb_table;

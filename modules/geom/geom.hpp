@@ -481,18 +481,25 @@ The supercell concept generalization for the geometry class looks like:
       // ----------------------- Managing observers -----------------------
 
       void add_observer (DEP & d) {
+
+        auto it = std::find(observers.begin(), observers.end(), &d);
+
+        if (it != observers.end()) {
+            has_observers = true;
+            return;
+          }
+
         observers.push_back(&d);
         has_observers = true;
+
       }
 
       void remove_observer (DEP & d) {
 
         auto i = observers.begin();
 
-        while(i != observers.end())
-          {
-            if (*i == &d)
-              {
+        while(i != observers.end()) {
+            if (*i == &d) {
                 observers.erase(i);
                 break;
               }
