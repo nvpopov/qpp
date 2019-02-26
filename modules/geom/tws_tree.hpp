@@ -233,7 +233,7 @@ namespace qpp{
       REAL m_guess_rect_size{8.0};
       REAL m_min_tws_volume{150.0};
 
-      xgeometry<REAL, CELL>                                       *geom{nullptr};
+      xgeometry<REAL, CELL>                                      *geom{nullptr};
       tws_node_t<REAL, AINT>                                     *root{nullptr};
       std::vector<tws_node_t<REAL, AINT>* >                      m_flat_view;
       std::vector<std::vector<atom_node_lookup_t<REAL> > >       m_atom_node_lookup;
@@ -243,6 +243,7 @@ namespace qpp{
       bool m_auto_build{true}; /// \brief bAutoBuild
       bool m_build_imaginary_atoms_bonds{true};/// \brief bBuildImaginaryAtomsBonds
       bool m_keep_img_atoms{false};
+      bool m_tree_is_dirty{false};
 
       std::vector<img_atom_t<REAL, AINT> >                            m_img_atoms;
       std::vector<std::vector<tws_node_content_t<REAL, AINT> > >      m_ngb_table;
@@ -388,7 +389,7 @@ namespace qpp{
       /// \param atm2
       void clr_bond_img_real (const AINT img_atom_id, const int atm2) {
         for (auto it = m_img_atoms[img_atom_id].m_img_bonds.begin();
-            it != m_img_atoms[img_atom_id].m_img_bonds.end(); )
+             it != m_img_atoms[img_atom_id].m_img_bonds.end(); )
           if (it->m_atm == atm2) m_img_atoms[img_atom_id].m_img_bonds.erase(it);
           else ++it;
       }
@@ -413,8 +414,8 @@ namespace qpp{
         if (m_ngb_table[atm1].size() > 0){
             auto new_end = std::remove_if(m_ngb_table[atm1].begin(), m_ngb_table[atm1].end(),
                                           [&atm2](tws_node_content_t<REAL> & bonds) {
-                                            return bonds.m_atm == atm2;
-                                          });
+                           return bonds.m_atm == atm2;
+          });
             m_ngb_table[atm1].erase(new_end);
           }
       }
@@ -945,6 +946,7 @@ namespace qpp{
             if (m_auto_build) insert_object_to_tree(geom->nat()-1);
             if (m_auto_bonding) find_neighbours(geom->nat()-1);
           }
+        m_tree_is_dirty = true;
       }
 
 
@@ -960,6 +962,7 @@ namespace qpp{
         if (st == before_after::after) {
             do_action(act_check_consistency);
           }
+        m_tree_is_dirty = true;
       }
 
       /// \brief changed
@@ -991,6 +994,7 @@ namespace qpp{
               }
 
           }
+        m_tree_is_dirty = true;
 
       }
 
@@ -1005,6 +1009,7 @@ namespace qpp{
           } else {
             do_action(act_check_consistency | act_rebuild_all);
           }
+        m_tree_is_dirty = true;
       }
 
       /// \brief shaded
@@ -1014,13 +1019,13 @@ namespace qpp{
       void shaded (int at,
                    before_after st,
                    bool sh) override {
-
+        m_tree_is_dirty = true;
       }
 
       /// \brief reordered
       void reordered (const std::vector<int> &,
                       before_after) override {
-
+        m_tree_is_dirty = true;
       }
 
   };
