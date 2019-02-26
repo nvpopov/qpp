@@ -244,6 +244,7 @@ namespace qpp{
       bool m_build_imaginary_atoms_bonds{true};/// \brief bBuildImaginaryAtomsBonds
       bool m_keep_img_atoms{false};
       bool m_tree_is_dirty{false};
+      bool m_atoms_existence_is_broken{false};
 
       std::vector<img_atom_t<REAL, AINT> >                            m_img_atoms;
       std::vector<std::vector<tws_node_content_t<REAL, AINT> > >      m_ngb_table;
@@ -947,6 +948,7 @@ namespace qpp{
             if (m_auto_bonding) find_neighbours(geom->nat()-1);
           }
         m_tree_is_dirty = true;
+        m_atoms_existence_is_broken = true;
       }
 
 
@@ -963,6 +965,7 @@ namespace qpp{
             do_action(act_check_consistency);
           }
         m_tree_is_dirty = true;
+        m_atoms_existence_is_broken = true;
       }
 
       /// \brief changed
@@ -1010,6 +1013,7 @@ namespace qpp{
             do_action(act_check_consistency | act_rebuild_all);
           }
         m_tree_is_dirty = true;
+        m_atoms_existence_is_broken = true;
       }
 
       /// \brief shaded
