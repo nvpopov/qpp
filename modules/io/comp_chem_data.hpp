@@ -81,16 +81,19 @@ namespace qpp {
 
   template <class REAL>
   struct comp_chem_program_vibration_info_t {
+
       std::vector<vector3<REAL> > m_disp;
       REAL m_frequency{REAL(0)};
       REAL m_intensity{REAL(0)};
       REAL m_reduced_mass{REAL(0)};
       REAL m_raman_activity{REAL(0)};
       REAL m_depolarization{REAL(0)};
+
   };
 
   template <class REAL>
   struct comp_chem_program_scf_step_info_t {
+
       int m_iter{0};
       int m_ex{0};
       int m_dem{0};
@@ -98,10 +101,12 @@ namespace qpp {
       REAL m_e_change{REAL(0)};
       REAL m_d_change{REAL(0)};
       REAL m_orb_grad_or_diis_error{REAL(0)};
+
   };
 
   template <class REAL>
   struct comp_chem_program_step_t {
+
       std::vector<comp_chem_program_scf_step_info_t<REAL> > m_scf_steps;
       REAL m_toten{REAL(0)};
       std::vector<vector3<REAL> > m_atoms_pos;
@@ -116,13 +121,14 @@ namespace qpp {
       REAL m_energy_gap_spin_2;
       std::vector<std::pair<REAL, REAL> > m_mulliken_pop_per_atom;
       std::vector<std::pair<REAL, REAL> > m_lowdin_pop_per_atom;
-      std::optional<vector3<REAL> > m_dipole_moment{std::nullopt};
+      vector3<REAL> m_dipole_moment{0};
       vector3<REAL> m_gradient_min{0,0,0};
       vector3<REAL> m_gradient_max{0,0,0};
       vector3<REAL> m_gradient_average{0,0,0};
       REAL m_gradient_norm_min{10};
       REAL m_gradient_norm_max{0};
       REAL m_gradient_norm_average{0};
+
   };
 
   template <class REAL>

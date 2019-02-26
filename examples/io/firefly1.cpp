@@ -86,8 +86,8 @@ int main () {
         }
 
       //write dipole moment
-      if (cc_o.m_steps[i].m_dipole_moment)
-        fmt::print(std::cout, "\nDipole moment = {}\n", *(cc_o.m_steps[i].m_dipole_moment));
+//      if (cc_o.m_steps[i].m_dipole_moment)
+//        fmt::print(std::cout, "\nDipole moment = {}\n", *(cc_o.m_steps[i].m_dipole_moment));
 
       //write atom coordinates and gradients
       if (!cc_o.m_steps[i].m_atoms_pos.empty() && !cc_o.m_steps[i].m_atoms_grads.empty()) {

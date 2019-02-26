@@ -35,7 +35,7 @@ namespace qpp {
     std::locale loc1("C");
     std::string s;
 
-    output.m_DIM == 0;
+    output.m_DIM = 0;
     output.m_comp_chem_program = comp_chem_program_t::pr_unknown;
 
     xyz_parser_state p_state{state_atom_count};

@@ -386,8 +386,7 @@ namespace qpp {
             REAL dy = std::stod(splt[1].data());
             REAL dz = std::stod(splt[2].data());
 
-            output.m_steps[cur_step].m_dipole_moment =
-                std::optional<vector3<REAL> >(vector3<REAL>(dx,dy,dz));
+            output.m_steps[cur_step].m_dipole_moment = vector3<REAL>(dx,dy,dz);
             p_state = pcg_ff_p_state::s_none;
             continue;
           }

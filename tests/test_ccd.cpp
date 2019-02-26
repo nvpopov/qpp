@@ -45,7 +45,7 @@ TEST_CASE( "Computational chemistry data parsing : PC Gamess Firefly" ) {
     REQUIRE(cc_o.m_steps.back().m_lowdin_pop_per_atom.front().second == Approx(0.010166));
     REQUIRE(cc_o.m_steps.back().m_lowdin_pop_per_atom.back().first == Approx(0.966150));
     REQUIRE(cc_o.m_steps.back().m_lowdin_pop_per_atom.back().second == Approx(0.033850));
-    REQUIRE(*(cc_o.m_steps.back().m_dipole_moment) == v3d(v3d::Zero()));
+    REQUIRE((cc_o.m_steps.back().m_dipole_moment) == v3d(v3d::Zero()));
 
   }
 
