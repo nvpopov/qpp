@@ -6,6 +6,8 @@
 #include <iostream>
 #include <fmt/format.h>
 #include <fmt/ostream.h>
+#include <geom/lace3d.hpp>
+#include <io/strfun.hpp>
 
 namespace qpp {
 
@@ -130,15 +132,27 @@ namespace qpp {
 
   template<typename INT = int, typename STR>
   INT str2int(std::vector<std::string_view> &splt,
-                const int index,
-                const uint64_t &cur_line,
-                const STR &s) {
+              const int index,
+              const uint64_t &cur_line,
+              const STR &s) {
     try {
       return std::stoi(splt[index].data());
     } catch (const std::out_of_range& oor) {
       throw parsing_error_t(cur_line, s, pe_type::spl_min_sz, splt.size(), index);
     } catch (const std::invalid_argument& iarg) {
       throw parsing_error_t(cur_line, s, pe_type::conv_int, index);
+    }
+
+  }
+
+  template<typename INT = int, typename STR>
+  INT str2int(
+      const uint64_t &cur_line,
+      const STR &s) {
+    try {
+      return std::stoi(s);
+    } catch (const std::invalid_argument& iarg) {
+      throw parsing_error_t(cur_line, s, pe_type::conv_int, 0);
     }
 
   }
@@ -152,6 +166,20 @@ namespace qpp {
       throw parsing_error_t(cur_line, s, pe_type::spl_min_sz, splt.size(), min_req);
   }
 
+  template<class REAL>
+  qpp::vector3<REAL> vec_from_str_ex(STRING &_inst,
+                                     const uint64_t &cur_line,
+                                     int idx = 0,
+                                     int idy = 1,
+                                     int idz = 2 ) {
+    std::vector<std::string_view> vfs_l = split_sv(_inst);
+    check_min_split_size(vfs_l, 3, cur_line, _inst);
+    REAL vx, vy, vz = 0.0;
+    vx = str2real(vfs_l, idx, cur_line, _inst);
+    vy = str2real(vfs_l, idy, cur_line, _inst);
+    vz = str2real(vfs_l, idz, cur_line, _inst);
+    return qpp::vector3<REAL>(vx, vy, vz);
+  }
 
 }
 

@@ -8,6 +8,7 @@
 #include <geom/geom.hpp>
 #include <geom/geom_anim.hpp>
 #include <io/comp_chem_data.hpp>
+#include <io/parsing_exceptions.hpp>
 
 #include <vector>
 #include <cmath>
@@ -44,14 +45,16 @@ namespace qpp {
     int frame_idx{0};
     bool init_filled{false};
 
+    uint64_t cur_line{0};
+
     while (!inp.eof()) {
 
-        std::getline(inp, s);
+        sgetline(inp, s, cur_line);
         if (inp.eof()) continue;
 
         if (p_state == xyz_parser_state::state_atom_count) {
 
-            output.m_tot_nat = std::stoi(s);
+            output.m_tot_nat = str2int(cur_line, s);
             p_state = xyz_parser_state::state_comment;
             continue;
           }
@@ -78,14 +81,15 @@ namespace qpp {
           }
 
         if (p_state == xyz_parser_state::state_atom_data) {
+
             bool string_contains_tab = s.find("\t") != std::string::npos;
             if (string_contains_tab) replace_string_inplace(s, "\t", " ");
             std::vector<std::string_view> splt = split_sv(s, " ");
-            //std::cout << s << std::endl;
-            vector3<REAL> pos(
-                  std::stod(splt[1].data()),
-                  std::stod(splt[2].data()),
-                  std::stod(splt[3].data()));
+            check_min_split_size(splt, 4, cur_line, s);
+
+            vector3<REAL> pos(str2real(splt, 1, cur_line, s),
+                              str2real(splt, 2, cur_line, s),
+                              str2real(splt, 3, cur_line, s));
 
             if (!init_filled) {
                 output.m_init_atoms_names[atom_c] = std::string(splt[0]);
@@ -105,12 +109,17 @@ namespace qpp {
                   }
                 p_state = xyz_parser_state::state_atom_count;
               }
+
             continue;
+
           }
 
       }
 
     if (output.m_steps.size() > 0) output.m_run_t = comp_chem_program_run_t::rt_geo_opt;
+
+    if (output.m_tot_nat == 0)
+      throw parsing_error_t(cur_line, s, "Invalid XYZ file");
 
   }
 

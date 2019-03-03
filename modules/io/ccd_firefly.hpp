@@ -614,6 +614,9 @@ namespace qpp {
         //end parsing calc data
       }
 
+    if (!b_init_parsed)
+      throw parsing_error_t(cur_line, s, "Invalid Firefly output file");
+
   }
 
 }
