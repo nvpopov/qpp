@@ -18,27 +18,140 @@ namespace qpp {
     return std::getline(__is, __str);
   };
 
-  class generic_parsing_error_t : public std::exception {
+  enum pe_type : int {
+    unknown,
+    conv_float,
+    conv_int,
+    spl_min_sz,
+    spl_max_sz
+  };
+
+  class parsing_error_t : public std::exception {
 
     public:
 
       std::string m_exception_src;
       std::string m_exception_msg;
       uint64_t m_line_num{0};
+      pe_type m_error_type{pe_type::unknown};
+      int m_error_pos{0};
+      int m_sv_size{0};
+      int m_sv_extr{0};
 
-      generic_parsing_error_t(uint64_t _line_num) :
-        m_line_num(_line_num), m_exception_src("SRC UNDEFINED"), m_exception_msg("UNKNOWN") {};
+      parsing_error_t(uint64_t _line_num) :
+        m_line_num(_line_num),
+        m_exception_src("SRC UNDEFINED"),
+        m_exception_msg("UNKNOWN") { compose_message(); };
 
-      generic_parsing_error_t(uint64_t _line_num,
-                              const std::string _e_src) :
-        m_line_num(_line_num), m_exception_src(_e_src), m_exception_msg("UNKNOWN") {};
+      parsing_error_t(uint64_t _line_num,
+                      const std::string _e_src) :
+        m_line_num(_line_num),
+        m_exception_src(_e_src),
+        m_exception_msg("UNKNOWN") { compose_message(); };
 
-      generic_parsing_error_t(uint64_t _line_num,
-                              const std::string _e_src,
-                              const std::string _e_msg) :
-        m_line_num(_line_num), m_exception_src(_e_src), m_exception_msg(_e_msg) {};
+      parsing_error_t(uint64_t _line_num,
+                      const std::string _e_src,
+                      const std::string _e_msg) :
+        m_line_num(_line_num),
+        m_exception_src(_e_src),
+        m_exception_msg(_e_msg) { compose_message(); };
+
+      parsing_error_t(uint64_t _line_num,
+                      const std::string _e_src,
+                      const pe_type _error_type,
+                      const int _error_pos) :
+        m_line_num(_line_num),
+        m_exception_src(_e_src),
+        m_error_type(_error_type),
+        m_error_pos(_error_pos) { compose_message(); };
+
+      parsing_error_t(uint64_t _line_num,
+                      const std::string _e_src,
+                      const pe_type _error_type,
+                      const int _sv_size,
+                      const int _sv_extr) :
+        m_line_num(_line_num),
+        m_exception_src(_e_src),
+        m_error_type(_error_type),
+        m_sv_size(_sv_size),
+        m_sv_extr(_sv_extr) { compose_message(); };
+
+      void compose_message() {
+
+        switch (m_error_type) {
+
+          case pe_type::unknown : {
+              break;
+            }
+
+          case pe_type::conv_float : {
+              m_exception_msg = fmt::format("Error while trying convert to float in pos {}",
+                                            m_error_pos);
+              break;
+            }
+
+          case pe_type::conv_int : {
+              m_exception_msg = fmt::format("Error while trying convert to int in pos {}",
+                                            m_error_pos);
+              break;
+            }
+
+          case pe_type::spl_min_sz : {
+              m_exception_msg = fmt::format("Required min el. idx = {}, sv.size() = {}",
+                                            m_error_pos);
+              break;
+            }
+
+          case pe_type::spl_max_sz : {
+              m_exception_msg = fmt::format("Required max el. idx = {}, sv.size() = {}",
+                                            m_error_pos);
+              break;
+            }
+
+          }
+      }
 
   };
+
+  template<typename REAL = float, typename STR>
+  REAL str2real(std::vector<std::string_view> &splt,
+                const int index,
+                const uint64_t &cur_line,
+                const STR &s) {
+    try {
+      return std::stod(splt[index].data());
+    } catch (const std::out_of_range& oor) {
+      throw parsing_error_t(cur_line, s, pe_type::spl_min_sz, splt.size(), index);
+    } catch (const std::invalid_argument& iarg) {
+      throw parsing_error_t(cur_line, s, pe_type::conv_float, index);
+    }
+
+  }
+
+  template<typename INT = int, typename STR>
+  INT str2int(std::vector<std::string_view> &splt,
+                const int index,
+                const uint64_t &cur_line,
+                const STR &s) {
+    try {
+      return std::stoi(splt[index].data());
+    } catch (const std::out_of_range& oor) {
+      throw parsing_error_t(cur_line, s, pe_type::spl_min_sz, splt.size(), index);
+    } catch (const std::invalid_argument& iarg) {
+      throw parsing_error_t(cur_line, s, pe_type::conv_int, index);
+    }
+
+  }
+
+  template<typename STR>
+  void check_min_split_size(std::vector<std::string_view> &splt,
+                            const int min_req,
+                            const uint64_t &cur_line,
+                            const STR &s) {
+    if (splt.size() < min_req)
+      throw parsing_error_t(cur_line, s, pe_type::spl_min_sz, splt.size(), min_req);
+  }
+
 
 }
 
