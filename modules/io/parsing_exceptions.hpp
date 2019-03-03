@@ -181,6 +181,21 @@ namespace qpp {
     return qpp::vector3<REAL>(vx, vy, vz);
   }
 
+  template<class REAL>
+  qpp::vector3<REAL> vec_from_str_ex(STRING &_inst,
+                                     std::vector<std::string_view> &splt,
+                                     const uint64_t &cur_line,
+                                     int idx = 0,
+                                     int idy = 1,
+                                     int idz = 2 ) {
+    check_min_split_size(splt, std::max(idx, std::max(idy, idz)) + 1, cur_line, _inst);
+    REAL vx, vy, vz = 0.0;
+    vx = str2real(splt, idx, cur_line, _inst);
+    vy = str2real(splt, idy, cur_line, _inst);
+    vz = str2real(splt, idz, cur_line, _inst);
+    return qpp::vector3<REAL>(vx, vy, vz);
+  }
+
 }
 
 #endif

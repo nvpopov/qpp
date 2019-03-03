@@ -98,6 +98,10 @@ namespace qpp{
 
       }
 
+    if (geom.nat() == 0)
+      throw parsing_error_t(cur_line, poscar_arecord, "Invalid POSCAR file");
+
+
   }
 
   ///
