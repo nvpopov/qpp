@@ -145,11 +145,11 @@ endif()
 #qc stuff
 if(BUILD_QC)
     message("-- @ Building of quantum chemistry programs enabled")
-    add_library(int-imp STATIC IMPORTED)
-    set_target_properties(int-imp PROPERTIES IMPORTED_LOCATION
-        "${PROJECT_SOURCE_DIR}/deps/libint/lib/.libs/libint2.a")
-    include_directories(${PROJECT_SOURCE_DIR}/deps/libint/include)
-    add_subdirectory(${PROJECT_SOURCE_DIR}/examples/qc)
+    #add_library(int-imp STATIC IMPORTED)
+    #set_target_properties(int-imp PROPERTIES IMPORTED_LOCATION
+    #    "${PROJECT_SOURCE_DIR}/deps/libint/lib/.libs/libint2.a")
+    #include_directories(${PROJECT_SOURCE_DIR}/deps/libint/include)
+    #add_subdirectory(${PROJECT_SOURCE_DIR}/examples/qc)
     #find_package(OpenMP)
     #if(OPENMP_FOUND)
     #    add_definitions(${OpenMP_CXX_FLAGS})
