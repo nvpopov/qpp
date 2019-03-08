@@ -220,6 +220,9 @@ void py_rotrans_export (py::module m, const char * pyname) {
 void pyqpp_linalg_export (py::module m) {
 
   py_vector3_export<float>(m, "vector3f");
+#ifdef QPPCAD_PY_EXPORT
+  py_vector3_export<int>(m, "vector3i");
+#endif
   py_matrix3_export<float>(m, "matrix3f");
   py_eigen3_export<float>(m);
   py_rotrans_export<float,false>(m, "rotrans_f");
