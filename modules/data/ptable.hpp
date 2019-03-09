@@ -5,7 +5,7 @@
 #include <geom/lace3d.hpp>
 #include <data/types.hpp>
 #include <array>
-#include <data/compiler_fallback.hpp>
+#include <optional>
 #include <data/case_icomp.hpp>
 
 #if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
@@ -21,8 +21,8 @@ namespace py = pybind11;
 
 namespace qpp {
 
-    const uint PTABLE_ELEM_N = 100;
-    const uint PTABLE_INT_NONE = -1;
+    const size_t PTABLE_ELEM_N = 100;
+    const size_t PTABLE_INT_NONE = -1;
     const float PTABLE_FLOAT_NONE = -1.0;
     const STRING PTABLE_NONE = "X";
 
@@ -43,8 +43,8 @@ namespace qpp {
         STRING       m_name;
         STRING       m_symbol;
 
-        uint         m_number;
-        uint         m_n_val_elec;
+        size_t         m_number;
+        size_t         m_n_val_elec;
         float        m_radius; // A
         float        m_mass;
         float        m_covrad_slater;// A
@@ -91,7 +91,7 @@ namespace qpp {
 
         ptable () {}
 
-        static STRING symbol_by_number (const uint number) {
+        static STRING symbol_by_number (const size_t number) {
             ptable *table = ptable::get_inst();
             if ((number >= 1) && (number < PTABLE_ELEM_N))
                 return table->arecs[number-1].m_symbol;
@@ -107,7 +107,7 @@ namespace qpp {
 
         }
 
-        static std::optional<uint> number_by_name (const STRING& name) {
+        static std::optional<size_t> number_by_name (const STRING& name) {
 
             ptable *table = ptable::get_inst();
             for (int i = 0; i < PTABLE_ELEM_N; i++)
@@ -117,20 +117,20 @@ namespace qpp {
 
         }
 
-        static std::optional<uint> number_by_symbol (const STRING& symbol) {
+        static std::optional<size_t> number_by_symbol (const STRING& symbol) {
 
             ptable *table = ptable::get_inst();
             if ( table->cache_atom_idx.find(symbol) ==
                  table->cache_atom_idx.end() ) {
               return std::nullopt;
             } else {
-              return std::optional<uint>(table->cache_atom_idx[symbol]);
+              return std::optional<size_t>(table->cache_atom_idx[symbol]);
             }
             return std::nullopt;
 
         }
 
-        static std::optional<float> mass_by_number (const uint number) {
+        static std::optional<float> mass_by_number (const size_t number) {
 
             ptable *table = ptable::get_inst();
             if (number >= 1 && number < PTABLE_ELEM_N)
@@ -139,7 +139,7 @@ namespace qpp {
 
         }
 
-        static std::optional<float> ionic_rad_by_number (const uint number) {
+        static std::optional<float> ionic_rad_by_number (const size_t number) {
 
             ptable *table = ptable::get_inst();
             if (number >= 1 && number < PTABLE_ELEM_N)
@@ -148,7 +148,7 @@ namespace qpp {
 
         }
 
-        static std::optional<float> cov_rad_by_number (const uint number) {
+        static std::optional<float> cov_rad_by_number (const size_t number) {
 
             ptable *table = ptable::get_inst();
             if (number >= 1 && number < PTABLE_ELEM_N)
@@ -157,7 +157,7 @@ namespace qpp {
 
         }
 
-        static std::optional<float> vdw_rad_by_number (const uint number) {
+        static std::optional<float> vdw_rad_by_number (const size_t number) {
 
             ptable *table = ptable::get_inst();
             if (number >= 1 && number < PTABLE_ELEM_N)
@@ -166,7 +166,7 @@ namespace qpp {
 
         }
 
-        static uint nval_elec_by_number (const uint number) {
+        static uint nval_elec_by_number (const size_t number) {
 
             ptable *table = ptable::get_inst();
             if (number >= 1 && number < PTABLE_ELEM_N)

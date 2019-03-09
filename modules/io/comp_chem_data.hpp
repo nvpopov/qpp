@@ -1,7 +1,6 @@
 #ifndef QPP_COMP_CHEM_PROG_OUTPUT_H
 #define QPP_COMP_CHEM_PROG_OUTPUT_H
 
-#include <data/compiler_fallback.hpp>
 #include <vector>
 #include <variant>
 #include <numeric>

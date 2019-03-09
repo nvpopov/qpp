@@ -767,11 +767,11 @@ FOUND:
 
             bool found = false;
             for (int j=0; j < axes.size(); j++)
-              if ( (n[i]-axes[j]).norm()<eps or (n[i]+axes[j]).norm()<eps ){
+              if ( ((n[i]-axes[j]).norm() < eps) || ((n[i]+axes[j]).norm() < eps) ) {
                   found = true;
                   same_ax[j].push_back(i);
                 }
-            if ( not found ){
+            if (!found ) {
                 axes.push_back(n[i]);
                 same_ax.push_back({i});
               }

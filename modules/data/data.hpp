@@ -71,21 +71,17 @@ namespace qpp {
 
       inline ITEM operator()(int i, int j) const{
         if (i<0) i+=N;
-        if (i<0 or i>=N)
-          throw std::range_error("Index 0 out of range in static_table");
+        if (i<0 || i>=N) throw std::range_error("Index 0 out of range in static_table");
         if (j<0) j+=M;
-        if (j<0 or j>=M)
-          throw std::range_error("Index 1 out of range in static_table");
+        if (j<0 || j>=M) throw std::range_error("Index 1 out of range in static_table");
         return tbl[idx(i,j)];
       }
 
-      inline ITEM & operator()(int i, int j){
+      inline ITEM & operator()(int i, int j) {
         if (i<0) i+=N;
-        if (i<0 or i>=N)
-          throw std::range_error("Index 0 out of range in static_table");
+        if (i<0 || i>=N) throw std::range_error("Index 0 out of range in static_table");
         if (j<0) j+=M;
-        if (j<0 or j>=M)
-          throw std::range_error("Index 1 out of range in static_table");
+        if (j<0 || j>=M) throw std::range_error("Index 1 out of range in static_table");
         return tbl[idx(i,j)];
       }
 
@@ -100,12 +96,12 @@ namespace qpp {
   /*
    */
   template<class T, class INT>
-  void reorder(std::vector<T> & data, std::vector<INT> & idx){
+  void reorder(std::vector<T> & data, std::vector<INT> & idx) {
     std::vector<INT> ridx(idx.size());
     for (INT i=0; i<idx.size(); i++)
       ridx[idx[i]] = i;
     bool done;
-    do{
+    do {
         done = true;
         for (INT i=0; i<idx.size(); i++)
           if (ridx[i]!=i){

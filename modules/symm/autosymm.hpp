@@ -10,8 +10,6 @@
 #include <symm/group_theory.hpp>
 #include <symm/point_groups.hpp>
 #include <symm/permut.hpp>
-//#include <symm/spgw.hpp>
-#include <data/compiler_fallback.hpp>
 #include <Eigen/Dense>
 #include <algorithm>
 #include <iomanip>
@@ -26,9 +24,7 @@ namespace py = pybind11;
 #pragma pop_macro("slots")
 #endif
 
-namespace qpp{
-
-
+namespace qpp {
 
   template<class REAL, class CELL>
   bool has_symmetry (geometry<REAL,CELL> & geom, CELL & symm,
@@ -112,6 +108,7 @@ namespace qpp{
       }
 
       bool within (const vector3<REAL> & x) const {
+
         REAL tol_equiv = vector3<REAL>::tol_equiv;
         if (dim == -1) return false;
         else if (dim == 0)
@@ -127,17 +124,23 @@ namespace qpp{
           }
         else if (dim == 3)
           return true;
+        return false;
+
       }
 
       bool operator== (const subspace_of3d<REAL> & L ) const {
+
         if (L.dim != dim)
           return false;
         if (dim == 0)
           return (point-L.point).norm() < vector3<REAL>::tol_equiv;
-        else if ( dim == 1 or dim == 2)
+        else if ( dim == 1 || dim == 2)
           return ((axis-L.axis).norm() < vector3<REAL>::tol_equiv ) and within(L.point);
-        else if (dim == -1 or dim == 3)
+        else if (dim == -1 || dim == 3)
           return true;
+
+        return false;
+
       }
 
       bool operator!= (const subspace_of3d<REAL> & L ) const {

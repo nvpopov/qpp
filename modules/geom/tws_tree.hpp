@@ -21,7 +21,6 @@
 #include <geom/ray.hpp>
 #include <geom/primitive_intersections.hpp>
 #include <data/ptable.hpp>
-#include <data/compiler_fallback.hpp>
 
 //#if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
 //#pragma push_macro("slots")
