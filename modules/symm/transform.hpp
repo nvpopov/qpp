@@ -163,7 +163,7 @@ namespace qpp{
       }
 
       //!\ Rotrans oputput in qpp format
-      virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const{
+      virtual void write(std::basic_ostream<CHAR_EX,TRAITS> &os, int offset=0) const{
         for (int k=0; k<offset; k++) os << " ";
         if (BOUND)
           os << "bound_rotrans(";

@@ -40,7 +40,7 @@ namespace qpp{
     else return b;
   }
 
-  template<> STRING datum::get<STRING>() const {
+  template<> STRING_EX datum::get<STRING_EX>() const {
     if (tp!=type_string) throw std::invalid_argument("Type mismatch in datum conversion to STRING");
     if (ptr) return *ps;
     else return s;
@@ -72,7 +72,7 @@ namespace qpp{
     else return b;
   }
 
-  template<> STRING& datum::ref<STRING>() {
+  template<> STRING_EX& datum::ref<STRING_EX>() {
     if (tp!=type_string) throw std::invalid_argument("Type mismatch in datum conversion to STRING");
     if (ptr) return *ps;
     else return s;
@@ -86,14 +86,14 @@ namespace qpp{
   datum::datum( float  _f){set(_f);}
   datum::datum( double _d){set(_d);}
   datum::datum( bool   _b){set(_b);}
-  datum::datum( const STRING & _s){set(_s);}
+  datum::datum( const STRING_EX & _s){set(_s);}
   datum::datum( const char * _s){set(_s);}
 
   datum::datum( int    *_i){set(_i);}
   datum::datum( float  *_f){set(_f);}
   datum::datum( double *_d){set(_d);}
   datum::datum( bool   *_b){set(_b);}
-  datum::datum( STRING *_s){set(_s);}
+  datum::datum( STRING_EX *_s){set(_s);}
 
   datum::datum(const datum & v) {
     ptr = v.ptr;

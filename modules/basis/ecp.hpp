@@ -21,7 +21,7 @@ namespace qpp{
 
   public:
 
-    STRING name;
+    STRING_EX name;
     int nelec;
 
     void init_props(){

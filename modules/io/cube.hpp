@@ -64,7 +64,7 @@ namespace qpp {
   }
 
   template<class REAL, class CELL>
-  void read_cube(std::basic_istream<CHAR,TRAITS> & inp,
+  void read_cube(std::basic_istream<CHAR_EX,TRAITS> & inp,
                  geometry<REAL, CELL> &geom,
                  scalar_volume_t<REAL> &volume) {
 

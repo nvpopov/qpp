@@ -167,7 +167,7 @@ namespace qpp {
   }
 
   template<class REAL>
-  qpp::vector3<REAL> vec_from_str_ex(STRING &_inst,
+  qpp::vector3<REAL> vec_from_str_ex(STRING_EX &_inst,
                                      const uint64_t &cur_line,
                                      int idx = 0,
                                      int idy = 1,
@@ -182,7 +182,7 @@ namespace qpp {
   }
 
   template<class REAL>
-  qpp::vector3<REAL> vec_from_str_ex(STRING &_inst,
+  qpp::vector3<REAL> vec_from_str_ex(STRING_EX &_inst,
                                      std::vector<std::string_view> &splt,
                                      const uint64_t &cur_line,
                                      int idx = 0,

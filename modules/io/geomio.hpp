@@ -30,9 +30,9 @@ namespace qpp {
   /// \param inp
   /// \param geom
   template<class REAL, class CELL>
-  void read_xyz(std::basic_istream<CHAR,TRAITS> & inp, geometry<REAL, CELL> & geom) {
+  void read_xyz(std::basic_istream<CHAR_EX,TRAITS> & inp, geometry<REAL, CELL> & geom) {
 
-    STRING s;
+    STRING_EX s;
     std::getline(inp,s);
     int nat = std::stoi(s);
     std::getline(inp,s);
@@ -79,14 +79,14 @@ namespace qpp {
   /// \param inp
   /// \param geom
   template<class REAL, class CELL>
-  void read_xyzq(std::basic_istream<CHAR,TRAITS> & inp,
+  void read_xyzq(std::basic_istream<CHAR_EX,TRAITS> & inp,
                  xgeometry<REAL,CELL> & geom,
                  bool preserve_geom = false, int xgeom_charge_field_idx = 4) {
 
-    STRING s;
+    STRING_EX s;
     std::getline(inp,s);
     int nat;
-    std::basic_stringstream<CHAR,TRAITS>(s) >> nat;
+    std::basic_stringstream<CHAR_EX,TRAITS>(s) >> nat;
     std::getline(inp,s);
     // fixme - check these are numbers!
 
@@ -160,60 +160,16 @@ namespace qpp {
   }
 
   template<class REAL, class CELL>
-  void read_xyzq_wrp_def(std::basic_istream<CHAR,TRAITS> & inp,
+  void read_xyzq_wrp_def(std::basic_istream<CHAR_EX,TRAITS> & inp,
                          xgeometry<REAL,CELL> & geom) {
     read_xyzq(inp, geom, true);
   }
-  /*
-    template< class REAL, class CELL>
-    void read_xyzq(std::basic_istream<CHAR,TRAITS> & inp, xgeometry<REAL,CELL> & geom)
-    {
-      STRING s;
-      std::getline(inp,s);
-      int nat;
-      std::basic_stringstream<CHAR,TRAITS>(s) >> nat;
-      std::getline(inp,s);
-      // fixme - check these are numbers!
-      if (DIM==3)
-        {
-    int nf = strnf(s);
-    if ( nf==9 || nf == 6 )
-      {
-        REAL vv[nf];
-        std::basic_stringstream<CHAR,TRAITS> ss(s);
-        for (int i=0; i<nf; i++) ss >> vv[i];
-        if (nf==9)
-          {
-      (*geom.cell)(0) = {vv[0],vv[1],vv[2]};
-      (*geom.cell)(1) = {vv[3],vv[4],vv[5]};
-      (*geom.cell)(2) = {vv[6],vv[7],vv[8]};
-          }
-        else
-          geom.cell = new periodic_cell<DIM,REAL>(vv[0],vv[1],vv[2],vv[3],vv[4],vv[5]);
-      }
-        }
-      for (int i = 0; i<nat; i++)
-        {
-    std::getline(inp,s);
-    if (i==0)
-      {
-        // Analise the line, recognize .xyz type
-      }
-    //	char s1[max_atomic_name_length];
-    STRING s1;
-    REAL x,y,z,q;
-    std::basic_stringstream<CHAR,TRAITS> tmps(s);
-    tmps >> s1 >> x >> y >> z >> q;
-    geom.add(s1,{x,y,z},{q},{},{});
-        }
-      geom.field_names({"charge"});
-    }
-    */
+
   // -------------------------------------------------------------------//
   //                writing geometry into simple xyz                    //
   // -------------------------------------------------------------------//
   template< class REAL, class TRANSFORM >
-  void write_xyz(std::basic_ostream<CHAR,TRAITS>  & out,
+  void write_xyz(std::basic_ostream<CHAR_EX,TRAITS>  & out,
                  const qpp::geometry<REAL,TRANSFORM> & geom){
     out << geom.nat() << "\n";
 
@@ -232,7 +188,7 @@ namespace qpp {
   //                writing geometry into simple xyz                    //
   // -------------------------------------------------------------------//
   template< class REAL, class TRANSFORM >
-  void write_xyzq(std::basic_ostream<CHAR,TRAITS>  & out,
+  void write_xyzq(std::basic_ostream<CHAR_EX,TRAITS>  & out,
                   const qpp::xgeometry<REAL,TRANSFORM> & geom){
     out << geom.nat() << "\n";
 
@@ -273,7 +229,7 @@ namespace qpp {
     */
 
   template< class REAL, class CELL>
-  void write_ngbr(std::basic_ostream<CHAR,TRAITS>  & out,
+  void write_ngbr(std::basic_ostream<CHAR_EX,TRAITS>  & out,
                   neighbours_table<REAL,CELL> & ngbr){
     for (int i=0; i<ngbr.geom->nat(); i++){
         out << i << " " << ngbr.geom->atom(i);

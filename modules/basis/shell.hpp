@@ -4,7 +4,7 @@ class qpp_shell<QBAS, FREAL> { //: public qpp_object{
   int _nprim, _nl;
   int * _l;
   FREAL * _alpha, * _coeff;
-  STRING * _lbl;
+  STRING_EX * _lbl;
 
   qpp_angtype _angtype;
   const static FREAL eps;
@@ -26,7 +26,7 @@ public:
     _l = new int[_nl];
     _alpha = new FREAL[_nprim];
     _coeff = new FREAL[_nprim*_nl];
-    _lbl = new STRING[_nl];
+    _lbl = new STRING_EX[_nl];
     _angtype = __angtype;
     init_props();
   }
@@ -38,7 +38,7 @@ public:
     _l = new int[_nl];
     _alpha = new FREAL[_nprim];
     _coeff = new FREAL[_nprim*_nl];
-    _lbl = new STRING[_nl];
+    _lbl = new STRING_EX[_nl];
     for (int i=0; i<_nl; i++){
         _l[i] = sh._l[i];
         _lbl[i] = sh._lbl[i];
@@ -64,10 +64,10 @@ public:
   inline int nshells() const
   { return _nl; }
 
-  inline STRING & label(int i)
+  inline STRING_EX & label(int i)
   { return _lbl[i]; }
 
-  inline STRING label(int i) const
+  inline STRING_EX label(int i) const
   { return _lbl[i]; }
 
   inline int & l(int i)
@@ -143,7 +143,7 @@ public:
     _nl = nshells() + sh.nshells();
   }
 
-  virtual void write_g98(std::basic_ostream<CHAR,TRAITS> &os,
+  virtual void write_g98(std::basic_ostream<CHAR_EX,TRAITS> &os,
                          int offset=0) const{
     for (int i=0; i<nshells(); i++){
         for (int f=0; f<offset; f++) os << " ";
@@ -166,7 +166,7 @@ public:
   }
 
   /*
-    virtual STRING category() const
+    virtual STRING_EX category() const
     {
       return "shell";
     }
@@ -232,10 +232,10 @@ public:
 
   typedef qpp_shell<QBAS,FREAL> SELF;
 
-  inline void py_set_label(int i, const STRING & l)
+  inline void py_set_label(int i, const STRING_EX & l)
   { _lbl[i]=l; }
 
-  inline STRING py_get_label(int i)
+  inline STRING_EX py_get_label(int i)
   { return _lbl[i]; }
 
   inline int py_get_l(int i)
@@ -262,7 +262,7 @@ public:
   inline void py_set_coeff1(int i, const FREAL & c)
   { TypeError("Contraction coefficient needs 2 indicies"); }
 
-  py_indexed_property< SELF, STRING, int,
+  py_indexed_property< SELF, STRING_EX, int,
                       &SELF::py_get_label, &SELF::py_set_label> py_label;
 
   py_indexed_property< SELF, int, int,
@@ -279,7 +279,7 @@ public:
 
     std::string sPropNameLabel =
          fmt::format("{0}_{1}",pyname,"idx_prop_label");
-    py_indexed_property< SELF, STRING, int,
+    py_indexed_property< SELF, STRING_EX, int,
         &SELF::py_get_label, &SELF::py_set_label>::py_export(
           m, sPropNameLabel.c_str());
 

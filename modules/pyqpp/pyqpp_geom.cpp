@@ -8,9 +8,9 @@ void py_geom_export(py::module m, const char * pyname) {
   qpp::geometry<REAL,CELL>::py_props(m, pyname);
   py::class_<qpp::geometry<REAL,CELL>,
              std::shared_ptr<qpp::geometry<REAL,CELL>> >(m, pyname, py::dynamic_attr())
-      .def(py::init<int,   const STRING&>(),
+      .def(py::init<int,   const STRING_EX&>(),
            py::arg("dim"), py::arg("__name") = "")
-      .def(py::init<CELL&, const STRING&>(),
+      .def(py::init<CELL&, const STRING_EX&>(),
            py::arg("CELL"), py::arg("__name") = "")
       .def("add_observer",    & qpp::geometry<REAL,CELL>::add_observer )
       .def("remove_observer", & qpp::geometry<REAL,CELL>::remove_observer )

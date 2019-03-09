@@ -11,7 +11,8 @@ namespace qpp {
 
   // simple and dirty table
   template <class ITEM>
-  class static_table{
+  class static_table {
+
       int N,M;
       ITEM * tbl;
       //std::vector<std::vector<ITEM> > tbl;
@@ -51,7 +52,7 @@ namespace qpp {
         tbl = nullptr;
       }
 
-      static_table(const static_table<ITEM> & T){
+      static_table(const static_table<ITEM> & T) {
         N = T.N;
         M = T.M;
         if (T.tbl == nullptr)
@@ -142,10 +143,10 @@ namespace qpp {
           float  *pf;
           double *pd;
           bool   *pb;
-          STRING *ps;
+          STRING_EX *ps;
       };
 
-      STRING s;
+      STRING_EX s;
       basic_types tp;
       bool ptr;
 
@@ -155,14 +156,14 @@ namespace qpp {
       inline void set(float  _f) { f=_f; tp = type_float;  ptr=false;}
       inline void set(double _d) { d=_d; tp = type_double; ptr=false;}
       inline void set(bool   _b) { b=_b; tp = type_bool;   ptr=false;}
-      inline void set(const STRING &_s){ s=_s; tp = type_string; ptr=false; }
+      inline void set(const STRING_EX &_s){ s=_s; tp = type_string; ptr=false; }
       inline void set(const char *_s)  { s=_s; tp = type_string; ptr=false; }
 
       inline void set(int    *_i) { pi=_i; tp = type_int;    ptr=true;}
       inline void set(float  *_f) { pf=_f; tp = type_float;  ptr=true;}
       inline void set(double *_d) { pd=_d; tp = type_double; ptr=true;}
       inline void set(bool   *_b) { pb=_b; tp = type_bool;   ptr=true;}
-      inline void set(STRING *_s) { ps=_s; tp = type_string; ptr=true;}
+      inline void set(STRING_EX *_s) { ps=_s; tp = type_string; ptr=true;}
 
       inline basic_types type() const {return tp;}
       inline bool is_ref() const {return ptr;}
@@ -177,8 +178,8 @@ namespace qpp {
       inline float  & operator=(const float &v);
       inline double & operator=(const double &v);
       inline bool   & operator=(const bool &v);
-      inline STRING & operator=(const STRING &v);
-      inline STRING & operator=(const char * v);
+      inline STRING_EX & operator=(const STRING_EX &v);
+      inline STRING_EX & operator=(const char * v);
 
       datum();
 
@@ -186,14 +187,14 @@ namespace qpp {
       datum( float  _f);
       datum( double _d);
       datum( bool   _b) ;
-      datum( const STRING & _s);
+      datum( const STRING_EX & _s);
       datum( const char * _s);
 
       datum( int    *_i);
       datum( float  *_f);
       datum( double *_d);
       datum( bool   *_b);
-      datum( STRING *_s);
+      datum( STRING_EX *_s);
 
       datum(const datum & v);
       /*
@@ -208,7 +209,7 @@ namespace qpp {
   template<> float datum::get<float>() const;
   template<> double datum::get<double>() const;
   template<> bool datum::get<bool>() const;
-  template<> STRING datum::get<STRING>() const;
+  template<> STRING_EX datum::get<STRING_EX>() const;
 
   // -------------------------------------------------------------------
 
@@ -216,7 +217,7 @@ namespace qpp {
   template<> float& datum::ref<float>();
   template<> double& datum::ref<double>();
   template<> bool& datum::ref<bool>();
-  template<> STRING& datum::ref<STRING>();
+  template<> STRING_EX& datum::ref<STRING_EX>();
 
   inline int & datum::operator=(const int &v)
   {  set(v);    return ref<int>(); }
@@ -230,11 +231,11 @@ namespace qpp {
   inline bool & datum::operator=(const bool &v)
   {  set(v);    return ref<bool>(); }
 
-  inline STRING & datum::operator=(const STRING &v)
-  {  set(v);    return ref<STRING>(); }
+  inline STRING_EX & datum::operator=(const STRING_EX &v)
+  {  set(v);    return ref<STRING_EX>(); }
 
-  inline STRING & datum::operator=(const char * v)
-  {  set(v);    return ref<STRING>(); }
+  inline STRING_EX & datum::operator=(const char * v)
+  {  set(v);    return ref<STRING_EX>(); }
 
   template<typename _CharT, class _Traits>
   std::basic_ostream<_CharT, _Traits>&
@@ -249,7 +250,7 @@ namespace qpp {
       case type_int:    __s << v.get<int>(); break;
       case type_float:  __s << v.get<float>(); break;
       case type_double: __s << v.get<double>(); break;
-      case type_string: __s << v.get<STRING>(); break;
+      case type_string: __s << v.get<STRING_EX>(); break;
       default: break;
       }
 

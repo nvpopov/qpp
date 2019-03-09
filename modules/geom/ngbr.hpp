@@ -29,10 +29,10 @@ namespace qpp {
   class bonding_table {
 
       struct _covrad_record {
-          STRING at;
+          STRING_EX at;
           REAL d;
 
-          _covrad_record(const STRING & _at, REAL _d){
+          _covrad_record(const STRING_EX & _at, REAL _d){
             at = _at;
             d = _d;
           }
@@ -41,11 +41,11 @@ namespace qpp {
 
       std::vector<_covrad_record> _covrads;
 
-      inline bool _covrad_match(const STRING & at, int i) const {
+      inline bool _covrad_match(const STRING_EX & at, int i) const {
         return at == _covrads[i].at;
       }
 
-      inline int _find_covrad(const STRING & at) const {
+      inline int _find_covrad(const STRING_EX & at) const {
         for (int i=0; i<_covrads.size(); i++)
           if (_covrad_match(at,i))
             return i;
@@ -55,10 +55,10 @@ namespace qpp {
       // -------------------------------------------------
 
       struct _ngbr_record {
-          STRING at1, at2;
+          STRING_EX at1, at2;
           REAL d;
 
-          _ngbr_record(const STRING & _at1, const STRING & _at2, REAL _d){
+          _ngbr_record(const STRING_EX & _at1, const STRING_EX & _at2, REAL _d){
             at1 = _at1;
             at2 = _at2;
             d = _d;
@@ -67,13 +67,13 @@ namespace qpp {
 
       std::vector<_ngbr_record> _records;
 
-      inline bool _record_match(const STRING & at1,
-                                const STRING & at2, int i) const{
+      inline bool _record_match(const STRING_EX & at1,
+                                const STRING_EX & at2, int i) const{
         return ( at1 == _records[i].at1 && at2 == _records[i].at2 ) ||
             ( at2 == _records[i].at1 && at1 == _records[i].at2 );
       }
 
-      inline int _find_record(const STRING & at1, const STRING & at2) const{
+      inline int _find_record(const STRING_EX & at1, const STRING_EX & at2) const{
         for (int i=0; i<_records.size(); i++)
           if (_record_match(at1,at2,i))
             return i;
@@ -84,16 +84,16 @@ namespace qpp {
 
       typedef bonding_table<REAL> SELF;
 
-      STRING name;
+      STRING_EX name;
 
       REAL default_distance;
 
-      REAL covrad(const STRING & at){
+      REAL covrad(const STRING_EX & at){
         int i = _find_covrad(at);
         return i>-1 ? _covrads[i].d : 0e0;
       }
 
-      void set_covrad(const STRING  & at, const REAL & d){
+      void set_covrad(const STRING_EX  & at, const REAL & d){
         int i = _find_covrad(at);
         if (i>-1)
           _covrads[i].d = d;
@@ -101,12 +101,12 @@ namespace qpp {
           _covrads.push_back(_covrad_record(at,d));
       }
 
-      REAL pair(const STRING   at1, const STRING   at2){
+      REAL pair(const STRING_EX   at1, const STRING_EX   at2){
         int i = _find_record(at1,at2);
         return i>-1 ? _records[i].d : 0e0;
       }
 
-      void set_pair(const STRING   at1, const STRING   at2, const REAL &d){
+      void set_pair(const STRING_EX   at1, const STRING_EX   at2, const REAL &d){
         int i = _find_record(at1,at2);
         if (i>-1)
           _records[i].d = d;
@@ -114,7 +114,7 @@ namespace qpp {
           _records.push_back(_ngbr_record(at1,at2,d));
       }
 
-      REAL distance(const STRING & at1, const STRING   at2){
+      REAL distance(const STRING_EX & at1, const STRING_EX   at2){
         int i = _find_record(at1,at2);
         if (i>-1)
           return _records[i].d;
@@ -135,7 +135,7 @@ namespace qpp {
         default_distance = 0e0;
       }
 
-      virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const{
+      virtual void write(std::basic_ostream<CHAR_EX,TRAITS> &os, int offset=0) const{
         for (int k=0; k<offset; k++) os << " ";
         os << "bonding_table";
         if (name != "")
@@ -183,21 +183,21 @@ namespace qpp {
 
       // --------------- PYTHON -------------------------------
 
-      py_indexed_property<SELF, REAL, const STRING &,
+      py_indexed_property<SELF, REAL, const STRING_EX &,
       &SELF::covrad, &SELF::set_covrad> py_covrad;
 
-      REAL py_getpair(const STRING  ){ return -1;}
-      void py_setpair(const STRING  , const REAL &){}
+      REAL py_getpair(const STRING_EX){ return -1;}
+      void py_setpair(const STRING_EX, const REAL &){}
 
-      REAL py_getpair2(const STRING  at1, const STRING  at2){
+      REAL py_getpair2(const STRING_EX at1, const STRING_EX  at2){
         return pair(at1,at2);
       }
 
-      void py_setpair2(const STRING  at1 , const STRING  at2, const REAL & d){
+      void py_setpair2(const STRING_EX at1, const STRING_EX  at2, const REAL & d){
         set_pair(at1,at2,d);
       }
 
-      py_2indexed_property<SELF,REAL,REAL, const STRING  ,
+      py_2indexed_property<SELF, REAL, REAL, const STRING_EX,
       &SELF::py_getpair, &SELF::py_setpair,
       &SELF::py_getpair2, &SELF::py_setpair2 > py_pair;
 
@@ -226,7 +226,7 @@ namespace qpp {
 
             //bp::extract<STRING> ks(p[0]);
             if (py::isinstance<py::str>(p.first)){
-                STRING s = py::cast<STRING>(p.first);
+                STRING_EX s = py::cast<STRING_EX>(p.first);
                 if (s=="default")
                   default_distance = val;
                 else
@@ -241,8 +241,8 @@ namespace qpp {
 
                 if (py::isinstance<py::str>(t[0]) &&
                     py::isinstance<py::str>(t[1]))
-                  set_pair(py::cast<STRING>(t[0]),
-                      py::cast<STRING>(t[1]), val);
+                  set_pair(py::cast<STRING_EX>(t[0]),
+                      py::cast<STRING_EX>(t[1]), val);
                 else
                   TypeError("bonding_table::from_dict: Invalid dictionary,"
                             " tuple key can contain a pair of atoms only");
@@ -256,12 +256,12 @@ namespace qpp {
       static void py_export(py::module m, const char * pyname){
         std::string sPropNameCovRad =
             fmt::format("{0}_{1}",pyname,"idx_prop_covrad");
-        py_indexed_property<SELF, REAL, const STRING & , &SELF::covrad,
+        py_indexed_property<SELF, REAL, const STRING_EX & , &SELF::covrad,
             &SELF::set_covrad>::py_export(m, sPropNameCovRad.c_str());
 
         std::string sPropNamePair =
             fmt::format("{0}_{1}",pyname,"idx_prop_pair");
-        py_2indexed_property<SELF,REAL,REAL, const STRING , &SELF::py_getpair,
+        py_2indexed_property<SELF,REAL,REAL, const STRING_EX , &SELF::py_getpair,
             &SELF::py_setpair,&SELF::py_getpair2, &SELF::py_setpair2 >
             ::py_2export(m, sPropNamePair.c_str(),true);
 
@@ -294,7 +294,7 @@ namespace qpp {
 
 #endif
 
-      bonding_table(const STRING & __name = ""){
+      bonding_table(const STRING_EX & __name = ""){
         name = __name;
         default_distance = 0e0;
 #if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
@@ -791,7 +791,7 @@ namespace qpp {
 
       void ref_inserted(int at,
                         before_after st,
-                        const STRING & a,
+                        const STRING_EX & a,
                         const vector3<REAL> & r){
         if (st == DEP::after){
             _table.insert(_table.begin()+at, std::vector<index>());
@@ -812,7 +812,7 @@ namespace qpp {
       }
 
       void ref_added(before_after st,
-                     const STRING & a,
+                     const STRING_EX & a,
                      const vector3<REAL> & r){
         ref_inserted(geom->nat()-1,st,a,r);
       }
@@ -848,19 +848,19 @@ namespace qpp {
                         bool sh){}
 
       virtual void added( before_after st,
-                          const STRING & a,
+                          const STRING_EX & a,
                           const vector3<REAL> & r)
       {}
 
       virtual void inserted(int at,
                             before_after st,
-                            const STRING & a,
+                            const STRING_EX & a,
                             const vector3<REAL> & r)
       {}
 
       virtual void changed(int at,
                            before_after st,
-                           const STRING & a,
+                           const STRING_EX & a,
                            const vector3<REAL> & r)
       {}
 

@@ -13,7 +13,7 @@ int main()
   a="nhruhruhru";
 
   std::cout << a.type() << "\n";
-  std::cout << a.get<STRING>() << "\n";
+  std::cout << a.get<STRING_EX>() << "\n";
   
 
   //  a.set("nhruhruhru");
@@ -33,11 +33,11 @@ int main()
   b = ss;
 
   std::cout << a.type() << "\n";
-  std::cout << a.get<STRING>() << "\n";
+  std::cout << a.get<STRING_EX>() << "\n";
 
-  a.ref<STRING>()[5] = 'W';
+  a.ref<STRING_EX>()[5] = 'W';
 
-  std::cout << ss << "|" << b.get<STRING>() << "\n";
+  std::cout << ss << "|" << b.get<STRING_EX>() << "\n";
 
   qpp::datum c;
   c.set(float(1.111111111111));

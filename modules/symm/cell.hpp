@@ -61,7 +61,7 @@ namespace qpp{
       int DIM;
 
       vector3<REAL> *v;
-      STRING name;
+      STRING_EX name;
 
       //! \brief Create periodic cell of dimension dim with zero
       //!  translation vectors
@@ -306,7 +306,7 @@ namespace qpp{
         return true;
       }
 
-      virtual void write(std::basic_ostream<CHAR,TRAITS> &os,
+      virtual void write(std::basic_ostream<CHAR_EX,TRAITS> &os,
                          int offset=0) const{
         if (DIM == 0) return;
         for (int k=0; k<offset; k++) os << " ";

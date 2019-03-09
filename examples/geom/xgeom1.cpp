@@ -56,7 +56,7 @@ int main()
     case type_float: std::cout << "(flt)" << x[j].get<float>(); break;
     case type_double: std::cout << "(dbl)" << x[j].get<double>(); break;
     case type_bool: std::cout << "(bool)" << x[j].get<bool>(); break;
-    case type_string: std::cout << "(str)" << x[j].get<STRING>(); break;
+    case type_string: std::cout << "(str)" << x[j].get<STRING_EX>(); break;
     default: break;
     }
       std::cout << "\n";

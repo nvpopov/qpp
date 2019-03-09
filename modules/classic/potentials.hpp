@@ -15,7 +15,7 @@ namespace qpp{
     int N;
 
     std::vector<REAL> rmin, rmax;
-    std::vector<STRING> atyp;
+    std::vector<STRING_EX> atyp;
     
     virtual REAL energy(const std::vector<vector3<REAL> > &) const  =0;
 

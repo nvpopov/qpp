@@ -30,7 +30,7 @@ namespace qpp {
   };
 
   template<class REAL>
-  void read_ccd_from_cp2k_output(std::basic_istream<CHAR,TRAITS> &inp,
+  void read_ccd_from_cp2k_output(std::basic_istream<CHAR_EX,TRAITS> &inp,
                                  comp_chem_program_data_t<REAL> &output) {
 
     std::locale loc1("C");

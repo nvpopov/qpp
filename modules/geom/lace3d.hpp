@@ -120,12 +120,12 @@ namespace qpp {
       }
 
       //template<typename = std::enable_if<check_is_vector3<N , M>::value> >
-      STRING to_string_vec() const {
+      STRING_EX to_string_vec() const {
         return fmt::format("[{}, {}, {}]", (*this)[0], (*this)[1], (*this)[2]);
       }
 
       //template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
-      STRING to_string_matr() const {
+      STRING_EX to_string_matr() const {
         return fmt::format("[{}, {}, {}]",
                            (*this).row(0),
                            (*this).row(1),

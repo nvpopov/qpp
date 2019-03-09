@@ -19,11 +19,11 @@
 namespace qpp{
 
   template<qpp_bastype BT, class FREAL>
-  void read_gms_basis(std::basic_istream<CHAR,
+  void read_gms_basis(std::basic_istream<CHAR_EX,
                       TRAITS> & inp,
                       atomic_basis<BT,FREAL> & bas){
     bas.shells.clear();
-    STRING s1, s2;
+    STRING_EX s1, s2;
     std::getline(inp,s1);
     //std::cerr << s1 << "\n";
 
@@ -42,7 +42,7 @@ namespace qpp{
       }
     int nsh = 0;
     while (strnf(s1)==2){
-        std::vector<STRING> fields = split(s1);
+        std::vector<STRING_EX> fields = split(s1);
         fields[0] = tolower(fields[0]);
         int l1,l2,ng;
         if (fields[0]=="s")
@@ -92,14 +92,14 @@ namespace qpp{
   }
 
   template<qpp_bastype BT, class FREAL>
-  void write_gms_basis(std::basic_ostream<CHAR,TRAITS>  & out,
+  void write_gms_basis(std::basic_ostream<CHAR_EX,TRAITS>  & out,
                        const atomic_basis<BT,FREAL> & bas){
     if (bas.shells.size()==0 && bas.basis_name!=""){
         out << bas.basis_name << std::endl;
         return;
       }
     for (const auto & sh : bas.shells){
-        STRING lbl="";
+        STRING_EX lbl="";
         if (sh.nshells()==1){
             if (sh.l(0)==0)
               lbl = "S";
@@ -130,12 +130,12 @@ namespace qpp{
 
 
   template<class FREAL>
-  void read_gms_ecp(std::basic_istream<CHAR,TRAITS>  & inp,
-                    STRING & name, atomic_ecp<FREAL> & ecp){
-    STRING s;
+  void read_gms_ecp(std::basic_istream<CHAR_EX,TRAITS>  & inp,
+                    STRING_EX & name, atomic_ecp<FREAL> & ecp){
+    STRING_EX s;
     std::getline(inp,s);
 
-    std::vector<STRING> sf = split(s);
+    std::vector<STRING_EX> sf = split(s);
 
     if (sf.size()==1){
         name = sf[0];
@@ -177,8 +177,8 @@ namespace qpp{
   }
 
   template<class FREAL>
-  void write_gms_ecp(std::basic_ostream<CHAR,TRAITS>  & out,
-                     const STRING & name,
+  void write_gms_ecp(std::basic_ostream<CHAR_EX,TRAITS>  & out,
+                     const STRING_EX & name,
                      const atomic_ecp<FREAL> & ecp){
     if (icompare(name,"none"))
       out << "none none" << std::endl;
@@ -200,7 +200,7 @@ namespace qpp{
 
 
   template<class REAL, class CELL = periodic_cell<REAL> >
-  void write_gms_data(std::basic_ostream<CHAR,TRAITS>  & out,
+  void write_gms_data(std::basic_ostream<CHAR_EX,TRAITS>  & out,
                       geometry<REAL, CELL> & geom,
                       std::vector<atomic_basis<qbas_gauss,REAL> > & bas){
     if (!geom.is_xgeometry())
@@ -231,7 +231,7 @@ namespace qpp{
   }
 
   template<class REAL, class CELL = periodic_cell<REAL>, class FREAL = REAL >
-  void write_gms_data(std::basic_ostream<CHAR,TRAITS>  & out,
+  void write_gms_data(std::basic_ostream<CHAR_EX,TRAITS>  & out,
                       qmmm_molecule<REAL,CELL,qbas_gauss,FREAL> & mol){
     for (int i : mol.fixedatoms)
       mol.geom->shadow(i,true);
@@ -243,7 +243,7 @@ namespace qpp{
   // ------------------------------------------------
 
   template<class REAL, class CELL = periodic_cell<REAL> >
-  void write_gms_charges(std::basic_ostream<CHAR,TRAITS>  & out,
+  void write_gms_charges(std::basic_ostream<CHAR_EX,TRAITS>  & out,
                          xgeometry<REAL, CELL> & geom){
     out << " $EFRAG" << std::endl
         << " position=fixed coord=cart" << std::endl
@@ -274,7 +274,7 @@ namespace qpp{
   }
 
   template<class REAL, class CELL = periodic_cell<REAL>, class FREAL = REAL >
-  void write_gms_charges(std::basic_ostream<CHAR,TRAITS>  & out,
+  void write_gms_charges(std::basic_ostream<CHAR_EX,TRAITS>  & out,
                          qmmm_molecule<REAL,CELL,qbas_gauss,FREAL> & mol){
     for (int i : mol.fixedatoms)
       mol.geom->shadow(i,true);

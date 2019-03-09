@@ -108,7 +108,7 @@ namespace qpp {
     xgeometry<REALDST,CELLDST> *xdst = nullptr;
     xgeometry<REALSRC,CELLSRC> *xsrc = nullptr;
 
-    std::vector<STRING> fn;
+    std::vector<STRING_EX> fn;
     std::vector<basic_types> ft;
 
     if (src.is_xgeometry())
@@ -148,7 +148,7 @@ namespace qpp {
     int ix,iy,iz;
     if (xsrc != nullptr)
       for (int i = 0; i < xsrc->nfields(); i++) {
-          STRING fn = xsrc -> field_name(i);
+          STRING_EX fn = xsrc -> field_name(i);
           if (fn=="x")
             ix = i;
           else if (fn=="y")
@@ -200,7 +200,7 @@ namespace qpp {
     int ix,iy,iz;
     if (xsrc != nullptr)
       for (int i=0; i<xsrc->nfields(); i++) {
-          STRING fn = xsrc -> field_name(i);
+          STRING_EX fn = xsrc -> field_name(i);
           if (fn=="x")
             ix = i;
           else if (fn=="y")

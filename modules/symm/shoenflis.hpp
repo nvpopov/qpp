@@ -135,9 +135,9 @@ namespace qpp{
         return G;
       }
 
-      static array_group<matrix3<REAL> > group(const STRING & _name) {
+      static array_group<matrix3<REAL> > group(const STRING_EX & _name) {
 
-        STRING name  = tolower(_name), error = "Nonexisting point group "+_name;
+        STRING_EX name  = tolower(_name), error = "Nonexisting point group "+_name;
         int n;
         size_t sz;
 
@@ -150,8 +150,8 @@ namespace qpp{
           sz = 0; n=0;
         }
 
-        CHAR first = name[0], last;
-        STRING spec = name.substr(sz+1);
+        CHAR_EX first = name[0], last;
+        STRING_EX spec = name.substr(sz+1);
         if (spec.length() == 0)
           last = ' ';
         else if (spec.length() == 1)
@@ -205,7 +205,7 @@ namespace qpp{
 
       }
 
-      static std::vector<STRING> groups_by_order(int n) {
+      static std::vector<STRING_EX> groups_by_order(int n) {
 
         if (n==1) return {"C1"};
         else if (n==2) return {"Ci", "Cs", "C2", "C2h", "C2v", "D2", "D2h"};
@@ -218,7 +218,7 @@ namespace qpp{
         else if (n==9) return {"C9", "C9v", "D9"};
         else if (n==10) return {"Ih", "C10", "C5h", "C10h", "C10v", "D10", "D5d", "D5h", "D10h", "S10"};
         else {
-            STRING nn = std::to_string(n), n2 = std::to_string(n/2);
+            STRING_EX nn = std::to_string(n), n2 = std::to_string(n/2);
 
             if (n%2==1) return {"C"+nn, "C"+nn+"v", "D"+nn};
             else if (n%4==2) return {"C"+nn, "C"+n2+"h", "C"+nn+"h", "C"+nn+"v", "D"+nn,

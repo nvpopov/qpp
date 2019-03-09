@@ -22,7 +22,7 @@
 namespace qpp {
 
   template<class REAL, class CELL = periodic_cell<REAL> >
-  void write_cp2k_coord_section (std::basic_ostream<CHAR,TRAITS> &out, geometry<REAL, CELL> &geom) {
+  void write_cp2k_coord_section (std::basic_ostream<CHAR_EX,TRAITS> &out, geometry<REAL, CELL> &geom) {
 
 //  Reference:
 //    &CELL

@@ -25,11 +25,11 @@ namespace qpp {
   template<class REAL, class CELL>
   class molecule {
 
-      std::vector<STRING> atoms;
+      std::vector<STRING_EX> atoms;
       std::vector<int> attypes;
 
     public:
-      STRING name;
+      STRING_EX name;
       CELL * cell;
       geometry<REAL,CELL> * geom;
 
@@ -38,15 +38,15 @@ namespace qpp {
       //! \brief Gives the name of atomic type number t. For correct
       //! work of molecule::atom the type table of molecule::geom
       //! must be correctly built
-      STRING atom(int t) const {
+      STRING_EX atom(int t) const {
         return geom->atom_of_type(t);
       }
 
-      int type(const STRING & at) const {
+      int type(const STRING_EX & at) const {
         return geom->type_of_atom(at);
       }
 
-      int define_type(const STRING & at) {
+      int define_type(const STRING_EX & at) {
         geom -> define_type(at);
       }
 

@@ -9,7 +9,7 @@
 namespace qpp {
 
   template<class REAL, class CELL>
-  void load_grid_ascii(std::basic_istream<CHAR,TRAITS> & inp,
+  void load_grid_ascii(std::basic_istream<CHAR_EX,TRAITS> & inp,
                        geometry<REAL, CELL> &geom,
                        std::vector<scalar_volume_t<REAL>> &volumes) {
     std::locale loc1("C");

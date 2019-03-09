@@ -23,10 +23,10 @@ namespace qpp{
 
   template<class REAL, class CELL>
   void read_vasp_poscar(
-      std::basic_istream<CHAR,TRAITS> & inp,
+      std::basic_istream<CHAR_EX,TRAITS> & inp,
       geometry<REAL,CELL> & geom){
 
-    STRING poscar_header,
+    STRING_EX poscar_header,
         poscar_header_scale,
         poscar_a,
         poscar_b,
@@ -65,7 +65,7 @@ namespace qpp{
       acount_v[i] = str2int(acount_l, i, cur_line, poscar_acount);
 
     sgetline(inp, poscar_coord_type, cur_line);
-    STRING poscar_coord_type_t = tolower(poscar_coord_type);
+    STRING_EX poscar_coord_type_t = tolower(poscar_coord_type);
 
     //Construct cell
     geom.cell.v[0] = va;
@@ -108,14 +108,14 @@ namespace qpp{
   ///
   template<class REAL, class CELL>
   void read_vasp_outcar_md_with_frames(
-      std::basic_istream<CHAR,TRAITS> & inp,
+      std::basic_istream<CHAR_EX,TRAITS> & inp,
       geometry<REAL, CELL> &geom,
       std::vector<geom_anim_record_t<REAL> > &anim
       /*std::vector<std::vector<qpp::vector3<REAL> > > &vel_list,
               std::vector<REAL> &toten,
               std::vector<REAL> &temperature*/){
 
-    STRING inps;
+    STRING_EX inps;
 
     bool state_atom_types_filled{false};
     bool state_atom_num_filled{false};
@@ -123,7 +123,7 @@ namespace qpp{
     bool state_parse_geom_data{false};
     bool state_ibrion_parsed{false};
 
-    std::vector<STRING> atom_types;
+    std::vector<STRING_EX> atom_types;
     std::vector<size_t> atom_count;
     std::vector<std::array<qpp::vector3<REAL>, 3 > > cells;
 
@@ -288,9 +288,9 @@ namespace qpp{
   }
 
   template< class REAL, class CELL >
-  void write_vasp_poscar(std::basic_ostream<CHAR,TRAITS>  & out, qpp::geometry<REAL,CELL> & geom){
+  void write_vasp_poscar(std::basic_ostream<CHAR_EX,TRAITS>  & out, qpp::geometry<REAL,CELL> & geom){
 
-    STRING poscar_comment = "";
+    STRING_EX poscar_comment = "";
 
     for (int i = 0; i < geom.n_types(); i++)
       poscar_comment += geom.atom_of_type(i) + (i == geom.n_types() - 1 ? "" : " ");

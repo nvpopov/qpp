@@ -430,7 +430,7 @@ namespace qpp{
   // -------------------------------------------------------------------------------
 
   template<class REAL>
-  STRING point_group_symbol(const array_group<matrix3<REAL> > & G)
+  STRING_EX point_group_symbol(const array_group<matrix3<REAL> > & G)
   {
     group_analyzer<matrix3<REAL>, array_group<matrix3<REAL> > > A(G);
 
@@ -440,7 +440,7 @@ namespace qpp{
       if (A.order(i)>maxord)
   maxord=A.order(i);
     }
-    std::vector<STRING> cand_groups = shnfl<REAL>::groups_by_order(maxord);
+    std::vector<STRING_EX> cand_groups = shnfl<REAL>::groups_by_order(maxord);
 
     for (int i=cand_groups.size()-1; i>=0; i--)
       {
@@ -453,9 +453,9 @@ namespace qpp{
 
     typename shnfl<REAL>::fingerprint FG(G,fpeps);
     bool found = false;
-    STRING res = "";
+    STRING_EX res = "";
 
-    for (const STRING &s:cand_groups)
+    for (const STRING_EX &s:cand_groups)
       if ( typename shnfl<REAL>::fingerprint(shnfl<REAL>::group(s),fpeps)
      .compare(FG, fpeps) )
   {
@@ -715,7 +715,7 @@ FOUND:
 
   reconstruct_point_group(G,AP.multab);
 
-    STRING Gname = point_group_symbol(G);
+    STRING_EX Gname = point_group_symbol(G);
 
     std::cout << " group= " << Gname << " found= " << found << "\n";
 

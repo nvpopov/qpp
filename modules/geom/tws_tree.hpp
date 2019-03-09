@@ -950,7 +950,7 @@ namespace qpp{
       /// \param a
       /// \param r
       void added (before_after st,
-                  const STRING & a,
+                  const STRING_EX & a,
                   const vector3<REAL> & r) override {
         if (st == before_after::after) {
             do_action(act_check_consistency);
@@ -969,7 +969,7 @@ namespace qpp{
       /// \param r
       void inserted (int at,
                      before_after st,
-                     const STRING & a,
+                     const STRING_EX & a,
                      const vector3<REAL> & r) override {
         if (st == before_after::after) {
             do_action(act_check_consistency);
@@ -985,7 +985,7 @@ namespace qpp{
       /// \param r
       void changed (int at,
                     before_after st,
-                    const STRING & a,
+                    const STRING_EX & a,
                     const vector3<REAL> & r) override {
 
         if (st == before_after::after) {

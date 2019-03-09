@@ -25,10 +25,10 @@ namespace qpp {
       std::vector<TRANSFORM> generators;
       index _begin, _end;
       int DIM;
-      STRING name;
+      STRING_EX name;
 
       genform_group(int dim = 0,
-                    const STRING & _name = "") {
+                    const STRING_EX & _name = "") {
         DIM=dim;
         generators.resize(DIM);
         _begin = index::D(DIM);
@@ -39,7 +39,7 @@ namespace qpp {
       genform_group(const std::vector<TRANSFORM> & g,
                     const index & __begin,
                     const index & __end,
-                    const STRING & _name = "") {
+                    const STRING_EX & _name = "") {
         DIM = g.size();
         generators.resize(DIM);
         int d=0;
@@ -50,7 +50,7 @@ namespace qpp {
         name = _name;
       }
 
-      genform_group(const std::vector<TRANSFORM> & g, const STRING & _name = "") {
+      genform_group(const std::vector<TRANSFORM> & g, const STRING_EX & _name = "") {
         DIM = g.size();
         generators.resize(DIM);
 
@@ -144,7 +144,7 @@ namespace qpp {
 
       static int default_lim_size;
       int lim_size;
-      STRING name;
+      STRING_EX name;
 
       std::vector<TRANSFORM> group;
 
@@ -159,7 +159,7 @@ namespace qpp {
         return result? i : -1;
       }
 
-      array_group(const STRING & _name="",
+      array_group(const STRING_EX & _name="",
                   TRANSFORM E = TRANSFORM::unity) {
         name = _name;
         group.push_back(E);
@@ -227,7 +227,7 @@ namespace qpp {
           }
       }
 
-      virtual void write(std::basic_ostream<CHAR,TRAITS> &os,
+      virtual void write(std::basic_ostream<CHAR_EX,TRAITS> &os,
                          int offset=0) const {
         // fixme
       }
@@ -252,7 +252,7 @@ namespace qpp {
 
       static void py_export(py::module m, const char * pyname){
         py::class_<array_group<TRANSFORM>, std::shared_ptr<array_group<TRANSFORM> > >(m, pyname)
-            .def(py::init<const STRING &, TRANSFORM>(),
+            .def(py::init<const STRING_EX &, TRANSFORM>(),
                  py::arg("_name") = "",
                  py::arg("E") = TRANSFORM::unity )
             .def(py::init<const array_group<TRANSFORM> &>())

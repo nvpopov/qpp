@@ -13,6 +13,7 @@
 #include <Eigen/Dense>
 #include <algorithm>
 #include <iomanip>
+#include <optional>
 
 #if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
 #pragma push_macro("slots")

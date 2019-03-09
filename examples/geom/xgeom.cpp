@@ -66,11 +66,11 @@ int main()
 
   g2.mass(1) = 235.0;
   g2.charge(0) = 0.55555;
-  g2.xfield<STRING>(8,2) = "coronium";
+  g2.xfield<STRING_EX>(8,2) = "coronium";
 
   xgeometry<double, periodic_cell<double> > *pg2 = &g2;
 
-  pg2->xfield<STRING>(8,2) = "cococoronium";
+  pg2->xfield<STRING_EX>(8,2) = "cococoronium";
   pg2->xfield<int>(1,2) = 333;
 
   g2.write(std::cout);

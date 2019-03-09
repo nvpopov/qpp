@@ -31,19 +31,19 @@ void py_shape_export (py::module m, const char * pyname) {
 
     std::string boxShapeName = "box_"+std::string(pyname);
     py::class_<qpp::shape_box<REAL> >(m, boxShapeName.c_str(), ashape)
-      .def(py::init<const v3d&, const v3d&, const v3d&, const v3d&, const STRING & >(),
-	   py::arg("a"), py::arg("b"), py::arg("c"), py::arg("r0"), py::arg("name") = "")
-     //TODO bp::optional<const STRING &> >())
-      .def(py::init<const v3d&, const v3d&, const v3d&, const STRING & >(),
-	   py::arg("a"), py::arg("b"), py::arg("c"), py::arg("name") = "")
-      .def(py::init<REAL, REAL, REAL, const STRING & >(),
-	   py::arg("a"), py::arg("b"), py::arg("c"), py::arg("name") = "")
+      .def(py::init<const v3d&, const v3d&, const v3d&, const v3d&, const STRING_EX & >(),
+     py::arg("a"), py::arg("b"), py::arg("c"), py::arg("r0"), py::arg("name") = "")
+     //TODO bp::optional<const STRING_EX &> >())
+      .def(py::init<const v3d&, const v3d&, const v3d&, const STRING_EX & >(),
+     py::arg("a"), py::arg("b"), py::arg("c"), py::arg("name") = "")
+      .def(py::init<REAL, REAL, REAL, const STRING_EX & >(),
+     py::arg("a"), py::arg("b"), py::arg("c"), py::arg("name") = "")
         ;
     std::string sphereShapeName = "sphere_"+std::string(pyname);
     py::class_<qpp::shape_sphere<REAL> >(m, sphereShapeName.c_str(), ashape)
-      .def(py::init<REAL,const STRING & >(), py::arg("R"), py::arg("name") = "" ) 
-      .def(py::init<REAL,const v3d&, const STRING &>(),
-	   py::arg("R"), py::arg("center"), py::arg("name") = "")
+      .def(py::init<REAL,const STRING_EX & >(), py::arg("R"), py::arg("name") = "" )
+      .def(py::init<REAL,const v3d&, const STRING_EX &>(),
+     py::arg("R"), py::arg("center"), py::arg("name") = "")
       ;
 }
 
