@@ -68,6 +68,16 @@ namespace qpp{
       tws_node_content_t (const AINT _atm, const index _idx) noexcept {m_atm = _atm; m_idx = _idx;}
   };
 
+  /// data to store in rtree                                                ///
+  template<typename REAL = float, typename AINT = size_t>
+  struct tws_node_content_bonds_t {
+      AINT m_atm;
+      index m_idx;
+      matrix4<float> m_mat_model;
+      tws_node_content_bonds_t (const AINT _atm, const index _idx) noexcept
+      {m_atm = _atm; m_idx = _idx;}
+  };
+
   /// \brief The imaginary_atom struct
   template<typename REAL, typename AINT = size_t>
   struct img_atom_t {

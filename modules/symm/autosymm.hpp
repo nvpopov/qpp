@@ -173,8 +173,9 @@ namespace qpp{
               return subspace_of3d<REAL>(-1,vector3<REAL>(0,0,0));
           }
 
-        if ( d1 == 1 and d2 == 1) {
-            if ((n1-n2).norm() < vector3<REAL>::tol_equiv or (n1+n2).norm() <  vector3<REAL>::tol_equiv) {
+        if ( d1 == 1 && d2 == 1) {
+            if ((n1-n2).norm() < vector3<REAL>::tol_equiv ||
+                (n1+n2).norm() <  vector3<REAL>::tol_equiv) {
                 if (subspace_of3d<REAL>(d1,p1,n1).within(p2))
                   return *this;
                 else
@@ -189,7 +190,7 @@ namespace qpp{
               return subspace_of3d<REAL>(-1,vector3<REAL>(0,0,0));
           }
 
-        if (d1 == 2 and d2 == 1) {
+        if (d1 == 2 && d2 == 1) {
             if (std::abs(n1.dot(n2)) < vector3<REAL>::tol_equiv){
                 if (std::abs(n1.dot(p2-p1)) < vector3<REAL>::tol_equiv)
                   return subspace_of3d<REAL>(1,p2,n2);
@@ -200,8 +201,9 @@ namespace qpp{
               return  subspace_of3d(0,p2+n2*n1.dot(p1-p2)/n1.dot(n2));
           }
 
-        if (d1 == 2 and d2 == 2) {
-            if ((n1-n2).norm() < vector3<REAL>::tol_equiv or (n1+n2).norm() < vector3<REAL>::tol_equiv){
+        if (d1 == 2 && d2 == 2) {
+            if ((n1-n2).norm() < vector3<REAL>::tol_equiv ||
+                (n1+n2).norm() < vector3<REAL>::tol_equiv){
                 if (std::abs(n1.dot(p1-p2)) <  vector3<REAL>::tol_equiv)
                   return *this;
                 else

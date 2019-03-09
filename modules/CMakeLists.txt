@@ -15,7 +15,9 @@ endif()
 
 add_dependencies(qpp ${QPP_DEPS})
 
-set(QPP_LINK_LIB m)
+if(NOT ${CMAKE_CXX_COMPILER_ID} MATCHES "MSVC")
+  set(QPP_LINK_LIB m)
+endif()
 
 target_link_libraries(qpp ${QPP_LINK_LIB} )
 

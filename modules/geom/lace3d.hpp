@@ -504,7 +504,7 @@ namespace qpp {
               i2 = i;
           }
         for (int i=0; i<3; i++)
-          if (i!=i0 and i!=i2) i1 = i;
+          if (i!=i0 && i!=i2) i1 = i;
 
         eigvals = { A(i0,i0), A(i1,i1), A(i2,i2)};
         eigvecs = { {0,0,0}, {0,0,0}, {0,0,0} };
@@ -741,7 +741,7 @@ namespace qpp {
           i2 = i;
       }
     for (int i=0; i<3; i++)
-      if (i!=i0 and i!=i2) i1 = i;
+      if (i!=i0 && i!=i2) i1 = i;
 
     eigvals(0) = eigvals1(i0);
     eigvals(1) = eigvals1(i1);

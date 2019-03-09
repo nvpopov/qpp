@@ -107,8 +107,7 @@ namespace qpp{
 
   template<class REAL>
   void best_axes(matrix3<REAL> & axes, vector3<REAL> & lambda,
-                 const geometry<REAL, periodic_cell<REAL> > & g)
-  {
+                 const geometry<REAL, periodic_cell<REAL> > & g) {
     matrix3<REAL> S = matrix3<REAL>::Zero();
 
     for (int i=0; i<g.size(); i++)
@@ -224,7 +223,7 @@ namespace qpp{
   // -----------------------------------------------------------------------
 
   template<class REAL>
-  void unitarize(matrix3<REAL> & U){
+  void unitarize(matrix3<REAL> & U) {
     /*
     matrix3<REAL> S = U*U.transpose(), ss;
     vector3<REAL> sig;
@@ -247,7 +246,7 @@ namespace qpp{
 
   template<class REAL>
   int pg_approx_find(const array_group<matrix3<REAL> > & G,
-                     const matrix3<REAL> & M, REAL angle_error){
+                     const matrix3<REAL> & M, REAL angle_error) {
     REAL norm_error = std::sqrt(8e0)*std::sin(0.5*angle_error);
 
     int i0;
@@ -267,7 +266,7 @@ namespace qpp{
   template<class REAL>
   void pg_approx_multab(std::vector<std::vector<int> > & multab,
                         const array_group<matrix3<REAL> > & G,
-                        REAL angle_error){
+                        REAL angle_error) {
     for (int i=0; i<G.size(); i++)
       for (int j=0; j<G.size(); j++)
         if (multab[i][j] == -1)
@@ -278,8 +277,7 @@ namespace qpp{
 
   template<class REAL>
   int pg_max_order(const array_group<matrix3<REAL> > & G,
-                   REAL angle_error = 8*matrix3<REAL>::tol_equiv)
-  {
+                   REAL angle_error = 8*matrix3<REAL>::tol_equiv) {
     matrix3<REAL> E = matrix3<REAL>::Identity();
     matrix3<REAL> I = -E;
     int i0 = pg_approx_find(G,E,angle_error);
@@ -287,7 +285,7 @@ namespace qpp{
 
     REAL phi_min = 2*pi;
     for (int i=0; i<G.size(); i++)
-      if (i!=i0 and i!=i1){
+      if (i!=i0 && i!=i1) {
           vector3<REAL> ax;
           REAL phi;
           bool inv;
@@ -308,7 +306,7 @@ namespace qpp{
 
   template <class REAL>
   void complete_point_group(array_group<matrix3<REAL> > & G,
-                            std::vector<permutation> & P){
+                            std::vector<permutation> & P) {
     for (int i=0; i<P.size(); i++)
       for (int j=0; j<=i; j++){
           permutation p = P[i]*P[j];
@@ -435,36 +433,36 @@ namespace qpp{
   STRING point_group_symbol(const array_group<matrix3<REAL> > & G)
   {
     group_analyzer<matrix3<REAL>, array_group<matrix3<REAL> > > A(G);
-    
+
     // Define the maximum order
     int maxord=1;
     for (int i=0; i<G.size(); i++){
       if (A.order(i)>maxord)
-	maxord=A.order(i);
+  maxord=A.order(i);
     }
     std::vector<STRING> cand_groups = shnfl<REAL>::groups_by_order(maxord);
 
     for (int i=cand_groups.size()-1; i>=0; i--)
       {
-	//std::cout << cand_groups[i] << " " << shnfl<REAL>::group(cand_groups[i]).size() << "\n";
-	if (shnfl<REAL>::group(cand_groups[i]).size() != G.size() )
-	  cand_groups.erase(cand_groups.begin()+i);
+  //std::cout << cand_groups[i] << " " << shnfl<REAL>::group(cand_groups[i]).size() << "\n";
+  if (shnfl<REAL>::group(cand_groups[i]).size() != G.size() )
+    cand_groups.erase(cand_groups.begin()+i);
       }
-    
+
     REAL fpeps = matrix3<REAL>::tol_equiv*G.size();
-    
+
     typename shnfl<REAL>::fingerprint FG(G,fpeps);
     bool found = false;
     STRING res = "";
-    
+
     for (const STRING &s:cand_groups)
       if ( typename shnfl<REAL>::fingerprint(shnfl<REAL>::group(s),fpeps)
-	   .compare(FG, fpeps) )
-	{
-	  found = true;
-	  res = s;
-	  break;
-	}
+     .compare(FG, fpeps) )
+  {
+    found = true;
+    res = s;
+    break;
+  }
     return res;
   }
 
@@ -715,10 +713,10 @@ FOUND:
 
     // Correct point group according to the multiplication table
 
-  reconstruct_point_group(G,AP.multab);    
+  reconstruct_point_group(G,AP.multab);
 
-    STRING Gname = point_group_symbol(G);    
-    
+    STRING Gname = point_group_symbol(G);
+
     std::cout << " group= " << Gname << " found= " << found << "\n";
 
     G.name = Gname;

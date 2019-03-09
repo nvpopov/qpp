@@ -234,17 +234,17 @@ namespace qpp{
 
           int size() const {return trace.size();}
 
-          void add(REAL tr, REAL dt, REAL eps = matrix3<REAL>::tol_equiv){
+          void add(REAL tr, REAL dt, REAL eps = matrix3<REAL>::tol_equiv) {
             int i=0;
             bool found = false;
 
             for (i=0; i<trace.size(); i++){
-                if (std::abs(trace[i]-tr)<eps and std::abs(det[i]-dt)<eps)
+                if (std::abs(trace[i]-tr)<eps && std::abs(det[i]-dt)<eps)
                   {
                     found = true;
                     break;
                   }
-                if (trace[i]+eps < tr or (std::abs(trace[i]-tr)<eps and  det[i]+eps < dt))
+                if (trace[i]+eps < tr || (std::abs(trace[i]-tr)<eps &&  det[i]+eps < dt))
                   break;
               }
             if (found)
@@ -257,32 +257,33 @@ namespace qpp{
               }
           }
 
-          bool compare(const fingerprint & f, REAL eps = matrix3<REAL>::tol_equiv) const{
-            if (size() != f.size())
-              return false;
+          bool compare(const fingerprint & f, REAL eps = matrix3<REAL>::tol_equiv) const {
+
+            if (size() != f.size()) return false;
+
             bool res = true;
 
-
             for (int i=0; i<trace.size(); i++)
-              if (not( std::abs(trace[i]-f.trace[i])<eps and
-                       std::abs(det[i]-f.det[i])<eps and
-                       count[i]==f.count[i]))
-                {
+              if (!( std::abs(trace[i]-f.trace[i])<eps &&
+                     std::abs(det[i]-f.det[i])<eps &&
+                     count[i]==f.count[i])
+                  ) {
                   res = false;
                   break;
                 }
+
             return res;
+
           }
 
-          bool operator==(const fingerprint & f)const{
+          bool operator==(const fingerprint & f) const {
             return compare(f);
           }
 
           fingerprint(){}
 
-          fingerprint(const array_group<matrix3<REAL> > & G, REAL eps = matrix3<REAL>::tol_equiv)
-          {
-            for (int i=0; i<G.size(); i++){
+          fingerprint(const array_group<matrix3<REAL> > & G, REAL eps = matrix3<REAL>::tol_equiv) {
+            for (int i=0; i<G.size(); i++) {
                 auto M = G[i];
                 add( M(0,0) + M(1,1) + M(2,2), M.determinant(), eps);
               }
