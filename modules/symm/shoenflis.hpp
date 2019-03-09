@@ -36,95 +36,95 @@ namespace qpp{
 
       static array_group<matrix3<REAL> > Cn(int n) {
         array_group<matrix3<REAL> > G("C"+std::to_string(n));
-        G.generate(RotMtrx<REAL>({0,0,1},2*pi/n));
+        G.generate(RotMtrx<REAL>({0,0,1},2*REAL(pi)/n));
         return G;
       }
 
       static array_group<matrix3<REAL> > Cnv(int n) {
         array_group<matrix3<REAL> > G("C"+std::to_string(n)+"v");
-        G.generate(RotMtrx<REAL>({0,0,1},2*pi/n));
+        G.generate(RotMtrx<REAL>({0,0,1},2*REAL(pi)/n));
         G.generate(Sigma<REAL>({1,0,0}));
         return G;
       }
 
       static array_group<matrix3<REAL> > Cnh(int n) {
         array_group<matrix3<REAL> > G("C"+std::to_string(n)+"h");
-        G.generate(RotMtrx<REAL>({0,0,1},2*pi/n));
+        G.generate(RotMtrx<REAL>({0,0,1},2*REAL(pi)/n));
         G.generate(Sigma<REAL>({0,0,1}));
         return G;
       }
 
       static array_group<matrix3<REAL> > S2n(int n) {
         array_group<matrix3<REAL> > G("S"+std::to_string(2*n));
-        G.generate(RotMtrx<REAL>({0,0,1},pi/n)*Sigma<REAL>({0,0,1}));
+        G.generate(RotMtrx<REAL>({0,0,1},REAL(pi)/n)*Sigma<REAL>({0,0,1}));
         return G;
       }
 
       static array_group<matrix3<REAL> > Dn(int n) {
         array_group<matrix3<REAL> > G("D"+std::to_string(n));
-        G.generate(RotMtrx<REAL>({0,0,1},2*pi/n));
-        G.generate(RotMtrx<REAL>({1,0,0},pi));
+        G.generate(RotMtrx<REAL>({0,0,1},2*REAL(pi)/n));
+        G.generate(RotMtrx<REAL>({1,0,0},REAL(pi)));
         return G;
       }
 
       static array_group<matrix3<REAL> > Dnh(int n) {
         array_group<matrix3<REAL> > G("D"+std::to_string(n)+"h");
-        G.generate(RotMtrx<REAL>({0,0,1},2*pi/n));
-        G.generate(RotMtrx<REAL>({1,0,0},pi));
+        G.generate(RotMtrx<REAL>({0,0,1},2*REAL(pi)/n));
+        G.generate(RotMtrx<REAL>({1,0,0},REAL(pi)));
         G.generate(Sigma<REAL>({0,0,1}));
         return G;
       }
 
       static array_group<matrix3<REAL> > Dnd(int n) {
         array_group<matrix3<REAL> > G("D"+std::to_string(n)+"d");
-        G.generate(RotMtrx<REAL>({0,0,1},2*pi/n));
-        G.generate(RotMtrx<REAL>({1,0,0},pi));
-        G.generate(Sigma<REAL>({std::sin(pi/(2*n)),std::cos(pi/(2*n)),0}));
+        G.generate(RotMtrx<REAL>({0,0,1},2*REAL(pi)/n));
+        G.generate(RotMtrx<REAL>({1,0,0},REAL(pi)));
+        G.generate(Sigma<REAL>({std::sin(REAL(pi)/(2*n)),std::cos(REAL(pi)/(2*n)),0}));
         return G;
       }
 
       static array_group<matrix3<REAL> > T() {
         array_group<matrix3<REAL> > G("T");
-        G.generate(RotMtrx<REAL>({1,1,1},2*pi/3));
-        G.generate(RotMtrx<REAL>({1,0,0},pi));
+        G.generate(RotMtrx<REAL>({1,1,1},2*REAL(pi)/3));
+        G.generate(RotMtrx<REAL>({1,0,0},REAL(pi)));
         return G;
       }
 
       static array_group<matrix3<REAL> > Td() {
         array_group<matrix3<REAL> > G("Td");
-        G.generate(RotMtrx<REAL>({1,1,1},2*pi/3));
-        G.generate(RotMtrx<REAL>({1,0,0},pi));
+        G.generate(RotMtrx<REAL>({1,1,1},2*REAL(pi)/3));
+        G.generate(RotMtrx<REAL>({1,0,0},REAL(pi)));
         G.generate(Sigma<REAL>({1,1,0}));
         return G;
       }
 
       static array_group<matrix3<REAL> > Th() {
         array_group<matrix3<REAL> > G("Th");
-        G.generate(RotMtrx<REAL>({1,1,1},pi/3)*Sigma<REAL>({1,1,1}));
-        G.generate(RotMtrx<REAL>({1,0,0},pi));
+        G.generate(RotMtrx<REAL>({1,1,1},REAL(pi)/3)*Sigma<REAL>({1,1,1}));
+        G.generate(RotMtrx<REAL>({1,0,0},REAL(pi)));
         return G;
       }
 
       static array_group<matrix3<REAL> > O() {
         array_group<matrix3<REAL> > G("O");
-        G.generate(RotMtrx<REAL>({1,1,1},2*pi/3));
-        G.generate(RotMtrx<REAL>({1,0,0},pi/2));
+        G.generate(RotMtrx<REAL>({1,1,1},2*REAL(pi)/3));
+        G.generate(RotMtrx<REAL>({1,0,0},REAL(pi)/2));
         return G;
       }
 
       static array_group<matrix3<REAL> > Oh() {
         array_group<matrix3<REAL> > G("Oh");
-        G.generate(RotMtrx<REAL>({1,1,1},2*pi/3));
-        G.generate(RotMtrx<REAL>({1,0,0},pi/2));
+        G.generate(RotMtrx<REAL>({1,1,1},2*REAL(pi)/3));
+        G.generate(RotMtrx<REAL>({1,0,0},REAL(pi)/2));
         G.generate(-1*matrix3<REAL>::Identity());
         return G;
       }
 
       static array_group<matrix3<REAL> > I() {
         array_group<matrix3<REAL> > G("I");
-        G.generate(RotMtrx<REAL>({0,0,1},2*pi/5));
-        REAL alp = acos(-std::cos(3*pi/5)/(1+std::cos(3*pi/5)));
-        G.generate(RotMtrx<REAL>({std::sin(alp),0, std::cos(alp)},2*pi/5));
+        G.generate(RotMtrx<REAL>({0,0,1},2*REAL(pi)/5));
+        REAL alp = acos(-std::cos(3*REAL(pi)/5)/(1+std::cos(3*REAL(pi)/5)));
+        G.generate(RotMtrx<REAL>({std::sin(alp),0, std::cos(alp)},2*REAL(pi)/5));
         return G;
       }
 

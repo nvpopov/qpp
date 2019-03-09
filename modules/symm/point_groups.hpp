@@ -283,20 +283,20 @@ namespace qpp{
     int i0 = pg_approx_find(G,E,angle_error);
     int i1 = pg_approx_find(G,I,angle_error);
 
-    REAL phi_min = 2*pi;
+    REAL phi_min = 2 * REAL(pi);
     for (int i=0; i<G.size(); i++)
       if (i!=i0 && i!=i1) {
           vector3<REAL> ax;
           REAL phi;
           bool inv;
           analyze_transform(ax,phi,inv,G[i]);
-          if (inv) phi = pi - phi;
+          if (inv) phi = REAL(pi) - phi;
           if ( phi > angle_error and phi < phi_min)
             phi_min = phi;
         }
 
-    int n = int(2*pi/phi_min + 0.5);
-    if (2*pi/n < angle_error)
+    int n = int(2*REAL(pi)/phi_min + 0.5);
+    if (2 * REAL(pi) / n < angle_error)
       ValueError("pg_max_order : the principle axis roation angle is smaller than angle_error");
     return n;
   }
@@ -607,7 +607,7 @@ namespace qpp{
 
           theta = std::acos(cos_t);
 
-          if ( theta > angle_error && theta < pi - angle_error ){
+          if ( theta > angle_error && theta < REAL(pi) - angle_error ){
               found = true;
               goto FOUND;
             }
@@ -791,7 +791,7 @@ FOUND:
         for (int i=axes.size()-1; i>=0; i--){
             bool pln = false;
             for (int j : same_ax[i])
-              if ( pi - phi[j] < epscos and inv[j]  ) {
+              if ( REAL(pi) - phi[j] < epscos and inv[j]  ) {
                   pln = true;
                   break;
                 }
@@ -816,7 +816,7 @@ FOUND:
 
             std::sort(same_ax[i].begin(), same_ax[i].end(),
                       [&phi,&inv] (int i1, int i2) -> bool
-            { return (inv[i1]? pi-phi[i1]:phi[i1]) < (inv[i2]? pi-phi[i2]:phi[i2]); }
+            { return (inv[i1]? REAL(pi)-phi[i1]:phi[i1]) < (inv[i2]? REAL(pi)-phi[i2]:phi[i2]); }
             );
             /*
   std::cout << "axes " << i << "\n";
@@ -827,7 +827,7 @@ FOUND:
             int j = same_ax[i][0];
             rotoinversion[i] = inv[j];
 
-            orders[i] = int( 2*pi/( inv[j]? pi-phi[j] : phi[j] ) + 0.5 );
+            orders[i] = int( 2*REAL(pi)/( inv[j]? REAL(pi)-phi[j] : phi[j] ) + 0.5 );
           }
       }
 

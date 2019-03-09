@@ -5,7 +5,7 @@
 #include <symm/group_theory.hpp>
 #include <iostream>
 #include <fmt/format.h>
- 
+
 using namespace qpp;
 
 void prnmtr(const matrix3<double> & M){
@@ -37,7 +37,7 @@ int main()
   for (int d=0; d < Oh.DIM; d++)
     {
       std::cout << "generator " << d << "\n";
-      prnmtr(Oh.generators[d]);      
+      prnmtr(Oh.generators[d]);
     }
   std::cout << "orders: " << Oh.begin() << Oh.end() << "\n";
 

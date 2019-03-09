@@ -428,7 +428,7 @@ namespace qpp{
       /// \return
       ///
       virtual VALTYPE volume() const{
-        return 4*qpp::pi*R*R*R/3;
+        return (4 * VALTYPE(qpp::pi) * R * R * R) / 3;
       }
 
       virtual void scale(VALTYPE s){

@@ -296,13 +296,13 @@ namespace qpp {
           }
       }
     else {
-        if ( phi < epscos ){
+        if ( phi < epscos ) {
             // Pure inversion case
             dim = 0;
             point = 0.5*R.T;
             //std::cout << "  ---- invariant_subspace ----- inversion\n";
           }
-        else if ( std::abs(phi - pi) < epscos){
+        else if ( std::abs(phi - REAL(pi)) < epscos) {
             if ( (R.T - axis*axis.dot(R.T)).norm() < eps ) {
                 // Mirror plane case
                 dim = 2;

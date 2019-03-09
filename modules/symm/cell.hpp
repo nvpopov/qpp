@@ -97,9 +97,9 @@ namespace qpp{
       periodic_cell (REAL a, REAL b, REAL c, REAL alpha, REAL beta, REAL gamma) {
         DIM = 3;
         v = new vector3<REAL>[DIM];
-        alpha *= pi/180;
-        beta  *= pi/180;
-        gamma *= pi/180;
+        alpha *= REAL(pi) / 180;
+        beta  *= REAL(pi) / 180;
+        gamma *= REAL(pi) / 180;
         v[0] = vector3<REAL>(a,REAL(0),REAL(0));
         v[1] = vector3<REAL>(b*std::cos(gamma), b*std::sin(gamma), REAL(0));
         REAL nx = std::cos(beta);

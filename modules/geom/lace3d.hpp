@@ -452,8 +452,8 @@ namespace qpp {
         VALTYPE SQ = std::sqrt(Q);
         VALTYPE theta = std::acos(R/(Q*SQ));
         res = {-2*SQ*std::cos(theta/3)-b/3,
-               -2*SQ*std::cos((theta+2*pi)/3)-b/3,
-               -2*SQ*std::cos((theta+4*pi)/3)-b/3};
+               -2*SQ*std::cos((theta + 2 * VALTYPE(pi))/3)-b/3,
+               -2*SQ*std::cos((theta + 4 * VALTYPE(pi))/3)-b/3};
       }
 
     else {
