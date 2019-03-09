@@ -18,6 +18,7 @@
 #include <ios>
 #include <algorithm>
 #include <numeric>
+#include <array>
 #include <consts.hpp>
 #include <data/ptable.hpp>
 

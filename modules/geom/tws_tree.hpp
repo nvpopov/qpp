@@ -8,6 +8,7 @@
 #include <set>
 #include <algorithm>
 #include <cmath>
+#include <array>
 #include <type_traits>
 
 #include <cassert>

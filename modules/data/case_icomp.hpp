@@ -1,7 +1,10 @@
 #ifndef QPP_CASE_INSENSITIVE_COMP
 #define QPP_CASE_INSENSITIVE_COMP
 
+#ifndef _WIN32
 #include <strings.h>
+#endif
+
 #include <map>
 #include <string>
 

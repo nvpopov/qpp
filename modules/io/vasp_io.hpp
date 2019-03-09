@@ -17,6 +17,7 @@
 #include <fstream>
 #include <ios>
 #include <algorithm>
+#include <array>
 
 namespace qpp{
 
@@ -251,7 +252,7 @@ namespace qpp{
     //loadout first frame into geometry
     geom.DIM = 3;
 
-    for (uint i = 0; i < atom_lookup_v.size(); i++){
+    for (size_t i = 0; i < atom_lookup_v.size(); i++){
         geom.add(atom_types[atom_lookup_v[i]], anim_md.frames[0].atom_pos[i]);
         anim_static.frames[0].atom_pos.push_back(anim_md.frames[0].atom_pos[i]);
       }

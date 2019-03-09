@@ -6,8 +6,9 @@
 #include <cmath>
 
 
-namespace qpp{
-  const uint DIM_RECT = 3;
+namespace qpp {
+
+  const uint8_t DIM_RECT = 3;
 
   /// 3d axis aligned bounding box
   template<typename REAL = float>
@@ -113,7 +114,7 @@ namespace qpp{
       void split(aabb_3d_t<REAL> &nl,
                  aabb_3d_t<REAL> &nh,
                  const int iAxis = 0){
-        for (uint i = 0; i < DIM_RECT; i++){
+        for (uint8_t i = 0; i < DIM_RECT; i++){
             REAL mid_point = (max[i] - min[i]) /2 ;
             nl.min[i] =  min[i];
             if (i == iAxis){
@@ -135,7 +136,7 @@ namespace qpp{
       ///
       REAL volume(){
         REAL _ret = 1.0;
-        for (uint i = 0 ; i < DIM_RECT; i++) _ret *= (max[i] - min[i]);
+        for (uint8_t i = 0 ; i < DIM_RECT; i++) _ret *= (max[i] - min[i]);
         return _ret;
       }
 

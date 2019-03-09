@@ -18,6 +18,7 @@
 #include <fstream>
 #include <ios>
 #include <algorithm>
+#include <array>
 
 namespace qpp {
 

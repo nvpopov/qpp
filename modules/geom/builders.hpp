@@ -66,7 +66,8 @@ namespace qpp {
     b.default_distance = geom.tol_geom;
     neighbours_table<REAL,CELL> n(geom,b);
     n.build();
-    int todel[geom.nat()];
+    std::vector<int> todel;
+    todel.resize(geom.nat());
     for (int i = 0; i < geom.nat(); i++)
       todel[i] = -1;
     for (int i = 0; i < geom.nat(); i++)
@@ -177,6 +178,7 @@ namespace qpp {
         }
 
     treat_crowd(dst,mode);
+
   }
 
   // -------------------------------------------------------------------------------
@@ -262,6 +264,7 @@ namespace qpp {
       }
 
     treat_crowd(dst,mode);
+
   }
 
   template<class REALDST, class CELLDST, class REALSRC, class CELLSRC>
@@ -285,28 +288,25 @@ namespace qpp {
 
         // Minimal and maximal fractional coordinates of atoms
         vector3<REALSRC> fmin,fmax;
-        for (int at=0; at<src.nat(); at++){
+        for (int at=0; at<src.nat(); at++) {
             vector3<REALSRC> f = src.coord(at);
             if (!src.frac) f = cell->cart2frac(f);
-            if (at==0)
-              fmin = fmax = f;
+            if (at==0) fmin = fmax = f;
             else
-              for (int i=0; i<3; i++){
-                  if (fmin[i]>f[i])
-                    fmin[i] = f[i];
-                  if (fmax[i]<f[i])
-                    fmax[i] = f[i];
+              for (int i=0; i<3; i++) {
+                  if (fmin[i]>f[i]) fmin[i] = f[i];
+                  if (fmax[i]<f[i]) fmax[i] = f[i];
                 }
           }
 
         std::cout << "fmin= " << fmin << " fmax= " << fmax << "\n";
 
-        begin = {floor(Smin[0]-fmax[0]),
-                 floor(Smin[1]-fmax[1]),
-                 floor(Smin[2]-fmax[2])};
-        end   = {floor(Smax[0]-fmin[0]) + 1,
-                 floor(Smax[1]-fmin[1]) + 1,
-                 floor(Smax[2]-fmin[2]) + 1};
+        begin = {int(floor(Smin[0]-fmax[0])),
+                 int(floor(Smin[1]-fmax[1])),
+                 int(floor(Smin[2]-fmax[2]))};
+        end   = {int(floor(Smax[0]-fmin[0])) + 1,
+                 int(floor(Smax[1]-fmin[1])) + 1,
+                 int(floor(Smax[2]-fmin[2])) + 1};
 
         std::cout << "begin= " << begin << " end= " << end << "\n";
       }
@@ -433,8 +433,8 @@ namespace qpp {
               const geometry<REAL,NUCELL> & nugeom,
               const UCELL & group,
               const std::function<REAL(const geometry<REAL,NUCELL> &, int)> & key =
-              [](const geometry<REAL,NUCELL> &g, int i) -> REAL
-              {return std::sqrt(std::pow(g.pos(i)(1),2) + std::pow(g.pos(i)(2),2)); },
+      [](const geometry<REAL,NUCELL> &g, int i) -> REAL
+  {return std::sqrt(std::pow(g.pos(i)(1),2) + std::pow(g.pos(i)(2),2)); },
               REAL eps = geometry<REAL,NUCELL>::tol_geom_default) {
     unique(n_images, ugeom, nugeom, group, group.begin(), group.end(), key, eps);
   }
@@ -444,8 +444,8 @@ namespace qpp {
               geometry<REAL,UCELL> & ugeom,
               const geometry<REAL,NUCELL> & nugeom,
               const std::function<REAL(const geometry<REAL,NUCELL> &, int)> & key =
-              [](const geometry<REAL,NUCELL> &g, int i) -> REAL
-              {return std::sqrt(std::pow(g.pos(i)(1),2) + std::pow(g.pos(i)(2),2)); },
+      [](const geometry<REAL,NUCELL> &g, int i) -> REAL
+  {return std::sqrt(std::pow(g.pos(i)(1),2) + std::pow(g.pos(i)(2),2)); },
               REAL eps = geometry<REAL,NUCELL>::tol_geom_default) {
     unique(n_images, ugeom, nugeom, ugeom.cell, ugeom.cell.begin(), ugeom.cell.end(), key, eps );
   }
@@ -455,8 +455,8 @@ namespace qpp {
               const geometry<REAL,NUCELL> & nugeom,
               const UCELL & group,
               const std::function<REAL(const geometry<REAL,NUCELL> &, int)> & key =
-              [](const geometry<REAL,NUCELL> &g, int i) -> REAL
-              { return std::sqrt(g.y[i]*g.y[i]+g.z[i]*g.z[i]); },
+      [](const geometry<REAL,NUCELL> &g, int i) -> REAL
+  { return std::sqrt(g.y[i]*g.y[i]+g.z[i]*g.z[i]); },
               REAL eps = geometry<REAL,NUCELL>::tol_geom) {
     std::vector<int> n_images;
     unique(n_images, ugeom, nugeom, group, group.begin(), group.end(), key, eps );
@@ -466,8 +466,8 @@ namespace qpp {
   void unique(geometry<REAL,UCELL> & ugeom,
               const geometry<REAL,NUCELL> & nugeom,
               const std::function<REAL(const geometry<REAL,NUCELL> &, int)> & key =
-              [](const geometry<REAL,NUCELL> &g, int i) -> REAL
-              {return std::sqrt(std::pow(g.pos(i)(1),2) + std::pow(g.pos(i)(2),2)); },
+      [](const geometry<REAL,NUCELL> &g, int i) -> REAL
+  {return std::sqrt(std::pow(g.pos(i)(1),2) + std::pow(g.pos(i)(2),2)); },
               REAL eps = geometry<REAL,NUCELL>::tol_geom_default) {
     std::vector<int> n_images;
     unique(n_images, ugeom, nugeom, ugeom.cell, ugeom.cell.begin(), ugeom.cell.end(), key, eps );

@@ -7,12 +7,13 @@
 #include <algorithm>
 #include <iostream>
 #include <geom/lace3d.hpp>
+#include <string_view>
 
-namespace qpp{
+namespace qpp {
 
   // -------------------- Simple tokenizer -----------------------------------
 
-  class tokenizer{
+  class tokenizer {
     std::basic_istream<CHAR,TRAITS> * _input;
     STRING _buff, _dump, _sepr;
     int _line_number;
@@ -21,7 +22,7 @@ namespace qpp{
 
   public:
 
-    tokenizer(ISTREAM & input, const STRING & __filename=""){
+    tokenizer(ISTREAM & input, const STRING & __filename="") {
       _input = & input;
       _dump = " \t";
       _line_number = 0;
@@ -62,18 +63,18 @@ namespace qpp{
 
     STRING get(){
       int i;
-      if (_buff == "" ){
+      if (_buff == "" ) {
           std::getline(*_input, _buff);
 
           _line_number++;
         }
 
-      do{
+      do {
           i = _buff.find_first_not_of(_dump);
 
           //debug
           //std::cout << "i = " << i << "\""  << _buff << "\"\n";
-          if (i != std::string::npos){
+          if (i != std::string::npos) {
               _buff = _buff.substr(i);
               break;
             }
@@ -103,14 +104,14 @@ namespace qpp{
           _buff = _buff.substr(1);
 
         }
-      else if (i != std::string::npos){
+      else if (i != std::string::npos) {
           //debug
           //std::cout << "here2\n";
 
           rez =  _buff.substr(0,i);
           _buff = _buff.substr(i);
         }
-      else{
+      else {
           //debug
           //std::cout << "here3\n";
 
@@ -233,6 +234,7 @@ namespace qpp{
       else return false/*-1*/; // not found
       return false;
   }
+
 }
 
 #endif

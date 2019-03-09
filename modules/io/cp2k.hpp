@@ -8,7 +8,9 @@
 #include <geom/geom.hpp>
 #include <geom/xgeom.hpp>
 #include <geom/ngbr.hpp>
+
 #include <vector>
+#include <array>
 #include <cmath>
 #include <sstream>
 #include <string>
