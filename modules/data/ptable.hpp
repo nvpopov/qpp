@@ -62,7 +62,7 @@ namespace qpp {
 
       static ptable *instance;
 
-      std::map<std::string, uint, case_icomp<std::string> > cache_atom_idx;
+      std::map<std::string, size_t, case_icomp<std::string> > cache_atom_idx;
       std::array<ptable_atom_record, PTABLE_ELEM_N> arecs;
 
       static ptable* get_inst () {
@@ -112,7 +112,7 @@ namespace qpp {
         ptable *table = ptable::get_inst();
         for (int i = 0; i < PTABLE_ELEM_N; i++)
           if (table->arecs[i].m_name == name)
-            return std::optional<uint>(i+1);
+            return std::optional<size_t>(i+1);
         return std::nullopt;
 
       }

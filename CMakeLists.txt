@@ -9,17 +9,16 @@ set(CMAKE_ABSOLUTE_DESTINATION_FILES)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 
-#set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -Og -fno-omit-frame-pointer -g3")
 add_definitions(-DFMT_HEADER_ONLY)
 if(NOT MSVC)
-  add_definitions(-std=c++17 -fPIC -DFMT_HEADER_ONLY)
+  add_definitions(-fPIC)
   set(CMAKE_CXX_FLAGS " -std=c++17 -fno-omit-frame-pointer -fvisibility=hidden")
   set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -Og -fno-omit-frame-pointer -g3 -ggdb")
   set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -O3 -ffast-math")
 elseif(MSVC)
+   add_definitions(-D_ENABLE_EXTENDED_ALIGNED_STORAGE)
    add_compile_options("/std:c++latest")
 endif()
-
 
 include(FindOpenMP)
 if(OPENMP_FOUND)
@@ -27,12 +26,6 @@ if(OPENMP_FOUND)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
 endif()
-
-set(BLAS_INCLUDE "-" CACHE STRING "Blas include dir")
-set(BLAS_LIB "-" CACHE STRING "Blas library dir")
-set(LAPACK_INCLUDE "-" CACHE STRING "Lapack include dir")
-set(LAPACK_LIB "-" CACHE STRING "Lapack lib dir")
-set(LA_TYPE "MKL" CACHE STRING "Type of linear algebra library, (MKL,ACML)")
 
 # option declaration
 option(PYTHON_BINDINGS "build qpp python bindings" ON)
@@ -76,20 +69,10 @@ endfunction(def_example_custom_lib)
 
 # end example framework
 
-if (LA_TYPE EQUAL "MKL")
-    set(BLAS_LIBS_COM
-        -L${BLAS_LIB}
-        -l mkl_core
-        )
-    include_directories(${BLAS_INCLUDE})
-    message(STATUS "MKL!")
-endif()
-
 add_subdirectory(deps)
 include_directories(${PROJECT_SOURCE_DIR}/deps/fmtlib)
 include_directories(${PROJECT_SOURCE_DIR}/deps/pybind11/include)
 #add_subdirectory(${CMAKE_SOURCE_DIR}/deps/fmtlib)
-
 
 #Python related stuff
 if(PYTHON_BINDINGS)

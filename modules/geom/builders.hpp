@@ -405,7 +405,7 @@ namespace qpp {
               vector3<REAL> r = group.transform(nugeom.pos(i),I);
               for (int j = 0; j<nugeom.nat(); j++)
                 if (!marked[j])
-                  if ( nugeom.atom(i)==nugeom.atom(j) and (r - nugeom.pos(j)).norm() < eps ) {
+                  if ( nugeom.atom(i)==nugeom.atom(j) && (r - nugeom.pos(j)).norm() < eps ) {
                       images.insert(j);
                       marked[j] = true;
                     }

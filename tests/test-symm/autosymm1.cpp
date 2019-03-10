@@ -19,8 +19,8 @@ void prnmtr(const matrix3<double> & M){
 
 int main()
 {
-  matrix3<double> C4x = RotMtrx({1,0,0},pi/2);
-  matrix3<double> C4y = RotMtrx({0,1,0},pi/2);
+  matrix3<double> C4x = RotMtrx({1,0,0}, pi/2);
+  matrix3<double> C4y = RotMtrx({0,1,0}, pi/2);
   matrix3<double> I = matrix3<double>::Identity()*-1;
 
   array_group<matrix3<double> > OH;

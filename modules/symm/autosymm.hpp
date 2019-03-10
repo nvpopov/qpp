@@ -136,7 +136,7 @@ namespace qpp {
         if (dim == 0)
           return (point-L.point).norm() < vector3<REAL>::tol_equiv;
         else if ( dim == 1 || dim == 2)
-          return ((axis-L.axis).norm() < vector3<REAL>::tol_equiv ) and within(L.point);
+          return ((axis-L.axis).norm() < vector3<REAL>::tol_equiv ) && within(L.point);
         else if (dim == -1 || dim == 3)
           return true;
 

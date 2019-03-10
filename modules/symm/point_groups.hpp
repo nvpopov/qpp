@@ -791,7 +791,7 @@ FOUND:
         for (int i=axes.size()-1; i>=0; i--){
             bool pln = false;
             for (int j : same_ax[i])
-              if ( REAL(pi) - phi[j] < epscos and inv[j]  ) {
+              if ( REAL(pi) - phi[j] < epscos && inv[j]  ) {
                   pln = true;
                   break;
                 }
