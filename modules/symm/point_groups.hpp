@@ -291,7 +291,7 @@ namespace qpp{
           bool inv;
           analyze_transform(ax,phi,inv,G[i]);
           if (inv) phi = REAL(pi) - phi;
-          if ( phi > angle_error and phi < phi_min)
+          if ( phi > angle_error && phi < phi_min)
             phi_min = phi;
         }
 

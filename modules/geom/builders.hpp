@@ -433,8 +433,8 @@ namespace qpp {
               const geometry<REAL,NUCELL> & nugeom,
               const UCELL & group,
               const std::function<REAL(const geometry<REAL,NUCELL> &, int)> & key =
-      [](const geometry<REAL,NUCELL> &g, int i) -> REAL
-  {return std::sqrt(std::pow(g.pos(i)(1),2) + std::pow(g.pos(i)(2),2)); },
+              [](const geometry<REAL,NUCELL> &g, int i) -> REAL
+              {return std::sqrt(std::pow(g.pos(i)(1),2) + std::pow(g.pos(i)(2),2)); },
               REAL eps = geometry<REAL,NUCELL>::tol_geom_default) {
     unique(n_images, ugeom, nugeom, group, group.begin(), group.end(), key, eps);
   }
@@ -444,8 +444,8 @@ namespace qpp {
               geometry<REAL,UCELL> & ugeom,
               const geometry<REAL,NUCELL> & nugeom,
               const std::function<REAL(const geometry<REAL,NUCELL> &, int)> & key =
-      [](const geometry<REAL,NUCELL> &g, int i) -> REAL
-  {return std::sqrt(std::pow(g.pos(i)(1),2) + std::pow(g.pos(i)(2),2)); },
+              [](const geometry<REAL,NUCELL> &g, int i) -> REAL
+              {return std::sqrt(std::pow(g.pos(i)(1),2) + std::pow(g.pos(i)(2),2)); },
               REAL eps = geometry<REAL,NUCELL>::tol_geom_default) {
     unique(n_images, ugeom, nugeom, ugeom.cell, ugeom.cell.begin(), ugeom.cell.end(), key, eps );
   }
@@ -455,8 +455,8 @@ namespace qpp {
               const geometry<REAL,NUCELL> & nugeom,
               const UCELL & group,
               const std::function<REAL(const geometry<REAL,NUCELL> &, int)> & key =
-      [](const geometry<REAL,NUCELL> &g, int i) -> REAL
-  { return std::sqrt(g.y[i]*g.y[i]+g.z[i]*g.z[i]); },
+              [](const geometry<REAL,NUCELL> &g, int i) -> REAL
+              { return std::sqrt(g.y[i]*g.y[i]+g.z[i]*g.z[i]); },
               REAL eps = geometry<REAL,NUCELL>::tol_geom) {
     std::vector<int> n_images;
     unique(n_images, ugeom, nugeom, group, group.begin(), group.end(), key, eps );
@@ -466,8 +466,8 @@ namespace qpp {
   void unique(geometry<REAL,UCELL> & ugeom,
               const geometry<REAL,NUCELL> & nugeom,
               const std::function<REAL(const geometry<REAL,NUCELL> &, int)> & key =
-      [](const geometry<REAL,NUCELL> &g, int i) -> REAL
-  {return std::sqrt(std::pow(g.pos(i)(1),2) + std::pow(g.pos(i)(2),2)); },
+              [](const geometry<REAL,NUCELL> &g, int i) -> REAL
+              {return std::sqrt(std::pow(g.pos(i)(1),2) + std::pow(g.pos(i)(2),2)); },
               REAL eps = geometry<REAL,NUCELL>::tol_geom_default) {
     std::vector<int> n_images;
     unique(n_images, ugeom, nugeom, ugeom.cell, ugeom.cell.begin(), ugeom.cell.end(), key, eps );
