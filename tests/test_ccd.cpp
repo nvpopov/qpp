@@ -27,7 +27,7 @@ TEST_CASE( "Computational chemistry data parsing : PC Gamess Firefly" ) {
     REQUIRE(cc_o.m_n_alpha == 35);
     REQUIRE(cc_o.m_n_beta == 35);
     REQUIRE(cc_o.m_tot_nat == 20);
-    REQUIRE(cc_o.m_run_t == comp_chem_program_run_t::rt_energy);
+    REQUIRE(cc_o.m_run_t == comp_chem_program_run_e::rt_energy);
     REQUIRE(cc_o.m_steps.back().m_scf_steps.size() == 9);
     REQUIRE(cc_o.m_steps.back().m_scf_steps.front().m_toten == Approx(-379.453243734));
     REQUIRE(cc_o.m_steps.back().m_scf_steps.back().m_toten == Approx(-379.777955008));
@@ -61,7 +61,7 @@ TEST_CASE( "Computational chemistry data parsing : PC Gamess Firefly" ) {
     REQUIRE(cc_o.m_n_alpha == 35);
     REQUIRE(cc_o.m_n_beta == 35);
     REQUIRE(cc_o.m_tot_nat == 20);
-    REQUIRE(cc_o.m_run_t == comp_chem_program_run_t::rt_geo_opt);
+    REQUIRE(cc_o.m_run_t == comp_chem_program_run_e::rt_geo_opt);
     REQUIRE(cc_o.m_init_atoms_pos.size() == 20);
     REQUIRE(cc_o.m_init_atoms_names.size() == 20);
     REQUIRE(cc_o.m_steps.size() == 24);
@@ -87,7 +87,7 @@ TEST_CASE( "Computational chemistry data parsing : PC Gamess Firefly" ) {
     REQUIRE(cc_o.m_n_alpha == 35 );
     REQUIRE(cc_o.m_n_beta == 35 );
     REQUIRE(cc_o.m_tot_nat == 20);
-    REQUIRE(cc_o.m_run_t == comp_chem_program_run_t::rt_vib);
+    REQUIRE(cc_o.m_run_t == comp_chem_program_run_e::rt_vib);
     REQUIRE(cc_o.m_init_atoms_pos.size() == 20);
     REQUIRE(cc_o.m_init_atoms_names.size() == 20);
     REQUIRE(cc_o.m_vibs.size() == 60 );
@@ -118,7 +118,7 @@ TEST_CASE( "Computational chemistry data parsing : PC Gamess Firefly" ) {
     REQUIRE(cc_o.m_n_alpha == 35 );
     REQUIRE(cc_o.m_n_beta == 35 );
     REQUIRE(cc_o.m_tot_nat == 20);
-    REQUIRE(cc_o.m_run_t == comp_chem_program_run_t::rt_raman);
+    REQUIRE(cc_o.m_run_t == comp_chem_program_run_e::rt_raman);
     REQUIRE(cc_o.m_init_atoms_pos.size() == 20);
     REQUIRE(cc_o.m_init_atoms_names.size() == 20);
 
@@ -216,7 +216,7 @@ TEST_CASE( "Computational chemistry data parsing : CP2K Output" ) {
     bool succes = compile_geometry(cc_o, g);
     bool succes_anims = compile_animation(cc_o, anim_rec);
 
-    REQUIRE(cc_o.m_run_t == comp_chem_program_run_t::rt_geo_opt);
+    REQUIRE(cc_o.m_run_t == comp_chem_program_run_e::rt_geo_opt);
     REQUIRE(cc_o.m_DIM == 3);
     REQUIRE(cc_o.m_cell_v.size() == 3);
     REQUIRE(cc_o.m_cell_v[0] == v3d(12.566, 0.000,  0.000 ));

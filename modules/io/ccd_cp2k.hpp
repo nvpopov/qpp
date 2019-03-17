@@ -40,7 +40,7 @@ namespace qpp {
     bool is_init_parsed{false};
 
     output.m_DIM = 0;
-    output.m_comp_chem_program = comp_chem_program_t::pr_cp2k;
+    output.m_comp_chem_program = comp_chem_program_e::pr_cp2k;
     bool is_fisrt_spin_subspace{false};
 
     uint64_t cur_line{0};
@@ -66,11 +66,11 @@ namespace qpp {
             //Parse run type
             if (s.find("GLOBAL| Run type") != std::string::npos) {
                 if (s.find("GEO_OPT") != std::string::npos)
-                  output.m_run_t = comp_chem_program_run_t::rt_geo_opt;
+                  output.m_run_t = comp_chem_program_run_e::rt_geo_opt;
                 if (s.find("ENERGY") != std::string::npos)
-                  output.m_run_t = comp_chem_program_run_t::rt_energy;
+                  output.m_run_t = comp_chem_program_run_e::rt_energy;
                 if (s.find("GRADIENT") != std::string::npos)
-                  output.m_run_t = comp_chem_program_run_t::rt_grad;
+                  output.m_run_t = comp_chem_program_run_e::rt_grad;
                 continue;
               } // End of Parse run type
 

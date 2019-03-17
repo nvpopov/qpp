@@ -35,7 +35,7 @@ namespace qpp {
 
 //  };
 
-  enum comp_chem_program_run_t {
+  enum comp_chem_program_run_e {
     rt_unknown,
     rt_energy,
     rt_grad,
@@ -47,7 +47,7 @@ namespace qpp {
     rt_spectrum
   };
 
-  enum comp_chem_program_t {
+  enum comp_chem_program_e {
     pr_unknown,
     pr_vasp,
     pr_firefly,
@@ -57,7 +57,7 @@ namespace qpp {
     pr_molcas
   };
 
-  static std::map<comp_chem_program_t, std::string> ccdprog2str = {
+  static std::map<comp_chem_program_e, std::string> ccdprog2str = {
     std::make_pair(pr_unknown, "Unknown"),
     std::make_pair(pr_vasp,    "VASP"),
     std::make_pair(pr_firefly, "PC Gamess Firefly"),
@@ -66,7 +66,7 @@ namespace qpp {
     std::make_pair(pr_molcas,  "OpenMolcas"),
   };
 
-  static std::map<comp_chem_program_run_t, std::string> ccdrt2str = {
+  static std::map<comp_chem_program_run_e, std::string> ccdrt2str = {
     std::make_pair(rt_unknown,  "Unknown"),
     std::make_pair(rt_energy,   "Single-point energy"),
     std::make_pair(rt_grad,     "Gradients calculation"),
@@ -132,13 +132,14 @@ namespace qpp {
 
   template <class REAL>
   struct comp_chem_program_data_t {
+
       std::vector<comp_chem_program_step_t<REAL> > m_steps;
       std::vector<vector3<REAL> > m_init_atoms_pos;
       std::vector<std::string> m_init_atoms_names;
       std::vector<REAL> m_init_atoms_charges;
       std::vector<comp_chem_program_vibration_info_t<REAL> > m_vibs;
       std::vector<vector3<REAL> > m_cell_v;
-      comp_chem_program_t m_comp_chem_program{comp_chem_program_t::pr_unknown};
+      comp_chem_program_e m_comp_chem_program{comp_chem_program_e::pr_unknown};
       uint32_t m_ccd_flags;
       int m_DIM{0};
       int m_tot_nat{0};
@@ -150,13 +151,13 @@ namespace qpp {
       int m_n_beta{0};
       int m_n_spin_states{-1};
       bool m_is_terminated_normally{false};
-      comp_chem_program_run_t m_run_t{comp_chem_program_run_t::rt_unknown};
+      comp_chem_program_run_e m_run_t{comp_chem_program_run_e::rt_unknown};
       vector3<REAL> m_global_gradient_min{0,0,0};
       vector3<REAL> m_global_gradient_max{0,0,0};
       vector3<REAL> m_global_gradient_average{0,0,0};
       REAL m_global_gradient_norm_min{10};
       REAL m_global_gradient_norm_max{0};
-      //comp_chem_data_entry_t<REAL> root;
+
   };
 
 
@@ -186,7 +187,7 @@ namespace qpp {
           }
       }
 
-    if (ccd_inst.m_run_t == comp_chem_program_run_t::rt_geo_opt && !ccd_inst.m_steps.empty()) {
+    if (ccd_inst.m_run_t == comp_chem_program_run_e::rt_geo_opt && !ccd_inst.m_steps.empty()) {
 
         int total_valid_steps = 0;
 
@@ -274,10 +275,10 @@ namespace qpp {
                          std::vector<geom_anim_record_t<REAL> > &anim_rec,
                          uint32_t compile_flags = ccd_cf_default_flags) {
 
-    if (ccd_inst.m_run_t != comp_chem_program_run_t::rt_geo_opt &&
-        ccd_inst.m_run_t != comp_chem_program_run_t::rt_md &&
-        ccd_inst.m_run_t != comp_chem_program_run_t::rt_vib &&
-        ccd_inst.m_run_t != comp_chem_program_run_t::rt_raman) return false;
+    if (ccd_inst.m_run_t != comp_chem_program_run_e::rt_geo_opt &&
+        ccd_inst.m_run_t != comp_chem_program_run_e::rt_md &&
+        ccd_inst.m_run_t != comp_chem_program_run_e::rt_vib &&
+        ccd_inst.m_run_t != comp_chem_program_run_e::rt_raman) return false;
 
     bool copy_steps_content = false;
 
@@ -285,29 +286,35 @@ namespace qpp {
     std::string stored_anim_name;
 
     switch (ccd_inst.m_run_t) {
-      case comp_chem_program_run_t::rt_geo_opt :
+
+      case comp_chem_program_run_e::rt_geo_opt :
         stored_anim_type = geom_anim_t::anim_geo_opt;
         copy_steps_content = true;
         stored_anim_name = "geo_opt";
         break;
-      case comp_chem_program_run_t::rt_md :
+
+      case comp_chem_program_run_e::rt_md :
         stored_anim_type = geom_anim_t::anim_md;
         copy_steps_content = true;
         stored_anim_name = "mol_dyn";
         break;
-      case comp_chem_program_run_t::rt_vib :
+
+      case comp_chem_program_run_e::rt_vib :
         stored_anim_type = geom_anim_t::anim_vib;
         copy_steps_content = false;
         stored_anim_name = "vib";
         break;
-      case comp_chem_program_run_t::rt_raman :
+
+      case comp_chem_program_run_e::rt_raman :
         stored_anim_type = geom_anim_t::anim_vib;
         copy_steps_content = false;
         stored_anim_name = "vib";
         break;
+
       default:
         return false;
         break;
+
       };
 
     if (copy_steps_content) {
@@ -338,8 +345,8 @@ namespace qpp {
       }
 
     else {
-        if (ccd_inst.m_run_t == comp_chem_program_run_t::rt_vib ||
-            ccd_inst.m_run_t == comp_chem_program_run_t::rt_raman)
+        if (ccd_inst.m_run_t == comp_chem_program_run_e::rt_vib ||
+            ccd_inst.m_run_t == comp_chem_program_run_e::rt_raman)
           for (size_t v = 0; v < ccd_inst.m_vibs.size(); v++) {
               geom_anim_record_t<REAL> anim;
               anim.m_anim_type = stored_anim_type;

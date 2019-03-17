@@ -37,7 +37,7 @@ namespace qpp {
     std::string s;
 
     output.m_DIM = 0;
-    output.m_comp_chem_program = comp_chem_program_t::pr_unknown;
+    output.m_comp_chem_program = comp_chem_program_e::pr_unknown;
 
     xyz_parser_state p_state{state_atom_count};
 
@@ -172,7 +172,7 @@ namespace qpp {
 
       }
 
-    if (output.m_steps.size() > 0) output.m_run_t = comp_chem_program_run_t::rt_geo_opt;
+    if (output.m_steps.size() > 0) output.m_run_t = comp_chem_program_run_e::rt_geo_opt;
 
     if (output.m_tot_nat == 0)
       throw parsing_error_t(cur_line, s, "Invalid XYZ file");
