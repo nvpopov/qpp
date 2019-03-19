@@ -1,16 +1,7 @@
 include(ExternalProject)
 add_subdirectory(${PROJECT_SOURCE_DIR}/deps/pybind11)
 
-#fmtlib for fast c++ format routines
-ExternalProject_Add(fmtlib
-
-  SOURCE_DIR "${PROJECT_SOURCE_DIR}/deps/fmtlib"
-  INSTALL_COMMAND ""
-  UPDATE_COMMAND ""
-  CONFIGURE_COMMAND ""
-  BUILD_COMMAND ""
-  #CMAKE_ARGS -DFMT_DOC:bool=off -DFMT_INSTALL:bool=off -DFMT_TEST:bool=off -DFMT_USE_CPP11:bool=on
-)
+add_subdirectory(${PROJECT_SOURCE_DIR}/deps/fmtlib EXCLUDE_FROM_ALL)
 
 if(NOT USE_SYSTEM_EIGEN3)
 ExternalProject_Add(eigen3

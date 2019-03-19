@@ -70,8 +70,8 @@ endfunction(def_example_custom_lib)
 # end example framework
 
 add_subdirectory(deps)
-include_directories(${PROJECT_SOURCE_DIR}/deps/fmtlib)
 include_directories(${PROJECT_SOURCE_DIR}/deps/pybind11/include)
+include_directories(${PROJECT_SOURCE_DIR}/deps/fmtlib/include)
 #add_subdirectory(${CMAKE_SOURCE_DIR}/deps/fmtlib)
 
 #Python related stuff
