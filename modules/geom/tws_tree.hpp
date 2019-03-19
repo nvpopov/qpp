@@ -3,6 +3,7 @@
 
 #include <ostream>
 #include <unordered_map>
+#include <unordered_set>
 #include <functional>
 #include <utility>
 #include <set>
@@ -514,7 +515,7 @@ namespace qpp{
       template<typename adding_result_policy = query_ray_add_all<REAL> >
       void query_ray (ray_t<REAL> &_ray,
                       std::vector<tws_query_data_t<REAL, AINT> > &res,
-                      const std::set<size_t> &hidden_types,
+                      const std::unordered_set<size_t> &hidden_types,
                       REAL scale_factor = 0.25,
                       bool hide_by_field = false,
                       int xgeom_hide_field_id = 6) {
@@ -536,7 +537,7 @@ namespace qpp{
       void traverse_query_ray (tws_node_t<REAL, AINT> *cur_node,
                                ray_t<REAL> &_ray,
                                std::vector<tws_query_data_t<REAL, AINT> > &res,
-                               const std::set<size_t> &hidden_types,
+                               const std::unordered_set<size_t> &hidden_types,
                                const REAL scale_factor,
                                bool hide_by_field,
                                int xgeom_hide_field_id) {
