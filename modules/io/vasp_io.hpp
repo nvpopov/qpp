@@ -19,7 +19,7 @@
 #include <algorithm>
 #include <array>
 
-namespace qpp{
+namespace qpp {
 
   template<class REAL, class CELL>
   void read_vasp_poscar(
