@@ -38,6 +38,8 @@ namespace qpp {
 
     uint64_t cur_line;
 
+    bool selective_dynamics{false};
+
     sgetline(inp, poscar_header, cur_line);
     sgetline(inp, poscar_header_scale, cur_line);
 
@@ -66,6 +68,11 @@ namespace qpp {
 
     sgetline(inp, poscar_coord_type, cur_line);
     STRING_EX poscar_coord_type_t = tolower(poscar_coord_type);
+    if (poscar_coord_type_t.find("selective") != std::string::npos) {
+        selective_dynamics = true;
+        sgetline(inp, poscar_coord_type, cur_line);
+        poscar_coord_type_t = tolower(poscar_coord_type);
+      }
 
     //Construct cell
     geom.cell.v[0] = va;
