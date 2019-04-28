@@ -247,16 +247,14 @@ namespace qpp {
   // -------------------------------------------------------------
 
   template<class CMPLX>
-  vector3<typename numeric_type<CMPLX>::real> vecreal(
-      const vector3<CMPLX> & v){
-    return vector3<typename numeric_type<CMPLX>::real>(v(0).real(),
-                                                       v(1).real(), v(2).real() );
+  vector3<typename numeric_type<CMPLX>::real> vecreal(const vector3<CMPLX> & v){
+    return vector3<typename numeric_type<CMPLX>::real>(v(0).real(), v(1).real(), v(2).real() );
   }
 
   // -------------------------------------------------------------
 
   template<class REAL>
-  subspace_of3d<REAL> invariant_subspace(const rotrans<REAL,false> & R){
+  subspace_of3d<REAL> invariant_subspace(const rotrans<REAL,false> & R) {
     vector3<REAL> axis, point;
     REAL phi;
     bool inv;
@@ -267,10 +265,10 @@ namespace qpp {
 
     analyze_transform(axis, phi, inv, R.R);
 
-    if (!inv){
-        if (phi < epscos){
+    if (!inv) {
+        if (phi < epscos) {
             // Unity matrix
-            if ( R.T.norm() < eps ){
+            if ( R.T.norm() < eps ) {
                 dim = 3;
                 point = {0,0,0};
                 //std::cout << "  ---- invariant_subspace ----- unity matrix - d3\n";
@@ -327,6 +325,7 @@ namespace qpp {
       }
 
     return subspace_of3d(dim, point, axis);
+
   }
 
   // -------------------------------------------------------------

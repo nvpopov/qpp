@@ -138,7 +138,7 @@ namespace qpp {
     //prepare volume data
     for (auto &volume : volumes) {
 
-        volume.m_field.reserve(n_of_points);
+        volume.m_field.resize(n_of_points);
         volume.m_offset = vector3<REAL>{org_x, org_y, org_z};
         volume.m_axis[0] = (vector3<REAL>{ax0_x, ax0_y, ax0_z} / net_0);
         volume.m_axis[1] = (vector3<REAL>{ax1_x, ax1_y, ax1_z} / net_1);
@@ -146,35 +146,59 @@ namespace qpp {
         volume.m_steps[0] = net_0;
         volume.m_steps[1] = net_1;
         volume.m_steps[2] = net_2;
-        volume.m_addr_mode = 1;
+        volume.m_addr_mode = 0;
       }
 
-    //read data chunks
-//    for (size_t i_block = 0; i_block < n_blocks; i_block++) {
-//        for (size_t i_grid = 0; i_grid < n_of_grids; i_grid++) {
-//            std::getline(inp, s); splt = split_sv(s, "=");
-//            fmt::print(std::cout, "{}\n", s);
-//            for (size_t i_point = 0; i_point < block_size; i_point++) {
-//                std::getline(inp, s);
-//              }
-//          }
-//      }
-
-    size_t current_grid = 0;
+    size_t current_grid = -1;
     REAL v0;
 
+    std::vector<size_t> ix;
+    ix.resize(volumes.size());
+
+    std::vector<size_t> iy;
+    iy.resize(volumes.size());
+
+    std::vector<size_t> iz;
+    iz.resize(volumes.size());
+
     while(std::getline(inp, s)) {
-       //fmt::print(std::cout, "{}\n", s);
+
         splt = split_sv(s, " ");
+
         if (splt.size() >= 2) { //change grid
-            if (s.find("Title=") == std::string::npos) break;
+
+            if (s.find("Title=") == std::string::npos)
+              break;
+
             current_grid += 1;
-            if (current_grid >= n_of_grids) current_grid = 0;
-          } else { // emit point
-            v0 = std::stod(s);
-            volumes[current_grid].m_field.push_back(v0);
+
+            if (current_grid >= n_of_grids)
+              current_grid = 0;
+
+          } else {
+
+            // emit point
+            v0 = std::stod(s); //read value
+
+            volumes[current_grid].m_field[iz[current_grid]*net_2*net_1 +
+                iy[current_grid]*net_2 + ix[current_grid]] = v0;
+
+            ix[current_grid]++;
+
+            if (ix[current_grid] == net_0) {
+                ix[current_grid] = 0;
+                iy[current_grid]++;
+              }
+
+            if (iy[current_grid] == net_1) {
+                iy[current_grid] = 0;
+                iz[current_grid]++;
+              }
+
             if (v0 < -0.01) volumes[current_grid].m_has_negative_values = true;
+
           }
+
       }
 
     fmt::print(std::cout, "DEBUG MGRID Natom={}\n", natom);
@@ -193,8 +217,8 @@ namespace qpp {
     for (size_t i = 0 ; i < n_of_grids; i++)
       fmt::print(std::cout, "DEBUG MGRID GRID NAME[{}] {}\n", i, grid_names[i]);
 
-  }
+  } // load_grid_ascii
 
-}
+} // namespace qpp
 
 #endif

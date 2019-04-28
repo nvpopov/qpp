@@ -709,11 +709,11 @@ FOUND:
     complete_point_group(G, P);
 
     // Construct multiplication table
-  group_analyzer<permutation> AP(P);
+    group_analyzer<permutation> AP(P);
 
     // Correct point group according to the multiplication table
 
-  reconstruct_point_group(G,AP.multab);
+    reconstruct_point_group(G,AP.multab);
 
     STRING_EX Gname = point_group_symbol(G);
 

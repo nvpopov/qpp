@@ -520,6 +520,30 @@ namespace qpp{
     */
     // ---------------------------------------------------------
 
+    void clone(xgeometry<REAL,CELL> &dst) {
+
+      dst.clear();
+
+      dst.DIM = DIM;
+
+      //copy cell vectors
+      for (size_t i = 0; i <DIM; i++) dst.cell.v[i] = cell.v[i];
+
+      //copy xgeom headers
+      dst.set_format(_field_name, _field_type);
+
+      //copy data
+      for (size_t i = 0; i < nat(); i++) {
+          dst.add("", vector3<float>{0});
+          std::vector<datum> v;
+          get_fields(i, v);
+          dst.set_fields(i,v);
+        }
+
+      dst.build_types();
+
+    }
+
     template<class T>
     void parse_field(int i, int j, T t){
       basic_types f = field_type(i);
