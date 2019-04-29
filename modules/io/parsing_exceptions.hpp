@@ -100,13 +100,13 @@ namespace qpp {
 
           case pe_type::spl_min_sz : {
               m_exception_msg = fmt::format("Required min el. idx = {}, sv.size() = {}",
-                                            m_error_pos);
+                                            m_error_pos, m_sv_size);
               break;
             }
 
           case pe_type::spl_max_sz : {
               m_exception_msg = fmt::format("Required max el. idx = {}, sv.size() = {}",
-                                            m_error_pos);
+                                            m_error_pos, m_sv_size);
               break;
             }
 

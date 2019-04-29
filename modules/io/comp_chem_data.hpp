@@ -11,30 +11,6 @@
 
 namespace qpp {
 
-//  template <typename REAL = float, typename STR_CLASS = std::string>
-//  class comp_chem_data_entry_t {
-//    private:
-//      std::variant<int, REAL, bool, STR_CLASS, std::vector<comp_chem_data_entry_t>,
-//      std::map<STR_CLASS, comp_chem_data_entry_t> > p_data;
-
-//    public:
-//      template <typename T>
-//      T get() {
-//        return std::get<T>(p_data);
-//      }
-
-//      template <typename T>
-//      T get_if() {
-//        return std::get_if<T>(p_data);
-//      }
-
-//      template <typename T>
-//      void set(T t_inst) {
-//        p_data = t_inst;
-//      }
-
-//  };
-
   enum comp_chem_program_run_e {
     rt_unknown,
     rt_energy,
@@ -54,7 +30,8 @@ namespace qpp {
     pr_pc_gamess,
     pr_cp2k,
     pr_orca,
-    pr_molcas
+    pr_molcas,
+    pr_molden
   };
 
   static std::map<comp_chem_program_e, std::string> ccdprog2str = {
@@ -64,6 +41,7 @@ namespace qpp {
     std::make_pair(pr_cp2k,    "CP2K"),
     std::make_pair(pr_orca,    "Orca"),
     std::make_pair(pr_molcas,  "OpenMolcas"),
+    std::make_pair(pr_molden,  "Molden"),
   };
 
   static std::map<comp_chem_program_run_e, std::string> ccdrt2str = {
@@ -241,6 +219,9 @@ namespace qpp {
 
     if (ccd_inst.m_DIM != ccd_inst.m_cell_v.size()) return false;
 
+    if (ccd_inst.m_tot_nat == 0 && !ccd_inst.m_init_atoms_names.empty())
+      ccd_inst.m_tot_nat = ccd_inst.m_init_atoms_names.size();
+
     g.DIM = ccd_inst.m_DIM;
 
     if (g.DIM > 0)
@@ -250,6 +231,7 @@ namespace qpp {
       g.add(ccd_inst.m_init_atoms_names[i], ccd_inst.m_init_atoms_pos[i]);
 
     return true;
+
   }
 
   template <class REAL>
@@ -268,6 +250,7 @@ namespace qpp {
 
     anim_rec.push_back(std::move(anim));
     return true;
+
   }
 
   template <class REAL>
@@ -362,8 +345,8 @@ namespace qpp {
                   int tf_index = i;
                   if (i > total_frames_upwards) tf_index = total_frames - (i+1);
                   for (size_t q = 0; q < ccd_inst.m_vibs[v].m_disp.size(); q++) {
-                      anim.frames[i].atom_pos[q] = ccd_inst.m_init_atoms_pos[q] +
-                                              ccd_inst.m_vibs[v].m_disp[q] *
+                      anim.frames[i].atom_pos[q] =
+                          ccd_inst.m_init_atoms_pos[q] + ccd_inst.m_vibs[v].m_disp[q] *
                                               (REAL(tf_index) / total_frames_upwards);
                     }
                 }

@@ -6,4 +6,6 @@ def_example(embq_gen embq_gen.cpp)
 def_example(cube1 cube1.cpp)
 def_example(ff1 firefly1.cpp)
 def_example(molcas_grid molcas_grid.cpp)
+def_example(molden1 molden1.cpp)
+
 #def_example(vasp_chgcar1 vasp_chgcar1.cpp)
