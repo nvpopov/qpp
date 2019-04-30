@@ -547,7 +547,7 @@ namespace qpp{
         if (ray_aabb_test(_ray, cur_node->m_bb)) {
 
             if (cur_node->m_tot_childs > 0) {
-                for (auto *ch_node : cur_node->m_sub_nodes)
+                for (auto ch_node : cur_node->m_sub_nodes)
                   if (ch_node)
                     traverse_query_ray<adding_result_policy>(ch_node,
                                                              _ray,
@@ -579,7 +579,8 @@ namespace qpp{
                     ray_hit &&
                     adding_result_policy::can_add(test_pos, nc.m_idx, geom->DIM) &&
                     !atom_hidden &&
-                    (!geom->template xfield<bool>(xgeom_hide_field_id, nc.m_atm) ||
+                    (!hide_by_field ||
+                     !geom->template xfield<bool>(xgeom_hide_field_id, nc.m_atm) ||
                      !xgeom_hide_field_id)
                     )
                   res.push_back(tws_query_data_t<REAL, AINT>(nc.m_atm, nc.m_idx, ray_hit_dist));
@@ -615,7 +616,7 @@ namespace qpp{
 
         if (cur_node->m_bb.test_sphere(sph_r, sph_cnt)){
 
-            for (auto *child : cur_node->m_sub_nodes)
+            for (auto child : cur_node->m_sub_nodes)
               if (child) traverse_query_sphere(child, sph_r, sph_cnt, res);
 
             for (auto &cnt : cur_node->m_content)
