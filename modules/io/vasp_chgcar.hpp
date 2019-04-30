@@ -136,16 +136,21 @@ namespace qpp {
     size_t iy = 0;
     size_t iz = 0;
 
-    while (!inp.eof()) {
+    bool exit_fl{false};
+    while (!inp.eof() && !exit_fl) {
 
         sgetline(inp, _str, cur_line);
         splt = split_sv(_str, " ");
         for (size_t i = 0; i < splt.size(); i++) {
-            //std::cout << "NXYZ " << ix << " " << iy << " " << iz << std::endl;
+
+
             REAL val = str2real<REAL>(splt, i, cur_line, _str) / cell_volume;
             volumes[0].m_field[ix*nz*ny + iy*nz + iz] = val;
 
             ix++;
+//            std::cout << "NXYZ " << ix << " " << iy << " " << iz << " " <<
+//                      (ix == nx - 1 && iy == ny - 1 && iz == nz - 1) << std::endl;
+            if (ix == nx - 1 && iy == ny - 1 && iz == nz - 1) exit_fl = true;
 
             if (ix == nx) {
                 ix = 0;
