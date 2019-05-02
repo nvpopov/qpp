@@ -16,6 +16,7 @@ namespace qpp {
     rt_energy,
     rt_grad,
     rt_geo_opt,
+    rt_cell_opt,
     rt_md,
     rt_vib,
     rt_raman,
@@ -49,6 +50,7 @@ namespace qpp {
     std::make_pair(rt_energy,   "Single-point energy"),
     std::make_pair(rt_grad,     "Gradients calculation"),
     std::make_pair(rt_geo_opt,  "Geometry optimization"),
+    std::make_pair(rt_cell_opt, "Cell optimization"),
     std::make_pair(rt_md,       "Molecular dynamics"),
     std::make_pair(rt_vib,      "Vibrations calculation"),
     std::make_pair(rt_raman,    "Raman spectrum calculation"),
@@ -89,22 +91,31 @@ namespace qpp {
       std::vector<vector3<REAL> > m_atoms_pos;
       std::vector<vector3<REAL> > m_atoms_grads;
       std::vector<vector3<REAL> > m_atoms_vels;
-      //std::vector<REAL> m_eigen_values;
+
       std::vector<REAL> m_eigen_values_spin_1_occ;
       std::vector<REAL> m_eigen_values_spin_1_unocc;
       std::vector<REAL> m_eigen_values_spin_2_occ;
       std::vector<REAL> m_eigen_values_spin_2_unocc;
       REAL m_energy_gap_spin_1;
       REAL m_energy_gap_spin_2;
+
+      // atomic population
       std::vector<std::pair<REAL, REAL> > m_mulliken_pop_per_atom;
       std::vector<std::pair<REAL, REAL> > m_lowdin_pop_per_atom;
+
       vector3<REAL> m_dipole_moment{0};
+
+      // gradient stuff
       vector3<REAL> m_gradient_min{0,0,0};
       vector3<REAL> m_gradient_max{0,0,0};
       vector3<REAL> m_gradient_average{0,0,0};
       REAL m_gradient_norm_min{10};
       REAL m_gradient_norm_max{0};
       REAL m_gradient_norm_average{0};
+
+      // for cell_opt steps
+      bool m_cell_is_animable{false};
+      std::array<vector3<REAL>, 3> m_cell;
 
   };
 
@@ -261,7 +272,8 @@ namespace qpp {
     if (ccd_inst.m_run_t != comp_chem_program_run_e::rt_geo_opt &&
         ccd_inst.m_run_t != comp_chem_program_run_e::rt_md &&
         ccd_inst.m_run_t != comp_chem_program_run_e::rt_vib &&
-        ccd_inst.m_run_t != comp_chem_program_run_e::rt_raman) return false;
+        ccd_inst.m_run_t != comp_chem_program_run_e::rt_raman &&
+        ccd_inst.m_run_t != comp_chem_program_run_e::rt_cell_opt) return false;
 
     bool copy_steps_content = false;
 
@@ -274,6 +286,12 @@ namespace qpp {
         stored_anim_type = geom_anim_t::anim_geo_opt;
         copy_steps_content = true;
         stored_anim_name = "geo_opt";
+        break;
+
+      case comp_chem_program_run_e::rt_cell_opt :
+        stored_anim_type = geom_anim_t::anim_generic;
+        copy_steps_content = true;
+        stored_anim_name = "cell_opt";
         break;
 
       case comp_chem_program_run_e::rt_md :
@@ -300,32 +318,57 @@ namespace qpp {
 
       };
 
+    int last_valid_cell = -1;
+    bool is_cell_opt =
+        ccd_inst.m_run_t == comp_chem_program_run_e::rt_cell_opt && ccd_inst.m_DIM > 0;
+
     if (copy_steps_content) {
 
         geom_anim_record_t<REAL> anim;
         anim.m_anim_type = stored_anim_type;
         anim.m_anim_name = stored_anim_name;
 
-        int non_empty_steps_count = std::count_if(ccd_inst.m_steps.begin(), ccd_inst.m_steps.end(),
-                                                  [](comp_chem_program_step_t<REAL> &step) {
-                                                    return !step.m_atoms_pos.empty();
-                                                  });
+        auto valid_step = [&is_cell_opt](comp_chem_program_step_t<REAL> &step) {
+          return !step.m_atoms_pos.empty() &&
+              (!is_cell_opt || (is_cell_opt && step.m_cell_is_animable));
+        };
 
-        anim.frames.resize(non_empty_steps_count);
+        // pre-calculation of valid steps
+        int steps_valid_c =
+            std::count_if(ccd_inst.m_steps.begin(), ccd_inst.m_steps.end(), valid_step);
+
+        anim.frames.resize(steps_valid_c);
         int steps_c = -1;
+        int total_cells_approved = 0;
 
-        for (size_t i = 0; i < ccd_inst.m_steps.size(); i++) {
-            if (!ccd_inst.m_steps[i].m_atoms_pos.empty()) {
-                steps_c += 1;
-                anim.frames[steps_c].atom_pos.resize(ccd_inst.m_steps[i].m_atoms_pos.size());
-                for (size_t q = 0; q < ccd_inst.m_steps[i].m_atoms_pos.size(); q++)
-                  anim.frames[steps_c].atom_pos[q] = ccd_inst.m_steps[i].m_atoms_pos[q];
-              }
-          }
+        for (size_t i = 0; i < ccd_inst.m_steps.size(); i++)
+
+          if (valid_step(ccd_inst.m_steps[i])) {
+
+              steps_c += 1;
+
+              // copy cell info
+              if (is_cell_opt && ccd_inst.m_steps[i].m_cell_is_animable) {
+                  total_cells_approved++;
+                  anim.frames[steps_c].m_cell_is_animable = true;
+                  for (size_t cell_i = 0; cell_i <= ccd_inst.m_DIM; cell_i++)
+                    anim.frames[steps_c].m_cell[cell_i] = ccd_inst.m_steps[i].m_cell[cell_i];
+                }
+
+              // copy atom pos data
+              anim.frames[steps_c].atom_pos.resize(ccd_inst.m_steps[i].m_atoms_pos.size());
+              for (size_t q = 0; q < ccd_inst.m_steps[i].m_atoms_pos.size(); q++)
+                anim.frames[steps_c].atom_pos[q] = ccd_inst.m_steps[i].m_atoms_pos[q];
+
+            } // !ccd_inst.m_steps[i].m_atoms_pos.empty()
+
+        // final decision on variable cell animation
+        anim.m_variable_cell_anim = is_cell_opt && total_cells_approved == anim.frames.size();
 
         anim_rec.push_back(std::move(anim));
         return true;
-      }
+
+      } // if (copy_steps_content)
 
     else {
         if (ccd_inst.m_run_t == comp_chem_program_run_e::rt_vib ||

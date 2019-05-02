@@ -71,6 +71,8 @@ namespace qpp {
                   output.m_run_t = comp_chem_program_run_e::rt_energy;
                 if (s.find("GRADIENT") != std::string::npos)
                   output.m_run_t = comp_chem_program_run_e::rt_grad;
+                if (s.find("CELL_OPT") != std::string::npos)
+                  output.m_run_t = comp_chem_program_run_e::rt_cell_opt;
                 continue;
               } // End of Parse run type
 
@@ -279,6 +281,29 @@ namespace qpp {
                     if (add_to_pos) output.m_steps.back().m_atoms_pos.push_back(std::move(pg));
                     else output.m_steps.back().m_atoms_grads.push_back(std::move(pg));
                   }
+
+                //read line after coords or grads, here may be cell info
+                sgetline(inp, s, cur_line);
+                std::vector<std::string_view> splt = split_sv(s, " ");
+                if (splt.size() == 12) {
+
+                    vector3<REAL> c_a = vec_from_str_ex<REAL>(s, splt, cur_line, 2, 3, 4);
+                    vector3<REAL> c_b = vec_from_str_ex<REAL>(s, splt, cur_line, 5, 6, 7);
+                    vector3<REAL> c_c = vec_from_str_ex<REAL>(s, splt, cur_line, 8, 9, 10);
+
+//                    fmt::print("\n cell info: {}\n", s);
+//                    fmt::print("@CCD_CP2K: ca {} {} {}\n",   c_a[0], c_a[1], c_a[2]);
+//                    fmt::print("@CCD_CP2K: cb {} {} {}\n",   c_b[0], c_b[1], c_b[2]);
+//                    fmt::print("@CCD_CP2K: cc {} {} {}\n\n", c_c[0], c_c[1], c_c[2]);
+
+                    auto &step = output.m_steps.back();
+                    step.m_cell_is_animable = true;
+                    step.m_cell[0] = std::move(c_a);
+                    step.m_cell[1] = std::move(c_b);
+                    step.m_cell[2] = std::move(c_c);
+
+                  }
+                continue;
               } //end of parsing trajectory and gradient
 
           } // end of is_init_parsed == true
