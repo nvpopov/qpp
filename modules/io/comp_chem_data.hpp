@@ -318,7 +318,6 @@ namespace qpp {
 
       };
 
-    int last_valid_cell = -1;
     bool is_cell_opt =
         ccd_inst.m_run_t == comp_chem_program_run_e::rt_cell_opt && ccd_inst.m_DIM > 0;
 
@@ -339,8 +338,11 @@ namespace qpp {
 
         anim.frames.resize(steps_valid_c);
         int steps_c = -1;
-        int total_cells_approved = 0;
 
+//        std::cout << fmt::format("@CCD COMPILE ANIM steps_valid_c = {}",
+//                                 steps_valid_c) << std::endl;
+
+        // we're starting to form an animation
         for (size_t i = 0; i < ccd_inst.m_steps.size(); i++)
 
           if (valid_step(ccd_inst.m_steps[i])) {
@@ -348,22 +350,26 @@ namespace qpp {
               steps_c += 1;
 
               // copy cell info
-              if (is_cell_opt && ccd_inst.m_steps[i].m_cell_is_animable) {
-                  total_cells_approved++;
+              if (is_cell_opt) {
                   anim.frames[steps_c].m_cell_is_animable = true;
-                  for (size_t cell_i = 0; cell_i <= ccd_inst.m_DIM; cell_i++)
+                  for (size_t cell_i = 0; cell_i < ccd_inst.m_DIM; cell_i++)
                     anim.frames[steps_c].m_cell[cell_i] = ccd_inst.m_steps[i].m_cell[cell_i];
                 }
 
               // copy atom pos data
+//              std::cout << fmt::format("@CCD COMPILE ANIM steps_c = {}, "
+//                                       "i = {}, st[i].m_a_p.size() = {}, cell_is_a = {}",
+//                                       steps_c, i, ccd_inst.m_steps[i].m_atoms_pos.size(),
+//                                       ccd_inst.m_steps[i].m_cell_is_animable) << std::endl;
+
               anim.frames[steps_c].atom_pos.resize(ccd_inst.m_steps[i].m_atoms_pos.size());
               for (size_t q = 0; q < ccd_inst.m_steps[i].m_atoms_pos.size(); q++)
                 anim.frames[steps_c].atom_pos[q] = ccd_inst.m_steps[i].m_atoms_pos[q];
 
-            } // !ccd_inst.m_steps[i].m_atoms_pos.empty()
+            } // the animation has been formed. put it in the geom_anim_record_t
 
         // final decision on variable cell animation
-        anim.m_variable_cell_anim = is_cell_opt && total_cells_approved == anim.frames.size();
+        anim.m_variable_cell_anim = is_cell_opt && (steps_valid_c > 0);
 
         anim_rec.push_back(std::move(anim));
         return true;

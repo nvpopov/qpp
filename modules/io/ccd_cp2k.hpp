@@ -291,10 +291,10 @@ namespace qpp {
                     vector3<REAL> c_b = vec_from_str_ex<REAL>(s, splt, cur_line, 5, 6, 7);
                     vector3<REAL> c_c = vec_from_str_ex<REAL>(s, splt, cur_line, 8, 9, 10);
 
-//                    fmt::print("\n cell info: {}\n", s);
-//                    fmt::print("@CCD_CP2K: ca {} {} {}\n",   c_a[0], c_a[1], c_a[2]);
-//                    fmt::print("@CCD_CP2K: cb {} {} {}\n",   c_b[0], c_b[1], c_b[2]);
-//                    fmt::print("@CCD_CP2K: cc {} {} {}\n\n", c_c[0], c_c[1], c_c[2]);
+                    fmt::print("\n cell info: {}\n", s);
+                    fmt::print("@CCD_CP2K: ca {} {} {}\n",   c_a[0], c_a[1], c_a[2]);
+                    fmt::print("@CCD_CP2K: cb {} {} {}\n",   c_b[0], c_b[1], c_b[2]);
+                    fmt::print("@CCD_CP2K: cc {} {} {}\n\n", c_c[0], c_c[1], c_c[2]);
 
                     auto &step = output.m_steps.back();
                     step.m_cell_is_animable = true;
