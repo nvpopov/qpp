@@ -24,7 +24,7 @@ namespace qpp {
   template<class REAL, class CELL>
   void read_vasp_poscar(
       std::basic_istream<CHAR_EX,TRAITS> & inp,
-      geometry<REAL,CELL> & geom){
+      geometry<REAL,CELL> & geom) {
 
     STRING_EX poscar_header,
         poscar_header_scale,
@@ -108,7 +108,6 @@ namespace qpp {
 
     if (geom.nat() == 0)
       throw parsing_error_t(cur_line, poscar_arecord, "Invalid POSCAR file");
-
 
   }
 
