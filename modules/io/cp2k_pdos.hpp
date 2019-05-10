@@ -9,12 +9,18 @@
 
 namespace qpp {
 
-    template<class REAL>
-    void read_cp2k_pdos(
-            std::basic_istream<CHAR_EX,TRAITS> & inp,
-            pdos_data_t<REAL> &data) {
+  template<class REAL>
+  void read_cp2k_pdos(
+      STRING_EX &file_name,
+      std::basic_istream<CHAR_EX,TRAITS> &inp,
+      pdos_data_t<REAL> &data) {
 
-    }
+    // read first line
+    // read second line
+
+    // process data
+
+  }
 
 } // namespace qpp
 
