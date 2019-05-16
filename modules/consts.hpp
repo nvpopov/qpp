@@ -5,12 +5,14 @@
 
 namespace qpp {
 
-  const double pi = 3.141592653589793238463e0;
-  const double ang_to_bohr = 1.88973e0; // 1 Angstrom to 1 Bohr
-  const double bohr_to_angs = 1 / ang_to_bohr;
-  const float infty = HUGE_VALF;
-  const float def_isovalue_mo = 0.02f; // (electrons/(bohr)^3)^2
-  const float def_isovalue_dens = 0.008f; // electrons/(bohr)^3
+  const auto pi = 3.141592653589793238463e0;
+  const auto ang_to_bohr = 1.88973e0; // 1 Angstrom to 1 Bohr
+  const auto bohr_to_angs = 1 / ang_to_bohr;
+  const auto infty = HUGE_VALF;
+  const auto def_isovalue_mo = 0.02; // (electrons/(bohr)^3)^2
+  const auto def_isovalue_dens = 0.008; // electrons/(bohr)^3
+  const auto hartree_to_ev = 27.211;
+
 }
 
 #endif

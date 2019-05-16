@@ -315,6 +315,6 @@ namespace qpp {
 
   }
 
-}
+} // namespace qpp
 
 #endif

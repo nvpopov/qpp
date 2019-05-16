@@ -79,7 +79,7 @@ namespace qpp{
     std::basic_stringstream<CHAR_EX,TRAITS> ss(s);
     STRING_EX a;
     int nf = 0;
-    for (nf=0; ss >> a; a!="") nf++;
+    for (nf=0; ss >> a; a!="") nf++; // TODO: inequality comparison result unused
     return nf;
   }
 
