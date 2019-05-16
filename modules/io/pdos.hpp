@@ -14,7 +14,7 @@ namespace qpp {
 
       size_t m_atom_kind{0};
       size_t m_spin_subspace{0};
-
+      bool m_spin_polarized{false};
       REAL m_efermi{0};
 
       // Max angular momentum in the data
