@@ -116,7 +116,11 @@ namespace qpp {
               break;
             }
           case 6: {
-              geom.cell = periodic_cell<REAL>(vv[0],vv[1],vv[2],vv[3],vv[4],vv[5]);
+              //fmt::print("@XYZQ CELL6 {} {} {} {} {} {}\n", vv[0],vv[1],vv[2],vv[3],vv[4],vv[5]);
+              periodic_cell<REAL> tc = periodic_cell<REAL>(vv[0],vv[1],vv[2],vv[3],vv[4],vv[5]);
+              geom.cell(0) = tc(0);
+              geom.cell(1) = tc(1);
+              geom.cell(2) = tc(2);
               force3d = true;
               break;
             }
