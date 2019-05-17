@@ -25,6 +25,9 @@ namespace qpp {
     bool is_alpha = file_name.find("ALPHA") != std::string::npos;
     bool is_beta = file_name.find("BETA") != std::string::npos;
 
+    data.m_is_alpha = is_alpha;
+    data.m_is_beta = is_beta;
+
     //extract kind
     auto kind_pos_start = file_name.find("_k");
     auto kind_pos_end = file_name.find("-", kind_pos_start);
@@ -43,6 +46,9 @@ namespace qpp {
     // # Projected DOS for atomic kind <ATOM> at iteration step i = <ITER>, E(Fermi) = <EFERMI> a.u.
     // 0 1         2   3   4      5    6      7  8         9   10 11 12      13      14  15     16
     sgetline(inp, s, cur_line);
+    //extract specie label
+    std::vector<std::string_view> splt = split_sv(s, " ");
+    data.m_specie_name = std::string(splt[6]);
 
     // read second line
     //# MO Eigenvalue [a.u.] Occupation s py pz  px  d-2..2 f-3..3 g-4..4
