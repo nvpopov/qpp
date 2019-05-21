@@ -8,6 +8,7 @@
 #include <geom/lace3d.hpp>
 #include <geom/geom.hpp>
 #include <geom/geom_anim.hpp>
+#include <io/ccd_programs.hpp>
 
 namespace qpp {
 
@@ -22,17 +23,6 @@ namespace qpp {
     rt_raman,
     rt_tddft,
     rt_spectrum
-  };
-
-  enum comp_chem_program_e {
-    pr_unknown,
-    pr_vasp,
-    pr_firefly,
-    pr_pc_gamess,
-    pr_cp2k,
-    pr_orca,
-    pr_molcas,
-    pr_molden
   };
 
   static std::map<comp_chem_program_e, std::string> ccdprog2str = {
