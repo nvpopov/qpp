@@ -50,6 +50,8 @@ namespace qpp {
     std::vector<std::string_view> splt = split_sv(s, " ");
     data.m_specie_name = std::string(splt[6]);
 
+    data.m_efermi = str2real(splt, 15, cur_line, s) * hartree_to_ev;
+
     // read second line
     //# MO Eigenvalue [a.u.] Occupation s py pz  px  d-2..2 f-3..3 g-4..4
     //0 1  2          3      4          5 6  7   8   9   ...
