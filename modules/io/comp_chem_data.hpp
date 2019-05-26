@@ -120,6 +120,8 @@ namespace qpp {
       std::vector<vector3<REAL> > m_cell_v;
       comp_chem_program_e m_comp_chem_program{comp_chem_program_e::pr_unknown};
       uint32_t m_ccd_flags;
+      bool m_is_qmmm{false};
+      bool m_need_to_extract_mm{false};
       int m_DIM{0};
       int m_tot_nat{0};
       int m_tot_nelec{0};

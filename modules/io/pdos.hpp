@@ -19,6 +19,12 @@ namespace qpp {
       bool m_is_alpha{false};
       bool m_is_beta{false};
       REAL m_efermi{0};
+      REAL m_scale{1};
+
+      size_t m_occ_start{0};
+      size_t m_occ_end{0};
+      size_t m_unocc_start{0};
+      size_t m_unocc_end{0};
 
       // Max angular momentum in the data
       qm_l m_max_l{qm_l::qm_l_s};
