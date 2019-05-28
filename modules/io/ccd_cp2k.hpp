@@ -197,6 +197,16 @@ namespace qpp {
                   }
               }
 
+            if (s.find("ENERGY|") != std::string::npos) {
+                //ENERGY| Total FORCE_EVAL ( QS ) energy (a.u.):            -8615.216698379990703
+                //  0      1     2         3 4 5   6        7               8
+                std::vector<std::string_view> splt = split_sv(s, " "); // 3 - pop 4 - charge
+                check_min_split_size(splt, 9, cur_line, s);
+                output.m_steps.back().m_toten = str2real<double>(splt, 8, cur_line, s);
+                //fmt::print("{} {} \n", output.m_steps.size(), s);
+                continue;
+              }
+
             //mulliken pop per atom
             if (s.find("Mulliken Population Analysis") != std::string::npos) {
                 for (auto i = 0; i < 2; i++) sgetline(inp, s, cur_line); //read two common lines

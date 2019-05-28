@@ -66,10 +66,10 @@ namespace qpp {
       int m_iter{0};
       int m_ex{0};
       int m_dem{0};
-      REAL m_toten{REAL(0)};
-      REAL m_e_change{REAL(0)};
-      REAL m_d_change{REAL(0)};
-      REAL m_orb_grad_or_diis_error{REAL(0)};
+      double m_toten{double(0)};
+      double m_e_change{double(0)};
+      double m_d_change{double(0)};
+      double m_orb_grad_or_diis_error{double(0)};
 
   };
 
@@ -77,7 +77,7 @@ namespace qpp {
   struct comp_chem_program_step_t {
 
       std::vector<comp_chem_program_scf_step_info_t<REAL> > m_scf_steps;
-      REAL m_toten{REAL(0)};
+      double m_toten{double(0)};
       std::vector<vector3<REAL> > m_atoms_pos;
       std::vector<vector3<REAL> > m_atoms_grads;
       std::vector<vector3<REAL> > m_atoms_vels;
