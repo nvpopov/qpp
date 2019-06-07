@@ -374,7 +374,7 @@ namespace qpp {
           for (size_t v = 0; v < ccd_inst.m_vibs.size(); v++) {
               geom_anim_record_t<REAL> anim;
               anim.m_anim_type = stored_anim_type;
-              anim.m_anim_name = fmt::format("vibration {}", v);
+              anim.m_anim_name = fmt::format("f={} cm-1", ccd_inst.m_vibs[v].m_frequency);
 
               const int total_frames_upwards = 10;
               const int total_frames = total_frames_upwards * 2 + 1;
