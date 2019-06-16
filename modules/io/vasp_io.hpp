@@ -118,8 +118,8 @@ namespace qpp {
       geometry<REAL, CELL> &geom,
       std::vector<geom_anim_record_t<REAL> > &anim
       /*std::vector<std::vector<qpp::vector3<REAL> > > &vel_list,
-              std::vector<REAL> &toten,
-              std::vector<REAL> &temperature*/){
+                      std::vector<REAL> &toten,
+                      std::vector<REAL> &temperature*/) {
 
     STRING_EX inps;
 
@@ -128,6 +128,8 @@ namespace qpp {
     bool state_first_cell_parsed{false};
     bool state_parse_geom_data{false};
     bool state_ibrion_parsed{false};
+    bool state_parse_init_geom{false};
+    bool init_geom_parsed{false};
 
     std::vector<STRING_EX> atom_types;
     std::vector<size_t> atom_count;
@@ -142,103 +144,165 @@ namespace qpp {
 
     int total_frames = 0;
     int local_atom_count = 0;
+    int local_atom_count_init_geom = 0;
+
     std::vector<int> atom_lookup_v;
 
-    while(std::getline(inp, inps)){
+    while(std::getline(inp, inps)) {
 
         bool state_line_checked = false;
 
-        if (!state_ibrion_parsed && !state_line_checked)
-          if (inps.find("IBRION") != std::string::npos) {
-              std::string_view ibrion_line(inps);
-              std::vector<std::string_view> ibrion_splt = split_sv(inps, " ");
-              uint8_t ibrion = std::atoi(ibrion_splt[2].data());
-              if (ibrion == 0) {
-                  anim_md.m_anim_name = "vasp_md";
-                  anim_md.m_anim_type = geom_anim_t::anim_md;
-                } else {
-                  anim_md.m_anim_name = "vasp_relax";
-                  anim_md.m_anim_type = geom_anim_t::anim_geo_opt;
-                }
-              state_ibrion_parsed = true;
-              state_line_checked = true;
-            }
+        if (!state_ibrion_parsed &&
+            !state_line_checked &&
+            inps.find("IBRION") != std::string::npos) {
 
-        if (!state_atom_types_filled && !state_line_checked)
-          if (inps.find("VRHFIN") != std::string::npos){
-              std::string_view atypes_l(inps);
-              auto start_name = atypes_l.find("=") + 1;
-              auto end_name = atypes_l.find(":");
-              std::string_view at_name_sv = atypes_l.substr(start_name , end_name - start_name );
-              std::string at_name(at_name_sv);
-              at_name.erase(std::remove(at_name.begin(), at_name.end(), ' '), at_name.end());
-              atom_types.push_back(at_name);
-              state_line_checked = true;
-            }
+            std::string_view ibrion_line(inps);
+            std::vector<std::string_view> ibrion_splt = split_sv(inps, " ");
+            uint8_t ibrion = std::atoi(ibrion_splt[2].data());
 
-        if (!state_atom_num_filled && !state_line_checked)
-          if (inps.find("ions per type") != std::string::npos){
-              state_atom_types_filled = true;
-              std::vector<std::string_view> acount_l = split_sv(inps, " ");
+            if (ibrion == 0) {
+                anim_md.m_anim_name = "vasp_md";
+                anim_md.m_anim_type = geom_anim_t::anim_md;
+              } else {
+                anim_md.m_anim_name = "vasp_relax";
+                anim_md.m_anim_type = geom_anim_t::anim_geo_opt;
+              }
 
-              for (size_t i = 4; i < acount_l.size(); i++){
-                  size_t _atc = std::stoul(acount_l[i].data());
-                  atom_count.push_back(_atc);
-                }
+            state_ibrion_parsed = true;
+            state_line_checked = true;
 
-              state_atom_num_filled = true;
-              state_line_checked = true;
+          }
 
-              //build atom lookup table
-              for(size_t at_c = 0; at_c < atom_types.size(); at_c++)
-                for(size_t ac_c = 0; ac_c < atom_count[at_c]; ac_c++)
-                  atom_lookup_v.push_back(at_c);
-            }
+        if (!state_atom_types_filled &&
+            !state_line_checked &&
+            inps.find("VRHFIN") != std::string::npos) {
 
-        if (!state_line_checked && inps.find("direct lattice vectors") != std::string::npos){
+            std::string_view atypes_l(inps);
+            auto start_name = atypes_l.find("=") + 1;
+            auto end_name = atypes_l.find(":");
+            std::string_view at_name_sv = atypes_l.substr(start_name , end_name - start_name );
+            std::string at_name(at_name_sv);
+            at_name.erase(std::remove(at_name.begin(), at_name.end(), ' '), at_name.end());
+            atom_types.push_back(at_name);
+            state_line_checked = true;
+
+          }
+
+        if (!state_atom_num_filled &&
+            !state_line_checked &&
+            inps.find("ions per type") != std::string::npos) {
+
+            state_atom_types_filled = true;
+            std::vector<std::string_view> acount_l = split_sv(inps, " ");
+
+            for (size_t i = 4; i < acount_l.size(); i++){
+                size_t _atc = std::stoul(acount_l[i].data());
+                atom_count.push_back(_atc);
+              }
+
+            state_atom_num_filled = true;
+            state_line_checked = true;
+
+            //build atom lookup table
+            for(size_t at_c = 0; at_c < atom_types.size(); at_c++)
+              for(size_t ac_c = 0; ac_c < atom_count[at_c]; ac_c++)
+                atom_lookup_v.push_back(at_c);
+
+          }
+
+        if (!state_line_checked && inps.find("direct lattice vectors") != std::string::npos) {
+
             std::array<qpp::vector3<REAL>, 3 > _cell;
+
             for(int i = 0; i < 3; i++){
+
                 std::getline(inp, inps);
                 std::vector<std::string_view> splt = split_sv(inps, " ");
                 _cell[i][0] = std::stof(splt[0].data());
                 _cell[i][1] = std::stof(splt[1].data());
                 _cell[i][2] = std::stof(splt[2].data());
+
               }
+
             if (state_first_cell_parsed) cells.push_back(_cell);
             else state_first_cell_parsed = true;
             state_line_checked = true;
+
           }
 
-        if (!state_parse_geom_data && !state_line_checked)
-          if (inps.find("POSITION") != std::string::npos){
-
-              std::getline(inp, inps);
-              local_atom_count = 0;
-
-              //              qpp::periodic_cell<REAL> cell(cells[total_frames-1][0],
-              //                  cells[total_frames-1][1],
-              //                  cells[total_frames-1][2]);
-
-              anim_md.frames.resize(anim_md.frames.size()+1);
-              anim_md.frames[anim_md.frames.size()-1].atom_pos.reserve(
-                    atom_lookup_v.size());
-              total_frames += 1;
-
-              state_parse_geom_data = true;
+        if (!state_parse_init_geom &&
+            !state_line_checked &&
+            inps.find("position of ions in cartesian coordinates  (Angs") != std::string::npos) {
+              state_parse_init_geom = true;
               state_line_checked = true;
+              init_geom_parsed = true;
             }
 
-        if (state_parse_geom_data && !state_line_checked){
-            if (inps.find("------------------------") == std::string::npos){
-                std::vector<std::string_view> splt = split_sv(inps, " ");
+        if (!state_parse_geom_data &&
+            !state_line_checked &&
+            inps.find("POSITION") != std::string::npos) {
+
+            std::getline(inp, inps);
+            local_atom_count = 0;
+
+            //              qpp::periodic_cell<REAL> cell(cells[total_frames-1][0],
+            //                  cells[total_frames-1][1],
+            //                  cells[total_frames-1][2]);
+
+            anim_md.frames.resize(anim_md.frames.size()+1);
+            anim_md.frames[anim_md.frames.size()-1].atom_pos.reserve(atom_lookup_v.size());
+            total_frames += 1;
+
+            state_parse_geom_data = true;
+            state_line_checked = true;
+
+          }
+
+        //parse step data
+        if (state_parse_geom_data && !state_line_checked) {
+
+            std::vector<std::string_view> splt = split_sv(inps, " ");
+
+            if (inps.find("------------------------") == std::string::npos
+                && (splt.size() == 3 || splt.size() == 6)) {
+
                 qpp::vector3<REAL> pos{std::stof(splt[0].data()),
                       std::stof(splt[1].data()),
                       std::stof(splt[2].data())};
                 anim_md.frames[anim_md.frames.size()-1].atom_pos.push_back(std::move(pos));
                 local_atom_count += 1;
+
+              } else {
+
+                state_parse_geom_data = false;
+
               }
-            else state_parse_geom_data = false;
+
             state_line_checked = true;
+
+          }
+
+        //parse init geom data
+        if (state_parse_init_geom && !state_line_checked) {
+
+            std::vector<std::string_view> splt = split_sv(inps, " ");
+
+            if (splt.size() == 3) {
+
+                qpp::vector3<REAL> pos{std::stof(splt[0].data()),
+                      std::stof(splt[1].data()),
+                      std::stof(splt[2].data())};
+                anim_static.frames[anim_static.frames.size()-1].atom_pos.push_back(std::move(pos));
+                local_atom_count_init_geom += 1;
+
+              } else {
+
+                state_parse_init_geom = false;
+
+              }
+
+            state_line_checked = true;
+
           }
 
         //        if (inps.find("total energy   ETOTAL =") != std::string::npos && !state_line_checked){
@@ -258,9 +322,15 @@ namespace qpp {
     //loadout first frame into geometry
     geom.DIM = 3;
 
-    for (size_t i = 0; i < atom_lookup_v.size(); i++){
-        geom.add(atom_types[atom_lookup_v[i]], anim_md.frames[0].atom_pos[i]);
-        anim_static.frames[0].atom_pos.push_back(anim_md.frames[0].atom_pos[i]);
+    for (size_t i = 0; i < atom_lookup_v.size(); i++) {
+
+        if (init_geom_parsed) {
+            geom.add(atom_types[atom_lookup_v[i]], anim_static.frames[0].atom_pos[i]);
+          } else {
+            geom.add(atom_types[atom_lookup_v[i]], anim_md.frames[0].atom_pos[i]);
+            anim_static.frames[0].atom_pos.push_back(anim_md.frames[0].atom_pos[i]);
+          }
+
       }
 
     geom.cell.v[0] = cells[0][0];
@@ -268,8 +338,9 @@ namespace qpp {
     geom.cell.v[2] = cells[0][2];
 
     //postproces animation to fight with riot atoms
-    for (size_t i = 1; i < anim_md.frames.size(); i++){
-        for (size_t ac = 0; ac < geom.nat(); ac++){
+    for (size_t i = 1; i < anim_md.frames.size(); i++) {
+        for (size_t ac = 0; ac < geom.nat(); ac++) {
+
             //index min_dist_index = index::D(geom.DIM).all(0);
             float min_dist = 100.0f;
             vector3<REAL> goal_vector = anim_md.frames[i].atom_pos[ac];
@@ -286,6 +357,7 @@ namespace qpp {
               }
             anim_md.frames[i].atom_pos[ac] = std::move(goal_vector);
           }
+
       }
 
     anim.push_back(std::move(anim_static));
@@ -294,7 +366,8 @@ namespace qpp {
   }
 
   template< class REAL, class CELL >
-  void write_vasp_poscar(std::basic_ostream<CHAR_EX,TRAITS>  & out, qpp::geometry<REAL,CELL> & geom){
+  void write_vasp_poscar(std::basic_ostream<CHAR_EX,TRAITS>  & out,
+                         qpp::geometry<REAL,CELL> & geom) {
 
     STRING_EX poscar_comment = "";
 
@@ -307,13 +380,13 @@ namespace qpp {
       fmt::print(out,
                  "{:15.8f} {:15.8f} {:15.8f}\n",
                  geom.cell.v[i][0],
-                 geom.cell.v[i][1],
-                 geom.cell.v[i][2]);
+          geom.cell.v[i][1],
+          geom.cell.v[i][2]);
 
     fmt::print(out, "{}\n", poscar_comment);
 
     for (int i = 0; i < geom.n_types(); i++)
-       fmt::print(out, i == geom.n_types() - 1 ? "{}" : "{} ", geom.get_atom_count_by_type(i));
+      fmt::print(out, i == geom.n_types() - 1 ? "{}" : "{} ", geom.get_atom_count_by_type(i));
 
     fmt::print(out, "\n");
     fmt::print(out, "cartesian\n");
@@ -324,8 +397,8 @@ namespace qpp {
           fmt::print(out,
                      "{:15.8f} {:15.8f} {:15.8f}\n",
                      geom.pos(q)[0],
-                     geom.pos(q)[1],
-                     geom.pos(q)[2]);
+              geom.pos(q)[1],
+              geom.pos(q)[2]);
 
   }
 
