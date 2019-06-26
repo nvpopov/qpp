@@ -16,19 +16,6 @@ void py_read_vasp_poscar (int fd, qpp::geometry<REAL,CELL> & geom) {
 
 }
 
-template<class REAL, class CELL>
-py::tuple py_read_vasp_outcar_md (int fd) {
-
-  boost::fdistream inp(fd);
-  std::vector<qpp::geometry<REAL,CELL>* > geom;
-  std::vector<std::vector<qpp::vector3<REAL> > > vel_list;
-  std::vector<REAL> toten;
-  std::vector<REAL> temperature;
-  read_vasp_outcar_md(inp, geom, vel_list, toten, temperature);
-  return py::make_tuple(geom, vel_list, toten, temperature);
-
-}
-
 template< class REAL, class CELL >
 void py_write_vasp_poscar (int fd, qpp::geometry<REAL, CELL> & geom) {
 
@@ -84,7 +71,7 @@ template< class REAL, class CELL >
 void py_export_vasp_io (py::module m) {
 
   m.def("read_vasp_poscar", &py_read_vasp_poscar<REAL, CELL>);
-  m.def("read_vasp_outcar_md", &py_read_vasp_outcar_md<REAL, CELL> );
+  //m.def("read_vasp_outcar_md", &py_read_vasp_outcar_md<REAL, CELL> );
   m.def("write_vasp_poscar", &py_write_vasp_poscar<REAL, CELL>);
 
 }

@@ -8,6 +8,7 @@
 #include <geom/geom.hpp>
 #include <geom/geom_anim.hpp>
 #include <io/comp_chem_data.hpp>
+#include <io/parsing_exceptions.hpp>
 
 #include <vector>
 #include <cmath>
@@ -17,6 +18,7 @@
 #include <fstream>
 #include <ios>
 #include <algorithm>
+#include <array>
 
 namespace qpp {
 
@@ -84,6 +86,9 @@ namespace qpp {
   const std::string s_eq_geom_located_str =
       "***** EQUILIBRIUM GEOMETRY LOCATED *****";
 
+  const std::string s_terminated_normally_str =
+      "EXECUTION OF FIREFLY TERMINATED NORMALLY";
+
   const std::string s_gradients_header_str =
       "ATOM     ZNUC       DE/DX         DE/DY         DE/DZ";
 
@@ -99,6 +104,12 @@ namespace qpp {
   const std::string s_eigen_end_ff_outdated =
       "WARNING! THIS VERSION OF";
 
+  const std::string s_eigen_end_ff_outdated_v2 =
+      " WARNING! YOU ARE USING OUTDATED";
+
+  const std::string s_eigen_end_ff_outdated_v3 =
+      " WARNING! ";
+
   const std::string s_mulliken_lowdin_section_str =
       "TOTAL MULLIKEN AND LOWDIN ATOMIC POPULATIONS";
 
@@ -112,7 +123,7 @@ namespace qpp {
       "REFERENCE ON SAYVETZ CONDITIONS";
 
   template<class REAL>
-  void read_ccd_from_firefly_output(std::basic_istream<CHAR,TRAITS> & inp,
+  void read_ccd_from_firefly_output(std::basic_istream<CHAR_EX,TRAITS> & inp,
                                     comp_chem_program_data_t<REAL> &output) {
 
     std::locale loc1("C");
@@ -127,11 +138,13 @@ namespace qpp {
     int vib_line_seek{0};
 
     output.m_DIM = 0;
-    output.m_comp_chem_program = comp_chem_program_t::pr_firefly;
+    output.m_comp_chem_program = comp_chem_program_e::pr_firefly;
+
+    uint64_t cur_line{0};
 
     while (!inp.eof()) {
 
-        std::getline(inp, s);
+        sgetline(inp, s, cur_line);
 
         //start parsing initial section
         if (!b_init_parsed) {
@@ -156,19 +169,20 @@ namespace qpp {
                     p_state = pcg_ff_p_state::s_none;
                     b_atoms_bootstraped = true;
                   } else {
-                    REAL x,y,z, charge;
-                    charge = std::stod(splt[1].data());
-                    x = std::stod(splt[2].data());
-                    y = std::stod(splt[3].data());
-                    z = std::stod(splt[4].data());
+
+                    std::array<REAL, 4> _qxyz;
+                    for (int i = 0; i < 4; i++)
+                      _qxyz[i] = str2real(splt, i + 1, cur_line, s);
+
                     if (!output.m_steps.empty()) {
-                        output.m_steps[cur_step].m_atoms_pos.push_back(vector3<REAL>(x,y,z));
+                        vector3<REAL> _pos{_qxyz[1], _qxyz[2], _qxyz[3]};
+                        output.m_steps[cur_step].m_atoms_pos.push_back(_pos);
                       }
                     else {
-                        output.m_init_atoms_pos.push_back(vector3<REAL>(x*bohr_to_angs,
-                                                                y*bohr_to_angs,
-                                                                z*bohr_to_angs));
-                        output.m_init_atoms_charges.push_back(charge);
+                        vector3<REAL> _pos{_qxyz[1], _qxyz[2], _qxyz[3]};
+                        output.m_init_atoms_pos.push_back(_pos*bohr_to_angs);
+                        output.m_init_atoms_charges.push_back(_qxyz[0]);
+                        check_min_split_size(splt, 1, cur_line, s);
                         std::string at_name = std::string(splt[0]);
                         output.m_init_atoms_names.push_back(std::move(at_name));
                       }
@@ -180,33 +194,30 @@ namespace qpp {
 
             //total number of electrons in init section
             if (s.find(s_init_tot_num_electons_str) != std::string::npos) {
+
                 std::vector<std::string_view> splt = split_sv(s, " ");
-                int tot_num_electrons = std::stoi(splt[4].data());
-                output.m_tot_nelec = tot_num_electrons;
+                output.m_tot_nelec = str2int(splt, 4, cur_line, s);
                 continue;
               }
 
             //total charge in init section
             if (s.find(s_init_tot_charge_str) != std::string::npos) {
                 std::vector<std::string_view> splt = split_sv(s, " ");
-                REAL tot_charge = std::stod(splt[4].data());
-                output.m_tot_charge = tot_charge;
+                output.m_tot_charge = str2real(splt, 4, cur_line, s);
                 continue;
               }
 
             //multiplicity in init section
             if (s.find(s_init_tot_mult_str) != std::string::npos) {
                 std::vector<std::string_view> splt = split_sv(s, " ");
-                int tot_mult = std::stoi(splt[3].data());
-                output.m_mult = tot_mult;
+                output.m_mult = str2int(splt, 3, cur_line, s);;
                 continue;
               }
 
             //num occup alpha in init section
             if (s.find(s_init_tot_num_occup_alpha) != std::string::npos) {
                 std::vector<std::string_view> splt = split_sv(s, " ");
-                int tot_occ_alpha = std::stoi(splt[6].data());
-                output.m_n_alpha = tot_occ_alpha;
+                output.m_n_alpha = str2int(splt, 6, cur_line, s);
                 output.m_is_unrestricted = true;
                 continue;
               }
@@ -214,8 +225,7 @@ namespace qpp {
             //num occup beta in init section
             if (s.find(s_init_tot_num_occup_beta) != std::string::npos) {
                 std::vector<std::string_view> splt = split_sv(s, " ");
-                int tot_occ_beta = std::stoi(splt[7].data());
-                output.m_n_beta = tot_occ_beta;
+                output.m_n_beta = str2int(splt, 7, cur_line, s);;
                 output.m_is_unrestricted = true;
                 continue;
               }
@@ -223,29 +233,33 @@ namespace qpp {
             //total atoms in init section
             if (s.find(s_init_tot_num_atoms_str) != std::string::npos) {
                 std::vector<std::string_view> splt = split_sv(s, " ");
-                int tot_atoms = std::stoi(splt[5].data());
-                output.m_tot_nat = tot_atoms;
+                output.m_tot_nat = str2int(splt, 5, cur_line, s);
                 continue;
               }
 
-            if (s.find(s_init_control_section_str) != std::string::npos){
-                std::getline(inp, s); // read -------
-                std::getline(inp, s); // SCFTYP=RHF RUNTYP=OPTIMIZE EXETYP=RUN
+            if (s.find(s_init_control_section_str) != std::string::npos) {
+
+                sgetline(inp, s, cur_line); // read -------
+                sgetline(inp, s, cur_line); // SCFTYP=RHF RUNTYP=OPTIMIZE EXETYP=RUN
                 std::vector<std::string_view> splt = split_sv(s, " ");
 
-                if (splt[0] == "SCFTYP=RHF") output.m_is_unrestricted = false;
-                if (splt[0] == "SCFTYP=UHF") output.m_is_unrestricted = true;
+                if (splt.size() >= 0) {
+                    if (splt[0] == "SCFTYP=RHF") output.m_is_unrestricted = false;
+                    if (splt[0] == "SCFTYP=UHF") output.m_is_unrestricted = true;
+                  }
 
-                if (splt[1] == "RUNTYP=OPTIMIZE")
-                  output.m_run_t = comp_chem_program_run_t::rt_geo_opt;
-                if (splt[1] == "RUNTYP=ENERGY")
-                  output.m_run_t = comp_chem_program_run_t::rt_energy;
-                if (splt[1] == "RUNTYP=GRADIENT")
-                  output.m_run_t = comp_chem_program_run_t::rt_grad;
-                if (splt[1] == "RUNTYP=HESSIAN")
-                  output.m_run_t = comp_chem_program_run_t::rt_vib;
-                if (splt[1] == "RUNTYP=RAMAN")
-                  output.m_run_t = comp_chem_program_run_t::rt_raman;
+                if (splt.size() >= 1) {
+                    if (splt[1] == "RUNTYP=OPTIMIZE")
+                      output.m_run_t = comp_chem_program_run_e::rt_geo_opt;
+                    if (splt[1] == "RUNTYP=ENERGY")
+                      output.m_run_t = comp_chem_program_run_e::rt_energy;
+                    if (splt[1] == "RUNTYP=GRADIENT")
+                      output.m_run_t = comp_chem_program_run_e::rt_grad;
+                    if (splt[1] == "RUNTYP=HESSIAN")
+                      output.m_run_t = comp_chem_program_run_e::rt_vib;
+                    if (splt[1] == "RUNTYP=RAMAN")
+                      output.m_run_t = comp_chem_program_run_e::rt_raman;
+                  }
 
                 b_init_parsed = true;
                 p_state = pcg_ff_p_state::s_none;
@@ -272,15 +286,24 @@ namespace qpp {
                 s.find("INITIATING") == std::string::npos) {
                 //fill scf step info
                 comp_chem_program_scf_step_info_t<REAL> _scf_step;
-                _scf_step.m_iter = std::stoi(splt[0].data());
-                _scf_step.m_ex = std::stoi(splt[1].data());
-                _scf_step.m_dem = std::stoi(splt[2].data());
-                _scf_step.m_toten = std::stod(splt[3].data());
-                _scf_step.m_e_change = std::stod(splt[4].data());
-                _scf_step.m_d_change = std::stod(splt[5].data());
-                _scf_step.m_orb_grad_or_diis_error = std::stod(splt[6].data());
+
+                std::array<int, 3> en_line_i;
+                for (int i = 0; i < 3; i++) en_line_i[i] = str2int(splt, i, cur_line, s);
+
+                std::array<REAL, 4> en_line_f;
+                for (int i = 0; i < 4; i++) en_line_f[i] = str2real(splt, i + 3, cur_line, s);
+
+                _scf_step.m_iter = en_line_i[0];
+                _scf_step.m_ex = en_line_i[1];
+                _scf_step.m_dem = en_line_i[2];
+
+                _scf_step.m_toten = en_line_f[0];
+                _scf_step.m_e_change = en_line_f[1];
+                _scf_step.m_d_change = en_line_f[2];
+                _scf_step.m_orb_grad_or_diis_error = en_line_f[4];
 
                 output.m_steps[cur_step].m_scf_steps.push_back(std::move(_scf_step));
+
               }
 
             if (s.find("-----------------") != std::string::npos || s.length() == 1) {
@@ -297,8 +320,8 @@ namespace qpp {
             s.find(s_eigen_vectors_secton_molecular_orbitals) != std::string::npos) {
             //std::cout << s << std::endl;
             p_state = pcg_ff_p_state::s_eigen_vectors_section_parsing_idx;
-            std::getline(inp, s); //read ------------
-            std::getline(inp, s); //read empty line
+            sgetline(inp, s, cur_line); //read ------------
+            sgetline(inp, s, cur_line); //read empty line
             //std::cout << s << std::endl;
             continue;
           }
@@ -310,7 +333,9 @@ namespace qpp {
 
             //------------------------------
             //properties for the RHF density
-            if (s.length() == 1 || s.find(s_eigen_end_ff_outdated) != std::string::npos) {
+            if (s.length() == 1 || s.find(s_eigen_end_ff_outdated) != std::string::npos ||
+                s.find(s_eigen_end_ff_outdated_v2) != std::string::npos ||
+                s.find(s_eigen_end_ff_outdated_v3) != std::string::npos) {
                 p_state = pcg_ff_p_state::s_none;
                 continue;
               }
@@ -320,8 +345,9 @@ namespace qpp {
 
         if (p_state == pcg_ff_p_state::s_eigen_vectors_section_parsing_energy) {
             std::vector<std::string_view> splt = split_sv(s, " ");
-            for (const auto &sv : splt)
-              output.m_steps.back().m_eigen_values_spin_1_occ.push_back(std::stod(sv.data()));
+            for (size_t i = 0; i < splt.size(); i++)
+              output.m_steps.back().m_eigen_values_spin_1_occ.push_back(
+                    str2real(splt, i, cur_line, s));
             p_state = pcg_ff_p_state::s_eigen_vectors_section_parsing_sym;
             continue;
           }
@@ -346,35 +372,39 @@ namespace qpp {
         //Eigenvectors section end
 
         if (s.find(s_mulliken_lowdin_section_str) != std::string::npos) {
-            std::getline(inp, s);
+            sgetline(inp, s, cur_line);
             p_state = pcg_ff_p_state::s_mulliken_lowdin_pop_with_charges;
             continue;
           }
 
         if (p_state == pcg_ff_p_state::s_mulliken_lowdin_pop_with_charges) {
+
             std::vector<std::string_view> splt = split_sv(s, " ");
             if (splt.size() != 6) {
                 p_state = pcg_ff_p_state::s_none;
                 continue;
               }
-            REAL m_p = std::stod(splt[2].data());
-            REAL m_c = std::stod(splt[3].data());
-            REAL l_p = std::stod(splt[4].data());
-            REAL l_c = std::stod(splt[5].data());
+
+            std::array<REAL, 4> pa;
+            for (int i = 0; i < 4; i++) pa[i] = str2real(splt, i + 2, cur_line, s);
+
             output.m_steps[cur_step].m_mulliken_pop_per_atom.push_back(
-                  std::pair<REAL, REAL>(m_p, m_c));
+                  std::pair<REAL, REAL>(pa[0], pa[1]));
             output.m_steps[cur_step].m_lowdin_pop_per_atom.push_back(
-                  std::pair<REAL, REAL>(l_p, l_c));
+                  std::pair<REAL, REAL>(pa[2], pa[3]));
+
             continue;
+
           }
 
         if (s.find(s_electrostatic_moments_str) != std::string::npos) {
-            for (int i = 0 ; i < 5; i++) std::getline(inp, s);
+            for (int i = 0 ; i < 5; i++) sgetline(inp, s, cur_line);
             p_state = pcg_ff_p_state::s_electrostatic_moments;
             continue;
           }
 
         if (p_state == pcg_ff_p_state::s_electrostatic_moments) {
+
             std::vector<std::string_view> splt = split_sv(s, " ");
 
             if (splt.size() != 4) {
@@ -382,13 +412,14 @@ namespace qpp {
                 continue;
               }
 
-            REAL dx = std::stod(splt[0].data());
-            REAL dy = std::stod(splt[1].data());
-            REAL dz = std::stod(splt[2].data());
+            std::array<REAL, 3> dv;
+            for (int i = 0; i < 3; i++) dv[i] = str2real(splt, i, cur_line, s);
 
-            output.m_steps[cur_step].m_dipole_moment = vector3<REAL>(dx,dy,dz);
+            output.m_steps[cur_step].m_dipole_moment = vector3<REAL>(dv[0], dv[1], dv[2]);
             p_state = pcg_ff_p_state::s_none;
+
             continue;
+
           }
 
         //parsing vibrations
@@ -404,8 +435,8 @@ namespace qpp {
             //newline
             //
 
-            if (output.m_run_t == comp_chem_program_run_t::rt_raman) std::getline(inp, s);
-            std::getline(inp, s); //read empty line
+            if (output.m_run_t == comp_chem_program_run_e::rt_raman) sgetline(inp, s, cur_line);
+            sgetline(inp, s, cur_line); //read empty line
             p_state = pcg_ff_p_state::s_vib_general;
             continue;
           }
@@ -439,43 +470,41 @@ namespace qpp {
               output.m_vibs[output.m_vibs.size() - i - 1].m_disp.resize(output.m_tot_nat);
             int tv = output.m_vibs.size();
 
-            std::getline(inp,s);
+            sgetline(inp, s, cur_line);
             std::vector<std::string_view> splt_s1 = split_sv(s, " ");
-            for (size_t i = 1; i < vib_line_size + 1; i++) {
-                output.m_vibs[tv-vib_line_size+i-1].m_frequency = std::stod(splt_s1[i].data());
-              }
+            for (size_t i = 1; i < vib_line_size + 1; i++)
+              output.m_vibs[tv-vib_line_size + i - 1].m_frequency =
+                  str2real(splt_s1, i, cur_line, s);
 
-            std::getline(inp,s);
+            sgetline(inp, s, cur_line);
             std::vector<std::string_view> splt_s2 = split_sv(s, " ");
-            for (size_t i = 1; i < vib_line_size + 1; i++) {
-                output.m_vibs[tv-vib_line_size+i-1].m_reduced_mass =
-                    std::stod(splt_s2[i+1].data());
-              }
+            for (size_t i = 1; i < vib_line_size + 1; i++)
+              output.m_vibs[tv-vib_line_size + i - 1].m_reduced_mass =
+                  str2real(splt_s2, i + 1, cur_line, s);
 
-            std::getline(inp,s);
+            sgetline(inp, s, cur_line);
             std::vector<std::string_view> splt_s3 = split_sv(s, " ");
-            for (size_t i = 1; i < vib_line_size + 1; i++) {
-                output.m_vibs[tv-vib_line_size+i-1].m_intensity = std::stod(splt_s3[i+1].data());
-              }
+            for (size_t i = 1; i < vib_line_size + 1; i++)
+              output.m_vibs[tv-vib_line_size+i-1].m_intensity =
+                  str2real(splt_s3, i + 1, cur_line, s);
 
-            if (output.m_run_t == comp_chem_program_run_t::rt_raman) {
-                std::getline(inp,s);
+            if (output.m_run_t == comp_chem_program_run_e::rt_raman) {
+                sgetline(inp, s, cur_line);
                 std::vector<std::string_view> splt_ram_act = split_sv(s, " ");
-                for (size_t i = 1; i < vib_line_size + 1; i++) {
-                    output.m_vibs[tv-vib_line_size+i-1].m_raman_activity =
-                        std::stod(splt_ram_act[i+1].data());
-                  }
+                for (size_t i = 1; i < vib_line_size + 1; i++)
+                  output.m_vibs[tv-vib_line_size+i-1].m_raman_activity =
+                      str2real(splt_ram_act, i + 1, cur_line, s);
 
-                std::getline(inp,s);
+                sgetline(inp, s, cur_line);
                 std::vector<std::string_view> splt_depol = split_sv(s, " ");
-                for (size_t i = 1; i < vib_line_size + 1; i++) {
-                    output.m_vibs[tv-vib_line_size+i-1].m_depolarization =
-                        std::stod(splt_depol[i].data());
-                  }
+                for (size_t i = 1; i < vib_line_size + 1; i++)
+                  output.m_vibs[tv-vib_line_size+i-1].m_depolarization =
+                      str2real(splt_depol, i, cur_line, s);
+
               }
 
             //read empty line
-            std::getline(inp, s);
+            sgetline(inp, s, cur_line);
             vib_line_seek = 0;
             p_state = pcg_ff_p_state::s_vib_displ;
             continue;
@@ -485,7 +514,7 @@ namespace qpp {
         if (p_state == pcg_ff_p_state::s_vib_displ) {
 
             if (s.length() == 1) {
-                for (int i = 0; i < 10; i++) std::getline(inp,s);
+                for (int i = 0; i < 10; i++) sgetline(inp, s, cur_line);
                 p_state = pcg_ff_p_state::s_vib_general;
                 continue;
               }
@@ -497,7 +526,7 @@ namespace qpp {
                 //X LINE
                 for (int i = 0 ; i < vib_line_size; i++) {
                     output.m_vibs[output.m_vibs.size() - vib_line_size + i].
-                        m_disp[vib_line_seek][0] = std::stod(splt[i+3].data());
+                        m_disp[vib_line_seek][0] = str2real(splt, i + 3, cur_line, s);
                     continue;
                   }
               }
@@ -508,7 +537,7 @@ namespace qpp {
 
                 for (int i = 0 ; i < vib_line_size; i++)
                   output.m_vibs[output.m_vibs.size() - vib_line_size + i].
-                      m_disp[vib_line_seek][i_stride] = std::stod(splt[i+1].data());
+                      m_disp[vib_line_seek][i_stride] =  str2real(splt, i + 1, cur_line, s);
 
                 if (i_stride == 2) vib_line_seek +=1;
                 continue;
@@ -523,8 +552,8 @@ namespace qpp {
 
         //found COORDINATES OF ALL ATOMS
         if (s.find(s_coordinates_header_str) != std::string::npos) {
-            std::getline(inp, s); //read next line  "ATOM CHARGE X Y Z"
-            std::getline(inp, s); //read next line --------
+            sgetline(inp, s, cur_line); //read next line  "ATOM CHARGE X Y Z"
+            sgetline(inp, s, cur_line); //read next line --------
             p_state = pcg_ff_p_state::s_coord_parsing;
             //output.steps[cur_step].pos.reserve(output.tot_num_atoms);
             continue;
@@ -537,9 +566,9 @@ namespace qpp {
                 p_state = pcg_ff_p_state::s_none;
               } else {
                 REAL x,y,z;
-                x = std::stod(splt[2].data());
-                y = std::stod(splt[3].data());
-                z = std::stod(splt[4].data());
+                x = str2real(splt, 2, cur_line, s);
+                y = str2real(splt, 3, cur_line, s);
+                z = str2real(splt, 4, cur_line, s);
                 if (!output.m_steps.empty()) {
                     output.m_steps[cur_step].m_atoms_pos.push_back(vector3<REAL>(x,y,z));
                   }
@@ -553,7 +582,7 @@ namespace qpp {
           }
 
         if (s.find(s_gradients_header_str) != std::string::npos) {
-            std::getline(inp, s); //read -------
+            sgetline(inp, s, cur_line); //read -------
             p_state = pcg_ff_p_state::s_grad_parsing;
             continue;
           }
@@ -564,9 +593,9 @@ namespace qpp {
                 p_state = pcg_ff_p_state::s_none;
               } else  {
                 REAL gx,gy,gz;
-                gx = std::stod(splt[3].data());
-                gy = std::stod(splt[4].data());
-                gz = std::stod(splt[5].data());
+                gx = str2real(splt, 3, cur_line, s);
+                gy = str2real(splt, 4, cur_line, s);
+                gz = str2real(splt, 5, cur_line, s);
                 output.m_steps[cur_step].m_atoms_grads.push_back(vector3<REAL>(gx,gy,gz));
               }
             continue;
@@ -578,8 +607,16 @@ namespace qpp {
             continue;
           }
 
+        if (s.find(s_terminated_normally_str) != std::string::npos) {
+            output.m_is_terminated_normally = true;
+            continue;
+          }
+
         //end parsing calc data
       }
+
+    if (!b_init_parsed)
+      throw parsing_error_t(cur_line, s, "Invalid Firefly output file");
 
   }
 

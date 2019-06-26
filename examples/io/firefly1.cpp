@@ -10,7 +10,7 @@ int main () {
   //std::ifstream ifile("../examples/io/ref_data/firefly/1Ca10F20.outp");
   //std::ifstream ifile("../examples/io/ref_data/firefly/water_mp2.out");
   //std::ifstream ifile("../examples/io/ref_data/firefly/dvb_gopt_a.out");
-  std::ifstream ifile("../examples/io/ref_data/firefly/dvb_ir.out");
+  std::ifstream ifile("../examples/io/ref_data/firefly/h11.out");
   comp_chem_program_data_t<float> cc_o;
   read_ccd_from_firefly_output(ifile, cc_o);
 

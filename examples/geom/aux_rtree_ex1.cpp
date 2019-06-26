@@ -6,8 +6,7 @@
 #include <data/symmetric_key.hpp>
 #include <map>
 
-static std::array<qpp::vector3<float>, 1> a2
-= {qpp::vector3<float>(0.1f, 0.2f, 0.3f)};
+static std::array<qpp::vector3<float>, 1> a2 = {qpp::vector3<float>(0.1f, 0.2f, 0.3f)};
 
 static qpp::vector3<float> a(0.1, 0.2, 0.3);
 

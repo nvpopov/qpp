@@ -36,7 +36,7 @@ namespace qpp{
       int nfun;
 
       // Text label for i-th basis function
-      virtual STRING label(int i) =0;
+      virtual STRING_EX label(int i) =0;
 
       // Calculate the values of basis functions on a grid
 
@@ -84,7 +84,7 @@ namespace qpp{
   class atomic_basis{
     public:
 
-      STRING atom, basis_name;
+      STRING_EX atom, basis_name;
       std::vector<qpp_shell<BT, FREAL> > shells;
       atomic_ecp<FREAL> ecp;
 
@@ -118,15 +118,15 @@ namespace qpp{
   template <qpp_bastype ST, class FREAL=double>
   class qpp_basis_data : public qpp_declaration{
 
-    std::vector<std::vector<STRING> > labels;
+    std::vector<std::vector<STRING_EX> > labels;
     std::vector<std::vector<int> > numbers;
     std::vector<atomic_basis<ST,FREAL> > _atbasis;
 
   public:
 
-    qpp_basis_data(const STRING & __name = "", qpp_object * __owner = NULL,
+    qpp_basis_data(const STRING_EX & __name = "", qpp_object * __owner = NULL,
        qpp_param_array * __parm = NULL,
-       int __line=-1, const STRING & __file="") :
+       int __line=-1, const STRING_EX & __file="") :
       qpp_declaration("basis",__name,__owner,__parm,__line,__file)
     {}
 
@@ -253,12 +253,12 @@ namespace qpp{
       add_number(n_atbasis(),num);
     }
 
-    void add_label(int r, const STRING & lbl)
+    void add_label(int r, const STRING_EX & lbl)
     {
       labels[r].push_back(lbl);
     }
 
-    void add_label(const STRING & lbl)
+    void add_label(const STRING_EX & lbl)
     {
       add_label(n_atbasis()-1,lbl);
     }
@@ -282,17 +282,17 @@ namespace qpp{
       add_shell(n_atbasis()-1,sh);
     }
 
-    void add_import(int r, const STRING & imp)
+    void add_import(int r, const STRING_EX & imp)
     {
       _atbasis[r].basis_import = imp;
     }
 
-    void add_import(const STRING & imp)
+    void add_import(const STRING_EX & imp)
     {
       _atbasis[n_atbasis()-1].basis_import = imp;
     }
 
-    virtual STRING category() const
+    virtual STRING_EX category() const
     { return "basis";}
 
     virtual qppobject_type gettype() const
@@ -304,7 +304,7 @@ namespace qpp{
       return new qpp_basis_data<ST,FREAL>(*this);
     }
 
-    virtual void write_g98(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const
+    virtual void write_g98(std::basic_ostream<CHAR_EX,TRAITS> &os, int offset=0) const
     {
       for (int i=0; i<offset; i++)
   os << " ";
@@ -341,7 +341,7 @@ namespace qpp{
       os << "}\n";
     }
 
-    virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const
+    virtual void write(std::basic_ostream<CHAR_EX, TRAITS> &os, int offset=0) const
     {
       //debug
       for (int k=0; k<offset; k++) os << " ";
@@ -417,7 +417,7 @@ namespace qpp{
                      {{3,0,0}, {0,3,0}, {0,0,3}, {1,2,0}, {2,1,0}, {1,0,2}, {2,0,1}, {0,1,2}, {0,2,1}, {1,1,1}}};
 
 
-  const STRING
+  const STRING_EX
   anglf_label[][10] = {{"S"},
                        {"PX","PY","PZ"},
                        {"DXX","DYY","DZZ","DXY","DXZ","DYZ"},
@@ -437,7 +437,7 @@ namespace qpp{
     int nsh;
 
     // Text label for i-th basis function
-    virtual STRING label(int i)
+    virtual STRING_EX label(int i)
     {}
 
     // Calculate the values of basis functions on a grid
@@ -456,23 +456,23 @@ namespace qpp{
   return NULL;
     }
 
-    virtual STRING category() const
+    virtual STRING_EX category() const
     {
       return "basis";
     }
 
-    virtual STRING name() const
+    virtual STRING_EX name() const
     {
 
     }
 
     virtual qppobject_type gettype() const=0;
 
-    virtual void error(STRING const & what) =0;
+    virtual void error(STRING_EX const & what) =0;
 
-    virtual STRING error() =0;
+    virtual STRING_EX error() =0;
 
-    virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const =0;
+    virtual void write(std::basic_ostream<CHAR_EX, TRAITS> &os, int offset=0) const =0;
 
   };
     */

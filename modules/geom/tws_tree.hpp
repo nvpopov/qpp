@@ -3,11 +3,13 @@
 
 #include <ostream>
 #include <unordered_map>
+#include <unordered_set>
 #include <functional>
 #include <utility>
 #include <set>
 #include <algorithm>
 #include <cmath>
+#include <array>
 #include <type_traits>
 
 #include <cassert>
@@ -21,7 +23,6 @@
 #include <geom/ray.hpp>
 #include <geom/primitive_intersections.hpp>
 #include <data/ptable.hpp>
-#include <data/compiler_fallback.hpp>
 
 //#if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
 //#pragma push_macro("slots")
@@ -66,6 +67,16 @@ namespace qpp{
       AINT m_atm;
       index m_idx;
       tws_node_content_t (const AINT _atm, const index _idx) noexcept {m_atm = _atm; m_idx = _idx;}
+  };
+
+  /// data to store in rtree                                                ///
+  template<typename REAL = float, typename AINT = size_t>
+  struct tws_node_content_bonds_t {
+      AINT m_atm;
+      index m_idx;
+      matrix4<float> m_mat_model;
+      tws_node_content_bonds_t (const AINT _atm, const index _idx) noexcept
+      {m_atm = _atm; m_idx = _idx;}
   };
 
   /// \brief The imaginary_atom struct
@@ -504,7 +515,7 @@ namespace qpp{
       template<typename adding_result_policy = query_ray_add_all<REAL> >
       void query_ray (ray_t<REAL> &_ray,
                       std::vector<tws_query_data_t<REAL, AINT> > &res,
-                      const std::set<size_t> &hidden_types,
+                      const std::unordered_set<size_t> &hidden_types,
                       REAL scale_factor = 0.25,
                       bool hide_by_field = false,
                       int xgeom_hide_field_id = 6) {
@@ -526,7 +537,7 @@ namespace qpp{
       void traverse_query_ray (tws_node_t<REAL, AINT> *cur_node,
                                ray_t<REAL> &_ray,
                                std::vector<tws_query_data_t<REAL, AINT> > &res,
-                               const std::set<size_t> &hidden_types,
+                               const std::unordered_set<size_t> &hidden_types,
                                const REAL scale_factor,
                                bool hide_by_field,
                                int xgeom_hide_field_id) {
@@ -536,7 +547,7 @@ namespace qpp{
         if (ray_aabb_test(_ray, cur_node->m_bb)) {
 
             if (cur_node->m_tot_childs > 0) {
-                for (auto *ch_node : cur_node->m_sub_nodes)
+                for (auto ch_node : cur_node->m_sub_nodes)
                   if (ch_node)
                     traverse_query_ray<adding_result_policy>(ch_node,
                                                              _ray,
@@ -568,7 +579,8 @@ namespace qpp{
                     ray_hit &&
                     adding_result_policy::can_add(test_pos, nc.m_idx, geom->DIM) &&
                     !atom_hidden &&
-                    (!geom->template xfield<bool>(xgeom_hide_field_id, nc.m_atm) ||
+                    (!hide_by_field ||
+                     !geom->template xfield<bool>(xgeom_hide_field_id, nc.m_atm) ||
                      !xgeom_hide_field_id)
                     )
                   res.push_back(tws_query_data_t<REAL, AINT>(nc.m_atm, nc.m_idx, ray_hit_dist));
@@ -604,7 +616,7 @@ namespace qpp{
 
         if (cur_node->m_bb.test_sphere(sph_r, sph_cnt)){
 
-            for (auto *child : cur_node->m_sub_nodes)
+            for (auto child : cur_node->m_sub_nodes)
               if (child) traverse_query_sphere(child, sph_r, sph_cnt, res);
 
             for (auto &cnt : cur_node->m_content)
@@ -940,7 +952,7 @@ namespace qpp{
       /// \param a
       /// \param r
       void added (before_after st,
-                  const STRING & a,
+                  const STRING_EX & a,
                   const vector3<REAL> & r) override {
         if (st == before_after::after) {
             do_action(act_check_consistency);
@@ -959,7 +971,7 @@ namespace qpp{
       /// \param r
       void inserted (int at,
                      before_after st,
-                     const STRING & a,
+                     const STRING_EX & a,
                      const vector3<REAL> & r) override {
         if (st == before_after::after) {
             do_action(act_check_consistency);
@@ -975,7 +987,7 @@ namespace qpp{
       /// \param r
       void changed (int at,
                     before_after st,
-                    const STRING & a,
+                    const STRING_EX & a,
                     const vector3<REAL> & r) override {
 
         if (st == before_after::after) {

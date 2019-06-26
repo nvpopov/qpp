@@ -20,9 +20,9 @@
 namespace qpp{
 
   template<class REAL, class CELL = periodic_cell<REAL> >
-  void read_gulp_simple_input(std::basic_istream<CHAR,TRAITS> & inp, geometry<REAL,CELL> & geom){
+  void read_gulp_simple_input(std::basic_istream<CHAR_EX,TRAITS> & inp, geometry<REAL,CELL> & geom){
 
-    STRING s;
+    STRING_EX s;
 
     bool bParseGeometry = false;
     bool bLineChecked = false;
@@ -33,7 +33,7 @@ namespace qpp{
 
     while((std::getline(inp, s)) || (bFinishParsing)){
 
-        STRING lower_s = tolower(s);
+        STRING_EX lower_s = tolower(s);
         bLineChecked = false;
 
         if (lower_s.find("vectors") != std::string::npos && !bLineChecked) {
@@ -52,7 +52,7 @@ namespace qpp{
           }
 
         if (bParseGeometry && !bLineChecked){
-            std::vector<STRING> geom_l = split(s);
+            std::vector<STRING_EX> geom_l = split(s);
             if (iSavedARecordSize == -1) iSavedARecordSize = geom_l.size();
             if (iSavedARecordSize != -1) {
                 if (iSavedARecordSize == geom_l.size()) {
@@ -78,7 +78,7 @@ namespace qpp{
   }
 
   template<class REAL, class CELL = periodic_cell<REAL> >
-  void write_gulp_simple_input(std::basic_ostream<CHAR,TRAITS> &out, geometry<REAL, CELL> &geom){
+  void write_gulp_simple_input(std::basic_ostream<CHAR_EX,TRAITS> &out, geometry<REAL, CELL> &geom){
 
     out << "opti prop conp relax" << std::endl;
     out << "vectors" << std::endl;

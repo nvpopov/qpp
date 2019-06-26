@@ -7,22 +7,22 @@
 #include <algorithm>
 #include <iostream>
 #include <geom/lace3d.hpp>
-#include <data/compiler_fallback.hpp>
+#include <string_view>
 
-namespace qpp{
+namespace qpp {
 
   // -------------------- Simple tokenizer -----------------------------------
 
-  class tokenizer{
-    std::basic_istream<CHAR,TRAITS> * _input;
-    STRING _buff, _dump, _sepr;
+  class tokenizer {
+    std::basic_istream<CHAR_EX,TRAITS> * _input;
+    STRING_EX _buff, _dump, _sepr;
     int _line_number;
-    STRING _filename;
+    STRING_EX _filename;
     bool _created_here;
 
   public:
 
-    tokenizer(ISTREAM & input, const STRING & __filename=""){
+    tokenizer(ISTREAM & input, const STRING_EX & __filename="") {
       _input = & input;
       _dump = " \t";
       _line_number = 0;
@@ -30,7 +30,7 @@ namespace qpp{
       _created_here = false;
     }
     /*
-        tokenizer(const STRING & str)
+        tokenizer(const STRING_EX & str)
         {
           _input = new std::basic_stringstream<CHAR,TRAITS>(str);
           _dump = " \t";
@@ -39,9 +39,9 @@ namespace qpp{
           _created_here = true;
         }
         */
-    tokenizer(const STRING & __filename){
+    tokenizer(const STRING_EX & __filename){
       _input = new
-          std::basic_ifstream<CHAR,TRAITS>(__filename.c_str());
+          std::basic_ifstream<CHAR_EX,TRAITS>(__filename.c_str());
       _dump = " \t";
       _line_number = 0;
       _filename = __filename;
@@ -53,28 +53,28 @@ namespace qpp{
         delete _input;
     }
 
-    void dump(const STRING & smb){
+    void dump(const STRING_EX & smb){
       _dump = smb;
     }
 
-    void separate(const STRING & smb){
+    void separate(const STRING_EX & smb){
       _sepr = smb;
     }
 
-    STRING get(){
+    STRING_EX get(){
       int i;
-      if (_buff == "" ){
+      if (_buff == "" ) {
           std::getline(*_input, _buff);
 
           _line_number++;
         }
 
-      do{
+      do {
           i = _buff.find_first_not_of(_dump);
 
           //debug
           //std::cout << "i = " << i << "\""  << _buff << "\"\n";
-          if (i != std::string::npos){
+          if (i != std::string::npos) {
               _buff = _buff.substr(i);
               break;
             }
@@ -94,7 +94,7 @@ namespace qpp{
       //debug
       //std::cout << "\"" << _buff << "\"\n";
 
-      STRING rez;
+      STRING_EX rez;
       i = _buff.find_first_of(_sepr + _dump);
       if (i==0){
           //debug
@@ -104,14 +104,14 @@ namespace qpp{
           _buff = _buff.substr(1);
 
         }
-      else if (i != std::string::npos){
+      else if (i != std::string::npos) {
           //debug
           //std::cout << "here2\n";
 
           rez =  _buff.substr(0,i);
           _buff = _buff.substr(i);
         }
-      else{
+      else {
           //debug
           //std::cout << "here3\n";
 
@@ -121,7 +121,7 @@ namespace qpp{
       return rez;
     }
 
-    void back(STRING s){
+    void back(STRING_EX s){
       _buff = s + " " + _buff;
     }
 
@@ -133,7 +133,7 @@ namespace qpp{
       return _line_number;
     }
 
-    STRING file() const{
+    STRING_EX file() const{
       return _filename;
     }
 
@@ -141,33 +141,33 @@ namespace qpp{
 
   // -----------------------------------------------------------
 
-  STRING tolower(const STRING & s);
+  STRING_EX tolower(const STRING_EX & s);
   // Make lowercase
 
   // -----------------------------------------------------------
 
-  bool icompare(const STRING & s1, const STRING s2);
+  bool icompare(const STRING_EX & s1, const STRING_EX s2);
   // Case insensitive comparison of two strings
   // -----------------------------------------------------------
 
-  void split(const STRING &s,
-             std::vector<STRING> &elems,
-             const STRING & delims = " \t");
+  void split(const STRING_EX &s,
+             std::vector<STRING_EX> &elems,
+             const STRING_EX & delims = " \t");
   // fixme - not efficient!
 
-  std::vector<STRING> split(const STRING &s, const STRING & delims=" \t");
+  std::vector<STRING_EX> split(const STRING_EX &s, const STRING_EX & delims=" \t");
 
-  bool is_identifier(const STRING &s);
+  bool is_identifier(const STRING_EX &s);
 
   // --------------------------------------------------------------------//
 
-  int strnf(const STRING & s);
+  int strnf(const STRING_EX & s);
 
   // -------------------------------- string to type T convertor ----------------------------
 
   template<typename T>
-  bool s2t(const STRING & s, T & val){
-    std::basic_stringstream<CHAR,TRAITS> ss(s);
+  bool s2t(const STRING_EX & s, T & val){
+    std::basic_stringstream<CHAR_EX,TRAITS> ss(s);
     ss >> val;
 
     //std::cout << "ss eof= " << ss.eof() << "\n";
@@ -175,19 +175,19 @@ namespace qpp{
   }
 
   template<>
-  bool s2t<bool>(const STRING & s, bool & val);
+  bool s2t<bool>(const STRING_EX & s, bool & val);
 
   // -------------------------------------------------------------
 
   template<typename T>
-  STRING t2s(const T & val){
-    std::basic_stringstream<CHAR,TRAITS> ss;
+  STRING_EX t2s(const T & val){
+    std::basic_stringstream<CHAR_EX,TRAITS> ss;
     ss << val;
     return ss.str();
   }
 
   template<>
-  STRING t2s<bool>(const bool & val);
+  STRING_EX t2s<bool>(const bool & val);
 
   // -------------------------------------------------------------
 
@@ -195,11 +195,11 @@ namespace qpp{
   std::string extract_base_name(std::string const & path);
 
   template<class REAL>
-  qpp::vector3<REAL> vec_from_string(STRING &_inst,
+  qpp::vector3<REAL> vec_from_string(STRING_EX &_inst,
                                       int idx = 0,
                                       int idy = 1,
                                       int idz = 2 ){
-    std::vector<STRING> vfs_l = split(_inst);
+    std::vector<STRING_EX> vfs_l = split(_inst);
     REAL vx, vy, vz = 0.0;
     s2t(vfs_l[idx], vx);
     s2t(vfs_l[idy], vy);
@@ -213,8 +213,8 @@ namespace qpp{
   //https://www.bfilipek.com/2018/07/string-view-perf-followup.html
   std::vector<std::string_view> split_sv (std::string_view strv, std::string_view delims = " ");
 
-  char *vec_str_to_char(const STRING & s);
-  const char *vec_str_to_char_ref(const STRING & s);
+  char *vec_str_to_char(const STRING_EX & s);
+  const char *vec_str_to_char_ref(const STRING_EX & s);
 
   template<typename charT>
   struct ci_equal {
@@ -234,6 +234,7 @@ namespace qpp{
       else return false/*-1*/; // not found
       return false;
   }
+
 }
 
 #endif

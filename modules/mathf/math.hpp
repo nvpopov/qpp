@@ -3,8 +3,9 @@
 
 #include <algorithm>
 #include <cmath>
+#include <consts.hpp>
 
-namespace qpp{
+namespace qpp {
 
   template <class REAL>
   int floor(REAL x)
@@ -21,12 +22,12 @@ namespace qpp{
 
   template <class REAL>
   REAL deg2rad(REAL deg){
-    return (deg * M_PI) / 180;
+    return (deg * REAL(pi)) / 180;
   }
 
   template <class REAL>
   REAL rad2deg(REAL rad){
-    return (rad * 180) / M_PI;
+    return (rad * 180) / REAL(pi);
   }
 
   template <class REAL>

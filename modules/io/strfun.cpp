@@ -3,8 +3,8 @@
 namespace qpp{
 
   template<>
-  bool s2t<bool>(const STRING & s, bool & val){
-    STRING s1 = tolower(s);
+  bool s2t<bool>(const STRING_EX & s, bool & val){
+    STRING_EX s1 = tolower(s);
     if ( (s1 == "y") || (s1 == "yes") || (s1 == "true") || (s1 == "1")){
         val = true;
         return true;
@@ -21,29 +21,29 @@ namespace qpp{
   // -----------------------------------------------------------
 
   template<>
-  STRING t2s(const bool & val){
+  STRING_EX t2s(const bool & val){
     return val ? "y" : "n";
   }
 
   // -----------------------------------------------------------
   // Make lowercase
-  STRING tolower(const STRING & s){
-    STRING ss = s;
+  STRING_EX tolower(const STRING_EX & s){
+    STRING_EX ss = s;
     std::transform(ss.begin(), ss.end(), ss.begin(), ::tolower);
     return ss;
   }
 
   // -----------------------------------------------------------
   // Case insensitive comparison of two strings
-  bool icompare(const STRING & s1, const STRING s2){
+  bool icompare(const STRING_EX & s1, const STRING_EX s2){
     return tolower(s1) == tolower(s2);
   }
 
   // -----------------------------------------------------------
 
-  void split(const STRING &s,
-             std::vector<STRING> &elems,
-             const STRING & delims  ){
+  void split(const STRING_EX &s,
+             std::vector<STRING_EX> &elems,
+             const STRING_EX & delims  ){
   // fixme - not efficient!
 
     SSTREAM ss(s);
@@ -55,7 +55,7 @@ namespace qpp{
     // std::cerr << "split\n";
 
     do {
-      STRING item = tok.get();
+      STRING_EX item = tok.get();
 
       //std::cerr << "split:\"" << item << "\"";
       if (item.size()==0)
@@ -67,31 +67,31 @@ namespace qpp{
 
   // -----------------------------------------------------------
 
-  std::vector<STRING> split(const STRING &s, const STRING & delims ){
-    std::vector<STRING> elems;
+  std::vector<STRING_EX> split(const STRING_EX &s, const STRING_EX & delims ){
+    std::vector<STRING_EX> elems;
     split(s, elems, delims);
     return elems;
   }
 
   // -----------------------------------------------------------
 
-  int strnf(const STRING & s){
-    std::basic_stringstream<CHAR,TRAITS> ss(s);
-    STRING a;
+  int strnf(const STRING_EX & s){
+    std::basic_stringstream<CHAR_EX,TRAITS> ss(s);
+    STRING_EX a;
     int nf = 0;
-    for (nf=0; ss >> a; a!="") nf++;
+    for (nf=0; ss >> a; a!="") nf++; // TODO: inequality comparison result unused
     return nf;
   }
 
   // ----------------------------------------------------------
 
-  bool is_identifier(const STRING &s){
+  bool is_identifier(const STRING_EX &s){
     if (s=="")
       return false;
 
-    STRING alp = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_";
-    STRING alpnum = alp + "0123456789";
-    STRING s0 = s.substr(0,1);
+    STRING_EX alp = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_";
+    STRING_EX alpnum = alp + "0123456789";
+    STRING_EX s0 = s.substr(0,1);
 
     //std::cout << "s= " << s << " s0= " << s0 << "\n";
 
@@ -104,15 +104,15 @@ namespace qpp{
     return true;
   }
 
-  std::string extract_base_name(const STRING &path){
+  std::string extract_base_name(const STRING_EX &path){
     return path.substr(path.find_last_of("/\\") + 1);
   }
 
-  const char *vec_str_to_char_ref(const STRING &s){
+  const char *vec_str_to_char_ref(const STRING_EX &s){
      return s.c_str();
   }
 
-  char *vec_str_to_char(const STRING & s){
+  char *vec_str_to_char(const STRING_EX & s){
      char *pc = new char[s.size()+1];
      std::strcpy(pc, s.c_str());
      return pc;

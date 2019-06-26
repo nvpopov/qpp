@@ -83,7 +83,7 @@ void py_write_gms_charges1 (int fd,
 // --------------------------------------------------------
 
 template<class FREAL>
-void py_read_gms_ecp (int fd, STRING & name, qpp::atomic_ecp<FREAL> & ecp) {
+void py_read_gms_ecp (int fd, STRING_EX & name, qpp::atomic_ecp<FREAL> & ecp) {
 
   boost::fdistream inp(fd);
   qpp::read_gms_ecp(inp,name,ecp);
@@ -91,7 +91,7 @@ void py_read_gms_ecp (int fd, STRING & name, qpp::atomic_ecp<FREAL> & ecp) {
 }
 
 template<class FREAL>
-void py_write_gms_ecp (int fd, STRING & name, qpp::atomic_ecp<FREAL> & ecp) {
+void py_write_gms_ecp (int fd, STRING_EX & name, qpp::atomic_ecp<FREAL> & ecp) {
 
   boost::fdostream out(fd);
   qpp::write_gms_ecp(out,name,ecp);

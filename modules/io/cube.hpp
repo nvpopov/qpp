@@ -18,6 +18,7 @@
 #include <ios>
 #include <algorithm>
 #include <numeric>
+#include <array>
 #include <consts.hpp>
 #include <data/ptable.hpp>
 
@@ -40,12 +41,13 @@ namespace qpp {
                                 const int iy,
                                 const int iz,
                                 scalar_volume_t<REAL> &volume) {
-    //return field[ix * ix_size * iy_size + iy_size * iy + iz];
+
     if (ix < 0 || iy < 0 || iz < 0 ||
         ix >= volume.m_steps[0] ||
         iy >= volume.m_steps[1] ||
         iz >= volume.m_steps[2]) return 0;
     else return volume.m_field[iz + volume.m_steps[2] * (iy +  volume.m_steps[1] * ix)];
+
   }
 
   template<class REAL>
@@ -53,7 +55,7 @@ namespace qpp {
                                    const int iy,
                                    const int iz,
                                    scalar_volume_t<REAL> &volume) {
-    //return field[ix * ix_size * iy_size + iy_size * iy + iz];
+
     if (ix < 0 || iy < 0 || iz < 0 ||
         ix >= volume.m_steps[0] ||
         iy >= volume.m_steps[1] ||
@@ -63,7 +65,7 @@ namespace qpp {
   }
 
   template<class REAL, class CELL>
-  void read_cube(std::basic_istream<CHAR,TRAITS> & inp,
+  void read_cube(std::basic_istream<CHAR_EX,TRAITS> & inp,
                  geometry<REAL, CELL> &geom,
                  scalar_volume_t<REAL> &volume) {
 
@@ -123,7 +125,8 @@ namespace qpp {
           s2t(lsp[4].data(), vz);
 
           std::string at_name = ptable::get_inst()->symbol_by_number(at_num);
-          geom.add(at_name, vector3<REAL>(vx * bohr_to_angs, vy * bohr_to_angs, vz * bohr_to_angs));
+          geom.add(at_name,
+                   vector3<REAL>(vx * bohr_to_angs, vy * bohr_to_angs, vz * bohr_to_angs));
         }
 
     //read odd line

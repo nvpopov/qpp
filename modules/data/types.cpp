@@ -61,19 +61,19 @@ namespace qpp{
 
   // ------------------------------------------------------------------------
 
-  STRING attributes<bool>::name        = "bool";
+  STRING_EX attributes<bool>::name        = "bool";
   basic_types attributes<bool>::type   = type_bool;
 
-  STRING attributes<int>::name         = "int";
+  STRING_EX attributes<int>::name         = "int";
   basic_types attributes<int>::type    = type_int;
 
-  STRING attributes<float>::name       = "float";
+  STRING_EX attributes<float>::name       = "float";
   basic_types attributes<float>::type  = type_float;
 
-  STRING attributes<double>::name      = "double";
+  STRING_EX attributes<double>::name      = "double";
   basic_types attributes<double>::type = type_double;
 
-  STRING attributes<STRING>::name      = "string";
-  basic_types attributes<STRING>::type = type_string;
+  STRING_EX attributes<STRING_EX>::name      = "string";
+  basic_types attributes<STRING_EX>::type = type_string;
 
 };

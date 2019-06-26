@@ -163,7 +163,7 @@ namespace qpp{
       }
 
       //!\ Rotrans oputput in qpp format
-      virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const{
+      virtual void write(std::basic_ostream<CHAR_EX,TRAITS> &os, int offset=0) const{
         for (int k=0; k<offset; k++) os << " ";
         if (BOUND)
           os << "bound_rotrans(";
@@ -200,7 +200,7 @@ namespace qpp{
 
   template<class REAL, bool BOUND>
   rotrans<REAL,BOUND>
-  rotrans<REAL,BOUND>::unity(vector3<REAL>(0),matrix3<REAL>::unity);
+  rotrans<REAL,BOUND>::unity(vector3<REAL>::Zero(), matrix3<REAL>::unity);
 
   //!\brief Inverse of rotrans R, P=R^(-1). Means R*P==1.
   //  template<class REAL, bool BOUND>

@@ -5,7 +5,7 @@
 #include <symm/group_theory.hpp>
 #include <iostream>
 #include <fmt/format.h>
- 
+
 using namespace qpp;
 
 void prnmtr(const matrix3<double> & M){
@@ -19,8 +19,8 @@ void prnmtr(const matrix3<double> & M){
 
 int main()
 {
-  matrix3<double> C4x = RotMtrx({1,0,0},pi/2);
-  matrix3<double> C4y = RotMtrx({0,1,0},pi/2);
+  matrix3<double> C4x = RotMtrx({1,0,0}, pi/2);
+  matrix3<double> C4y = RotMtrx({0,1,0}, pi/2);
   matrix3<double> I = matrix3<double>::Identity()*-1;
 
   array_group<matrix3<double> > OH;
@@ -37,7 +37,7 @@ int main()
   for (int d=0; d < Oh.DIM; d++)
     {
       std::cout << "generator " << d << "\n";
-      prnmtr(Oh.generators[d]);      
+      prnmtr(Oh.generators[d]);
     }
   std::cout << "orders: " << Oh.begin() << Oh.end() << "\n";
 

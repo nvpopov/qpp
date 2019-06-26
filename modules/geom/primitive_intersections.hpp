@@ -85,7 +85,7 @@ namespace qpp {
 
   template <typename REAL>
   bool point_aabb_test(const vector3<REAL> p, aabb_3d_t<REAL> &a){
-    for (uint i = 0; i < 3; i++)
+    for (uint8_t i = 0; i < 3; i++)
       if (!((p[i] >= a.min[i]) && (p[i] <= a.max[i])))
         return false;
     return true;

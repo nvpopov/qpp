@@ -120,12 +120,12 @@ namespace qpp {
       }
 
       //template<typename = std::enable_if<check_is_vector3<N , M>::value> >
-      STRING to_string_vec() const {
+      STRING_EX to_string_vec() const {
         return fmt::format("[{}, {}, {}]", (*this)[0], (*this)[1], (*this)[2]);
       }
 
       //template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
-      STRING to_string_matr() const {
+      STRING_EX to_string_matr() const {
         return fmt::format("[{}, {}, {}]",
                            (*this).row(0),
                            (*this).row(1),
@@ -452,8 +452,8 @@ namespace qpp {
         VALTYPE SQ = std::sqrt(Q);
         VALTYPE theta = std::acos(R/(Q*SQ));
         res = {-2*SQ*std::cos(theta/3)-b/3,
-               -2*SQ*std::cos((theta+2*pi)/3)-b/3,
-               -2*SQ*std::cos((theta+4*pi)/3)-b/3};
+               -2*SQ*std::cos((theta + 2 * VALTYPE(pi))/3)-b/3,
+               -2*SQ*std::cos((theta + 4 * VALTYPE(pi))/3)-b/3};
       }
 
     else {
@@ -504,7 +504,7 @@ namespace qpp {
               i2 = i;
           }
         for (int i=0; i<3; i++)
-          if (i!=i0 and i!=i2) i1 = i;
+          if (i!=i0 && i!=i2) i1 = i;
 
         eigvals = { A(i0,i0), A(i1,i1), A(i2,i2)};
         eigvecs = { {0,0,0}, {0,0,0}, {0,0,0} };
@@ -741,7 +741,7 @@ namespace qpp {
           i2 = i;
       }
     for (int i=0; i<3; i++)
-      if (i!=i0 and i!=i2) i1 = i;
+      if (i!=i0 && i!=i2) i1 = i;
 
     eigvals(0) = eigvals1(i0);
     eigvals(1) = eigvals1(i1);

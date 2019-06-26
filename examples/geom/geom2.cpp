@@ -1,5 +1,5 @@
 #include <iostream>
-#include <symm/gcell.hpp>
+#include <symm/gen_cell.hpp>
 #include <geom/lace3d.hpp>
 #include <geom/geom.hpp>
 #include <geom/builders.hpp>

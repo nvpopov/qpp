@@ -12,10 +12,15 @@ namespace qpp{
   class classical_potential{
   public:   
 
+
     /*
     template<class CELL>
     virtual REAL energy(const geometry<REAL,CELL> & g) const  =0;
     */
+
+    std::vector<REAL> rmin, rmax;
+    std::vector<STRING_EX> atyp;
+
     
     virtual REAL energy(const std::vector<vector3<REAL> > &) const  =0;
 

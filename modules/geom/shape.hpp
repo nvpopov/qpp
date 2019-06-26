@@ -34,17 +34,17 @@ namespace qpp{
   /// \brief 3D primitives prototype
   ///
   template <class VALTYPE>
-  class shape{
+  class shape {
 
     public:
 
-      STRING name;
+      STRING_EX name;
 
-      shape( const STRING &__name = "")
+      shape( const STRING_EX &__name = "")
       {  name = __name; }
 
       /*
-    shape(const STRING & __name = "", qpp_object * __owner = nullptr):
+    shape(const STRING_EX & __name = "", qpp_object * __owner = nullptr):
       qpp_object(__name,__owner)
       {}*/
 
@@ -89,7 +89,7 @@ namespace qpp{
       ///
       virtual v3d fmax(const periodic_cell<VALTYPE> &v) const =0;
 
-      virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const =0;
+      virtual void write(std::basic_ostream<CHAR_EX,TRAITS> &os, int offset=0) const =0;
 
       shape<VALTYPE> & operator|(shape<VALTYPE> & sh)
       {  return *new shape_union<VALTYPE>(*this,sh);}
@@ -163,7 +163,7 @@ namespace qpp{
       shape_box(){}
 
       shape_box(const v3d & a1, const v3d & a2, const v3d & a3, const v3d & r0,
-                const STRING & __name = "") : shape<VALTYPE>(__name){
+                const STRING_EX & __name = "") : shape<VALTYPE>(__name){
         crn = r0;
         a[0] = a1;
         a[1] = a2;
@@ -171,14 +171,14 @@ namespace qpp{
       }
 
       shape_box(const v3d & a1, const v3d & a2, const v3d & a3,
-                const STRING & __name = "") : shape<VALTYPE>(__name){
+                const STRING_EX & __name = "") : shape<VALTYPE>(__name){
         crn = v3d::Zero();
         a[0] = a1;
         a[1] = a2;
         a[2] = a3;
       }
 
-      shape_box(VALTYPE a1, VALTYPE a2, VALTYPE a3, const STRING & __name = "") :
+      shape_box(VALTYPE a1, VALTYPE a2, VALTYPE a3, const STRING_EX & __name = "") :
         shape<VALTYPE>(__name){
         crn = v3d::Zero();
         a[0] = v3d(a1,  0e0, 0e0);
@@ -194,7 +194,7 @@ namespace qpp{
         a[2] = s.a[2];
       }
 
-      virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0)
+      virtual void write(std::basic_ostream<CHAR_EX,TRAITS> &os, int offset=0)
       const{
         for (int i=0; i<offset; i++)
           os << " ";
@@ -349,13 +349,13 @@ namespace qpp{
 
       shape_sphere(){}
 
-      shape_sphere(VALTYPE _R, const STRING & __name = "")
+      shape_sphere(VALTYPE _R, const STRING_EX & __name = "")
         : shape<VALTYPE>(__name){
         R = _R;
         r0 = v3d::Zero();
       }
 
-      shape_sphere(VALTYPE _R, const v3d & _r0, const STRING & __name = "") :
+      shape_sphere(VALTYPE _R, const v3d & _r0, const STRING_EX & __name = "") :
         shape<VALTYPE>(__name){
         R = _R;
         r0 = _r0;
@@ -366,7 +366,7 @@ namespace qpp{
         r0 = s.r0;
       }
 
-      virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0)
+      virtual void write(std::basic_ostream<CHAR_EX,TRAITS> &os, int offset=0)
       const{
         for (int i=0; i<offset; i++)
           os << " ";
@@ -428,7 +428,7 @@ namespace qpp{
       /// \return
       ///
       virtual VALTYPE volume() const{
-        return 4*qpp::pi*R*R*R/3;
+        return (4 * VALTYPE(qpp::pi) * R * R * R) / 3;
       }
 
       virtual void scale(VALTYPE s){
@@ -447,8 +447,8 @@ namespace qpp{
       /*
     static void py_export(const char * pyname){
       bp::class_<shape_sphere<VALTYPE>, bp::bases<shape<VALTYPE> > >(pyname)
-        .def(bp::init<VALTYPE, bp::optional<const STRING &> >())
-        .def(bp::init<VALTYPE, const v3d&, bp::optional<const STRING &> >())
+        .def(bp::init<VALTYPE, bp::optional<const STRING_EX &> >())
+        .def(bp::init<VALTYPE, const v3d&, bp::optional<const STRING_EX &> >())
         ;
     }
 */
@@ -467,7 +467,7 @@ namespace qpp{
       using shape<VALTYPE>::name;
 
       shape_union(shape<VALTYPE> & __sh1, shape<VALTYPE> &__sh2,
-                  const STRING & __name = "") : shape<VALTYPE>(__name){
+                  const STRING_EX & __name = "") : shape<VALTYPE>(__name){
         sh1 = &__sh1; sh2 = &__sh2;
       }
 
@@ -519,7 +519,7 @@ namespace qpp{
         return f;
       }
 
-      virtual void write(std::basic_ostream<CHAR,TRAITS> &os,
+      virtual void write(std::basic_ostream<CHAR_EX,TRAITS> &os,
                          int offset=0) const {
         for (int i=0; i<offset; i++) os << " ";
         os << "union";
@@ -545,7 +545,7 @@ namespace qpp{
       using shape<VALTYPE>::name;
 
       shape_intersect(shape<VALTYPE> & __sh1, shape<VALTYPE> &__sh2,
-                      const STRING & __name = "") : shape<VALTYPE>(__name)
+                      const STRING_EX & __name = "") : shape<VALTYPE>(__name)
       { sh1 = &__sh1; sh2 = &__sh2; }
 
       shape_intersect(const shape_intersect<VALTYPE> & s) :
@@ -597,7 +597,7 @@ namespace qpp{
         return f;
       }
 
-      virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0)
+      virtual void write(std::basic_ostream<CHAR_EX,TRAITS> &os, int offset=0)
       const{
         for (int i=0; i<offset; i++) os << " ";
         os << "intersect";
@@ -623,7 +623,7 @@ namespace qpp{
       using shape<VALTYPE>::name;
 
       shape_subtract(shape<VALTYPE> & __sh1, shape<VALTYPE> &__sh2,
-                     const STRING & __name = ""):
+                     const STRING_EX & __name = ""):
         shape<VALTYPE>(__name)
       { sh1 = &__sh1; sh2 = &__sh2; }
 
@@ -660,7 +660,7 @@ namespace qpp{
       virtual v3d fmax(const periodic_cell<VALTYPE> &v) const
       { return sh1->fmax(v); }
 
-      virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0)
+      virtual void write(std::basic_ostream<CHAR_EX,TRAITS> &os, int offset=0)
       const{
         for (int i=0; i<offset; i++) os << " ";
         os << "subtract";
@@ -685,7 +685,7 @@ namespace qpp{
     public:
       using shape<VALTYPE>::name;
 
-      shape_invert(shape<VALTYPE> & __sh, const STRING & __name = ""):
+      shape_invert(shape<VALTYPE> & __sh, const STRING_EX & __name = ""):
         shape<VALTYPE>(__name)
       { sh = &__sh; }
 
@@ -721,7 +721,7 @@ namespace qpp{
       virtual v3d fmax(const periodic_cell<VALTYPE> &v) const
       { return  {infty, infty, infty}; }
 
-      virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const {
+      virtual void write(std::basic_ostream<CHAR_EX,TRAITS> &os, int offset=0) const {
         for (int i=0; i<offset; i++) os << " ";
         os << "invert";
         if (name != "")
@@ -744,7 +744,7 @@ namespace qpp{
       using shape<VALTYPE>::name;
 
       shape_xor(shape<VALTYPE> & __sh1, shape<VALTYPE> &__sh2,
-                const STRING & __name = ""):
+                const STRING_EX & __name = ""):
         shape<VALTYPE>(__name)
       { sh1 = &__sh1; sh2 = &__sh2; }
 
@@ -800,7 +800,7 @@ namespace qpp{
         return f;
       }
 
-      virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0)
+      virtual void write(std::basic_ostream<CHAR_EX,TRAITS> &os, int offset=0)
       const {
         for (int i=0; i<offset; i++) os << " ";
         os << "xor";
@@ -902,7 +902,7 @@ namespace qpp{
               v);
       }
 
-      void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const
+      void write(std::basic_ostream<CHAR_EX, TRAITS> &os, int offset=0) const
       {
         //this->get_override("write")(os,offset);
       }

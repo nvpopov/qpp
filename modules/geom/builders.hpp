@@ -23,10 +23,10 @@ namespace py = pybind11;
 #pragma pop_macro("slots")
 #endif
 
-namespace qpp{
+namespace qpp {
 
   //!\brief the flags regulating the details of building procedures
-  enum build_mode{
+  enum build_mode {
 
     //!\brief ignore the situation when two or more atoms are put too close ("crowded") - simply
     //! put them into crowd
@@ -53,10 +53,12 @@ namespace qpp{
 
     // !\brief use periodic pattern for legacy uc files
     legacy_fill   = 32
+
   };
 
   template<class REAL, class CELL>
-  void treat_crowd(geometry<REAL,CELL> & geom, int mode){
+  void treat_crowd(geometry<REAL,CELL> & geom, int mode) {
+
     if (mode & crowd_ignore)
       return;
 
@@ -64,12 +66,13 @@ namespace qpp{
     b.default_distance = geom.tol_geom;
     neighbours_table<REAL,CELL> n(geom,b);
     n.build();
-    int todel[geom.nat()];
-    for (int i=0; i<geom.nat(); i++)
+    std::vector<int> todel;
+    todel.resize(geom.nat());
+    for (int i = 0; i < geom.nat(); i++)
       todel[i] = -1;
-    for (int i=0; i<geom.nat(); i++)
-      if ( todel[i]==-1 && n.n(i)>0)
-        for (int j=0; j<n.n(i); j++)
+    for (int i = 0; i < geom.nat(); i++)
+      if ( todel[i] == -1 && n.n(i)>0)
+        for (int j = 0; j < n.n(i); j++)
           if (geom.atom(i)==geom.atom(j))
             todel[n(i,j)] = i;
 
@@ -78,16 +81,14 @@ namespace qpp{
 
     if (merge)
       for (int i=geom.nat()-1; i>=0; i--)
-        if (todel[i]>-1){
+        if (todel[i] > -1) {
             int j=todel[i];
-            for (int k=0; k<xgeom->nfields(); k++)
-              if (xgeom->additive(k)){
+            for (int k=0; k <xgeom->nfields(); k++)
+              if (xgeom->additive(k)) {
                   if (xgeom->field_type(k) == type_int)
-                    xgeom->template xfield<int>(k,j)  +=
-                        xgeom->template xfield<int>(k,i);
+                    xgeom->template xfield<int>(k,j) += xgeom->template xfield<int>(k,i);
                   else if (xgeom->field_type(k) == type_real)
-                    xgeom->template xfield<REAL>(k,j) +=
-                        xgeom->template xfield<REAL>(k,i);
+                    xgeom->template xfield<REAL>(k,j) += xgeom->template xfield<REAL>(k,i);
                 }
           }
 
@@ -102,12 +103,12 @@ namespace qpp{
 
   template<class REALDST, class CELLDST, class REALSRC, class CELLSRC>
   void copy_header(geometry<REALDST,CELLDST> & dst,
-                   const geometry<REALSRC,CELLSRC> & src){
+                   const geometry<REALSRC,CELLSRC> & src) {
 
     xgeometry<REALDST,CELLDST> *xdst = nullptr;
     xgeometry<REALSRC,CELLSRC> *xsrc = nullptr;
 
-    std::vector<STRING> fn;
+    std::vector<STRING_EX> fn;
     std::vector<basic_types> ft;
 
     if (src.is_xgeometry())
@@ -115,8 +116,7 @@ namespace qpp{
 
     if (dst.is_xgeometry()){
         xdst = (xgeometry<REALDST,CELLDST>*)(&dst);
-        if (src.is_xgeometry())
-          {
+        if (src.is_xgeometry()) {
             xsrc->get_format(fn,ft);
             xdst->set_format(fn,ft);
           }
@@ -148,7 +148,7 @@ namespace qpp{
     int ix,iy,iz;
     if (xsrc != nullptr)
       for (int i = 0; i < xsrc->nfields(); i++) {
-          STRING fn = xsrc -> field_name(i);
+          STRING_EX fn = xsrc -> field_name(i);
           if (fn=="x")
             ix = i;
           else if (fn=="y")
@@ -178,6 +178,7 @@ namespace qpp{
         }
 
     treat_crowd(dst,mode);
+
   }
 
   // -------------------------------------------------------------------------------
@@ -199,7 +200,7 @@ namespace qpp{
     int ix,iy,iz;
     if (xsrc != nullptr)
       for (int i=0; i<xsrc->nfields(); i++) {
-          STRING fn = xsrc -> field_name(i);
+          STRING_EX fn = xsrc -> field_name(i);
           if (fn=="x")
             ix = i;
           else if (fn=="y")
@@ -215,6 +216,7 @@ namespace qpp{
 
     std::vector<std::vector<datum> > v(src.nat());
     std::vector<vector3<REALSRC> > r1(src.nat());
+
     for (int at=0; at<src.nat(); at++){
         src.get_fields(at,v[at]);
         v[at][ix].set(&r1[at][0]);
@@ -255,22 +257,25 @@ namespace qpp{
 
         if (something)
           for (int at=0; at<src.nat(); at++)
-            if (!src.shadow(at) && (allcell || inside[at])){
+            if (!src.shadow(at) && (allcell || inside[at])) {
                 dst.add("",vector3<REALDST>::Zero());
                 dst.set_fields(dst.nat()-1,v[at]);
               }
       }
 
     treat_crowd(dst,mode);
+
   }
 
   template<class REALDST, class CELLDST, class REALSRC, class CELLSRC>
   void fill( geometry<REALDST,CELLDST> & dst,
              const geometry<REALSRC,CELLSRC> & src,
              const shape<REALSRC> & shp,
-             int mode = crowd_ignore | fill_atoms){
+             int mode = crowd_ignore | fill_atoms) {
+
     index begin, end;
-    if (typeid(CELLSRC)==typeid(periodic_cell<REALSRC>)){
+
+    if (typeid(CELLSRC)==typeid(periodic_cell<REALSRC>)) {
 
         std::cout << "fillf:: alive1\n";
 
@@ -283,56 +288,55 @@ namespace qpp{
 
         // Minimal and maximal fractional coordinates of atoms
         vector3<REALSRC> fmin,fmax;
-        for (int at=0; at<src.nat(); at++){
+        for (int at=0; at<src.nat(); at++) {
             vector3<REALSRC> f = src.coord(at);
             if (!src.frac) f = cell->cart2frac(f);
-            if (at==0)
-              fmin = fmax = f;
+            if (at==0) fmin = fmax = f;
             else
-              for (int i=0; i<3; i++){
-                  if (fmin[i]>f[i])
-                    fmin[i] = f[i];
-                  if (fmax[i]<f[i])
-                    fmax[i] = f[i];
+              for (int i=0; i<3; i++) {
+                  if (fmin[i]>f[i]) fmin[i] = f[i];
+                  if (fmax[i]<f[i]) fmax[i] = f[i];
                 }
           }
 
         std::cout << "fmin= " << fmin << " fmax= " << fmax << "\n";
 
-        begin = {floor(Smin[0]-fmax[0]),
-                 floor(Smin[1]-fmax[1]),
-                 floor(Smin[2]-fmax[2])};
-        end   = {floor(Smax[0]-fmin[0]) + 1,
-                 floor(Smax[1]-fmin[1]) + 1,
-                 floor(Smax[2]-fmin[2]) + 1};
+        begin = {int(floor(Smin[0]-fmax[0])),
+                 int(floor(Smin[1]-fmax[1])),
+                 int(floor(Smin[2]-fmax[2]))};
+        end   = {int(floor(Smax[0]-fmin[0])) + 1,
+                 int(floor(Smax[1]-fmin[1])) + 1,
+                 int(floor(Smax[2]-fmin[2])) + 1};
 
         std::cout << "begin= " << begin << " end= " << end << "\n";
       }
-    else{
+    else {
         begin = src.cell.begin();
         end   = src.cell.end();
       }
+
     fill(dst, src, shp, src.cell, begin, end, mode );
+
   }
 
   // -----------------------------------------------------------------------------------
 
   template<class REAL, class CELL>
   std::set<int> select( const geometry<REAL,CELL> & geom,
-                        const shape<REAL> & shp){
+                        const shape<REAL> & shp) {
     return std::set<int>();
   }
 
   template<class REAL, class CELL, class REAL1, class CELL1>
   std::set<int> select( const geometry<REAL,CELL> & geom,
                         const geometry<REAL1,CELL1> & frag,
-                        const bonding_table<REAL> & b){
+                        const bonding_table<REAL> & b) {
     return std::set<int>();
   }
 
   template<class REAL, class CELL, class REAL1, class CELL1>
   std::set<int> select( const geometry<REAL,CELL> & geom,
-                        const geometry<REAL1,CELL1> & frag, REAL R){
+                        const geometry<REAL1,CELL1> & frag, REAL R) {
     bonding_table<REAL> b;
     b.default_distance = R;
     return select(geom,frag,b);
@@ -340,13 +344,13 @@ namespace qpp{
 
   template<class REAL, class CELL>
   void selection_grow( std::set<int> & selection,
-	     const neighbours_table<REAL,CELL> & ngbr){
+                       const neighbours_table<REAL,CELL> & ngbr) {
 
   }
 
   template<class REAL, class CELL>
   void selection_shrink( std::set<int> & selection,
-               const neighbours_table<REAL,CELL> & ngbr){
+                         const neighbours_table<REAL,CELL> & ngbr) {
 
   }
 
@@ -375,98 +379,96 @@ namespace qpp{
   */
 
   // -----------------------------------------------------------------------------
-  
+
   template<class REAL, class UCELL, class NUCELL>
   void unique(std::vector<int> & n_images,
-	      geometry<REAL,UCELL> & ugeom,
-	      const geometry<REAL,NUCELL> & nugeom,
-	      const UCELL & group,
-	      const index & begin,
-	      const index & end,
-	      const std::function<REAL(const geometry<REAL,NUCELL> &, int)> & key,
-	      //[](const geometry<REAL,NUCELL> &g, int i) -> REAL
-	      //{ return std::sqrt(g.y[i]*g.y[i]+g.z[i]*g.z[i]); },
-	      REAL eps)
-  {
+              geometry<REAL,UCELL> & ugeom,
+              const geometry<REAL,NUCELL> & nugeom,
+              const UCELL & group,
+              const index & begin,
+              const index & end,
+              const std::function<REAL(const geometry<REAL,NUCELL> &, int)> & key,
+              //[](const geometry<REAL,NUCELL> &g, int i) -> REAL
+              //{ return std::sqrt(g.y[i]*g.y[i]+g.z[i]*g.z[i]); },
+              REAL eps) {
+
     n_images.clear();
     ugeom.clear();
+
     std::vector<Bool> marked(nugeom.nat(), false);
     for (int i=0; i<nugeom.nat(); i++)
-      if (not marked[i]){
-	std::set<int> images = {i};
-	marked[i] = true;
+      if (!marked[i]){
+          std::set<int> images = {i};
+          marked[i] = true;
 
-	for (iterator I(begin,end); not I.end(); I++){
-	  vector3<REAL> r = group.transform(nugeom.pos(i),I);
-	  for (int j = 0; j<nugeom.nat(); j++)
-	    if (not marked[j])
-	      if ( nugeom.atom(i)==nugeom.atom(j) and (r - nugeom.pos(j)).norm() < eps ){
-		images.insert(j);
-		marked[j] = true;
-	      }
-	}
-	int iuniq = i;
-	for (int j : images)
-	  if ( key(nugeom,j) < key(nugeom, iuniq) )
-	    iuniq = j;
-	ugeom.add(nugeom.atom(iuniq), nugeom.pos(iuniq));
-	n_images.push_back(images.size());
-      }
+          for (iterator I(begin,end); not I.end(); I++) {
+              vector3<REAL> r = group.transform(nugeom.pos(i),I);
+              for (int j = 0; j<nugeom.nat(); j++)
+                if (!marked[j])
+                  if ( nugeom.atom(i)==nugeom.atom(j) && (r - nugeom.pos(j)).norm() < eps ) {
+                      images.insert(j);
+                      marked[j] = true;
+                    }
+            }
+          int iuniq = i;
+          for (int j : images)
+            if ( key(nugeom,j) < key(nugeom, iuniq) )
+              iuniq = j;
+          ugeom.add(nugeom.atom(iuniq), nugeom.pos(iuniq));
+          n_images.push_back(images.size());
+        }
 
     std::cout << "n_images: ";
     for (int j: n_images)
       std::cout << " " << j;
     std::cout << "\n";
+
   }
 
   // -----------------------------------------------------------------------------
 
   template<class REAL, class UCELL, class NUCELL>
   void unique(std::vector<int> & n_images,
-	      geometry<REAL,UCELL> & ugeom,
-	      const geometry<REAL,NUCELL> & nugeom,
-	      const UCELL & group,
-	      const std::function<REAL(const geometry<REAL,NUCELL> &, int)> & key =
-	      [](const geometry<REAL,NUCELL> &g, int i) -> REAL
-		{return std::sqrt(std::pow(g.pos(i)(1),2) + std::pow(g.pos(i)(2),2)); },
-	      REAL eps = geometry<REAL,NUCELL>::tol_geom_default)
-  {
+              geometry<REAL,UCELL> & ugeom,
+              const geometry<REAL,NUCELL> & nugeom,
+              const UCELL & group,
+              const std::function<REAL(const geometry<REAL,NUCELL> &, int)> & key =
+              [](const geometry<REAL,NUCELL> &g, int i) -> REAL
+              {return std::sqrt(std::pow(g.pos(i)(1),2) + std::pow(g.pos(i)(2),2)); },
+              REAL eps = geometry<REAL,NUCELL>::tol_geom_default) {
     unique(n_images, ugeom, nugeom, group, group.begin(), group.end(), key, eps);
   }
 
   template<class REAL, class UCELL, class NUCELL>
   void unique(std::vector<int> & n_images,
-	      geometry<REAL,UCELL> & ugeom,
-	      const geometry<REAL,NUCELL> & nugeom,
-	      const std::function<REAL(const geometry<REAL,NUCELL> &, int)> & key =
-	      [](const geometry<REAL,NUCELL> &g, int i) -> REAL
-		{return std::sqrt(std::pow(g.pos(i)(1),2) + std::pow(g.pos(i)(2),2)); },
-	      REAL eps = geometry<REAL,NUCELL>::tol_geom_default)
-  {
+              geometry<REAL,UCELL> & ugeom,
+              const geometry<REAL,NUCELL> & nugeom,
+              const std::function<REAL(const geometry<REAL,NUCELL> &, int)> & key =
+              [](const geometry<REAL,NUCELL> &g, int i) -> REAL
+              {return std::sqrt(std::pow(g.pos(i)(1),2) + std::pow(g.pos(i)(2),2)); },
+              REAL eps = geometry<REAL,NUCELL>::tol_geom_default) {
     unique(n_images, ugeom, nugeom, ugeom.cell, ugeom.cell.begin(), ugeom.cell.end(), key, eps );
   }
 
   template<class REAL, class UCELL, class NUCELL>
   void unique(geometry<REAL,UCELL> & ugeom,
-	      const geometry<REAL,NUCELL> & nugeom,
-	      const UCELL & group,
-	      const std::function<REAL(const geometry<REAL,NUCELL> &, int)> & key =
-	      [](const geometry<REAL,NUCELL> &g, int i) -> REAL
-		{ return std::sqrt(g.y[i]*g.y[i]+g.z[i]*g.z[i]); },
-	      REAL eps = geometry<REAL,NUCELL>::tol_geom)
-  {
+              const geometry<REAL,NUCELL> & nugeom,
+              const UCELL & group,
+              const std::function<REAL(const geometry<REAL,NUCELL> &, int)> & key =
+              [](const geometry<REAL,NUCELL> &g, int i) -> REAL
+              { return std::sqrt(g.y[i]*g.y[i]+g.z[i]*g.z[i]); },
+              REAL eps = geometry<REAL,NUCELL>::tol_geom) {
     std::vector<int> n_images;
     unique(n_images, ugeom, nugeom, group, group.begin(), group.end(), key, eps );
   }
 
   template<class REAL, class UCELL, class NUCELL>
   void unique(geometry<REAL,UCELL> & ugeom,
-	      const geometry<REAL,NUCELL> & nugeom,
-	      const std::function<REAL(const geometry<REAL,NUCELL> &, int)> & key =
-	      [](const geometry<REAL,NUCELL> &g, int i) -> REAL
-		{return std::sqrt(std::pow(g.pos(i)(1),2) + std::pow(g.pos(i)(2),2)); },
-	      REAL eps = geometry<REAL,NUCELL>::tol_geom_default)
-  {
+              const geometry<REAL,NUCELL> & nugeom,
+              const std::function<REAL(const geometry<REAL,NUCELL> &, int)> & key =
+              [](const geometry<REAL,NUCELL> &g, int i) -> REAL
+              {return std::sqrt(std::pow(g.pos(i)(1),2) + std::pow(g.pos(i)(2),2)); },
+              REAL eps = geometry<REAL,NUCELL>::tol_geom_default) {
     std::vector<int> n_images;
     unique(n_images, ugeom, nugeom, ugeom.cell, ugeom.cell.begin(), ugeom.cell.end(), key, eps );
   }
@@ -514,43 +516,40 @@ namespace qpp{
 
   template<class REAL, class UCELL, class NUCELL>
   void py_unique1(py::list & images,
-		  geometry<REAL,UCELL> & ugeom,
-		  const geometry<REAL,NUCELL> & nugeom,
-		  const UCELL & group,
-		  const index & begin,
-		  const index & end,
-		  const std::function<REAL(const geometry<REAL,NUCELL> &, int)> & key,
-		  REAL eps)
-  {
+                  geometry<REAL,UCELL> & ugeom,
+                  const geometry<REAL,NUCELL> & nugeom,
+                  const UCELL & group,
+                  const index & begin,
+                  const index & end,
+                  const std::function<REAL(const geometry<REAL,NUCELL> &, int)> & key,
+                  REAL eps) {
     std::vector<int>  n_images;
     unique(n_images, ugeom, nugeom, group, begin, end, key, eps);
     images.attr("clear")();
     for (const auto & n : n_images)
       images.append(n);
   }
-  
+
   template<class REAL, class UCELL, class NUCELL>
   void py_unique2(py::list & images,
-		  geometry<REAL,UCELL> & ugeom,
-		  const geometry<REAL,NUCELL> & nugeom,
-		  const UCELL & group,
-		  const std::function<REAL(const geometry<REAL,NUCELL> &, int)> & key,
-		  REAL eps)
-  {
+                  geometry<REAL,UCELL> & ugeom,
+                  const geometry<REAL,NUCELL> & nugeom,
+                  const UCELL & group,
+                  const std::function<REAL(const geometry<REAL,NUCELL> &, int)> & key,
+                  REAL eps) {
     std::vector<int>  n_images;
     unique(n_images, ugeom, nugeom, group, key, eps);
     images.attr("clear")();
     for (const auto & n : n_images)
       images.append(n);
   }
-   
+
   template<class REAL, class UCELL, class NUCELL>
   void py_unique3(py::list & images,
-		  geometry<REAL,UCELL> & ugeom,
-		  const geometry<REAL,NUCELL> & nugeom,
-		  const std::function<REAL(const geometry<REAL,NUCELL> &, int)> & key, 
-		  REAL eps)
-  {
+                  geometry<REAL,UCELL> & ugeom,
+                  const geometry<REAL,NUCELL> & nugeom,
+                  const std::function<REAL(const geometry<REAL,NUCELL> &, int)> & key,
+                  REAL eps) {
     std::vector<int>  n_images;
     unique(n_images, ugeom, nugeom, key, eps);
     images.attr("clear")();
@@ -560,40 +559,37 @@ namespace qpp{
 
   template<class REAL, class UCELL, class NUCELL>
   void py_unique4(geometry<REAL,UCELL> & ugeom,
-		  const geometry<REAL,NUCELL> & nugeom,
-		  const UCELL & group,
-		  const std::function<REAL(const geometry<REAL,NUCELL> &, int)> & key,
-		  REAL eps)
+                  const geometry<REAL,NUCELL> & nugeom,
+                  const UCELL & group,
+                  const std::function<REAL(const geometry<REAL,NUCELL> &, int)> & key,
+                  REAL eps)
   { unique(ugeom, nugeom, group, key, eps); }
 
   template<class REAL, class UCELL, class NUCELL>
   void py_unique5(geometry<REAL,UCELL> & ugeom,
-		  const geometry<REAL,NUCELL> & nugeom,
-		  const std::function<REAL(const geometry<REAL,NUCELL> &, int)> & key,
-		  REAL eps)
+                  const geometry<REAL,NUCELL> & nugeom,
+                  const std::function<REAL(const geometry<REAL,NUCELL> &, int)> & key,
+                  REAL eps)
   { unique(ugeom, nugeom, key, eps); }
-  
+
   /*
   template<class REALDST, class CELLDST, class REALSRC, class CELLSRC>
   void py_replicate3(geometry<REALDST,CELLDST> & dst,
                      const geometry<REALSRC,CELLSRC> & src,
                      const CELLSRC & cell,
-                     int mode = crowd_ignore)
-  {
+                     int mode = crowd_ignore) {
     replicate(dst, src, cell, cell.begin(), cell.end(), mode);
   }
 
   template<class REALDST, class CELLDST, class REALSRC, class CELLSRC>
   void py_replicate3(geometry<REALDST,CELLDST> & dst,  const geometry<REALSRC,CELLSRC> & src,
-                     int mode = crowd_ignore)
-  {
+                     int mode = crowd_ignore) {
     replicate(dst, src, src.cell, mode);
   }
 
   template<class REALDST, class CELLDST, class REALSRC, class CELLSRC>
   void py_replicate4(geometry<REALDST,CELLDST> & dst,  const geometry<REALSRC,CELLSRC> & src,
-                     const index & begin, const index& end, int mode = crowd_ignore)
-  {
+                     const index & begin, const index& end, int mode = crowd_ignore) {
     replicate(dst, src, src.cell, begin, end, mode);
   }
   */

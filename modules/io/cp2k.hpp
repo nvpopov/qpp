@@ -8,7 +8,9 @@
 #include <geom/geom.hpp>
 #include <geom/xgeom.hpp>
 #include <geom/ngbr.hpp>
+
 #include <vector>
+#include <array>
 #include <cmath>
 #include <sstream>
 #include <string>
@@ -20,7 +22,7 @@
 namespace qpp {
 
   template<class REAL, class CELL = periodic_cell<REAL> >
-  void write_cp2k_coord_section (std::basic_ostream<CHAR,TRAITS> &out, geometry<REAL, CELL> &geom) {
+  void write_cp2k_coord_section (std::basic_ostream<CHAR_EX,TRAITS> &out, geometry<REAL, CELL> &geom) {
 
 //  Reference:
 //    &CELL

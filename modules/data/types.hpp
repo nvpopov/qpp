@@ -11,34 +11,35 @@
 
 #include <stdexcept>
 
-namespace qpp{
+namespace qpp {
+
   const double symm_tol_equiv = 1e-8;
 
 #ifdef WCHAR
 
-#define CHAR wchar
-#define STRING std::wstring
+#define CHAR_EX wchar
+#define STRING_EX std::wstring
 
 #else
 
-#define CHAR char
-#define STRING std::string
+#define CHAR_EX char
+#define STRING_EX std::string
 
 #endif
 
 #undef assert
 
-  typedef std::char_traits<CHAR> TRAITS;
+  typedef std::char_traits<CHAR_EX> TRAITS;
 
-  typedef std::basic_ostream<CHAR,TRAITS> OSTREAM;
+  typedef std::basic_ostream<CHAR_EX,TRAITS> OSTREAM;
 
-  typedef std::basic_istream<CHAR,TRAITS> ISTREAM;
+  typedef std::basic_istream<CHAR_EX,TRAITS> ISTREAM;
 
-  typedef std::basic_ifstream<CHAR,TRAITS> IFSTREAM;
+  typedef std::basic_ifstream<CHAR_EX,TRAITS> IFSTREAM;
 
-  typedef std::basic_ofstream<CHAR,TRAITS> OFSTREAM;
+  typedef std::basic_ofstream<CHAR_EX,TRAITS> OFSTREAM;
 
-  typedef std::basic_stringstream<CHAR,TRAITS> SSTREAM;
+  typedef std::basic_stringstream<CHAR_EX,TRAITS> SSTREAM;
 
   // -----------------------------------------------------
 
@@ -46,7 +47,7 @@ namespace qpp{
   struct numeric_type;
 
   template<>
-  struct numeric_type<float>{
+  struct numeric_type<float> {
       typedef float real;
       typedef std::complex<float> complex;
       typedef float norm;
@@ -56,7 +57,7 @@ namespace qpp{
   };
 
   template<>
-  struct numeric_type<double>{
+  struct numeric_type<double> {
       typedef double real;
       typedef std::complex<double> complex;
       typedef double norm;
@@ -66,7 +67,7 @@ namespace qpp{
   };
 
   template<>
-  struct numeric_type<long double>{
+  struct numeric_type<long double> {
       typedef long double real;
       typedef std::complex<long double> complex;
       typedef long double norm;
@@ -76,7 +77,7 @@ namespace qpp{
   };
 
   template<>
-  struct numeric_type<std::complex<float> >{
+  struct numeric_type<std::complex<float> > {
       typedef float real;
       typedef std::complex<float> complex;
       typedef float norm;
@@ -86,7 +87,7 @@ namespace qpp{
   };
 
   template<>
-  struct numeric_type<std::complex<double> >{
+  struct numeric_type<std::complex<double> > {
       typedef double real;
       typedef std::complex<double> complex;
       typedef double norm;
@@ -150,31 +151,31 @@ namespace qpp{
 
   template <>
   struct attributes<bool>{
-      static STRING name;
+      static STRING_EX name;
       static basic_types type;
   };
 
   template <>
   struct attributes<int>{
-      static STRING name;
+      static STRING_EX name;
       static basic_types type;
   };
 
   template <>
   struct attributes<float>{
-      static STRING name;
+      static STRING_EX name;
       static basic_types type;
   };
 
   template <>
   struct attributes<double>{
-      static STRING name;
+      static STRING_EX name;
       static basic_types type;
   };
 
   template <>
-  struct attributes<STRING>{
-      static STRING name;
+  struct attributes<STRING_EX>{
+      static STRING_EX name;
       static basic_types type;
   };
 

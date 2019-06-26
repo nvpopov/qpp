@@ -8,16 +8,18 @@ set(M_SRC
 
 add_library(qpp ${M_SRC})
 
-set(QPP_DEPS fmtlib)
+set(QPP_DEPS)
 if(NOT USE_SYSTEM_EIGEN3)
     list(APPEND QPP_DEPS eigen3)
 endif()
 
 add_dependencies(qpp ${QPP_DEPS})
 
-set(QPP_LINK_LIB m)
+if(NOT MSVC)
+  set(QPP_LINK_LIB m)
+endif()
 
-target_link_libraries(qpp ${QPP_LINK_LIB} )
+target_link_libraries(qpp ${QPP_LINK_LIB})
 
 #set(IOPY io/io.py.cpp io/geomio.py.cpp io/gmsio.py.cpp)
 

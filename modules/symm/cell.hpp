@@ -61,7 +61,7 @@ namespace qpp{
       int DIM;
 
       vector3<REAL> *v;
-      STRING name;
+      STRING_EX name;
 
       //! \brief Create periodic cell of dimension dim with zero
       //!  translation vectors
@@ -97,9 +97,9 @@ namespace qpp{
       periodic_cell (REAL a, REAL b, REAL c, REAL alpha, REAL beta, REAL gamma) {
         DIM = 3;
         v = new vector3<REAL>[DIM];
-        alpha *= pi/180;
-        beta  *= pi/180;
-        gamma *= pi/180;
+        alpha *= REAL(pi) / 180;
+        beta  *= REAL(pi) / 180;
+        gamma *= REAL(pi) / 180;
         v[0] = vector3<REAL>(a,REAL(0),REAL(0));
         v[1] = vector3<REAL>(b*std::cos(gamma), b*std::sin(gamma), REAL(0));
         REAL nx = std::cos(beta);
@@ -306,7 +306,7 @@ namespace qpp{
         return true;
       }
 
-      virtual void write(std::basic_ostream<CHAR,TRAITS> &os,
+      virtual void write(std::basic_ostream<CHAR_EX,TRAITS> &os,
                          int offset=0) const{
         if (DIM == 0) return;
         for (int k=0; k<offset; k++) os << " ";

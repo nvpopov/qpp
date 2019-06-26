@@ -10,11 +10,10 @@
 #include <symm/group_theory.hpp>
 #include <symm/point_groups.hpp>
 #include <symm/permut.hpp>
-//#include <symm/spgw.hpp>
-#include <data/compiler_fallback.hpp>
 #include <Eigen/Dense>
 #include <algorithm>
 #include <iomanip>
+#include <optional>
 
 #if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
 #pragma push_macro("slots")
@@ -26,9 +25,7 @@ namespace py = pybind11;
 #pragma pop_macro("slots")
 #endif
 
-namespace qpp{
-
-
+namespace qpp {
 
   template<class REAL, class CELL>
   bool has_symmetry (geometry<REAL,CELL> & geom, CELL & symm,
@@ -112,6 +109,7 @@ namespace qpp{
       }
 
       bool within (const vector3<REAL> & x) const {
+
         REAL tol_equiv = vector3<REAL>::tol_equiv;
         if (dim == -1) return false;
         else if (dim == 0)
@@ -127,17 +125,23 @@ namespace qpp{
           }
         else if (dim == 3)
           return true;
+        return false;
+
       }
 
       bool operator== (const subspace_of3d<REAL> & L ) const {
+
         if (L.dim != dim)
           return false;
         if (dim == 0)
           return (point-L.point).norm() < vector3<REAL>::tol_equiv;
-        else if ( dim == 1 or dim == 2)
-          return ((axis-L.axis).norm() < vector3<REAL>::tol_equiv ) and within(L.point);
-        else if (dim == -1 or dim == 3)
+        else if ( dim == 1 || dim == 2)
+          return ((axis-L.axis).norm() < vector3<REAL>::tol_equiv ) && within(L.point);
+        else if (dim == -1 || dim == 3)
           return true;
+
+        return false;
+
       }
 
       bool operator!= (const subspace_of3d<REAL> & L ) const {
@@ -173,8 +177,9 @@ namespace qpp{
               return subspace_of3d<REAL>(-1,vector3<REAL>(0,0,0));
           }
 
-        if ( d1 == 1 and d2 == 1) {
-            if ((n1-n2).norm() < vector3<REAL>::tol_equiv or (n1+n2).norm() <  vector3<REAL>::tol_equiv) {
+        if ( d1 == 1 && d2 == 1) {
+            if ((n1-n2).norm() < vector3<REAL>::tol_equiv ||
+                (n1+n2).norm() <  vector3<REAL>::tol_equiv) {
                 if (subspace_of3d<REAL>(d1,p1,n1).within(p2))
                   return *this;
                 else
@@ -189,7 +194,7 @@ namespace qpp{
               return subspace_of3d<REAL>(-1,vector3<REAL>(0,0,0));
           }
 
-        if (d1 == 2 and d2 == 1) {
+        if (d1 == 2 && d2 == 1) {
             if (std::abs(n1.dot(n2)) < vector3<REAL>::tol_equiv){
                 if (std::abs(n1.dot(p2-p1)) < vector3<REAL>::tol_equiv)
                   return subspace_of3d<REAL>(1,p2,n2);
@@ -200,8 +205,9 @@ namespace qpp{
               return  subspace_of3d(0,p2+n2*n1.dot(p1-p2)/n1.dot(n2));
           }
 
-        if (d1 == 2 and d2 == 2) {
-            if ((n1-n2).norm() < vector3<REAL>::tol_equiv or (n1+n2).norm() < vector3<REAL>::tol_equiv){
+        if (d1 == 2 && d2 == 2) {
+            if ((n1-n2).norm() < vector3<REAL>::tol_equiv ||
+                (n1+n2).norm() < vector3<REAL>::tol_equiv){
                 if (std::abs(n1.dot(p1-p2)) <  vector3<REAL>::tol_equiv)
                   return *this;
                 else
@@ -241,16 +247,14 @@ namespace qpp{
   // -------------------------------------------------------------
 
   template<class CMPLX>
-  vector3<typename numeric_type<CMPLX>::real> vecreal(
-      const vector3<CMPLX> & v){
-    return vector3<typename numeric_type<CMPLX>::real>(v(0).real(),
-                                                       v(1).real(), v(2).real() );
+  vector3<typename numeric_type<CMPLX>::real> vecreal(const vector3<CMPLX> & v){
+    return vector3<typename numeric_type<CMPLX>::real>(v(0).real(), v(1).real(), v(2).real() );
   }
 
   // -------------------------------------------------------------
 
   template<class REAL>
-  subspace_of3d<REAL> invariant_subspace(const rotrans<REAL,false> & R){
+  subspace_of3d<REAL> invariant_subspace(const rotrans<REAL,false> & R) {
     vector3<REAL> axis, point;
     REAL phi;
     bool inv;
@@ -261,10 +265,10 @@ namespace qpp{
 
     analyze_transform(axis, phi, inv, R.R);
 
-    if (!inv){
-        if (phi < epscos){
+    if (!inv) {
+        if (phi < epscos) {
             // Unity matrix
-            if ( R.T.norm() < eps ){
+            if ( R.T.norm() < eps ) {
                 dim = 3;
                 point = {0,0,0};
                 //std::cout << "  ---- invariant_subspace ----- unity matrix - d3\n";
@@ -290,13 +294,13 @@ namespace qpp{
           }
       }
     else {
-        if ( phi < epscos ){
+        if ( phi < epscos ) {
             // Pure inversion case
             dim = 0;
             point = 0.5*R.T;
             //std::cout << "  ---- invariant_subspace ----- inversion\n";
           }
-        else if ( std::abs(phi - pi) < epscos){
+        else if ( std::abs(phi - REAL(pi)) < epscos) {
             if ( (R.T - axis*axis.dot(R.T)).norm() < eps ) {
                 // Mirror plane case
                 dim = 2;
@@ -321,6 +325,7 @@ namespace qpp{
       }
 
     return subspace_of3d(dim, point, axis);
+
   }
 
   // -------------------------------------------------------------

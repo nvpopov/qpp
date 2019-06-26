@@ -58,17 +58,17 @@ namespace qpp{
       }
 
       void added( before_after st,
-                  const STRING & a,
+                  const STRING_EX & a,
                   const vector3<REAL> & r) override { cmp_pos(r); }
 
       void inserted(int at,
                     before_after st,
-                    const STRING & a,
+                    const STRING_EX & a,
                     const vector3<REAL> & r) override { cmp_pos(r); }
 
       void changed(int at,
                    before_after st,
-                   const STRING & a,
+                   const STRING_EX & a,
                    const vector3<REAL> & r) override { cmp_pos(r); }
 
       void erased(int at,

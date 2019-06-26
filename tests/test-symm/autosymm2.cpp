@@ -3,6 +3,7 @@
 #include <symm/gen_cell.hpp>
 #include <symm/group_theory.hpp>
 #include <iostream>
+#include <optional>
 
 using namespace qpp;
 

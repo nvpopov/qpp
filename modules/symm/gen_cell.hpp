@@ -159,7 +159,7 @@ namespace qpp{
       return r;
     }
 
-    virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const{
+    virtual void write(std::basic_ostream<CHAR_EX,TRAITS> &os, int offset=0) const{
 
       // fixme - implement this
     }

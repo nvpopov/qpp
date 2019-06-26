@@ -36,95 +36,95 @@ namespace qpp{
 
       static array_group<matrix3<REAL> > Cn(int n) {
         array_group<matrix3<REAL> > G("C"+std::to_string(n));
-        G.generate(RotMtrx<REAL>({0,0,1},2*pi/n));
+        G.generate(RotMtrx<REAL>({0,0,1},2*REAL(pi)/n));
         return G;
       }
 
       static array_group<matrix3<REAL> > Cnv(int n) {
         array_group<matrix3<REAL> > G("C"+std::to_string(n)+"v");
-        G.generate(RotMtrx<REAL>({0,0,1},2*pi/n));
+        G.generate(RotMtrx<REAL>({0,0,1},2*REAL(pi)/n));
         G.generate(Sigma<REAL>({1,0,0}));
         return G;
       }
 
       static array_group<matrix3<REAL> > Cnh(int n) {
         array_group<matrix3<REAL> > G("C"+std::to_string(n)+"h");
-        G.generate(RotMtrx<REAL>({0,0,1},2*pi/n));
+        G.generate(RotMtrx<REAL>({0,0,1},2*REAL(pi)/n));
         G.generate(Sigma<REAL>({0,0,1}));
         return G;
       }
 
       static array_group<matrix3<REAL> > S2n(int n) {
         array_group<matrix3<REAL> > G("S"+std::to_string(2*n));
-        G.generate(RotMtrx<REAL>({0,0,1},pi/n)*Sigma<REAL>({0,0,1}));
+        G.generate(RotMtrx<REAL>({0,0,1},REAL(pi)/n)*Sigma<REAL>({0,0,1}));
         return G;
       }
 
       static array_group<matrix3<REAL> > Dn(int n) {
         array_group<matrix3<REAL> > G("D"+std::to_string(n));
-        G.generate(RotMtrx<REAL>({0,0,1},2*pi/n));
-        G.generate(RotMtrx<REAL>({1,0,0},pi));
+        G.generate(RotMtrx<REAL>({0,0,1},2*REAL(pi)/n));
+        G.generate(RotMtrx<REAL>({1,0,0},REAL(pi)));
         return G;
       }
 
       static array_group<matrix3<REAL> > Dnh(int n) {
         array_group<matrix3<REAL> > G("D"+std::to_string(n)+"h");
-        G.generate(RotMtrx<REAL>({0,0,1},2*pi/n));
-        G.generate(RotMtrx<REAL>({1,0,0},pi));
+        G.generate(RotMtrx<REAL>({0,0,1},2*REAL(pi)/n));
+        G.generate(RotMtrx<REAL>({1,0,0},REAL(pi)));
         G.generate(Sigma<REAL>({0,0,1}));
         return G;
       }
 
       static array_group<matrix3<REAL> > Dnd(int n) {
         array_group<matrix3<REAL> > G("D"+std::to_string(n)+"d");
-        G.generate(RotMtrx<REAL>({0,0,1},2*pi/n));
-        G.generate(RotMtrx<REAL>({1,0,0},pi));
-        G.generate(Sigma<REAL>({std::sin(pi/(2*n)),std::cos(pi/(2*n)),0}));
+        G.generate(RotMtrx<REAL>({0,0,1},2*REAL(pi)/n));
+        G.generate(RotMtrx<REAL>({1,0,0},REAL(pi)));
+        G.generate(Sigma<REAL>({std::sin(REAL(pi)/(2*n)),std::cos(REAL(pi)/(2*n)),0}));
         return G;
       }
 
       static array_group<matrix3<REAL> > T() {
         array_group<matrix3<REAL> > G("T");
-        G.generate(RotMtrx<REAL>({1,1,1},2*pi/3));
-        G.generate(RotMtrx<REAL>({1,0,0},pi));
+        G.generate(RotMtrx<REAL>({1,1,1},2*REAL(pi)/3));
+        G.generate(RotMtrx<REAL>({1,0,0},REAL(pi)));
         return G;
       }
 
       static array_group<matrix3<REAL> > Td() {
         array_group<matrix3<REAL> > G("Td");
-        G.generate(RotMtrx<REAL>({1,1,1},2*pi/3));
-        G.generate(RotMtrx<REAL>({1,0,0},pi));
+        G.generate(RotMtrx<REAL>({1,1,1},2*REAL(pi)/3));
+        G.generate(RotMtrx<REAL>({1,0,0},REAL(pi)));
         G.generate(Sigma<REAL>({1,1,0}));
         return G;
       }
 
       static array_group<matrix3<REAL> > Th() {
         array_group<matrix3<REAL> > G("Th");
-        G.generate(RotMtrx<REAL>({1,1,1},pi/3)*Sigma<REAL>({1,1,1}));
-        G.generate(RotMtrx<REAL>({1,0,0},pi));
+        G.generate(RotMtrx<REAL>({1,1,1},REAL(pi)/3)*Sigma<REAL>({1,1,1}));
+        G.generate(RotMtrx<REAL>({1,0,0},REAL(pi)));
         return G;
       }
 
       static array_group<matrix3<REAL> > O() {
         array_group<matrix3<REAL> > G("O");
-        G.generate(RotMtrx<REAL>({1,1,1},2*pi/3));
-        G.generate(RotMtrx<REAL>({1,0,0},pi/2));
+        G.generate(RotMtrx<REAL>({1,1,1},2*REAL(pi)/3));
+        G.generate(RotMtrx<REAL>({1,0,0},REAL(pi)/2));
         return G;
       }
 
       static array_group<matrix3<REAL> > Oh() {
         array_group<matrix3<REAL> > G("Oh");
-        G.generate(RotMtrx<REAL>({1,1,1},2*pi/3));
-        G.generate(RotMtrx<REAL>({1,0,0},pi/2));
+        G.generate(RotMtrx<REAL>({1,1,1},2*REAL(pi)/3));
+        G.generate(RotMtrx<REAL>({1,0,0},REAL(pi)/2));
         G.generate(-1*matrix3<REAL>::Identity());
         return G;
       }
 
       static array_group<matrix3<REAL> > I() {
         array_group<matrix3<REAL> > G("I");
-        G.generate(RotMtrx<REAL>({0,0,1},2*pi/5));
-        REAL alp = acos(-std::cos(3*pi/5)/(1+std::cos(3*pi/5)));
-        G.generate(RotMtrx<REAL>({std::sin(alp),0, std::cos(alp)},2*pi/5));
+        G.generate(RotMtrx<REAL>({0,0,1},2*REAL(pi)/5));
+        REAL alp = acos(-std::cos(3*REAL(pi)/5)/(1+std::cos(3*REAL(pi)/5)));
+        G.generate(RotMtrx<REAL>({std::sin(alp),0, std::cos(alp)},2*REAL(pi)/5));
         return G;
       }
 
@@ -135,9 +135,9 @@ namespace qpp{
         return G;
       }
 
-      static array_group<matrix3<REAL> > group(const STRING & _name) {
+      static array_group<matrix3<REAL> > group(const STRING_EX & _name) {
 
-        STRING name  = tolower(_name), error = "Nonexisting point group "+_name;
+        STRING_EX name  = tolower(_name), error = "Nonexisting point group "+_name;
         int n;
         size_t sz;
 
@@ -150,8 +150,8 @@ namespace qpp{
           sz = 0; n=0;
         }
 
-        CHAR first = name[0], last;
-        STRING spec = name.substr(sz+1);
+        CHAR_EX first = name[0], last;
+        STRING_EX spec = name.substr(sz+1);
         if (spec.length() == 0)
           last = ' ';
         else if (spec.length() == 1)
@@ -205,7 +205,7 @@ namespace qpp{
 
       }
 
-      static std::vector<STRING> groups_by_order(int n) {
+      static std::vector<STRING_EX> groups_by_order(int n) {
 
         if (n==1) return {"C1"};
         else if (n==2) return {"Ci", "Cs", "C2", "C2h", "C2v", "D2", "D2h"};
@@ -218,7 +218,7 @@ namespace qpp{
         else if (n==9) return {"C9", "C9v", "D9"};
         else if (n==10) return {"Ih", "C10", "C5h", "C10h", "C10v", "D10", "D5d", "D5h", "D10h", "S10"};
         else {
-            STRING nn = std::to_string(n), n2 = std::to_string(n/2);
+            STRING_EX nn = std::to_string(n), n2 = std::to_string(n/2);
 
             if (n%2==1) return {"C"+nn, "C"+nn+"v", "D"+nn};
             else if (n%4==2) return {"C"+nn, "C"+n2+"h", "C"+nn+"h", "C"+nn+"v", "D"+nn,
@@ -234,17 +234,17 @@ namespace qpp{
 
           int size() const {return trace.size();}
 
-          void add(REAL tr, REAL dt, REAL eps = matrix3<REAL>::tol_equiv){
+          void add(REAL tr, REAL dt, REAL eps = matrix3<REAL>::tol_equiv) {
             int i=0;
             bool found = false;
 
             for (i=0; i<trace.size(); i++){
-                if (std::abs(trace[i]-tr)<eps and std::abs(det[i]-dt)<eps)
+                if (std::abs(trace[i]-tr)<eps && std::abs(det[i]-dt)<eps)
                   {
                     found = true;
                     break;
                   }
-                if (trace[i]+eps < tr or (std::abs(trace[i]-tr)<eps and  det[i]+eps < dt))
+                if (trace[i]+eps < tr || (std::abs(trace[i]-tr)<eps &&  det[i]+eps < dt))
                   break;
               }
             if (found)
@@ -257,32 +257,33 @@ namespace qpp{
               }
           }
 
-          bool compare(const fingerprint & f, REAL eps = matrix3<REAL>::tol_equiv) const{
-            if (size() != f.size())
-              return false;
+          bool compare(const fingerprint & f, REAL eps = matrix3<REAL>::tol_equiv) const {
+
+            if (size() != f.size()) return false;
+
             bool res = true;
 
-
             for (int i=0; i<trace.size(); i++)
-              if (not( std::abs(trace[i]-f.trace[i])<eps and
-                       std::abs(det[i]-f.det[i])<eps and
-                       count[i]==f.count[i]))
-                {
+              if (!( std::abs(trace[i]-f.trace[i])<eps &&
+                     std::abs(det[i]-f.det[i])<eps &&
+                     count[i]==f.count[i])
+                  ) {
                   res = false;
                   break;
                 }
+
             return res;
+
           }
 
-          bool operator==(const fingerprint & f)const{
+          bool operator==(const fingerprint & f) const {
             return compare(f);
           }
 
           fingerprint(){}
 
-          fingerprint(const array_group<matrix3<REAL> > & G, REAL eps = matrix3<REAL>::tol_equiv)
-          {
-            for (int i=0; i<G.size(); i++){
+          fingerprint(const array_group<matrix3<REAL> > & G, REAL eps = matrix3<REAL>::tol_equiv) {
+            for (int i=0; i<G.size(); i++) {
                 auto M = G[i];
                 add( M(0,0) + M(1,1) + M(2,2), M.determinant(), eps);
               }

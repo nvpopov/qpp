@@ -107,8 +107,7 @@ namespace qpp{
 
   template<class REAL>
   void best_axes(matrix3<REAL> & axes, vector3<REAL> & lambda,
-                 const geometry<REAL, periodic_cell<REAL> > & g)
-  {
+                 const geometry<REAL, periodic_cell<REAL> > & g) {
     matrix3<REAL> S = matrix3<REAL>::Zero();
 
     for (int i=0; i<g.size(); i++)
@@ -224,7 +223,7 @@ namespace qpp{
   // -----------------------------------------------------------------------
 
   template<class REAL>
-  void unitarize(matrix3<REAL> & U){
+  void unitarize(matrix3<REAL> & U) {
     /*
     matrix3<REAL> S = U*U.transpose(), ss;
     vector3<REAL> sig;
@@ -247,7 +246,7 @@ namespace qpp{
 
   template<class REAL>
   int pg_approx_find(const array_group<matrix3<REAL> > & G,
-                     const matrix3<REAL> & M, REAL angle_error){
+                     const matrix3<REAL> & M, REAL angle_error) {
     REAL norm_error = std::sqrt(8e0)*std::sin(0.5*angle_error);
 
     int i0;
@@ -267,7 +266,7 @@ namespace qpp{
   template<class REAL>
   void pg_approx_multab(std::vector<std::vector<int> > & multab,
                         const array_group<matrix3<REAL> > & G,
-                        REAL angle_error){
+                        REAL angle_error) {
     for (int i=0; i<G.size(); i++)
       for (int j=0; j<G.size(); j++)
         if (multab[i][j] == -1)
@@ -278,27 +277,26 @@ namespace qpp{
 
   template<class REAL>
   int pg_max_order(const array_group<matrix3<REAL> > & G,
-                   REAL angle_error = 8*matrix3<REAL>::tol_equiv)
-  {
+                   REAL angle_error = 8*matrix3<REAL>::tol_equiv) {
     matrix3<REAL> E = matrix3<REAL>::Identity();
     matrix3<REAL> I = -E;
     int i0 = pg_approx_find(G,E,angle_error);
     int i1 = pg_approx_find(G,I,angle_error);
 
-    REAL phi_min = 2*pi;
+    REAL phi_min = 2 * REAL(pi);
     for (int i=0; i<G.size(); i++)
-      if (i!=i0 and i!=i1){
+      if (i!=i0 && i!=i1) {
           vector3<REAL> ax;
           REAL phi;
           bool inv;
           analyze_transform(ax,phi,inv,G[i]);
-          if (inv) phi = pi - phi;
-          if ( phi > angle_error and phi < phi_min)
+          if (inv) phi = REAL(pi) - phi;
+          if ( phi > angle_error && phi < phi_min)
             phi_min = phi;
         }
 
-    int n = int(2*pi/phi_min + 0.5);
-    if (2*pi/n < angle_error)
+    int n = int(2*REAL(pi)/phi_min + 0.5);
+    if (2 * REAL(pi) / n < angle_error)
       ValueError("pg_max_order : the principle axis roation angle is smaller than angle_error");
     return n;
   }
@@ -308,7 +306,7 @@ namespace qpp{
 
   template <class REAL>
   void complete_point_group(array_group<matrix3<REAL> > & G,
-                            std::vector<permutation> & P){
+                            std::vector<permutation> & P) {
     for (int i=0; i<P.size(); i++)
       for (int j=0; j<=i; j++){
           permutation p = P[i]*P[j];
@@ -432,39 +430,39 @@ namespace qpp{
   // -------------------------------------------------------------------------------
 
   template<class REAL>
-  STRING point_group_symbol(const array_group<matrix3<REAL> > & G)
+  STRING_EX point_group_symbol(const array_group<matrix3<REAL> > & G)
   {
     group_analyzer<matrix3<REAL>, array_group<matrix3<REAL> > > A(G);
-    
+
     // Define the maximum order
     int maxord=1;
     for (int i=0; i<G.size(); i++){
       if (A.order(i)>maxord)
-	maxord=A.order(i);
+  maxord=A.order(i);
     }
-    std::vector<STRING> cand_groups = shnfl<REAL>::groups_by_order(maxord);
+    std::vector<STRING_EX> cand_groups = shnfl<REAL>::groups_by_order(maxord);
 
     for (int i=cand_groups.size()-1; i>=0; i--)
       {
-	//std::cout << cand_groups[i] << " " << shnfl<REAL>::group(cand_groups[i]).size() << "\n";
-	if (shnfl<REAL>::group(cand_groups[i]).size() != G.size() )
-	  cand_groups.erase(cand_groups.begin()+i);
+  //std::cout << cand_groups[i] << " " << shnfl<REAL>::group(cand_groups[i]).size() << "\n";
+  if (shnfl<REAL>::group(cand_groups[i]).size() != G.size() )
+    cand_groups.erase(cand_groups.begin()+i);
       }
-    
+
     REAL fpeps = matrix3<REAL>::tol_equiv*G.size();
-    
+
     typename shnfl<REAL>::fingerprint FG(G,fpeps);
     bool found = false;
-    STRING res = "";
-    
-    for (const STRING &s:cand_groups)
+    STRING_EX res = "";
+
+    for (const STRING_EX &s:cand_groups)
       if ( typename shnfl<REAL>::fingerprint(shnfl<REAL>::group(s),fpeps)
-	   .compare(FG, fpeps) )
-	{
-	  found = true;
-	  res = s;
-	  break;
-	}
+     .compare(FG, fpeps) )
+  {
+    found = true;
+    res = s;
+    break;
+  }
     return res;
   }
 
@@ -609,7 +607,7 @@ namespace qpp{
 
           theta = std::acos(cos_t);
 
-          if ( theta > angle_error && theta < pi - angle_error ){
+          if ( theta > angle_error && theta < REAL(pi) - angle_error ){
               found = true;
               goto FOUND;
             }
@@ -711,14 +709,14 @@ FOUND:
     complete_point_group(G, P);
 
     // Construct multiplication table
-  group_analyzer<permutation> AP(P);
+    group_analyzer<permutation> AP(P);
 
     // Correct point group according to the multiplication table
 
-  reconstruct_point_group(G,AP.multab);    
+    reconstruct_point_group(G,AP.multab);
 
-    STRING Gname = point_group_symbol(G);    
-    
+    STRING_EX Gname = point_group_symbol(G);
+
     std::cout << " group= " << Gname << " found= " << found << "\n";
 
     G.name = Gname;
@@ -769,11 +767,11 @@ FOUND:
 
             bool found = false;
             for (int j=0; j < axes.size(); j++)
-              if ( (n[i]-axes[j]).norm()<eps or (n[i]+axes[j]).norm()<eps ){
+              if ( ((n[i]-axes[j]).norm() < eps) || ((n[i]+axes[j]).norm() < eps) ) {
                   found = true;
                   same_ax[j].push_back(i);
                 }
-            if ( not found ){
+            if (!found ) {
                 axes.push_back(n[i]);
                 same_ax.push_back({i});
               }
@@ -793,7 +791,7 @@ FOUND:
         for (int i=axes.size()-1; i>=0; i--){
             bool pln = false;
             for (int j : same_ax[i])
-              if ( pi - phi[j] < epscos and inv[j]  ) {
+              if ( REAL(pi) - phi[j] < epscos && inv[j]  ) {
                   pln = true;
                   break;
                 }
@@ -818,7 +816,7 @@ FOUND:
 
             std::sort(same_ax[i].begin(), same_ax[i].end(),
                       [&phi,&inv] (int i1, int i2) -> bool
-            { return (inv[i1]? pi-phi[i1]:phi[i1]) < (inv[i2]? pi-phi[i2]:phi[i2]); }
+            { return (inv[i1]? REAL(pi)-phi[i1]:phi[i1]) < (inv[i2]? REAL(pi)-phi[i2]:phi[i2]); }
             );
             /*
   std::cout << "axes " << i << "\n";
@@ -829,7 +827,7 @@ FOUND:
             int j = same_ax[i][0];
             rotoinversion[i] = inv[j];
 
-            orders[i] = int( 2*pi/( inv[j]? pi-phi[j] : phi[j] ) + 0.5 );
+            orders[i] = int( 2*REAL(pi)/( inv[j]? REAL(pi)-phi[j] : phi[j] ) + 0.5 );
           }
       }
 

@@ -21,7 +21,7 @@
 namespace qpp {
   using string = std::string;
   template<class REAL, class CELL>
-  void read_xyz_multiframe (std::basic_istream<CHAR,TRAITS> & inp,
+  void read_xyz_multiframe (std::basic_istream<CHAR_EX,TRAITS> & inp,
                             geometry<REAL, CELL> & geom,
                             std::vector<geom_anim_record_t<float> > &anim,
                             bool keep_pdb_like_names = false ) {

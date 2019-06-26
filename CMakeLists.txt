@@ -3,16 +3,22 @@ cmake_minimum_required (VERSION 3.2)
 project(qpp CXX C)
 set (QPP_VERSION_MAJOR 0)
 set (QPP_VERSION_MINOR 1)
-add_definitions(-std=c++17 -fPIC -DFMT_HEADER_ONLY)
-#set(CMAKE_BUILD_TYPE "Debug")
-set(CMAKE_BUILD_TYPE "Release")
+
+#set(CMAKE_BUILD_TYPE "Release")
 set(CMAKE_ABSOLUTE_DESTINATION_FILES)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 
-#set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -Og -fno-omit-frame-pointer -g3")
-set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -Og -fno-omit-frame-pointer -g3 -ggdb")
-set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -O3")
+add_definitions(-DFMT_HEADER_ONLY)
+if(NOT MSVC)
+  add_definitions(-fPIC)
+  set(CMAKE_CXX_FLAGS " -std=c++17 -fno-omit-frame-pointer -fvisibility=hidden")
+  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -Og -fno-omit-frame-pointer -g3 -ggdb")
+  set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -O3 -ffast-math")
+elseif(MSVC)
+   add_definitions(-D_ENABLE_EXTENDED_ALIGNED_STORAGE -DHAVE_SNPRINTF)
+   add_compile_options("/std:c++latest")
+endif()
 
 include(FindOpenMP)
 if(OPENMP_FOUND)
@@ -20,12 +26,6 @@ if(OPENMP_FOUND)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
 endif()
-
-set(BLAS_INCLUDE "-" CACHE STRING "Blas include dir")
-set(BLAS_LIB "-" CACHE STRING "Blas library dir")
-set(LAPACK_INCLUDE "-" CACHE STRING "Lapack include dir")
-set(LAPACK_LIB "-" CACHE STRING "Lapack lib dir")
-set(LA_TYPE "MKL" CACHE STRING "Type of linear algebra library, (MKL,ACML)")
 
 # option declaration
 option(PYTHON_BINDINGS "build qpp python bindings" ON)
@@ -69,20 +69,10 @@ endfunction(def_example_custom_lib)
 
 # end example framework
 
-if (LA_TYPE EQUAL "MKL")
-    set(BLAS_LIBS_COM
-        -L${BLAS_LIB}
-        -l mkl_core
-        )
-    include_directories(${BLAS_INCLUDE})
-    message(STATUS "MKL!")
-endif()
-
 add_subdirectory(deps)
-include_directories(${PROJECT_SOURCE_DIR}/deps/fmtlib)
 include_directories(${PROJECT_SOURCE_DIR}/deps/pybind11/include)
+include_directories(${PROJECT_SOURCE_DIR}/deps/fmtlib/include)
 #add_subdirectory(${CMAKE_SOURCE_DIR}/deps/fmtlib)
-
 
 #Python related stuff
 if(PYTHON_BINDINGS)
@@ -145,11 +135,11 @@ endif()
 #qc stuff
 if(BUILD_QC)
     message("-- @ Building of quantum chemistry programs enabled")
-    add_library(int-imp STATIC IMPORTED)
-    set_target_properties(int-imp PROPERTIES IMPORTED_LOCATION
-        "${PROJECT_SOURCE_DIR}/deps/libint/lib/.libs/libint2.a")
-    include_directories(${PROJECT_SOURCE_DIR}/deps/libint/include)
-    add_subdirectory(${PROJECT_SOURCE_DIR}/examples/qc)
+    #add_library(int-imp STATIC IMPORTED)
+    #set_target_properties(int-imp PROPERTIES IMPORTED_LOCATION
+    #    "${PROJECT_SOURCE_DIR}/deps/libint/lib/.libs/libint2.a")
+    #include_directories(${PROJECT_SOURCE_DIR}/deps/libint/include)
+    #add_subdirectory(${PROJECT_SOURCE_DIR}/examples/qc)
     #find_package(OpenMP)
     #if(OPENMP_FOUND)
     #    add_definitions(${OpenMP_CXX_FLAGS})

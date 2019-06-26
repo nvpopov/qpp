@@ -121,9 +121,9 @@ TEST_CASE( "Basic matrix3<T> tests", "[vector3<T>]" ) {
     REQUIRE( lbd[1].real() == Approx(3).margin(0.01) );
     REQUIRE( lbd[2].real() == Approx(-4).margin(0.01) );
 
-    REQUIRE( m_di_t_ev[0] == Approx(0).margin(0.01) );
+    REQUIRE( m_di_t_ev[0] == Approx(-4).margin(0.01) );
     REQUIRE( m_di_t_ev[1] == Approx(3).margin(0.01) );
-    REQUIRE( m_di_t_ev[2] == Approx(-4).margin(0.01) );
+    REQUIRE( m_di_t_ev[2] == Approx(0).margin(0.01) );
 
   }
 
@@ -157,29 +157,29 @@ TEST_CASE( "Basic matrix3<T> tests", "[vector3<T>]" ) {
 
     m3f rot_m_x = {
       {1.0f, 0.0f,           0.0f},
-      {0.0f, cos(pi / 4.0f), -sin(pi/4.0f)},
-      {0,    sin(pi/4.0f),   cos(pi / 4.0f)}
+      {0.0f, cos(float(pi) / 4.0f), -sin(float(pi)/4.0f)},
+      {0,    sin(float(pi)/4.0f),   cos(float(pi) / 4.0f)}
     };
     v3f rot_m_x_a = v3f(1.0f, 0.0f, 0.0f);
-    m3f rot_m_x_i = RotMtrx<float>(rot_m_x_a, pi/4.0f);
+    m3f rot_m_x_i = RotMtrx<float>(rot_m_x_a, float(pi)/4.0f);
     REQUIRE( rot_m_x == rot_m_x_i);
 
     m3f rot_m_y = {
-      {cos(pi / 4.0f), 0.0f, sin(pi/4.0f)},
+      {cos(float(pi) / 4.0f), 0.0f, sin(float(pi)/4.0f)},
       {0.0f,           1.0f, 0.0f},
-      {-sin(pi/4.0f), 0.0f, cos(pi / 4.0f)}
+      {-sin(float(pi)/4.0f), 0.0f, cos(float(pi) / 4.0f)}
     };
     v3f rot_m_y_a = v3f(0.0f, 1.0f, 0.0f);
-    m3f rot_m_y_i = RotMtrx<float>(rot_m_y_a, pi/4.0f);
+    m3f rot_m_y_i = RotMtrx<float>(rot_m_y_a, float(pi)/4.0f);
     REQUIRE( rot_m_y == rot_m_y_i);
 
     m3f rot_m_z = {
-      {cos(pi / 4.0f), -sin(pi/4.0f),  0.0f},
-      {sin(pi/4.0f),   cos(pi / 4.0f), 0.0f},
+      {cos(float(pi) / 4.0f), -sin(float(pi)/4.0f),  0.0f},
+      {sin(float(pi)/4.0f),   cos(float(pi) / 4.0f), 0.0f},
       {0.0,            0.0f,           1.0f}
     };
     v3f rot_m_z_a = v3f(0.0f, 0.0f, 1.0f);
-    m3f rot_m_z_i = RotMtrx<float>(rot_m_z_a, pi/4.0f);
+    m3f rot_m_z_i = RotMtrx<float>(rot_m_z_a, float(pi)/4.0f);
     REQUIRE( rot_m_z == rot_m_z_i);
   }
 

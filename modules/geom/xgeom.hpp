@@ -32,9 +32,9 @@ namespace qpp{
     std::vector<std::vector<REAL> >   _xreal;
     std::vector<std::vector<int> >    _xint;
     std::vector<std::vector<short> >  _xbool;
-    std::vector<std::vector<STRING> > _xstring;
+    std::vector<std::vector<STRING_EX> > _xstring;
 
-    std::vector<STRING>       _field_name;
+    std::vector<STRING_EX>       _field_name;
     std::vector<basic_types>  _field_type;
 
     std::vector<int>          _field_idx;
@@ -76,7 +76,7 @@ namespace qpp{
 
     inline int nfields() const{ return _nfields; }
 
-    inline STRING field_name(int i) const{ return _field_name[i]; }
+    inline STRING_EX field_name(int i) const{ return _field_name[i]; }
 
     inline basic_types field_type(int i) const{ return _field_type[i]; }
 
@@ -93,7 +93,7 @@ namespace qpp{
     ///
     xgeometry(CELL & __cell,
               int __nxstring, int __nxreal=0, int __nxint=0, int __nxbool=0,
-              const STRING & __name = "") :
+              const STRING_EX & __name = "") :
       _xstring(__nxstring), _xreal(__nxreal), _xint(__nxint), _xbool(__nxbool),
       _field_name(__nxreal + __nxint + __nxbool + __nxstring),
       _field_type(__nxreal + __nxint + __nxbool + __nxstring),
@@ -112,7 +112,7 @@ namespace qpp{
     /// \param __cell
     /// \param __name
     ///
-    xgeometry(CELL & __cell,  const STRING & __name = "") :
+    xgeometry(CELL & __cell,  const STRING_EX & __name = "") :
       geometry<REAL,CELL>(__cell, __name){
       init_xdefault();
     }
@@ -122,7 +122,7 @@ namespace qpp{
     /// \param dim
     /// \param __name
     ///
-    xgeometry(int dim,  const STRING & __name = "") :
+    xgeometry(int dim,  const STRING_EX & __name = "") :
       geometry<REAL,CELL>(dim, __name){
       init_xdefault();
     }
@@ -132,7 +132,7 @@ namespace qpp{
     /// \param fn
     /// \param ft
     ///
-    void get_format(std::vector<STRING> & fn, std::vector<basic_types> & ft){
+    void get_format(std::vector<STRING_EX> & fn, std::vector<basic_types> & ft){
       fn = _field_name;
       ft = _field_type;
     }
@@ -142,7 +142,7 @@ namespace qpp{
     /// \param fn
     /// \param ft
     ///
-    void set_format(const std::vector<STRING> & fn,
+    void set_format(const std::vector<STRING_EX> & fn,
                     const std::vector<basic_types> & ft){
       _field_name = fn;
       _field_type = ft;
@@ -207,7 +207,7 @@ namespace qpp{
           _nxstring += 1;
           _nxreal   += 3;
 
-          std::vector<STRING> inss = {"atom","x","y","z"};
+          std::vector<STRING_EX> inss = {"atom","x","y","z"};
           _field_name.insert(_field_name.begin(), inss.begin(), inss.end());
 
           std::vector<basic_types> inst = {type_string, type_real, type_real, type_real};
@@ -253,9 +253,9 @@ namespace qpp{
     /// \param ft
     /// \param __name
     ///
-    xgeometry(CELL & __cell,  const std::vector<STRING> & fn,
+    xgeometry(CELL & __cell,  const std::vector<STRING_EX> & fn,
               const std::vector<basic_types> & ft,
-              const STRING & __name = "") : geometry<REAL,CELL>(__cell, __name) {
+              const STRING_EX & __name = "") : geometry<REAL,CELL>(__cell, __name) {
       init_xdefault();
       set_format(fn,ft);
     }
@@ -282,9 +282,9 @@ namespace qpp{
 
       if (attributes<T>::type == type_string){
           if (i==ix_atom)
-            return convert<T&,STRING&>::get(_atm[j]);
+            return convert<T&,STRING_EX&>::get(_atm[j]);
           else
-            return  convert<T&,STRING&>::get(_xstring[_field_idx[i]][j]);
+            return  convert<T&,STRING_EX&>::get(_xstring[_field_idx[i]][j]);
         }
       else if (attributes<T>::type == type_bool)
         return  convert<T&,short&>::get(_xbool[_field_idx[i]][j]);
@@ -315,9 +315,9 @@ namespace qpp{
 
       if (attributes<T>::type == type_string){
           if (i==ix_atom)
-            return convert<T,STRING>::get(_atm[j]);
+            return convert<T,STRING_EX>::get(_atm[j]);
           else
-            return  convert<T,STRING>::get(_xstring[_field_idx[i]][j]);
+            return  convert<T,STRING_EX>::get(_xstring[_field_idx[i]][j]);
         }
       else if (attributes<T>::type == type_bool)
         return  convert<T,short>::get(_xbool[_field_idx[i]][j]);
@@ -338,7 +338,7 @@ namespace qpp{
     }
 
     template<class T>
-    inline T & xfield(const STRING & f, int j){
+    inline T & xfield(const STRING_EX & f, int j){
       int i = 0;
       while (_field_name[i]!=f && i<nfields()) i++;
 
@@ -350,7 +350,7 @@ namespace qpp{
     }
 
     template<class T>
-    T xfield(const STRING & f, int j) const{
+    T xfield(const STRING_EX & f, int j) const{
       int i = 0;
       while (_field_name[i]!=f && i<nfields()) i++;
 
@@ -371,7 +371,7 @@ namespace qpp{
       v.resize(nfields());
       for (int i=0; i<nfields(); i++){
           if (field_type(i)==type_string)
-            v[i] = xfield<STRING>(i,j);
+            v[i] = xfield<STRING_EX>(i,j);
           else if (field_type(i)==type_real)
             v[i] = xfield<REAL>(i,j);
           else if (field_type(i)==type_int)
@@ -388,7 +388,7 @@ namespace qpp{
       if (v.size()!=nfields())
         throw std::invalid_argument("xgeometry::set_fields: wrong number of fields");
 
-      STRING a1 = v[ix_atom].template get<STRING>();
+      STRING_EX a1 = v[ix_atom].template get<STRING_EX>();
       vector3<REAL> r1(v[ix_x].template get<REAL>(),
                        v[ix_y].template get<REAL>(),
                        v[ix_z].template get<REAL>());
@@ -398,7 +398,7 @@ namespace qpp{
 
       for (int i=0; i<nfields(); i++){
           if (field_type(i)==type_string)
-            xfield<STRING>(i,j) = v[i].get<STRING>();
+            xfield<STRING_EX>(i,j) = v[i].get<STRING_EX>();
           else if (field_type(i)==type_real)
             xfield<REAL>(i,j) = v[i].get<REAL>();
           else if (field_type(i)==type_int)
@@ -424,8 +424,8 @@ namespace qpp{
         _xbool[i].erase(_xbool[i].begin()+j);
     }
 
-    void add(const STRING & a, const vector3<REAL> & r,
-             std::initializer_list<STRING> xts,
+    void add(const STRING_EX & a, const vector3<REAL> & r,
+             std::initializer_list<STRING_EX> xts,
              std::initializer_list<REAL> xtr = {},
              std::initializer_list<int> xti = {},
              std::initializer_list<bool> xtb = {}){
@@ -449,8 +449,8 @@ namespace qpp{
       geometry<REAL,CELL>::add(a,r);
     }
 
-    void insert(const int j, const STRING & a, const vector3<REAL> &r,
-                std::initializer_list<STRING> xts,
+    void insert(const int j, const STRING_EX & a, const vector3<REAL> &r,
+                std::initializer_list<STRING_EX> xts,
                 std::initializer_list<REAL> xtr = {},
                 std::initializer_list<int> xti = {},
                 std::initializer_list<bool> xtb = {}){
@@ -473,7 +473,7 @@ namespace qpp{
       geometry<REAL,CELL>::insert(j,a,r);
     }
 
-    virtual void add(const STRING &a, const vector3<REAL> & r){
+    virtual void add(const STRING_EX &a, const vector3<REAL> & r){
       for (int i=0; i<_nxstring; i++)
         _xstring[i].push_back( "" );
       for (int i=0; i<_nxreal; i++)
@@ -485,7 +485,7 @@ namespace qpp{
       geometry<REAL,CELL>::add(a,r);
     }
 
-    virtual void insert(const int j, STRING a, const vector3<REAL> &r){
+    virtual void insert(const int j, STRING_EX a, const vector3<REAL> &r){
       for (int i=0; i<_nxstring; i++)
         _xstring[i].insert(_xstring[i].begin()+j, "" );
       for (int i=0; i<_nxreal; i++)
@@ -510,7 +510,7 @@ namespace qpp{
     }
 
 
-    virtual void add(STRING a, REAL _x, REAL _y, REAL _z)
+    virtual void add(STRING_EX a, REAL _x, REAL _y, REAL _z)
     {
       add(a, {_x,_y,_z});
     }
@@ -560,18 +560,42 @@ namespace qpp{
 
     
     /*
-    virtual void insert(const int j, STRING a, const REAL _x, const REAL _y, const REAL _z)
+    virtual void insert(const int j, STRING_EX a, const REAL _x, const REAL _y, const REAL _z)
     {
       insert(j,a, {_x,_y,_z});
     }
     */
     // ---------------------------------------------------------
 
+    void clone(xgeometry<REAL,CELL> &dst) {
+
+      dst.clear();
+
+      dst.DIM = DIM;
+
+      //copy cell vectors
+      for (size_t i = 0; i <DIM; i++) dst.cell.v[i] = cell.v[i];
+
+      //copy xgeom headers
+      dst.set_format(_field_name, _field_type);
+
+      //copy data
+      for (size_t i = 0; i < nat(); i++) {
+          dst.add("", vector3<float>{0});
+          std::vector<datum> v;
+          get_fields(i, v);
+          dst.set_fields(i,v);
+        }
+
+      dst.build_types();
+
+    }
+
     template<class T>
     void parse_field(int i, int j, T t){
       basic_types f = field_type(i);
       if (f==type_string)
-        xfield<STRING>(i,j) = convert<STRING,T>::get(t);
+        xfield<STRING_EX>(i,j) = convert<STRING_EX,T>::get(t);
       else if (f==type_real)
         xfield<REAL>(i,j) = convert<REAL,T>::get(t);
       else if (f==type_int)
@@ -616,7 +640,7 @@ namespace qpp{
 
     // ----------------------------------------
 
-    virtual void write(std::basic_ostream<CHAR,TRAITS> &os, int offset=0) const{
+    virtual void write(std::basic_ostream<CHAR_EX,TRAITS> &os, int offset=0) const{
       for (int k=0; k<offset; k++) os << " ";
       os << "geometry";
       if (name != "")
@@ -644,7 +668,7 @@ namespace qpp{
           for (int k=0; k<offset+3; k++) os << " ";
           for (int j=0; j<nfields(); j++)
             if (field_type(j)==type_string)
-              os << " " << xfield<STRING>(j,i);
+              os << " " << xfield<STRING_EX>(j,i);
             else if (field_type(j)==type_real)
               os << " " << xfield<REAL>(j,i);
             else if (field_type(j)==type_int)
@@ -745,11 +769,11 @@ namespace qpp{
 
 #if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
 
-    xgeometry(CELL & __cell, const py::list f, const STRING & __name = "") :
+    xgeometry(CELL & __cell, const py::list f, const STRING_EX & __name = "") :
       geometry<REAL,CELL>(__cell, __name){
       init_xdefault();
 
-      std::vector<STRING> fn;
+      std::vector<STRING_EX> fn;
       std::vector<basic_types> ft;
 
       for (int i=0; i<py::len(f); i++){
@@ -762,8 +786,8 @@ namespace qpp{
              !py::isinstance<py::str>(t[1]))
             throw std::invalid_argument("In xgeometry constructor - bad format list");
 
-          fn.push_back(py::cast<STRING>(t[0]));
-          STRING s = py::cast<STRING>(t[1]);
+          fn.push_back(py::cast<STRING_EX>(t[0]));
+          STRING_EX s = py::cast<STRING_EX>(t[1]);
 
           if (s=="string")
             ft.push_back(type_string);
@@ -786,7 +810,7 @@ namespace qpp{
       py::list l;
       for (int i=0; i<nfields(); i++){
           if (field_type(i)==type_string)
-            l.append(xfield<STRING>(i,j));
+            l.append(xfield<STRING_EX>(i,j));
           else if (field_type(i)==type_real)
             l.append(xfield<REAL>(i,j));
           else if (field_type(i)==type_int)
@@ -807,7 +831,7 @@ namespace qpp{
           if (field_type(i)==type_string){
               if (!py::isinstance<py::str>(l[i]))
                 throw std::invalid_argument("xgeometry:: bad list of fields");
-              xfield<STRING>(i,j) = py::cast<STRING>(l[i]);
+              xfield<STRING_EX>(i,j) = py::cast<STRING_EX>(l[i]);
             }
           else if (field_type(i)==type_real){
               if (!py::isinstance<py::float_>(l[i]))
@@ -846,7 +870,7 @@ namespace qpp{
         throw std::invalid_argument("xgeometry: atom index out of range");
 
       if (field_type(i)==type_string)
-        return py::cast(xfield<STRING>(i,j));
+        return py::cast(xfield<STRING_EX>(i,j));
       else if (field_type(i)==type_real)
         return py::cast(xfield<REAL>(i,j));
       else if (field_type(i)==type_int)
@@ -869,7 +893,7 @@ namespace qpp{
       if (t==type_string){
           if ( !py::isinstance<py::str>(o))
             throw std::invalid_argument("xgeometry: string value of the field expected");
-          xfield<STRING>(i,j) = py::cast<STRING>(o);
+          xfield<STRING_EX>(i,j) = py::cast<STRING_EX>(o);
         }
       else if (t==type_real){
           if ( !py::isinstance<py::float_>(o))
@@ -929,9 +953,9 @@ namespace qpp{
       py::class_<xgeometry<REAL,CELL>, geometry<REAL,CELL>,
           std::shared_ptr<xgeometry<REAL,CELL>> >
           (m, pyname, py::dynamic_attr())
-          .def(py::init<int,   const STRING&>(),
+          .def(py::init<int,   const STRING_EX&>(),
                py::arg("dim"), py::arg("__name") = "")
-          .def(py::init<CELL&, const py::list &, const STRING&>(),
+          .def(py::init<CELL&, const py::list &, const STRING_EX&>(),
                py::arg("CELL"), py::arg("f"), py::arg("__name") = "")
           .def_readwrite("field", & SELF::py_fields)
           .def_readwrite("additive", & SELF::py_add)

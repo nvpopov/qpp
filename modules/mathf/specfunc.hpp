@@ -2,6 +2,7 @@
 #define _QPP_SPECFUNC_H
 
 #include <consts.hpp>
+#include <vector>
 
 #ifdef PY_EXPORT
 #include <pybind11/pybind11.h>
@@ -10,34 +11,40 @@
 namespace py = pybind11;
 #endif
 
-namespace qpp{
+namespace qpp {
 
-  double logfact(int n)
-  // returns ln(n!)
-  {
+  /**
+   * @brief logfact
+   * @param n
+   * @return returns ln(n!)
+   */
+  double logfact(int n) {
     double f = 0e0;
     for (int k = 1; k<=n; k++)
       f += std::log(1e0*k);
     return f;
   }
 
-  double atanxy(double x, double y)
-  {
-    // returns the polar angle for the (x,y) direction
+  /**
+   * @brief atanxy
+   * @param x
+   * @param y
+   * @return returns the polar angle for the (x,y) direction
+   */
+  double atanxy(double x, double y) {
+
     const double eps=1e-8;
     double phi;
-    
-    if ( std::abs(x) <= eps )
-      {
-	phi = pi/2;
-	if ( y < 0 )
-	  phi += pi;
+
+    if ( std::abs(x) <= eps ) {
+        phi = pi / 2;
+        if ( y < 0 )
+          phi += pi;
       }
-    else
-      {
-	phi = std::atan(y/x);
-	if ( x  < 0 )
-	  phi += pi;
+    else {
+        phi = std::atan(y/x);
+        if ( x  < 0 )
+          phi += pi;
       }
     return phi;
   }
@@ -46,66 +53,76 @@ namespace qpp{
   //                 Orthogonal polynomials
   // -------------------------------------------------------------
 
+
+  /**
+   * @brief Pl_legendre
+   * @tparam REAL
+   * @param x
+   * @param l
+   * @param Pl
+   Returns Legendre polynomials of variable x from 0 to l-th order
+   in the vector Pl.
+                     n
+                1   d     2     n
+     Pl(n) = ------ --- (x  - 1)
+              n       n
+             2  n!  dx
+   *
+   */
   template <class REAL>
-  void Pl_legendre(REAL x, int l, std::vector<REAL> & Pl)
-  // Returns Legendre polynomials of variable x from 0 to l-th order
-  // in the vector Pl.
-  //                   n
-  //              1   d     2     n
-  //   Pl(n) = ------ --- (x  - 1) 
-  //            n       n
-  //           2  n!  dx
-  //
-  {
+  void Pl_legendre(double x, int l, std::vector<REAL> & Pl) {
+
     Pl.resize(l+1);
     Pl[0] = REAL(1);
-    
+
     REAL pl_prev = REAL(1), pl = x;
     REAL pl_next;
-    
+
     for (int k = 1; k<=l; k++)
       {
-	Pl[k] = pl;
-	
-	pl_next = pl*x*(2*k + 1)/(k + 1) - pl_prev*k/(k+1);
-	pl_prev = pl;
-	pl = pl_next;
-      }
-    
-  }
-  
-  //------------------------------------------------------
+        Pl[k] = pl;
 
+        pl_next = pl*x*(2*k + 1)/(k + 1) - pl_prev*k/(k+1);
+        pl_prev = pl;
+        pl = pl_next;
+      }
+
+  }
+
+
+  /**
+   * @brief Pn_Jacobi
+   * @details
+   * Jacobi polynomials are defined here as
+
+
+                   n                n
+               (-1)        2 -a    d       2  n+a
+     P_n(x) = ------ (1 - x )    --- (1 - x  )
+               n                    n
+              2  n!               dx
+
+
+   */
   template <class REAL>
-  void Pn_Jacobi(REAL x, REAL alpha, int n, std::vector<REAL> & Pn)
-  // Jacobi polynomials are defined here as
-  //
-  //
-  //                 n                n
-  //             (-1)        2 -a    d       2  n+a
-  //   P_n(x) = ------ (1 - x )    --- (1 - x  ) 
-  //             n                    n
-  //            2  n!               dx
-  //
-  //
-  {
+  void Pn_Jacobi(REAL x, REAL alpha, int n, std::vector<REAL> & Pn) {
     Pn.resize(n+1);
-    
+
     REAL p, p_1, p_2;
     Pn[0] = p_2 = REAL(1);
-    
+
     if (n>=1)
       Pn[1] =  p_1 = (alpha + REAL(1))*(REAL(1) - 2*x);
-    
+
     for (int k = 2; k <= n; k++)
       {
-	p = (alpha + k -.5)*(1 - 2*x)*p_1 - .5*(alpha + k - 1)*p_2;
-	p *= 2*(alpha+k)/((2*alpha+k)*k);
-	
-	Pn[k] = p;
-	
-	p_2 = p_1;
-	p_1 = p;
+        p = (alpha + k -.5)*(1 - 2*x)*p_1 - .5*(alpha + k - 1)*p_2;
+        p *= 2*(alpha+k)/((2*alpha+k)*k);
+
+        Pn[k] = p;
+
+        p_2 = p_1;
+        p_1 = p;
       }
   }
 
@@ -123,56 +140,56 @@ namespace qpp{
   //
   {
     double p, p_1, p_2;
-    
+
     Pn(0) = p_2 = 1e0;
-    
+
     if (n>=1)
       Pn(1) =  p_1 = alpha + 1e0 - x;
-    
+
     for (int k = 2; k <= n; k++)
       {
-	p = -( (x-alpha-2*k+1)*p_1 + (alpha+k-1)*p_2 )/k;
-	
-	Pn(k) = p;
-	
-	p_2 = p_1;
-	p_1 = p;
-      }    
+  p = -( (x-alpha-2*k+1)*p_1 + (alpha+k-1)*p_2 )/k;
+
+  Pn(k) = p;
+
+  p_2 = p_1;
+  p_1 = p;
+      }
   }
 
   // -------------------------------------------------------
   //              Boys function & error function
   // -------------------------------------------------------
-  
+
   double efrc(double x)
   {
     double z = (x>0) ? x : -x;
     double t = 1e0/(1 + .5e0*z);
-    
-    double erfcc = t*std::exp( -z*z - 1.26551223 + t*( 1.00002368 + t*( .37409196 + 
-		                t*( .09678418 + t*( -.18628806 + t*( .27886807 + t*( -1.13520398 + 
-			        t*( 1.48851587 + t*( -.82215223 + t*.17087277)))))))));
-    
+
+    double erfcc = t*std::exp( -z*z - 1.26551223 + t*( 1.00002368 + t*( .37409196 +
+                    t*( .09678418 + t*( -.18628806 + t*( .27886807 + t*( -1.13520398 +
+              t*( 1.48851587 + t*( -.82215223 + t*.17087277)))))))));
+
     if (x<0)
       return 2e0 - erfcc;
-    else 
+    else
       return erfcc;
   }
 
   //------------------------------------------------------
-  
+
   double erf(double x)
   {
     return 1e0 - erfc(x);
   }
-  
+
   //------------------------------------------------------
-  
+
   void Fn_boys(double x, int n, lace::vector<double> & Fn)
   {
     double sx = std::sqrt(x);
     double ex = std::exp(-x);
-    
+
     Fn(0) = erf(sx)/sx;
     double hspi = std::sqrt(pi)/2;
     for (int k=0; k<n; k++)
@@ -185,7 +202,7 @@ namespace qpp{
 
   double I0_bessel(double x, double predexp = 0e0)
   {
-    const double 
+    const double
       p1 = 1.0e0,
       p2 = 3.5156229e0,
       p3 = 3.0899424e0,
@@ -202,20 +219,20 @@ namespace qpp{
       q7 = 0.2635537e-1,
       q8 = -0.1647633e-1,
       q9 = 0.392377e-2;
-    
+
     double absx = std::abs(x);
     if ( absx < 3.75e0 )
       {
-	double xx = x/3.75e0;
-	xx *= xx;
+  double xx = x/3.75e0;
+  xx *= xx;
 
-	return ( p1 + xx*(p2 + xx*(p3 + xx*(p4 + xx*(p5 + xx*(p6 + xx*p7))))) )*std::exp(predexp);
+  return ( p1 + xx*(p2 + xx*(p3 + xx*(p4 + xx*(p5 + xx*(p6 + xx*p7))))) )*std::exp(predexp);
       }
     else
       {
-	double xx = 3.75/absx;
-	return (std::exp(predexp+absx)/std::sqrt(absx))*(q1 + xx*(q2 + xx*(q3 + xx*(q4 + 
- 		    xx*(q5 + xx*(q6 + xx*(q7 + xx*(q8 + xx*q9))))))));
+  double xx = 3.75/absx;
+  return (std::exp(predexp+absx)/std::sqrt(absx))*(q1 + xx*(q2 + xx*(q3 + xx*(q4 +
+        xx*(q5 + xx*(q6 + xx*(q7 + xx*(q8 + xx*q9))))))));
       }
   }
 
@@ -223,30 +240,30 @@ namespace qpp{
   {
     double I0 = I0_bessel(x, predexp);
     double tx = 2e0/x;
-    
+
     double big = 1e10, small = 1e-10;
     double bi = 1e0, bip=0e0, bim;
-    
+
     double accrcy = 40e0;
     int nstart = 2*( ( n + (int)std::sqrt(accrcy*n) )/2 );
-    
+
     for ( int j = nstart; j>0; j-- )
       {
-	bim = bip + j * tx * bi;
-	bip = bi;
-	bi = bim;
-	
-	if (j<=n+1) In(j-1) = bi;
-	
-	if ( bi > big )
-	  {
-	    bi  *= small;
-	    bip *= small;
-	    
-	    for (int i=j-1; i<=n; i++) In(i) *= small;
-	  }
+  bim = bip + j * tx * bi;
+  bip = bi;
+  bi = bim;
+
+  if (j<=n+1) In(j-1) = bi;
+
+  if ( bi > big )
+    {
+      bi  *= small;
+      bip *= small;
+
+      for (int i=j-1; i<=n; i++) In(i) *= small;
+    }
       }
-    
+
     for (int i=0; i<=n; i++) In(i) *= I0/bi;
   }
   */
@@ -254,29 +271,29 @@ namespace qpp{
   //                 Spherical harmonics
   // -------------------------------------------------------------
 
+  /**
+   * @brief Qml_legendre
+   * @details
+    Returns array Qml, where Qml(l-m) is
+                 ________
+     m          / (l-m)!   m
+    Q (x) = _  / -------  P  (x)
+     l       \/   (l+m)!   l
+
+    Pml - associated Legendre polynomials
+    Different normalization is for avoiding overflow for large l
+   */
   template <class REAL>
-  void Qml_legendre(int l, int m, REAL x, std::vector<REAL> & Qml)
-  //  Returns array Qml, where Qml(l-m) is
-  //
-  //               ________
-  //   m          / (l-m)!   m
-  //  Q (x) = _  / -------  P  (x)
-  //   l       \/   (l+m)!   l
-  //
-  //
-  //  Pml - associated Legendre polynomials
-  //  Different normalization is for avoiding overflow for large l
-  //
-  {
+  void Qml_legendre(int l, int m, REAL x, std::vector<REAL> & Qml) {
     int n = l - m;
     Qml.resize(n+1);
-    
+
     REAL Cmm = REAL(1);
     REAL sin2 = REAL(1) - x*x;
     for (int i=1; i<=m; i++)
       Cmm *= sin2*(1 - .5e0/i);
     Cmm = std::sqrt(Cmm);
-    
+
     if ( int(m/2)*2 != m ) Cmm = -Cmm;
     
     Qml[0]=Cmm;
@@ -338,47 +355,47 @@ namespace qpp{
   {
     // fixme - inefficient implementation
     // It's better to use recurrence relations
-    int sgn = 1; 
+    int sgn = 1;
     double pi=std::atan(1.)*4;
-  
+
     if ((beta<=pi/2))//||(beta>=pi))
       {
-	beta=pi-beta;
-	if((J+M)%2==1){sgn*=(-1);};
-	K = -K;
+  beta=pi-beta;
+  if((J+M)%2==1){sgn*=(-1);};
+  K = -K;
       };
     if (M+K<0)
       {
-	int tmp = M;
-	M = -K;
-	K = -tmp;
+  int tmp = M;
+  M = -K;
+  K = -tmp;
       };
     if (K>M)
       {
-	sgn *= ((K-M)%2 == 1)? -1 : 1;
-	int tmp = K;
-	K = M;
-	M = tmp;
+  sgn *= ((K-M)%2 == 1)? -1 : 1;
+  int tmp = K;
+  K = M;
+  M = tmp;
       };
 
     /// Calculating prefactor
-    
-    int f1 = 1; 
+
+    int f1 = 1;
     if ( (J-K)%2 == 1 ) {f1 = -1;};
-      
+
     double f2 = 0e0;
     ///-
       for(int i = J-M+1;i<=J+M; i++)
-	{
-	  f2 += std::log( (double)i );
-	};
+  {
+    f2 += std::log( (double)i );
+  };
       f2 *= 0.5e0;
-	
+
       double f3=0e0;
       for(int i = J-abs(K)+1; i<=J+abs(K); i++)
-	{
-	  f3 += std::log( (double)i );
-	};  
+  {
+    f3 += std::log( (double)i );
+  };
 
       f3 *= 0.5e0;
 
@@ -386,9 +403,9 @@ namespace qpp{
 
       double fmk=0e0;
       for(int i = 1; i<=M+K; i++)
-	{
-	  fmk += std::log( (double)i );
-	};  
+  {
+    fmk += std::log( (double)i );
+  };
 
       double beta2=beta/2;
       double Sin = std::sin(beta2);
@@ -403,13 +420,13 @@ namespace qpp{
 
 
       for(int i = 0; i < J-M; i++)
-	{
-	    
-	  g *= -CTan2*(J-M-i)*(J-K-i)/((i+1)*(M+K+i+1));
+  {
+
+    g *= -CTan2*(J-M-i)*(J-K-i)/((i+1)*(M+K+i+1));
 
 
-	  sum += g;
-	};
+    sum += g;
+  };
 
 
       return Prefac*sum;
