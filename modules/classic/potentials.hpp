@@ -8,16 +8,23 @@
 
 namespace qpp{
   
-  template <class REAL>
+  template <class REAL> //, class CELL>
   class classical_potential{
-  public:
-    // number of particles
-    int N;
+  public:   
 
-    std::vector<REAL> rmin, rmax;
-    std::vector<STRING> atyp;
+    /*
+    template<class CELL>
+    virtual REAL energy(const geometry<REAL,CELL> & g) const  =0;
+    */
     
     virtual REAL energy(const std::vector<vector3<REAL> > &) const  =0;
+
+    /*
+    virtual REAL energy_2b(REAL r) =0;
+    virtual REAL energy_3b(const vector3<REAL> & r1,
+			   const vector3<REAL> & r2,
+			   const vector3<REAL> & r3)
+    */
 
     virtual void grad(const std::vector<vector3<REAL> > &, std::vector<vector3<REAL> > &) const =0;
 

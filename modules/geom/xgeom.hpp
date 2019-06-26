@@ -45,6 +45,8 @@ namespace qpp{
 
     using geometry<REAL,CELL>::_atm;
     using geometry<REAL,CELL>::_crd;
+    using geometry<REAL,CELL>::_shadow;
+    using geometry<REAL,CELL>::reorder_types;
     using geometry<REAL,CELL>::size;
     using geometry<REAL,CELL>::has_observers;
     using geometry<REAL,CELL>::observers;
@@ -512,6 +514,51 @@ namespace qpp{
     {
       add(a, {_x,_y,_z});
     }
+
+    virtual void reorder (const std::vector<int> & ord) {
+
+      for (int i=0; i<observers.size(); i++)
+	observers[i]->reordered(ord, before);
+      // fixme - might be inefficient for large molecules
+      
+      std::vector<STRING> __atm(_atm);
+      std::vector<vector3<REAL> > __crd(_crd);
+      std::vector<Bool> __shadow(_shadow);
+      
+      for (int i=0; i<size(); i++){
+	_atm[i] = __atm[ord[i]];
+	_crd[i] = __crd[ord[i]];
+	_shadow[i] = __shadow[ord[i]];
+      }
+
+      reorder_types(ord);
+
+      for (int i=0; i<_nxstring; i++){
+	std::vector<STRING> __xstring(_xstring[i]);
+	for (int j=0; j<size(); j++)
+	  _xstring[i][j] = __xstring[ord[j]];
+      }
+      for (int i=0; i<_nxreal; i++){
+	std::vector<REAL> __xreal(_xreal[i]);
+	for (int j=0; j<size(); j++)
+	  _xreal[i][j] = __xreal[ord[j]];
+      }
+      for (int i=0; i<_nxint; i++){
+	std::vector<int> __xint(_xint[i]);
+	for (int j=0; j<size(); j++)
+	  _xint[i][j] = __xint[ord[j]];
+      }
+      for (int i=0; i<_nxbool; i++){
+	std::vector<short> __xbool(_xbool[i]);
+	for (int j=0; j<size(); j++)
+	  _xbool[i][j] = __xbool[ord[j]];
+      }
+      for (int i=0; i<observers.size(); i++)
+	observers[i]->reordered(ord, after);
+      
+    }
+
+    
     /*
     virtual void insert(const int j, STRING a, const REAL _x, const REAL _y, const REAL _z)
     {

@@ -11,6 +11,7 @@ namespace py = pybind11;
 #pragma pop_macro("slots")
 
 void pyqpp_linalg_export       (py::module m);
+void pyqpp_math_export         (py::module m);
 void pyqpp_cell_export         (py::module m);
 void pyqpp_geom_export         (py::module m);
 void pyqpp_xgeom_export        (py::module m);

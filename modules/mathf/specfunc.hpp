@@ -47,7 +47,7 @@ namespace qpp{
   // -------------------------------------------------------------
 
   template <class REAL>
-  void Pl_legendre(double x, int l, std::vector<REAL> & Pl)
+  void Pl_legendre(REAL x, int l, std::vector<REAL> & Pl)
   // Returns Legendre polynomials of variable x from 0 to l-th order
   // in the vector Pl.
   //                   n
@@ -279,33 +279,58 @@ namespace qpp{
     
     if ( int(m/2)*2 != m ) Cmm = -Cmm;
     
-    Qml(0)=Cmm;
+    Qml[0]=Cmm;
     
-    if ( n>0 ) Qml(1) = std::sqrt(2*m+1)*x*Qml(0);
+    if ( n>0 ) Qml[1] = std::sqrt(2*m+1)*x*Qml[0];
     
     for (int i=2; i<=n; i++ )
       {
 	int ll = m+i;
-	Qml(i) = (2*ll-1)*x*Qml(i-1) - std::sqrt( (ll-1)*(ll-1e0) - m*m )*Qml(i-2);
-	Qml(i) /= std::sqrt(ll*ll - m*m);
+	Qml[i] = (2*ll-1)*x*Qml[i-1] - std::sqrt( (ll-1)*(ll-REAL(1)) - m*m )*Qml[i-2];
+	Qml[i] /= std::sqrt(ll*ll - m*m);
       }
   }
 
   //-----------------------------------------------------------
 
   template <class REAL>
-  void Ylm_spherical(std::vector<std::vector<REAL> > & ylm, int l, int m, REAL theta, REAL phi)
+  void Ylm_spherical( int l, int m, REAL theta, std::vector<REAL> & ylm)
   // Spherical harmonics Y_lm without the exp(i*m*phi) multiplier
   {
-    stdvector<double> Q(l-m+1);
+    ylm.resize(l-m+1);
     int sgn = 1;
-    if (m<0 && 2*int(m/2)!=m ) sgn = -1; 
+    if ( m < 0 &&  m%2 != 0 ) sgn = -1; 
     if (m<0) m = -m;
-    Qml_legendre(l,m,std::cos(theta),Q);
-    return  sgn*std::sqrt((2*l+1)/(4*pi))*Q(l-m);
+    Qml_legendre(l,m,std::cos(theta), ylm);
+    //REAL Cml = std::exp(logfact(2*m)/2);
+    for (int ll=m; ll<=l; ll++){
+      ylm[ll-m] *= sgn*std::sqrt((2*ll+1)/(4*pi));
+      //Cml *= std::sqrt((1e0+ll+m)/(1+ll-m));
+    }
   }
 
-  // fixme - implement Ylm returning array of values!
+#ifdef PY_EXPORT
+
+  template <class REAL>
+  void py_pl_legendre(REAL x, int l, py::list & Pl)
+  {
+    std::vector<REAL> res;
+    Pl_legendre(x,l,res);
+    for (int i=0; i<res.size(); i++)
+      Pl.append(res[i]);
+  }
+
+  template <class REAL>
+  void py_ylm_spherical ( int l, int m, REAL theta, py::list & ylm)
+  { 
+    std::vector<REAL> Q;
+    Ylm_spherical(l,m,theta,Q);
+    for (int i=0; i<Q.size(); i++)
+      ylm.append(Q[i]);
+  }
+    
+#endif
+
 
   //---------------------------------------------------------------------------------//
   /*

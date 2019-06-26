@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <vector>
 #include <cmath>
+#include <functional>
 #include <geom/lace3d.hpp>
 #include <data/data.hpp>
 #include <symm/index.hpp>
@@ -14,6 +15,8 @@
 #undef slots
 #include <pybind11/pybind11.h>
 #include <pybind11/operators.h>
+#include <pybind11/stl.h>
+#include <pybind11/functional.h>
 #include <pyqpp/py_indexed_property.hpp>
 namespace py = pybind11;
 #pragma pop_macro("slots")
@@ -622,6 +625,15 @@ The supercell concept generalization for the geometry class looks like:
       virtual void change_pos (int at, const vector3<REAL> & r1)
       { _change(at, _atm[at], r1); }
 
+
+    void reorder_types(const std::vector<int> & ord){
+      if (_type_table.size() != size())
+	return;
+      std::vector<int> __type_table(_type_table);
+      for (int i=0; i<size(); i++)
+	_type_table[i] = __type_table[ord[i]];
+    }
+    
       virtual void reorder (const std::vector<int> & ord) {
 
         for (int i=0; i<observers.size(); i++)
@@ -631,33 +643,32 @@ The supercell concept generalization for the geometry class looks like:
         std::vector<STRING> __atm(_atm);
         std::vector<vector3<REAL> > __crd(_crd);
         std::vector<Bool> __shadow(_shadow);
-        std::vector<int> __type_table(_type_table);
-        bool reorder_types = (_type_table.size() == size());
+        
+        //bool reorder_types = (_type_table.size() == size());
 
         for (int i=0; i<size(); i++){
             _atm[i] = __atm[ord[i]];
             _crd[i] = __crd[ord[i]];
             _shadow[i] = __shadow[ord[i]];
-            if (reorder_types)
-              _type_table[i] = __type_table[ord[i]];
           }
+
+	reorder_types(ord);
 
         for (int i=0; i<observers.size(); i++)
           observers[i]->reordered(ord, after);
 
       }
 
-      void sort (REAL (*key)(const geometry<REAL,CELL> &, int i)) {
+      void sort (const std::function<REAL(const geometry<REAL,CELL> &, int)> & key) {
 
         std::vector<int> ord(size());
         for (int i = 0; i < size(); i++)
           ord[i] = i;
         std::sort(ord.begin(), ord.end(),
                   [&](const int& a, const int& b){
-            return ((*key)(*this,a) < (*key)(*this,b));
+            return (key(*this,a) < key(*this,b));
           });
         reorder(ord);
-
       }
 
       virtual void clear () {

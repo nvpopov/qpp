@@ -25,6 +25,7 @@ if(PYTHON_BINDINGS)
     pybind11_add_module(pyqpp MODULE NO_EXTRAS
         pyqpp/pyqpp.cpp
         pyqpp/pyqpp_linalg.cpp
+        pyqpp/pyqpp_math.cpp
         pyqpp/pyqpp_cell.cpp
         pyqpp/pyqpp_geom.cpp
         pyqpp/pyqpp_xgeom.cpp

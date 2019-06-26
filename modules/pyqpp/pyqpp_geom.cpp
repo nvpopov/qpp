@@ -23,6 +23,7 @@ void py_geom_export(py::module m, const char * pyname) {
       .def("insert",     &qpp::geometry<REAL,CELL>::py_insert2)
       .def("insert",     &qpp::geometry<REAL,CELL>::py_insert3)
       .def("clear",      &qpp::geometry<REAL,CELL>::clear)
+      .def("sort",       &qpp::geometry<REAL,CELL>::sort)
       .def("pos",        &qpp::geometry<REAL,CELL>::py_pos1)
       .def("pos",        &qpp::geometry<REAL,CELL>::py_pos2)
       .def("pos",        &qpp::geometry<REAL,CELL>::py_pos3)

@@ -5,47 +5,43 @@ sys.path.append("../../modules/pyqpp")
 
 from qpp import *
 from sys import stdin,stdout
-from math import pi,sqrt
+from math import pi,sqrt,floor,atan2,cos,sin,acos
+import numpy as np
+
+eps = 1e-3
+
+def frac_dev(x):
+    return x - floor(x+.5)
 
 
-def qmmm_unit_cell(uc,pg,cntr,R):
+def transl_equiv(geom,cell,i,j):
+    if geom.atom[i] != geom.atom[j]:
+        return False
+    f = cell.cart2frac(geom.pos(i)-geom.pos(j))
+    return abs(frac_dev(f[0])) < eps and abs(frac_dev(f[1])) < eps and abs(frac_dev(f[2])) < eps
 
-    #eps = vector3d.tol_equiv
-    eps = 1e-3
-    
-    quc = xgeometry('d',periodic_cell_d(0),[('charge','real')])
-    for i in range(len(uc)):
-        if uc.frac:
-            uc.coord[i] -= uc.cell.cart2frac(cntr)
-        else:
-            uc.coord[i] -= cntr
-    fill(quc,uc,sphere_shape_d(R))
 
-    G = point_group_d([])
-    generator_form(G,pg)
-    quc_unq = geometry_pgd(G)
-    nimage = []
-    unique(nimage,quc_unq, quc, key = lambda g,i : sqrt(g.y[i]*g.y[i]+g.z[i]*g.z[i]), eps = eps)
+def transl_equiv_shells(geom,cell,I,J):
+    for i in I:
+        for j in J:
+            if transl_equiv(geom,cell,i,j):
+                return True
+    return False
 
-    shells = [[] for i in range(len(quc_unq))]
-    for i in range(len(quc_unq)):
-        for I in index_range(G.begin(),G.end()):
-            a = quc_unq.atom[i]
-            r = quc_unq.pos(i,I)
-            for k in range(len(quc)):
-                if (quc.pos(k) - r).norm()<eps and quc.atom[k]==a:
-                    shells[i].append(k)
+def lin_cond_minimum(A,B,b):
+    '''Find the minimum of quadratic form:
+             x*B*x = min
+       with additional conditions:
+             A*x = b
+       the dimension of A is NxM, that of B is MxM,
+       and M > N'''
+    Binv = np.linalg.inv(B)
+    BA = np.matmul(Binv,A.transpose())
+    ABA = np.linalg.inv(np.matmul(A,BA))
+    return np.matmul(BA,np.matmul(ABA,b))
 
-    supshells = []
-
-    print("Shells of symm-equiv:")
-    for i in range(len(quc_unq)):
-        print(i,shells[i])
-                    
-    for x in quc_unq: print(x)
-    print(nimage)
-    
-    return quc
+def qmmm_unit_cell(uc,pg,cntr,R,Lmax):
+    pass
 
 
 ''' -----------------  qmmm_uc -------------------
@@ -114,7 +110,10 @@ PG = G[i]
 line = input('Please enter the radius of resulting unit cell: ')
 R = float(line)
 
-qmmm_uc = qmmm_unit_cell(uc,PG,cntr,R)
+line = input('Please enter the maximum L for multipole moments to nullify: ')
+Lmax = int(line)
+
+qmmm_uc = qmmm_unit_cell(uc,PG,cntr,R,Lmax)
 
 f=open('qmmm_uc.xyz','w')
 io.write_xyzq(f.fileno(),qmmm_uc)
