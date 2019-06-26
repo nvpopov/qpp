@@ -35,6 +35,7 @@ namespace qpp {
     STRING_EX s;
     std::getline(inp,s);
     int nat = std::stoi(s);
+    //fmt::print("nat={}\n", nat);
     std::getline(inp,s);
 
     if (geom.DIM == 3) {

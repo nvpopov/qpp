@@ -60,7 +60,7 @@ void py_write_xyzq (int fd, const qpp::xgeometry<REAL, CELL> & geom) {
 template< class REAL, class CELL >
 void py_export_ioxyz (py::module m) {
 
-  m.def("read_xyz",  &py_read_xyzq<REAL, CELL>);
+  m.def("read_xyz",  &py_read_xyz<REAL, CELL>);
   m.def("read_xyzq", &py_read_xyzq<REAL, CELL>);
   m.def("write_xyz", &py_write_xyz<REAL, CELL>);
   m.def("write_xyzq",&py_write_xyzq<REAL, CELL>);
