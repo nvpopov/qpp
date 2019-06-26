@@ -521,7 +521,7 @@ namespace qpp{
 	observers[i]->reordered(ord, before);
       // fixme - might be inefficient for large molecules
       
-      std::vector<STRING> __atm(_atm);
+      std::vector<STRING_EX> __atm(_atm);
       std::vector<vector3<REAL> > __crd(_crd);
       std::vector<Bool> __shadow(_shadow);
       
@@ -534,7 +534,7 @@ namespace qpp{
       reorder_types(ord);
 
       for (int i=0; i<_nxstring; i++){
-	std::vector<STRING> __xstring(_xstring[i]);
+	std::vector<STRING_EX> __xstring(_xstring[i]);
 	for (int j=0; j<size(); j++)
 	  _xstring[i][j] = __xstring[ord[j]];
       }
