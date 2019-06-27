@@ -97,6 +97,26 @@ namespace qpp {
         (*this).row(2) = v3;
       }
 
+      template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
+      generic_matrix(const VALTYPE v00, const VALTYPE v01, const VALTYPE v02,
+                     const VALTYPE v10, const VALTYPE v11, const VALTYPE v12,
+                     const VALTYPE v20, const VALTYPE v21, const VALTYPE v22):
+        Eigen::Matrix<VALTYPE, N , M >() {
+
+        (*this).row(0)(0) = v00;
+        (*this).row(0)(1) = v01;
+        (*this).row(0)(2) = v02;
+
+        (*this).row(1)(0) = v10;
+        (*this).row(1)(1) = v11;
+        (*this).row(1)(2) = v12;
+
+        (*this).row(2)(0) = v20;
+        (*this).row(2)(1) = v21;
+        (*this).row(2)(2) = v22;
+
+      }
+
       generic_matrix(VALTYPE xyz):Eigen::Matrix<VALTYPE, N , M >() {
         (*this) = generic_matrix<VALTYPE, N , M>::Constant(N, M, xyz);
       }
@@ -121,15 +141,27 @@ namespace qpp {
 
       //template<typename = std::enable_if<check_is_vector3<N , M>::value> >
       STRING_EX to_string_vec() const {
-        return fmt::format("[{}, {}, {}]", (*this)[0], (*this)[1], (*this)[2]);
+        return fmt::format("[{:15.8f}, {:15.8f}, {:15.8f}]", (*this)[0], (*this)[1], (*this)[2]);
       }
 
       //template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
       STRING_EX to_string_matr() const {
-        return fmt::format("[{}, {}, {}]",
-                           (*this).row(0),
-                           (*this).row(1),
-                           (*this).row(2));
+
+        return fmt::format("[\n"
+                           " {:15.8f}, {:15.8f}, {:15.8f}\n"
+                           " {:15.8f}, {:15.8f}, {:15.8f}\n"
+                           " {:15.8f}, {:15.8f}, {:15.8f}\n"
+                           "]",
+                           (*this).row(0)(0),
+                           (*this).row(0)(1),
+                           (*this).row(0)(2),
+                           (*this).row(1)(0),
+                           (*this).row(1)(1),
+                           (*this).row(1)(2),
+                           (*this).row(2)(0),
+                           (*this).row(2)(1),
+                           (*this).row(2)(2));
+
       }
 
 

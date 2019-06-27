@@ -380,8 +380,8 @@ namespace qpp {
       fmt::print(out,
                  "{:15.8f} {:15.8f} {:15.8f}\n",
                  geom.cell.v[i][0],
-          geom.cell.v[i][1],
-          geom.cell.v[i][2]);
+                 geom.cell.v[i][1],
+                 geom.cell.v[i][2]);
 
     fmt::print(out, "{}\n", poscar_comment);
 
@@ -397,8 +397,8 @@ namespace qpp {
           fmt::print(out,
                      "{:15.8f} {:15.8f} {:15.8f}\n",
                      geom.pos(q)[0],
-              geom.pos(q)[1],
-              geom.pos(q)[2]);
+                     geom.pos(q)[1],
+                     geom.pos(q)[2]);
 
   }
 

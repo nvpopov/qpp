@@ -69,6 +69,9 @@ void py_matrix3_export (py::module m, const char * pyname) {
   py::class_<qpp::matrix3<VALTYPE> >(m, pyname)
       .def(py::init<>())
       .def(py::init<VALTYPE>())
+      .def(py::init<VALTYPE, VALTYPE, VALTYPE,
+                    VALTYPE, VALTYPE, VALTYPE,
+                    VALTYPE, VALTYPE, VALTYPE>())
       .def(py::init<const qpp::matrix3<VALTYPE>&>())
       .def(py::init<const qpp::vector3<VALTYPE>&,
            const qpp::vector3<VALTYPE>&,
