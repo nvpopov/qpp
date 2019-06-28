@@ -1,17 +1,6 @@
 #ifndef LACE3D_H
 #define LACE3D_H
 
-#pragma GCC diagnostic ignored "-Wnarrowing"
-#include <cmath>
-#include <complex>
-#include <ostream>
-#include <sstream>
-#include <initializer_list>
-#include <Eigen/Eigen>
-#include <unsupported/Eigen/MatrixFunctions>
-#include <data/types.hpp>
-#include <consts.hpp>
-
 #if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
 #pragma push_macro("slots")
 #undef slots
@@ -22,6 +11,17 @@
 namespace py = pybind11;
 #pragma pop_macro("slots")
 #endif
+
+#pragma GCC diagnostic ignored "-Wnarrowing"
+#include <cmath>
+#include <complex>
+#include <ostream>
+#include <sstream>
+#include <initializer_list>
+#include <Eigen/Eigen>
+#include <unsupported/Eigen/MatrixFunctions>
+#include <data/types.hpp>
+#include <consts.hpp>
 
 namespace qpp {
 

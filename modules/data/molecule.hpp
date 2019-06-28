@@ -1,12 +1,6 @@
 #ifndef QPP_MOLECULE_H
 #define QPP_MOLECULE_H
 
-//#include <data/atom.hpp>
-#include <classic/potentials.hpp>
-#include <geom/geom.hpp>
-#include <basis/basis.hpp>
-#include <basis/ecp.hpp>
-
 #if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
 #pragma push_macro("slots")
 #undef slots
@@ -17,6 +11,11 @@
 namespace py = pybind11;
 #pragma pop_macro("slots")
 #endif
+
+#include <classic/potentials.hpp>
+#include <geom/geom.hpp>
+#include <basis/basis.hpp>
+#include <basis/ecp.hpp>
 
 namespace qpp {
 

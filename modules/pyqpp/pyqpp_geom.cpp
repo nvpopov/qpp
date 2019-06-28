@@ -1,6 +1,17 @@
+#pragma push_macro("slots")
+#undef slots
+#include <pybind11/pybind11.h>
+#include <pybind11/operators.h>
+#include <pybind11/stl.h>
+#include <pybind11/iostream.h>
+#pragma pop_macro("slots")
+namespace py = pybind11;
+
 #include <pyqpp/pyqpp.hpp>
 #include <geom/geom.hpp>
 #include <symm/gen_cell.hpp>
+
+using namespace qpp;
 
 template<class REAL,class CELL>
 void py_geom_export(py::module m, const char * pyname) {

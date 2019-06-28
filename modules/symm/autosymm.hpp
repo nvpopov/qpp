@@ -1,6 +1,16 @@
 #ifndef QPP_AUTOSYMM_H
 #define QPP_AUTOSYMM_H
 
+#if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
+#pragma push_macro("slots")
+#undef slots
+#include <pybind11/pybind11.h>
+#include <pybind11/operators.h>
+#include <pyqpp/py_indexed_property.hpp>
+namespace py = pybind11;
+#pragma pop_macro("slots")
+#endif
+
 #include <geom/geom.hpp>
 #include <geom/ngbr.hpp>
 #include <geom/shape.hpp>
@@ -14,16 +24,6 @@
 #include <algorithm>
 #include <iomanip>
 #include <optional>
-
-#if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
-#pragma push_macro("slots")
-#undef slots
-#include <pybind11/pybind11.h>
-#include <pybind11/operators.h>
-#include <pyqpp/py_indexed_property.hpp>
-namespace py = pybind11;
-#pragma pop_macro("slots")
-#endif
 
 namespace qpp {
 

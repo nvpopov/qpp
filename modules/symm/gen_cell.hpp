@@ -1,14 +1,6 @@
 #ifndef QPP_GCELL_H
 #define QPP_GCELL_H
 
-#include <geom/lace3d.hpp>
-#include <symm/index.hpp>
-#include <symm/transform.hpp>
-#include <symm/groups.hpp>
-#include <consts.hpp>
-#include <stdexcept>
-#include <cmath>
-
 #if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
 #pragma push_macro("slots")
 #undef slots
@@ -18,6 +10,14 @@
 namespace py = pybind11;
 #pragma pop_macro("slots")
 #endif
+
+#include <geom/lace3d.hpp>
+#include <symm/index.hpp>
+#include <symm/transform.hpp>
+#include <symm/groups.hpp>
+#include <consts.hpp>
+#include <stdexcept>
+#include <cmath>
 
 namespace qpp{
 

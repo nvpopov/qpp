@@ -1,8 +1,5 @@
-#ifndef _QPP_PERMUT_H
-#define _QPP_PERMUT_H
-
-#include <vector>
-#include <string>
+#ifndef QPP_PERMUT_H
+#define QPP_PERMUT_H
 
 #if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
 #pragma push_macro("slots")
@@ -14,10 +11,13 @@ namespace py = pybind11;
 #pragma pop_macro("slots")
 #endif
 
-namespace qpp{
+#include <vector>
+#include <string>
+
+namespace qpp {
 
   // ------------------------------------------------------
-  class permutation{
+  class permutation {
 
       std::vector<int> p;
 
@@ -26,21 +26,20 @@ namespace qpp{
       int N;
 
       //static permutation unity;
-
-      permutation(int _N){
+      permutation(int _N) {
         N = _N;
         for (int i=0; i<N; i++)
           p.push_back(i);
       }
 
-      permutation(const permutation & b){
+      permutation(const permutation & b) {
         //std::cout << "copy constructor\n";
         N = b.N;
         for (int i : b.p)
           p.push_back(i);
       }
 
-      permutation(const std::vector<int> & li){
+      permutation(const std::vector<int> & li) {
         //std::cout << "list constructor\n";
         N = li.size();
         for (int j : li)
@@ -62,7 +61,7 @@ namespace qpp{
       inline int size() const
       {return p.size();}
 
-      inline permutation operator*(const permutation & b) const{
+      inline permutation operator*(const permutation & b) const {
         if (N != b.N) IndexError("Permutations have different dimensions");
         permutation res(N);
         for (int i=0; i<N; i++) res[i] = b[p[i]];

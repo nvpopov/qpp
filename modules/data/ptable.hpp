@@ -1,12 +1,5 @@
 #ifndef QPP_ptable_H
 #define QPP_ptable_H
-#include <string>
-#include <iostream>
-#include <geom/lace3d.hpp>
-#include <data/types.hpp>
-#include <array>
-#include <optional>
-#include <data/case_icomp.hpp>
 
 #if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
 #pragma push_macro("slots")
@@ -18,6 +11,14 @@
 namespace py = pybind11;
 #pragma pop_macro("slots")
 #endif
+
+#include <string>
+#include <iostream>
+#include <geom/lace3d.hpp>
+#include <data/types.hpp>
+#include <array>
+#include <optional>
+#include <data/case_icomp.hpp>
 
 namespace qpp {
 

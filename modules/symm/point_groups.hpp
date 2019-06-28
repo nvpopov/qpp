@@ -1,15 +1,6 @@
 #ifndef QPP_POINT_GROUPS_H
 #define QPP_POINT_GROUPS_H
 
-#include <geom/lace3d.hpp>
-#include <symm/groups.hpp>
-#include <symm/group_theory.hpp>
-#include <symm/gen_cell.hpp>
-#include <symm/shoenflis.hpp>
-#include <symm/permut.hpp>
-#include <io/geomio.hpp>
-#include <cmath>
-
 #if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
 #pragma push_macro("slots")
 #undef slots
@@ -19,6 +10,15 @@
 namespace py = pybind11;
 #pragma pop_macro("slots")
 #endif
+
+#include <geom/lace3d.hpp>
+#include <symm/groups.hpp>
+#include <symm/group_theory.hpp>
+#include <symm/gen_cell.hpp>
+#include <symm/shoenflis.hpp>
+#include <symm/permut.hpp>
+#include <io/geomio.hpp>
+#include <cmath>
 
 namespace qpp{
 

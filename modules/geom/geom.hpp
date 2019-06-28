@@ -1,15 +1,6 @@
 #ifndef QPP_GEOM_H
 #define QPP_GEOM_H
 
-#include <algorithm>
-#include <vector>
-#include <cmath>
-#include <functional>
-#include <geom/lace3d.hpp>
-#include <data/data.hpp>
-#include <symm/index.hpp>
-#include <symm/cell.hpp>
-
 #if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
 #pragma push_macro("slots")
 #undef slots
@@ -21,6 +12,15 @@
 namespace py = pybind11;
 #pragma pop_macro("slots")
 #endif
+
+#include <algorithm>
+#include <vector>
+#include <cmath>
+#include <functional>
+#include <geom/lace3d.hpp>
+#include <data/data.hpp>
+#include <symm/index.hpp>
+#include <symm/cell.hpp>
 
 namespace qpp{
 
@@ -628,12 +628,12 @@ The supercell concept generalization for the geometry class looks like:
 
     void reorder_types(const std::vector<int> & ord){
       if (_type_table.size() != size())
-	return;
+  return;
       std::vector<int> __type_table(_type_table);
       for (int i=0; i<size(); i++)
-	_type_table[i] = __type_table[ord[i]];
+  _type_table[i] = __type_table[ord[i]];
     }
-    
+
       virtual void reorder (const std::vector<int> & ord) {
 
         for (int i=0; i<observers.size(); i++)
@@ -643,7 +643,7 @@ The supercell concept generalization for the geometry class looks like:
         std::vector<STRING_EX> __atm(_atm);
         std::vector<vector3<REAL> > __crd(_crd);
         std::vector<Bool> __shadow(_shadow);
-        
+
         //bool reorder_types = (_type_table.size() == size());
 
         for (int i=0; i<size(); i++){
@@ -652,7 +652,7 @@ The supercell concept generalization for the geometry class looks like:
             _shadow[i] = __shadow[ord[i]];
           }
 
-	reorder_types(ord);
+  reorder_types(ord);
 
         for (int i=0; i<observers.size(); i++)
           observers[i]->reordered(ord, after);

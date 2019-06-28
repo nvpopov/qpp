@@ -1,5 +1,6 @@
 #ifndef QPP_VASP_IO_NATIVE
 #define QPP_VASP_IO_NATIVE
+
 #include <iostream>
 #include <fmt/format.h>
 #include <fmt/ostream.h>

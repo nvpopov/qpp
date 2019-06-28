@@ -1,14 +1,6 @@
 #ifndef QPP_INDEX_H
 #define QPP_INDEX_H
 
-#include <ostream>
-#include <sstream>
-#include <initializer_list>
-#include <stdexcept>
-#include <geom/lace3d.hpp>
-#include <data/errors.hpp>
-#include <io/strfun.hpp>
-
 #if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
 #pragma push_macro("slots")
 #undef slots
@@ -18,6 +10,15 @@
 namespace py = pybind11;
 #pragma pop_macro("slots")
 #endif
+
+
+#include <ostream>
+#include <sstream>
+#include <initializer_list>
+#include <stdexcept>
+#include <geom/lace3d.hpp>
+#include <data/errors.hpp>
+#include <io/strfun.hpp>
 
 namespace qpp {
 

@@ -20,7 +20,8 @@
 namespace qpp{
 
   template<class REAL, class CELL = periodic_cell<REAL> >
-  void read_gulp_simple_input(std::basic_istream<CHAR_EX,TRAITS> & inp, geometry<REAL,CELL> & geom){
+  void read_gulp_simple_input(std::basic_istream<CHAR_EX,TRAITS> & inp,
+                              geometry<REAL,CELL> & geom) {
 
     STRING_EX s;
 
@@ -78,7 +79,8 @@ namespace qpp{
   }
 
   template<class REAL, class CELL = periodic_cell<REAL> >
-  void write_gulp_simple_input(std::basic_ostream<CHAR_EX,TRAITS> &out, geometry<REAL, CELL> &geom){
+  void write_gulp_simple_input(std::basic_ostream<CHAR_EX,TRAITS> &out,
+                               geometry<REAL, CELL> &geom) {
 
     out << "opti prop conp relax" << std::endl;
     out << "vectors" << std::endl;
@@ -86,8 +88,8 @@ namespace qpp{
       out <<
              fmt::format("{:16.8f} {:16.8f} {:16.8f}",
                          geom.cell.v[i][0],
-          geom.cell.v[i][1],
-          geom.cell.v[i][2]) << std::endl;
+                         geom.cell.v[i][1],
+                         geom.cell.v[i][2]) << std::endl;
     out << "frac" << std::endl;
 
     for (int q = 0; q < geom.nat(); q++ )
@@ -96,9 +98,10 @@ namespace qpp{
                                "core",
                                2.0,
                                geom.pos(q)[0],
-          geom.pos(q)[1],
-          geom.pos(q)[2]) << std::endl;
+                               geom.pos(q)[1],
+                               geom.pos(q)[2]) << std::endl;
   }
+
 }
 
 #endif

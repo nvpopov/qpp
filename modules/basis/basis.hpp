@@ -1,14 +1,6 @@
 #ifndef QPP_BASIS_H
 #define QPP_BASIS_H
 
-//#include <data/data.hpp>
-#include <geom/geom.hpp>
-#include <basis/ecp.hpp>
-#include <geom/lace3d.hpp>
-#include <Eigen/Dense>
-#include <fmt/format.h>
-#include <fmt/ostream.h>
-
 #if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
 #pragma push_macro("slots")
 #undef slots
@@ -20,7 +12,15 @@ namespace py = pybind11;
 #pragma pop_macro("slots")
 #endif
 
-namespace qpp{
+//#include <data/data.hpp>
+#include <geom/geom.hpp>
+#include <basis/ecp.hpp>
+#include <geom/lace3d.hpp>
+#include <Eigen/Dense>
+#include <fmt/format.h>
+#include <fmt/ostream.h>
+
+namespace qpp {
   //fixme - this drags the whole namespace into qpp::
   //  using namespace boost::numeric::ublas;
 
@@ -47,7 +47,7 @@ namespace qpp{
 
   // -----------------------------------------------------------------
 
-  enum qpp_bastype{
+  enum qpp_bastype {
     qbas_gauss,
     qbas_slater,
     qbas_siesta,
@@ -59,7 +59,7 @@ namespace qpp{
 
   // -----------------------------------------------------------------
 
-  enum qpp_angtype{
+  enum qpp_angtype {
     qang_spherical,
     qang_cartesian
   };

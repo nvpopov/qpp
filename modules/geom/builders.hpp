@@ -1,16 +1,5 @@
 #ifndef QPP_BUILDERS_H
 #define QPP_BUILDERS_H
-#pragma GCC diagnostic ignored "-Wnarrowing"
-#include <vector>
-#include <cmath>
-#include <functional>
-#include <symm/index.hpp>
-#include <symm/groups.hpp>
-#include <symm/cell.hpp>
-#include <geom/geom.hpp>
-#include <geom/xgeom.hpp>
-#include <geom/shape.hpp>
-#include <geom/ngbr.hpp>
 
 #if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
 #pragma push_macro("slots")
@@ -22,6 +11,18 @@
 namespace py = pybind11;
 #pragma pop_macro("slots")
 #endif
+
+#pragma GCC diagnostic ignored "-Wnarrowing"
+#include <vector>
+#include <cmath>
+#include <functional>
+#include <symm/index.hpp>
+#include <symm/groups.hpp>
+#include <symm/cell.hpp>
+#include <geom/geom.hpp>
+#include <geom/xgeom.hpp>
+#include <geom/shape.hpp>
+#include <geom/ngbr.hpp>
 
 namespace qpp {
 

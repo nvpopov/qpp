@@ -1,12 +1,6 @@
 #ifndef QPP_SHAPE_H
 #define QPP_SHAPE_H
 
-//#include <mathf/constants.hpp>
-//#include <data/qppdata.hpp>
-#include <geom/geom.hpp>
-#include <geom/lace3d.hpp>
-#include <algorithm>
-
 #if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
 #pragma push_macro("slots")
 #undef slots
@@ -16,6 +10,10 @@
 namespace py = pybind11;
 #pragma pop_macro("slots")
 #endif
+
+#include <geom/geom.hpp>
+#include <geom/lace3d.hpp>
+#include <algorithm>
 
 #define v2d qpp::vector2<VALTYPE>
 #define v3d qpp::vector3<VALTYPE>

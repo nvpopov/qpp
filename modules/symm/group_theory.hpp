@@ -8,10 +8,10 @@
 #include <data/data.hpp>
 #include <Eigen/Dense>
 
-namespace qpp{
+namespace qpp {
 
   template<class TRANSFORM, class ARRAY = std::vector<TRANSFORM> >
-  class group_analyzer{
+  class group_analyzer {
 
       // All group elements are stored here
       const ARRAY & G;
@@ -243,7 +243,7 @@ namespace qpp{
       //-------------------------------------------------------------------------------------
 
       // Constructors
-      group_analyzer(const ARRAY & _G) : G(_G){
+      group_analyzer(const ARRAY & _G) : G(_G) {
         //mtab = NULL;
         //ordr = NULL;
 
@@ -259,7 +259,7 @@ namespace qpp{
         //std::cout << "alive4\n";
       }
 
-      ~group_analyzer(){
+      ~group_analyzer() {
         //      if (ordr != nullptr) delete [] ordr;
         delete [] ordr;
       }
@@ -269,7 +269,7 @@ namespace qpp{
   // -------------------------------------------------------------------------------
 
   template <class TRANSFORM, class ARRAY = std::vector<TRANSFORM> >
-  void generator_form(genform_group<TRANSFORM> & R, ARRAY & G){
+  void generator_form(genform_group<TRANSFORM> & R, ARRAY & G) {
     group_analyzer<TRANSFORM,ARRAY> A(G);
     std::vector<int> ee = {0}, gg = A.find_generators(ee);
     int DIM = gg.size();
@@ -314,7 +314,7 @@ namespace qpp{
       }
 
       // Regular representation matrix for i-th element
-      matrix regrep(int i){
+      matrix regrep(int i) {
         matrix R = matrix::Zero(G.size(),G.size());
 
         for (int j=0; j<G.size(); j++)
@@ -324,7 +324,7 @@ namespace qpp{
 
       // ----------------------------------------------------------
       // Scalar product of character chi with irrep character
-      VALTYPE chi_scal(const vector &ch, int irrep){
+      VALTYPE chi_scal(const vector &ch, int irrep) {
         VALTYPE s(0);
         for (int cl = 0; cl < A.n_classes(); cl++)
           s += std::conj(ch(cl))*chi(irrep,cl)*VALTYPE(A.class_size(cl));
@@ -337,14 +337,14 @@ namespace qpp{
       // Decompose the subspace of the regular representation defined by its
       // basis vectors n(i) into invariant subspaces
       // n(i,j) = delta_ij in the beginning
-      void subspace_decompose(matrix &n, std::vector<int> &dims){
+      void subspace_decompose(matrix &n, std::vector<int> &dims) {
         // n(i,j) is j-th component of i-th basis vector of the subspace
         // dims array contains the dimensions of invariant subspaces
 
         int N = G.size();
         if (N!=n.rows() || N!=n.cols())
-          throw  std::range_error("group_characters::subspace_decompose : "
-                                  "only regular representaion subspaces!");
+          throw std::range_error("group_characters::subspace_decompose : "
+                                 "only regular representaion subspaces!");
 
         // Step 1. Form the matrix commuting the regular representation
         //std::cout << "step1\n";
@@ -407,7 +407,7 @@ namespace qpp{
       // into invariant subspaces
       // fixme - find more efficient algorithm (MeatAxe?)
       // fixme - should this algorithm be recursive?
-      void build_chi(){
+      void build_chi() {
         int N = G.size();
         //chi.resize(A.n_classes());
 
@@ -470,9 +470,8 @@ namespace qpp{
               chi(i, j) = VALTYPE(0);
       }
 
-
   };
 
-}
+} //namespace qpp
 
 #endif

@@ -1,5 +1,4 @@
 #include "errors.hpp"
-#include <stdexcept>
 
 #if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
 #pragma push_macro("slots")
@@ -9,6 +8,8 @@
 namespace py = pybind11;
 #pragma pop_macro("slots")
 #endif
+
+#include <stdexcept>
 
 namespace qpp{
 

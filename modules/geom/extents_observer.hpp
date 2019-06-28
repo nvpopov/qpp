@@ -1,15 +1,6 @@
 #ifndef QPP_EXTENTS_OBS_H
 #define QPP_EXTENTS_OBS_H
 
-#include <typeinfo>
-#include <utility>
-#include <set>
-#include <algorithm>
-#include <cmath>
-#include <geom/geom.hpp>
-#include <geom/aabb.hpp>
-#include <string>
-
 #if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
 #pragma push_macro("slots")
 #undef slots
@@ -21,8 +12,16 @@ namespace py = pybind11;
 #pragma pop_macro("slots")
 #endif
 
+#include <typeinfo>
+#include <utility>
+#include <set>
+#include <algorithm>
+#include <cmath>
+#include <geom/geom.hpp>
+#include <geom/aabb.hpp>
+#include <string>
 
-namespace qpp{
+namespace qpp {
 
   template <class REAL, class CELL = periodic_cell<REAL> >
   class extents_observer_t : public geometry_observer<REAL> {
@@ -83,5 +82,6 @@ namespace qpp{
 
   };
 
-}
+} // namespace qpp
+
 #endif

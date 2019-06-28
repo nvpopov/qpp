@@ -25,5 +25,6 @@ void pyqpp_io_export           (py::module m);
 void pyqpp_gmsio_export        (py::module m);
 void pyqpp_experimental_export (py::module m);
 void pyqpp_ptable_export       (py::module m);
+void pyqpp_ccd_export          (py::module m);
 
 #endif
