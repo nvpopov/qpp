@@ -16,15 +16,52 @@ namespace py = pybind11;
 using namespace qpp;
 
 template<typename REAL>
+void pyqpp_ccd_scf_step_export_tmpl(py::module m, const char * pyname) {
+
+  py::class_<comp_chem_program_scf_step_info_t<REAL>,
+      std::shared_ptr<comp_chem_program_scf_step_info_t<REAL> > >
+      py_ccd_scf_step(m, pyname);
+
+  py_ccd_scf_step.def_readonly("iter", &comp_chem_program_scf_step_info_t<REAL>::m_iter)
+                 .def_readonly("ex", &comp_chem_program_scf_step_info_t<REAL>::m_ex)
+                 .def_readonly("dem", &comp_chem_program_scf_step_info_t<REAL>::m_dem)
+                 .def_readonly("toten", &comp_chem_program_scf_step_info_t<REAL>::m_toten)
+                 .def_readonly("e_change", &comp_chem_program_scf_step_info_t<REAL>::m_e_change)
+                 .def_readonly("d_change", &comp_chem_program_scf_step_info_t<REAL>::m_d_change)
+                 .def_readonly("error", &comp_chem_program_scf_step_info_t<REAL>::m_generic_error);
+
+}
+
+template<typename REAL>
 void pyqpp_ccd_step_export_tmpl(py::module m, const char * pyname) {
 
-  py::class_<comp_chem_program_step_t<REAL>, std::shared_ptr<comp_chem_program_step_t<REAL> > >
+  py::class_<comp_chem_program_step_t<REAL>,
+      std::shared_ptr<comp_chem_program_step_t<REAL> > >
       py_ccd_step(m, pyname);
 
-  py_ccd_step.def_readonly("toten", &comp_chem_program_step_t<REAL>::m_toten);
-  py_ccd_step.def_readonly("pos", &comp_chem_program_step_t<REAL>::m_atoms_pos);
-  py_ccd_step.def_readonly("grad", &comp_chem_program_step_t<REAL>::m_atoms_grads);
-  py_ccd_step.def_readonly("vel", &comp_chem_program_step_t<REAL>::m_atoms_vels);
+  py_ccd_step.def_readonly("toten", &comp_chem_program_step_t<REAL>::m_toten)
+             .def_readonly("pos", &comp_chem_program_step_t<REAL>::m_atoms_pos)
+             .def_readonly("grad", &comp_chem_program_step_t<REAL>::m_atoms_grads)
+             .def_readonly("vel", &comp_chem_program_step_t<REAL>::m_atoms_vels)
+             .def_readonly("en_spin_1_o",
+                           &comp_chem_program_step_t<REAL>::m_eigen_values_spin_1_occ)
+             .def_readonly("en_spin_1_u",
+                           &comp_chem_program_step_t<REAL>::m_eigen_values_spin_1_unocc)
+             .def_readonly("en_spin_2_o",
+                           &comp_chem_program_step_t<REAL>::m_eigen_values_spin_2_occ)
+             .def_readonly("en_spin_2_u",
+                           &comp_chem_program_step_t<REAL>::m_eigen_values_spin_2_unocc)
+             .def_readonly("en_gap_spin_1", &comp_chem_program_step_t<REAL>::m_energy_gap_spin_1)
+             .def_readonly("en_gap_spin_2", &comp_chem_program_step_t<REAL>::m_energy_gap_spin_2)
+             .def_readonly("dipole_moment", &comp_chem_program_step_t<REAL>::m_dipole_moment)
+             .def_readonly("gr_min", &comp_chem_program_step_t<REAL>::m_gradient_min)
+             .def_readonly("gr_max", &comp_chem_program_step_t<REAL>::m_gradient_max)
+             .def_readonly("gr_av", &comp_chem_program_step_t<REAL>::m_gradient_average)
+             .def_readonly("ngr_min", &comp_chem_program_step_t<REAL>::m_gradient_norm_min)
+             .def_readonly("ngr_max", &comp_chem_program_step_t<REAL>::m_gradient_norm_max)
+             .def_readonly("ngr_av", &comp_chem_program_step_t<REAL>::m_gradient_norm_average)
+             .def_readonly("cell_is_animable", &comp_chem_program_step_t<REAL>::m_cell_is_animable)
+             .def_readonly("cell", &comp_chem_program_step_t<REAL>::m_cell);
 
 }
 
@@ -36,7 +73,11 @@ void pyqpp_ccd_vib_export_tmpl(py::module m, const char * pyname) {
       py_ccd_vib(m, pyname);
 
   py_ccd_vib.def_readonly("freq", &comp_chem_program_vibration_info_t<REAL>::m_frequency)
-            .def_readonly("disp", &comp_chem_program_vibration_info_t<REAL>::m_disp);
+            .def_readonly("disp", &comp_chem_program_vibration_info_t<REAL>::m_disp)
+            .def_readonly("intensity", &comp_chem_program_vibration_info_t<REAL>::m_intensity)
+            .def_readonly("red_mass", &comp_chem_program_vibration_info_t<REAL>::m_reduced_mass)
+            .def_readonly("raman_act", &comp_chem_program_vibration_info_t<REAL>::m_raman_activity)
+            .def_readonly("depol", &comp_chem_program_vibration_info_t<REAL>::m_depolarization);
 
 }
 
@@ -95,11 +136,13 @@ void pyqpp_ccd_export(py::module m) {
       .export_values();
 
   pyqpp_ccd_vib_export_tmpl<float>(m, "ccd_vib_f");
+  pyqpp_ccd_scf_step_export_tmpl<float>(m, "ccd_scf_step_f");
   pyqpp_ccd_step_export_tmpl<float>(m, "ccd_step_f");
   pyqpp_ccd_export_tmpl<float>(m, "ccd_f");
 
 #ifdef PYTHON_EXP_EXT
-  pyqpp_ccd_vib_export_tmpl<float>(m, "ccd_vib_d");
+  pyqpp_ccd_vib_export_tmpl<double>(m, "ccd_vib_d");
+  pyqpp_ccd_scf_step_export_tmpl<double>(m, "ccd_scf_step_d");
   pyqpp_ccd_step_export_tmpl<double>(m, "ccd_step_d");
   pyqpp_ccd_export_tmpl<double>(m, "ccd_d");
 #endif

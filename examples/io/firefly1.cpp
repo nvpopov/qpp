@@ -57,7 +57,7 @@ int main () {
               fmt::print(std::cout, "{:15} {:15} {:15} {:15} {:15} {:15} {:15}\n",
                          scf_step.m_iter, scf_step.m_ex, scf_step.m_dem,
                          scf_step.m_toten, scf_step.m_e_change, scf_step.m_d_change,
-                         scf_step.m_orb_grad_or_diis_error);
+                         scf_step.m_generic_error);
             }
         }
 

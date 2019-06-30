@@ -300,7 +300,7 @@ namespace qpp {
                 _scf_step.m_toten = en_line_f[0];
                 _scf_step.m_e_change = en_line_f[1];
                 _scf_step.m_d_change = en_line_f[2];
-                _scf_step.m_orb_grad_or_diis_error = en_line_f[4];
+                _scf_step.m_generic_error = en_line_f[4];
 
                 output.m_steps[cur_step].m_scf_steps.push_back(std::move(_scf_step));
 

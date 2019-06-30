@@ -69,7 +69,7 @@ namespace qpp {
       double m_toten{double(0)};
       double m_e_change{double(0)};
       double m_d_change{double(0)};
-      double m_orb_grad_or_diis_error{double(0)};
+      double m_generic_error{double(0)};
 
   };
 
