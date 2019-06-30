@@ -2,9 +2,9 @@
 #undef slots
 #include <pybind11/pybind11.h>
 #include <pybind11/operators.h>
-#include <pybind11/stl.h>
 #include <pybind11/iostream.h>
 #pragma pop_macro("slots")
+
 namespace py = pybind11;
 
 #include <pyqpp/pyqpp.hpp>
@@ -22,6 +22,21 @@ void pyqpp_ccd_step_export_tmpl(py::module m, const char * pyname) {
       py_ccd_step(m, pyname);
 
   py_ccd_step.def_readonly("toten", &comp_chem_program_step_t<REAL>::m_toten);
+  py_ccd_step.def_readonly("pos", &comp_chem_program_step_t<REAL>::m_atoms_pos);
+  py_ccd_step.def_readonly("grad", &comp_chem_program_step_t<REAL>::m_atoms_grads);
+  py_ccd_step.def_readonly("vel", &comp_chem_program_step_t<REAL>::m_atoms_vels);
+
+}
+
+template<typename REAL>
+void pyqpp_ccd_vib_export_tmpl(py::module m, const char * pyname) {
+
+  py::class_<comp_chem_program_vibration_info_t<REAL>,
+      std::shared_ptr<comp_chem_program_vibration_info_t<REAL> > >
+      py_ccd_vib(m, pyname);
+
+  py_ccd_vib.def_readonly("freq", &comp_chem_program_vibration_info_t<REAL>::m_frequency)
+            .def_readonly("disp", &comp_chem_program_vibration_info_t<REAL>::m_disp);
 
 }
 
@@ -48,7 +63,8 @@ void pyqpp_ccd_export_tmpl(py::module m, const char * pyname) {
         .def_readonly("gr_norm_max", &comp_chem_program_data_t<REAL>::m_global_gradient_norm_max)
         .def_readonly("init_atoms_names", &comp_chem_program_data_t<REAL>::m_init_atoms_names)
         .def_readonly("init_atoms_charges", &comp_chem_program_data_t<REAL>::m_init_atoms_charges)
-        .def_readonly("steps", &comp_chem_program_data_t<REAL>::m_steps);
+        .def_readonly("steps", &comp_chem_program_data_t<REAL>::m_steps)
+        .def_readonly("vibs", &comp_chem_program_data_t<REAL>::m_vibs);
 
 }
 
@@ -78,10 +94,12 @@ void pyqpp_ccd_export(py::module m) {
       .value("rt_spectrum", rt_spectrum, "rt_spectrum")
       .export_values();
 
+  pyqpp_ccd_vib_export_tmpl<float>(m, "ccd_vib_f");
   pyqpp_ccd_step_export_tmpl<float>(m, "ccd_step_f");
   pyqpp_ccd_export_tmpl<float>(m, "ccd_f");
 
 #ifdef PYTHON_EXP_EXT
+  pyqpp_ccd_vib_export_tmpl<float>(m, "ccd_vib_d");
   pyqpp_ccd_step_export_tmpl<double>(m, "ccd_step_d");
   pyqpp_ccd_export_tmpl<double>(m, "ccd_d");
 #endif

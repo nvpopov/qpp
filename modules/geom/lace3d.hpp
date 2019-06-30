@@ -141,17 +141,16 @@ namespace qpp {
 
       //template<typename = std::enable_if<check_is_vector3<N , M>::value> >
       STRING_EX to_string_vec() const {
-        return fmt::format("[{:15.8f}, {:15.8f}, {:15.8f}]", (*this)[0], (*this)[1], (*this)[2]);
+        return fmt::format("[ {:8.6f}, {:8.6f}, {:8.6f} ]",
+                           (*this)[0], (*this)[1], (*this)[2]);
       }
 
       //template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
       STRING_EX to_string_matr() const {
 
-        return fmt::format("[\n"
-                           " {:15.8f}, {:15.8f}, {:15.8f}\n"
-                           " {:15.8f}, {:15.8f}, {:15.8f}\n"
-                           " {:15.8f}, {:15.8f}, {:15.8f}\n"
-                           "]",
+        return fmt::format("[ {:8.6f}, {:8.6f}, {:8.6f}\n"
+                           "   {:8.6f}, {:8.6f}, {:8.6f}\n"
+                           "   {:8.6f}, {:8.6f}, {:8.6f} ]",
                            (*this).row(0)(0),
                            (*this).row(0)(1),
                            (*this).row(0)(2),

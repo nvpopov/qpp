@@ -10,6 +10,7 @@
 namespace py = pybind11;
 #pragma pop_macro("slots")
 
+void pyqpp_opaque_types_export (py::module m);
 void pyqpp_linalg_export       (py::module m);
 void pyqpp_math_export         (py::module m);
 void pyqpp_cell_export         (py::module m);

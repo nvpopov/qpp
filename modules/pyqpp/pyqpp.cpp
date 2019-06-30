@@ -3,6 +3,9 @@
 PYBIND11_MODULE(pyqpp, m) {
 
   pyqpp_linalg_export(m);
+
+  pyqpp_opaque_types_export(m);
+
   pyqpp_math_export(m);
   pyqpp_cell_export(m);
   pyqpp_geom_export(m);

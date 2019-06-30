@@ -9,7 +9,7 @@
 namespace py = pybind11;
 #pragma pop_macro("slots")
 
-namespace qpp{
+namespace qpp {
 
   // ----------------------------------------------
 
@@ -98,11 +98,10 @@ namespace qpp{
         owner = _owner;
       }
 
-
-
-
   };
-}
+
+} // namespace qpp
+
 #endif
 
 #endif

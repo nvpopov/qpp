@@ -26,6 +26,7 @@ target_link_libraries(qpp ${QPP_LINK_LIB})
 if(PYTHON_BINDINGS)
     pybind11_add_module(pyqpp MODULE NO_EXTRAS
         pyqpp/pyqpp.cpp
+        pyqpp/pyqpp_opaque_types.cpp
         pyqpp/pyqpp_linalg.cpp
         pyqpp/pyqpp_math.cpp
         pyqpp/pyqpp_cell.cpp
