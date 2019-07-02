@@ -13,7 +13,34 @@ namespace py = pybind11;
 #include <fmt/format.h>
 #include <fmt/ostream.h>
 
+#include <io/ccd_cp2k.hpp>
+#include <io/ccd_firefly.hpp>
+#include <io/ccd_xyz.hpp>
+#include <io/fdstream.hpp>
+
 using namespace qpp;
+
+template<auto FUNC, typename REAL>
+void pyqpp_ccd_func_template(int fd, comp_chem_program_data_t<REAL> &ccd) {
+
+  boost::fdistream inp(fd);
+  FUNC(inp, ccd);
+
+}
+
+template<typename REAL>
+void pyqpp_ccd_io_export_tmpl(py::module m) {
+
+  auto io_m = m.def_submodule("io");
+
+  io_m.def("read_ccd_from_cp2k_output",
+           &pyqpp_ccd_func_template<read_ccd_from_cp2k_output<REAL>, REAL>);
+  io_m.def("read_ccd_from_firefly_output",
+           &pyqpp_ccd_func_template<read_ccd_from_firefly_output<REAL>, REAL>);
+  io_m.def("read_ccd_from_xyz_file",
+           &pyqpp_ccd_func_template<read_ccd_from_xyz_file<REAL>, REAL>);
+
+}
 
 template<typename REAL>
 void pyqpp_ccd_scf_step_export_tmpl(py::module m, const char * pyname) {
@@ -87,7 +114,8 @@ void pyqpp_ccd_export_tmpl(py::module m, const char * pyname) {
   py::class_<comp_chem_program_data_t<REAL>, std::shared_ptr<comp_chem_program_data_t<REAL> > >
       py_ccd(m, pyname);
 
-  py_ccd.def_readonly("runtype", &comp_chem_program_data_t<REAL>::m_run_t)
+  py_ccd.def(py::init<>())
+        .def_readonly("runtype", &comp_chem_program_data_t<REAL>::m_run_t)
         .def_readonly("program", &comp_chem_program_data_t<REAL>::m_comp_chem_program)
         .def_readonly("is_qmmm", &comp_chem_program_data_t<REAL>::m_is_qmmm)
         .def_readonly("DIM", &comp_chem_program_data_t<REAL>::m_DIM)
@@ -139,12 +167,14 @@ void pyqpp_ccd_export(py::module m) {
   pyqpp_ccd_scf_step_export_tmpl<float>(m, "ccd_scf_step_f");
   pyqpp_ccd_step_export_tmpl<float>(m, "ccd_step_f");
   pyqpp_ccd_export_tmpl<float>(m, "ccd_f");
+  pyqpp_ccd_io_export_tmpl<float>(m);
 
 #ifdef PYTHON_EXP_EXT
   pyqpp_ccd_vib_export_tmpl<double>(m, "ccd_vib_d");
   pyqpp_ccd_scf_step_export_tmpl<double>(m, "ccd_scf_step_d");
   pyqpp_ccd_step_export_tmpl<double>(m, "ccd_step_d");
   pyqpp_ccd_export_tmpl<double>(m, "ccd_d");
+  pyqpp_ccd_io_export_tmpl<double>(m);
 #endif
 
 }
