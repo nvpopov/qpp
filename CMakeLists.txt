@@ -72,6 +72,7 @@ endfunction(def_example_custom_lib)
 add_subdirectory(deps)
 include_directories(${PROJECT_SOURCE_DIR}/deps/pybind11/include)
 include_directories(${PROJECT_SOURCE_DIR}/deps/fmtlib/include)
+include_directories(${PROJECT_SOURCE_DIR}/deps/fmtlib/CppNumericalSolvers)
 #add_subdirectory(${CMAKE_SOURCE_DIR}/deps/fmtlib)
 
 #Python related stuff
