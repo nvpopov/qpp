@@ -9,6 +9,7 @@
 #include <geom/geom.hpp>
 #include <geom/geom_anim.hpp>
 #include <io/ccd_programs.hpp>
+#include <data/generic_array.hpp>
 
 namespace qpp {
 
@@ -78,9 +79,9 @@ namespace qpp {
 
       std::vector<comp_chem_program_scf_step_info_t<REAL> > m_scf_steps;
       double m_toten{double(0)};
-      std::vector<vector3<REAL> > m_atoms_pos;
-      std::vector<vector3<REAL> > m_atoms_grads;
-      std::vector<vector3<REAL> > m_atoms_vels;
+      generic_array_t<vector3<REAL>, REAL > m_atoms_pos;
+      generic_array_t<vector3<REAL>, REAL > m_atoms_grads;
+      generic_array_t<vector3<REAL>, REAL > m_atoms_vels;
 
       std::vector<REAL> m_eigen_values_spin_1_occ;
       std::vector<REAL> m_eigen_values_spin_1_unocc;
@@ -113,7 +114,9 @@ namespace qpp {
   struct comp_chem_program_data_t {
 
       std::vector<comp_chem_program_step_t<REAL> > m_steps;
-      std::vector<vector3<REAL> > m_init_atoms_pos;
+
+      generic_array_t<vector3<REAL>, REAL > m_init_atoms_pos;
+
       std::vector<std::string> m_init_atoms_names;
       std::vector<REAL> m_init_atoms_charges;
       std::vector<comp_chem_program_vibration_info_t<REAL> > m_vibs;

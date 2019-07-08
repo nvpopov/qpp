@@ -2,7 +2,7 @@
 #include <geom/builders.hpp>
 #include <geom/ngbr.hpp>
 #include <symm/gen_cell.hpp>
-#include <pybind11/stl.h>
+//#include <pybind11/stl.h>
 #include <pybind11/functional.h>
 
 template<class REALDST, class CELLDST, class REALSRC, class CELLSRC>
@@ -44,44 +44,44 @@ template<class REAL, class UCELL, class NUCELL>
 void def_unique(py::module m, const std::string & kname){
 
   m.def("unique", qpp::py_unique1<REAL,UCELL,NUCELL>,
-	py::arg("n_images"), py::arg("ugeom"), py::arg("nugeom"),
-	py::arg("group"), py::arg("begin"), py::arg("end"),
-	py::arg("key") =
-	(std::function<REAL(const qpp::geometry<REAL,NUCELL> &, int)>)
-	([](const qpp::geometry<REAL,NUCELL> &g, int i) -> REAL
-	{ return std::sqrt(std::pow(g.pos(i)(1),2) + std::pow(g.pos(i)(2),2)); }),
-	py::arg("eps") = qpp::geometry<REAL,NUCELL>::tol_geom_default);
+  py::arg("n_images"), py::arg("ugeom"), py::arg("nugeom"),
+  py::arg("group"), py::arg("begin"), py::arg("end"),
+  py::arg("key") =
+  (std::function<REAL(const qpp::geometry<REAL,NUCELL> &, int)>)
+  ([](const qpp::geometry<REAL,NUCELL> &g, int i) -> REAL
+  { return std::sqrt(std::pow(g.pos(i)(1),2) + std::pow(g.pos(i)(2),2)); }),
+  py::arg("eps") = qpp::geometry<REAL,NUCELL>::tol_geom_default);
 
   m.def("unique", qpp::py_unique2<REAL,UCELL,NUCELL>,
-	py::arg("n_images"), py::arg("ugeom"), py::arg("nugeom"), py::arg("group"), 
-	py::arg("key") =
-	(std::function<REAL(const qpp::geometry<REAL,NUCELL> &, int)>)
-	([](const qpp::geometry<REAL,NUCELL> &g, int i) -> REAL
-	{ return std::sqrt(std::pow(g.pos(i)(1),2) + std::pow(g.pos(i)(2),2)); }),
-	py::arg("eps") = qpp::geometry<REAL,NUCELL>::tol_geom_default);
-  
+  py::arg("n_images"), py::arg("ugeom"), py::arg("nugeom"), py::arg("group"),
+  py::arg("key") =
+  (std::function<REAL(const qpp::geometry<REAL,NUCELL> &, int)>)
+  ([](const qpp::geometry<REAL,NUCELL> &g, int i) -> REAL
+  { return std::sqrt(std::pow(g.pos(i)(1),2) + std::pow(g.pos(i)(2),2)); }),
+  py::arg("eps") = qpp::geometry<REAL,NUCELL>::tol_geom_default);
+
   m.def("unique", qpp::py_unique3<REAL,UCELL,NUCELL>,
-	py::arg("n_images"), py::arg("ugeom"), py::arg("nugeom"),
-	py::arg("key") =
-	(std::function<REAL(const qpp::geometry<REAL,NUCELL> &, int)>)
-	([](const qpp::geometry<REAL,NUCELL> &g, int i) -> REAL
-	{ return std::sqrt(std::pow(g.pos(i)(1),2) + std::pow(g.pos(i)(2),2)); }),
-	py::arg("eps") = qpp::geometry<REAL,NUCELL>::tol_geom_default);
+  py::arg("n_images"), py::arg("ugeom"), py::arg("nugeom"),
+  py::arg("key") =
+  (std::function<REAL(const qpp::geometry<REAL,NUCELL> &, int)>)
+  ([](const qpp::geometry<REAL,NUCELL> &g, int i) -> REAL
+  { return std::sqrt(std::pow(g.pos(i)(1),2) + std::pow(g.pos(i)(2),2)); }),
+  py::arg("eps") = qpp::geometry<REAL,NUCELL>::tol_geom_default);
 
   m.def("unique", qpp::py_unique4<REAL,UCELL,NUCELL>,
-	py::arg("ugeom"), py::arg("nugeom"), py::arg("group"), 
-	py::arg("key") =
-	(std::function<REAL(const qpp::geometry<REAL,NUCELL> &, int)>)
-	([](const qpp::geometry<REAL,NUCELL> &g, int i) -> REAL
-	{ return std::sqrt(std::pow(g.pos(i)(1),2) + std::pow(g.pos(i)(2),2)); }),
-	py::arg("eps") = qpp::geometry<REAL,NUCELL>::tol_geom_default);
+  py::arg("ugeom"), py::arg("nugeom"), py::arg("group"),
+  py::arg("key") =
+  (std::function<REAL(const qpp::geometry<REAL,NUCELL> &, int)>)
+  ([](const qpp::geometry<REAL,NUCELL> &g, int i) -> REAL
+  { return std::sqrt(std::pow(g.pos(i)(1),2) + std::pow(g.pos(i)(2),2)); }),
+  py::arg("eps") = qpp::geometry<REAL,NUCELL>::tol_geom_default);
 
   m.def("unique", qpp::py_unique5<REAL,UCELL,NUCELL>,
-	py::arg("ugeom"), py::arg("nugeom"), py::arg("key") =
-	(std::function<REAL(const qpp::geometry<REAL,NUCELL> &, int)>)
-	([](const qpp::geometry<REAL,NUCELL> &g, int i) -> REAL
-	{ return std::sqrt(std::pow(g.pos(i)(1),2) + std::pow(g.pos(i)(2),2)); }),
-	py::arg("eps") = qpp::geometry<REAL,NUCELL>::tol_geom_default);
+  py::arg("ugeom"), py::arg("nugeom"), py::arg("key") =
+  (std::function<REAL(const qpp::geometry<REAL,NUCELL> &, int)>)
+  ([](const qpp::geometry<REAL,NUCELL> &g, int i) -> REAL
+  { return std::sqrt(std::pow(g.pos(i)(1),2) + std::pow(g.pos(i)(2),2)); }),
+  py::arg("eps") = qpp::geometry<REAL,NUCELL>::tol_geom_default);
 
 }
 
@@ -94,7 +94,7 @@ void def_unique2(py::module m, const std::string & kname){
   */
   py::class_<std::function<REAL(const qpp::geometry<REAL,NUCELL> &, int)> >(m,("keyfunctype_"+kname).c_str())
     .def(py::init<>());
-  
+
   //  def_unique<REAL, qpp::periodic_cell<REAL>,                 NUCELL>(m, kname+"t");
   def_unique<REAL, qpp::gen_cell<REAL, qpp::matrix3<REAL> >, NUCELL>(m, kname+"p");
   def_unique<REAL, qpp::gen_cell<REAL, qpp::rotrans<REAL> >, NUCELL>(m, kname+"c");

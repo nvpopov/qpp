@@ -51,14 +51,9 @@ void py_vector3_export (py::module m, const char * pyname) {
       .def("normalized",       &qpp::vector3<VALTYPE>::normalized_proxy)
       .def_static("identity", &qpp::vector3<VALTYPE>::identity_proxy)
 
-      .def_property("x",  &qpp::vector3<VALTYPE>::py_getx,
-                &qpp::vector3<VALTYPE>::py_setx)
-
-      .def_property("y",  &qpp::vector3<VALTYPE>::py_gety,
-                    &qpp::vector3<VALTYPE>::py_sety)
-
-      .def_property("z",  &qpp::vector3<VALTYPE>::py_getz,
-                    &qpp::vector3<VALTYPE>::py_setz)
+      .def_property("x",  &qpp::vector3<VALTYPE>::py_getx, &qpp::vector3<VALTYPE>::py_setx)
+      .def_property("y",  &qpp::vector3<VALTYPE>::py_gety, &qpp::vector3<VALTYPE>::py_sety)
+      .def_property("z",  &qpp::vector3<VALTYPE>::py_getz, &qpp::vector3<VALTYPE>::py_setz)
       .def_readwrite_static("tol_equiv", &qpp::vector3<VALTYPE>::tol_equiv) ;
 
 }

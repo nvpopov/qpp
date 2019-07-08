@@ -97,11 +97,11 @@ int main () {
               fmt::print(std::cout, "{:>15} {:15} {:15} {:15} {:15} {:15} {:15}\n",
                          cc_o.m_init_atoms_names[q],
                          cc_o.m_steps[i].m_atoms_pos[q][0],
-                  cc_o.m_steps[i].m_atoms_pos[q][1],
-                  cc_o.m_steps[i].m_atoms_pos[q][2],
-                  cc_o.m_steps[i].m_atoms_grads[q][0],
-                  cc_o.m_steps[i].m_atoms_grads[q][1],
-                  cc_o.m_steps[i].m_atoms_grads[q][2]);
+                         cc_o.m_steps[i].m_atoms_pos[q][1],
+                         cc_o.m_steps[i].m_atoms_pos[q][2],
+                         cc_o.m_steps[i].m_atoms_grads[q][0],
+                         cc_o.m_steps[i].m_atoms_grads[q][1],
+                         cc_o.m_steps[i].m_atoms_grads[q][2]);
             }
         }
 
