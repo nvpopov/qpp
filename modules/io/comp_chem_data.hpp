@@ -52,7 +52,7 @@ namespace qpp {
   template <class REAL>
   struct comp_chem_program_vibration_info_t {
 
-      std::vector<vector3<REAL> > m_disp;
+      generic_array_t<vector3<REAL>, REAL > m_disp;
       REAL m_frequency{REAL(0)};
       REAL m_intensity{REAL(0)};
       REAL m_reduced_mass{REAL(0)};

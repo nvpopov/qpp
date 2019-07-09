@@ -15,6 +15,7 @@ namespace py = pybind11;
 #include <variant>
 #include <numeric>
 #include <map>
+#include <data/types.hpp>
 
 namespace qpp {
 
@@ -45,6 +46,21 @@ namespace qpp {
 
             }
 
+            STRING_EX to_string_vec() const {
+
+              STRING_EX ret = "[";
+
+              for (size_t i = 0; i < this->size() - 1; i++)
+                ret += fmt::format("{},", this->at(i));
+
+              if (!this->empty())
+                ret += fmt::format("{}", this->back());
+
+              ret += "]";
+              return ret;
+
+            }
+
 #if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
 
             static void py_export(py::module m, const char * pyname) {
@@ -70,6 +86,10 @@ namespace qpp {
                                      [](generic_array_t<STORED_TYPE, SCALAR_TYPE> &self,
                                      generic_array_t<STORED_TYPE, SCALAR_TYPE> &ns)
                                      {return self.opaque_vector_add(ns);});
+                py_opaque_vector.def("__str__",
+                                     &generic_array_t<STORED_TYPE, SCALAR_TYPE>::to_string_vec);
+                py_opaque_vector.def("__repr__",
+                                     &generic_array_t<STORED_TYPE, SCALAR_TYPE>::to_string_vec);
 
             }
 
