@@ -131,8 +131,9 @@ void pyqpp_ccd_export_tmpl(py::module m, const char * pyname) {
         .def_readonly("terminated_norm", &comp_chem_program_data_t<REAL>::m_is_terminated_normally)
         .def_readonly("gr_norm_min", &comp_chem_program_data_t<REAL>::m_global_gradient_norm_min)
         .def_readonly("gr_norm_max", &comp_chem_program_data_t<REAL>::m_global_gradient_norm_max)
-        .def_readonly("init_atoms_names", &comp_chem_program_data_t<REAL>::m_init_atoms_names)
-        .def_readonly("init_atoms_charges", &comp_chem_program_data_t<REAL>::m_init_atoms_charges)
+        .def_readonly("init_anames", &comp_chem_program_data_t<REAL>::m_init_anames)
+        .def_readonly("init_achg", &comp_chem_program_data_t<REAL>::m_init_achg)
+        .def_readonly("init_apos", &comp_chem_program_data_t<REAL>::m_init_apos)
         .def_readonly("steps", &comp_chem_program_data_t<REAL>::m_steps)
         .def_readonly("vibs", &comp_chem_program_data_t<REAL>::m_vibs);
 

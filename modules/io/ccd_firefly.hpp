@@ -180,11 +180,11 @@ namespace qpp {
                       }
                     else {
                         vector3<REAL> _pos{_qxyz[1], _qxyz[2], _qxyz[3]};
-                        output.m_init_atoms_pos.push_back(_pos*bohr_to_angs);
-                        output.m_init_atoms_charges.push_back(_qxyz[0]);
+                        output.m_init_apos.push_back(_pos*bohr_to_angs);
+                        output.m_init_achg.push_back(_qxyz[0]);
                         check_min_split_size(splt, 1, cur_line, s);
                         std::string at_name = std::string(splt[0]);
-                        output.m_init_atoms_names.push_back(std::move(at_name));
+                        output.m_init_anames.push_back(std::move(at_name));
                       }
                   }
 
@@ -573,9 +573,9 @@ namespace qpp {
                     output.m_steps[cur_step].m_atoms_pos.push_back(vector3<REAL>(x,y,z));
                   }
                 else if (!b_atoms_bootstraped) {
-                    output.m_init_atoms_pos.push_back(vector3<REAL>(x,y,z));
+                    output.m_init_apos.push_back(vector3<REAL>(x,y,z));
                     std::string at_name = std::string(splt[0]);
-                    output.m_init_atoms_names.push_back(std::move(at_name));
+                    output.m_init_anames.push_back(std::move(at_name));
                   }
                 continue;
               }

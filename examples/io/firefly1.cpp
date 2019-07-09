@@ -36,10 +36,10 @@ int main () {
 
   fmt::print(std::cout, "\nInitial geometry:\n");
   fmt::print(std::cout, "{:>15} {:>15} {:>15} {:>15}\n", "atom", "x", "y", "z");
-  for (size_t i = 0; i < cc_o.m_init_atoms_names.size(); i++)
-    fmt::print(std::cout, "{:>15} {:15} {:15} {:15}\n", cc_o.m_init_atoms_names[i],
-               cc_o.m_init_atoms_pos[i][0], cc_o.m_init_atoms_pos[i][1],
-               cc_o.m_init_atoms_pos[i][2]);
+  for (size_t i = 0; i < cc_o.m_init_anames.size(); i++)
+    fmt::print(std::cout, "{:>15} {:15} {:15} {:15}\n", cc_o.m_init_anames[i],
+               cc_o.m_init_apos[i][0], cc_o.m_init_apos[i][1],
+               cc_o.m_init_apos[i][2]);
 
   for (size_t i = 0; i < cc_o.m_steps.size(); i++) {
 
@@ -93,9 +93,9 @@ int main () {
       if (!cc_o.m_steps[i].m_atoms_pos.empty() && !cc_o.m_steps[i].m_atoms_grads.empty()) {
           fmt::print(std::cout, "\n{:>15} {:>15} {:>15} {:>15} {:>15} {:>15} {:>15}\n",
                      "atom", "x", "y", "z", "dx", "dy", "dz");
-          for (size_t q = 0 ; q < cc_o.m_init_atoms_names.size(); q++){
+          for (size_t q = 0 ; q < cc_o.m_init_anames.size(); q++){
               fmt::print(std::cout, "{:>15} {:15} {:15} {:15} {:15} {:15} {:15}\n",
-                         cc_o.m_init_atoms_names[q],
+                         cc_o.m_init_anames[q],
                          cc_o.m_steps[i].m_atoms_pos[q][0],
                          cc_o.m_steps[i].m_atoms_pos[q][1],
                          cc_o.m_steps[i].m_atoms_pos[q][2],

@@ -80,9 +80,9 @@ namespace qpp {
           } // [FREQ]
 
         if (s.find(MOLDEN_FR_COORD) != std::string::npos) {
-            if (!output.m_init_atoms_names.empty() &&
-                tmp_displ.size() != output.m_init_atoms_names.size())
-              tmp_displ.reserve(output.m_init_atoms_names.size());
+            if (!output.m_init_anames.empty() &&
+                tmp_displ.size() != output.m_init_anames.size())
+              tmp_displ.reserve(output.m_init_anames.size());
             ps = molden_parser_state_e::molden_fr_coords;
             continue;
           } // [FR-COORD]
@@ -115,8 +115,8 @@ namespace qpp {
         if (ps == molden_parser_state_e::molden_fr_norm_coords) {
             if (s.find(MOLDEN_VIBRATION) != std::string::npos) {
                 norm_mode_id++;
-                 if (!output.m_init_atoms_names.empty())
-                  output.m_vibs[norm_mode_id].m_disp.reserve(output.m_init_atoms_names.size());
+                 if (!output.m_init_anames.empty())
+                  output.m_vibs[norm_mode_id].m_disp.reserve(output.m_init_anames.size());
                 continue;
               } else {
                 std::vector<std::string_view> splt = split_sv(s, " ");
@@ -133,14 +133,14 @@ namespace qpp {
             check_min_split_size(splt, 6, cur_line, s);
             vector3<REAL> atm_pos = vec_from_str_ex<REAL>(s, splt, cur_line, 3, 4, 5);
             if (is_au) atm_pos *= bohr_to_angs;
-            output.m_init_atoms_pos.push_back(std::move(atm_pos));
-            output.m_init_atoms_names.push_back(std::string(splt[0]));
+            output.m_init_apos.push_back(std::move(atm_pos));
+            output.m_init_anames.push_back(std::string(splt[0]));
             continue;
           } // atoms after MOLDEN_ATOMS
 
       }
 
-    output.m_tot_nat = output.m_init_atoms_names.size();
+    output.m_tot_nat = output.m_init_anames.size();
 
   } // read_ccd_from_molden
 

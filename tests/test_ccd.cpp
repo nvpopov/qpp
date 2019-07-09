@@ -33,9 +33,9 @@ TEST_CASE( "Computational chemistry data parsing : PC Gamess Firefly" ) {
     REQUIRE(cc_o.m_steps.back().m_scf_steps.back().m_toten == Approx(-379.777955008));
     REQUIRE(cc_o.m_steps.back().m_eigen_values_spin_1_occ.front() == Approx(-11.0409));
     REQUIRE(cc_o.m_steps.back().m_eigen_values_spin_1_occ.back() == Approx(1.1646));
-    REQUIRE(cc_o.m_init_atoms_pos.size() == 20);
-    REQUIRE(cc_o.m_init_atoms_names.size() == 20);
-    REQUIRE(cc_o.m_init_atoms_pos[0] ==
+    REQUIRE(cc_o.m_init_apos.size() == 20);
+    REQUIRE(cc_o.m_init_anames.size() == 20);
+    REQUIRE(cc_o.m_init_apos[0] ==
         v3d(2.6342558126*bohr_to_angs, -0.4183391645*bohr_to_angs, 0.000));
     REQUIRE(cc_o.m_steps.back().m_mulliken_pop_per_atom.front().first == Approx(5.997223));
     REQUIRE(cc_o.m_steps.back().m_mulliken_pop_per_atom.front().second == Approx(0.002777));
@@ -62,12 +62,12 @@ TEST_CASE( "Computational chemistry data parsing : PC Gamess Firefly" ) {
     REQUIRE(cc_o.m_n_beta == 35);
     REQUIRE(cc_o.m_tot_nat == 20);
     REQUIRE(cc_o.m_run_t == comp_chem_program_run_e::rt_geo_opt);
-    REQUIRE(cc_o.m_init_atoms_pos.size() == 20);
-    REQUIRE(cc_o.m_init_atoms_names.size() == 20);
+    REQUIRE(cc_o.m_init_apos.size() == 20);
+    REQUIRE(cc_o.m_init_anames.size() == 20);
     REQUIRE(cc_o.m_steps.size() == 24);
     REQUIRE(cc_o.m_is_terminated_normally == true);
-    REQUIRE(cc_o.m_steps.front().m_atoms_pos.size() == cc_o.m_init_atoms_pos.size());
-    REQUIRE(cc_o.m_steps.back().m_atoms_pos.size() == cc_o.m_init_atoms_pos.size());
+    REQUIRE(cc_o.m_steps.front().m_atoms_pos.size() == cc_o.m_init_apos.size());
+    REQUIRE(cc_o.m_steps.back().m_atoms_pos.size() == cc_o.m_init_apos.size());
     REQUIRE(cc_o.m_steps.back().m_atoms_pos[0] == v3d(0.2292900177, 1.3927230046, 0.0));
     REQUIRE(cc_o.m_steps.back().m_atoms_pos.back() == v3d(-0.0328883188, 4.8736185925, 0.0));
     REQUIRE(cc_o.m_steps.back().m_atoms_grads.front() == v3d(-0.0000150, -0.0000011, 0.0000000));
@@ -88,8 +88,8 @@ TEST_CASE( "Computational chemistry data parsing : PC Gamess Firefly" ) {
     REQUIRE(cc_o.m_n_beta == 35 );
     REQUIRE(cc_o.m_tot_nat == 20);
     REQUIRE(cc_o.m_run_t == comp_chem_program_run_e::rt_vib);
-    REQUIRE(cc_o.m_init_atoms_pos.size() == 20);
-    REQUIRE(cc_o.m_init_atoms_names.size() == 20);
+    REQUIRE(cc_o.m_init_apos.size() == 20);
+    REQUIRE(cc_o.m_init_anames.size() == 20);
     REQUIRE(cc_o.m_vibs.size() == 60 );
     REQUIRE(cc_o.m_vibs[0].m_frequency == Approx(5.89) );
     REQUIRE(cc_o.m_vibs[0].m_intensity == Approx(0.00000) );
@@ -119,8 +119,8 @@ TEST_CASE( "Computational chemistry data parsing : PC Gamess Firefly" ) {
     REQUIRE(cc_o.m_n_beta == 35 );
     REQUIRE(cc_o.m_tot_nat == 20);
     REQUIRE(cc_o.m_run_t == comp_chem_program_run_e::rt_raman);
-    REQUIRE(cc_o.m_init_atoms_pos.size() == 20);
-    REQUIRE(cc_o.m_init_atoms_names.size() == 20);
+    REQUIRE(cc_o.m_init_apos.size() == 20);
+    REQUIRE(cc_o.m_init_anames.size() == 20);
 
   }
 
@@ -139,7 +139,7 @@ TEST_CASE("Compilation of ccd model" ) {
     REQUIRE(g.nat() == cc_o.m_tot_nat);
     bool all_atoms_the_same = true;
     for (size_t i = 0; i < g.nat(); i++)
-      if (g.pos(i) != cc_o.m_init_atoms_pos[i]) all_atoms_the_same = false;
+      if (g.pos(i) != cc_o.m_init_apos[i]) all_atoms_the_same = false;
     REQUIRE(all_atoms_the_same);
 
   }
@@ -224,10 +224,10 @@ TEST_CASE( "Computational chemistry data parsing : CP2K Output" ) {
     REQUIRE(cc_o.m_cell_v[2] == v3d(0.000,  0.000,  12.566 ));
 
     REQUIRE(cc_o.m_tot_nat == 96);
-    REQUIRE(cc_o.m_init_atoms_names.size() == 96);
-    REQUIRE(cc_o.m_init_atoms_pos.size() == 96);
-    REQUIRE(std::count(cc_o.m_init_atoms_names.begin(), cc_o.m_init_atoms_names.end(), "Ba") == 32);
-    REQUIRE(std::count(cc_o.m_init_atoms_names.begin(), cc_o.m_init_atoms_names.end(), "F") == 64);
+    REQUIRE(cc_o.m_init_anames.size() == 96);
+    REQUIRE(cc_o.m_init_apos.size() == 96);
+    REQUIRE(std::count(cc_o.m_init_anames.begin(), cc_o.m_init_anames.end(), "Ba") == 32);
+    REQUIRE(std::count(cc_o.m_init_anames.begin(), cc_o.m_init_anames.end(), "F") == 64);
     REQUIRE(cc_o.m_n_spin_states == 1);
     REQUIRE(cc_o.m_mult == 1);
     REQUIRE(cc_o.m_tot_charge == Approx(0));
@@ -265,4 +265,5 @@ TEST_CASE( "Computational chemistry data parsing : CP2K Output" ) {
     REQUIRE(cc_o.m_steps.size() == 24);
 
   }
+
 }

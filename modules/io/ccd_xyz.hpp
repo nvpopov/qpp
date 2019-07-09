@@ -113,14 +113,14 @@ namespace qpp {
             atom_c = 0;
 
             if (!init_filled) {
-                output.m_init_atoms_pos.resize(output.m_tot_nat);
-                output.m_init_atoms_names.resize(output.m_tot_nat);
+                output.m_init_apos.resize(output.m_tot_nat);
+                output.m_init_anames.resize(output.m_tot_nat);
               } else {
                 //if multiframe file -> copy content from init geom to first frame
                 if (frame_idx == 0) {
                     output.m_steps.resize(output.m_steps.size()+1);
                     //output.steps[frame_idx].pos.resize(output.tot_num_atoms);
-                    output.m_steps[frame_idx].m_atoms_pos = output.m_init_atoms_pos;
+                    output.m_steps[frame_idx].m_atoms_pos = output.m_init_apos;
                     frame_idx +=1;
                   }
                 output.m_steps.resize(output.m_steps.size()+1);
@@ -148,8 +148,8 @@ namespace qpp {
                               str2real(splt, 3, cur_line, s));
 
             if (!init_filled) {
-                output.m_init_atoms_names[atom_c] = std::string(splt[0]);
-                output.m_init_atoms_pos[atom_c] = pos;
+                output.m_init_anames[atom_c] = std::string(splt[0]);
+                output.m_init_apos[atom_c] = pos;
               } else {
                  output.m_steps[frame_idx].m_atoms_pos[atom_c] = pos;
               }

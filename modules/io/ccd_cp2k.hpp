@@ -106,8 +106,8 @@ namespace qpp {
                     std::vector<std::string_view> splt = split_sv(s, " ");
                     check_min_split_size(splt, 3, cur_line, s);
                     output.m_tot_nat = str2int(splt, 2, cur_line, s);
-                    output.m_init_atoms_names.reserve(output.m_tot_nat);
-                    output.m_init_atoms_pos.reserve(output.m_tot_nat);
+                    output.m_init_anames.reserve(output.m_tot_nat);
+                    output.m_init_apos.reserve(output.m_tot_nat);
                   }
                 continue;
               }
@@ -148,10 +148,10 @@ namespace qpp {
                     sgetline(inp, s, cur_line);
                     std::vector<std::string_view> splt = split_sv(s, " ");
                     check_min_split_size(splt, 7, cur_line, s);
-                    output.m_init_atoms_names.push_back(std::string(splt[2]));
+                    output.m_init_anames.push_back(std::string(splt[2]));
 
                     vector3<REAL> pos = vec_from_str_ex<REAL>(s, splt, cur_line, 4, 5, 6);
-                    output.m_init_atoms_pos.push_back(std::move(pos));
+                    output.m_init_apos.push_back(std::move(pos));
                   }
                 is_init_parsed = true;
                 continue;

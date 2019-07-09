@@ -113,16 +113,21 @@ namespace qpp {
   template <class REAL>
   struct comp_chem_program_data_t {
 
+      // initial values
+      generic_array_t<vector3<REAL>, REAL > m_init_apos; // initial atoms pos
+      std::vector<std::string> m_init_anames; // initial atoms names
+      std::vector<REAL> m_init_achg; // initial atoms charges
+
+      // general data
       std::vector<comp_chem_program_step_t<REAL> > m_steps;
-
-      generic_array_t<vector3<REAL>, REAL > m_init_atoms_pos;
-
-      std::vector<std::string> m_init_atoms_names;
-      std::vector<REAL> m_init_atoms_charges;
       std::vector<comp_chem_program_vibration_info_t<REAL> > m_vibs;
-      std::vector<vector3<REAL> > m_cell_v;
+
+      // general info about the run
       comp_chem_program_e m_comp_chem_program{comp_chem_program_e::pr_unknown};
+      comp_chem_program_run_e m_run_t{comp_chem_program_run_e::rt_unknown};
       uint32_t m_ccd_flags;
+
+      std::vector<vector3<REAL> > m_cell_v;
       bool m_is_qmmm{false};
       bool m_need_to_extract_mm{false};
       int m_DIM{0};
@@ -135,7 +140,7 @@ namespace qpp {
       int m_n_beta{0};
       int m_n_spin_states{-1};
       bool m_is_terminated_normally{false};
-      comp_chem_program_run_e m_run_t{comp_chem_program_run_e::rt_unknown};
+
       vector3<REAL> m_global_gradient_min{0,0,0};
       vector3<REAL> m_global_gradient_max{0,0,0};
       vector3<REAL> m_global_gradient_average{0,0,0};
@@ -217,24 +222,24 @@ namespace qpp {
                         geometry<REAL, periodic_cell<REAL> > &g,
                         uint32_t compile_flags = ccd_cf_default_flags) {
 
-    if ((ccd_inst.m_init_atoms_pos.empty() || ccd_inst.m_init_atoms_names.empty())
+    if ((ccd_inst.m_init_apos.empty() || ccd_inst.m_init_anames.empty())
         || (compile_flags & ccd_cf_allow_null_init_geom)) return false;
 
-    if ((ccd_inst.m_init_atoms_pos.size() != ccd_inst.m_init_atoms_names.size())
+    if ((ccd_inst.m_init_apos.size() != ccd_inst.m_init_anames.size())
         || (compile_flags & ccd_cf_allow_different_size_pos_names)) return false;
 
     if (ccd_inst.m_DIM != ccd_inst.m_cell_v.size()) return false;
 
-    if (ccd_inst.m_tot_nat == 0 && !ccd_inst.m_init_atoms_names.empty())
-      ccd_inst.m_tot_nat = ccd_inst.m_init_atoms_names.size();
+    if (ccd_inst.m_tot_nat == 0 && !ccd_inst.m_init_anames.empty())
+      ccd_inst.m_tot_nat = ccd_inst.m_init_anames.size();
 
     g.DIM = ccd_inst.m_DIM;
 
     if (g.DIM > 0)
       for (size_t i = 0; i < ccd_inst.m_DIM; i++) g.cell.v[i] = ccd_inst.m_cell_v[i];
 
-    for (size_t i = 0; i < ccd_inst.m_init_atoms_names.size(); i++)
-      g.add(ccd_inst.m_init_atoms_names[i], ccd_inst.m_init_atoms_pos[i]);
+    for (size_t i = 0; i < ccd_inst.m_init_anames.size(); i++)
+      g.add(ccd_inst.m_init_anames[i], ccd_inst.m_init_apos[i]);
 
     return true;
 
@@ -250,9 +255,9 @@ namespace qpp {
     anim.m_anim_type = geom_anim_t::anim_static;
     anim.m_anim_name = "static";
     anim.frames.resize(1);
-    anim.frames[0].atom_pos.resize(ccd_inst.m_init_atoms_pos.size());
-    for (size_t i = 0; i < ccd_inst.m_init_atoms_pos.size(); i++)
-      anim.frames[0].atom_pos[i] = ccd_inst.m_init_atoms_pos[i];
+    anim.frames[0].atom_pos.resize(ccd_inst.m_init_apos.size());
+    for (size_t i = 0; i < ccd_inst.m_init_apos.size(); i++)
+      anim.frames[0].atom_pos[i] = ccd_inst.m_init_apos[i];
 
     anim_rec.push_back(std::move(anim));
     return true;
@@ -390,7 +395,7 @@ namespace qpp {
                   if (i > total_frames_upwards) tf_index = total_frames - (i+1);
                   for (size_t q = 0; q < ccd_inst.m_vibs[v].m_disp.size(); q++) {
                       anim.frames[i].atom_pos[q] =
-                          ccd_inst.m_init_atoms_pos[q] + ccd_inst.m_vibs[v].m_disp[q] *
+                          ccd_inst.m_init_apos[q] + ccd_inst.m_vibs[v].m_disp[q] *
                                               (REAL(tf_index) / total_frames_upwards);
                     }
                 }
@@ -402,6 +407,6 @@ namespace qpp {
 
   }
 
-}
+} // namespace qpp
 
 #endif

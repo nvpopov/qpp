@@ -11,7 +11,7 @@ int main() {
   read_ccd_from_molden(ifile, cc_o);
 
   fmt::print("Total vibs = {}\n", cc_o.m_vibs.size());
-  fmt::print("Total atom names in init = {}\n", cc_o.m_init_atoms_names.size());
-  fmt::print("Total atom pos in init = {}\n", cc_o.m_init_atoms_pos.size());
+  fmt::print("Total atom names in init = {}\n", cc_o.m_init_anames.size());
+  fmt::print("Total atom pos in init = {}\n", cc_o.m_init_apos.size());
 
 }
