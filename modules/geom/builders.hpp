@@ -402,7 +402,7 @@ namespace qpp {
           std::set<int> images = {i};
           marked[i] = true;
 
-          for (iterator I(begin,end); not I.end(); I++) {
+          for (iterator I(begin,end); !I.end(); I++) {
               vector3<REAL> r = group.transform(nugeom.pos(i),I);
               for (int j = 0; j<nugeom.nat(); j++)
                 if (!marked[j])
