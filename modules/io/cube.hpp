@@ -51,6 +51,23 @@ namespace qpp {
   }
 
   template<class REAL>
+  void set_field_value_at(const int ix,
+                          const int iy,
+                          const int iz,
+                          const REAL new_field_val,
+                          scalar_volume_t<REAL> &volume) {
+
+    if (ix < 0 || iy < 0 || iz < 0 ||
+        ix >= volume.m_steps[0] ||
+        iy >= volume.m_steps[1] ||
+        iz >= volume.m_steps[2]) return ;
+    else
+      volume.m_field[iz + volume.m_steps[2] * (iy +  volume.m_steps[1] * ix)]
+          = new_field_val;
+
+  }
+
+  template<class REAL>
   const REAL get_field_value_at_v2(const int ix,
                                    const int iy,
                                    const int iz,
