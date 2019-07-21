@@ -328,8 +328,7 @@ namespace qpp {
         anim.m_anim_name = stored_anim_name;
 
         auto valid_step = [&is_cell_opt](comp_chem_program_step_t<REAL> &step) {
-          return !step.m_atoms_pos.empty() &&
-              (!is_cell_opt || (is_cell_opt && step.m_cell_is_animable));
+          return !step.m_atoms_pos.empty() && (!is_cell_opt || step.m_cell_is_animable);
         };
 
         // pre-calculation of valid steps
@@ -338,9 +337,6 @@ namespace qpp {
 
         anim.frames.resize(steps_valid_c);
         int steps_c = -1;
-
-//        std::cout << fmt::format("@CCD COMPILE ANIM steps_valid_c = {}",
-//                                 steps_valid_c) << std::endl;
 
         // we're starting to form an animation
         for (size_t i = 0; i < ccd_inst.m_steps.size(); i++)
@@ -357,11 +353,6 @@ namespace qpp {
                 }
 
               // copy atom pos data
-//              std::cout << fmt::format("@CCD COMPILE ANIM steps_c = {}, "
-//                                       "i = {}, st[i].m_a_p.size() = {}, cell_is_a = {}",
-//                                       steps_c, i, ccd_inst.m_steps[i].m_atoms_pos.size(),
-//                                       ccd_inst.m_steps[i].m_cell_is_animable) << std::endl;
-
               anim.frames[steps_c].atom_pos.resize(ccd_inst.m_steps[i].m_atoms_pos.size());
               for (size_t q = 0; q < ccd_inst.m_steps[i].m_atoms_pos.size(); q++)
                 anim.frames[steps_c].atom_pos[q] = ccd_inst.m_steps[i].m_atoms_pos[q];
@@ -377,6 +368,7 @@ namespace qpp {
       } // if (copy_steps_content)
 
     else {
+
         if (ccd_inst.m_run_t == comp_chem_program_run_e::rt_vib ||
             ccd_inst.m_run_t == comp_chem_program_run_e::rt_raman)
           for (size_t v = 0; v < ccd_inst.m_vibs.size(); v++) {
@@ -401,6 +393,7 @@ namespace qpp {
                 }
               anim_rec.push_back(std::move(anim));
             }
+
       }
 
     return true;

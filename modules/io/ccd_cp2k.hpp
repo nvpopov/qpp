@@ -175,7 +175,7 @@ namespace qpp {
                   }
 
                 if (s.find("HFX_") != std::string::npos || s.find("-----") != std::string::npos ||
-                    s.find("POWELL|")) {
+                    s.find("POWELL|") != std::string::npos) {
                     continue;
                   }
 

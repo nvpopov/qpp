@@ -686,10 +686,10 @@ The supercell concept generalization for the geometry class looks like:
 
         v.clear();
         v.push_back(atom(j));
-        vector3<REAL> r = coord(j);
-        v.push_back(r(0));
-        v.push_back(r(1));
-        v.push_back(r(2));
+        vector3<REAL> rl = coord(j);
+        v.push_back(rl(0));
+        v.push_back(rl(1));
+        v.push_back(rl(2));
 
       }
 
@@ -1177,7 +1177,7 @@ The supercell concept generalization for the geometry class looks like:
   };
 #endif
 
-}
+} // namespace qpp
 
 #endif
 

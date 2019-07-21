@@ -27,12 +27,6 @@ namespace qpp {
   const float PTABLE_FLOAT_NONE = -1.0;
   const STRING_EX PTABLE_NONE = "X";
 
-
-  struct ptable_atom_ionic_radii {
-      float charge;
-      float radii;
-  };
-
   struct ptable_atom_record {
 
       vector3<float> m_color_jmol;
@@ -41,11 +35,11 @@ namespace qpp {
 
       std::vector<std::tuple<int,std::string,int> > m_elec_conf;
 
-      STRING_EX       m_name;
-      STRING_EX       m_symbol;
+      STRING_EX    m_name;
+      STRING_EX    m_symbol;
 
-      size_t         m_number;
-      size_t         m_n_val_elec;
+      size_t       m_number;
+      size_t       m_n_val_elec;
       float        m_radius; // A
       float        m_mass;
       float        m_covrad_slater;// A
