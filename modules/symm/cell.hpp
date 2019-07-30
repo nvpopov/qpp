@@ -19,7 +19,7 @@ namespace py = pybind11;
 #include <stdexcept>
 #include <cmath>
 
-namespace qpp{
+namespace qpp {
 
   /*
     The supercell concept generalization for the geometry class looks like:
@@ -138,12 +138,22 @@ namespace qpp{
       index end() const
       {return index::D(DIM).all(1); }
 
+      vector3<REAL> cnt() const {
 
-      vector3<REAL> transform(const vector3<REAL> & r, const index & I) const{
+        vector3<REAL> ret_cnt{0};
+        for (int d=0; d<DIM; d++)
+          ret_cnt += v[d]*0.5;
+        return ret_cnt;
+
+      }
+
+      vector3<REAL> transform(const vector3<REAL> & r, const index & I) const {
+
         vector3<REAL> r1 = r;
         for (int d=0; d<DIM; d++)
           r1 += v[d]*I(d);
         return r1;
+
       }
 
       /*! \brief Answers the question whether r belongs to the unit cell
@@ -151,18 +161,21 @@ namespace qpp{
       the coordinate origin
       the others are pointed by lattice vectors
     */
-      bool within(const vector3<REAL> & r) const{
+      bool within(const vector3<REAL> & r) const {
+
         vector3<REAL> f = cart2frac(r);
         bool res = true;
         for (int d=0; d<DIM; d++)
-          if ( f(d)<REAL(0) || f(d) >= REAL(1) ){
+          if (f(d)<REAL(0) || f(d) >= REAL(1)){
               res = false;
               break;
             }
         return res;
+
       }
 
-      bool within_already_frac(const vector3<REAL> & r) const{
+      bool within_already_frac(const vector3<REAL> & r) const {
+
         bool res = true;
         for (int d=0; d<DIM; d++)
           if ( r(d)<REAL(0) || r(d) >= REAL(1) ){
@@ -170,9 +183,11 @@ namespace qpp{
               break;
             }
         return res;
+
       }
 
-      bool within_epsilon_b(const vector3<REAL> & r, const REAL eps) const{
+      bool within_epsilon_b(const vector3<REAL> & r, const REAL eps) const {
+
         vector3<REAL> f = cart2frac(r);
         bool res = true;
         for (int d=0; d<DIM; d++)
@@ -181,6 +196,7 @@ namespace qpp{
               break;
             }
         return res;
+
       }
 
       /*! \brief Brings the point r into the volume of unit cell by translations
@@ -188,17 +204,19 @@ namespace qpp{
        the coordinate origin
        the others are pointed by lattice vectors
     */
-      vector3<REAL> reduce(const vector3<REAL> & r) const{
+      vector3<REAL> reduce(const vector3<REAL> & r) const {
+
         vector3<REAL> f = cart2frac(r);
         for (int d=0; d<DIM; d++)
           f(d) -= floor(f(d));
         return frac2cart(f);
+
       }
 
       /*! \brief find high symmetry point within "radius" distance from given point "r"
       makes sence for rotational symmetries
     */
-      vector3<REAL> symmetrize(const vector3<REAL> & r, REAL radius) const{
+      vector3<REAL> symmetrize(const vector3<REAL> & r, REAL radius) const {
         return r;
       }
 
@@ -208,7 +226,8 @@ namespace qpp{
        orthogonal to both translation vectors
        @return Cartesian coordinates
     */
-      vector3<REAL> frac2cart(const vector3<REAL> & r) const{
+      vector3<REAL> frac2cart(const vector3<REAL> & r) const {
+
         vector3<REAL> res = vector3<REAL>::Zero();
         for (int i=0; i<DIM; i++)
           res += r(i)*v[i];
@@ -220,6 +239,7 @@ namespace qpp{
           }
 
         return res;
+
       }
 
       /*! \brief cartesian to fractional transformation,
@@ -229,7 +249,8 @@ namespace qpp{
        coordinate ( z=f(2) ) is
        orthogonal to both translation vectors
     */
-      vector3<REAL> cart2frac(const vector3<REAL> & r) const{
+      vector3<REAL> cart2frac(const vector3<REAL> & r) const {
+
         vector3<REAL> v2;
         if (DIM==3)
           v2 = v[2];
@@ -243,6 +264,7 @@ namespace qpp{
         A.col(1) = v[1];
         A.col(2) = v2;
         return solve3(A, r);
+
       }
 
       // -----------------------------------------------------------------------
@@ -257,9 +279,11 @@ namespace qpp{
       { return v[i]; }
 
       inline periodic_cell<REAL> & operator=(const periodic_cell<REAL> & cl) {
+
         for(int i=0; i<DIM; i++)
           v[i] = cl.v[i];
         return *this;
+
       }
 
       /*! \brief Brings the point r into the volume of unit cell
@@ -268,12 +292,15 @@ namespace qpp{
        coordinate origin
     */
       inline vector3<REAL> reduce_cntr(const vector3<REAL> & r) const {
+
         vector3<REAL> f = cart2frac(r);
         for (int i=0; i<DIM; i++){
             f(i) -= int(f(i));
             if ( f(i) > REAL(1)/2 ) f(i)-=1;
           }
+
         return frac2cart(f);
+
       }
 
       /*! \brief Brings r into Wigner-Zeitz unit cell
@@ -288,6 +315,7 @@ namespace qpp{
      * centred at the coordinate origin
      */
       inline bool within_centered(vector3<REAL> r) const {
+
         vector3<REAL> f = cart2frac(r);
         bool res = true;
         for (int d=0; d<DIM; d++)
@@ -296,6 +324,7 @@ namespace qpp{
               break;
             }
         return res;
+
       }
 
       /*! \brief Answers the question whether r belongs to Wigner-Zeitz
@@ -307,7 +336,8 @@ namespace qpp{
       }
 
       virtual void write(std::basic_ostream<CHAR_EX,TRAITS> &os,
-                         int offset=0) const{
+                         int offset=0) const {
+
         if (DIM == 0) return;
         for (int k=0; k<offset; k++) os << " ";
         os << "vectors";
@@ -324,6 +354,7 @@ namespace qpp{
 
         for (int k=0; k<offset; k++) os << " ";
         os << "}\n";
+
       }
 
 #if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)

@@ -27,18 +27,19 @@ void py_cell_export (py::module m, const char * pyname) {
       .def("__getitem__",      &qpp::periodic_cell<REAL>::py_getitem2)
       .def("__setitem__",      &qpp::periodic_cell<REAL>::py_setitem)
       .def("__setitem__",      &qpp::periodic_cell<REAL>::py_setitem2)
-      .def( "reduce",          &qpp::periodic_cell<REAL>::reduce)
-      .def( "within",	     &qpp::periodic_cell<REAL>::within)
-      .def( "transform",	     &qpp::periodic_cell<REAL>::transform)
-      .def( "begin",           &qpp::periodic_cell<REAL>:: begin)
-      .def( "end",	     &qpp::periodic_cell<REAL>::end)
-      .def( "symmetrize",	     &qpp::periodic_cell<REAL>::symmetrize)
-      .def( "frac2cart",	     &qpp::periodic_cell<REAL>::frac2cart)
-      .def( "cart2frac",	     &qpp::periodic_cell<REAL>::cart2frac)
-      .def( "reduce_cntr",     &qpp::periodic_cell<REAL>::reduce_cntr)
-      .def( "within_centered", &qpp::periodic_cell<REAL>::within_centered)
-      .def( "reduce_wz",	     &qpp::periodic_cell<REAL>::reduce_wz)
-      .def( "within_wz",       &qpp::periodic_cell<REAL>::within_wz);
+      .def("cnt",              &qpp::periodic_cell<REAL>::cnt)
+      .def("reduce",           &qpp::periodic_cell<REAL>::reduce)
+      .def("within",	         &qpp::periodic_cell<REAL>::within)
+      .def("transform",	       &qpp::periodic_cell<REAL>::transform)
+      .def("begin",            &qpp::periodic_cell<REAL>:: begin)
+      .def("end",	             &qpp::periodic_cell<REAL>::end)
+      .def("symmetrize",	     &qpp::periodic_cell<REAL>::symmetrize)
+      .def("frac2cart",	       &qpp::periodic_cell<REAL>::frac2cart)
+      .def("cart2frac",	       &qpp::periodic_cell<REAL>::cart2frac)
+      .def("reduce_cntr",      &qpp::periodic_cell<REAL>::reduce_cntr)
+      .def("within_centered",  &qpp::periodic_cell<REAL>::within_centered)
+      .def("reduce_wz",	       &qpp::periodic_cell<REAL>::reduce_wz)
+      .def("within_wz",        &qpp::periodic_cell<REAL>::within_wz);
   //TODO: __str__ for cell
   /* .def("__str__", [](const qpp::periodic_cell<REAL> &c){
       return fmt::format("[{0}, {1}, {2}], d={3}", c.v[]);})*/
