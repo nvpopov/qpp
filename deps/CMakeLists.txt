@@ -14,8 +14,5 @@ ExternalProject_Add(eigen3
 )
 endif()
 
-add_library(KMeansRex ${PROJECT_SOURCE_DIR}/deps/KMeansRex/src/KMeansRexCore.cpp
-                      ${PROJECT_SOURCE_DIR}/deps/KMeansRex/src/mersenneTwister2002.c)
-
 if(BUILD_QC)
 endif(BUILD_QC)
