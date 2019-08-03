@@ -69,22 +69,6 @@ endfunction(def_example_custom_lib)
 
 # end example framework
 
-add_subdirectory(deps)
-include_directories(${PROJECT_SOURCE_DIR}/deps/pybind11/include)
-include_directories(${PROJECT_SOURCE_DIR}/deps/fmtlib/include)
-include_directories(${PROJECT_SOURCE_DIR}/deps/fmtlib/CppNumericalSolvers)
-#add_subdirectory(${CMAKE_SOURCE_DIR}/deps/fmtlib)
-
-#Python related stuff
-if(PYTHON_BINDINGS)
-    message("-- Python bindings are enabled")
-    if(PYTHON_EXPOSE_EXTENDED)
-        message("-- Python interface for REAL=double")
-        add_definitions(-DPYTHON_EXP_EXT)
-    endif()
-endif()
-#end python stuff
-
 #eigen3
 if(USE_SYSTEM_EIGEN3)
     find_package(Eigen3)
@@ -98,6 +82,24 @@ else()
     include_directories(${PROJECT_SOURCE_DIR}/deps/eigen3/Eigen)
 endif()
 #end eigen3
+
+add_subdirectory(deps)
+include_directories(${PROJECT_SOURCE_DIR}/deps/pybind11/include)
+include_directories(${PROJECT_SOURCE_DIR}/deps/eigen3)
+include_directories(${PROJECT_SOURCE_DIR}/deps/fmtlib/include)
+include_directories(${PROJECT_SOURCE_DIR}/deps/fmtlib/CppNumericalSolvers)
+include_directories(${PROJECT_SOURCE_DIR}/deps/fmtlib/KMeansRex/src)
+#add_subdirectory(${CMAKE_SOURCE_DIR}/deps/fmtlib)
+
+#Python related stuff
+if(PYTHON_BINDINGS)
+    message("-- Python bindings are enabled")
+    if(PYTHON_EXPOSE_EXTENDED)
+        message("-- Python interface for REAL=double")
+        add_definitions(-DPYTHON_EXP_EXT)
+    endif()
+endif()
+#end python stuff
 
 #Add all src and headers to qtcreator ide
 file(GLOB_RECURSE ide_headers "modules/*/*.hpp")
