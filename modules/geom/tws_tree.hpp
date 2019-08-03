@@ -243,6 +243,7 @@ namespace qpp{
 
       REAL m_guess_rect_size{8.0};
       REAL m_min_tws_volume{150.0};
+      REAL m_cell_within_eps{0.09};
 
       xgeometry<REAL, CELL>                                      *geom{nullptr};
       tws_node_t<REAL, AINT>                                     *root{nullptr};
@@ -263,9 +264,13 @@ namespace qpp{
 
       /// \brief aux_rtree constructor
       /// \param g
-      tws_tree_t (xgeometry<REAL, CELL> & g) {
+      explicit tws_tree_t (xgeometry<REAL, CELL> & g) {
         geom = & g;
         geom->add_observer(*this);
+      }
+
+      ~tws_tree_t() {
+        if (geom) geom->remove_observer(*this);
       }
 
       std::optional<AINT> find_img_atom (const AINT atm, const index idx) {
@@ -305,7 +310,7 @@ namespace qpp{
           }
 
         if (action & act_check_root) {
-            if (!root){
+            if (!root) {
                 root = new tws_node_t<REAL>();
                 m_flat_view.push_back(root);
                 root->m_bb.fill_guess(m_guess_rect_size);
@@ -630,7 +635,8 @@ namespace qpp{
         for (iterator i(index::D(geom->DIM).all(-1), index::D(geom->DIM).all(1)); !i.end(); i++ )
           if (i == index::D(geom->DIM).all(0))
             insert_object_to_tree(atm, i);
-          else if (geom->cell.within_epsilon_b(geom->pos(atm, i), 0.09f) || m_keep_img_atoms)
+          else if (geom->cell.within_epsilon_b(geom->pos(atm, i), m_cell_within_eps) ||
+                   m_keep_img_atoms)
             insert_object_to_tree(atm, i);
       }
 
