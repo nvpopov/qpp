@@ -209,17 +209,25 @@ namespace qpp {
 
             //mulliken pop per atom
             if (s.find("Mulliken Population Analysis") != std::string::npos) {
+
                 for (auto i = 0; i < 2; i++) sgetline(inp, s, cur_line); //read two common lines
                 output.m_steps.back().m_mulliken_pop_per_atom.reserve(output.m_tot_nat);
+                output.m_steps.back().m_mulliken_spin_pop_per_atom.reserve(output.m_tot_nat);
+
                 for (size_t i = 0; i < output.m_tot_nat; i++) {
+
                     sgetline(inp, s, cur_line);
                     std::vector<std::string_view> splt = split_sv(s, " "); // 3 - pop 4 - charge
                     check_min_split_size(splt, 5, cur_line, s);
                     std::pair<REAL, REAL> mr{str2real<REAL>(splt, 3, cur_line, s),
                                              str2real<REAL>(splt, 4, cur_line, s)};
                     output.m_steps.back().m_mulliken_pop_per_atom.push_back(std::move(mr));
+                    output.m_steps.back().m_mulliken_spin_pop_per_atom.push_back(
+                          str2real<REAL>(splt, 5, cur_line, s));
                   }
+
                 continue;
+
               }
             //end mulliken pop per atom
 

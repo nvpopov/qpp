@@ -2,7 +2,7 @@
 #define QPP_COLOR
 #include <geom/lace3d.hpp>
 
-namespace qpp{
+namespace qpp {
 
   static const vector3<float> clr_white     (1.00, 1.00, 1.00);
   static const vector3<float> clr_silver    (0.75, 0.75, 0.75);
