@@ -92,8 +92,12 @@ namespace qpp {
 
       // atomic population
       std::vector<std::pair<REAL, REAL> > m_mulliken_pop_per_atom;
+      std::vector<REAL> m_mulliken_net_chg_per_atom;
       std::vector<REAL> m_mulliken_spin_pop_per_atom;
+
       std::vector<std::pair<REAL, REAL> > m_lowdin_pop_per_atom;
+      std::vector<REAL> m_lowdin_net_chg_per_atom;
+      std::vector<REAL> m_lowdin_spin_pop_per_atom;
 
       vector3<REAL> m_dipole_moment{0};
 
