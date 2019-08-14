@@ -32,7 +32,7 @@ option(PYTHON_BINDINGS "build qpp python bindings" ON)
 option(PYTHON_EXPOSE_EXTENDED "build python wrappers not only for real=float" ON)
 option(USE_SYSTEM_EIGEN3 "use system avaiable eigen3 or download as deps" OFF)
 option(BUILD_EXAMPLES "build examples" ON)
-option(BUILD_TESTS "build tests executable" ON)
+option(BUILD_QPP_TESTS "build tests executable" ON)
 option(BUILD_QC "build qc stuff")
 option(BUILD_DOCS "build documentation")
 option(BUILD_TOOLS  "build tools" OFF)
@@ -124,7 +124,7 @@ else()
 endif()
 
 #Build tests
-if(BUILD_TESTS)
+if(BUILD_QPP_TESTS)
     message("-- Testing is enabled")
     enable_testing()
 
