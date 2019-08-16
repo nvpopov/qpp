@@ -7,6 +7,7 @@
 #include <map>
 #include <geom/lace3d.hpp>
 #include <geom/geom.hpp>
+#include <geom/xgeom.hpp>
 #include <geom/geom_anim.hpp>
 #include <io/ccd_programs.hpp>
 #include <data/generic_array.hpp>
@@ -245,6 +246,16 @@ namespace qpp {
 
     for (size_t i = 0; i < ccd_inst.m_init_anames.size(); i++)
       g.add(ccd_inst.m_init_anames[i], ccd_inst.m_init_apos[i]);
+
+    if (ccd_inst.m_init_achg.size() == ccd_inst.m_tot_nat && g.is_xgeometry()) {
+
+        xgeometry<REAL, periodic_cell<REAL> > *xsrc = nullptr;
+        xsrc = (xgeometry<REAL, periodic_cell<REAL> >*)(&g);
+
+        if (xsrc)
+          for (size_t q = 0; q < xsrc->nat(); q++) xsrc->charge(q) = ccd_inst.m_init_achg[q];
+
+      }
 
     return true;
 
