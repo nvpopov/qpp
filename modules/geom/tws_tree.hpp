@@ -489,7 +489,7 @@ namespace qpp{
             //iterate over imaginary atoms, store secondary imaginary atom, erase required atom
             std::vector<std::tuple<AINT, index> > pair_img_atoms;
             for (auto it = m_img_atoms.begin(); it != m_img_atoms.end();)
-              if (it->m_atm == atm){
+              if (it->m_atm == atm) {
                   for(auto &nc : it->m_img_bonds){
                       if (nc.m_idx != index::D(geom->DIM).all(0)) {
                           pair_img_atoms.push_back(std::tuple<AINT, index>(nc.m_atm, nc.m_idx));
@@ -500,7 +500,7 @@ namespace qpp{
                 } else ++it;
 
             //delete bonds from paired imaginary atoms
-            for (auto &pair : pair_img_atoms){
+            for (auto &pair : pair_img_atoms) {
                 std::optional<AINT> paired_img_id = find_img_atom(std::get<0>(pair),
                                                                   std::get<1>(pair));
                 if (paired_img_id){
@@ -677,8 +677,9 @@ namespace qpp{
 
         for (iterator i(index::D(geom->DIM).all(-1), index::D(geom->DIM).all(1)); !i.end(); i++ )
           if (i == index::D(geom->DIM).all(0)) insert_object_to_tree(atm, i);
-          else if (geom->cell.within_epsilon_b(geom->pos(atm, i), m_cell_within_eps) ||
-                   m_keep_img_atoms)
+          else if ((geom->nat() < 500 &&
+                    geom->cell.within_epsilon_b(geom->pos(atm, i), m_cell_within_eps))
+                    || m_keep_img_atoms)
             insert_object_to_tree(atm, i);
 
       }
