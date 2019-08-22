@@ -22,11 +22,14 @@
 namespace qpp {
 
   enum cp2k_output_parser_state {
+
     cp2k_op_state_none,
     cp2k_op_parse_scf,
     cp2k_op_parse_explicit_step_data,
     cp2k_op_parse_eigen_values_occ,
-    cp2k_op_parse_eigen_values_unocc
+    cp2k_op_parse_eigen_values_unocc,
+    cp2k_op_parse_tddfpt_state_en_tr_dm
+
   };
 
   template<class REAL>
@@ -353,6 +356,60 @@ namespace qpp {
                   }
                 continue;
               } //end of parsing trajectory and gradient
+
+            /* tddft parsing */
+            if (s.find("number   energy (eV)       x           y           z     strength (a.u.)")
+                != std::string::npos) {
+
+                sgetline(inp, s, cur_line); // read unnecessary line --------------------------
+                p_state = cp2k_output_parser_state::cp2k_op_parse_tddfpt_state_en_tr_dm;
+                continue;
+
+              }
+
+            /*
+             * Section looks like:
+             State    Excitation        Transition dipole (a.u.)        Oscillator
+             number   energy (eV)       x           y           z     strength (a.u.)
+             ------------------------------------------------------------------------
+     TDDFPT|      1       0.89402   1.0262E-01  6.4435E-03  3.4425E-01   2.82732E-03
+     0            1         2          3            4           5            6
+            */
+            if (p_state == cp2k_output_parser_state::cp2k_op_parse_tddfpt_state_en_tr_dm) {
+
+                std::vector<std::string_view> splt = split_sv(s, " ");
+
+                if (s.find("TDDFPT|") != std::string::npos) {
+
+                    check_min_split_size(splt, 7, cur_line, s);
+
+                    REAL exc_en  = str2real<REAL>(splt, 2, cur_line, s);
+                    REAL dip_x   = str2real<REAL>(splt, 3, cur_line, s);
+                    REAL dip_y   = str2real<REAL>(splt, 4, cur_line, s);
+                    REAL dip_z   = str2real<REAL>(splt, 5, cur_line, s);
+                    REAL osc_str = str2real<REAL>(splt, 6, cur_line, s);
+
+                    tddft_transition_rec<REAL> tddft_tr_rec;
+                    tddft_tr_rec.m_en_ev = exc_en;
+                    tddft_tr_rec.m_osc_str = osc_str;
+                    tddft_tr_rec.m_trans_dipole_moment = {dip_x, dip_y, dip_z};
+
+                    /* placeholder from/to states*/
+                    tddft_tr_rec.m_to_state.push_back({
+                                                        output.m_tddft_trans_rec.size()+1,
+                                                        1.0
+                                                      });
+
+                    output.m_tddft_trans_rec.push_back(std::move(tddft_tr_rec));
+
+                  } else {
+                    p_state = cp2k_output_parser_state::cp2k_op_state_none;
+                  }
+
+                continue;
+
+              }
+            /* end of tddft parsing */
 
           } // end of is_init_parsed == true
 

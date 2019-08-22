@@ -15,6 +15,7 @@
 namespace qpp {
 
   enum comp_chem_program_run_e {
+
     rt_unknown,
     rt_energy,
     rt_grad,
@@ -25,9 +26,11 @@ namespace qpp {
     rt_raman,
     rt_tddft,
     rt_spectrum
+
   };
 
   static std::map<comp_chem_program_e, std::string> ccdprog2str = {
+
     std::make_pair(pr_unknown, "Unknown"),
     std::make_pair(pr_vasp,    "VASP"),
     std::make_pair(pr_firefly, "PC Gamess Firefly"),
@@ -35,9 +38,11 @@ namespace qpp {
     std::make_pair(pr_orca,    "Orca"),
     std::make_pair(pr_molcas,  "OpenMolcas"),
     std::make_pair(pr_molden,  "Molden"),
+
   };
 
   static std::map<comp_chem_program_run_e, std::string> ccdrt2str = {
+
     std::make_pair(rt_unknown,  "Unknown"),
     std::make_pair(rt_energy,   "Single-point energy"),
     std::make_pair(rt_grad,     "Gradients calculation"),
@@ -48,6 +53,7 @@ namespace qpp {
     std::make_pair(rt_raman,    "Raman spectrum calculation"),
     std::make_pair(rt_tddft,    "TDDFT energy calculation"),
     std::make_pair(rt_spectrum, "Generic spectrum calculation")
+
   };
 
   template <class REAL>
@@ -116,6 +122,21 @@ namespace qpp {
 
   };
 
+  template<class REAL>
+  struct tddft_transition_rec {
+
+      bool m_is_from_state_gs{true};
+      bool m_is_hole_excitation{false};
+
+      REAL m_en_ev{0};
+      REAL m_osc_str{0};
+      vector3<REAL> m_trans_dipole_moment;
+
+      std::vector<std::tuple<size_t, REAL> > m_from_state;
+      std::vector<std::tuple<size_t, REAL> > m_to_state;
+
+  };
+
   template <class REAL>
   struct comp_chem_program_data_t {
 
@@ -152,6 +173,8 @@ namespace qpp {
       vector3<REAL> m_global_gradient_average{0,0,0};
       REAL m_global_gradient_norm_min{10};
       REAL m_global_gradient_norm_max{0};
+
+      std::vector<tddft_transition_rec<REAL> > m_tddft_trans_rec;
 
   };
 

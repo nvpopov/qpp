@@ -26,6 +26,7 @@ namespace qpp {
 
   template<class REAL>
   struct scalar_volume_t {
+
       std::array<vector3<REAL>,3> m_axis;
       std::array<uint16_t, 3> m_steps;
       vector3<REAL> m_offset{0, 0, 0};
@@ -34,6 +35,7 @@ namespace qpp {
       bool m_has_negative_values{false};
       std::string m_name;
       int m_addr_mode{0};
+
   };
 
   template<class REAL>

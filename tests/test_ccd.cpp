@@ -182,25 +182,31 @@ TEST_CASE("Compilation of ccd model" ) {
 TEST_CASE("Testing parsing xyz files with ccd approach") {
 
   SECTION("Parsing single geometry - 0d") {
+
     std::ifstream isec("../examples/io/ref_data/xyz/zoloft.xyz");
     comp_chem_program_data_t<double> cc_o;
     read_ccd_from_xyz_file(isec, cc_o);
     REQUIRE(cc_o.m_tot_nat == 37);
+
   }
 
   SECTION("Parsing multiframe geometry - 0d") {
+
     std::ifstream isec("../examples/io/ref_data/xyz/23elim.xyz");
     comp_chem_program_data_t<double> cc_o;
     read_ccd_from_xyz_file(isec, cc_o);
     REQUIRE(cc_o.m_tot_nat == 22);
     REQUIRE(cc_o.m_steps.size() == 22);
+
   }
 
   SECTION("Parsing single geometry with big amount of atoms - 0d") {
+
     std::ifstream isec("../examples/io/ref_data/xyz/relax.xyz");
     comp_chem_program_data_t<double> cc_o;
     read_ccd_from_xyz_file(isec, cc_o);
     REQUIRE(cc_o.m_tot_nat == 49651);
+
   }
 
 }
@@ -208,6 +214,7 @@ TEST_CASE("Testing parsing xyz files with ccd approach") {
 TEST_CASE( "Computational chemistry data parsing : CP2K Output" ) {
 
   SECTION ("Parsing results of geometry optimization [CP2K]") {
+
     std::ifstream isec("../examples/io/ref_data/cp2k/baf2_gopt.cp2k_out");
     comp_chem_program_data_t<double> cc_o;
     read_ccd_from_cp2k_output(isec, cc_o);
@@ -243,9 +250,11 @@ TEST_CASE( "Computational chemistry data parsing : CP2K Output" ) {
     REQUIRE(cc_o.m_steps.size() == 5);
     REQUIRE(cc_o.m_steps.back().m_eigen_values_spin_1_unocc.size() == 3);
     REQUIRE(cc_o.m_steps.back().m_eigen_values_spin_1_occ.size() == 384);
+
   }
 
   SECTION ("Parsing results of geometry optimization [CP2K] - file 2") {
+
     std::ifstream isec("../examples/io/ref_data/cp2k/baf2_c3v_o.cp2k_out");
     comp_chem_program_data_t<double> cc_o;
     read_ccd_from_cp2k_output(isec, cc_o);
@@ -263,6 +272,27 @@ TEST_CASE( "Computational chemistry data parsing : CP2K Output" ) {
                                               ccd_cf_remove_empty_geom_steps);
     REQUIRE(succes_ccd_compilation);
     REQUIRE(cc_o.m_steps.size() == 24);
+
+  }
+
+  SECTION ("Parsing results of tddft calculation [CP2K] - file 1") {
+
+    std::ifstream isec("../examples/io/ref_data/cp2k/tddft_hole_exc.out");
+    comp_chem_program_data_t<double> cc_o;
+    read_ccd_from_cp2k_output(isec, cc_o);
+    geometry<double, periodic_cell<double> > g(3);
+    std::vector<geom_anim_record_t<double> > anim_rec;
+    bool succes = compile_geometry(cc_o, g);
+
+    REQUIRE(succes);
+
+    bool succes_ccd_compilation = compile_ccd(cc_o, ccd_cf_default_flags |
+                                              ccd_cf_remove_empty_geom_steps);
+    REQUIRE(succes_ccd_compilation);
+    REQUIRE(cc_o.m_tddft_trans_rec.size() == 10);
+    REQUIRE(cc_o.m_tddft_trans_rec[0].m_to_state.size() == 1);
+    REQUIRE(std::get<0>(cc_o.m_tddft_trans_rec[0].m_to_state[0]) == 1);
+    REQUIRE(std::get<0>(cc_o.m_tddft_trans_rec[0].m_to_state[0]) == 1);
 
   }
 
