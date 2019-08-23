@@ -28,7 +28,8 @@ namespace qpp {
     cp2k_op_parse_explicit_step_data,
     cp2k_op_parse_eigen_values_occ,
     cp2k_op_parse_eigen_values_unocc,
-    cp2k_op_parse_tddfpt_state_en_tr_dm
+    cp2k_op_parse_tddfpt_state_en_tr_dm,
+    cp2k_op_parse_tddfpt_state_picture
 
   };
 
@@ -47,6 +48,9 @@ namespace qpp {
     bool is_fisrt_spin_subspace{false};
 
     uint64_t cur_line{0};
+
+    /* tddft stuff */
+    int cur_tddft_state{-1};
 
     while (!inp.eof()) {
 
@@ -395,10 +399,10 @@ namespace qpp {
                     tddft_tr_rec.m_trans_dipole_moment = {dip_x, dip_y, dip_z};
 
                     /* placeholder from/to states*/
-                    tddft_tr_rec.m_to_state.push_back({
-                                                        output.m_tddft_trans_rec.size()+1,
-                                                        1.0
-                                                      });
+//                    tddft_tr_rec.m_to_state.push_back({
+//                                                        output.m_tddft_trans_rec.size()+1,
+//                                                        1.0
+//                                                      });
 
                     output.m_tddft_trans_rec.push_back(std::move(tddft_tr_rec));
 
@@ -409,6 +413,74 @@ namespace qpp {
                 continue;
 
               }
+
+            /* parsing tddft`s picture of states*/
+            if (p_state == cp2k_output_parser_state::cp2k_op_state_none &&
+                s.find("Excitation analysis") != std::string::npos) {
+
+                for (size_t q = 0; q < 4; q++)
+                  sgetline(inp, s, cur_line); // read unnecessary line, total 5
+
+                p_state = cp2k_output_parser_state::cp2k_op_parse_tddfpt_state_picture;
+                cur_tddft_state = -1;
+                continue;
+
+              }
+
+            if (p_state == cp2k_output_parser_state::cp2k_op_parse_tddfpt_state_picture) {
+
+                std::vector<std::string_view> splt = split_sv(s, " ");
+                auto splt_size = splt.size();
+
+                switch (splt_size) {
+
+                  case 0 : {
+                      p_state = cp2k_output_parser_state::cp2k_op_state_none;
+                      break;
+                    }
+
+                  case 1 : {
+//                      fmt::print(std::cout, "output.m_tddft.size = {}, "
+//                                            "line = \"{}\", "
+//                                            "cur_tddft_state = {}\n",
+//                                 output.m_tddft_trans_rec.size(),
+//                                 s,
+//                                 cur_tddft_state);
+                      cur_tddft_state++;
+                      break;
+                    }
+
+                  case 5 : {
+
+                      bool is_alpha_lhs = splt[1].find("alpha") != std::string::npos;
+                      bool is_alpha_rhs = splt[3].find("alpha") != std::string::npos;
+
+                      size_t lhs_orb_num = str2int<REAL>(splt, 0, cur_line, s);
+                      size_t rhs_orb_num = str2int<REAL>(splt, 2, cur_line, s);
+
+                      REAL exc_ampl = str2real<REAL>(splt, 4, cur_line, s);
+
+                      output.m_tddft_trans_rec[cur_tddft_state].m_transition.push_back({
+                        lhs_orb_num, is_alpha_lhs ? ccd_spin_e::spin_alpha : ccd_spin_e::spin_beta,
+                        rhs_orb_num, is_alpha_rhs ? ccd_spin_e::spin_alpha : ccd_spin_e::spin_beta,
+                        exc_ampl
+                      });
+
+                      break;
+
+                    }
+
+                  default : {
+                      p_state = cp2k_output_parser_state::cp2k_op_state_none;
+                      break;
+                    }
+
+                  }
+
+                continue;
+
+              }
+
             /* end of tddft parsing */
 
           } // end of is_init_parsed == true

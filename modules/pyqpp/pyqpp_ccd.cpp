@@ -82,12 +82,12 @@ void pyqpp_ccd_step_export_tmpl(py::module m, const char * pyname) {
              .def_readonly("en_gap_spin_1", &comp_chem_program_step_t<REAL>::m_energy_gap_spin_1)
              .def_readonly("en_gap_spin_2", &comp_chem_program_step_t<REAL>::m_energy_gap_spin_2)
              .def_readonly("dipole_moment", &comp_chem_program_step_t<REAL>::m_dipole_moment)
-             .def_readonly("gr_min", &comp_chem_program_step_t<REAL>::m_gradient_min)
-             .def_readonly("gr_max", &comp_chem_program_step_t<REAL>::m_gradient_max)
-             .def_readonly("gr_av", &comp_chem_program_step_t<REAL>::m_gradient_average)
-             .def_readonly("ngr_min", &comp_chem_program_step_t<REAL>::m_gradient_norm_min)
-             .def_readonly("ngr_max", &comp_chem_program_step_t<REAL>::m_gradient_norm_max)
-             .def_readonly("ngr_av", &comp_chem_program_step_t<REAL>::m_gradient_norm_average)
+             .def_readonly("gr_min", &comp_chem_program_step_t<REAL>::m_grad_min)
+             .def_readonly("gr_max", &comp_chem_program_step_t<REAL>::m_grad_max)
+             .def_readonly("gr_av", &comp_chem_program_step_t<REAL>::m_grad_aver)
+             .def_readonly("ngr_min", &comp_chem_program_step_t<REAL>::m_grad_norm_min)
+             .def_readonly("ngr_max", &comp_chem_program_step_t<REAL>::m_grad_norm_max)
+             .def_readonly("ngr_av", &comp_chem_program_step_t<REAL>::m_grad_norm_average)
              .def_readonly("cell_is_animable", &comp_chem_program_step_t<REAL>::m_cell_is_animable)
              .def_readonly("cell", &comp_chem_program_step_t<REAL>::m_cell);
 

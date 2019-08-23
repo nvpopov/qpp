@@ -290,9 +290,14 @@ TEST_CASE( "Computational chemistry data parsing : CP2K Output" ) {
                                               ccd_cf_remove_empty_geom_steps);
     REQUIRE(succes_ccd_compilation);
     REQUIRE(cc_o.m_tddft_trans_rec.size() == 10);
-    REQUIRE(cc_o.m_tddft_trans_rec[0].m_to_state.size() == 1);
-    REQUIRE(std::get<0>(cc_o.m_tddft_trans_rec[0].m_to_state[0]) == 1);
-    REQUIRE(std::get<0>(cc_o.m_tddft_trans_rec[0].m_to_state[0]) == 1);
+//    REQUIRE(cc_o.m_tddft_trans_rec[0].m_to_state.size() == 1);
+//    REQUIRE(std::get<0>(cc_o.m_tddft_trans_rec[0].m_to_state[0]) == 1);
+//    REQUIRE(std::get<0>(cc_o.m_tddft_trans_rec[0].m_to_state[0]) == 1);
+
+    REQUIRE(std::get<1>(cc_o.m_tddft_trans_rec[0].m_transition[0]) == ccd_spin_e::spin_beta);
+    REQUIRE(std::get<3>(cc_o.m_tddft_trans_rec[0].m_transition[0]) == ccd_spin_e::spin_beta);
+    REQUIRE(std::get<2>(cc_o.m_tddft_trans_rec[0].m_transition[0]) == 768);
+    REQUIRE(std::get<4>(cc_o.m_tddft_trans_rec[0].m_transition[0]) == 0.365314);
 
   }
 

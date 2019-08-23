@@ -14,6 +14,13 @@
 
 namespace qpp {
 
+  enum ccd_spin_e {
+
+    spin_alpha,
+    spin_beta
+
+  };
+
   enum comp_chem_program_run_e {
 
     rt_unknown,
@@ -109,12 +116,12 @@ namespace qpp {
       vector3<REAL> m_dipole_moment{0};
 
       // gradient stuff
-      vector3<REAL> m_gradient_min{0,0,0};
-      vector3<REAL> m_gradient_max{0,0,0};
-      vector3<REAL> m_gradient_average{0,0,0};
-      REAL m_gradient_norm_min{10};
-      REAL m_gradient_norm_max{0};
-      REAL m_gradient_norm_average{0};
+      vector3<REAL> m_grad_min{0,0,0};
+      vector3<REAL> m_grad_max{0,0,0};
+      vector3<REAL> m_grad_aver{0,0,0};
+      REAL m_grad_norm_min{10};
+      REAL m_grad_norm_max{0};
+      REAL m_grad_norm_average{0};
 
       // for cell_opt steps
       bool m_cell_is_animable{false};
@@ -132,8 +139,8 @@ namespace qpp {
       REAL m_osc_str{0};
       vector3<REAL> m_trans_dipole_moment;
 
-      std::vector<std::tuple<size_t, REAL> > m_from_state;
-      std::vector<std::tuple<size_t, REAL> > m_to_state;
+      /* lhs state, lhs spin, rhs state, rhs spin, amplitude */
+      std::vector<std::tuple<size_t, ccd_spin_e, size_t, ccd_spin_e, REAL> > m_transition;
 
   };
 
@@ -217,14 +224,14 @@ namespace qpp {
 
                   REAL grad_norm = step.m_atoms_grads[i].norm();
 
-                  if (grad_norm > step.m_gradient_norm_max) {
-                      step.m_gradient_norm_max = grad_norm;
-                      step.m_gradient_max = step.m_atoms_grads[i];
+                  if (grad_norm > step.m_grad_norm_max) {
+                      step.m_grad_norm_max = grad_norm;
+                      step.m_grad_max = step.m_atoms_grads[i];
                     }
 
-                  if (grad_norm < step.m_gradient_norm_min) {
-                      step.m_gradient_norm_min = grad_norm;
-                      step.m_gradient_min = step.m_atoms_grads[i];
+                  if (grad_norm < step.m_grad_norm_min) {
+                      step.m_grad_norm_min = grad_norm;
+                      step.m_grad_min = step.m_atoms_grads[i];
                     }
 
                   if (grad_norm > ccd_inst.m_global_gradient_norm_max)
@@ -233,12 +240,12 @@ namespace qpp {
                   if (grad_norm < ccd_inst.m_global_gradient_norm_min)
                     ccd_inst.m_global_gradient_norm_min = grad_norm;
 
-                  step.m_gradient_average += step.m_atoms_grads[i];
-                  step.m_gradient_norm_average += grad_norm;
+                  step.m_grad_aver += step.m_atoms_grads[i];
+                  step.m_grad_norm_average += grad_norm;
                 }
 
-              step.m_gradient_average /= step.m_atoms_grads.size();
-              step.m_gradient_norm_average /= step.m_atoms_grads.size();
+              step.m_grad_aver /= step.m_atoms_grads.size();
+              step.m_grad_norm_average /= step.m_atoms_grads.size();
 
             }
       }
