@@ -130,17 +130,30 @@ namespace qpp {
   };
 
   template<class REAL>
-  struct tddft_transition_rec {
+  struct tddft_transition_rec_t {
 
-      bool m_is_from_state_gs{true};
-      bool m_is_hole_excitation{false};
+      size_t m_from{0};
+      size_t m_from_spin{ccd_spin_e::spin_alpha};
+
+      size_t m_to{0};
+      size_t m_to_spin{ccd_spin_e::spin_alpha};
+
+      REAL m_amplitude{0};
+
+  };
+
+  template<class REAL>
+  struct tddft_transitions_t {
+
+      bool m_all_lhs_equal{false};
+      bool m_all_rhs_equal{false};
 
       REAL m_en_ev{0};
       REAL m_osc_str{0};
       vector3<REAL> m_trans_dipole_moment;
 
       /* lhs state, lhs spin, rhs state, rhs spin, amplitude */
-      std::vector<std::tuple<size_t, ccd_spin_e, size_t, ccd_spin_e, REAL> > m_transition;
+      std::vector<tddft_transition_rec_t<REAL > > m_transition;
 
   };
 
@@ -181,7 +194,7 @@ namespace qpp {
       REAL m_global_gradient_norm_min{10};
       REAL m_global_gradient_norm_max{0};
 
-      std::vector<tddft_transition_rec<REAL> > m_tddft_trans_rec;
+      std::vector<tddft_transitions_t<REAL> > m_tddft_trans_rec;
 
   };
 
@@ -250,7 +263,31 @@ namespace qpp {
             }
       }
 
+    /* tddft data compilation */
+    if (!ccd_inst.m_tddft_trans_rec.empty())
+      for (auto &rec : ccd_inst.m_tddft_trans_rec) {
+
+          bool all_lhs_equal{true};
+          bool all_rhs_equal{true};
+
+          if (rec.m_transition.size() > 1)
+            for (size_t i = 1; i < rec.m_transition.size(); i++) {
+
+                if (rec.m_transition[i-1].m_from != rec.m_transition[i].m_from)
+                  all_lhs_equal = false;
+
+                if (rec.m_transition[i-1].m_to != rec.m_transition[i].m_to)
+                  all_lhs_equal = false;
+
+              }
+
+          rec.m_all_lhs_equal = all_lhs_equal;
+          rec.m_all_rhs_equal = all_rhs_equal;
+
+        }
+
     return true;
+
   }
 
   template <class REAL>

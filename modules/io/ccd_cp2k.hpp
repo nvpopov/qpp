@@ -393,7 +393,7 @@ namespace qpp {
                     REAL dip_z   = str2real<REAL>(splt, 5, cur_line, s);
                     REAL osc_str = str2real<REAL>(splt, 6, cur_line, s);
 
-                    tddft_transition_rec<REAL> tddft_tr_rec;
+                    tddft_transitions_t<REAL> tddft_tr_rec;
                     tddft_tr_rec.m_en_ev = exc_en;
                     tddft_tr_rec.m_osc_str = osc_str;
                     tddft_tr_rec.m_trans_dipole_moment = {dip_x, dip_y, dip_z};

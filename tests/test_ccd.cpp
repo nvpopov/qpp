@@ -314,10 +314,10 @@ TEST_CASE( "Computational chemistry data parsing : CP2K Output" ) {
 //    REQUIRE(std::get<0>(cc_o.m_tddft_trans_rec[0].m_to_state[0]) == 1);
 //    REQUIRE(std::get<0>(cc_o.m_tddft_trans_rec[0].m_to_state[0]) == 1);
 
-    REQUIRE(std::get<1>(cc_o.m_tddft_trans_rec[0].m_transition[0]) == ccd_spin_e::spin_beta);
-    REQUIRE(std::get<3>(cc_o.m_tddft_trans_rec[0].m_transition[0]) == ccd_spin_e::spin_beta);
-    REQUIRE(std::get<2>(cc_o.m_tddft_trans_rec[0].m_transition[0]) == 768);
-    REQUIRE(std::get<4>(cc_o.m_tddft_trans_rec[0].m_transition[0]) == 0.365314);
+    REQUIRE(cc_o.m_tddft_trans_rec[0].m_transition[0].m_from_spin == ccd_spin_e::spin_beta);
+    REQUIRE(cc_o.m_tddft_trans_rec[0].m_transition[0].m_to_spin == ccd_spin_e::spin_beta);
+    REQUIRE(cc_o.m_tddft_trans_rec[0].m_transition[0].m_to == 768);
+    REQUIRE(cc_o.m_tddft_trans_rec[0].m_transition[0].m_amplitude == Approx(0.365314));
 
   }
 
