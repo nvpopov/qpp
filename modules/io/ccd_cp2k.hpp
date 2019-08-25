@@ -45,7 +45,10 @@ namespace qpp {
 
     output.m_DIM = 0;
     output.m_comp_chem_program = comp_chem_program_e::pr_cp2k;
-    bool is_fisrt_spin_subspace{false};
+    bool is_first_spin_subspace{false};
+
+    bool alpha_spin_num_isset{false};
+    bool beta_spin_num_isset{false};
 
     uint64_t cur_line{0};
 
@@ -168,6 +171,31 @@ namespace qpp {
 
         // start of is_init_parsed == true
         if (is_init_parsed) {
+
+            //Number of electrons:  768
+            //  0    1     2         3
+            if (s.find("Number of electrons") != std::string::npos) {
+
+                std::vector<std::string_view> splt = split_sv(s, " ");
+                check_min_split_size(splt, 4, cur_line, s);
+                size_t num_electrons = str2int(splt, 3, cur_line, s);
+
+                if (!alpha_spin_num_isset) {
+                    alpha_spin_num_isset = true;
+                    output.m_n_alpha = num_electrons;
+                    continue;
+                  }
+
+                if (!beta_spin_num_isset) {
+                    beta_spin_num_isset = true;
+                    output.m_n_beta = num_electrons;
+                    continue;
+                  }
+
+                continue;
+
+              }
+
             if (s.find("SCF WAVEFUNCTION OPTIMIZATION") != std::string::npos) {
                 output.m_steps.resize(output.m_steps.size() + 1);
                 p_state = cp2k_output_parser_state::cp2k_op_parse_scf;
@@ -270,14 +298,14 @@ namespace qpp {
 
             //start eigenvalues parsing
             if (s.find("Eigenvalues of the occupied subspace spin") != std::string::npos) {
-                is_fisrt_spin_subspace = s.find("1") != std::string::npos;//determine spin subspace
+                is_first_spin_subspace = s.find("1") != std::string::npos;//determine spin subspace
                 sgetline(inp, s, cur_line); //read common line --------
                 p_state = cp2k_output_parser_state::cp2k_op_parse_eigen_values_occ;
                 continue;
               }
 
             if (s.find("Lowest Eigenvalues of the unoccupied subspace") != std::string::npos) {
-                is_fisrt_spin_subspace = s.find("1") != std::string::npos;//determine spin subspace
+                is_first_spin_subspace = s.find("1") != std::string::npos;//determine spin subspace
                 sgetline(inp, s, cur_line); //read common line --------
                 p_state = cp2k_output_parser_state::cp2k_op_parse_eigen_values_unocc;
                 continue;
@@ -304,7 +332,7 @@ namespace qpp {
                     REAL sp_eigen_value = str2real<REAL>(splt, i, cur_line, s);
 
                     if (p_state == cp2k_output_parser_state::cp2k_op_parse_eigen_values_occ) {
-                        if (is_fisrt_spin_subspace)
+                        if (is_first_spin_subspace)
                           output.m_steps.back().m_eigen_values_spin_1_occ.push_back(
                                 sp_eigen_value);
                         else
@@ -313,7 +341,7 @@ namespace qpp {
                       }
 
                     if (p_state == cp2k_output_parser_state::cp2k_op_parse_eigen_values_unocc) {
-                        if (is_fisrt_spin_subspace)
+                        if (is_first_spin_subspace)
                           output.m_steps.back().m_eigen_values_spin_1_unocc.push_back(
                                 sp_eigen_value);
                         else output.m_steps.back().m_eigen_values_spin_2_unocc.push_back(

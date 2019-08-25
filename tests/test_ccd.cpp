@@ -300,6 +300,7 @@ TEST_CASE( "Computational chemistry data parsing : CP2K Output" ) {
     std::ifstream isec("../examples/io/ref_data/cp2k/tddft_hole_exc.out");
     comp_chem_program_data_t<double> cc_o;
     read_ccd_from_cp2k_output(isec, cc_o);
+
     geometry<double, periodic_cell<double> > g(3);
     std::vector<geom_anim_record_t<double> > anim_rec;
     bool succes = compile_geometry(cc_o, g);
@@ -310,14 +311,16 @@ TEST_CASE( "Computational chemistry data parsing : CP2K Output" ) {
                                               ccd_cf_remove_empty_geom_steps);
     REQUIRE(succes_ccd_compilation);
     REQUIRE(cc_o.m_tddft_trans_rec.size() == 10);
-//    REQUIRE(cc_o.m_tddft_trans_rec[0].m_to_state.size() == 1);
-//    REQUIRE(std::get<0>(cc_o.m_tddft_trans_rec[0].m_to_state[0]) == 1);
-//    REQUIRE(std::get<0>(cc_o.m_tddft_trans_rec[0].m_to_state[0]) == 1);
 
     REQUIRE(cc_o.m_tddft_trans_rec[0].m_transition[0].m_from_spin == ccd_spin_e::spin_beta);
     REQUIRE(cc_o.m_tddft_trans_rec[0].m_transition[0].m_to_spin == ccd_spin_e::spin_beta);
     REQUIRE(cc_o.m_tddft_trans_rec[0].m_transition[0].m_to == 768);
     REQUIRE(cc_o.m_tddft_trans_rec[0].m_transition[0].m_amplitude == Approx(0.365314));
+    REQUIRE(cc_o.m_tddft_trans_rec[0].m_all_lhs_equal == false);
+    REQUIRE(cc_o.m_tddft_trans_rec[0].m_all_rhs_equal == true);
+
+    REQUIRE(cc_o.m_n_alpha == 768);
+    REQUIRE(cc_o.m_n_beta == 767);
 
   }
 
