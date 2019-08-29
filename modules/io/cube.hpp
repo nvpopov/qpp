@@ -36,6 +36,19 @@ namespace qpp {
       std::string m_name;
       int m_addr_mode{0};
 
+      bool is_structure_equals(scalar_volume_t<REAL> &vol) {
+
+        return m_field.size() == vol.m_field.size() &&
+            m_steps[0] == vol.m_steps[0] &&
+            m_steps[1] == vol.m_steps[1] &&
+            m_steps[2] == vol.m_steps[2] &&
+            m_offset == vol.m_offset &&
+            m_axis[0] == vol.m_axis[0] &&
+            m_axis[1] == vol.m_axis[1] &&
+            m_axis[2] == vol.m_axis[2];
+
+      }
+
   };
 
   template<class REAL>
