@@ -1069,7 +1069,7 @@ namespace qpp{
 
         if (st == before_after::after) {
 
-            if (m_auto_bonding && m_auto_build){
+            if (m_auto_bonding && m_auto_build) {
 
                 do_action(act_check_consistency);
                 clr_atom_bond_data(at);
@@ -1096,10 +1096,13 @@ namespace qpp{
       void erased(int at,
                   before_after st) override {
 
-        if (st == before_after::before) {
-            do_action(act_clear_all);
-          } else {
-            do_action(act_check_consistency | act_rebuild_all);
+        if (m_auto_bonding && m_auto_build) {
+            if (st == before_after::before) {
+                do_action(act_clear_all);
+              } else {
+                do_action(act_check_consistency | act_rebuild_all);
+              }
+
           }
 
         m_tree_is_dirty = true;
