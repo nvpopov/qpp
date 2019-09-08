@@ -21,7 +21,7 @@ namespace py = pybind11;
 #include <initializer_list>
 #include <stdexcept>
 
-namespace qpp{
+namespace qpp {
 
   template<class REAL, class CELL>
   ///
@@ -53,11 +53,13 @@ namespace qpp{
       //using geometry<DIM,REAL,CELL>::error;
 
       void init_xdefault() {
+
         _nxreal = _nxstring = _nxint = _nxbool = 0;
 #if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
         py_fields.bind(this);
         py_add.bind(this);
 #endif
+
       }
 
     public:
@@ -99,12 +101,14 @@ namespace qpp{
         _field_type(__nxreal + __nxint + __nxbool + __nxstring),
         _field_idx(__nxreal + __nxint + __nxbool + __nxstring),
         _field_additive(__nxreal + __nxint + __nxbool + __nxstring),
-        geometry<REAL,CELL>(__cell, __name){
+        geometry<REAL,CELL>(__cell, __name) {
+
         init_xdefault();
         _nxreal   = __nxreal;
         _nxint    = __nxint;
         _nxbool   = __nxbool;
         _nxstring = __nxstring;
+
       }
 
       ///
@@ -113,7 +117,7 @@ namespace qpp{
       /// \param __name
       ///
       xgeometry(CELL & __cell,  const STRING_EX & __name = "") :
-        geometry<REAL,CELL>(__cell, __name){
+        geometry<REAL,CELL>(__cell, __name) {
         init_xdefault();
       }
 
@@ -123,7 +127,7 @@ namespace qpp{
       /// \param __name
       ///
       xgeometry(int dim,  const STRING_EX & __name = "") :
-        geometry<REAL,CELL>(dim, __name){
+        geometry<REAL,CELL>(dim, __name) {
         init_xdefault();
       }
 
@@ -143,7 +147,8 @@ namespace qpp{
       /// \param ft
       ///
       void set_format(const std::vector<STRING_EX> & fn,
-                      const std::vector<basic_types> & ft){
+                      const std::vector<basic_types> & ft) {
+
         _field_name = fn;
         _field_type = ft;
         _nxstring = std::count(ft.begin(), ft.end(), type_string);
@@ -256,8 +261,10 @@ namespace qpp{
       xgeometry(CELL & __cell,  const std::vector<STRING_EX> & fn,
                 const std::vector<basic_types> & ft,
                 const STRING_EX & __name = "") : geometry<REAL,CELL>(__cell, __name) {
+
         init_xdefault();
         set_format(fn,ft);
+
       }
 
       int nfields_string() const{ return _nxstring; }
@@ -273,10 +280,13 @@ namespace qpp{
       bool & additive(int i){ return _field_additive[i]; }
 
       template<class T>
-      T & xfield(int i, int j){
+      T & xfield(int i, int j) {
+
         basic_types ft = field_type(i);
+
         if (ft == type_real)
           ft = attributes<REAL>::type;
+
         if (attributes<T>::type != ft)
           throw std::invalid_argument("xgeometry::xfield - wrong type for the field " + t2s(i));
 
@@ -290,7 +300,7 @@ namespace qpp{
           return  convert<T&,short&>::get(_xbool[_field_idx[i]][j]);
         else if (attributes<T>::type == type_int)
           return convert<T&,int&>::get(_xint[_field_idx[i]][j]);
-        else if (attributes<T>::type == attributes<REAL>::type){
+        else if (attributes<T>::type == attributes<REAL>::type) {
             if (i==ix_x)
               return convert<T&,REAL&>::get(_crd[j].x());
             else if (i==ix_y)
@@ -302,13 +312,17 @@ namespace qpp{
           }
         else
           throw std::invalid_argument("Illegal type of xgeometry extra field");
+
       }
 
       template<class T>
-      inline T xfield(int i, int j) const{
+      inline T xfield(int i, int j) const {
+
         basic_types ft = field_type(i);
+
         if (ft == type_real)
           ft = attributes<REAL>::type;
+
         if (attributes<T>::type != ft)
           throw std::invalid_argument(
               "xgeometry::xfield - wrong type for the field " + t2s(i));
@@ -335,10 +349,26 @@ namespace qpp{
           }
         else
           throw std::invalid_argument("Illegal type of xgeometry extra field");
+
       }
 
       template<class T>
-      inline T & xfield(const STRING_EX & f, int j){
+      inline T & xfield(const STRING_EX & f, int j) {
+
+        int i = 0;
+        while (_field_name[i]!=f && i<nfields()) i++;
+
+        if (i<nfields())
+          return xfield<T>(i,j);
+        else {
+            throw std::invalid_argument("Field not found in xgeometry");
+          }
+
+      }
+
+      template<class T>
+      T xfield(const STRING_EX & f, int j) const {
+
         int i = 0;
         while (_field_name[i]!=f && i<nfields()) i++;
 
@@ -347,23 +377,13 @@ namespace qpp{
         else{
             throw std::invalid_argument("Field not found in xgeometry");
           }
-      }
 
-      template<class T>
-      T xfield(const STRING_EX & f, int j) const{
-        int i = 0;
-        while (_field_name[i]!=f && i<nfields()) i++;
-
-        if (i<nfields())
-          return xfield<T>(i,j);
-        else{
-            throw std::invalid_argument("Field not found in xgeometry");
-          }
       }
 
       // ----------------------------------------------------
 
       virtual void get_fields(int j, std::vector<datum> & v) const {
+
         if (j < 0) j += nat();
         if (j < 0 || j >= nat())
           throw std::invalid_argument("xgeometry::py_getitem: index out of range");
@@ -379,9 +399,11 @@ namespace qpp{
             else if (field_type(i)==type_bool)
               v[i] = xfield<bool>(i,j);
           }
+
       }
 
-      virtual void set_fields(int j, const std::vector<datum> & v){
+      virtual void set_fields(int j, const std::vector<datum> & v) {
+
         if (j < 0) j += nat();
         if (j < 0 || j >= nat())
           throw std::invalid_argument("xgeometry::set_fields: index out of range");
@@ -410,25 +432,31 @@ namespace qpp{
         if (has_observers)
           for (int i=0; i<observers.size(); i++)
             observers[i]->changed(j, after, a1, r1);
+
       }
 
       // ----------------------------------------------------
 
-      virtual void erase(int j){
+      virtual void erase(int j) {
+
         geometry<REAL,CELL>::erase(j);
+
         for (int i=0; i<_nxreal; i++)
           _xreal[i].erase(_xreal[i].begin()+j);
+
         for (int i=0; i<_nxint; i++)
           _xint[i].erase(_xint[i].begin()+j);
+
         for (int i=0; i<_nxbool; i++)
           _xbool[i].erase(_xbool[i].begin()+j);
+
       }
 
       void add(const STRING_EX & a, const vector3<REAL> & r,
                std::initializer_list<STRING_EX> xts,
                std::initializer_list<REAL> xtr = {},
                std::initializer_list<int> xti = {},
-               std::initializer_list<bool> xtb = {}){
+               std::initializer_list<bool> xtb = {}) {
 
         int i = 0;
         for (const auto & xs : xts)
@@ -447,13 +475,15 @@ namespace qpp{
           _xbool[i++].push_back(xb);
 
         geometry<REAL,CELL>::add(a,r);
+
       }
 
       void insert(const int j, const STRING_EX & a, const vector3<REAL> &r,
                   std::initializer_list<STRING_EX> xts,
                   std::initializer_list<REAL> xtr = {},
                   std::initializer_list<int> xti = {},
-                  std::initializer_list<bool> xtb = {}){
+                  std::initializer_list<bool> xtb = {}) {
+
         int i = 0;
         for ( const auto & xs : xts )
           _xstring[i].insert( _xstring[i++].begin() + j, xs);
@@ -471,47 +501,65 @@ namespace qpp{
           _xbool[i].insert( _xbool[i++].begin() + j, xb);
 
         geometry<REAL,CELL>::insert(j,a,r);
+
       }
 
-      virtual void add(const STRING_EX &a, const vector3<REAL> & r){
+      virtual void add(const STRING_EX &a, const vector3<REAL> & r) {
+
         for (int i=0; i<_nxstring; i++)
           _xstring[i].push_back( "" );
+
         for (int i=0; i<_nxreal; i++)
           _xreal[i].push_back( REAL(0) );
+
         for (int i=0; i<_nxint; i++)
           _xint[i].push_back(0);
+
         for (int i=0; i<_nxbool; i++)
           _xbool[i].push_back( false );
+
         geometry<REAL,CELL>::add(a,r);
+
       }
 
-      virtual void insert(const int j, STRING_EX a, const vector3<REAL> &r){
+      virtual void insert(const int j, STRING_EX a, const vector3<REAL> &r) {
+
         for (int i=0; i<_nxstring; i++)
           _xstring[i].insert(_xstring[i].begin()+j, "" );
+
         for (int i=0; i<_nxreal; i++)
           _xreal[i].insert(_xreal[i].begin()+j, REAL(0) );
+
         for (int i=0; i<_nxint; i++)
           _xint[i].insert(_xint[i].begin()+j, 0);
+
         for (int i=0; i<_nxbool; i++)
           _xbool[i].insert(_xbool[i].begin()+j, false);
+
         geometry<REAL,CELL>::insert(j,a,r);
+
       }
 
-      virtual void clear(){
+      virtual void clear() {
+
         geometry<REAL,CELL>::clear();
+
         for (int i=0; i<_nxstring; i++)
           _xstring[i].clear();
+
         for (int i=0; i<_nxreal; i++)
           _xreal[i].clear();
+
         for (int i=0; i<_nxint; i++)
           _xint[i].clear();
+
         for (int i=0; i<_nxbool; i++)
           _xbool[i].clear();
+
       }
 
 
-      virtual void add(STRING_EX a, REAL _x, REAL _y, REAL _z)
-      {
+      virtual void add(STRING_EX a, REAL _x, REAL _y, REAL _z) {
         add(a, {_x,_y,_z});
       }
 
@@ -592,7 +640,8 @@ namespace qpp{
       }
 
       template<class T>
-      void parse_field(int i, int j, T t){
+      void parse_field(int i, int j, T t) {
+
         basic_types f = field_type(i);
         if (f==type_string)
           xfield<STRING_EX>(i,j) = convert<STRING_EX,T>::get(t);
@@ -602,17 +651,18 @@ namespace qpp{
           xfield<int>(i,j) = convert<int,T>::get(t);
         else if (f==type_bool)
           xfield<bool>(i,j) = convert<bool,T>::get(t);
+
       }
 
       // ----------------------------------------
 
       template<class T, typename... Args>
-      void parse(int i, int j, T t){
+      void parse(int i, int j, T t) {
         parse_field(i,j,t);
       }
 
       template<class T, typename... Args>
-      void parse(int i, int j, T t, Args... args){
+      void parse(int i, int j, T t, Args... args) {
         parse_field(i,j,t);
         parse(i+1, j, args...);
       }
@@ -620,27 +670,34 @@ namespace qpp{
       // ----------------------------------------
 
       template<typename... Args>
-      void xfill(int j, Args... args){
+      void xfill(int j, Args... args) {
+
         parse(0,j,args...);
         if (auto_update_types)
           type(j) = define_type(_atm[j]);
+
       }
 
       template<typename... Args>
-      void xadd(Args... args){
+      void xadd(Args... args) {
+
         add("",{REAL(0),REAL(0),REAL(0)});
         xfill(size()-1, args... );
+
       }
 
       template<typename... Args>
-      void xinsert(int at, Args... args){
+      void xinsert(int at, Args... args) {
+
         insert(at,"",{REAL(0),REAL(0),REAL(0)});
         xfill(at, args... );
+
       }
 
       // ----------------------------------------
 
-      virtual void write(std::basic_ostream<CHAR_EX,TRAITS> &os, int offset=0) const{
+      virtual void write(std::basic_ostream<CHAR_EX,TRAITS> &os, int offset=0) const {
+
         for (int k=0; k<offset; k++) os << " ";
         os << "geometry";
         if (name != "")
@@ -680,6 +737,7 @@ namespace qpp{
 
         for (int k=0; k<offset+2; k++) os << " ";
         os << "}\n";
+
       }
 
       // Some named fields ----------------------------------------------
@@ -687,6 +745,7 @@ namespace qpp{
       bool has_charge(){ return ix_charge >= 0; }
 
       REAL charge(int i) const {
+
         if (i < 0) i += nat();
         if (i < 0 || i >= nat())
           throw std::invalid_argument("xgeometry::py_getitem: index out of range");
@@ -696,9 +755,11 @@ namespace qpp{
         else
           throw std::runtime_error("\"charge\" field is requested for the geometry which"
                                    " does not have charges");
+
       }
 
       REAL & charge(int i) {
+
         if (i < 0) i+=nat();
         if (i < 0 || i>= nat())
           throw std::invalid_argument("xgeometry::py_getitem: index out of range");
@@ -708,13 +769,15 @@ namespace qpp{
         else
           throw std::runtime_error("\"charge\" field is requested for the geometry "
                                    "which does not have charges");
+
       }
 
       //-----------------------------------------------------------
 
       bool has_number(){ return ix_number >= 0; }
 
-      int number(int i) const{
+      int number(int i) const {
+
         if (i < 0) i += nat();
         if (i < 0 || i >= nat())
           throw std::invalid_argument("xgeometry::py_getitem: index out of range");
@@ -724,9 +787,11 @@ namespace qpp{
         else
           throw std::runtime_error("\"number\" field is requested for the geometry "
                                    "which does not have numbers");
+
       }
 
       int & number(int i) {
+
         if (i < 0) i += nat();
         if (i < 0 || i >= nat())
           throw std::invalid_argument("xgeometry::py_getitem: index out of range");
@@ -736,6 +801,7 @@ namespace qpp{
         else
           throw std::runtime_error("\"number\" field is requested for the geometry "
                                    "which does not have numbers");
+
       }
 
       //-----------------------------------------------------------
@@ -744,6 +810,7 @@ namespace qpp{
       { return ix_mass >= 0; }
 
       REAL mass(int i) const {
+
         if (i < 0) i+=nat();
         if (i < 0 || i>= nat())
           throw std::invalid_argument("xgeometry::py_getitem: index out of range");
@@ -753,9 +820,11 @@ namespace qpp{
         else
           throw std::runtime_error("\"mass\" field is requested for the geometry"
                                    " which does not have masses");
+
       }
 
       REAL & mass(int i) {
+
         if (i < 0) i+=nat();
         if (i < 0 || i>= nat())
           throw std::invalid_argument("xgeometry::py_getitem: index out of range");
@@ -765,18 +834,20 @@ namespace qpp{
         else
           throw std::runtime_error("\"mass\" field is requested for the geometry"
                                    " which does not have masses");
+
       }
 
 #if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
 
       xgeometry(CELL & __cell, const py::list f, const STRING_EX & __name = "") :
-        geometry<REAL,CELL>(__cell, __name){
+        geometry<REAL,CELL>(__cell, __name) {
+
         init_xdefault();
 
         std::vector<STRING_EX> fn;
         std::vector<basic_types> ft;
 
-        for (int i=0; i<py::len(f); i++){
+        for (int i=0; i<py::len(f); i++) {
             if (!py::isinstance<py::tuple>(f[i]))
               throw std::invalid_argument("In xgeometry constructor - bad format list");
 
@@ -800,14 +871,18 @@ namespace qpp{
             else
               throw std::invalid_argument("In xgeometry constructor - bad field type");
           }
+
         set_format(fn,ft);
+
       }
 
-      virtual py::list py_getitem(int j) const{
+      virtual py::list py_getitem(int j) const {
+
         if (j<0) j+=nat();
         if (j<0 || j>= nat())
           throw std::invalid_argument("xgeometry::py_getitem: index out of range");
         py::list l;
+
         for (int i=0; i<nfields(); i++){
             if (field_type(i)==type_string)
               l.append(xfield<STRING_EX>(i,j));
@@ -818,10 +893,13 @@ namespace qpp{
             else if (field_type(i)==type_bool)
               l.append(xfield<bool>(i,j));
           }
+
         return l;
+
       }
 
-      virtual void py_setitem(int j, const py::list & l){
+      virtual void py_setitem(int j, const py::list & l) {
+
         if (j<0) j+=nat();
         if (j<0 || j>= nat()) throw std::invalid_argument("xgeometry:: index out of range");
         if (py::len(l) != nfields())
@@ -849,18 +927,20 @@ namespace qpp{
                 xfield<bool>(i,j) = py::cast<bool>(l[i]);
               }
           }
+
       }
 
-      py::object py_getfield1(int i){
+      py::object py_getfield1(int i) {
         throw std::invalid_argument("xgeometry::field accepts 2 indicies");
         return py::none();
       }
 
-      void py_setfield1(int i, const py::object & o){
+      void py_setfield1(int i, const py::object & o) {
         throw std::invalid_argument("xgeometry::field accepts 2 indicies");
       }
 
-      py::object py_getfield(int i, int j){
+      py::object py_getfield(int i, int j) {
+
         if (i<0) i += nfields();
         if (i<0 || i >= nfields())
           throw std::invalid_argument("xgeometry: field index out of range");
@@ -880,7 +960,8 @@ namespace qpp{
 
       }
 
-      void py_setfield(int i, int j, const py::object & o){
+      void py_setfield(int i, int j, const py::object & o) {
+
         if (i<0) i += nfields();
         if (i<0 || i >= nfields())
           throw std::invalid_argument("xgeometry: field index out of range");
@@ -910,34 +991,39 @@ namespace qpp{
               throw std::invalid_argument("xgeometry: bool value of the field expected");
             xfield<bool>(i,j) = py::cast<bool>(o);
           }
+
       }
 
       py_2indexed_property<SELF, py::object, py::object, int, &SELF::py_getfield1,
       &SELF::py_setfield1, &SELF::py_getfield, &SELF::py_setfield > py_fields;
 
-      bool py_getadd(int i){
+      bool py_getadd(int i) {
+
         if (i<0) i += nfields();
         if (i<0 || i >= nfields())
           throw std::invalid_argument("xgeometry: field index out of range");
         return additive(i);
+
       }
 
-      void py_setadd(int i, const bool &a){
+      void py_setadd(int i, const bool &a) {
+
         if (i<0) i += nfields();
         if (i<0 || i >= nfields())
           throw std::invalid_argument("xgeometry: field index out of range");
         additive(i) = a;
+
       }
 
       py_indexed_property<SELF, bool, int, &SELF::py_getadd,
       &SELF::py_setadd > py_add;
 
-      virtual void py_add_list(const py::list & l){
+      virtual void py_add_list(const py::list & l) {
         geometry<REAL,CELL>::add("",0,0,0);
         py_setitem(nat()-1,l);
       }
 
-      static void py_export(py::module m, const char * pyname){
+      static void py_export(py::module m, const char * pyname) {
 
         std::string sPropNameField =
             fmt::format("{0}_{1}",pyname,"idx_prop_xfield");
@@ -968,6 +1054,6 @@ namespace qpp{
 
   };
 
-}
+} // namespace qpp
 
 #endif
