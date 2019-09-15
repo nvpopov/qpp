@@ -20,7 +20,8 @@ void qpp::ptable::init_default(){
 
 
 
-void qpp::ptable::assembly_ptable_0(){
+void qpp::ptable::assembly_ptable_0() {
+
   this->arecs[0].m_number       = 1;
   this->arecs[0].m_name         = "Hydrogen";
   this->arecs[0].m_symbol       = "H";
@@ -251,7 +252,8 @@ void qpp::ptable::assembly_ptable_0(){
 
 }
 
-void qpp::ptable::assembly_ptable_1(){
+void qpp::ptable::assembly_ptable_1() {
+
   this->arecs[9].m_number       = 10;
   this->arecs[9].m_name         = "Neon";
   this->arecs[9].m_symbol       = "Ne";
@@ -531,7 +533,8 @@ void qpp::ptable::assembly_ptable_1(){
 
 }
 
-void qpp::ptable::assembly_ptable_2(){
+void qpp::ptable::assembly_ptable_2() {
+
   this->arecs[19].m_number       = 20;
   this->arecs[19].m_name         = "Calcium";
   this->arecs[19].m_symbol       = "Ca";
@@ -833,7 +836,8 @@ void qpp::ptable::assembly_ptable_2(){
 
 }
 
-void qpp::ptable::assembly_ptable_3(){
+void qpp::ptable::assembly_ptable_3() {
+
   this->arecs[29].m_number       = 30;
   this->arecs[29].m_name         = "Zinc";
   this->arecs[29].m_symbol       = "Zn";
@@ -1149,7 +1153,8 @@ void qpp::ptable::assembly_ptable_3(){
 
 }
 
-void qpp::ptable::assembly_ptable_4(){
+void qpp::ptable::assembly_ptable_4() {
+
   this->arecs[39].m_number       = 40;
   this->arecs[39].m_name         = "Zirconium";
   this->arecs[39].m_symbol       = "Zr";
@@ -1482,7 +1487,8 @@ void qpp::ptable::assembly_ptable_4(){
 
 }
 
-void qpp::ptable::assembly_ptable_5(){
+void qpp::ptable::assembly_ptable_5() {
+
   this->arecs[49].m_number       = 50;
   this->arecs[49].m_name         = "Tin";
   this->arecs[49].m_symbol       = "Sn";
@@ -1834,7 +1840,8 @@ void qpp::ptable::assembly_ptable_5(){
 
 }
 
-void qpp::ptable::assembly_ptable_6(){
+void qpp::ptable::assembly_ptable_6() {
+
   this->arecs[59].m_number       = 60;
   this->arecs[59].m_name         = "Neodymium";
   this->arecs[59].m_symbol       = "Nd";
@@ -2198,7 +2205,8 @@ void qpp::ptable::assembly_ptable_6(){
 
 }
 
-void qpp::ptable::assembly_ptable_7(){
+void qpp::ptable::assembly_ptable_7() {
+
   this->arecs[69].m_number       = 70;
   this->arecs[69].m_name         = "Ytterbium";
   this->arecs[69].m_symbol       = "Yb";
@@ -2570,7 +2578,8 @@ void qpp::ptable::assembly_ptable_7(){
 
 }
 
-void qpp::ptable::assembly_ptable_8(){
+void qpp::ptable::assembly_ptable_8() {
+
   this->arecs[79].m_number       = 80;
   this->arecs[79].m_name         = "Mercury";
   this->arecs[79].m_symbol       = "Hg";
@@ -2956,7 +2965,8 @@ void qpp::ptable::assembly_ptable_8(){
 
 }
 
-void qpp::ptable::assembly_ptable_9(){
+void qpp::ptable::assembly_ptable_9() {
+
   this->arecs[89].m_number       = 90;
   this->arecs[89].m_name         = "Thorium";
   this->arecs[89].m_symbol       = "Th";
@@ -3402,7 +3412,9 @@ void qpp::ptable::assembly_ptable_9(){
         1.0);
 }
 
-void ptable::init_cache_atom_idx(){
-  for(int i = 0; i < 100; i++)
+void ptable::init_cache_atom_idx() {
+
+  for (int i = 0; i < 100; i++)
     cache_atom_idx[this->arecs[i].m_symbol] = this->arecs[i].m_number;
+
 }

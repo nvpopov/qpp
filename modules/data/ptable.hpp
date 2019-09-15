@@ -87,10 +87,12 @@ namespace qpp {
       ptable () {}
 
       static STRING_EX symbol_by_number (const size_t number) {
+
         ptable *table = ptable::get_inst();
         if ((number >= 1) && (number < PTABLE_ELEM_N))
           return table->arecs[number-1].m_symbol;
         return PTABLE_NONE;
+
       }
 
       static STRING_EX name_by_number (const int number) {
@@ -115,8 +117,8 @@ namespace qpp {
       static std::optional<size_t> number_by_symbol (const STRING_EX& symbol) {
 
         ptable *table = ptable::get_inst();
-        if ( table->cache_atom_idx.find(symbol) ==
-             table->cache_atom_idx.end() ) {
+        if (table->cache_atom_idx.find(symbol) ==
+             table->cache_atom_idx.end()) {
             return std::nullopt;
           } else {
             return std::optional<size_t>(table->cache_atom_idx[symbol]);
@@ -172,6 +174,6 @@ namespace qpp {
 
   };
 
-}
+} // namespace qpp
 
 #endif
