@@ -4,6 +4,7 @@
 #include <io/ccd_firefly.hpp>
 #include <io/ccd_xyz.hpp>
 #include <io/ccd_cp2k.hpp>
+#include <io/ccd_orca.hpp>
 #include <fstream>
 
 using namespace qpp;
@@ -321,6 +322,26 @@ TEST_CASE( "Computational chemistry data parsing : CP2K Output" ) {
 
     REQUIRE(cc_o.m_n_alpha == 768);
     REQUIRE(cc_o.m_n_beta == 767);
+
+  }
+
+  SECTION ("Parsing results of energy + tddft calculation [Orca] - file 1") {
+
+    std::ifstream isec("../examples/io/ref_data/orca/tddft_alpha_fc.out");
+    comp_chem_program_data_t<double> cc_o;
+    read_ccd_from_orca_output(isec, cc_o);
+
+    geometry<double, periodic_cell<double> > g(3);
+    std::vector<geom_anim_record_t<double> > anim_rec;
+    bool succes = compile_geometry(cc_o, g);
+
+    REQUIRE(succes);
+
+    bool succes_ccd_compilation = compile_ccd(cc_o, ccd_cf_default_flags |
+                                              ccd_cf_remove_empty_geom_steps);
+    REQUIRE(succes_ccd_compilation);
+    REQUIRE(g.nat() == 307);
+    REQUIRE(g.n_types() == 5);
 
   }
 

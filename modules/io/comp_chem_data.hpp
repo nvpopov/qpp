@@ -471,7 +471,7 @@ namespace qpp {
                   for (size_t q = 0; q < ccd_inst.m_vibs[v].m_disp.size(); q++) {
                       anim.frames[i].atom_pos[q] =
                           ccd_inst.m_init_apos[q] + ccd_inst.m_vibs[v].m_disp[q] *
-                                              (REAL(tf_index) / total_frames_upwards);
+                          (REAL(tf_index) / total_frames_upwards);
                     }
                 }
               anim_rec.push_back(std::move(anim));

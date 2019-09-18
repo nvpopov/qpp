@@ -223,6 +223,3 @@ TEST_CASE( "lace3d miscellaneous tests" ) {
   }
 
 }
-
-
-
