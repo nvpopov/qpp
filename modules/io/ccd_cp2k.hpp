@@ -155,6 +155,7 @@ namespace qpp {
 
                 for (int i = 0; i < 3; i++) sgetline(inp, s, cur_line); //read 3 lines
                 for (int i = 0; i < output.m_tot_nat; i++) {
+
                     sgetline(inp, s, cur_line);
                     std::vector<std::string_view> splt = split_sv(s, " ");
                     check_min_split_size(splt, 7, cur_line, s);
@@ -162,9 +163,12 @@ namespace qpp {
 
                     vector3<REAL> pos = vec_from_str_ex<REAL>(s, splt, cur_line, 4, 5, 6);
                     output.m_init_apos.push_back(std::move(pos));
+
                   }
+
                 is_init_parsed = true;
                 continue;
+
               }
 
           } // end of !is_init_parsed
@@ -216,23 +220,30 @@ namespace qpp {
 
                 if (s.find("P_Mix") != std::string::npos || s.find("Diag.") != std::string::npos ||
                     s.find("OT") != std::string::npos || s.find("DIIS") != std::string::npos) {
+
                     //fmt::print(std::cout, "{}\n", s);
                     std::vector<std::string_view> splt = split_sv(s, " ");
                     size_t tot_l = splt.size();
 
                     if (tot_l > 0 && splt[1] == "OT") {
+
                         comp_chem_program_scf_step_info_t<REAL> scf_info;
                         check_min_split_size(splt, 1, cur_line, s);
                         scf_info.m_iter = std::stoi(splt[0].data());
                         if (tot_l == 8) scf_info.m_toten = str2real<REAL>(splt, 6, cur_line, s);
                         if (tot_l == 6) scf_info.m_toten = str2real<REAL>(splt, 5, cur_line, s);
                         output.m_steps.back().m_scf_steps.push_back(std::move(scf_info));
+
                       }
+
                     continue;
+
                   }
+
               }
 
             if (s.find("ENERGY|") != std::string::npos) {
+
                 //ENERGY| Total FORCE_EVAL ( QS ) energy (a.u.):            -8615.216698379990703
                 //  0      1     2         3 4 5   6        7               8
                 std::vector<std::string_view> splt = split_sv(s, " "); // 3 - pop 4 - charge
@@ -240,6 +251,7 @@ namespace qpp {
                 output.m_steps.back().m_toten = str2real<double>(splt, 8, cur_line, s);
                 //fmt::print("{} {} \n", output.m_steps.size(), s);
                 continue;
+
               }
 
             //Mulliken pop per atom
@@ -298,17 +310,21 @@ namespace qpp {
 
             //start eigenvalues parsing
             if (s.find("Eigenvalues of the occupied subspace spin") != std::string::npos) {
+
                 is_first_spin_subspace = s.find("1") != std::string::npos;//determine spin subspace
                 sgetline(inp, s, cur_line); //read common line --------
                 p_state = cp2k_output_parser_state::cp2k_op_parse_eigen_values_occ;
                 continue;
+
               }
 
             if (s.find("Lowest Eigenvalues of the unoccupied subspace") != std::string::npos) {
+
                 is_first_spin_subspace = s.find("1") != std::string::npos;//determine spin subspace
                 sgetline(inp, s, cur_line); //read common line --------
                 p_state = cp2k_output_parser_state::cp2k_op_parse_eigen_values_unocc;
                 continue;
+
               }
 
             if (p_state == cp2k_output_parser_state::cp2k_op_parse_eigen_values_occ ||
@@ -349,20 +365,26 @@ namespace qpp {
                       }
 
                   }
+
                 continue;
+
               }
 
             //end eigenvalues parsing
 
             // start of parsing trajectory and gradient
             if (s.find(" i =") != std::string::npos) {
+
                 bool add_to_pos = output.m_steps.back().m_atoms_pos.empty();
+
                 for (size_t i = 0; i < output.m_tot_nat; i++) {
+
                     sgetline(inp, s, cur_line);
                     std::vector<std::string_view> splt = split_sv(s, " ");
                     vector3<REAL> pg = vec_from_str_ex<REAL>(s, splt, cur_line, 1, 2, 3);
                     if (add_to_pos) output.m_steps.back().m_atoms_pos.push_back(std::move(pg));
                     else output.m_steps.back().m_atoms_grads.push_back(std::move(pg));
+
                   }
 
                 //read line after coords or grads, here may be cell info
@@ -386,7 +408,9 @@ namespace qpp {
                     step.m_cell[2] = std::move(c_c);
 
                   }
+
                 continue;
+
               } //end of parsing trajectory and gradient
 
             /* tddft parsing */

@@ -337,11 +337,11 @@ TEST_CASE( "Computational chemistry data parsing : CP2K Output" ) {
 
     REQUIRE(succes);
 
-    bool succes_ccd_compilation = compile_ccd(cc_o, ccd_cf_default_flags |
-                                              ccd_cf_remove_empty_geom_steps);
+    bool succes_ccd_compilation = compile_ccd(cc_o, ccd_cf_default_flags );
     REQUIRE(succes_ccd_compilation);
     REQUIRE(g.nat() == 307);
     REQUIRE(g.n_types() == 5);
+    REQUIRE(cc_o.m_steps.size() == 1);
 
   }
 
