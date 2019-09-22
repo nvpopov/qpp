@@ -342,6 +342,9 @@ TEST_CASE( "Computational chemistry data parsing : CP2K Output" ) {
     REQUIRE(g.nat() == 307);
     REQUIRE(g.n_types() == 5);
     REQUIRE(cc_o.m_steps.size() == 1);
+    REQUIRE(cc_o.m_is_unrestricted == true);
+    REQUIRE(cc_o.m_mult == 2);
+    REQUIRE(cc_o.m_tot_nelec == 657);
 
   }
 

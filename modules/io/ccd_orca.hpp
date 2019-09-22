@@ -93,6 +93,33 @@ namespace qpp {
 
           }
 
+        if (s.find("Hartree-Fock type      HFTyp") != std::string::npos) {
+//             Hartree-Fock type      HFTyp           .... UHF
+//                0           1         2               3   4
+            std::vector<std::string_view> splt = split_sv(s, " ");
+            check_min_split_size(splt, 5, cur_line, s);
+            if (splt[4] == "UHF") output.m_is_unrestricted = true;
+            continue;
+          }
+
+        if (s.find("Multiplicity           Mult") != std::string::npos) {
+//           Multiplicity    Mult      ....    2
+//                0           1         2      3
+            std::vector<std::string_view> splt = split_sv(s, " ");
+            check_min_split_size(splt, 4, cur_line, s);
+            output.m_mult = str2int(splt, 3, cur_line, s);
+            continue;
+          }
+
+        if (s.find("Number of Electrons    NEL") != std::string::npos) {
+//           Number of Electrons    NEL             ....  657
+//                0  1     2         3                4    5
+            std::vector<std::string_view> splt = split_sv(s, " ");
+            check_min_split_size(splt, 6, cur_line, s);
+            output.m_tot_nelec = str2int(splt, 5, cur_line, s);
+            continue;
+          }
+
         if (s.find("SCF ITERATIONS") != std::string::npos) {
 
             pstate = orca_parser_state_e::orca_parse_scf_section;
@@ -107,10 +134,8 @@ namespace qpp {
 
         if (pstate == orca_parser_state_e::orca_parse_scf_section &&
             (s.find("****************") != std::string::npos || s.size()==1)) {
-
             pstate = orca_parser_state_e::orca_parse_none;
             continue;
-
           }
 
         if (pstate == orca_parser_state_e::orca_parse_scf_section &&
