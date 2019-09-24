@@ -27,7 +27,8 @@ namespace qpp {
     orca_parse_init_coords,
     orca_parse_scf_section,
     orca_parse_eigen_values,
-    orca_parse_tddft
+    orca_parse_tddft_states,
+    orca_parse_tddft_tran_osc
 
   };
 
@@ -45,6 +46,11 @@ namespace qpp {
     bool is_init_crds_parsed{false};
 
     uint64_t cur_line{0};
+
+    // counter for reading tddft oscillator strength section
+    size_t tddft_osc_str_trdpm_c{0};
+
+    output.m_run_t = comp_chem_program_run_e::rt_energy;
 
     while (!inp.eof()) {
 
@@ -164,6 +170,114 @@ namespace qpp {
             continue;
 
           }
+
+        // tddft section begin
+
+        if (s.find("TD-DFT/TDA EXCITED STATES") != std::string::npos) {
+            pstate = orca_parser_state_e::orca_parse_tddft_states;
+            continue;
+          }
+
+        if (s.find("ABSORPTION SPECTRUM VIA TRANSITION ELECTRIC DIPOLE MOMENTS")
+            != std::string::npos) {
+
+//            -----------------------------------------------------------------------------
+//                     ABSORPTION SPECTRUM VIA TRANSITION ELECTRIC DIPOLE MOMENTS
+//            ----------------------------------------------------------------------------- 1
+//            State   Energy    Wavelength  fosc         T2        TX        TY        TZ   2
+//                    (cm-1)      (nm)                 (au**2)    (au)      (au)      (au)  3
+//            ----------------------------------------------------------------------------- 4
+
+            for (auto i = 0; i < 4; i++) sgetline(inp, s, cur_line);
+            pstate = orca_parser_state_e::orca_parse_tddft_tran_osc;
+            tddft_osc_str_trdpm_c = 0;
+            continue;
+
+          }
+
+        if (pstate == orca_parser_state_e::orca_parse_tddft_states) {
+
+            if (s.find("-----------------------------") != std::string::npos) {
+                pstate = orca_parser_state_e::orca_parse_none;
+                continue;
+              }
+
+            if (s.find("STATE ") != std::string::npos) {
+
+                // STATE  1:  E=   0.060753 au      1.653 eV    13333.8 cm**-1
+                //   0    1   2       3     4          5  6      7     8
+                std::vector<std::string_view> splt = split_sv(s, " ");
+                check_min_split_size(splt, 7, cur_line, s);
+                tddft_transitions_t<REAL> tddft_trans;
+                tddft_trans.m_en_ev = str2real(splt, 5, cur_line, s);
+                output.m_tddft_trans_rec.push_back(std::move(tddft_trans));
+
+                continue;
+
+              }
+
+            if (s.find("->") != std::string::npos) {
+
+                //328a -> 329a  :     0.964957 (c= -0.98232241)
+                // 0   1   2    3         4     5    6
+                std::vector<std::string_view> splt = split_sv(s, " ");
+                check_min_split_size(splt, 7, cur_line, s);
+
+                std::string st1 = std::string(splt[0]);
+                std::string st2 = std::string(splt[2]);
+
+                std::string st1_wpf = st1.substr(0, st1.size()-1);
+                std::string st2_wpf = st2.substr(0, st2.size()-1);
+
+                tddft_transition_rec_t<REAL> tr_rec;
+                tr_rec.m_from_spin = st1.find("a") != std::string::npos ?
+                                                      ccd_spin_e::spin_alpha :
+                                                      ccd_spin_e::spin_beta;
+
+                tr_rec.m_to_spin   = st2.find("a") != std::string::npos ?
+                                                      ccd_spin_e::spin_alpha :
+                                                      ccd_spin_e::spin_beta;
+
+                tr_rec.m_from = std::stoi(st1_wpf);
+                tr_rec.m_to = std::stoi(st2_wpf);
+                tr_rec.m_amplitude = str2real(splt, 4, cur_line, s);
+                //tr_rec.m_from = str2int(splt, 0, )
+
+                output.m_tddft_trans_rec.back().m_transition.push_back(std::move(tr_rec));
+
+              }
+
+            continue;
+
+          }
+
+        if (pstate == orca_parse_tddft_tran_osc) {
+
+             std::vector<std::string_view> splt = split_sv(s, " ");
+
+             if (splt.size() <= 2) {
+                 pstate = orca_parser_state_e::orca_parse_none;
+                 continue;
+               }
+
+//             State   Energy    Wavelength  fosc         T2        TX        TY        TZ
+//                     (cm-1)      (nm)                 (au**2)    (au)      (au)      (au)
+//             -----------------------------------------------------------------------------
+//                1   13333.8    750.0   0.151048483   3.72938  -0.00002   1.09931   1.58774
+//                0      1        2          3           4         5         6          7
+             output.m_tddft_trans_rec[tddft_osc_str_trdpm_c].m_osc_str =
+                 str2real(splt, 3, cur_line, s);
+
+             for (auto i : std::array<size_t,3>{0,1,2})
+               output.m_tddft_trans_rec[tddft_osc_str_trdpm_c].m_trans_dipole_moment[0 + i] =
+                   str2real(splt, 5 + i, cur_line, s);
+
+             tddft_osc_str_trdpm_c++;
+             continue;
+
+          }
+
+        // tddft section end
 
       } // end of while loop
 

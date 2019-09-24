@@ -346,6 +346,37 @@ TEST_CASE( "Computational chemistry data parsing : CP2K Output" ) {
     REQUIRE(cc_o.m_mult == 2);
     REQUIRE(cc_o.m_tot_nelec == 657);
 
+    REQUIRE(cc_o.m_tddft_trans_rec.size() == 9);
+    REQUIRE(cc_o.m_tddft_trans_rec[0].m_transition[0].m_from == 328);
+    REQUIRE(cc_o.m_tddft_trans_rec[0].m_transition[0].m_to == 329);
+    REQUIRE(cc_o.m_tddft_trans_rec[0].m_transition[0].m_from_spin == spin_alpha);
+    REQUIRE(cc_o.m_tddft_trans_rec[0].m_transition[0].m_to_spin == spin_alpha);
+    REQUIRE(cc_o.m_tddft_trans_rec[0].m_transition[0].m_amplitude == Approx(0.964957));
+    REQUIRE(cc_o.m_tddft_trans_rec[0].m_en_ev == Approx(1.653));
+    REQUIRE(cc_o.m_tddft_trans_rec[8].m_en_ev == Approx(2.324));
+
+    REQUIRE(cc_o.m_tddft_trans_rec[0].m_osc_str == Approx(0.151048483));
+    REQUIRE(cc_o.m_tddft_trans_rec[8].m_osc_str == Approx(0.001687284));
+    REQUIRE(cc_o.m_tddft_trans_rec[0].m_trans_dipole_moment[0] == Approx(-0.00002));
+    REQUIRE(cc_o.m_tddft_trans_rec[0].m_trans_dipole_moment[1] == Approx(1.09931));
+    REQUIRE(cc_o.m_tddft_trans_rec[0].m_trans_dipole_moment[2] == Approx(1.58774));
+
+    REQUIRE(cc_o.m_tddft_trans_rec[1].m_transition[0].m_from == 328);
+    REQUIRE(cc_o.m_tddft_trans_rec[1].m_transition[0].m_to == 330);
+    REQUIRE(cc_o.m_tddft_trans_rec[1].m_transition[0].m_amplitude == Approx(0.865990));
+
+    REQUIRE(cc_o.m_tddft_trans_rec[1].m_transition[1].m_from == 328);
+    REQUIRE(cc_o.m_tddft_trans_rec[1].m_transition[1].m_to == 331);
+    REQUIRE(cc_o.m_tddft_trans_rec[1].m_transition[1].m_amplitude == Approx(0.025049));
+
+    REQUIRE(cc_o.m_tddft_trans_rec[1].m_transition[2].m_from == 328);
+    REQUIRE(cc_o.m_tddft_trans_rec[1].m_transition[2].m_to == 333);
+    REQUIRE(cc_o.m_tddft_trans_rec[1].m_transition[2].m_amplitude == Approx(0.079672));
+
+    REQUIRE(cc_o.m_tddft_trans_rec[1].m_transition[3].m_from == 328);
+    REQUIRE(cc_o.m_tddft_trans_rec[1].m_transition[3].m_to == 335);
+    REQUIRE(cc_o.m_tddft_trans_rec[1].m_transition[3].m_amplitude == Approx(0.010716));
+
   }
 
 }
