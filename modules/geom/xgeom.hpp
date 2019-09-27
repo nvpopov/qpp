@@ -169,9 +169,11 @@ namespace qpp {
         ix_x = ix_y = ix_z = ix_atom = -1;
         ix_charge = ix_mass = ix_number = -1;
 
-        for (int j = 0; j < _nfields; j++){
+        for (int j = 0; j < _nfields; j++) {
+
             basic_types tp = field_type(j);
-            if ( tp == type_string ){
+
+            if ( tp == type_string ) {
                 _field_idx[j] = is++;
                 if ( field_name(j) == "atom" ) ix_atom = j;
               }
@@ -190,9 +192,10 @@ namespace qpp {
               }
             else if ( tp == type_bool )
               _field_idx[j] = ib++;
-            else{
+            else {
                 throw std::invalid_argument("xgeometry::format: invalid type");
               }
+
           }
 
         /*
@@ -202,6 +205,7 @@ namespace qpp {
       */
 
         if (ix_atom == -1 && ix_x == -1 && ix_y==-1 && ix_z==-1) {
+
             ix_atom = 0;
             ix_x = 1; ix_y = 2; ix_z = 3;
             if (ix_charge >= 0) ix_charge += 4;
