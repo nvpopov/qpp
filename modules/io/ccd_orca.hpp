@@ -145,13 +145,17 @@ namespace qpp {
           }
 
         if (pstate == orca_parser_state_e::orca_parse_scf_section &&
-            s.find("ITER       Energy") == std::string::npos &&
+            s.find("ITER") == std::string::npos &&
             s.find("***  Starting") == std::string::npos &&
             s.find("***Turning") == std::string::npos &&
             s.find("*** Restarting") == std::string::npos &&
             s.find("*** Resetting") == std::string::npos &&
             s.find("***DIIS") == std::string::npos &&
-            s.find("SCF CONVERGED") == std::string::npos) {
+            s.find("SCF CONVERGED") == std::string::npos &&
+            s.find("*** Initiating") == std::string::npos &&
+            s.find("*** Removing") == std::string::npos &&
+            s.find("**** Energy") == std::string::npos &&
+            s.find(":") == std::string::npos) {
 
 //            ITER       Energy         Delta-E        Max-DP      RMS-DP      [F,P]     Damp
 //              0  -8136.7504381034   0.000000000000458.80750002  0.79296675  1.9269204 0.7000
@@ -268,7 +272,7 @@ namespace qpp {
              output.m_tddft_trans_rec[tddft_osc_str_trdpm_c].m_osc_str =
                  str2real(splt, 3, cur_line, s);
 
-             for (auto i : std::array<size_t,3>{0,1,2})
+             for (size_t i = 0; i < 3; i++)
                output.m_tddft_trans_rec[tddft_osc_str_trdpm_c].m_trans_dipole_moment[0 + i] =
                    str2real(splt, 5 + i, cur_line, s);
 
