@@ -26,6 +26,8 @@ namespace qpp {
     orca_parse_none,
     orca_parse_init_coords,
     orca_parse_scf_section,
+    orca_parse_geopt_coords,
+    orca_parse_grads,
     orca_parse_eigen_values,
     orca_parse_tddft_states,
     orca_parse_tddft_tran_osc
@@ -60,6 +62,11 @@ namespace qpp {
 
         if (s.find("* Single Point Calculation *") != std::string::npos) {
             output.m_run_t = comp_chem_program_run_e::rt_energy;
+            continue;
+          }
+
+        if (s.find("* Geometry Optimization Run *") != std::string::npos) {
+            output.m_run_t = comp_chem_program_run_e::rt_geo_opt;
             continue;
           }
 
@@ -174,6 +181,36 @@ namespace qpp {
             continue;
 
           }
+
+        // geopt section begin
+
+        if (s.find("CARTESIAN COORDINATES (ANGSTROEM)") != std::string::npos &&
+            !output.m_steps.empty()) {
+
+            sgetline(inp, s, cur_line);
+
+            output.m_steps.back().m_atoms_pos.resize(output.m_init_anames.size());
+
+            for (size_t i = 0; i < output.m_init_anames.size(); i++) {
+
+                sgetline(inp, s, cur_line);
+
+                std::vector<std::string_view> splt = split_sv(s, " ");
+                check_min_split_size(splt, 4, cur_line, s);
+
+                output.m_steps.back().m_atoms_pos[i] = {
+                  str2real(splt, 1, cur_line, s),
+                  str2real(splt, 2, cur_line, s),
+                  str2real(splt, 3, cur_line, s),
+                };
+
+              }
+
+            continue;
+
+          }
+
+        // geopt section end
 
         // tddft section begin
 
