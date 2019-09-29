@@ -212,6 +212,34 @@ namespace qpp {
 
         // geopt section end
 
+        // read gradient begin
+        if (s.find("CARTESIAN GRADIENT") != std::string::npos && !output.m_steps.empty()) {
+
+            sgetline(inp, s, cur_line);
+            sgetline(inp, s, cur_line);
+
+            output.m_steps.back().m_atoms_grads.resize(output.m_init_anames.size());
+
+            for (size_t i = 0; i < output.m_init_anames.size(); i++) {
+
+                sgetline(inp, s, cur_line);
+
+                std::vector<std::string_view> splt = split_sv(s, " ");
+                check_min_split_size(splt, 4, cur_line, s);
+
+                output.m_steps.back().m_atoms_grads[i] = {
+                  str2real(splt, 3, cur_line, s),
+                  str2real(splt, 4, cur_line, s),
+                  str2real(splt, 5, cur_line, s),
+                };
+
+              }
+
+            continue;
+
+          }
+        // read gradient end
+
         // tddft section begin
 
         if (s.find("TD-DFT/TDA EXCITED STATES") != std::string::npos) {

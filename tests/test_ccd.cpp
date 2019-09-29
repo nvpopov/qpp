@@ -397,6 +397,12 @@ TEST_CASE( "Computational chemistry data parsing : CP2K Output" ) {
     REQUIRE(g.n_types() == 4);
     REQUIRE(cc_o.m_steps.size() == 22);
 
+    REQUIRE(cc_o.m_steps[0].m_atoms_grads.size() == 24);
+    REQUIRE(cc_o.m_steps[0].m_atoms_grads[0][0] == Approx(0.076433267));
+    REQUIRE(cc_o.m_steps[0].m_atoms_grads[0][1] == Approx(-0.018518718));
+    REQUIRE(cc_o.m_steps[0].m_atoms_grads[0][2] == Approx(-0.066490034));
+    REQUIRE(cc_o.m_steps[10].m_atoms_grads.size() == 24);
+
   }
 
 }
