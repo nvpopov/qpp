@@ -28,9 +28,9 @@ namespace qpp {
     orca_parse_scf_section,
     orca_parse_geopt_coords,
     orca_parse_grads,
-    orca_parse_eigen_values,
     orca_parse_tddft_states,
-    orca_parse_tddft_tran_osc
+    orca_parse_tddft_tran_osc,
+    orca_parse_orbital_energies
 
   };
 
@@ -239,6 +239,41 @@ namespace qpp {
 
           }
         // read gradient end
+
+        // read orbital energies
+        if (s.find("ORBITAL ENERGIES") != std::string::npos) {
+            pstate = orca_parser_state_e::orca_parse_orbital_energies;
+            for (auto i = 0; i < 3; i++) sgetline(inp, s, cur_line);
+            continue;
+          }
+
+        if (pstate == orca_parser_state_e::orca_parse_orbital_energies) {
+
+            std::vector<std::string_view> splt = split_sv(s, " ");
+
+            if (splt.size() < 2) {
+                pstate = orca_parser_state_e::orca_parse_none;
+                continue;
+              }
+
+            if (!output.m_steps.empty()) {
+
+                REAL occ_ = str2real(splt, 1, cur_line, s);
+                REAL e_eV = str2real(splt, 3, cur_line, s);
+
+                if (std::abs(occ_) > 0.01) {
+                    output.m_steps.back().m_eigen_values_spin_1_occ.push_back(e_eV);
+                  } else {
+                    output.m_steps.back().m_eigen_values_spin_1_unocc.push_back(e_eV);
+                  }
+
+              }
+
+            continue;
+
+          }
+
+        // end read orbital energies
 
         // tddft section begin
 
