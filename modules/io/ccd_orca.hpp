@@ -275,6 +275,36 @@ namespace qpp {
 
         // end read orbital energies
 
+        // begin read mulliken charges
+
+        if (s.find("MULLIKEN ATOMIC CHARGES") != std::string::npos && !output.m_steps.empty()) {
+
+//            -----------------------
+//            MULLIKEN ATOMIC CHARGES
+//            -----------------------
+//               0 H :    0.105884
+//               1 N :   -0.221219
+//               0 1 2    3
+            sgetline(inp, s, cur_line);
+
+            output.m_steps.back().m_mulliken_net_chg_per_atom.resize(output.m_init_anames.size());
+
+            for (size_t i = 0; i < output.m_init_anames.size(); i++) {
+
+                sgetline(inp, s, cur_line);
+                std::vector<std::string_view> splt = split_sv(s, " ");
+
+                output.m_steps.back().m_mulliken_net_chg_per_atom[i] =
+                    str2real(splt, 3, cur_line, s);
+
+              }
+
+            continue;
+
+          }
+
+        // end read mulliken charges
+
         // tddft section begin
 
         if (s.find("TD-DFT/TDA EXCITED STATES") != std::string::npos) {

@@ -404,8 +404,12 @@ TEST_CASE( "Computational chemistry data parsing : CP2K Output" ) {
     REQUIRE(cc_o.m_steps[10].m_atoms_grads.size() == 24);
     REQUIRE(cc_o.m_steps[0].m_eigen_values_spin_1_occ.size() == 51);
     REQUIRE(cc_o.m_steps[0].m_eigen_values_spin_1_unocc.size() == 29);
-  //  REQUIRE(cc_o.m_steps[1].m_eigen_values_spin_1_occ.size() == 51);
- //   REQUIRE(cc_o.m_steps[1].m_eigen_values_spin_1_unocc.size() == 29);
+
+    REQUIRE(cc_o.m_steps[0].m_mulliken_net_chg_per_atom.size() == 24);
+    REQUIRE(cc_o.m_steps[0].m_mulliken_net_chg_per_atom[0] == Approx(0.062660));
+
+    //REQUIRE(cc_o.m_steps[10].m_eigen_values_spin_1_occ.size() == 51);
+    //REQUIRE(cc_o.m_steps[10].m_eigen_values_spin_1_unocc.size() == 29);
 
   }
 
