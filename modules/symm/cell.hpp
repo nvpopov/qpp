@@ -273,18 +273,18 @@ namespace qpp {
         if (axis_index >= 3) return std::nullopt;
 
         if (axis_index == 0) {
-            vector3<REAL> B_x_C = v[1]->cross(v[2]);
-            return std::optional( B_x_C / (v[0]->dot(B_x_C)));
+            vector3<REAL> B_x_C = v[1].cross(v[2]);
+            return std::optional( B_x_C / (v[0].dot(B_x_C)));
           }
 
         if (axis_index == 1) {
-            vector3<REAL> C_x_A = v[2]->cross(v[0]);
-            return std::optional( C_x_A / (v[1]->dot(C_x_A)));
+            vector3<REAL> C_x_A = v[2].cross(v[0]);
+            return std::optional( C_x_A / (v[1].dot(C_x_A)));
           }
 
         if (axis_index == 2) {
-            vector3<REAL> A_x_B = v[0]->cross(v[1]);
-            return std::optional( A_x_B / (v[2]->dot(A_x_B)));
+            vector3<REAL> A_x_B = v[0].cross(v[1]);
+            return std::optional( A_x_B / (v[2].dot(A_x_B)));
           }
 
         return std::nullopt;
