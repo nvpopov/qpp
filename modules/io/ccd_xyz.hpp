@@ -151,9 +151,6 @@ namespace qpp {
                 output.m_init_anames[atom_c] = std::string(splt[0]);
                 output.m_init_apos[atom_c] = pos;
               } else {
-                if (std::isnan(pos[0]) || std::isnan(pos[1]) || std::isnan(pos[2]) ||
-                    std::isinf(pos[0]) || std::isinf(pos[1]) || std::isinf(pos[2]) )
-                  pos = output.m_init_apos[atom_c];
                 output.m_steps[frame_idx].m_atoms_pos[atom_c] = pos;
               }
 

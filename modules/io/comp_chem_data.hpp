@@ -438,7 +438,13 @@ namespace qpp {
               // copy atom pos data
               anim.frames[steps_c].atom_pos.resize(ccd_inst.m_steps[i].m_atoms_pos.size());
               for (size_t q = 0; q < ccd_inst.m_steps[i].m_atoms_pos.size(); q++)
-                anim.frames[steps_c].atom_pos[q] = ccd_inst.m_steps[i].m_atoms_pos[q];
+                if (std::isnan(ccd_inst.m_steps[i].m_atoms_pos[q][0]) ||
+                    std::isnan(ccd_inst.m_steps[i].m_atoms_pos[q][1]) ||
+                    std::isnan(ccd_inst.m_steps[i].m_atoms_pos[q][0])) {
+                    anim.frames[steps_c].atom_pos[q] = ccd_inst.m_init_apos[q];
+                  } else {
+                    anim.frames[steps_c].atom_pos[q] = ccd_inst.m_steps[i].m_atoms_pos[q];
+                  }
 
             } // the animation has been formed. put it in the geom_anim_record_t
 
