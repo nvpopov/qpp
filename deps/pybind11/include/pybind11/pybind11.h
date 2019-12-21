@@ -41,15 +41,14 @@
 #  endif
 #endif
 
-#if defined(__GNUG__) && !defined(__clang__)
- #include <cxxabi.h>
-#endif
-
-
 #include "attr.h"
 #include "options.h"
 #include "detail/class.h"
 #include "detail/init.h"
+
+#if defined(__GNUG__) && !defined(__clang__)
+#  include <cxxabi.h>
+#endif
 
 NAMESPACE_BEGIN(PYBIND11_NAMESPACE)
 
@@ -496,7 +495,7 @@ protected:
 
                 function_call call(func, parent);
 
-                size_t args_to_copy = std::min(pos_args, n_args_in);
+                size_t args_to_copy = (std::min)(pos_args, n_args_in); // Protect std::min with parentheses
                 size_t args_copied = 0;
 
                 // 0. Inject new-style `self` argument
@@ -1004,14 +1003,21 @@ void call_operator_delete(T *p, size_t s, size_t) { T::operator delete(p, s); }
 
 inline void call_operator_delete(void *p, size_t s, size_t a) {
     (void)s; (void)a;
-#if defined(PYBIND11_CPP17)
-    if (a > __STDCPP_DEFAULT_NEW_ALIGNMENT__)
-        ::operator delete(p, s, std::align_val_t(a));
-    else
+    #if defined(__cpp_aligned_new) && (!defined(_MSC_VER) || _MSC_VER >= 1912)
+        if (a > __STDCPP_DEFAULT_NEW_ALIGNMENT__) {
+            #ifdef __cpp_sized_deallocation
+                ::operator delete(p, s, std::align_val_t(a));
+            #else
+                ::operator delete(p, std::align_val_t(a));
+            #endif
+            return;
+        }
+    #endif
+    #ifdef __cpp_sized_deallocation
         ::operator delete(p, s);
-#else
-    ::operator delete(p);
-#endif
+    #else
+        ::operator delete(p);
+    #endif
 }
 
 NAMESPACE_END(detail)
@@ -1470,9 +1476,17 @@ struct enum_base {
                 },                                                                     \
                 is_method(m_base))
 
+        #define PYBIND11_ENUM_OP_CONV_LHS(op, expr)                                    \
+            m_base.attr(op) = cpp_function(                                            \
+                [](object a_, object b) {                                              \
+                    int_ a(a_);                                                        \
+                    return expr;                                                       \
+                },                                                                     \
+                is_method(m_base))
+
         if (is_convertible) {
-            PYBIND11_ENUM_OP_CONV("__eq__", !b.is_none() &&  a.equal(b));
-            PYBIND11_ENUM_OP_CONV("__ne__",  b.is_none() || !a.equal(b));
+            PYBIND11_ENUM_OP_CONV_LHS("__eq__", !b.is_none() &&  a.equal(b));
+            PYBIND11_ENUM_OP_CONV_LHS("__ne__",  b.is_none() || !a.equal(b));
 
             if (is_arithmetic) {
                 PYBIND11_ENUM_OP_CONV("__lt__",   a <  b);
@@ -1485,6 +1499,8 @@ struct enum_base {
                 PYBIND11_ENUM_OP_CONV("__ror__",  a |  b);
                 PYBIND11_ENUM_OP_CONV("__xor__",  a ^  b);
                 PYBIND11_ENUM_OP_CONV("__rxor__", a ^  b);
+                m_base.attr("__invert__") = cpp_function(
+                    [](object arg) { return ~(int_(arg)); }, is_method(m_base));
             }
         } else {
             PYBIND11_ENUM_OP_STRICT("__eq__",  int_(a).equal(int_(b)), return false);
@@ -1500,6 +1516,7 @@ struct enum_base {
             }
         }
 
+        #undef PYBIND11_ENUM_OP_CONV_LHS
         #undef PYBIND11_ENUM_OP_CONV
         #undef PYBIND11_ENUM_OP_STRICT
 
@@ -1556,6 +1573,10 @@ public:
         #if PY_MAJOR_VERSION < 3
             def("__long__", [](Type value) { return (Scalar) value; });
         #endif
+        #if PY_MAJOR_VERSION > 3 || (PY_MAJOR_VERSION == 3 && PY_MINOR_VERSION >= 8)
+            def("__index__", [](Type value) { return (Scalar) value; });
+        #endif
+
         cpp_function setstate(
             [](Type &value, Scalar arg) { value = static_cast<Type>(arg); },
             is_method(*this));
@@ -1999,8 +2020,8 @@ class gil_scoped_release { };
 
 error_already_set::~error_already_set() {
     if (m_type) {
-        error_scope scope;
         gil_scoped_acquire gil;
+        error_scope scope;
         m_type.release().dec_ref();
         m_value.release().dec_ref();
         m_trace.release().dec_ref();

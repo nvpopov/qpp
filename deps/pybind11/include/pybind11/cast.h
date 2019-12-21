@@ -32,6 +32,10 @@
 #include <string_view>
 #endif
 
+#if defined(__cpp_lib_char8_t) && __cpp_lib_char8_t >= 201811L
+#  define PYBIND11_HAS_U8STRING
+#endif
+
 NAMESPACE_BEGIN(PYBIND11_NAMESPACE)
 NAMESPACE_BEGIN(detail)
 
@@ -533,9 +537,17 @@ public:
             case return_value_policy::copy:
                 if (copy_constructor)
                     valueptr = copy_constructor(src);
-                else
-                    throw cast_error("return_value_policy = copy, but the "
-                                     "object is non-copyable!");
+                else {
+#if defined(NDEBUG)
+                    throw cast_error("return_value_policy = copy, but type is "
+                                     "non-copyable! (compile in debug mode for details)");
+#else
+                    std::string type_name(tinfo->cpptype->name());
+                    detail::clean_type_id(type_name);
+                    throw cast_error("return_value_policy = copy, but type " +
+                                     type_name + " is non-copyable!");
+#endif
+                }
                 wrapper->owned = true;
                 break;
 
@@ -544,9 +556,18 @@ public:
                     valueptr = move_constructor(src);
                 else if (copy_constructor)
                     valueptr = copy_constructor(src);
-                else
-                    throw cast_error("return_value_policy = move, but the "
-                                     "object is neither movable nor copyable!");
+                else {
+#if defined(NDEBUG)
+                    throw cast_error("return_value_policy = move, but type is neither "
+                                     "movable nor copyable! "
+                                     "(compile in debug mode for details)");
+#else
+                    std::string type_name(tinfo->cpptype->name());
+                    detail::clean_type_id(type_name);
+                    throw cast_error("return_value_policy = move, but type " +
+                                     type_name + " is neither movable nor copyable!");
+#endif
+                }
                 wrapper->owned = true;
                 break;
 
@@ -574,10 +595,10 @@ public:
             if (type->operator_new) {
                 vptr = type->operator_new(type->type_size);
             } else {
-                #if defined(PYBIND11_CPP17)
+                #if defined(__cpp_aligned_new) && (!defined(_MSC_VER) || _MSC_VER >= 1912)
                     if (type->type_align > __STDCPP_DEFAULT_NEW_ALIGNMENT__)
                         vptr = ::operator new(type->type_size,
-                                              (std::align_val_t) type->type_align);
+                                              std::align_val_t(type->type_align));
                     else
                 #endif
                 vptr = ::operator new(type->type_size);
@@ -775,15 +796,25 @@ template <typename T, typename SFINAE = void> struct is_copy_constructible : std
 // so, copy constructability depends on whether the value_type is copy constructible.
 template <typename Container> struct is_copy_constructible<Container, enable_if_t<all_of<
         std::is_copy_constructible<Container>,
-        std::is_same<typename Container::value_type &, typename Container::reference>
+        std::is_same<typename Container::value_type &, typename Container::reference>,
+        // Avoid infinite recursion
+        negation<std::is_same<Container, typename Container::value_type>>
     >::value>> : is_copy_constructible<typename Container::value_type> {};
 
-#if !defined(PYBIND11_CPP17)
-// Likewise for std::pair before C++17 (which mandates that the copy constructor not exist when the
-// two types aren't themselves copy constructible).
+// Likewise for std::pair
+// (after C++17 it is mandatory that the copy constructor not exist when the two types aren't themselves
+// copy constructible, but this can not be relied upon when T1 or T2 are themselves containers).
 template <typename T1, typename T2> struct is_copy_constructible<std::pair<T1, T2>>
     : all_of<is_copy_constructible<T1>, is_copy_constructible<T2>> {};
-#endif
+
+// The same problems arise with std::is_copy_assignable, so we use the same workaround.
+template <typename T, typename SFINAE = void> struct is_copy_assignable : std::is_copy_assignable<T> {};
+template <typename Container> struct is_copy_assignable<Container, enable_if_t<all_of<
+        std::is_copy_assignable<Container>,
+        std::is_same<typename Container::value_type &, typename Container::reference>
+    >::value>> : is_copy_assignable<typename Container::value_type> {};
+template <typename T1, typename T2> struct is_copy_assignable<std::pair<T1, T2>>
+    : all_of<is_copy_assignable<T1>, is_copy_assignable<T2>> {};
 
 NAMESPACE_END(detail)
 
@@ -961,6 +992,9 @@ public:
 
 template <typename CharT> using is_std_char_type = any_of<
     std::is_same<CharT, char>, /* std::string */
+#if defined(PYBIND11_HAS_U8STRING)
+    std::is_same<CharT, char8_t>, /* std::u8string */
+#endif
     std::is_same<CharT, char16_t>, /* std::u16string */
     std::is_same<CharT, char32_t>, /* std::u32string */
     std::is_same<CharT, wchar_t> /* std::wstring */
@@ -995,9 +1029,11 @@ public:
         }
 
         bool py_err = py_value == (py_type) -1 && PyErr_Occurred();
+
+        // Protect std::numeric_limits::min/max with parentheses
         if (py_err || (std::is_integral<T>::value && sizeof(py_type) != sizeof(T) &&
-                       (py_value < (py_type) std::numeric_limits<T>::min() ||
-                        py_value > (py_type) std::numeric_limits<T>::max()))) {
+                       (py_value < (py_type) (std::numeric_limits<T>::min)() ||
+                        py_value > (py_type) (std::numeric_limits<T>::max)()))) {
             bool type_error = py_err && PyErr_ExceptionMatches(
 #if PY_VERSION_HEX < 0x03000000 && !defined(PYPY_VERSION)
                 PyExc_SystemError
@@ -1143,6 +1179,8 @@ public:
             if (res == 0 || res == 1) {
                 value = (bool) res;
                 return true;
+            } else {
+                PyErr_Clear();
             }
         }
         return false;
@@ -1160,6 +1198,9 @@ template <typename StringType, bool IsView = false> struct string_caster {
     // Simplify life by being able to assume standard char sizes (the standard only guarantees
     // minimums, but Python requires exact sizes)
     static_assert(!std::is_same<CharT, char>::value || sizeof(CharT) == 1, "Unsupported char size != 1");
+#if defined(PYBIND11_HAS_U8STRING)
+    static_assert(!std::is_same<CharT, char8_t>::value || sizeof(CharT) == 1, "Unsupported char8_t size != 1");
+#endif
     static_assert(!std::is_same<CharT, char16_t>::value || sizeof(CharT) == 2, "Unsupported char16_t size != 2");
     static_assert(!std::is_same<CharT, char32_t>::value || sizeof(CharT) == 4, "Unsupported char32_t size != 4");
     // wchar_t can be either 16 bits (Windows) or 32 (everywhere else)
@@ -1178,7 +1219,7 @@ template <typename StringType, bool IsView = false> struct string_caster {
 #if PY_MAJOR_VERSION >= 3
             return load_bytes(load_src);
 #else
-            if (sizeof(CharT) == 1) {
+            if (std::is_same<CharT, char>::value) {
                 return load_bytes(load_src);
             }
 
@@ -1238,7 +1279,7 @@ private:
     // without any encoding/decoding attempt).  For other C++ char sizes this is a no-op.
     // which supports loading a unicode from a str, doesn't take this path.
     template <typename C = CharT>
-    bool load_bytes(enable_if_t<sizeof(C) == 1, handle> src) {
+    bool load_bytes(enable_if_t<std::is_same<C, char>::value, handle> src) {
         if (PYBIND11_BYTES_CHECK(src.ptr())) {
             // We were passed a Python 3 raw bytes; accept it into a std::string or char*
             // without any encoding attempt.
@@ -1253,7 +1294,7 @@ private:
     }
 
     template <typename C = CharT>
-    bool load_bytes(enable_if_t<sizeof(C) != 1, handle>) { return false; }
+    bool load_bytes(enable_if_t<!std::is_same<C, char>::value, handle>) { return false; }
 };
 
 template <typename CharT, class Traits, class Allocator>
