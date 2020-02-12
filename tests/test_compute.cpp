@@ -20,7 +20,7 @@ TEST_CASE("Radial density function - main") {
 
      /* compute and check rdf */
      std::vector<std::vector<float> > data;
-     compute_rdf(g1, data, 0.1f, 4.0f, 20);
+     compute_rdf_naive(g1, data, 0.1f, 4.0f, 20);
      REQUIRE(data.size() == g1.nat());
      REQUIRE(data[0].size() == 20);
 
