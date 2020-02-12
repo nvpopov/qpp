@@ -2,18 +2,21 @@
 #define QPP_RADIAL_DENSITY_FUNCTION
 
 #include <geom/lace3d.hpp>
-#include <geom/geom.hpp>
+#include <geom/xgeom.hpp>
 
 namespace qpp {
 
-  // N^2 complexity alogorithm, no saptial optimization
+  // naive
   template<typename REAL, typename CELL>
-  void compute_rdf(geometry<REAL, CELL> &geom,
-                   std::vector<std::vector<REAL> > &data,
-                   REAL data_min = 0.1,
-                   REAL data_max = 4.0,
-                   size_t data_steps = 10,
-                   REAL r_eps = 0.1) {
+  void compute_rdf_naive(xgeometry<REAL, CELL> &geom,
+                         std::vector<std::vector<REAL> > &data,
+                         REAL data_min = 0.1,
+                         REAL data_max = 4.0,
+                         size_t data_steps = 10,
+                         REAL r_eps = 0.1) {
+
+    xgeometry<REAL, periodic_cell<REAL> > tmp_geom(3);
+    geom.clone(tmp_geom, false);
 
     data.resize(geom.nat());
     for (auto &per_atom_rec : data) per_atom_rec.resize(data_steps);
