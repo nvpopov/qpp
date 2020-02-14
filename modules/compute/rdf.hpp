@@ -21,6 +21,23 @@ namespace qpp {
     data.resize(geom.nat());
     for (auto &per_atom_rec : data) per_atom_rec.resize(data_steps);
 
+    //compute min max of input geometry
+    if (geom.nat() == 0) return;
+    vector3<REAL> min_pos = geom.pos(0);
+    vector3<REAL> max_pos = geom.pos(0);
+
+    for (size_t i = 0; i < geom.nat(); i++) {
+
+        if (min_pos[0] > geom.pos(i)[0]) min_pos[0] = geom.pos(i)[0];
+        if (min_pos[1] > geom.pos(i)[1]) min_pos[1] = geom.pos(i)[1];
+        if (min_pos[2] > geom.pos(i)[2]) min_pos[2] = geom.pos(i)[2];
+
+        if (max_pos[0] < geom.pos(i)[0]) max_pos[0] = geom.pos(i)[0];
+        if (max_pos[1] < geom.pos(i)[1]) max_pos[1] = geom.pos(i)[1];
+        if (max_pos[2] < geom.pos(i)[2]) max_pos[2] = geom.pos(i)[2];
+
+      }
+
     auto zero_idx = index::D(geom.DIM).all(0);
 
     for (size_t i = 0; i < geom.nat(); i++) {
