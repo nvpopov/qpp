@@ -11,12 +11,14 @@
 #include <pyqpp/py_indexed_property.hpp>
 namespace py = pybind11;
 #pragma pop_macro("slots")
+
 #endif
 
 #include <algorithm>
 #include <vector>
 #include <cmath>
 #include <functional>
+#include <numeric>
 #include <geom/lace3d.hpp>
 #include <data/data.hpp>
 #include <symm/index.hpp>
@@ -90,14 +92,11 @@ The supercell concept generalization for the geometry class looks like:
   template <class REAL>
   struct geometry_observer {
 
-      virtual void added (before_after, const STRING_EX &,
-                          const vector3<REAL> &) =0;
-      virtual void inserted (int at, before_after,
-                             const STRING_EX &, const vector3<REAL> &) = 0;
-      virtual void changed (int at, before_after,
-                            const STRING_EX &, const vector3<REAL> &) = 0;
-      virtual void erased (int at, before_after) =0;
-      virtual void shaded (int at, before_after, bool) =0;
+      virtual void added(before_after, const STRING_EX &, const vector3<REAL> &) = 0;
+      virtual void inserted(int at, before_after, const STRING_EX &, const vector3<REAL> &) = 0;
+      virtual void changed(int at, before_after, const STRING_EX &, const vector3<REAL> &) = 0;
+      virtual void erased(int at, before_after) = 0;
+      virtual void shaded(int at, before_after, bool) = 0;
       virtual void reordered (const std::vector<int> &, before_after) = 0;
 
   };
@@ -194,8 +193,7 @@ The supercell concept generalization for the geometry class looks like:
       inline vector3<REAL> r (int at, const index & I) const {
 
         vector3<REAL> r1 = _crd[at];
-        if (frac)
-          r1 = cell.frac2cart(r1);
+        if (frac) r1 = cell.frac2cart(r1);
         return cell.transform(r1, I);
 
       }
@@ -205,11 +203,9 @@ The supercell concept generalization for the geometry class looks like:
       /// \param I
       /// \return
       inline vector3<REAL> r_frac (int at, const index & I) const {
-
         vector3<REAL> r1 = _crd[at];
         r1 = cell.cart2frac(r1);
         return cell.transform(r1, I);
-
       }
 
       /// \brief r_frac
@@ -217,11 +213,9 @@ The supercell concept generalization for the geometry class looks like:
       /// \param I
       /// \return
       inline vector3<REAL> r_frac (int at) const {
-
         vector3<REAL> r1 = _crd[at];
         r1 = cell.cart2frac(r1);
         return cell.transform(r1, index::D(DIM).all(0));
-
       }
 
 
@@ -281,9 +275,8 @@ The supercell concept generalization for the geometry class looks like:
       //! Number of atomic type for atom named at
       inline int type_of_atom (const STRING_EX & at) const {
 
-        for (int t=0; t < _atm_types.size(); t++)
-          if ( _atm_types[t] == at )
-            return t;
+        for (int t = 0; t < _atm_types.size(); t++)
+          if (_atm_types[t] == at) return t;
         return -1;
 
       }
@@ -295,7 +288,7 @@ The supercell concept generalization for the geometry class looks like:
       int define_type (const STRING_EX & at) {
 
         int t = type_of_atom(at);
-        if (t==-1){
+        if (t==-1) {
             t = _atm_types.size();
             _atm_types.push_back(at);
             _symm_rad.push_back(default_symmetrize_radius);
@@ -474,7 +467,6 @@ The supercell concept generalization for the geometry class looks like:
 
         // observers
         has_observers = g.has_observers;
-
 
       }
 
@@ -691,12 +683,13 @@ The supercell concept generalization for the geometry class looks like:
       void sort (const std::function<REAL(const geometry<REAL,CELL> &, int)> & key) {
 
         std::vector<int> ord(size());
-        for (int i = 0; i < size(); i++)
-          ord[i] = i;
-        std::sort(ord.begin(), ord.end(),
-                  [&](const int& a, const int& b){
+        std::iota(std::begin(ord), std::end(ord), 0);
+
+        auto sort_func = [&](const int& a, const int& b){
             return (key(*this,a) < key(*this,b));
-          });
+          };
+
+        std::sort(ord.begin(), ord.end(), sort_func);
         reorder(ord);
 
       }
@@ -1218,4 +1211,3 @@ The supercell concept generalization for the geometry class looks like:
 } // namespace qpp
 
 #endif
-
