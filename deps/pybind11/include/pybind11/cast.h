@@ -835,19 +835,25 @@ NAMESPACE_END(detail)
 // You may specialize polymorphic_type_hook yourself for types that want to appear
 // polymorphic to Python but do not use C++ RTTI. (This is a not uncommon pattern
 // in performance-sensitive applications, used most notably in LLVM.)
+//
+// polymorphic_type_hook_base allows users to specialize polymorphic_type_hook with
+// std::enable_if. User provided specializations will always have higher priority than
+// the default implementation and specialization provided in polymorphic_type_hook_base.
 template <typename itype, typename SFINAE = void>
-struct polymorphic_type_hook
+struct polymorphic_type_hook_base
 {
     static const void *get(const itype *src, const std::type_info*&) { return src; }
 };
 template <typename itype>
-struct polymorphic_type_hook<itype, detail::enable_if_t<std::is_polymorphic<itype>::value>>
+struct polymorphic_type_hook_base<itype, detail::enable_if_t<std::is_polymorphic<itype>::value>>
 {
     static const void *get(const itype *src, const std::type_info*& type) {
         type = src ? &typeid(*src) : nullptr;
         return dynamic_cast<const void*>(src);
     }
 };
+template <typename itype, typename SFINAE = void>
+struct polymorphic_type_hook : public polymorphic_type_hook_base<itype> {};
 
 NAMESPACE_BEGIN(detail)
 
@@ -1432,9 +1438,14 @@ protected:
 
     template <size_t... Is>
     bool load_impl(const sequence &seq, bool convert, index_sequence<Is...>) {
+#ifdef __cpp_fold_expressions
+        if ((... || !std::get<Is>(subcasters).load(seq[Is], convert)))
+            return false;
+#else
         for (bool r : {std::get<Is>(subcasters).load(seq[Is], convert)...})
             if (!r)
                 return false;
+#endif
         return true;
     }
 
@@ -1961,14 +1972,19 @@ private:
 
     template <size_t... Is>
     bool load_impl_sequence(function_call &call, index_sequence<Is...>) {
+#ifdef __cpp_fold_expressions
+        if ((... || !std::get<Is>(argcasters).load(call.args[Is], call.args_convert[Is])))
+            return false;
+#else
         for (bool r : {std::get<Is>(argcasters).load(call.args[Is], call.args_convert[Is])...})
             if (!r)
                 return false;
+#endif
         return true;
     }
 
     template <typename Return, typename Func, size_t... Is, typename Guard>
-    Return call_impl(Func &&f, index_sequence<Is...>, Guard &&) {
+    Return call_impl(Func &&f, index_sequence<Is...>, Guard &&) && {
         return std::forward<Func>(f)(cast_op<Args>(std::move(std::get<Is>(argcasters)))...);
     }
 

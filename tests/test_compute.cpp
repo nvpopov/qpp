@@ -18,11 +18,11 @@ TEST_CASE("Radial density function - main") {
      /* check data */
      REQUIRE(g1.nat() == 192);
 
-     /* compute and check rdf */
-     std::vector<std::vector<float> > data;
-     compute_rdf_naive(g1, data, 0.1f, 4.0f, 20);
-     REQUIRE(data.size() == g1.nat());
-     REQUIRE(data[0].size() == 20);
+//     /* compute and check rdf */
+//     std::vector<std::vector<float> > data;
+//     compute_rdf_naive(g1, data, 0.1f, 4.0f, 20);
+//     REQUIRE(data.size() == g1.nat());
+//     REQUIRE(data[0].size() == 20);
 
    }
 

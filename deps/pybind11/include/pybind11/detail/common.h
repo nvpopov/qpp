@@ -93,8 +93,8 @@
 #endif
 
 #define PYBIND11_VERSION_MAJOR 2
-#define PYBIND11_VERSION_MINOR 4
-#define PYBIND11_VERSION_PATCH dev4
+#define PYBIND11_VERSION_MINOR 5
+#define PYBIND11_VERSION_PATCH dev1
 
 /// Include Python header, disable linking to pythonX_d.lib on Windows in debug mode
 #if defined(_MSC_VER)
@@ -218,6 +218,8 @@ extern "C" {
 #define PYBIND11_STRINGIFY(x) #x
 #define PYBIND11_TOSTRING(x) PYBIND11_STRINGIFY(x)
 #define PYBIND11_CONCAT(first, second) first##second
+#define PYBIND11_ENSURE_INTERNALS_READY \
+    pybind11::detail::get_internals();
 
 #define PYBIND11_CHECK_PYTHON_VERSION \
     {                                                                          \
@@ -264,6 +266,7 @@ extern "C" {
     static PyObject *pybind11_init();                                          \
     PYBIND11_PLUGIN_IMPL(name) {                                               \
         PYBIND11_CHECK_PYTHON_VERSION                                          \
+        PYBIND11_ENSURE_INTERNALS_READY                                        \
         try {                                                                  \
             return pybind11_init();                                            \
         } PYBIND11_CATCH_INIT_EXCEPTIONS                                       \
@@ -291,6 +294,7 @@ extern "C" {
     static void PYBIND11_CONCAT(pybind11_init_, name)(pybind11::module &);     \
     PYBIND11_PLUGIN_IMPL(name) {                                               \
         PYBIND11_CHECK_PYTHON_VERSION                                          \
+        PYBIND11_ENSURE_INTERNALS_READY                                        \
         auto m = pybind11::module(PYBIND11_TOSTRING(name));                    \
         try {                                                                  \
             PYBIND11_CONCAT(pybind11_init_, name)(m);                          \
@@ -681,6 +685,7 @@ PYBIND11_RUNTIME_EXCEPTION(key_error, PyExc_KeyError)
 PYBIND11_RUNTIME_EXCEPTION(value_error, PyExc_ValueError)
 PYBIND11_RUNTIME_EXCEPTION(type_error, PyExc_TypeError)
 PYBIND11_RUNTIME_EXCEPTION(buffer_error, PyExc_BufferError)
+PYBIND11_RUNTIME_EXCEPTION(import_error, PyExc_ImportError)
 PYBIND11_RUNTIME_EXCEPTION(cast_error, PyExc_RuntimeError) /// Thrown when pybind11::cast or handle::call fail due to a type casting error
 PYBIND11_RUNTIME_EXCEPTION(reference_cast_error, PyExc_RuntimeError) /// Used internally
 
