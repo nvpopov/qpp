@@ -6,10 +6,17 @@
 #undef slots
 #include <pybind11/pybind11.h>
 #include <pybind11/operators.h>
+#include <pybind11_eigen_wrp/pybind11_eigen_wrp.h>
 //#include <pybind11/stl.h>
 #include <pybind11/iostream.h>
 namespace py = pybind11;
 #pragma pop_macro("slots")
+#else
+namespace pybind11 {
+namespace detail {
+struct do_not_expose_me_as_ndarray {};
+}
+}
 #endif
 
 #pragma GCC diagnostic ignored "-Wnarrowing"
@@ -60,7 +67,8 @@ namespace qpp {
   };
 
   template <typename VALTYPE, int N, int M>
-  class generic_matrix : public Eigen::Matrix<VALTYPE, N , M > {
+  class generic_matrix : public Eigen::Matrix<VALTYPE, N, M >,
+                         public pybind11::detail::do_not_expose_me_as_ndarray {
     public:
       static typename numeric_type<VALTYPE>::norm tol_equiv;
       static generic_matrix unity;
@@ -77,11 +85,11 @@ namespace qpp {
         return 1e-8;
       }
 
-      generic_matrix(void):Eigen::Matrix<VALTYPE, N , M >() {}
+      generic_matrix(void):Eigen::Matrix<VALTYPE, N, M >() {}
 
       template<typename = std::enable_if<check_is_vector3<N , M>::value> >
       generic_matrix(VALTYPE x, VALTYPE y, VALTYPE z):
-        Eigen::Matrix<VALTYPE, N , M >() {
+        Eigen::Matrix<VALTYPE, N, M>() {
         (*this)(0) = x;
         (*this)(1) = y;
         (*this)(2) = z;
@@ -91,7 +99,7 @@ namespace qpp {
       generic_matrix(const generic_matrix<VALTYPE, 3, 1> &v1,
                      const generic_matrix<VALTYPE, 3, 1> &v2,
                      const generic_matrix<VALTYPE, 3, 1> &v3):
-        Eigen::Matrix<VALTYPE, N , M >() {
+        Eigen::Matrix<VALTYPE, N, M>() {
         (*this).row(0) = v1;
         (*this).row(1) = v2;
         (*this).row(2) = v3;
@@ -101,7 +109,7 @@ namespace qpp {
       generic_matrix(const VALTYPE v00, const VALTYPE v01, const VALTYPE v02,
                      const VALTYPE v10, const VALTYPE v11, const VALTYPE v12,
                      const VALTYPE v20, const VALTYPE v21, const VALTYPE v22):
-        Eigen::Matrix<VALTYPE, N , M >() {
+        Eigen::Matrix<VALTYPE, N, M>() {
 
         (*this).row(0)(0) = v00;
         (*this).row(0)(1) = v01;
@@ -117,25 +125,25 @@ namespace qpp {
 
       }
 
-      generic_matrix(VALTYPE xyz):Eigen::Matrix<VALTYPE, N , M >() {
-        (*this) = generic_matrix<VALTYPE, N , M>::Constant(N, M, xyz);
+      generic_matrix(VALTYPE xyz):Eigen::Matrix<VALTYPE, N, M >() {
+        (*this) = generic_matrix<VALTYPE, N, M>::Constant(N, M, xyz);
       }
 
       template<typename OtherDerived>
       generic_matrix(const Eigen::MatrixBase<OtherDerived>& other)
-        :Eigen::Matrix<VALTYPE, N , M >(other) { }
+        :Eigen::Matrix<VALTYPE, N, M>(other) { }
 
       template<typename OtherDerived>
       generic_matrix& operator=(const Eigen::MatrixBase <OtherDerived>& other) {
-        this->Eigen::Matrix<VALTYPE, N , M >::operator=(other);
+        this->Eigen::Matrix<VALTYPE, N, M>::operator=(other);
         return *this;
       }
 
-      inline bool operator==(const generic_matrix<VALTYPE, N , M> & b) const {
+      inline bool operator==(const generic_matrix<VALTYPE, N, M> & b) const {
         return (*this-b).norm() < generic_matrix::tol_equiv;
       }
 
-      inline bool operator!=(const generic_matrix<VALTYPE, N , M> &b) const {
+      inline bool operator!=(const generic_matrix<VALTYPE, N, M> &b) const {
         return ! ((*this)==b);
       }
 
@@ -165,76 +173,76 @@ namespace qpp {
 
 
 #if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
-      static generic_matrix<VALTYPE, N , M> identity_proxy(){
-        return generic_matrix<VALTYPE, N , M>::Identity();
+      static generic_matrix<VALTYPE, N, M> identity_proxy(){
+        return generic_matrix<VALTYPE, N, M>::Identity();
       }
 
       // template<typename = std::enable_if<check_is_vector3<N , M>::value> >
-      generic_matrix<VALTYPE, N , M> normalized_proxy(){
+      generic_matrix<VALTYPE, N, M> normalized_proxy(){
         return (*this).normalized();
       }
 
-      generic_matrix<VALTYPE, N , M> mul_proxy(const VALTYPE& other){
-        generic_matrix<VALTYPE, N , M> _tmv(
-              this->Eigen::Matrix<VALTYPE, N , M >::operator*(other));
+      generic_matrix<VALTYPE, N, M> mul_proxy(const VALTYPE& other){
+        generic_matrix<VALTYPE, N, M> _tmv(
+              this->Eigen::Matrix<VALTYPE, N, M >::operator*(other));
         return _tmv;
       }
 
-      generic_matrix<VALTYPE, N , M> div_proxy(const VALTYPE& other){
-        generic_matrix<VALTYPE, N , M> _tmv(
-              this->Eigen::Matrix<VALTYPE, N , M >::operator/(other));
+      generic_matrix<VALTYPE, N, M> div_proxy(const VALTYPE& other){
+        generic_matrix<VALTYPE, N, M> _tmv(
+              this->Eigen::Matrix<VALTYPE, N, M >::operator/(other));
         return _tmv;
       }
 
-      generic_matrix<VALTYPE, N , M> pow_proxy(const VALTYPE& other){
+      generic_matrix<VALTYPE, N, M> pow_proxy(const VALTYPE& other){
         return (*this).pow(other);
       }
 
-      generic_matrix<VALTYPE, N , M> sum_proxy
-      (const generic_matrix<VALTYPE, N , M>& other){
-        generic_matrix<VALTYPE, N , M> _tmv(
-              this->Eigen::Matrix<VALTYPE, N , M >::operator+(other));
+      generic_matrix<VALTYPE, N, M> sum_proxy
+      (const generic_matrix<VALTYPE, N, M>& other){
+        generic_matrix<VALTYPE, N, M> _tmv(
+              this->Eigen::Matrix<VALTYPE, N, M >::operator+(other));
         return _tmv;
       }
 
-      generic_matrix<VALTYPE, N , M> cross_product_proxy
+      generic_matrix<VALTYPE, N, M> cross_product_proxy
       (const generic_matrix& other){
         return (*this).cross(other);
       }
 
-      generic_matrix<VALTYPE, N , M> inverse_proxy(){
+      generic_matrix<VALTYPE, N, M> inverse_proxy(){
         return (*this).inverse();
       }
 
-      generic_matrix<VALTYPE, 3 , 1> mv_mul_proxy
-      (const generic_matrix<VALTYPE, 3 , 1> & other){
+      generic_matrix<VALTYPE, 3, 1> mv_mul_proxy
+      (const generic_matrix<VALTYPE, 3, 1> & other){
         return (*this)*other;
       }
 
-      const generic_matrix<VALTYPE, 3 , 3> mm_mul_proxy
-      (const generic_matrix<VALTYPE, 3 , 3> & other){
+      const generic_matrix<VALTYPE, 3, 3> mm_mul_proxy
+      (const generic_matrix<VALTYPE, 3, 3> & other){
         return (*this)*other;
       }
 
-      const generic_matrix<VALTYPE, N , M> transpose_proxy(){
+      const generic_matrix<VALTYPE, N, M> transpose_proxy(){
         return (*this).transpose();
       }
 
-      VALTYPE dot_product_proxy(const generic_matrix<VALTYPE, N , M>& other){
+      VALTYPE dot_product_proxy(const generic_matrix<VALTYPE, N, M>& other){
         return (*this).dot(other);
       }
 
-      generic_matrix<VALTYPE, N , M> sub_proxy(const generic_matrix<VALTYPE, N , M>& other){
-        generic_matrix<VALTYPE, N , M> _tmv(
-              this->Eigen::Matrix<VALTYPE, N , M >::operator-(other));
+      generic_matrix<VALTYPE, N, M> sub_proxy(const generic_matrix<VALTYPE, N, M>& other){
+        generic_matrix<VALTYPE, N, M> _tmv(
+              this->Eigen::Matrix<VALTYPE, N, M >::operator-(other));
         return _tmv;
       }
 
-      bool equal_proxy(const generic_matrix<VALTYPE, N , M> & b){
+      bool equal_proxy(const generic_matrix<VALTYPE, N, M> & b){
         return (*this) == b;
       }
 
-      bool nequal_proxy(const generic_matrix<VALTYPE, N , M> &b){
+      bool nequal_proxy(const generic_matrix<VALTYPE, N, M> &b){
         return (*this) != b;
       }
 
@@ -376,12 +384,12 @@ namespace qpp {
   }
 
   template<class VALTYPE>
-  matrix3<VALTYPE> mat4_to_mat3(const matrix4<VALTYPE> _inmat){
-    matrix3<VALTYPE> _res;
+  matrix3<VALTYPE> mat4_to_mat3(const matrix4<VALTYPE> inmat){
+    matrix3<VALTYPE> res;
     for (int i = 0; i < 3; i++)
       for (int q = 0; q < 3; q++)
-        _res(i,q) = _inmat(i,q);
-    return _res;
+        res(i,q) = inmat(i,q);
+    return res;
   }
 
   template<class VALTYPE>
@@ -394,9 +402,7 @@ namespace qpp {
   }
 
   template<class VALTYPE>
-  matrix3<VALTYPE> gen_matrix3(vector3<VALTYPE> v1,
-                               vector3<VALTYPE> v2,
-                               vector3<VALTYPE> v3){
+  matrix3<VALTYPE> gen_matrix3(vector3<VALTYPE> v1, vector3<VALTYPE> v2, vector3<VALTYPE> v3) {
     matrix3<VALTYPE> retm;
     retm.row(0) = v1;
     retm.row(1) = v2;
@@ -404,14 +410,14 @@ namespace qpp {
   }
 
   template<class VALTYPE>
-  matrix3<VALTYPE> RotMtrx(const vector3<VALTYPE> & nn, VALTYPE phi){
+  matrix3<VALTYPE> RotMtrx(const vector3<VALTYPE> & nn, VALTYPE phi) {
     vector3<VALTYPE> n = nn.normalized();
     matrix3<VALTYPE> m1 = Eigen::AngleAxis<VALTYPE>(phi, n).toRotationMatrix();
     return m1;
   }
 
   template<class VALTYPE>
-  matrix3<VALTYPE> gen_matrix(const VALTYPE value){
+  matrix3<VALTYPE> gen_matrix(const VALTYPE value) {
     matrix3<VALTYPE> retm;
     for (int i = 0; i < 3; i++)
       for (int q = 0; q < 3; q++)
@@ -440,8 +446,7 @@ namespace qpp {
   }
 
   template<class VALTYPE>
-  vector3<VALTYPE> solve3(const matrix3<VALTYPE> & A,
-                          const vector3<VALTYPE> & b){
+  vector3<VALTYPE> solve3(const matrix3<VALTYPE> & A, const vector3<VALTYPE> & b) {
     return A.inverse() * b;
   }
 
@@ -449,14 +454,14 @@ namespace qpp {
   vector3<VALTYPE> solve3(const vector3<VALTYPE> & A0,
                           const vector3<VALTYPE> & A1,
                           const vector3<VALTYPE> & A2,
-                          const vector3<VALTYPE> & b){
+                          const vector3<VALTYPE> & b) {
     matrix3<VALTYPE> A(A0, A1, A2);
     return solve3(A, b);
   }
 
   template<class VALTYPE>
-  vector3<typename numeric_type<VALTYPE>::complex> solve_cubeq(VALTYPE a, VALTYPE b, VALTYPE c,
-                                                               VALTYPE d) {
+  vector3<typename numeric_type<VALTYPE>::complex> solve_cubeq(VALTYPE a, VALTYPE b,
+                                                               VALTYPE c, VALTYPE d) {
     // Solves ax^3 + bx^2 + cx + d = 0, a is assumed to be nonzero
 
     typename numeric_type<VALTYPE>::complex I(0,1);
@@ -500,7 +505,8 @@ namespace qpp {
   }
 
   template<class VALTYPE>
-  vector3<VALTYPE> diagon3d(const matrix3<VALTYPE> & A){
+  vector3<VALTYPE> diagon3d(const matrix3<VALTYPE> & A) {
+
     VALTYPE b = A.row(0)[0] + A.row(1)[1] + A.row(2)[2];
     VALTYPE c = A.row(0)[1]*A.row(1)[0] + A.row(1)[2]*A.row(2)[1] + A.row(2)[0]*A.row(0)[2] -
                 A.row(0)[0]*A.row(1)[1] - A.row(1)[1]*A.row(2)[2] - A.row(2)[2]*A.row(0)[0];
@@ -511,6 +517,7 @@ namespace qpp {
     for (int i=0; i<3; i++)
       lbd_re(i) = lbd(i).real();
     return lbd_re;
+
   }
 
   template<class VALTYPE>
@@ -789,9 +796,7 @@ namespace qpp {
   // ---------------------------------------------------------
 
   template<class VALTYPE>
-  bool diagon3d(vector3<VALTYPE> & eigvals,
-                matrix3<VALTYPE> & eigvecs,
-                const matrix3<VALTYPE> & A){
+  bool diagon3d(vector3<VALTYPE> & eigvals, matrix3<VALTYPE> & eigvecs, const matrix3<VALTYPE> & A){
     vector3<typename numeric_type<VALTYPE>::complex> ceigvals;
     matrix3<typename numeric_type<VALTYPE>::complex> ceigvecs;
     VALTYPE eps = vector3<VALTYPE>::tol_equiv;

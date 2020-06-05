@@ -89,6 +89,7 @@ include_directories(${PROJECT_SOURCE_DIR}/deps/eigen3)
 include_directories(${PROJECT_SOURCE_DIR}/deps/fmtlib/include)
 include_directories(${PROJECT_SOURCE_DIR}/deps/fmtlib/CppNumericalSolvers)
 include_directories(${PROJECT_SOURCE_DIR}/deps/pugixml/src)
+include_directories(${PROJECT_SOURCE_DIR}/deps)
 #add_subdirectory(${CMAKE_SOURCE_DIR}/deps/fmtlib)
 
 #Python related stuff

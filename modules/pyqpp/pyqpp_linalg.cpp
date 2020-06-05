@@ -5,6 +5,15 @@
 #include <fmt/format.h>
 #include <fmt/ostream.h>
 
+#pragma push_macro("slots")
+#undef slots
+#include <pybind11/pybind11.h>
+#include <pybind11/operators.h>
+//#include <pybind11/stl.h>
+#include <pybind11/iostream.h>
+namespace py = pybind11;
+#pragma pop_macro("slots")
+
 template<class VALTYPE>
 void py_vector3_export (py::module m, const char * pyname) {
 
@@ -243,5 +252,12 @@ void pyqpp_linalg_export (py::module m) {
   qpp::index::py_export( m, "index");
   qpp::iterator::py_export(m, "iterator");
   qpp::index_range::py_export(m, "index_range");
+
+  m.def("test_eigen3d_to_numpy",
+        [](const Eigen::VectorXf &x) -> Eigen::VectorXf { return 2.0f * x; });
+  m.def("test_eigen3d_to_numpy2",
+        [](const int dim) -> Eigen::MatrixXf {
+          return Eigen::MatrixXf::Identity(dim, dim);
+        });
 
 }
