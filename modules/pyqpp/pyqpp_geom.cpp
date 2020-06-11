@@ -109,12 +109,12 @@ void py_observer_export(py::module m, const char * pyname) {
   py::class_<qpp::geometry_observer<REAL>,
       qpp::py_geometry_observer<REAL> >(m, pyname)
       .def(py::init<>())
-      .def("added",    &qpp::geometry_observer<REAL>::added)
+      .def("added", &qpp::geometry_observer<REAL>::added)
       .def("inserted", &qpp::geometry_observer<REAL>::inserted)
-      .def("changed",  &qpp::geometry_observer<REAL>::changed)
-      .def("erased",   &qpp::geometry_observer<REAL>::erased)
-      .def("shaded",   &qpp::geometry_observer<REAL>::shaded)
-      ;
+      .def("changed", &qpp::geometry_observer<REAL>::changed)
+      .def("erased", &qpp::geometry_observer<REAL>::erased)
+      .def("shaded", &qpp::geometry_observer<REAL>::shaded)
+      .def("geometry_destroyed", &qpp::geometry_observer<REAL>::geometry_destroyed);
 }
 
 void pyqpp_geom_export(py::module m) {
