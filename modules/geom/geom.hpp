@@ -426,7 +426,8 @@ class geometry {
 
   ~geometry() {
     // fixme
-    for (auto &observer : observers) observer->geometry_destroyed();
+//    for (auto observer : observers)
+//      if (observer) observer->geometry_destroyed();
   }
 
   /*
