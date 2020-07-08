@@ -59,31 +59,28 @@ struct periodic_cell {
   //! \brief The dimension of periodicity
   int DIM;
 
-  vector3<REAL> *v;
+  std::array<vector3<REAL>, 3> v{
+      vector3<REAL>{1, 0, 0}, vector3<REAL>{0, 1, 0}, vector3<REAL>{0, 0, 1}
+  };
+
   STRING_EX name;
 
   //! \brief Create periodic cell of dimension dim with zero
   //!  translation vectors
   periodic_cell(int dim = 0) {
     DIM = dim;
-    if (DIM > 0)
-      v = new vector3<REAL>[DIM];
-    else
-      v = nullptr;
     for (int d = 0; d < DIM; d++) v[d] = vector3<REAL>::Zero();
   }
 
   //! \brief Copy constructor for periodic cell
   periodic_cell(const periodic_cell<REAL> &cl) {
     DIM = cl.DIM;
-    if (DIM > 0)
-      v = new vector3<REAL>[DIM];
-    else
-      v = nullptr;
     for (int i = 0; i < DIM; i++) v[i] = cl.v[i];
   }
 
-  ~periodic_cell() { delete[] v; }
+  ~periodic_cell() {
+
+  }
 
   /*! \brief Creates periodic cell of DIM==3 with given lattice
    * constants and angles
@@ -91,8 +88,8 @@ struct periodic_cell {
     @param alpha, beta, gamma - angles are in degrees!
    */
   periodic_cell(REAL a, REAL b, REAL c, REAL alpha, REAL beta, REAL gamma) {
+
     DIM = 3;
-    v = new vector3<REAL>[DIM];
     alpha *= REAL(pi) / 180;
     beta *= REAL(pi) / 180;
     gamma *= REAL(pi) / 180;
@@ -102,6 +99,7 @@ struct periodic_cell {
     REAL ny = (std::cos(alpha) - nx * std::cos(gamma)) / std::sin(gamma);
     REAL nz = std::sqrt(1 - nx * nx - ny * ny);
     v[2] = vector3<REAL>(nx, ny, nz) * c;
+
   }
 
   /*! \brief Creates periodic cell with given translation vectors
@@ -109,17 +107,19 @@ struct periodic_cell {
     If only one provided, the resulting cell has
     DIM==1, if two provided, then DIM==2, and if all
     three provided, you get DIM==3 periodic cell
-*/
+  */
   periodic_cell(vector3<REAL> a, vector3<REAL> b = 0, vector3<REAL> c = 0) {
+
     DIM = 1;
     if (b != vector3<REAL>::Zero()) DIM = 2;
     if (c != vector3<REAL>::Zero()) DIM = 3;
 
-    v = new vector3<REAL>[DIM];
+    //v = new vector3<REAL>[DIM];
 
     if (DIM > 0) v[0] = a;
     if (DIM > 1) v[1] = b;
     if (DIM > 2) v[2] = c;
+
   }
 
   index begin() const { return index::D(DIM).all(-1); }
@@ -139,11 +139,12 @@ struct periodic_cell {
   }
 
   /*! \brief Answers the question whether r belongs to the unit cell
-  defined as parallelepiped with one vertex in
-  the coordinate origin
-  the others are pointed by lattice vectors
-*/
+   defined as parallelepiped with one vertex in
+   the coordinate origin
+   the others are pointed by lattice vectors
+  */
   bool within(const vector3<REAL> &r) const {
+
     vector3<REAL> f = cart2frac(r);
     bool res = true;
     for (int d = 0; d < DIM; d++)
@@ -152,9 +153,11 @@ struct periodic_cell {
         break;
       }
     return res;
+
   }
 
   bool within_already_frac(const vector3<REAL> &r) const {
+
     bool res = true;
     for (int d = 0; d < DIM; d++)
       if (r(d) < REAL(0) || r(d) >= REAL(1)) {
@@ -162,9 +165,11 @@ struct periodic_cell {
         break;
       }
     return res;
+
   }
 
   bool within_epsilon_b(const vector3<REAL> &r, const REAL eps) const {
+
     vector3<REAL> f = cart2frac(r);
     bool res = true;
     for (int d = 0; d < DIM; d++)
@@ -173,6 +178,7 @@ struct periodic_cell {
         break;
       }
     return res;
+
   }
 
   /*! \brief Brings the point r into the volume of unit cell by translations
@@ -181,9 +187,11 @@ struct periodic_cell {
    the others are pointed by lattice vectors
 */
   vector3<REAL> reduce(const vector3<REAL> &r) const {
+
     vector3<REAL> f = cart2frac(r);
     for (int d = 0; d < DIM; d++) f(d) -= floor(f(d));
     return frac2cart(f);
+
   }
 
   /*! \brief find high symmetry point within "radius" distance from given point
@@ -200,6 +208,7 @@ struct periodic_cell {
    @return Cartesian coordinates
 */
   vector3<REAL> frac2cart(const vector3<REAL> &r) const {
+
     vector3<REAL> res = vector3<REAL>::Zero();
     for (int i = 0; i < DIM; i++) res += r(i) * v[i];
 
@@ -210,6 +219,7 @@ struct periodic_cell {
     }
 
     return res;
+
   }
 
   /*! \brief cartesian to fractional transformation,
@@ -220,6 +230,7 @@ struct periodic_cell {
    orthogonal to both translation vectors
 */
   vector3<REAL> cart2frac(const vector3<REAL> &r) const {
+
     vector3<REAL> v2;
     if (DIM == 3)
       v2 = v[2];
@@ -233,9 +244,11 @@ struct periodic_cell {
     A.col(1) = v[1];
     A.col(2) = v2;
     return solve3(A, r);
+
   }
 
   std::optional<vector3<REAL>> get_reciporal_vectors(const size_t axis_index) {
+
     if (DIM != 3) return std::nullopt;
     if (axis_index >= 3) return std::nullopt;
 
@@ -255,6 +268,7 @@ struct periodic_cell {
     }
 
     return std::nullopt;
+
   }
 
   // -----------------------------------------------------------------------
@@ -278,6 +292,7 @@ struct periodic_cell {
    coordinate origin
 */
   inline vector3<REAL> reduce_cntr(const vector3<REAL> &r) const {
+
     vector3<REAL> f = cart2frac(r);
     for (int i = 0; i < DIM; i++) {
       f(i) -= int(f(i));
@@ -285,6 +300,7 @@ struct periodic_cell {
     }
 
     return frac2cart(f);
+
   }
 
   /*! \brief Brings r into Wigner-Zeitz unit cell
@@ -298,6 +314,7 @@ struct periodic_cell {
    * centred at the coordinate origin
    */
   inline bool within_centered(vector3<REAL> r) const {
+
     vector3<REAL> f = cart2frac(r);
     bool res = true;
     for (int d = 0; d < DIM; d++)
@@ -305,7 +322,9 @@ struct periodic_cell {
         res = false;
         break;
       }
+
     return res;
+
   }
 
   /*! \brief Answers the question whether r belongs to Wigner-Zeitz
@@ -314,8 +333,8 @@ struct periodic_cell {
   */
   inline bool within_wz(vector3<REAL> r) const { return true; }
 
-  virtual void write(std::basic_ostream<CHAR_EX, TRAITS> &os,
-                     int offset = 0) const {
+  virtual void write(std::basic_ostream<CHAR_EX, TRAITS> &os, int offset = 0) const {
+
     if (DIM == 0) return;
     for (int k = 0; k < offset; k++) os << " ";
     os << "vectors";
@@ -331,6 +350,7 @@ struct periodic_cell {
 
     for (int k = 0; k < offset; k++) os << " ";
     os << "}\n";
+
   }
 
 #if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
