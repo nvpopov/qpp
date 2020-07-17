@@ -543,8 +543,7 @@ public:
   bool reference_mode;
   bool transl_mode;
 
-  neighbours_table( geometry<REAL, CELL> & g, bonding_table<REAL> & t) :
-                                                                      ngrain(index::D(3)){
+  neighbours_table( geometry<REAL, CELL> & g, bonding_table<REAL> & t) : ngrain(index::D(3)){
     btbl = &t;
     geom = & g;
     DIM = geom -> DIM;
@@ -843,9 +842,17 @@ public:
     }
   }
 
-  void ref_shaded(  int at,
-                  before_after st,
-                  bool sh){}
+  void ref_shaded(int at, before_after st,bool sh){}
+
+  uint32_t get_flags() override {
+    return geometry_observer_supports_default
+           | geometry_observer_supports_added
+           | geometry_observer_supports_inserted
+           | geometry_observer_supports_changed
+           | geometry_observer_supports_erased
+           | geometry_observer_supports_shaded
+           | geometry_observer_supports_reordered;
+  };
 
   void added(before_after st, const STRING_EX & a, const vector3<REAL> & r) override {}
   void inserted(int at, before_after st, const STRING_EX & a, const vector3<REAL> & r) override {}
@@ -855,15 +862,15 @@ public:
   void reordered(const std::vector<int> &, before_after) override {}
   void geometry_destroyed () override {}
 
-  void dim_changed(before_after) override {
+  void dim_changed(before_after ord) override {
 
   }
 
-  void cell_changed(before_after) override {
+  void cell_changed(before_after ord) override {
 
   }
 
-  void xfield_changed(int at, before_after) override {
+  void xfield_changed(int at, int xid, before_after ord) override {
 
   }
 

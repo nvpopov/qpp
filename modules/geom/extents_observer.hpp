@@ -56,6 +56,16 @@ public:
     }
   }
 
+  uint32_t get_flags() override {
+    return geometry_observer_supports_default
+           | geometry_observer_supports_added
+           | geometry_observer_supports_inserted
+           | geometry_observer_supports_changed
+           | geometry_observer_supports_erased
+           | geometry_observer_supports_shaded
+           | geometry_observer_supports_reordered;
+  };
+
   void added(before_after st,const STRING_EX & a, const vector3<REAL> & r) override {
     cmp_pos(r);
   }
@@ -84,15 +94,15 @@ public:
 
   }
 
-  void dim_changed(before_after) override {
+  void dim_changed(before_after ord) override {
 
   }
 
-  void cell_changed(before_after) override {
+  void cell_changed(before_after ord) override {
 
   }
 
-  void xfield_changed(int at, before_after) override {
+  void xfield_changed(int at, int xid, before_after) override {
 
   }
 

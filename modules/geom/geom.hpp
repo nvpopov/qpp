@@ -107,16 +107,7 @@ const uint32_t geometry_observer_supports_xfield_changed      = 1 << 10;
 template <class REAL>
 struct geometry_observer {
 
-  virtual uint32_t get_flags() {
-    return geometry_observer_supports_default
-           | geometry_observer_supports_added
-           | geometry_observer_supports_inserted
-           | geometry_observer_supports_changed
-           | geometry_observer_supports_erased
-           | geometry_observer_supports_shaded
-           | geometry_observer_supports_reordered;
-  };
-
+  virtual uint32_t get_flags() = 0;
   virtual void added(before_after, const STRING_EX &,const vector3<REAL> &) = 0;
   virtual void inserted(int at, before_after, const STRING_EX &, const vector3<REAL> &) = 0;
   virtual void changed(int at, before_after, const STRING_EX &, const vector3<REAL> &) = 0;
@@ -126,7 +117,7 @@ struct geometry_observer {
   virtual void geometry_destroyed() = 0;
   virtual void dim_changed(before_after) = 0;
   virtual void cell_changed(before_after) = 0;
-  virtual void xfield_changed(int at, before_after) = 0;
+  virtual void xfield_changed(int at, int xid, before_after) = 0;
 
 };
 
@@ -1024,7 +1015,13 @@ REAL geometry<REAL, CELL>::tol_geom_default = 1e-5;
 
 template <class REAL>
 struct py_geometry_observer : geometry_observer<REAL> {
+
   using geometry_observer<REAL>::geometry_observer;
+
+  uint32_t get_flags() override {
+    PYBIND11_OVERLOAD_PURE(uint32_t, geometry_observer<REAL>, get_flags);
+  };
+
   void added(before_after s, const STRING_EX &a, const vector3<REAL> &v) override {
     PYBIND11_OVERLOAD_PURE(void, geometry_observer<REAL>, added, s, a, v);
   }
@@ -1062,8 +1059,8 @@ struct py_geometry_observer : geometry_observer<REAL> {
     PYBIND11_OVERLOAD_PURE(void, geometry_observer<REAL>, cell_changed, s);
   }
 
-  void xfield_changed(int at, before_after s) override {
-    PYBIND11_OVERLOAD_PURE(void, geometry_observer<REAL>, xfield_changed, at, s);
+  void xfield_changed(int at, int xid, before_after s) override {
+    PYBIND11_OVERLOAD_PURE(void, geometry_observer<REAL>, xfield_changed, at, xid, s);
   }
 
 };

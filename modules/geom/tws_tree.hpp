@@ -852,7 +852,6 @@ public:
 
   }
 
-
   /// \brief find_all_neighbours
   void find_all_neighbours() {
 
@@ -861,7 +860,6 @@ public:
       for (auto &img_atom : m_img_atoms) find_neighbours(img_atom.m_atm, img_atom.m_idx);
 
   }
-
 
   /// \brief find_neighbours
   /// \param at_num
@@ -1016,6 +1014,16 @@ public:
   }
 
 
+  uint32_t get_flags() override {
+    return geometry_observer_supports_default
+           | geometry_observer_supports_added
+           | geometry_observer_supports_inserted
+           | geometry_observer_supports_changed
+           | geometry_observer_supports_erased
+           | geometry_observer_supports_shaded
+           | geometry_observer_supports_reordered;
+  };
+
   /// \brief added
   /// \param st
   /// \param a
@@ -1110,7 +1118,7 @@ public:
   }
 
   /// \brief reordered
-  void reordered(const std::vector<int> &, before_after) override {
+  void reordered(const std::vector<int> &, before_after ord) override {
     m_tree_is_dirty = true;
   }
 
@@ -1118,15 +1126,15 @@ public:
 
   }
 
-  void dim_changed(before_after) override {
+  void dim_changed(before_after ord) override {
 
   }
 
-  void cell_changed(before_after) override {
+  void cell_changed(before_after ord) override {
 
   }
 
-  void xfield_changed(int at, before_after) override {
+  void xfield_changed(int at, int xid, before_after ord) override {
 
   }
 
