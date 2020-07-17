@@ -117,13 +117,13 @@ class geometry {
  public:
 
   // Storage of atoms
-  std::vector<STRING_EX> _atm;
+  std::vector<STRING_EX> m_atm;
 
   // Storage of coordinates
-  std::vector<vector3<REAL> > _crd;
+  std::vector<vector3<REAL> > m_crd;
 
   //! Special logical array allows to "hide" or "shadow" some atoms
-  std::vector<Bool> _shadow;
+  std::vector<Bool> m_shadow;
 
  protected:
 
@@ -160,26 +160,26 @@ class geometry {
   virtual bool is_xgeometry() const { return false; }
 
   //! Number of atoms
-  inline int size() const { return _crd.size(); }
+  inline int size() const { return m_crd.size(); }
 
   //! \brief Number of atoms
-  inline int nat() const { return _crd.size(); }
+  inline int nat() const { return m_crd.size(); }
 
   //! \brief The name of i-th atom
-  inline STRING_EX &atom(int at) { return _atm[at]; }
+  inline STRING_EX &atom(int at) { return m_atm[at]; }
 
-  inline STRING_EX atom(int at) const { return _atm[at]; }
+  inline STRING_EX atom(int at) const { return m_atm[at]; }
 
   /// \brief Gives the coordinates of an atom in the geometry
   ///  @param at - the number of atom in the geometry
-  inline vector3<REAL> coord(int at) const { return _crd[at]; }
+  inline vector3<REAL> coord(int at) const { return m_crd[at]; }
 
-  inline vector3<REAL> &coord(int at) { return _crd[at]; }
+  inline vector3<REAL> &coord(int at) { return m_crd[at]; }
 
   /// \brief real-space position of atom number at
   /// \param at - the number of the atom in the geometry
   inline vector3<REAL> r(int at) const {
-    vector3<REAL> r1 = _crd[at];
+    vector3<REAL> r1 = m_crd[at];
     if (frac) r1 = cell.frac2cart(r1);
     return cell.transform(r1, index::D(DIM).all(0));
   }
@@ -188,7 +188,7 @@ class geometry {
   /// \param at  - the number of atom in the geometry
   /// \param I   - the cell or symmetry indicies
   inline vector3<REAL> r(int at, const index &I) const {
-    vector3<REAL> r1 = _crd[at];
+    vector3<REAL> r1 = m_crd[at];
     if (frac) r1 = cell.frac2cart(r1);
     return cell.transform(r1, I);
   }
@@ -198,7 +198,7 @@ class geometry {
   /// \param I
   /// \return
   inline vector3<REAL> r_frac(int at, const index &I) const {
-    vector3<REAL> r1 = _crd[at];
+    vector3<REAL> r1 = m_crd[at];
     r1 = cell.cart2frac(r1);
     return cell.transform(r1, I);
   }
@@ -208,7 +208,7 @@ class geometry {
   /// \param I
   /// \return
   inline vector3<REAL> r_frac(int at) const {
-    vector3<REAL> r1 = _crd[at];
+    vector3<REAL> r1 = m_crd[at];
     r1 = cell.cart2frac(r1);
     return cell.transform(r1, index::D(DIM).all(0));
   }
@@ -217,7 +217,7 @@ class geometry {
   /// \param ai  - complex index; ai[0] is the number of atom in the geometry,
   ///   ai[1:DIM] are the cell or symmetry indicies
   inline vector3<REAL> r(const index &ai) const {
-    return cell.transform(_crd[ai(0)], ai.sub(1));
+    return cell.transform(m_crd[ai(0)], ai.sub(1));
   }
 
   //! \brief The synonym for r(at)
@@ -228,21 +228,21 @@ class geometry {
 
   //! \brief The synonym for r(ai)
   inline vector3<REAL> pos(const index &ai) const {
-    return cell.transform(_crd[ai(0)], ai.sub(1));
+    return cell.transform(m_crd[ai(0)], ai.sub(1));
   }
 
-  inline bool shadow(int at) const { return _shadow[at]; }
+  inline bool shadow(int at) const { return m_shadow[at]; }
 
   // ------------------- Typetable for atoms ------------------------------
 
  private:
-  std::vector<STRING_EX> _atm_types;
-  std::vector<int> _type_table;
-  std::vector<REAL> _symm_rad;
+  std::vector<STRING_EX> p_atm_types;
+  std::vector<int> p_type_table;
+  std::vector<REAL> p_symm_rad;
 
  public:
   //! Number of different atomic types in molecule
-  inline int n_atom_types() const { return _atm_types.size(); }
+  inline int n_atom_types() const { return p_atm_types.size(); }
 
   //! Then synonim for n_atom_types()
   inline int n_types() const { return n_atom_types(); }
@@ -250,14 +250,14 @@ class geometry {
   /*! \brief The string name of atom of type number t
   @param t - the atomic type number
  */
-  inline STRING_EX atom_of_type(int t) const { return _atm_types[t]; }
+  inline STRING_EX atom_of_type(int t) const { return p_atm_types[t]; }
 
-  inline STRING_EX atom_name(int i) const { return _atm_types[type_table(i)]; }
+  inline STRING_EX atom_name(int i) const { return p_atm_types[type_table(i)]; }
 
   //! Number of atomic type for atom named at
   inline int type_of_atom(const STRING_EX &at) const {
-    for (int t = 0; t < _atm_types.size(); t++)
-      if (_atm_types[t] == at) return t;
+    for (int t = 0; t < p_atm_types.size(); t++)
+      if (p_atm_types[t] == at) return t;
     return -1;
   }
 
@@ -267,9 +267,9 @@ class geometry {
   int define_type(const STRING_EX &at) {
     int t = type_of_atom(at);
     if (t == -1) {
-      t = _atm_types.size();
-      _atm_types.push_back(at);
-      _symm_rad.push_back(default_symmetrize_radius);
+      t = p_atm_types.size();
+      p_atm_types.push_back(at);
+      p_symm_rad.push_back(default_symmetrize_radius);
     }
     return t;
   }
@@ -278,38 +278,38 @@ class geometry {
   inline int get_atom_count_by_type(int atype) {
     int retval = 0;
 
-    for (int i = 0; i < _type_table.size(); i++)
-      if (_type_table[i] == atype) retval += 1;
+    for (int i = 0; i < p_type_table.size(); i++)
+      if (p_type_table[i] == atype) retval += 1;
     return retval;
   }
 
   //! type of i-th atom in the geometry
-  inline int type_table(int i) const { return _type_table[i]; }
+  inline int type_table(int i) const { return p_type_table[i]; }
 
   //! synonym
   inline int type(int i) const { return type_table(i); }
 
   //! set type of i-th atom in the geometry
-  inline int &type(int i) { return _type_table[i]; }
+  inline int &type(int i) { return p_type_table[i]; }
 
   //! synonym
   inline int type_of_atom(int i) const { return type_table(i); }
 
   virtual void build_type_table() {
-    _atm_types.clear();
-    _symm_rad.clear();
-    _type_table.resize(size());
+    p_atm_types.clear();
+    p_symm_rad.clear();
+    p_type_table.resize(size());
 
     for (int i = 0; i < size(); i++) {
       int t = type_of_atom(atom(i));
 
       if (t == -1) {
-        t = _atm_types.size();
-        _atm_types.push_back(atom(i));
-        _symm_rad.push_back(default_symmetrize_radius);
+        t = p_atm_types.size();
+        p_atm_types.push_back(atom(i));
+        p_symm_rad.push_back(default_symmetrize_radius);
       }
 
-      _type_table[i] = t;
+      p_type_table[i] = t;
     }
 
     //      ngbr.resize_disttable();
@@ -318,8 +318,8 @@ class geometry {
   void build_types() { build_type_table(); }
 
   void clear_type_table() {
-    _atm_types.clear();
-    _type_table.resize(size());
+    p_atm_types.clear();
+    p_type_table.resize(size());
   }
 
   // --------------- Symmetrization radius for each atomic type ----
@@ -330,9 +330,9 @@ class geometry {
   bool auto_symmetrize;
   REAL default_symmetrize_radius;
 
-  REAL symmetrize_radius(int t) const { return _symm_rad[t]; }
+  REAL symmetrize_radius(int t) const { return p_symm_rad[t]; }
 
-  void set_symmetrize_radius(int t, REAL rad) { _symm_rad[t] = rad; }
+  void set_symmetrize_radius(int t, REAL rad) { p_symm_rad[t] = rad; }
 
   REAL symmetrize_radius(const STRING_EX &a) const {
     int t = type_of_atom(a);
@@ -342,18 +342,18 @@ class geometry {
     if (t == -1)
       return default_symmetrize_radius;
     else
-      return _symm_rad[t];
+      return p_symm_rad[t];
   }
 
   void set_symmetrize_radius(const STRING_EX &a, REAL rad) {
     int t = type_of_atom(a);
 
     if (t == -1) {
-      t = _atm_types.size();
-      _atm_types.push_back(a);
-      _symm_rad.push_back(rad);
+      t = p_atm_types.size();
+      p_atm_types.push_back(a);
+      p_symm_rad.push_back(rad);
     } else
-      _symm_rad[t] = rad;
+      p_symm_rad[t] = rad;
 
     // std::cerr << "t= " << t << "\n";
 
@@ -371,9 +371,9 @@ class geometry {
     has_observers = false;
     default_symmetrize_radius = 0e0;
     tol_geom = tol_geom_default;
-    _atm.reserve(GEOM_DEFAULT_RESERVE_AMOUNT);
-    _crd.reserve(GEOM_DEFAULT_RESERVE_AMOUNT);
-    _shadow.reserve(GEOM_DEFAULT_RESERVE_AMOUNT);
+    m_atm.reserve(GEOM_DEFAULT_RESERVE_AMOUNT);
+    m_crd.reserve(GEOM_DEFAULT_RESERVE_AMOUNT);
+    m_shadow.reserve(GEOM_DEFAULT_RESERVE_AMOUNT);
 
 #if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
     py_atoms.bind(this);
@@ -402,12 +402,12 @@ class geometry {
 
   geometry(const geometry<REAL, CELL> &g)
       : cell(g.cell),
-        _atm(g._atm),
-        _crd(g._crd),
-        _shadow(g._shadow),
-        _type_table(g._type_table),
-        _symm_rad(g._symm_rad),
-        _atm_types(g._atm_types),
+        m_atm(g.m_atm),
+        m_crd(g.m_crd),
+        m_shadow(g.m_shadow),
+        p_type_table(g.p_type_table),
+        p_symm_rad(g.p_symm_rad),
+        p_atm_types(g.p_atm_types),
         observers(g.observers) {
     init_default();
 
@@ -487,11 +487,11 @@ void copy(const geometry<DIM, REAL> &G)
       for (int i = 0; i < observers.size(); i++)
         observers[i]->added(before, a, r2);
 
-    _atm.push_back(a);
-    _crd.push_back(r2);
-    _shadow.push_back(false);
+    m_atm.push_back(a);
+    m_crd.push_back(r2);
+    m_shadow.push_back(false);
 
-    if (auto_update_types) _type_table.push_back(define_type(a));
+    if (auto_update_types) p_type_table.push_back(define_type(a));
 
     if (has_observers)
       for (int i = 0; i < observers.size(); i++)
@@ -503,10 +503,10 @@ void copy(const geometry<DIM, REAL> &G)
       for (int j = 0; j < observers.size(); j++)
         observers[j]->erased(at, before);
 
-    _atm.erase(_atm.begin() + at);
-    _crd.erase(_crd.begin() + at);
-    _shadow.erase(_shadow.begin() + at);
-    if (auto_update_types) _type_table.erase(_type_table.begin() + at);
+    m_atm.erase(m_atm.begin() + at);
+    m_crd.erase(m_crd.begin() + at);
+    m_shadow.erase(m_shadow.begin() + at);
+    if (auto_update_types) p_type_table.erase(p_type_table.begin() + at);
 
     if (has_observers)
       for (int j = 0; j < observers.size(); j++)
@@ -521,12 +521,12 @@ void copy(const geometry<DIM, REAL> &G)
       for (int j = 0; j < observers.size(); j++)
         observers[j]->inserted(at, before, a, r2);
 
-    _atm.insert(_atm.begin() + at, a);
-    _crd.insert(_crd.begin() + at, r2);
-    _shadow.insert(_shadow.begin() + at, false);
+    m_atm.insert(m_atm.begin() + at, a);
+    m_crd.insert(m_crd.begin() + at, r2);
+    m_shadow.insert(m_shadow.begin() + at, false);
 
     if (auto_update_types)
-      _type_table.insert(_type_table.begin() + at, define_type(a));
+      p_type_table.insert(p_type_table.begin() + at, define_type(a));
 
     if (has_observers)
       for (int j = 0; j < observers.size(); j++)
@@ -538,11 +538,11 @@ void copy(const geometry<DIM, REAL> &G)
       for (int i = 0; i < observers.size(); i++)
         observers[i]->changed(at, before, a1, r1);
 
-    _crd[at] = r1;
-    _atm[at] = a1;
+    m_crd[at] = r1;
+    m_atm[at] = a1;
 
-    if (auto_update_types && at < _type_table.size())
-      _type_table[at] = define_type(a1);
+    if (auto_update_types && at < p_type_table.size())
+      p_type_table[at] = define_type(a1);
 
     if (has_observers)
       for (int i = 0; i < observers.size(); i++)
@@ -570,7 +570,7 @@ void copy(const geometry<DIM, REAL> &G)
   inline void shadow(int at, bool sh) {
     for (int i = 0; i < observers.size(); i++)
       observers[i]->shaded(at, before, sh);
-    _shadow[at] = sh;
+    m_shadow[at] = sh;
     for (int i = 0; i < observers.size(); i++)
       observers[i]->shaded(at, after, sh);
   }
@@ -580,14 +580,14 @@ void copy(const geometry<DIM, REAL> &G)
   }
 
   virtual void change_pos(int at, const vector3<REAL> &r1) {
-    _change(at, _atm[at], r1);
+    _change(at, m_atm[at], r1);
   }
 
   void reorder_types(const std::vector<int> &ord) {
-    if (_type_table.size() != size()) return;
+    if (p_type_table.size() != size()) return;
 
-    std::vector<int> __type_table(_type_table);
-    for (int i = 0; i < size(); i++) _type_table[i] = __type_table[ord[i]];
+    std::vector<int> __type_table(p_type_table);
+    for (int i = 0; i < size(); i++) p_type_table[i] = __type_table[ord[i]];
   }
 
   virtual void reorder(const std::vector<int> &ord) {
@@ -595,16 +595,16 @@ void copy(const geometry<DIM, REAL> &G)
       observers[i]->reordered(ord, before);
     // fixme - might be inefficient for large molecules
 
-    std::vector<STRING_EX> __atm(_atm);
-    std::vector<vector3<REAL> > __crd(_crd);
-    std::vector<Bool> __shadow(_shadow);
+    std::vector<STRING_EX> __atm(m_atm);
+    std::vector<vector3<REAL> > __crd(m_crd);
+    std::vector<Bool> __shadow(m_shadow);
 
     // bool reorder_types = (_type_table.size() == size());
 
     for (int i = 0; i < size(); i++) {
-      _atm[i] = __atm[ord[i]];
-      _crd[i] = __crd[ord[i]];
-      _shadow[i] = __shadow[ord[i]];
+      m_atm[i] = __atm[ord[i]];
+      m_crd[i] = __crd[ord[i]];
+      m_shadow[i] = __shadow[ord[i]];
     }
 
     reorder_types(ord);
@@ -626,9 +626,9 @@ void copy(const geometry<DIM, REAL> &G)
   }
 
   virtual void clear() {
-    _crd.clear();
-    _atm.clear();
-    _shadow.clear();
+    m_crd.clear();
+    m_atm.clear();
+    m_shadow.clear();
     clear_type_table();
   }
 
@@ -817,7 +817,7 @@ inline void py_setcell(CELL & cl)
     if (t == -1)
       KeyError("geometry::symmrad::get_symmrad: Atom not specified");
     else
-      return _symm_rad[t];
+      return p_symm_rad[t];
   }
 
   void py_setsymmrad(const char *at, const REAL &r) {
@@ -833,7 +833,7 @@ inline void py_setcell(CELL & cl)
     d["default"] = default_symmetrize_radius;
 
     for (int i = 0; i < n_atom_types(); i++)
-      d[(atom_of_type(i)).c_str()] = _symm_rad[i];
+      d[(atom_of_type(i)).c_str()] = p_symm_rad[i];
 
     return d;
   }
