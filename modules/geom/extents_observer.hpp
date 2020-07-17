@@ -84,6 +84,18 @@ public:
 
   }
 
+  void dim_changed(before_after) override {
+
+  }
+
+  void cell_changed(before_after) override {
+
+  }
+
+  void xfield_changed(int at, before_after) override {
+
+  }
+
 };
 
 } // namespace qpp

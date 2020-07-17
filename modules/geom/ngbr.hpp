@@ -855,6 +855,18 @@ public:
   void reordered(const std::vector<int> &, before_after) override {}
   void geometry_destroyed () override {}
 
+  void dim_changed(before_after) override {
+
+  }
+
+  void cell_changed(before_after) override {
+
+  }
+
+  void xfield_changed(int at, before_after) override {
+
+  }
+
   //------------------------------------------------------------
   bool operator==(const neighbours_table & t) const{
     if (_table.size() != t._table.size())

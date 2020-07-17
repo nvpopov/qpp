@@ -91,8 +91,32 @@ enum before_after { before = 0, after = 1 };
   Geometry will inform them all when atoms are added, inserted or removed
 */
 
+//geometry_observer capabilities
+const uint32_t geometry_observer_supports_default             = 0;
+const uint32_t geometry_observer_supports_added               = 1 << 1;
+const uint32_t geometry_observer_supports_inserted            = 1 << 2;
+const uint32_t geometry_observer_supports_changed             = 1 << 3;
+const uint32_t geometry_observer_supports_erased              = 1 << 4;
+const uint32_t geometry_observer_supports_shaded              = 1 << 5;
+const uint32_t geometry_observer_supports_reordered           = 1 << 6;
+const uint32_t geometry_observer_supports_geom_destroyed      = 1 << 7;
+const uint32_t geometry_observer_supports_dim_changed         = 1 << 8;
+const uint32_t geometry_observer_supports_cell_changed        = 1 << 9;
+const uint32_t geometry_observer_supports_xfield_changed      = 1 << 10;
+
 template <class REAL>
 struct geometry_observer {
+
+  virtual uint32_t get_flags() {
+    return geometry_observer_supports_default
+           | geometry_observer_supports_added
+           | geometry_observer_supports_inserted
+           | geometry_observer_supports_changed
+           | geometry_observer_supports_erased
+           | geometry_observer_supports_shaded
+           | geometry_observer_supports_reordered;
+  };
+
   virtual void added(before_after, const STRING_EX &,const vector3<REAL> &) = 0;
   virtual void inserted(int at, before_after, const STRING_EX &, const vector3<REAL> &) = 0;
   virtual void changed(int at, before_after, const STRING_EX &, const vector3<REAL> &) = 0;
@@ -100,6 +124,10 @@ struct geometry_observer {
   virtual void shaded(int at, before_after, bool) = 0;
   virtual void reordered(const std::vector<int> &, before_after) = 0;
   virtual void geometry_destroyed() = 0;
+  virtual void dim_changed(before_after) = 0;
+  virtual void cell_changed(before_after) = 0;
+  virtual void xfield_changed(int at, before_after) = 0;
+
 };
 
 /*! \class geometry
@@ -1024,6 +1052,18 @@ struct py_geometry_observer : geometry_observer<REAL> {
 
   void geometry_destroyed() override {
     PYBIND11_OVERLOAD_PURE(void, geometry_observer<REAL>, geometry_destroyed);
+  }
+
+  void dim_changed(before_after s) override {
+    PYBIND11_OVERLOAD_PURE(void, geometry_observer<REAL>, dim_changed, s);
+  }
+
+  void cell_changed(before_after s) override {
+    PYBIND11_OVERLOAD_PURE(void, geometry_observer<REAL>, cell_changed, s);
+  }
+
+  void xfield_changed(int at, before_after s) override {
+    PYBIND11_OVERLOAD_PURE(void, geometry_observer<REAL>, xfield_changed, at, s);
   }
 
 };
