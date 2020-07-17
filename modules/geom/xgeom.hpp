@@ -45,13 +45,13 @@ namespace qpp {
     int p_nxreal, p_nxint, p_nxbool, p_nxstring, p_nfields;
     int p_ix_charge, p_ix_x, p_ix_y, p_ix_z, p_ix_atom, p_ix_mass, p_ix_number;
 
-    using geometry<REAL,CELL>::m_atm;
-    using geometry<REAL,CELL>::m_crd;
-    using geometry<REAL,CELL>::m_shadow;
+    using geometry<REAL,CELL>::p_atm;
+    using geometry<REAL,CELL>::p_crd;
+    using geometry<REAL,CELL>::p_shadow;
     using geometry<REAL,CELL>::reorder_types;
     using geometry<REAL,CELL>::size;
     using geometry<REAL,CELL>::has_observers;
-    using geometry<REAL,CELL>::observers;
+    using geometry<REAL,CELL>::p_observers;
     //using geometry<DIM,REAL,CELL>::error;
 
     void init_xdefault() {
@@ -84,7 +84,7 @@ namespace qpp {
 
     inline basic_types field_type(int i) const{ return p_field_type[i]; }
 
-    // Constructors
+    /// Constructors
 
     ///
     /// \brief xgeometry
@@ -158,8 +158,8 @@ namespace qpp {
       p_nxint = std::count(ft.begin(), ft.end(), type_int);
       p_nxbool = std::count(ft.begin(), ft.end(), type_bool);
 
-      if (fn.size() != ft.size() || fn.size()
-          != p_nxstring + p_nxreal + p_nxint + p_nxbool){
+      if (fn.size() != ft.size() ||
+          fn.size() != p_nxstring + p_nxreal + p_nxint + p_nxbool) {
           throw std::invalid_argument("xgeometry::format: field names or types mismatch");
         }
 
@@ -238,8 +238,9 @@ namespace qpp {
         }
 
       p_field_additive.resize(p_nfields);
-      for (int i=0; i<p_nfields; i++)
-        p_field_additive[i] = false;
+
+      for (int i=0; i<p_nfields; i++) p_field_additive[i] = false;
+
       if (p_ix_charge>=0)
         p_field_additive[p_ix_charge] = true;
 
@@ -253,7 +254,6 @@ namespace qpp {
       p_xreal.resize(p_nxreal);
       p_xint.resize(p_nxint);
       p_xbool.resize(p_nxbool);
-
 
     }
 
@@ -296,28 +296,25 @@ namespace qpp {
       if (attributes<T>::type != ft)
         throw std::invalid_argument("xgeometry::xfield - wrong type for the field " + t2s(i));
 
-      if (attributes<T>::type == type_string){
-          if (i==p_ix_atom)
-            return convert<T&,STRING_EX&>::get(m_atm[j]);
-          else
-            return  convert<T&,STRING_EX&>::get(p_xstring[p_field_idx[i]][j]);
-        }
-      else if (attributes<T>::type == type_bool)
+      if (attributes<T>::type == type_string) {
+          if (i==p_ix_atom) return convert<T&,STRING_EX&>::get(p_atm[j]);
+          else return convert<T&,STRING_EX&>::get(p_xstring[p_field_idx[i]][j]);
+      } else if (attributes<T>::type == type_bool) {
         return  convert<T&,short&>::get(p_xbool[p_field_idx[i]][j]);
-      else if (attributes<T>::type == type_int)
+      } else if (attributes<T>::type == type_int) {
         return convert<T&,int&>::get(p_xint[p_field_idx[i]][j]);
-      else if (attributes<T>::type == attributes<REAL>::type) {
+      } else if (attributes<T>::type == attributes<REAL>::type) {
           if (i==p_ix_x)
-            return convert<T&,REAL&>::get(m_crd[j].x());
+            return convert<T&,REAL&>::get(p_crd[j].x());
           else if (i==p_ix_y)
-            return convert<T&,REAL&>::get(m_crd[j].y());
+            return convert<T&,REAL&>::get(p_crd[j].y());
           else if (i==p_ix_z)
-            return convert<T&,REAL&>::get(m_crd[j].z());
+            return convert<T&,REAL&>::get(p_crd[j].z());
           else
             return convert<T&,REAL&>::get(p_xreal[p_field_idx[i]][j]);
-        }
-      else
+      } else {
         throw std::invalid_argument("Illegal type of xgeometry extra field");
+      }
 
     }
 
@@ -326,35 +323,30 @@ namespace qpp {
 
       basic_types ft = field_type(i);
 
-      if (ft == type_real)
-        ft = attributes<REAL>::type;
+      if (ft == type_real) ft = attributes<REAL>::type;
 
       if (attributes<T>::type != ft)
-        throw std::invalid_argument(
-            "xgeometry::xfield - wrong type for the field " + t2s(i));
+        throw std::invalid_argument("xgeometry::xfield - wrong type for the field " + t2s(i));
 
-      if (attributes<T>::type == type_string){
-          if (i==p_ix_atom)
-            return convert<T,STRING_EX>::get(m_atm[j]);
-          else
-            return  convert<T,STRING_EX>::get(p_xstring[p_field_idx[i]][j]);
-        }
-      else if (attributes<T>::type == type_bool)
+      if (attributes<T>::type == type_string) {
+        if (i==p_ix_atom) return convert<T,STRING_EX>::get(p_atm[j]);
+        else return  convert<T,STRING_EX>::get(p_xstring[p_field_idx[i]][j]);
+      } else if (attributes<T>::type == type_bool) {
         return  convert<T,short>::get(p_xbool[p_field_idx[i]][j]);
-      else if (attributes<T>::type == type_int)
+      } else if (attributes<T>::type == type_int) {
         return convert<T,int>::get(p_xint[p_field_idx[i]][j]);
-      else if (attributes<T>::type == attributes<REAL>::type){
-          if (i==p_ix_x)
-            return convert<T,REAL>::get(m_crd[j].x());
-          else if (i==p_ix_y)
-            return convert<T,REAL>::get(m_crd[j].y());
-          else if (i==p_ix_z)
-            return convert<T,REAL>::get(m_crd[j].z());
-          else
-            return convert<T,REAL>::get(p_xreal[p_field_idx[i]][j]);
-        }
-      else
+      } else if (attributes<T>::type == attributes<REAL>::type) {
+        if (i==p_ix_x)
+          return convert<T,REAL>::get(p_crd[j].x());
+        else if (i==p_ix_y)
+          return convert<T,REAL>::get(p_crd[j].y());
+        else if (i==p_ix_z)
+          return convert<T,REAL>::get(p_crd[j].z());
+        else
+          return convert<T,REAL>::get(p_xreal[p_field_idx[i]][j]);
+      } else {
         throw std::invalid_argument("Illegal type of xgeometry extra field");
+      }
 
     }
 
@@ -364,11 +356,11 @@ namespace qpp {
       int i = 0;
       while (p_field_name[i]!=f && i<nfields()) i++;
 
-      if (i<nfields())
+      if (i<nfields()) {
         return xfield<T>(i,j);
-      else {
-          throw std::invalid_argument("Field not found in xgeometry");
-        }
+      } else {
+        throw std::invalid_argument("Field not found in xgeometry");
+      }
 
     }
 
@@ -378,11 +370,11 @@ namespace qpp {
       int i = 0;
       while (p_field_name[i]!=f && i<nfields()) i++;
 
-      if (i<nfields())
+      if (i<nfields()) {
         return xfield<T>(i,j);
-      else{
-          throw std::invalid_argument("Field not found in xgeometry");
-        }
+      } else {
+        throw std::invalid_argument("Field not found in xgeometry");
+      }
 
     }
 
@@ -411,8 +403,10 @@ namespace qpp {
     virtual void set_fields(int j, const std::vector<datum> & v) {
 
       if (j < 0) j += nat();
+
       if (j < 0 || j >= nat())
         throw std::invalid_argument("xgeometry::set_fields: index out of range");
+
       if (v.size()!=nfields())
         throw std::invalid_argument("xgeometry::set_fields: wrong number of fields");
 
@@ -420,24 +414,21 @@ namespace qpp {
       vector3<REAL> r1(v[p_ix_x].template get<REAL>(),
                        v[p_ix_y].template get<REAL>(),
                        v[p_ix_z].template get<REAL>());
+
       if (has_observers)
-        for (int i=0; i<observers.size(); i++)
-          observers[i]->changed(j, before, a1, r1);
+        for (int i=0; i<p_observers.size(); i++)
+          p_observers[i]->changed(j, before, a1, r1);
 
       for (int i=0; i<nfields(); i++){
-          if (field_type(i)==type_string)
-            xfield<STRING_EX>(i,j) = v[i].get<STRING_EX>();
-          else if (field_type(i)==type_real)
-            xfield<REAL>(i,j) = v[i].get<REAL>();
-          else if (field_type(i)==type_int)
-            xfield<int>(i,j) = v[i].get<int>();
-          else if (field_type(i)==type_bool)
-            xfield<bool>(i,j) = v[i].get<bool>();
+          if (field_type(i)==type_string)    xfield<STRING_EX>(i,j) = v[i].get<STRING_EX>();
+          else if (field_type(i)==type_real) xfield<REAL>(i,j) = v[i].get<REAL>();
+          else if (field_type(i)==type_int)  xfield<int>(i,j) = v[i].get<int>();
+          else if (field_type(i)==type_bool) xfield<bool>(i,j) = v[i].get<bool>();
         }
 
       if (has_observers)
-        for (int i=0; i<observers.size(); i++)
-          observers[i]->changed(j, after, a1, r1);
+        for (int i=0; i<p_observers.size(); i++)
+          p_observers[i]->changed(j, after, a1, r1);
 
     }
 
@@ -447,14 +438,9 @@ namespace qpp {
 
       geometry<REAL,CELL>::erase(j);
 
-      for (int i=0; i<p_nxreal; i++)
-        p_xreal[i].erase(p_xreal[i].begin()+j);
-
-      for (int i=0; i<p_nxint; i++)
-        p_xint[i].erase(p_xint[i].begin()+j);
-
-      for (int i=0; i<p_nxbool; i++)
-        p_xbool[i].erase(p_xbool[i].begin()+j);
+      for (int i=0; i<p_nxreal; i++) p_xreal[i].erase(p_xreal[i].begin()+j);
+      for (int i=0; i<p_nxint; i++) p_xint[i].erase(p_xint[i].begin()+j);
+      for (int i=0; i<p_nxbool; i++) p_xbool[i].erase(p_xbool[i].begin()+j);
 
     }
 
@@ -465,20 +451,16 @@ namespace qpp {
              std::initializer_list<bool> xtb = {}) {
 
       int i = 0;
-      for (const auto & xs : xts)
-        p_xstring[i++].push_back(xs);
+      for (const auto & xs : xts) p_xstring[i++].push_back(xs);
 
       i = 0;
-      for (const auto & xr : xtr)
-        p_xreal[i++].push_back(xr);
+      for (const auto & xr : xtr) p_xreal[i++].push_back(xr);
 
       i = 0;
-      for (const auto & xi : xti)
-        p_xint[i++].push_back(xi);
+      for (const auto & xi : xti) p_xint[i++].push_back(xi);
 
       i = 0;
-      for (const auto & xb : xtb)
-        p_xbool[i++].push_back(xb);
+      for (const auto & xb : xtb) p_xbool[i++].push_back(xb);
 
       geometry<REAL,CELL>::add(a,r);
 
@@ -491,20 +473,16 @@ namespace qpp {
                 std::initializer_list<bool> xtb = {}) {
 
       int i = 0;
-      for ( const auto & xs : xts )
-        p_xstring[i].insert( p_xstring[i++].begin() + j, xs);
+      for ( const auto & xs : xts ) p_xstring[i].insert( p_xstring[i++].begin() + j, xs);
 
       i = 0;
-      for ( const auto & xr : xtr )
-        p_xreal[i].insert( p_xreal[i++].begin() + j, xr);
+      for ( const auto & xr : xtr ) p_xreal[i].insert( p_xreal[i++].begin() + j, xr);
 
       i = 0;
-      for ( const auto & xi : xti )
-        p_xint[i].insert( p_xint[i++].begin() + j, xi);
+      for ( const auto & xi : xti ) p_xint[i].insert( p_xint[i++].begin() + j, xi);
 
       i = 0;
-      for ( const auto & xb : xtb )
-        p_xbool[i].insert( p_xbool[i++].begin() + j, xb);
+      for ( const auto & xb : xtb ) p_xbool[i].insert( p_xbool[i++].begin() + j, xb);
 
       geometry<REAL,CELL>::insert(j,a,r);
 
@@ -512,17 +490,10 @@ namespace qpp {
 
     virtual void add(const STRING_EX &a, const vector3<REAL> & r) {
 
-      for (int i=0; i<p_nxstring; i++)
-        p_xstring[i].push_back( "" );
-
-      for (int i=0; i<p_nxreal; i++)
-        p_xreal[i].push_back( REAL(0) );
-
-      for (int i=0; i<p_nxint; i++)
-        p_xint[i].push_back(0);
-
-      for (int i=0; i<p_nxbool; i++)
-        p_xbool[i].push_back( false );
+      for (int i=0; i<p_nxstring; i++) p_xstring[i].push_back("");
+      for (int i=0; i<p_nxreal; i++) p_xreal[i].push_back(REAL(0));
+      for (int i=0; i<p_nxint; i++) p_xint[i].push_back(0);
+      for (int i=0; i<p_nxbool; i++) p_xbool[i].push_back( false );
 
       geometry<REAL,CELL>::add(a,r);
 
@@ -530,17 +501,10 @@ namespace qpp {
 
     virtual void insert(const int j, STRING_EX a, const vector3<REAL> &r) {
 
-      for (int i=0; i<p_nxstring; i++)
-        p_xstring[i].insert(p_xstring[i].begin()+j, "" );
-
-      for (int i=0; i<p_nxreal; i++)
-        p_xreal[i].insert(p_xreal[i].begin()+j, REAL(0) );
-
-      for (int i=0; i<p_nxint; i++)
-        p_xint[i].insert(p_xint[i].begin()+j, 0);
-
-      for (int i=0; i<p_nxbool; i++)
-        p_xbool[i].insert(p_xbool[i].begin()+j, false);
+      for (int i=0; i<p_nxstring; i++) p_xstring[i].insert(p_xstring[i].begin()+j, "" );
+      for (int i=0; i<p_nxreal; i++) p_xreal[i].insert(p_xreal[i].begin()+j, REAL(0) );
+      for (int i=0; i<p_nxint; i++) p_xint[i].insert(p_xint[i].begin()+j, 0);
+      for (int i=0; i<p_nxbool; i++) p_xbool[i].insert(p_xbool[i].begin()+j, false);
 
       geometry<REAL,CELL>::insert(j,a,r);
 
@@ -550,17 +514,10 @@ namespace qpp {
 
       geometry<REAL,CELL>::clear();
 
-      for (int i=0; i<p_nxstring; i++)
-        p_xstring[i].clear();
-
-      for (int i=0; i<p_nxreal; i++)
-        p_xreal[i].clear();
-
-      for (int i=0; i<p_nxint; i++)
-        p_xint[i].clear();
-
-      for (int i=0; i<p_nxbool; i++)
-        p_xbool[i].clear();
+      for (int i=0; i<p_nxstring; i++) p_xstring[i].clear();
+      for (int i=0; i<p_nxreal; i++) p_xreal[i].clear();
+      for (int i=0; i<p_nxint; i++) p_xint[i].clear();
+      for (int i=0; i<p_nxbool; i++) p_xbool[i].clear();
 
     }
 
@@ -571,18 +528,18 @@ namespace qpp {
 
     virtual void reorder (const std::vector<int> & ord) {
 
-      for (int i=0; i<observers.size(); i++)
-        observers[i]->reordered(ord, before);
+      for (int i=0; i<p_observers.size(); i++)
+        p_observers[i]->reordered(ord, before);
       // fixme - might be inefficient for large molecules
 
-      std::vector<STRING_EX> __atm(m_atm);
-      std::vector<vector3<REAL> > __crd(m_crd);
-      std::vector<Bool> __shadow(m_shadow);
+      std::vector<STRING_EX> __atm(p_atm);
+      std::vector<vector3<REAL> > __crd(p_crd);
+      std::vector<Bool> __shadow(p_shadow);
 
       for (int i=0; i<size(); i++){
-          m_atm[i] = __atm[ord[i]];
-          m_crd[i] = __crd[ord[i]];
-          m_shadow[i] = __shadow[ord[i]];
+          p_atm[i] = __atm[ord[i]];
+          p_crd[i] = __crd[ord[i]];
+          p_shadow[i] = __shadow[ord[i]];
         }
 
       reorder_types(ord);
@@ -607,8 +564,8 @@ namespace qpp {
           for (int j=0; j<size(); j++)
             p_xbool[i][j] = __xbool[ord[j]];
         }
-      for (int i=0; i<observers.size(); i++)
-        observers[i]->reordered(ord, after);
+      for (int i=0; i<p_observers.size(); i++)
+        p_observers[i]->reordered(ord, after);
 
     }
 
@@ -682,7 +639,7 @@ namespace qpp {
 
       parse(0,j,args...);
       if (auto_update_types)
-        type(j) = define_type(m_atm[j]);
+        type(j) = define_type(p_atm[j]);
 
     }
 

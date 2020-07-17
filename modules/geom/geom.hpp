@@ -92,17 +92,17 @@ enum before_after { before = 0, after = 1 };
 */
 
 //geometry_observer capabilities
-const uint32_t geometry_observer_supports_default             = 0;
-const uint32_t geometry_observer_supports_added               = 1 << 1;
-const uint32_t geometry_observer_supports_inserted            = 1 << 2;
-const uint32_t geometry_observer_supports_changed             = 1 << 3;
-const uint32_t geometry_observer_supports_erased              = 1 << 4;
-const uint32_t geometry_observer_supports_shaded              = 1 << 5;
-const uint32_t geometry_observer_supports_reordered           = 1 << 6;
-const uint32_t geometry_observer_supports_geom_destroyed      = 1 << 7;
-const uint32_t geometry_observer_supports_dim_changed         = 1 << 8;
-const uint32_t geometry_observer_supports_cell_changed        = 1 << 9;
-const uint32_t geometry_observer_supports_xfield_changed      = 1 << 10;
+const uint32_t geometry_observer_supports_default           = 0;
+const uint32_t geometry_observer_supports_add               = 1 << 1;
+const uint32_t geometry_observer_supports_insert            = 1 << 2;
+const uint32_t geometry_observer_supports_change            = 1 << 3;
+const uint32_t geometry_observer_supports_erase             = 1 << 4;
+const uint32_t geometry_observer_supports_shadow            = 1 << 5;
+const uint32_t geometry_observer_supports_reorder           = 1 << 6;
+const uint32_t geometry_observer_supports_geom_destroy      = 1 << 7;
+const uint32_t geometry_observer_supports_dim_change        = 1 << 8;
+const uint32_t geometry_observer_supports_cell_change       = 1 << 9;
+const uint32_t geometry_observer_supports_xfield_change     = 1 << 10;
 
 template <class REAL>
 struct geometry_observer {
@@ -133,21 +133,20 @@ struct geometry_observer {
 template <class REAL, class CELL>
 class geometry {
 
- public:
-
-  // Storage of atoms
-  std::vector<STRING_EX> m_atm;
-
-  // Storage of coordinates
-  std::vector<vector3<REAL> > m_crd;
-
-  //! Special logical array allows to "hide" or "shadow" some atoms
-  std::vector<Bool> m_shadow;
-
  protected:
 
-  // The dependent objects array
-  std::vector<geometry_observer<REAL> *> observers;
+  /// Storage of atoms
+  std::vector<STRING_EX> p_atm;
+
+  /// Storage of coordinates
+  std::vector<vector3<REAL> > p_crd;
+
+  /// Special logical array allows to "hide" or "shadow" some atoms
+  std::vector<Bool> p_shadow;
+
+  /// The dependent objects array
+  std::vector<geometry_observer<REAL> *> p_observers;
+  std::vector<uint32_t> p_cached_obs_flags;
   bool has_observers;
 
  public:
@@ -179,26 +178,26 @@ class geometry {
   virtual bool is_xgeometry() const { return false; }
 
   //! Number of atoms
-  inline int size() const { return m_crd.size(); }
+  inline int size() const { return p_crd.size(); }
 
   //! \brief Number of atoms
-  inline int nat() const { return m_crd.size(); }
+  inline int nat() const { return p_crd.size(); }
 
   //! \brief The name of i-th atom
-  inline STRING_EX &atom(int at) { return m_atm[at]; }
+  inline STRING_EX &atom(int at) { return p_atm[at]; }
 
-  inline STRING_EX atom(int at) const { return m_atm[at]; }
+  inline STRING_EX atom(int at) const { return p_atm[at]; }
 
   /// \brief Gives the coordinates of an atom in the geometry
   ///  @param at - the number of atom in the geometry
-  inline vector3<REAL> coord(int at) const { return m_crd[at]; }
+  inline vector3<REAL> coord(int at) const { return p_crd[at]; }
 
-  inline vector3<REAL> &coord(int at) { return m_crd[at]; }
+  inline vector3<REAL> &coord(int at) { return p_crd[at]; }
 
   /// \brief real-space position of atom number at
   /// \param at - the number of the atom in the geometry
   inline vector3<REAL> r(int at) const {
-    vector3<REAL> r1 = m_crd[at];
+    vector3<REAL> r1 = p_crd[at];
     if (frac) r1 = cell.frac2cart(r1);
     return cell.transform(r1, index::D(DIM).all(0));
   }
@@ -207,7 +206,7 @@ class geometry {
   /// \param at  - the number of atom in the geometry
   /// \param I   - the cell or symmetry indicies
   inline vector3<REAL> r(int at, const index &I) const {
-    vector3<REAL> r1 = m_crd[at];
+    vector3<REAL> r1 = p_crd[at];
     if (frac) r1 = cell.frac2cart(r1);
     return cell.transform(r1, I);
   }
@@ -217,7 +216,7 @@ class geometry {
   /// \param I
   /// \return
   inline vector3<REAL> r_frac(int at, const index &I) const {
-    vector3<REAL> r1 = m_crd[at];
+    vector3<REAL> r1 = p_crd[at];
     r1 = cell.cart2frac(r1);
     return cell.transform(r1, I);
   }
@@ -227,7 +226,7 @@ class geometry {
   /// \param I
   /// \return
   inline vector3<REAL> r_frac(int at) const {
-    vector3<REAL> r1 = m_crd[at];
+    vector3<REAL> r1 = p_crd[at];
     r1 = cell.cart2frac(r1);
     return cell.transform(r1, index::D(DIM).all(0));
   }
@@ -236,7 +235,7 @@ class geometry {
   /// \param ai  - complex index; ai[0] is the number of atom in the geometry,
   ///   ai[1:DIM] are the cell or symmetry indicies
   inline vector3<REAL> r(const index &ai) const {
-    return cell.transform(m_crd[ai(0)], ai.sub(1));
+    return cell.transform(p_crd[ai(0)], ai.sub(1));
   }
 
   //! \brief The synonym for r(at)
@@ -247,10 +246,10 @@ class geometry {
 
   //! \brief The synonym for r(ai)
   inline vector3<REAL> pos(const index &ai) const {
-    return cell.transform(m_crd[ai(0)], ai.sub(1));
+    return cell.transform(p_crd[ai(0)], ai.sub(1));
   }
 
-  inline bool shadow(int at) const { return m_shadow[at]; }
+  inline bool shadow(int at) const { return p_shadow[at]; }
 
   // ------------------- Typetable for atoms ------------------------------
 
@@ -295,11 +294,13 @@ class geometry {
 
   // unifficent - need to be cached
   inline int get_atom_count_by_type(int atype) {
-    int retval = 0;
+    //    int retval = 0;
 
-    for (int i = 0; i < p_type_table.size(); i++)
-      if (p_type_table[i] == atype) retval += 1;
-    return retval;
+    //    for (int i = 0; i < p_type_table.size(); i++)
+    //      if (p_type_table[i] == atype) retval += 1;
+    //    return retval;
+    auto cnt_if_lambda = [atype](int atype_ex){ return atype_ex == atype;};
+    return std::count_if(begin(p_type_table), end(p_type_table), cnt_if_lambda);
   }
 
   //! type of i-th atom in the geometry
@@ -390,9 +391,9 @@ class geometry {
     has_observers = false;
     default_symmetrize_radius = 0e0;
     tol_geom = tol_geom_default;
-    m_atm.reserve(GEOM_DEFAULT_RESERVE_AMOUNT);
-    m_crd.reserve(GEOM_DEFAULT_RESERVE_AMOUNT);
-    m_shadow.reserve(GEOM_DEFAULT_RESERVE_AMOUNT);
+    p_atm.reserve(GEOM_DEFAULT_RESERVE_AMOUNT);
+    p_crd.reserve(GEOM_DEFAULT_RESERVE_AMOUNT);
+    p_shadow.reserve(GEOM_DEFAULT_RESERVE_AMOUNT);
 
 #if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
     py_atoms.bind(this);
@@ -407,6 +408,7 @@ class geometry {
   }
 
  public:
+
   geometry(const CELL &__cell, const STRING_EX &__name = "") : cell(__cell) {
     init_default();
     DIM = cell.DIM;
@@ -421,13 +423,13 @@ class geometry {
 
   geometry(const geometry<REAL, CELL> &g)
       : cell(g.cell),
-        m_atm(g.m_atm),
-        m_crd(g.m_crd),
-        m_shadow(g.m_shadow),
+        p_atm(g.p_atm),
+        p_crd(g.p_crd),
+        p_shadow(g.p_shadow),
         p_type_table(g.p_type_table),
         p_symm_rad(g.p_symm_rad),
         p_atm_types(g.p_atm_types),
-        observers(g.observers) {
+        p_observers(g.p_observers) {
     init_default();
 
     DIM = g.DIM;
@@ -465,36 +467,40 @@ void copy(const geometry<DIM, REAL> &G)
   // ----------------------- Managing observers -----------------------
 
   void add_observer(DEP &d) {
-    auto it = std::find(observers.begin(), observers.end(), &d);
 
-    if (it != observers.end()) {
+    auto it = std::find(p_observers.begin(), p_observers.end(), &d);
+
+    if (it != p_observers.end()) {
       has_observers = true;
       return;
     }
 
-    observers.push_back(&d);
+    p_observers.push_back(&d);
+    p_cached_obs_flags.push_back(d.get_flags());
     has_observers = true;
+
   }
 
   void remove_observer(DEP &d) {
-    auto i = observers.begin();
+    auto i = p_observers.begin();
 
-    while (i != observers.end()) {
+    while (i != p_observers.end()) {
       if (*i == &d) {
-        observers.erase(i);
+        p_observers.erase(i);
+        auto obs_shift = std::distance(begin(p_observers), i);
+        p_cached_obs_flags.erase(begin(p_cached_obs_flags) + obs_shift);
         break;
       }
       i++;
     }
 
-    if (observers.size() == 0) has_observers = false;
+    if (p_observers.size() == 0) has_observers = false;
   }
 
   // ----------------------- Manipulations with atoms -----------------------
 
  protected:
   inline void _add(const STRING_EX &a, const vector3<REAL> &r1) {
-    // std::cerr << "geometry::add entry\n";
 
     vector3<REAL> r2 = r1;
     if (auto_symmetrize) {
@@ -503,69 +509,82 @@ void copy(const geometry<DIM, REAL> &G)
     }
 
     if (has_observers)
-      for (int i = 0; i < observers.size(); i++)
-        observers[i]->added(before, a, r2);
+      for (int i = 0; i < p_observers.size(); i++)
+        if (p_cached_obs_flags[i] & geometry_observer_supports_add)
+          p_observers[i]->added(before, a, r2);
 
-    m_atm.push_back(a);
-    m_crd.push_back(r2);
-    m_shadow.push_back(false);
+    p_atm.push_back(a);
+    p_crd.push_back(r2);
+    p_shadow.push_back(false);
 
     if (auto_update_types) p_type_table.push_back(define_type(a));
 
     if (has_observers)
-      for (int i = 0; i < observers.size(); i++)
-        observers[i]->added(after, a, r2);
+      for (int i = 0; i < p_observers.size(); i++)
+        if (p_cached_obs_flags[i] & geometry_observer_supports_add)
+          p_observers[i]->added(after, a, r2);
   }
 
   inline void _erase(int at) {
-    if (has_observers)
-      for (int j = 0; j < observers.size(); j++)
-        observers[j]->erased(at, before);
 
-    m_atm.erase(m_atm.begin() + at);
-    m_crd.erase(m_crd.begin() + at);
-    m_shadow.erase(m_shadow.begin() + at);
+    if (has_observers)
+      for (int j = 0; j < p_observers.size(); j++)
+        if (p_cached_obs_flags[j] & geometry_observer_supports_erase)
+          p_observers[j]->erased(at, before);
+
+    p_atm.erase(p_atm.begin() + at);
+    p_crd.erase(p_crd.begin() + at);
+    p_shadow.erase(p_shadow.begin() + at);
     if (auto_update_types) p_type_table.erase(p_type_table.begin() + at);
 
     if (has_observers)
-      for (int j = 0; j < observers.size(); j++)
-        observers[j]->erased(at, after);
+      for (int j = 0; j < p_observers.size(); j++)
+        if (p_cached_obs_flags[j] & geometry_observer_supports_erase)
+          p_observers[j]->erased(at, after);
+
   }
 
   inline void _insert(int at, const STRING_EX &a, const vector3<REAL> &r1) {
+
     vector3<REAL> r2 = r1;
     if (auto_symmetrize) r2 = cell.symmetrize(r1, symmetrize_radius(a));
 
     if (has_observers)
-      for (int j = 0; j < observers.size(); j++)
-        observers[j]->inserted(at, before, a, r2);
+      for (int j = 0; j < p_observers.size(); j++)
+        if (p_cached_obs_flags[j] & geometry_observer_supports_insert)
+          p_observers[j]->inserted(at, before, a, r2);
 
-    m_atm.insert(m_atm.begin() + at, a);
-    m_crd.insert(m_crd.begin() + at, r2);
-    m_shadow.insert(m_shadow.begin() + at, false);
+    p_atm.insert(p_atm.begin() + at, a);
+    p_crd.insert(p_crd.begin() + at, r2);
+    p_shadow.insert(p_shadow.begin() + at, false);
 
     if (auto_update_types)
       p_type_table.insert(p_type_table.begin() + at, define_type(a));
 
     if (has_observers)
-      for (int j = 0; j < observers.size(); j++)
-        observers[j]->inserted(at, after, a, r2);
+      for (int j = 0; j < p_observers.size(); j++)
+        if (p_cached_obs_flags[j] & geometry_observer_supports_insert)
+          p_observers[j]->inserted(at, after, a, r2);
   }
 
   inline void _change(int at, const STRING_EX &a1, const vector3<REAL> &r1) {
-    if (has_observers)
-      for (int i = 0; i < observers.size(); i++)
-        observers[i]->changed(at, before, a1, r1);
 
-    m_crd[at] = r1;
-    m_atm[at] = a1;
+    if (has_observers)
+      for (int i = 0; i < p_observers.size(); i++)
+        if (p_cached_obs_flags[i] & geometry_observer_supports_change)
+          p_observers[i]->changed(at, before, a1, r1);
+
+    p_crd[at] = r1;
+    p_atm[at] = a1;
 
     if (auto_update_types && at < p_type_table.size())
       p_type_table[at] = define_type(a1);
 
     if (has_observers)
-      for (int i = 0; i < observers.size(); i++)
-        observers[i]->changed(at, after, a1, r1);
+      for (int i = 0; i < p_observers.size(); i++)
+        if (p_cached_obs_flags[i] & geometry_observer_supports_change)
+          p_observers[i]->changed(at, after, a1, r1);
+
   }
 
  public:
@@ -587,11 +606,17 @@ void copy(const geometry<DIM, REAL> &G)
   virtual void erase(int at) { _erase(at); }
 
   inline void shadow(int at, bool sh) {
-    for (int i = 0; i < observers.size(); i++)
-      observers[i]->shaded(at, before, sh);
-    m_shadow[at] = sh;
-    for (int i = 0; i < observers.size(); i++)
-      observers[i]->shaded(at, after, sh);
+
+    for (int i = 0; i < p_observers.size(); i++)
+      if (p_cached_obs_flags[i] & geometry_observer_supports_shadow)
+        p_observers[i]->shaded(at, before, sh);
+
+    p_shadow[at] = sh;
+
+    for (int i = 0; i < p_observers.size(); i++)
+      if (p_cached_obs_flags[i] & geometry_observer_supports_shadow)
+        p_observers[i]->shaded(at, after, sh);
+
   }
 
   virtual void change(int at, const STRING_EX &a1, const vector3<REAL> &r1) {
@@ -599,7 +624,7 @@ void copy(const geometry<DIM, REAL> &G)
   }
 
   virtual void change_pos(int at, const vector3<REAL> &r1) {
-    _change(at, m_atm[at], r1);
+    _change(at, p_atm[at], r1);
   }
 
   void reorder_types(const std::vector<int> &ord) {
@@ -610,26 +635,29 @@ void copy(const geometry<DIM, REAL> &G)
   }
 
   virtual void reorder(const std::vector<int> &ord) {
-    for (int i = 0; i < observers.size(); i++)
-      observers[i]->reordered(ord, before);
+
+    for (int i = 0; i < p_observers.size(); i++)
+      if (p_cached_obs_flags[i] & geometry_observer_supports_reorder)
+        p_observers[i]->reordered(ord, before);
     // fixme - might be inefficient for large molecules
 
-    std::vector<STRING_EX> __atm(m_atm);
-    std::vector<vector3<REAL> > __crd(m_crd);
-    std::vector<Bool> __shadow(m_shadow);
+    std::vector<STRING_EX> __atm(p_atm);
+    std::vector<vector3<REAL> > __crd(p_crd);
+    std::vector<Bool> __shadow(p_shadow);
 
     // bool reorder_types = (_type_table.size() == size());
 
     for (int i = 0; i < size(); i++) {
-      m_atm[i] = __atm[ord[i]];
-      m_crd[i] = __crd[ord[i]];
-      m_shadow[i] = __shadow[ord[i]];
+      p_atm[i] = __atm[ord[i]];
+      p_crd[i] = __crd[ord[i]];
+      p_shadow[i] = __shadow[ord[i]];
     }
 
     reorder_types(ord);
 
-    for (int i = 0; i < observers.size(); i++)
-      observers[i]->reordered(ord, after);
+    for (int i = 0; i < p_observers.size(); i++)
+      if (p_cached_obs_flags[i] & geometry_observer_supports_reorder)
+        p_observers[i]->reordered(ord, after);
   }
 
   void sort(const std::function<REAL(const geometry<REAL, CELL> &, int)> &key) {
@@ -645,9 +673,9 @@ void copy(const geometry<DIM, REAL> &G)
   }
 
   virtual void clear() {
-    m_crd.clear();
-    m_atm.clear();
-    m_shadow.clear();
+    p_crd.clear();
+    p_atm.clear();
+    p_shadow.clear();
     clear_type_table();
   }
 
@@ -820,34 +848,25 @@ inline void py_setcell(CELL & cl)
     py_setcoord(i, d, c);
   }
 
-  py_indexed_property<SELF, REAL, int, &SELF::py_getxyz<0>,
-                      &SELF::py_setxyz<0> >
-      py_x;
-  py_indexed_property<SELF, REAL, int, &SELF::py_getxyz<1>,
-                      &SELF::py_setxyz<1> >
-      py_y;
-  py_indexed_property<SELF, REAL, int, &SELF::py_getxyz<2>,
-                      &SELF::py_setxyz<2> >
-      py_z;
+  py_indexed_property<SELF, REAL, int, &SELF::py_getxyz<0>, &SELF::py_setxyz<0>> py_x;
+  py_indexed_property<SELF, REAL, int, &SELF::py_getxyz<1>, &SELF::py_setxyz<1>> py_y;
+  py_indexed_property<SELF, REAL, int, &SELF::py_getxyz<2>, &SELF::py_setxyz<2>> py_z;
 
   REAL py_getsymmrad(const char *at) {
     int t = type_of_atom(at);
-
-    if (t == -1)
-      KeyError("geometry::symmrad::get_symmrad: Atom not specified");
-    else
-      return p_symm_rad[t];
+    if (t == -1) KeyError("geometry::symmrad::get_symmrad: Atom not specified");
+    else return p_symm_rad[t];
   }
 
   void py_setsymmrad(const char *at, const REAL &r) {
     set_symmetrize_radius(at, r);
   }
 
-  py_indexed_property<SELF, REAL, const char *, &SELF::py_getsymmrad,
-                      &SELF::py_setsymmrad>
-      py_symmrad;
+  py_indexed_property<
+      SELF, REAL, const char *, &SELF::py_getsymmrad, &SELF::py_setsymmrad> py_symmrad;
 
   py::dict py_symmrad2dict() {
+
     py::dict d;
     d["default"] = default_symmetrize_radius;
 
@@ -855,6 +874,7 @@ inline void py_setcell(CELL & cl)
       d[(atom_of_type(i)).c_str()] = p_symm_rad[i];
 
     return d;
+
   }
 
   // --------------------------------------------------------------------
@@ -864,43 +884,35 @@ inline void py_setcell(CELL & cl)
   // --------------------------------------------------------------------
 
   static void py_props(py::module m, const char *pyname) {
+
     std::string sPropNameAtom = fmt::format("{0}_{1}", pyname, "idx_prop_atom");
-    py_indexed_property<SELF, STRING_EX, int, &SELF::py_getatom,
-                        &SELF::py_setatom>::py_export(m, sPropNameAtom.c_str());
+    py_indexed_property<SELF, STRING_EX, int, &SELF::py_getatom, &SELF::py_setatom>
+        ::py_export(m, sPropNameAtom.c_str());
 
-    std::string sPropNameShadow =
-        fmt::format("{0}_{1}", pyname, "idx_prop_shadow");
-    py_indexed_property<SELF, bool, int, &SELF::py_getshadow,
-                        &SELF::py_setshadow>::py_export(m, sPropNameShadow
-                                                               .c_str());
+    std::string sPropNameShadow = fmt::format("{0}_{1}", pyname, "idx_prop_shadow");
+    py_indexed_property<SELF, bool, int, &SELF::py_getshadow, &SELF::py_setshadow>
+        ::py_export(m, sPropNameShadow.c_str());
 
-    std::string sPropNameCoord =
-        fmt::format("{0}_{1}", pyname, "2idx_prop_coord");
+    std::string sPropNameCoord = fmt::format("{0}_{1}", pyname, "2idx_prop_coord");
     py_2indexed_property<SELF, vector3<REAL>, REAL, int, &SELF::py_getvec,
-                         &SELF::py_setvec, &SELF::py_getcoord,
-                         &SELF::py_setcoord>::py_2export(m, sPropNameCoord
-                                                                .c_str());
+                         &SELF::py_setvec, &SELF::py_getcoord, &SELF::py_setcoord>
+        ::py_2export(m, sPropNameCoord.c_str());
 
     std::string sPropNameXYZ0 = fmt::format("{0}_{1}", pyname, "idx_prop_xyz0");
-    py_indexed_property<SELF, REAL, int, &SELF::py_getxyz<0>,
-                        &SELF::py_setxyz<0> >::py_export(m,
-                                                         sPropNameXYZ0.c_str());
+    py_indexed_property<SELF, REAL, int, &SELF::py_getxyz<0>, &SELF::py_setxyz<0>>
+        ::py_export(m,sPropNameXYZ0.c_str());
 
     std::string sPropNameXYZ1 = fmt::format("{0}_{1}", pyname, "idx_prop_xyz1");
-    py_indexed_property<SELF, REAL, int, &SELF::py_getxyz<1>,
-                        &SELF::py_setxyz<1> >::py_export(m,
-                                                         sPropNameXYZ1.c_str());
+    py_indexed_property<SELF, REAL, int, &SELF::py_getxyz<1>, &SELF::py_setxyz<1>>
+        ::py_export(m,sPropNameXYZ1.c_str());
 
     std::string sPropNameXYZ2 = fmt::format("{0}_{1}", pyname, "idx_prop_xyz2");
-    py_indexed_property<SELF, REAL, int, &SELF::py_getxyz<2>,
-                        &SELF::py_setxyz<2> >::py_export(m,
-                                                         sPropNameXYZ2.c_str());
+    py_indexed_property<SELF, REAL, int, &SELF::py_getxyz<2>, &SELF::py_setxyz<2>>
+        ::py_export(m,sPropNameXYZ2.c_str());
 
-    std::string sPropNameSymRad =
-        fmt::format("{0}_{1}", pyname, "idx_prop_symrad");
-    py_indexed_property<SELF, REAL, const char *, &SELF::py_getsymmrad,
-                        &SELF::py_setsymmrad>::py_export(m, sPropNameSymRad
-                                                                .c_str());
+    std::string sPropNameSymRad = fmt::format("{0}_{1}", pyname, "idx_prop_symrad");
+    py_indexed_property<SELF, REAL, const char *, &SELF::py_getsymmrad, &SELF::py_setsymmrad>
+        ::py_export(m, sPropNameSymRad.c_str());
   }
 
   // --------------------------------------------------------------------
@@ -927,34 +939,31 @@ inline void py_setcell(CELL & cl)
 
   void py_add3(const py::list &l) {
     if (py::len(l) == 0) return;
-    if (py::isinstance<py::list>(l[0]))
+    if (py::isinstance<py::list>(l[0])) {
       // list of lists
-      for (int i = 0; i < py::len(l); i++)
-        py_add_list(py::cast<py::list>(l[i]));
-    else
+      for (int i = 0; i < py::len(l); i++) py_add_list(py::cast<py::list>(l[i]));
+    } else {
       py_add_list(l);
+    }
   }
 
   void py_insert1(int i, const STRING_EX &a, const vector3<REAL> &r1) {
     if (i < 0) i += nat();
     if (i < 0 || i > nat()) IndexError("geometry::Index out of range");
-
     insert(i, a, r1);
   }
 
-  void py_insert2(int i, const STRING_EX &a, const REAL _x, const REAL _y,
-                  const REAL _z) {
+  void py_insert2(int i, const STRING_EX &a, const REAL _x, const REAL _y, const REAL _z) {
     if (i < 0) i += nat();
     if (i < 0 || i > nat()) IndexError("geometry::Index out of range");
     insert(i, a, _x, _y, _z);
   }
 
   virtual void py_insert_list(int i, const py::list &l) {
-    if (!py_check_axyz(l))
-      TypeError("geometry::Invalid list. List must be [atom,x,y,z]");
+    if (!py_check_axyz(l)) TypeError("geometry::Invalid list. List must be [atom,x,y,z]");
 
-    insert(i, py::cast<STRING_EX>(l[0]), py::cast<REAL>(l[1]),
-           py::cast<REAL>(l[2]), py::cast<REAL>(l[3]));
+    insert(i, py::cast<STRING_EX>(l[0]),
+           py::cast<REAL>(l[1]), py::cast<REAL>(l[2]), py::cast<REAL>(l[3]));
   }
 
   void py_insert3(int at, const py::list &l) {
@@ -962,26 +971,23 @@ inline void py_setcell(CELL & cl)
     if (at < 0 || at > nat()) IndexError("geometry::Index out of range");
 
     if (py::len(l) == 0) return;
-    if (py::isinstance<py::list>(l[0]))
+    if (py::isinstance<py::list>(l[0])) {
       // list of lists
-      for (int i = 0; i < py::len(l); i++)
-        py_insert_list(at + i, py::cast<py::list>(l[i]));
-    else
+      for (int i = 0; i < py::len(l); i++) py_insert_list(at + i, py::cast<py::list>(l[i]));
+    } else {
       py_insert_list(at, l);
+    }
   }
 
   void py_erase(int at) {
     if (at < 0) at += nat();
     if (at < 0 || at >= nat()) IndexError("geometry::Index out of range");
-
     erase(at);
   }
 
   virtual py::list py_getitem(int i) const {
     if (i < 0) i += nat();
-
     if (i < 0 || i >= nat()) IndexError("geometry::Index out of range");
-
     py::list l;
     l.append(atom(i));
     l.append(coord(i).x());
@@ -992,16 +998,10 @@ inline void py_setcell(CELL & cl)
 
   virtual void py_setitem(int i, const py::list &l) {
     if (i < 0) i += nat();
-
     if (i < 0 || i >= nat()) IndexError("geometry::Index out of range");
-
-    if (!py_check_axyz(l))
-      TypeError("geometry::Invalid list. List must be [atom,x,y,z]");
-
+    if (!py_check_axyz(l)) TypeError("geometry::Invalid list. List must be [atom,x,y,z]");
     STRING_EX a1 = py::cast<STRING_EX>(l[0]);
-    REAL x1 = py::cast<REAL>(l[1]), y1 = py::cast<REAL>(l[2]),
-         z1 = py::cast<REAL>(l[3]);
-
+    REAL x1 = py::cast<REAL>(l[1]), y1 = py::cast<REAL>(l[2]), z1 = py::cast<REAL>(l[3]);
     change(i, a1, {x1, y1, z1});
   }
 
@@ -1026,8 +1026,7 @@ struct py_geometry_observer : geometry_observer<REAL> {
     PYBIND11_OVERLOAD_PURE(void, geometry_observer<REAL>, added, s, a, v);
   }
 
-  void inserted(int at, before_after s, const STRING_EX &a,
-                const vector3<REAL> &v) override {
+  void inserted(int at, before_after s, const STRING_EX &a, const vector3<REAL> &v) override {
     PYBIND11_OVERLOAD_PURE(void, geometry_observer<REAL>, inserted, at, s, a, v);
   }
 

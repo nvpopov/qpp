@@ -1016,12 +1016,12 @@ public:
 
   uint32_t get_flags() override {
     return geometry_observer_supports_default
-           | geometry_observer_supports_added
-           | geometry_observer_supports_inserted
-           | geometry_observer_supports_changed
-           | geometry_observer_supports_erased
-           | geometry_observer_supports_shaded
-           | geometry_observer_supports_reordered;
+           | geometry_observer_supports_add
+           | geometry_observer_supports_insert
+           | geometry_observer_supports_change
+           | geometry_observer_supports_erase
+           | geometry_observer_supports_shadow
+           | geometry_observer_supports_reorder;
   };
 
   /// \brief added
