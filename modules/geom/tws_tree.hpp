@@ -299,10 +299,10 @@ public:
     auto const max_cell_v_l_boundary = 25.0;
 
     if (!geom) return;
-    if (geom->DIM == 0) return;
+    if (geom->get_DIM() == 0) return;
 
     REAL max_cell_v_l{0};
-    for (size_t i = 0; i < geom->DIM; i++)
+    for (size_t i = 0; i < geom->get_DIM(); i++)
       max_cell_v_l = std::max(max_cell_v_l, geom->cell.v[i].norm());
 
     if (max_cell_v_l > max_cell_v_l_boundary) m_cell_within_eps = 0.001;
@@ -446,7 +446,7 @@ public:
   void clr_atom_bond_data(const AINT atm) {
 
     for(auto &bond : m_ngb_table[atm])
-      if (bond.m_idx == index::D(geom->DIM).all(0) || geom->DIM == 0)
+      if (bond.m_idx == index::D(geom->get_DIM()).all(0) || geom->get_DIM() == 0)
         clr_atom_pair_bond_data(bond.m_atm, atm);
       else {
         std::optional<AINT> img_id = find_img_atom(bond.m_atm, bond.m_idx);
@@ -477,10 +477,10 @@ public:
 
     std::vector<index> image_idx;
 
-    if (geom->DIM == 0 && m_atom_node_lookup[atm].size() > 0)
+    if (geom->get_DIM() == 0 && m_atom_node_lookup[atm].size() > 0)
       m_atom_node_lookup[atm][0].node->rm_cnt_by_id(atm);
 
-    if (geom->DIM > 0) {
+    if (geom->get_DIM() > 0) {
 
       //remove 0,0,0 and c1,c2,c3 atoms from tree
       for (auto& at_node : m_atom_node_lookup[atm])
@@ -491,7 +491,7 @@ public:
       for (auto it = m_img_atoms.begin(); it != m_img_atoms.end();)
         if (it->m_atm == atm) {
           for(auto &nc : it->m_img_bonds){
-            if (nc.m_idx != index::D(geom->DIM).all(0)) {
+            if (nc.m_idx != index::D(geom->get_DIM()).all(0)) {
               pair_img_atoms.push_back(std::tuple<AINT, index>(nc.m_atm, nc.m_idx));
             }
             else clr_bond_real_img(nc.m_atm, it->m_atm, it->m_idx);
@@ -619,14 +619,12 @@ public:
             if (it != hidden_types.end()) atom_hidden = true;
           }
 
-          if (
-              ray_hit &&
-              adding_result_policy::can_add(test_pos, nc.m_idx, geom->DIM) &&
-              !atom_hidden &&
-              (!hide_by_field ||
-               !geom->template xfield<bool>(xgeom_hide_field_id, nc.m_atm) ||
-               !xgeom_hide_field_id)
-              )
+          if (ray_hit
+              && adding_result_policy::can_add(test_pos, nc.m_idx, geom->get_DIM())
+              && !atom_hidden
+              && (!hide_by_field ||
+                  !geom->template xfield<bool>(xgeom_hide_field_id, nc.m_atm) ||
+                  !xgeom_hide_field_id))
             res.push_back(tws_query_data_t<REAL, AINT>(nc.m_atm, nc.m_idx, ray_hit_dist));
 
         }
@@ -674,10 +672,10 @@ public:
   //
   void insert_object_to_tree(const AINT atm) {
 
-    for (iterator i(index::D(geom->DIM).all(-1), index::D(geom->DIM).all(1)); !i.end(); i++ )
-      if (i == index::D(geom->DIM).all(0)) insert_object_to_tree(atm, i);
-      else if ((geom->nat() < 500 &&
-                geom->cell.within_epsilon_b(geom->pos(atm, i), m_cell_within_eps))
+    for (iterator i(index::D(geom->get_DIM()).all(-1), index::D(geom->get_DIM()).all(1));
+         !i.end(); i++)
+      if (i == index::D(geom->get_DIM()).all(0)) insert_object_to_tree(atm, i);
+      else if ((geom->nat() < 500 && geom->cell.within_eps_b(geom->pos(atm, i), m_cell_within_eps))
                || m_keep_img_atoms)
         insert_object_to_tree(atm, i);
 
@@ -693,9 +691,7 @@ public:
     if (m_atom_node_lookup.size() != geom->nat()) m_atom_node_lookup.resize(geom->nat());
 
     while (!(point_aabb_test(geom->pos(atm, idx), root->m_bb))) {
-
       grow_tws_root(atm, idx);
-
 #ifdef TWS_TREE_DEBUG
       std::cout<<fmt::format("rootgrow p = {}, {}, {}\n",
                                geom->pos(atm, idx)[0],
@@ -703,9 +699,7 @@ public:
                                geom->pos(atm, idx)[2] );
 #endif
     }
-
     traverse_insert_object_to_tree(root, atm, idx);
-
   }
 
   /// \brief traverse_insert_object_to_tree
@@ -777,7 +771,7 @@ public:
     //pass any atom and store index to lookup struct
     m_atom_node_lookup[atm].push_back(atom_node_lookup_t<REAL>(idx, cur_node));
 
-    if ( geom->DIM > 0 && idx != index::D(geom->DIM).all(0))
+    if (geom->get_DIM() > 0 && idx != index::D(geom->get_DIM()).all(0))
       m_img_atoms.push_back(img_atom_t<REAL>(atm, idx));
 
   }
@@ -855,7 +849,7 @@ public:
   /// \brief find_all_neighbours
   void find_all_neighbours() {
 
-    for (AINT i = 0; i < geom->nat(); i++) find_neighbours(i, index::D(geom->DIM).all(0));
+    for (AINT i = 0; i < geom->nat(); i++) find_neighbours(i, index::D(geom->get_DIM()).all(0));
     if (m_build_img_atoms_bonds)
       for (auto &img_atom : m_img_atoms) find_neighbours(img_atom.m_atm, img_atom.m_idx);
 
@@ -865,7 +859,7 @@ public:
   /// \param at_num
   void find_neighbours(AINT at_num) {
 
-    find_neighbours(at_num, index::D(geom->DIM).all(0));
+    find_neighbours(at_num, index::D(geom->get_DIM()).all(0));
     if (m_build_img_atoms_bonds)
       for (AINT i = 0; i < m_img_atoms.size(); i++)
         if (m_img_atoms[i].m_atm == at_num)
@@ -881,7 +875,7 @@ public:
     if (m_bonding_table.m_dist.size() == 0) m_bonding_table.init_default(geom);
     if (m_ngb_table.size() < geom->nat()) m_ngb_table.resize(geom->nat());
 
-    bool img_pass = idx != index::D(geom->DIM).all(0);
+    bool img_pass = idx != index::D(geom->get_DIM()).all(0);
 
     REAL sph_r = m_bonding_table.m_max_dist[geom->type_table(at_num)];
     if ( sph_r > 0.0){
@@ -905,8 +899,8 @@ public:
         REAL bond_len = bonding_record->second.m_bonding_dist;
 
         //cache comparison data
-        bool first_real      = idx == index::D(geom->DIM).all(0);
-        bool second_real          = r_el.m_idx == index::D(geom->DIM).all(0);
+        bool first_real      = idx == index::D(geom->get_DIM()).all(0);
+        bool second_real     = r_el.m_idx == index::D(geom->get_DIM()).all(0);
         bool first_im        = !first_real;
         bool second_im       = !second_real;
         bool mixed_real_im   = (first_real && second_im) || (first_im && second_real);

@@ -138,8 +138,8 @@ namespace qpp {
       }
 
     if (force3d) {
-        geom.DIM = 3;
-        geom.cell.DIM = 3;
+        geom.set_DIM(3);
+        //geom.cell.DIM = 3;
       }
 
     if (!preserve_geom) {
@@ -175,18 +175,21 @@ namespace qpp {
   // -------------------------------------------------------------------//
   template< class REAL, class TRANSFORM >
   void write_xyz(std::basic_ostream<CHAR_EX,TRAITS>  & out,
-                 const qpp::geometry<REAL,TRANSFORM> & geom){
+                 const qpp::geometry<REAL,TRANSFORM> & geom) {
+
     out << geom.nat() << "\n";
 
-    if (geom.DIM>0)
-      for (int d = 0; d<geom.DIM; d++)
+    if (geom.get_DIM()>0)
+      for (int d = 0; d<geom.get_DIM(); d++)
         for (int i=0; i<3; i++)
           out << fmt::format("{:12.6f} ", (geom.cell)(d)(i));
+
     //out << geom.name();
     out << std::endl;
     for (int i=0; i<geom.size(); i++)
       out << fmt::format("{:8s} {:12.6f} {:12.6f} {:12.6f}\n", geom.atom(i),
                          geom.coord(i)(0),  geom.coord(i)(1), geom.coord(i)(2));
+
   }
 
   // -------------------------------------------------------------------//
@@ -194,18 +197,18 @@ namespace qpp {
   // -------------------------------------------------------------------//
   template< class REAL, class TRANSFORM >
   void write_xyzq(std::basic_ostream<CHAR_EX,TRAITS>  & out,
-                  const qpp::xgeometry<REAL,TRANSFORM> & geom){
+                  const qpp::xgeometry<REAL,TRANSFORM> & geom) {
     out << geom.nat() << "\n";
 
-    if (geom.DIM>0)
-      for (int d = 0; d<geom.DIM; d++)
+    if (geom.get_DIM()>0)
+      for (int d = 0; d<geom.get_DIM(); d++)
         for (int i=0; i<3; i++)
           out << fmt::format("{:4.3f} ", geom.cell(d)(i));
+
     //out << geom.name();
     out << std::endl;
     for (int i=0; i<geom.nat(); i++)
-      out <<
-             fmt::format("{:8s} {:12.6f} {:12.6f} {:12.6f} {:12.6f}\n",
+      out << fmt::format("{:8s} {:12.6f} {:12.6f} {:12.6f} {:12.6f}\n",
                          geom.atom(i),geom.coord(i)(0), geom.coord(i)(1),
                          geom.coord(i)(2), geom.charge(i));
   }

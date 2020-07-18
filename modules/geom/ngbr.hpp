@@ -545,8 +545,8 @@ public:
 
   neighbours_table( geometry<REAL, CELL> & g, bonding_table<REAL> & t) : ngrain(index::D(3)){
     btbl = &t;
-    geom = & g;
-    DIM = geom -> DIM;
+    geom = &g;
+    DIM = geom->get_DIM();
     //_disttable.clear();
     build_disttable();
     reference_mode = false;
