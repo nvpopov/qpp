@@ -84,14 +84,7 @@ geometry
 
 enum before_after { before = 0, after = 1 };
 
-/*! \class geometry_observer
-  \brief Geometry updated objects
-  One geometry can maintain arbitrary number of "observers", i.e.
-  objects which need to know about the changes made to geometry.
-  Geometry will inform them all when atoms are added, inserted or removed
-*/
-
-//geometry_observer capabilities
+///geometry_observer capabilities
 const uint32_t geometry_observer_supports_default           = 0;
 const uint32_t geometry_observer_supports_add               = 1 << 1;
 const uint32_t geometry_observer_supports_insert            = 1 << 2;
@@ -104,6 +97,13 @@ const uint32_t geometry_observer_supports_dim_change        = 1 << 8;
 const uint32_t geometry_observer_supports_cell_change       = 1 << 9;
 const uint32_t geometry_observer_supports_xfield_change     = 1 << 10;
 
+/*!
+ * \class geometry_observer
+ * \brief Geometry updated objects
+ * One geometry can maintain arbitrary number of "observers", i.e.
+ * objects which need to know about the changes made to geometry.
+ * Geometry will inform them all when atoms are added, inserted or removed
+*/
 template <class REAL>
 struct geometry_observer {
 
@@ -121,13 +121,27 @@ struct geometry_observer {
 
 };
 
-/*! \class geometry
-  \brief geometry basically can store atomic symbols and coordinates for a
-  molecule or crystal. However, the functionality of geometry class is much more
-  than that. First, besides atomic symbols and coordinates any other additional
-  data of real, integer, boolean or string type can be stored for each atom (see
-  xgeometry). Second, geometry can handle any type of space symmetry, periodic
-  or non-periodic.
+///cell type traits
+template <typename T, typename = int>
+struct cell_has_only_tsym : std::false_type { };
+
+template <typename T>
+struct cell_has_only_tsym <T, decltype((void) T::v, 0)> : std::true_type { };
+
+template <typename T, typename = int>
+struct cell_has_tsym_DIM : std::false_type { };
+
+template <typename T>
+struct cell_has_tsym_DIM <T, decltype((void) T::DIM, 0)> : std::true_type { };
+
+/*!
+ * \class geometry
+ * \brief geometry basically can store atomic symbols and coordinates for a
+ * molecule or crystal. However, the functionality of geometry class is much more
+ * than that. First, besides atomic symbols and coordinates any other additional
+ * data of real, integer, boolean or string type can be stored for each atom (see
+ * xgeometry). Second, geometry can handle any type of space symmetry, periodic
+ * or non-periodic.
 */
 
 template <class REAL, class CELL>
@@ -149,6 +163,8 @@ class geometry {
   std::vector<uint32_t> p_cached_obs_flags;
   bool has_observers;
 
+  int p_DIM;
+
  public:
 
   typedef geometry_observer<REAL> DEP;
@@ -161,8 +177,6 @@ class geometry {
   //! default value for tol_geom
   static REAL tol_geom_default;
 
-  int DIM;
-
   //! cell for periodic boundary conditions and on-the-fly transformations
   CELL cell;
 
@@ -174,6 +188,21 @@ class geometry {
 
   //! the name of this geometry
   STRING_EX name;
+
+  int get_DIM() const {
+    return p_DIM;
+  }
+
+  void set_DIM(int new_DIM) {
+
+    if (p_DIM == new_DIM) return;
+    p_DIM = new_DIM;
+
+    if constexpr (cell_has_tsym_DIM<CELL>::value) {
+      cell.DIM = new_DIM;
+    }
+
+  }
 
   virtual bool is_xgeometry() const { return false; }
 
@@ -199,7 +228,7 @@ class geometry {
   inline vector3<REAL> r(int at) const {
     vector3<REAL> r1 = p_crd[at];
     if (frac) r1 = cell.frac2cart(r1);
-    return cell.transform(r1, index::D(DIM).all(0));
+    return cell.transform(r1, index::D(get_DIM()).all(0));
   }
 
   /// \brief real-space position of an atom
@@ -228,7 +257,7 @@ class geometry {
   inline vector3<REAL> r_frac(int at) const {
     vector3<REAL> r1 = p_crd[at];
     r1 = cell.cart2frac(r1);
-    return cell.transform(r1, index::D(DIM).all(0));
+    return cell.transform(r1, index::D(get_DIM()).all(0));
   }
 
   /// \brief real-space position of an atom
@@ -411,28 +440,27 @@ class geometry {
 
   geometry(const CELL &__cell, const STRING_EX &__name = "") : cell(__cell) {
     init_default();
-    DIM = cell.DIM;
+    p_DIM = cell.DIM;
     name = __name;
   }
 
   geometry(int dim = 0, const STRING_EX &__name = "") : cell(dim) {
     init_default();
-    DIM = dim;
+    p_DIM = dim;
     name = __name;
   }
 
-  geometry(const geometry<REAL, CELL> &g)
-      : cell(g.cell),
-        p_atm(g.p_atm),
-        p_crd(g.p_crd),
-        p_shadow(g.p_shadow),
-        p_type_table(g.p_type_table),
-        p_symm_rad(g.p_symm_rad),
-        p_atm_types(g.p_atm_types),
-        p_observers(g.p_observers) {
+  geometry(const geometry<REAL, CELL> &g) : cell(g.cell),
+                                            p_atm(g.p_atm),
+                                            p_crd(g.p_crd),
+                                            p_shadow(g.p_shadow),
+                                            p_type_table(g.p_type_table),
+                                            p_symm_rad(g.p_symm_rad),
+                                            p_atm_types(g.p_atm_types),
+                                            p_observers(g.p_observers) {
     init_default();
 
-    DIM = g.DIM;
+    p_DIM = g.get_DIM();
 
     // options
     auto_update_types = g.auto_update_types;
@@ -717,7 +745,7 @@ void copy(const geometry<DIM, REAL> &G)
     for (int k = 0; k < offset; k++) os << " ";
     os << "geometry";
     if (name != "") os << " " << name;
-    os << "(" << DIM << "d,atom,x,y,z){\n";
+    os << "(" << get_DIM() << "d,atom,x,y,z){\n";
 
     /*
   os << "(";

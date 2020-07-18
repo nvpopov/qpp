@@ -168,7 +168,7 @@ struct periodic_cell {
 
   }
 
-  bool within_epsilon_b(const vector3<REAL> &r, const REAL eps) const {
+  bool within_eps_b(const vector3<REAL> &r, const REAL eps) const {
 
     vector3<REAL> f = cart2frac(r);
     bool res = true;

@@ -292,7 +292,7 @@ namespace qpp {
 
   template <class REAL>
   bool compile_geometry(comp_chem_program_data_t<REAL> &ccd_inst,
-                        geometry<REAL, periodic_cell<REAL> > &g,
+                        geometry<REAL, periodic_cell<REAL>> &g,
                         uint32_t compile_flags = ccd_cf_default_flags) {
 
     if ((ccd_inst.m_init_apos.empty() || ccd_inst.m_init_anames.empty())
@@ -306,9 +306,9 @@ namespace qpp {
     if (ccd_inst.m_tot_nat == 0 && !ccd_inst.m_init_anames.empty())
       ccd_inst.m_tot_nat = ccd_inst.m_init_anames.size();
 
-    g.DIM = ccd_inst.m_DIM;
+    g.set_DIM(ccd_inst.m_DIM);
 
-    if (g.DIM > 0)
+    if (g.get_DIM() > 0)
       for (size_t i = 0; i < ccd_inst.m_DIM; i++) g.cell.v[i] = ccd_inst.m_cell_v[i];
 
     for (size_t i = 0; i < ccd_inst.m_init_anames.size(); i++)

@@ -321,7 +321,7 @@ namespace qpp {
       } //end while
 
     //loadout first frame into geometry
-    geom.DIM = 3;
+    geom.set_DIM(3);
 
     for (size_t i = 0; i < atom_lookup_v.size(); i++) {
 
@@ -345,8 +345,8 @@ namespace qpp {
             //index min_dist_index = index::D(geom.DIM).all(0);
             float min_dist = 100.0f;
             vector3<REAL> goal_vector = anim_md.frames[i].atom_pos[ac];
-            for (iterator idx(index::D(geom.DIM).all(-1),
-                              index::D(geom.DIM).all(1)); !idx.end(); idx++ ) {
+            for (iterator idx(index::D(geom.get_DIM()).all(-1),
+                              index::D(geom.get_DIM()).all(1)); !idx.end(); idx++ ) {
                 vector3<REAL> t_pos_cf = geom.cell.transform(
                                            anim_md.frames[i].atom_pos[ac], idx);
                 REAL dist = (anim_md.frames[i-1].atom_pos[ac] - t_pos_cf).norm();

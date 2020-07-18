@@ -68,13 +68,14 @@ namespace qpp {
 
     typedef xgeometry<REAL,CELL> SELF;
 
-    using geometry<REAL,CELL>::DIM;
-    using geometry<REAL,CELL>::name;
-    using geometry<REAL,CELL>::cell;
-    using geometry<REAL,CELL>::nat;
-    using geometry<REAL,CELL>::type;
-    using geometry<REAL,CELL>::define_type;
-    using geometry<REAL,CELL>::auto_update_types;
+    using geometry<REAL, CELL>::get_DIM;
+    using geometry<REAL, CELL>::set_DIM;
+    using geometry<REAL, CELL>::name;
+    using geometry<REAL, CELL>::cell;
+    using geometry<REAL, CELL>::nat;
+    using geometry<REAL, CELL>::type;
+    using geometry<REAL, CELL>::define_type;
+    using geometry<REAL, CELL>::auto_update_types;
 
     virtual bool is_xgeometry() const{return true;}
 
@@ -158,8 +159,7 @@ namespace qpp {
       p_nxint = std::count(ft.begin(), ft.end(), type_int);
       p_nxbool = std::count(ft.begin(), ft.end(), type_bool);
 
-      if (fn.size() != ft.size() ||
-          fn.size() != p_nxstring + p_nxreal + p_nxint + p_nxbool) {
+      if (fn.size() != ft.size() || fn.size() != p_nxstring + p_nxreal + p_nxint + p_nxbool) {
           throw std::invalid_argument("xgeometry::format: field names or types mismatch");
         }
 
@@ -176,27 +176,24 @@ namespace qpp {
           basic_types tp = field_type(j);
 
           if ( tp == type_string ) {
-              p_field_idx[j] = is++;
-              if ( field_name(j) == "atom" ) p_ix_atom = j;
-            }
-          else if ( tp == type_real || tp == attributes<REAL>::type ){
-              p_field_type[j] = type_real;
-              p_field_idx[j] = ir++;
-              if ( field_name(j) == "x" )      p_ix_x = j;
-              else if ( field_name(j) == "y" ) p_ix_y = j;
-              else if ( field_name(j) == "z" ) p_ix_z = j;
-              else if ( field_name(j) == "charge" ) p_ix_charge = j;
-              else if ( field_name(j) == "mass" )   p_ix_mass   = j;
-            }
-          else if ( tp == type_int ){
-              p_field_idx[j] = ii++;
-              if ( field_name(j) == "number" ) p_ix_number = j;
-            }
-          else if ( tp == type_bool )
+            p_field_idx[j] = is++;
+            if ( field_name(j) == "atom" ) p_ix_atom = j;
+          } else if ( tp == type_real || tp == attributes<REAL>::type ){
+            p_field_type[j] = type_real;
+            p_field_idx[j] = ir++;
+            if ( field_name(j) == "x" )      p_ix_x = j;
+            else if ( field_name(j) == "y" ) p_ix_y = j;
+            else if ( field_name(j) == "z" ) p_ix_z = j;
+            else if ( field_name(j) == "charge" ) p_ix_charge = j;
+            else if ( field_name(j) == "mass" )   p_ix_mass   = j;
+          } else if ( tp == type_int ){
+            p_field_idx[j] = ii++;
+            if ( field_name(j) == "number" ) p_ix_number = j;
+          } else if ( tp == type_bool ) {
             p_field_idx[j] = ib++;
-          else {
-              throw std::invalid_argument("xgeometry::format: invalid type");
-            }
+          } else {
+            throw std::invalid_argument("xgeometry::format: invalid type");
+          }
 
         }
 
@@ -582,10 +579,10 @@ namespace qpp {
 
       dst.clear();
 
-      dst.DIM = DIM;
+      dst.p_DIM = get_DIM();
 
       //copy cell vectors
-      for (size_t i = 0; i <DIM; i++) dst.cell.v[i] = cell.v[i];
+      for (size_t i = 0; i < get_DIM(); i++) dst.cell.v[i] = cell.v[i];
 
       //copy xgeom headers
       dst.set_format(p_field_name, p_field_type);
