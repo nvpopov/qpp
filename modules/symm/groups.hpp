@@ -63,8 +63,8 @@ public:
     name = _name;
   }
 
-  genform_group(const genform_group<TRANSFORM> & G) :
-                                                     DIM(G.DIM), generators(G.generators), _begin(G._begin), _end(G._end), name(G.name)
+  genform_group(const genform_group<TRANSFORM> & G)
+      : DIM(G.DIM), generators(G.generators), _begin(G._begin), _end(G._end), name(G.name)
   {}
 
   int get_dim(){return DIM;}

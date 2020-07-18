@@ -15,7 +15,7 @@ int main() {
   read_xyzq(uc_file, g);
 
   fmt::print(std::cout, "Total number of atoms = {}\n", g.nat());
-  fmt::print(std::cout, "g.DIM = {}\n", g.DIM);
+  fmt::print(std::cout, "g.DIM = {}\n", g.get_DIM());
 
   for (int i = 0; i < g.nat(); i++)
     fmt::print(std::cout, "{} {} {} {} {}\n",

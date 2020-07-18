@@ -33,7 +33,7 @@ namespace qpp {
 
     CELL cell = geom.cell;
     geom.cell = symm;
-    geom.DIM = symm.DIM;
+    geom.set_DIM(symm.DIM);
 
     bonding_table<REAL> b;
     b.default_distance = R;
@@ -76,7 +76,7 @@ namespace qpp {
       }
 
     geom.cell = cell;
-    geom.DIM = cell.DIM;
+    geom.set_DIM(cell.DIM);
     return res;
   }
 
