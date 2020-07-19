@@ -54,29 +54,25 @@ The supercell concept generalization for the geometry class looks like:
   vector3d<REAL> cart2frac(const vector3d<REAL> & r);
 };
 
-      Any class having these methods - can be used as a "supercell" for some
-geometry
+ Any class having these methods - can be used as a "supercell" for some geometry
 
   template <int DIM>
   struct atom_index {
   int atom;
   index<DIM> cell;
 
-  atom_index(int _atom, const index<DIM> & _cell = index<DIM>::all(0))
-  {
+  atom_index(int _atom, const index<DIM> & _cell = index<DIM>::all(0)) {
     atom = _atom;
     cell = _cell;
   }
 
   inline operator int() const {return atom;}
 
-  inline bool operator==(const atom_index<DIM> & ai)
-  {
+  inline bool operator==(const atom_index<DIM> & ai) {
     return atom == ai.atom && cell == ai.cell;
   }
 
-  inline bool operator!=(const atom_index<DIM> & ai)
-  {
+  inline bool operator!=(const atom_index<DIM> & ai) {
     return atom != ai.atom || cell != ai.cell;
   }
 
@@ -196,11 +192,22 @@ class geometry {
   void set_DIM(int new_DIM) {
 
     if (p_DIM == new_DIM) return;
+
+    if (has_observers)
+      for (int i = 0; i < p_observers.size(); i++)
+        if (p_cached_obs_flags[i] & geometry_observer_supports_dim_change)
+          p_observers[i]->dim_changed(before);
+
     p_DIM = new_DIM;
 
     if constexpr (cell_has_tsym_DIM<CELL>::value) {
       cell.DIM = new_DIM;
     }
+
+    if (has_observers)
+      for (int i = 0; i < p_observers.size(); i++)
+        if (p_cached_obs_flags[i] & geometry_observer_supports_dim_change)
+          p_observers[i]->dim_changed(after);
 
   }
 
@@ -345,19 +352,18 @@ class geometry {
   inline int type_of_atom(int i) const { return type_table(i); }
 
   virtual void build_type_table() {
+
     p_atm_types.clear();
     p_symm_rad.clear();
     p_type_table.resize(size());
 
     for (int i = 0; i < size(); i++) {
       int t = type_of_atom(atom(i));
-
       if (t == -1) {
         t = p_atm_types.size();
         p_atm_types.push_back(atom(i));
         p_symm_rad.push_back(default_symmetrize_radius);
       }
-
       p_type_table[i] = t;
     }
 
@@ -730,8 +736,7 @@ void copy(const geometry<DIM, REAL> &G)
       IndexError("geometry::set_fields: wrong number of fields, must be 4");
 
     change(j, v[0].get<STRING_EX>(),
-           qpp::vector3<REAL>(v[1].get<REAL>(), v[2].get<REAL>(),
-                              v[3].get<REAL>()));
+           qpp::vector3<REAL>(v[1].get<REAL>(), v[2].get<REAL>(), v[3].get<REAL>()));
   }
 
   std::vector<datum> operator[](int j) {
@@ -1036,8 +1041,7 @@ inline void py_setcell(CELL & cl)
 #endif
 };
 
-template <class REAL, class CELL>
-REAL geometry<REAL, CELL>::tol_geom_default = 1e-5;
+template <class REAL, class CELL> REAL geometry<REAL, CELL>::tol_geom_default = 1e-5;
 
 #if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
 
