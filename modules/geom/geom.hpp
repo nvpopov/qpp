@@ -15,15 +15,8 @@ namespace py = pybind11;
 
 #endif
 
-#include <algorithm>
-#include <cmath>
-#include <data/data.hpp>
-#include <functional>
-#include <geom/lace3d.hpp>
-#include <numeric>
+#include <geom/basic_geom.hpp>
 #include <symm/cell.hpp>
-#include <symm/index.hpp>
-#include <vector>
 
 namespace qpp {
 
@@ -78,58 +71,6 @@ The supercell concept generalization for the geometry class looks like:
 
   };*/
 
-enum before_after { before = 0, after = 1 };
-
-///geometry_observer capabilities
-const uint32_t geometry_observer_supports_default           = 0;
-const uint32_t geometry_observer_supports_add               = 1 << 1;
-const uint32_t geometry_observer_supports_insert            = 1 << 2;
-const uint32_t geometry_observer_supports_change            = 1 << 3;
-const uint32_t geometry_observer_supports_erase             = 1 << 4;
-const uint32_t geometry_observer_supports_shadow            = 1 << 5;
-const uint32_t geometry_observer_supports_reorder           = 1 << 6;
-const uint32_t geometry_observer_supports_geom_destroy      = 1 << 7;
-const uint32_t geometry_observer_supports_dim_change        = 1 << 8;
-const uint32_t geometry_observer_supports_cell_change       = 1 << 9;
-const uint32_t geometry_observer_supports_xfield_change     = 1 << 10;
-
-/*!
- * \class geometry_observer
- * \brief Geometry updated objects
- * One geometry can maintain arbitrary number of "observers", i.e.
- * objects which need to know about the changes made to geometry.
- * Geometry will inform them all when atoms are added, inserted or removed
-*/
-template <class REAL>
-struct geometry_observer {
-
-  virtual uint32_t get_flags() = 0;
-  virtual void added(before_after, const STRING_EX &,const vector3<REAL> &) = 0;
-  virtual void inserted(int at, before_after, const STRING_EX &, const vector3<REAL> &) = 0;
-  virtual void changed(int at, before_after, const STRING_EX &, const vector3<REAL> &) = 0;
-  virtual void erased(int at, before_after) = 0;
-  virtual void shaded(int at, before_after, bool) = 0;
-  virtual void reordered(const std::vector<int> &, before_after) = 0;
-  virtual void geometry_destroyed() = 0;
-  virtual void dim_changed(before_after) = 0;
-  virtual void cell_changed(before_after) = 0;
-  virtual void xfield_changed(int at, int xid, before_after) = 0;
-
-};
-
-///cell type traits
-template <typename T, typename = int>
-struct cell_has_only_tsym : std::false_type { };
-
-template <typename T>
-struct cell_has_only_tsym <T, decltype((void) T::v, 0)> : std::true_type { };
-
-template <typename T, typename = int>
-struct cell_has_tsym_DIM : std::false_type { };
-
-template <typename T>
-struct cell_has_tsym_DIM <T, decltype((void) T::DIM, 0)> : std::true_type { };
-
 /*!
  * \class geometry
  * \brief geometry basically can store atomic symbols and coordinates for a
@@ -141,7 +82,7 @@ struct cell_has_tsym_DIM <T, decltype((void) T::DIM, 0)> : std::true_type { };
 */
 
 template <class REAL, class CELL>
-class geometry {
+class geometry : public basic_geometry<REAL> {
 
  protected:
 
@@ -154,17 +95,19 @@ class geometry {
   /// Special logical array allows to "hide" or "shadow" some atoms
   std::vector<Bool> p_shadow;
 
-  /// The dependent objects array
-  std::vector<geometry_observer<REAL> *> p_observers;
-  std::vector<uint32_t> p_cached_obs_flags;
-  bool has_observers;
-
   int p_DIM;
+
+  using basic_geometry<REAL>::p_observers;
+  using basic_geometry<REAL>::p_cached_obs_flags;
+  using basic_geometry<REAL>::p_has_observers;
 
  public:
 
   typedef geometry_observer<REAL> DEP;
   typedef geometry<REAL, CELL> SELF;
+
+  using basic_geometry<REAL>::add_observer;
+  using basic_geometry<REAL>::remove_observer;
 
   //! geometry tolerance - maximal distance between two atoms
   //! where they are considered at the same point
@@ -193,7 +136,7 @@ class geometry {
 
     if (p_DIM == new_DIM) return;
 
-    if (has_observers)
+    if (p_has_observers)
       for (int i = 0; i < p_observers.size(); i++)
         if (p_cached_obs_flags[i] & geometry_observer_supports_dim_change)
           p_observers[i]->dim_changed(before);
@@ -204,7 +147,7 @@ class geometry {
       cell.DIM = new_DIM;
     }
 
-    if (has_observers)
+    if (p_has_observers)
       for (int i = 0; i < p_observers.size(); i++)
         if (p_cached_obs_flags[i] & geometry_observer_supports_dim_change)
           p_observers[i]->dim_changed(after);
@@ -423,7 +366,7 @@ class geometry {
     auto_update_types = true;
     frac = false;
     auto_symmetrize = false;
-    has_observers = false;
+    p_has_observers = false;
     default_symmetrize_radius = 0e0;
     tol_geom = tol_geom_default;
     p_atm.reserve(GEOM_DEFAULT_RESERVE_AMOUNT);
@@ -462,8 +405,8 @@ class geometry {
                                             p_shadow(g.p_shadow),
                                             p_type_table(g.p_type_table),
                                             p_symm_rad(g.p_symm_rad),
-                                            p_atm_types(g.p_atm_types),
-                                            p_observers(g.p_observers) {
+                                            p_atm_types(g.p_atm_types) {
+
     init_default();
 
     p_DIM = g.get_DIM();
@@ -476,13 +419,13 @@ class geometry {
     tol_geom = g.tol_geom;
 
     // observers
-    has_observers = g.has_observers;
+    //p_has_observers = g.p_has_observers;
+
   }
 
   ~geometry() {
     // fixme
-//    for (auto observer : observers)
-//      if (observer) observer->geometry_destroyed();
+
   }
 
   /*
@@ -498,42 +441,11 @@ void copy(const geometry<DIM, REAL> &G)
   frac = G.frac;
 }
 */
-  // ----------------------- Managing observers -----------------------
-
-  void add_observer(DEP &d) {
-
-    auto it = std::find(p_observers.begin(), p_observers.end(), &d);
-
-    if (it != p_observers.end()) {
-      has_observers = true;
-      return;
-    }
-
-    p_observers.push_back(&d);
-    p_cached_obs_flags.push_back(d.get_flags());
-    has_observers = true;
-
-  }
-
-  void remove_observer(DEP &d) {
-    auto i = p_observers.begin();
-
-    while (i != p_observers.end()) {
-      if (*i == &d) {
-        p_observers.erase(i);
-        auto obs_shift = std::distance(begin(p_observers), i);
-        p_cached_obs_flags.erase(begin(p_cached_obs_flags) + obs_shift);
-        break;
-      }
-      i++;
-    }
-
-    if (p_observers.size() == 0) has_observers = false;
-  }
 
   // ----------------------- Manipulations with atoms -----------------------
 
  protected:
+
   inline void _add(const STRING_EX &a, const vector3<REAL> &r1) {
 
     vector3<REAL> r2 = r1;
@@ -542,7 +454,7 @@ void copy(const geometry<DIM, REAL> &G)
       r2 = cell.symmetrize(r1, rad);
     }
 
-    if (has_observers)
+    if (p_has_observers)
       for (int i = 0; i < p_observers.size(); i++)
         if (p_cached_obs_flags[i] & geometry_observer_supports_add)
           p_observers[i]->added(before, a, r2);
@@ -553,7 +465,7 @@ void copy(const geometry<DIM, REAL> &G)
 
     if (auto_update_types) p_type_table.push_back(define_type(a));
 
-    if (has_observers)
+    if (p_has_observers)
       for (int i = 0; i < p_observers.size(); i++)
         if (p_cached_obs_flags[i] & geometry_observer_supports_add)
           p_observers[i]->added(after, a, r2);
@@ -561,7 +473,7 @@ void copy(const geometry<DIM, REAL> &G)
 
   inline void _erase(int at) {
 
-    if (has_observers)
+    if (p_has_observers)
       for (int j = 0; j < p_observers.size(); j++)
         if (p_cached_obs_flags[j] & geometry_observer_supports_erase)
           p_observers[j]->erased(at, before);
@@ -571,7 +483,7 @@ void copy(const geometry<DIM, REAL> &G)
     p_shadow.erase(p_shadow.begin() + at);
     if (auto_update_types) p_type_table.erase(p_type_table.begin() + at);
 
-    if (has_observers)
+    if (p_has_observers)
       for (int j = 0; j < p_observers.size(); j++)
         if (p_cached_obs_flags[j] & geometry_observer_supports_erase)
           p_observers[j]->erased(at, after);
@@ -583,7 +495,7 @@ void copy(const geometry<DIM, REAL> &G)
     vector3<REAL> r2 = r1;
     if (auto_symmetrize) r2 = cell.symmetrize(r1, symmetrize_radius(a));
 
-    if (has_observers)
+    if (p_has_observers)
       for (int j = 0; j < p_observers.size(); j++)
         if (p_cached_obs_flags[j] & geometry_observer_supports_insert)
           p_observers[j]->inserted(at, before, a, r2);
@@ -595,7 +507,7 @@ void copy(const geometry<DIM, REAL> &G)
     if (auto_update_types)
       p_type_table.insert(p_type_table.begin() + at, define_type(a));
 
-    if (has_observers)
+    if (p_has_observers)
       for (int j = 0; j < p_observers.size(); j++)
         if (p_cached_obs_flags[j] & geometry_observer_supports_insert)
           p_observers[j]->inserted(at, after, a, r2);
@@ -603,7 +515,7 @@ void copy(const geometry<DIM, REAL> &G)
 
   inline void _change(int at, const STRING_EX &a1, const vector3<REAL> &r1) {
 
-    if (has_observers)
+    if (p_has_observers)
       for (int i = 0; i < p_observers.size(); i++)
         if (p_cached_obs_flags[i] & geometry_observer_supports_change)
           p_observers[i]->changed(at, before, a1, r1);
@@ -614,7 +526,7 @@ void copy(const geometry<DIM, REAL> &G)
     if (auto_update_types && at < p_type_table.size())
       p_type_table[at] = define_type(a1);
 
-    if (has_observers)
+    if (p_has_observers)
       for (int i = 0; i < p_observers.size(); i++)
         if (p_cached_obs_flags[i] & geometry_observer_supports_change)
           p_observers[i]->changed(at, after, a1, r1);
@@ -814,9 +726,7 @@ inline void py_setcell(CELL & cl)
     change(i, a, coord(i));
   }
 
-  py_indexed_property<SELF, STRING_EX, int, &SELF::py_getatom,
-                      &SELF::py_setatom>
-      py_atoms;
+  py_indexed_property<SELF, STRING_EX, int, &SELF::py_getatom, &SELF::py_setatom> py_atoms;
 
   bool py_getshadow(int i) {
     if (i < 0) i += nat();
@@ -830,9 +740,7 @@ inline void py_setcell(CELL & cl)
     shadow(i, b);
   }
 
-  py_indexed_property<SELF, bool, int, &SELF::py_getshadow, &SELF::py_setshadow>
-      py_shadow;
-
+  py_indexed_property<SELF, bool, int, &SELF::py_getshadow, &SELF::py_setshadow> py_shadow;
   //    py_array_vector<REAL> py_coords;
 
   REAL py_getcoord(int i, int d) {

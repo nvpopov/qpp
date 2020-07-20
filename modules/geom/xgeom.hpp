@@ -45,13 +45,14 @@ namespace qpp {
     int p_nxreal, p_nxint, p_nxbool, p_nxstring, p_nfields;
     int p_ix_charge, p_ix_x, p_ix_y, p_ix_z, p_ix_atom, p_ix_mass, p_ix_number;
 
-    using geometry<REAL,CELL>::p_atm;
-    using geometry<REAL,CELL>::p_crd;
-    using geometry<REAL,CELL>::p_shadow;
-    using geometry<REAL,CELL>::reorder_types;
-    using geometry<REAL,CELL>::size;
-    using geometry<REAL,CELL>::has_observers;
-    using geometry<REAL,CELL>::p_observers;
+    using geometry<REAL, CELL>::p_atm;
+    using geometry<REAL, CELL>::p_crd;
+    using geometry<REAL, CELL>::p_shadow;
+    using geometry<REAL, CELL>::reorder_types;
+    using geometry<REAL, CELL>::size;
+    using geometry<REAL, CELL>::p_has_observers;
+    using geometry<REAL, CELL>::p_observers;
+    using geometry<REAL, CELL>::p_cached_obs_flags;
     //using geometry<DIM,REAL,CELL>::error;
 
     void init_xdefault() {
@@ -76,6 +77,8 @@ namespace qpp {
     using geometry<REAL, CELL>::type;
     using geometry<REAL, CELL>::define_type;
     using geometry<REAL, CELL>::auto_update_types;
+    using geometry<REAL, CELL>::add_observer;
+    using geometry<REAL, CELL>::remove_observer;
 
     virtual bool is_xgeometry() const{return true;}
 
@@ -412,7 +415,7 @@ namespace qpp {
                        v[p_ix_y].template get<REAL>(),
                        v[p_ix_z].template get<REAL>());
 
-      if (has_observers)
+      if (p_has_observers)
         for (int i=0; i<p_observers.size(); i++)
           p_observers[i]->changed(j, before, a1, r1);
 
@@ -423,7 +426,7 @@ namespace qpp {
           else if (field_type(i)==type_bool) xfield<bool>(i,j) = v[i].get<bool>();
         }
 
-      if (has_observers)
+      if (p_has_observers)
         for (int i=0; i<p_observers.size(); i++)
           p_observers[i]->changed(j, after, a1, r1);
 
