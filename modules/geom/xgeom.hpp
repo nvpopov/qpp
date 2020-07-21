@@ -378,6 +378,26 @@ namespace qpp {
 
     }
 
+    template<class T>
+    void set_xfield(int i, int j, T value) {
+
+      for (int i = 0; i < p_observers.size(); i++)
+        if (p_cached_obs_flags[i] & geometry_observer_supports_xfield_change)
+          p_observers[i]->xfield_changed(j, i, before);
+
+      xfield<T>(i, j) = value;
+
+      for (int i = 0; i < p_observers.size(); i++)
+        if (p_cached_obs_flags[i] & geometry_observer_supports_xfield_change)
+          p_observers[i]->xfield_changed(j, i, after);
+
+    }
+
+    template<class T>
+    T get_xfield(int i, int j) const {
+      return xfield<T>(i, j);
+    }
+
     // ----------------------------------------------------
 
     virtual void get_fields(int j, std::vector<datum> & v) const {
