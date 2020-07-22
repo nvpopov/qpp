@@ -998,8 +998,8 @@ struct py_geometry_observer : geometry_observer<REAL> {
     PYBIND11_OVERLOAD_PURE(void, geometry_observer<REAL>, cell_changed, s);
   }
 
-  void xfield_changed(int at, int xid, before_after s) override {
-    PYBIND11_OVERLOAD_PURE(void, geometry_observer<REAL>, xfield_changed, at, xid, s);
+  void xfield_changed(int xid, int at, before_after s) override {
+    PYBIND11_OVERLOAD_PURE(void, geometry_observer<REAL>, xfield_changed, xid, at, s);
   }
 
 };

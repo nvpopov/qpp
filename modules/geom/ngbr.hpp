@@ -870,7 +870,7 @@ public:
 
   }
 
-  void xfield_changed(int at, int xid, before_after ord) override {
+  void xfield_changed(int xid, int at, before_after ord) override {
 
   }
 
