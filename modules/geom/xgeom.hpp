@@ -53,6 +53,9 @@ namespace qpp {
     using geometry<REAL, CELL>::p_has_observers;
     using geometry<REAL, CELL>::p_observers;
     using geometry<REAL, CELL>::p_cached_obs_flags;
+    using geometry<REAL, CELL>::get_geom_data_access_mode;
+    using geometry<REAL, CELL>::set_geom_data_access_mode;
+
     //using geometry<DIM,REAL,CELL>::error;
 
     void init_xdefault() {
@@ -288,6 +291,8 @@ namespace qpp {
     template<class T>
     T & xfield(int i, int j) {
 
+      assert(get_geom_data_access_mode() == geom_data_access_mode::allow_direct_access);
+
       basic_types ft = field_type(i);
 
       if (ft == type_real)
@@ -352,6 +357,8 @@ namespace qpp {
 
     template<class T>
     inline T & xfield(const STRING_EX & f, int j) {
+
+      assert(get_geom_data_access_mode() == geom_data_access_mode::allow_direct_access);
 
       int i = 0;
       while (p_field_name[i]!=f && i<nfields()) i++;

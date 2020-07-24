@@ -8,11 +8,20 @@
 #include <geom/lace3d.hpp>
 #include <numeric>
 #include <symm/index.hpp>
+#include <cassert>
 #include <vector>
 
 namespace qpp {
 
-enum before_after { before = 0, after = 1 };
+enum before_after {
+  before = 0,
+  after = 1
+};
+
+enum geom_data_access_mode {
+  allow_direct_access,
+  disallow_direct_access
+};
 
 ///cell type traits
 template <typename T, typename = int>
@@ -74,7 +83,17 @@ protected:
   std::vector<uint32_t> p_cached_obs_flags;
   bool p_has_observers;
 
+  geom_data_access_mode p_access_mode{geom_data_access_mode::allow_direct_access};
+
 public:
+
+  void set_geom_data_access_mode(geom_data_access_mode mode) {
+    p_access_mode = mode;
+  }
+
+  geom_data_access_mode get_geom_data_access_mode() {
+    return p_access_mode;
+  }
 
   // ----------------------- Managing observers -----------------------
 

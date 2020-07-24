@@ -100,6 +100,8 @@ class geometry : public basic_geometry<REAL> {
   using basic_geometry<REAL>::p_observers;
   using basic_geometry<REAL>::p_cached_obs_flags;
   using basic_geometry<REAL>::p_has_observers;
+  using basic_geometry<REAL>::get_geom_data_access_mode;
+  using basic_geometry<REAL>::set_geom_data_access_mode;
 
  public:
 
@@ -171,7 +173,10 @@ class geometry : public basic_geometry<REAL> {
   ///  @param at - the number of atom in the geometry
   inline vector3<REAL> coord(int at) const { return p_crd[at]; }
 
-  inline vector3<REAL> &coord(int at) { return p_crd[at]; }
+  inline vector3<REAL> &coord(int at) {
+    assert(get_geom_data_access_mode() == geom_data_access_mode::allow_direct_access);
+    return p_crd[at];
+  }
 
   /// \brief real-space position of atom number at
   /// \param at - the number of the atom in the geometry
@@ -289,7 +294,10 @@ class geometry : public basic_geometry<REAL> {
   inline int type(int i) const { return type_table(i); }
 
   //! set type of i-th atom in the geometry
-  inline int &type(int i) { return p_type_table[i]; }
+  inline int &type(int i) {
+    assert(get_geom_data_access_mode() == geom_data_access_mode::allow_direct_access);
+    return p_type_table[i];
+  }
 
   //! synonym
   inline int type_of_atom(int i) const { return type_table(i); }
