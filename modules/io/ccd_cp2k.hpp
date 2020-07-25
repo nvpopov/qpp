@@ -21,7 +21,7 @@
 
 namespace qpp {
 
-  enum cp2k_output_parser_state {
+  enum class cp2k_output_parser_state {
 
     cp2k_op_state_none,
     cp2k_op_parse_scf,

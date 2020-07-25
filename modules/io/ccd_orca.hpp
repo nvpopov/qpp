@@ -21,7 +21,7 @@
 
 namespace qpp {
 
-  enum orca_parser_state_e {
+  enum class orca_parser_state_e {
 
     orca_parse_none,
     orca_parse_init_coords,
@@ -385,7 +385,7 @@ namespace qpp {
 
           }
 
-        if (pstate == orca_parse_tddft_tran_osc) {
+        if (pstate == orca_parser_state_e::orca_parse_tddft_tran_osc) {
 
              std::vector<std::string_view> splt = split_sv(s, " ");
 

@@ -20,7 +20,7 @@ namespace qpp {
     return std::getline(__is, __str);
   };
 
-  enum pe_type : int {
+  enum class pe_type : int {
     unknown,
     conv_float,
     conv_int,

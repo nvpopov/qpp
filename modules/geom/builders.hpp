@@ -86,9 +86,9 @@ namespace qpp {
             int j=todel[i];
             for (int k=0; k <xgeom->nfields(); k++)
               if (xgeom->additive(k)) {
-                  if (xgeom->field_type(k) == type_int)
+                if (xgeom->field_type(k) == basic_types::type_int)
                     xgeom->template xfield<int>(k,j) += xgeom->template xfield<int>(k,i);
-                  else if (xgeom->field_type(k) == type_real)
+                else if (xgeom->field_type(k) == basic_types::type_real)
                     xgeom->template xfield<REAL>(k,j) += xgeom->template xfield<REAL>(k,i);
                 }
           }
@@ -123,7 +123,7 @@ namespace qpp {
           }
         else
           xdst->set_format({"atom","x","y","z"},
-          {type_string,type_real,type_real,type_real});
+          {basic_types::type_string, basic_types::type_real, basic_types::type_real, basic_types::type_real});
       }
   }
 

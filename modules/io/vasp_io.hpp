@@ -137,7 +137,7 @@ namespace qpp {
     std::vector<std::array<qpp::vector3<REAL>, 3 > > cells;
 
     geom_anim_record_t<REAL> anim_static;
-    anim_static.m_anim_type = geom_anim_t::anim_static;
+    anim_static.m_anim_type = geom_anim_e::anim_static;
     anim_static.m_anim_name = "static";
     anim_static.frames.resize(1);
 
@@ -163,10 +163,10 @@ namespace qpp {
 
             if (ibrion == 0) {
                 anim_md.m_anim_name = "vasp_md";
-                anim_md.m_anim_type = geom_anim_t::anim_md;
+                anim_md.m_anim_type = geom_anim_e::anim_md;
               } else {
                 anim_md.m_anim_name = "vasp_relax";
-                anim_md.m_anim_type = geom_anim_t::anim_geo_opt;
+                anim_md.m_anim_type = geom_anim_e::anim_geo_opt;
               }
 
             state_ibrion_parsed = true;

@@ -144,7 +144,7 @@ namespace qpp {
 
     if (!preserve_geom) {
         geom.clear();
-        geom.set_format({"charge"},{type_real});
+        geom.set_format({"charge"},{ basic_types::type_real });
       }
 
     for (int i = 0; i<nat; i++) {

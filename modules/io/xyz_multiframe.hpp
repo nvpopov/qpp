@@ -34,10 +34,10 @@ namespace qpp {
     bool bootstrap_geom{false};
     geom_anim_record_t<REAL> animr, anim_static;
 
-    animr.m_anim_type = geom_anim_t::anim_generic;
+    animr.m_anim_type = geom_anim_e::anim_generic;
     animr.m_anim_name = "animation1";
 
-    anim_static.m_anim_type = geom_anim_t::anim_static;
+    anim_static.m_anim_type = geom_anim_e::anim_static;
     anim_static.m_anim_name = "static";
     anim_static.frames.resize(1);
 

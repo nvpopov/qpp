@@ -13,12 +13,12 @@
 
 namespace qpp {
 
-enum before_after {
+enum class before_after {
   before = 0,
   after = 1
 };
 
-enum geom_data_access_mode {
+enum class geom_data_access_mode {
   allow_direct_access,
   disallow_direct_access
 };

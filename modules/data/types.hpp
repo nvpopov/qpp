@@ -113,7 +113,14 @@ struct numeric_type<int>{
 
 // --------------------------------------------------------
 
-enum basic_types{type_int, type_real, type_double, type_float, type_bool, type_string};
+enum class basic_types {
+  type_int,
+  type_real,
+  type_double,
+  type_float,
+  type_bool,
+  type_string
+};
 
 // --------------------------------------------------------
 

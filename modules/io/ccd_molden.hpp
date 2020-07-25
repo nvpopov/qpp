@@ -22,7 +22,7 @@
 
 namespace qpp {
 
-  enum molden_parser_state_e : size_t {
+  enum class molden_parser_state_e : size_t {
     molden_none,
     molden_format,
     molden_atoms,

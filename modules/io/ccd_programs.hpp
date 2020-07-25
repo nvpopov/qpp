@@ -3,7 +3,7 @@
 
 namespace qpp {
 
-  enum comp_chem_program_e {
+  enum class comp_chem_program_e {
     pr_unknown,
     pr_vasp,
     pr_firefly,

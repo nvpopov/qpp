@@ -141,7 +141,7 @@ class geometry : public basic_geometry<REAL> {
     if (p_has_observers)
       for (int i = 0; i < p_observers.size(); i++)
         if (p_cached_obs_flags[i] & geometry_observer_supports_dim_change)
-          p_observers[i]->dim_changed(before);
+          p_observers[i]->dim_changed(before_after::before);
 
     p_DIM = new_DIM;
 
@@ -152,7 +152,7 @@ class geometry : public basic_geometry<REAL> {
     if (p_has_observers)
       for (int i = 0; i < p_observers.size(); i++)
         if (p_cached_obs_flags[i] & geometry_observer_supports_dim_change)
-          p_observers[i]->dim_changed(after);
+          p_observers[i]->dim_changed(before_after::after);
 
   }
 
@@ -465,7 +465,7 @@ void copy(const geometry<DIM, REAL> &G)
     if (p_has_observers)
       for (int i = 0; i < p_observers.size(); i++)
         if (p_cached_obs_flags[i] & geometry_observer_supports_add)
-          p_observers[i]->added(before, a, r2);
+          p_observers[i]->added(before_after::before, a, r2);
 
     p_atm.push_back(a);
     p_crd.push_back(r2);
@@ -476,7 +476,7 @@ void copy(const geometry<DIM, REAL> &G)
     if (p_has_observers)
       for (int i = 0; i < p_observers.size(); i++)
         if (p_cached_obs_flags[i] & geometry_observer_supports_add)
-          p_observers[i]->added(after, a, r2);
+          p_observers[i]->added(before_after::after, a, r2);
   }
 
   inline void _erase(int at) {
@@ -484,7 +484,7 @@ void copy(const geometry<DIM, REAL> &G)
     if (p_has_observers)
       for (int j = 0; j < p_observers.size(); j++)
         if (p_cached_obs_flags[j] & geometry_observer_supports_erase)
-          p_observers[j]->erased(at, before);
+          p_observers[j]->erased(at, before_after::before);
 
     p_atm.erase(p_atm.begin() + at);
     p_crd.erase(p_crd.begin() + at);
@@ -494,7 +494,7 @@ void copy(const geometry<DIM, REAL> &G)
     if (p_has_observers)
       for (int j = 0; j < p_observers.size(); j++)
         if (p_cached_obs_flags[j] & geometry_observer_supports_erase)
-          p_observers[j]->erased(at, after);
+          p_observers[j]->erased(at, before_after::after);
 
   }
 
@@ -506,7 +506,7 @@ void copy(const geometry<DIM, REAL> &G)
     if (p_has_observers)
       for (int j = 0; j < p_observers.size(); j++)
         if (p_cached_obs_flags[j] & geometry_observer_supports_insert)
-          p_observers[j]->inserted(at, before, a, r2);
+          p_observers[j]->inserted(at, before_after::before, a, r2);
 
     p_atm.insert(p_atm.begin() + at, a);
     p_crd.insert(p_crd.begin() + at, r2);
@@ -518,7 +518,7 @@ void copy(const geometry<DIM, REAL> &G)
     if (p_has_observers)
       for (int j = 0; j < p_observers.size(); j++)
         if (p_cached_obs_flags[j] & geometry_observer_supports_insert)
-          p_observers[j]->inserted(at, after, a, r2);
+          p_observers[j]->inserted(at, before_after::after, a, r2);
   }
 
   inline void _change(int at, const STRING_EX &a1, const vector3<REAL> &r1) {
@@ -526,7 +526,7 @@ void copy(const geometry<DIM, REAL> &G)
     if (p_has_observers)
       for (int i = 0; i < p_observers.size(); i++)
         if (p_cached_obs_flags[i] & geometry_observer_supports_change)
-          p_observers[i]->changed(at, before, a1, r1);
+          p_observers[i]->changed(at, before_after::before, a1, r1);
 
     p_crd[at] = r1;
     p_atm[at] = a1;
@@ -537,7 +537,7 @@ void copy(const geometry<DIM, REAL> &G)
     if (p_has_observers)
       for (int i = 0; i < p_observers.size(); i++)
         if (p_cached_obs_flags[i] & geometry_observer_supports_change)
-          p_observers[i]->changed(at, after, a1, r1);
+          p_observers[i]->changed(at, before_after::after, a1, r1);
 
   }
 
@@ -563,13 +563,13 @@ void copy(const geometry<DIM, REAL> &G)
 
     for (int i = 0; i < p_observers.size(); i++)
       if (p_cached_obs_flags[i] & geometry_observer_supports_shadow)
-        p_observers[i]->shaded(at, before, sh);
+        p_observers[i]->shaded(at, before_after::before, sh);
 
     p_shadow[at] = sh;
 
     for (int i = 0; i < p_observers.size(); i++)
       if (p_cached_obs_flags[i] & geometry_observer_supports_shadow)
-        p_observers[i]->shaded(at, after, sh);
+        p_observers[i]->shaded(at, before_after::after, sh);
 
   }
 
@@ -592,7 +592,7 @@ void copy(const geometry<DIM, REAL> &G)
 
     for (int i = 0; i < p_observers.size(); i++)
       if (p_cached_obs_flags[i] & geometry_observer_supports_reorder)
-        p_observers[i]->reordered(ord, before);
+        p_observers[i]->reordered(ord, before_after::before);
     // fixme - might be inefficient for large molecules
 
     std::vector<STRING_EX> __atm(p_atm);
@@ -611,7 +611,7 @@ void copy(const geometry<DIM, REAL> &G)
 
     for (int i = 0; i < p_observers.size(); i++)
       if (p_cached_obs_flags[i] & geometry_observer_supports_reorder)
-        p_observers[i]->reordered(ord, after);
+        p_observers[i]->reordered(ord, before_after::after);
   }
 
   void sort(const std::function<REAL(const geometry<REAL, CELL> &, int)> &key) {
