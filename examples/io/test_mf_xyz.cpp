@@ -18,7 +18,7 @@ int main(){
   std::cout << "Total animations in multiframe file = " << anim.size() << std::endl;
   for (auto i = 0 ; i < anim.size(); i++){
       std::cout << "Animations " << i << " data :" << std::endl;
-      std::cout << "Anim type " << anim[i].m_anim_type << std::endl;
+      std::cout << "Anim type " << static_cast<int>(anim[i].m_anim_type) << std::endl;
       std::cout << "Total frames " << anim[i].frames.size() << std::endl;
       for (auto q = 0; q < anim[i].frames.size(); q++){
           std::cout << "Total atoms in frame " << q << " = "

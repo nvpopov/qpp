@@ -27,7 +27,7 @@ int main () {
       fmt::print(std::cout, "Num. occup. = {}\n", cc_o.m_n_alpha);
     }
 
-  fmt::print(std::cout, "Calculation type = {}", cc_o.m_run_t);
+  fmt::print(std::cout, "Calculation type = {}", static_cast<int>(cc_o.m_run_t));
   fmt::print(std::cout, " [unknown(0), energy(1), grad(2), geo_opt(3),"
                         "md(4), vib(5), tddft(6), spectrum(7)]\n");
 

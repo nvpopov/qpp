@@ -180,7 +180,7 @@ TEST_CASE("Compilation of ccd model" ) {
     REQUIRE(succes_static);
     REQUIRE(succes_static_with_steps);
     REQUIRE(anim_rec_ws.size() == 2);
-    REQUIRE(anim_rec_ws[0].m_anim_type == geom_anim_t::anim_static);
+    REQUIRE(anim_rec_ws[0].m_anim_type == geom_anim_e::anim_static);
 
     std::ifstream isecv("../examples/io/ref_data/firefly/dvb_ir.out");
     comp_chem_program_data_t<double> cc_ov;
@@ -349,8 +349,8 @@ TEST_CASE( "Computational chemistry data parsing : CP2K Output" ) {
     REQUIRE(cc_o.m_tddft_trans_rec.size() == 9);
     REQUIRE(cc_o.m_tddft_trans_rec[0].m_transition[0].m_from == 328);
     REQUIRE(cc_o.m_tddft_trans_rec[0].m_transition[0].m_to == 329);
-    REQUIRE(cc_o.m_tddft_trans_rec[0].m_transition[0].m_from_spin == spin_alpha);
-    REQUIRE(cc_o.m_tddft_trans_rec[0].m_transition[0].m_to_spin == spin_alpha);
+    REQUIRE(cc_o.m_tddft_trans_rec[0].m_transition[0].m_from_spin == ccd_spin_e::spin_alpha);
+    REQUIRE(cc_o.m_tddft_trans_rec[0].m_transition[0].m_to_spin == ccd_spin_e::spin_alpha);
     REQUIRE(cc_o.m_tddft_trans_rec[0].m_transition[0].m_amplitude == Approx(0.964957));
     REQUIRE(cc_o.m_tddft_trans_rec[0].m_en_ev == Approx(1.653));
     REQUIRE(cc_o.m_tddft_trans_rec[8].m_en_ev == Approx(2.324));

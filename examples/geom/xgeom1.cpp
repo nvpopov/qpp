@@ -9,10 +9,13 @@ int main()
   periodic_cell<float> cl(0);
 
   xgeometry<float, periodic_cell<float> >
-    G(cl,
-      {"atom",      "number","charge",   "x","y","z",                    "optx","opty","optz",            "fullname"},
-      {type_string, type_int, type_real, type_real, type_real, type_real,type_bool, type_bool, type_bool, type_string },
-      "Rich_geometry");
+      G(cl,
+        {"atom", "number", "charge", "x", "y", "z", "optx", "opty", "optz", "fullname"},
+        {basic_types::type_string, basic_types::type_int, basic_types::type_real,
+         basic_types::type_real, basic_types::type_real, basic_types::type_real,
+         basic_types::type_bool, basic_types::type_bool, basic_types::type_bool,
+         basic_types::type_string },
+        "Rich_geometry");
 
   G.xadd("H", 1, 0.3, 1.1, 2.2, 3.3, true, false, false, "Hydrogen");
   G.xadd("C", 7, 0.0, 4,5,6,         false, true, true, "Carbon");
@@ -47,18 +50,18 @@ int main()
   std::cout << G.xfield<std::string>("fullname",3) << "\n";
 
   for (int i=0; i<G.nat(); i++)
-    {
-      auto x = G[i];
-      for (int j=0; j<x.size(); j++)
-  switch(x[j].type())
-    {
-    case type_int: std::cout << "(int)" << x[j].get<int>(); break;
-    case type_float: std::cout << "(flt)" << x[j].get<float>(); break;
-    case type_double: std::cout << "(dbl)" << x[j].get<double>(); break;
-    case type_bool: std::cout << "(bool)" << x[j].get<bool>(); break;
-    case type_string: std::cout << "(str)" << x[j].get<STRING_EX>(); break;
-    default: break;
-    }
-      std::cout << "\n";
-    }
+  {
+    auto x = G[i];
+    for (int j=0; j<x.size(); j++)
+      switch(x[j].type())
+      {
+      case basic_types::type_int: std::cout << "(int)" << x[j].get<int>(); break;
+      case basic_types::type_float: std::cout << "(flt)" << x[j].get<float>(); break;
+      case basic_types::type_double: std::cout << "(dbl)" << x[j].get<double>(); break;
+      case basic_types::type_bool: std::cout << "(bool)" << x[j].get<bool>(); break;
+      case basic_types::type_string: std::cout << "(str)" << x[j].get<STRING_EX>(); break;
+      default: break;
+      }
+    std::cout << "\n";
+  }
 }

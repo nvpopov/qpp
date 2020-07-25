@@ -15,8 +15,8 @@ int main()
   qpp::xgeometry<double, qpp::periodic_cell<double> > 
     g(cl, 
       {"charge","number","hren","mass","mult","word"},
-      {qpp::type_real, qpp::type_int, qpp::type_bool,
-       qpp::type_real, qpp::type_int, qpp::type_string},
+      {qpp::basic_types::type_real, qpp::basic_types::type_int, qpp::basic_types::type_bool,
+       qpp::basic_types::type_real, qpp::basic_types::type_int, qpp::basic_types::type_string},
       "g1");
 
   /*
@@ -53,9 +53,9 @@ int main()
     g2(cl, 
        {"atom",      "number", "z",       "charge",
         "x",       "y",       "mass",    "magmom",  "word"},
-       {type_string, type_int, type_real,
-        type_real, type_real, type_real,
-        type_real, type_real, type_string},
+       {basic_types::type_string, basic_types::type_int, basic_types::type_real,
+        basic_types::type_real, basic_types::type_real, basic_types::type_real,
+        basic_types::type_real, basic_types::type_real, basic_types::type_string},
        "rich_geometry");
 
   g2.xadd("H",   1,   0.3, 0.6,   3,  6, 1.01, 3.731e-3, "hydrogen");
