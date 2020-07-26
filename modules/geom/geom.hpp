@@ -454,7 +454,7 @@ void copy(const geometry<DIM, REAL> &G)
 
  protected:
 
-  inline void _add(const STRING_EX &a, const vector3<REAL> &r1) {
+  inline void add_impl(const STRING_EX &a, const vector3<REAL> &r1) {
 
     vector3<REAL> r2 = r1;
     if (auto_symmetrize) {
@@ -477,9 +477,10 @@ void copy(const geometry<DIM, REAL> &G)
       for (int i = 0; i < p_observers.size(); i++)
         if (p_cached_obs_flags[i] & geometry_observer_supports_add)
           p_observers[i]->added(before_after::after, a, r2);
+
   }
 
-  inline void _erase(int at) {
+  inline void erase_impl(int at) {
 
     if (p_has_observers)
       for (int j = 0; j < p_observers.size(); j++)
@@ -498,7 +499,7 @@ void copy(const geometry<DIM, REAL> &G)
 
   }
 
-  inline void _insert(int at, const STRING_EX &a, const vector3<REAL> &r1) {
+  inline void insert_impl(int at, const STRING_EX &a, const vector3<REAL> &r1) {
 
     vector3<REAL> r2 = r1;
     if (auto_symmetrize) r2 = cell.symmetrize(r1, symmetrize_radius(a));
@@ -521,9 +522,10 @@ void copy(const geometry<DIM, REAL> &G)
           p_observers[j]->inserted(at, before_after::after, a, r2);
   }
 
-  inline void _change(int at, const STRING_EX &a1, const vector3<REAL> &r1) {
+  inline void change_impl(int at, const STRING_EX &a1, const vector3<REAL> &r1,
+                          bool notify_observer) {
 
-    if (p_has_observers)
+    if (notify_observer && p_has_observers)
       for (int i = 0; i < p_observers.size(); i++)
         if (p_cached_obs_flags[i] & geometry_observer_supports_change)
           p_observers[i]->changed(at, before_after::before, a1, r1);
@@ -534,7 +536,7 @@ void copy(const geometry<DIM, REAL> &G)
     if (auto_update_types && at < p_type_table.size())
       p_type_table[at] = define_type(a1);
 
-    if (p_has_observers)
+    if (notify_observer && p_has_observers)
       for (int i = 0; i < p_observers.size(); i++)
         if (p_cached_obs_flags[i] & geometry_observer_supports_change)
           p_observers[i]->changed(at, before_after::after, a1, r1);
@@ -542,22 +544,21 @@ void copy(const geometry<DIM, REAL> &G)
   }
 
  public:
-  virtual void add(const STRING_EX &a, const vector3<REAL> &r1) { _add(a, r1); }
+  virtual void add(const STRING_EX &a, const vector3<REAL> &r1) { add_impl(a, r1); }
 
   void add(STRING_EX a, const REAL _x, const REAL _y, const REAL _z) {
     add(a, {_x, _y, _z});
   }
 
   virtual void insert(int at, const STRING_EX &a, const vector3<REAL> &r1) {
-    _insert(at, a, r1);
+    insert_impl(at, a, r1);
   }
 
-  void insert(int at, const STRING_EX &a, const REAL _x, const REAL _y,
-              const REAL _z) {
+  void insert(int at, const STRING_EX &a, const REAL _x, const REAL _y, const REAL _z) {
     insert(at, a, {_x, _y, _z});
   }
 
-  virtual void erase(int at) { _erase(at); }
+  virtual void erase(int at) { erase_impl(at); }
 
   inline void shadow(int at, bool sh) {
 
@@ -573,19 +574,20 @@ void copy(const geometry<DIM, REAL> &G)
 
   }
 
-  virtual void change(int at, const STRING_EX &a1, const vector3<REAL> &r1) {
-    _change(at, a1, r1);
+  virtual void change(int at, const STRING_EX &a1, const vector3<REAL> &r1,
+                      bool notify_observer = true) {
+    change_impl(at, a1, r1, notify_observer);
   }
 
-  virtual void change_pos(int at, const vector3<REAL> &r1) {
-    _change(at, p_atm[at], r1);
+  virtual void change_pos(int at, const vector3<REAL> &r1, bool notify_observer = true) {
+    change_impl(at, p_atm[at], r1, notify_observer);
   }
 
   void reorder_types(const std::vector<int> &ord) {
     if (p_type_table.size() != size()) return;
 
-    std::vector<int> __type_table(p_type_table);
-    for (int i = 0; i < size(); i++) p_type_table[i] = __type_table[ord[i]];
+    std::vector<int> type_table(p_type_table);
+    for (int i = 0; i < size(); i++) p_type_table[i] = type_table[ord[i]];
   }
 
   virtual void reorder(const std::vector<int> &ord) {
@@ -595,16 +597,16 @@ void copy(const geometry<DIM, REAL> &G)
         p_observers[i]->reordered(ord, before_after::before);
     // fixme - might be inefficient for large molecules
 
-    std::vector<STRING_EX> __atm(p_atm);
-    std::vector<vector3<REAL> > __crd(p_crd);
-    std::vector<Bool> __shadow(p_shadow);
+    std::vector<STRING_EX> atm(p_atm);
+    std::vector<vector3<REAL> > crd(p_crd);
+    std::vector<Bool> shadow(p_shadow);
 
     // bool reorder_types = (_type_table.size() == size());
 
     for (int i = 0; i < size(); i++) {
-      p_atm[i] = __atm[ord[i]];
-      p_crd[i] = __crd[ord[i]];
-      p_shadow[i] = __shadow[ord[i]];
+      p_atm[i]    = atm[ord[i]];
+      p_crd[i]    = crd[ord[i]];
+      p_shadow[i] = shadow[ord[i]];
     }
 
     reorder_types(ord);
@@ -634,9 +636,9 @@ void copy(const geometry<DIM, REAL> &G)
   }
 
   virtual void get_fields(int j, std::vector<datum> &v) const {
+
     if (j < 0) j += nat();
-    if (j < 0 || j >= nat())
-      IndexError("xgeometry::py_getitem: index out of range");
+    if (j < 0 || j >= nat()) IndexError("xgeometry::py_getitem: index out of range");
 
     v.clear();
     v.push_back(atom(j));
@@ -644,6 +646,7 @@ void copy(const geometry<DIM, REAL> &G)
     v.push_back(rl(0));
     v.push_back(rl(1));
     v.push_back(rl(2));
+
   }
 
   virtual void set_fields(int j, const std::vector<datum> &v) {
@@ -665,8 +668,7 @@ void copy(const geometry<DIM, REAL> &G)
     return v;
   }
 
-  virtual void write(std::basic_ostream<CHAR_EX, TRAITS> &os,
-                     int offset = 0) const {
+  virtual void write(std::basic_ostream<CHAR_EX, TRAITS> &os, int offset = 0) const {
     for (int k = 0; k < offset; k++) os << " ";
     os << "geometry";
     if (name != "") os << " " << name;

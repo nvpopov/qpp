@@ -102,15 +102,14 @@ public:
   /// \param __nxbool
   /// \param __name
   ///
-  xgeometry(CELL & __cell,
-            int __nxstring, int __nxreal=0, int __nxint=0, int __nxbool=0,
+  xgeometry(CELL & __cell, int __nxstring, int __nxreal=0, int __nxint=0, int __nxbool=0,
             const STRING_EX & __name = "") :
-                                            p_xstring(__nxstring), p_xreal(__nxreal), p_xint(__nxint), p_xbool(__nxbool),
-                                            p_field_name(__nxreal + __nxint + __nxbool + __nxstring),
-                                            p_field_type(__nxreal + __nxint + __nxbool + __nxstring),
-                                            p_field_idx(__nxreal + __nxint + __nxbool + __nxstring),
-                                            p_field_additive(__nxreal + __nxint + __nxbool + __nxstring),
-                                            geometry<REAL,CELL>(__cell, __name) {
+            p_xstring(__nxstring), p_xreal(__nxreal), p_xint(__nxint), p_xbool(__nxbool),
+            p_field_name(__nxreal + __nxint + __nxbool + __nxstring),
+            p_field_type(__nxreal + __nxint + __nxbool + __nxstring),
+            p_field_idx(__nxreal + __nxint + __nxbool + __nxstring),
+            p_field_additive(__nxreal + __nxint + __nxbool + __nxstring),
+            geometry<REAL,CELL>(__cell, __name) {
 
     init_xdefault();
     p_nxreal   = __nxreal;
@@ -125,8 +124,7 @@ public:
   /// \param __cell
   /// \param __name
   ///
-  xgeometry(CELL & __cell,  const STRING_EX & __name = "") :
-                                                          geometry<REAL,CELL>(__cell, __name) {
+  xgeometry(CELL & __cell,  const STRING_EX & __name = "") : geometry<REAL,CELL>(__cell, __name) {
     init_xdefault();
   }
 
@@ -135,8 +133,7 @@ public:
   /// \param dim
   /// \param __name
   ///
-  xgeometry(int dim,  const STRING_EX & __name = "") :
-                                                     geometry<REAL,CELL>(dim, __name) {
+  xgeometry(int dim,  const STRING_EX & __name = "") : geometry<REAL,CELL>(dim, __name) {
     init_xdefault();
   }
 
@@ -155,8 +152,7 @@ public:
   /// \param fn
   /// \param ft
   ///
-  void set_format(const std::vector<STRING_EX> & fn,
-                  const std::vector<basic_types> & ft) {
+  void set_format(const std::vector<STRING_EX> & fn, const std::vector<basic_types> & ft) {
 
     p_field_name = fn;
     p_field_type = ft;
@@ -313,14 +309,10 @@ public:
     } else if (attributes<T>::type == basic_types::type_int) {
       return convert<T&,int&>::get(p_xint[p_field_idx[i]][j]);
     } else if (attributes<T>::type == attributes<REAL>::type) {
-      if (i==p_ix_x)
-        return convert<T&,REAL&>::get(p_crd[j].x());
-      else if (i==p_ix_y)
-        return convert<T&,REAL&>::get(p_crd[j].y());
-      else if (i==p_ix_z)
-        return convert<T&,REAL&>::get(p_crd[j].z());
-      else
-        return convert<T&,REAL&>::get(p_xreal[p_field_idx[i]][j]);
+      if (i==p_ix_x) return convert<T&,REAL&>::get(p_crd[j].x());
+      else if (i==p_ix_y) return convert<T&,REAL&>::get(p_crd[j].y());
+      else if (i==p_ix_z) return convert<T&,REAL&>::get(p_crd[j].z());
+      else return convert<T&,REAL&>::get(p_xreal[p_field_idx[i]][j]);
     } else {
       throw std::invalid_argument("Illegal type of xgeometry extra field");
     }
@@ -390,17 +382,19 @@ public:
   }
 
   template<class T>
-  void set_xfield(int i, int j, T value) {
+  void set_xfield(int i, int j, T value, bool notify_observer = true) {
 
-    for (int q = 0; q < p_observers.size(); q++)
-      if (p_cached_obs_flags[q] & geometry_observer_supports_xfield_change)
-        p_observers[q]->xfield_changed(i, j, before_after::before);
+    if (notify_observer && p_has_observers)
+      for (int q = 0; q < p_observers.size(); q++)
+        if (p_cached_obs_flags[q] & geometry_observer_supports_xfield_change)
+          p_observers[q]->xfield_changed(i, j, before_after::before);
 
     xfield<T>(i, j) = value;
 
-    for (int q = 0; q < p_observers.size(); q++)
-      if (p_cached_obs_flags[q] & geometry_observer_supports_xfield_change)
-        p_observers[q]->xfield_changed(i, j, before_after::after);
+    if (notify_observer && p_has_observers)
+      for (int q = 0; q < p_observers.size(); q++)
+        if (p_cached_obs_flags[q] & geometry_observer_supports_xfield_change)
+          p_observers[q]->xfield_changed(i, j, before_after::after);
 
   }
 
@@ -522,7 +516,7 @@ public:
     for (int i=0; i<p_nxint; i++) p_xint[i].push_back(0);
     for (int i=0; i<p_nxbool; i++) p_xbool[i].push_back( false );
 
-    geometry<REAL,CELL>::add(a,r);
+    geometry<REAL,CELL>::add(a, r);
 
   }
 
@@ -548,7 +542,6 @@ public:
 
   }
 
-
   virtual void add(STRING_EX a, REAL _x, REAL _y, REAL _z) {
     add(a, {_x,_y,_z});
   }
@@ -573,24 +566,24 @@ public:
 
     for (int i=0; i<p_nxstring; i++){
       std::vector<STRING_EX> __xstring(p_xstring[i]);
-      for (int j=0; j<size(); j++)
-        p_xstring[i][j] = __xstring[ord[j]];
+      for (int j=0; j<size(); j++) p_xstring[i][j] = __xstring[ord[j]];
     }
+
     for (int i=0; i<p_nxreal; i++){
       std::vector<REAL> __xreal(p_xreal[i]);
-      for (int j=0; j<size(); j++)
-        p_xreal[i][j] = __xreal[ord[j]];
+      for (int j=0; j<size(); j++) p_xreal[i][j] = __xreal[ord[j]];
     }
+
     for (int i=0; i<p_nxint; i++){
       std::vector<int> __xint(p_xint[i]);
-      for (int j=0; j<size(); j++)
-        p_xint[i][j] = __xint[ord[j]];
+      for (int j=0; j<size(); j++)  p_xint[i][j] = __xint[ord[j]];
     }
+
     for (int i=0; i<p_nxbool; i++){
       std::vector<short> __xbool(p_xbool[i]);
-      for (int j=0; j<size(); j++)
-        p_xbool[i][j] = __xbool[ord[j]];
+      for (int j=0; j<size(); j++) p_xbool[i][j] = __xbool[ord[j]];
     }
+
     for (int i=0; i<p_observers.size(); i++)
       p_observers[i]->reordered(ord, before_after::after);
 
@@ -994,8 +987,7 @@ public:
 
   }
 
-  py_indexed_property<SELF, bool, int, &SELF::py_getadd,
-                      &SELF::py_setadd > py_add;
+  py_indexed_property<SELF, bool, int, &SELF::py_getadd, &SELF::py_setadd > py_add;
 
   virtual void py_add_list(const py::list & l) {
     geometry<REAL,CELL>::add("",0,0,0);
@@ -1004,19 +996,16 @@ public:
 
   static void py_export(py::module m, const char * pyname) {
 
-    std::string sPropNameField =
-        fmt::format("{0}_{1}",pyname,"idx_prop_xfield");
+    std::string sPropNameField = fmt::format("{0}_{1}",pyname,"idx_prop_xfield");
     py_2indexed_property<SELF, py::object, py::object, int, &SELF::py_getfield1,
                          &SELF::py_setfield1, &SELF::py_getfield,
                          &SELF::py_setfield >::py_2export(m, sPropNameField.c_str());
 
-    std::string sPropNameAdd =
-        fmt::format("{0}_{1}",pyname,"idx_prop_xadd");
+    std::string sPropNameAdd = fmt::format("{0}_{1}",pyname,"idx_prop_xadd");
     py_indexed_property<SELF, bool, int, &SELF::py_getadd,
-                        &SELF::py_setadd >::py_export(m, sPropNameAdd.c_str());
+                        &SELF::py_setadd>::py_export(m, sPropNameAdd.c_str());
 
-    py::class_<xgeometry<REAL,CELL>, geometry<REAL,CELL>,
-               std::shared_ptr<xgeometry<REAL,CELL>> >
+    py::class_<xgeometry<REAL,CELL>, geometry<REAL,CELL>, std::shared_ptr<xgeometry<REAL,CELL>>>
         (m, pyname, py::dynamic_attr())
             .def(py::init<int,   const STRING_EX&>(),
                  py::arg("dim"), py::arg("__name") = "")
