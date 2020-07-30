@@ -27,8 +27,7 @@ public:
   int DIM;
   STRING_EX name;
 
-  genform_group(int dim = 0,
-                const STRING_EX & _name = "") {
+  genform_group(int dim = 0, const STRING_EX & _name = "") {
     DIM=dim;
     generators.resize(DIM);
     _begin = index::D(DIM);
@@ -37,8 +36,7 @@ public:
   }
 
   genform_group(const std::vector<TRANSFORM> & g,
-                const index & __begin,
-                const index & __end,
+                const index & __begin, const index & __end,
                 const STRING_EX & _name = "") {
     DIM = g.size();
     generators.resize(DIM);
@@ -63,13 +61,12 @@ public:
     name = _name;
   }
 
-  genform_group(const genform_group<TRANSFORM> & G)
-      : DIM(G.DIM), generators(G.generators), _begin(G._begin), _end(G._end), name(G.name)
-  {}
+  genform_group(const genform_group<TRANSFORM> & G) :
+                                                     DIM(G.DIM), generators(G.generators), _begin(G._begin), _end(G._end), name(G.name){}
 
-  int get_dim(){return DIM;}
+  int get_dim() {return DIM;}
 
-  void set_dim(int D){
+  void set_dim(int D) {
     DIM = D;
     generators.resize(DIM);
 
@@ -138,8 +135,8 @@ int py_group_len(const array_group<TRANSFORM> & G)
 */
     // ------------------------------------------------------------------------
 
-    template<class TRANSFORM>
-    class array_group {
+template<class TRANSFORM>
+class array_group {
 public:
 
   static int default_lim_size;

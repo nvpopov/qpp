@@ -1,5 +1,8 @@
 from qpp import *
 from symm import abelian_sub, build_multab, complete_subgroup
+from numpy.linalg import matrix_rank
+from numpy.linalg import solve
+from math import floor,sqrt
 
 def is_pure_translation(A):
     return A.R.norm() < A.tol_rot and A.T.norm() < A.tol_transl
@@ -14,7 +17,7 @@ def has_pure_translation(G):
     return False
 
 def reduce_translations(G):
-    for j in xrange(len(G)):
+    for j in range(len(G)):
         f = G[j].cell.cart2frac(G[j].T)
         for i in range(3):
             if (f[i] > 1.0-G[j].tol_trans):
@@ -50,12 +53,12 @@ class linear3d:
             return (self.c-x).norm() < self.c.tol_equiv
         elif self.dim == 1:
             y = x - self.c
-            y = y - self.n*scal(y,self.n)
+            y = y - self.n*y.dot(self.n)
             return y.norm() < self.c.tol_equiv
         elif self.dim == 2:
             y = x - self.c
             #print 'Yes I am'
-            return abs(scal(y,self.n)) < self.c.tol_equiv
+            return abs(y.dot(self.n)) < self.c.tol_equiv
         elif self.dim == 3:
             return True
 
@@ -99,31 +102,31 @@ class linear3d:
                     return self
                 else:
                     return linear3d(-1,vector3d(0,0,0))
-            elif abs(scal(c2-c1,n1%n2)) < self.c.tol_equiv:
-                s = scal(n1,n2)
-                x1 = scal(n1 - s*n2, c2-c1)/(1-s*s)
+            elif abs((c2-c1).dot(n1.cross(n2))) < self.c.tol_equiv:
+                s = n1.dot(n2)
+                x1 = (n1 - s*n2).dot(c2-c1)/(1-s*s)
                 return linear3d(0,c1+x1*n1)
             else:
                 return linear3d(-1,vector3d(0,0,0))
         if d1==2 and d2==1:
-            if abs(scal(n1,n2)) < self.c.tol_equiv:
-                if abs(scal(n1,c2-c1)) < self.c.tol_equiv:
+            if abs(n1.dot(n2)) < self.c.tol_equiv:
+                if abs(n1.dot(c2-c1)) < self.c.tol_equiv:
                     return linear3d(1,c2,n2)
                 else:
                     return linear3d(-1,vector3d(0,0,0))
             else:
-                return  linear3d(0,c2+n2*scal(n1,c1-c2)/scal(n1,n2))
+                return  linear3d(0,c2+n2*n1.dot(c1-c2)/n1.dot(n2))
         if d1==2 and d2==2:
             if (n1-n2).norm() < self.c.tol_equiv or (n1+n2).norm() < self.c.tol_equiv:
-                if abs(scal(n1,c1-c2))<self.c.tol_equiv:
+                if abs(n1.dot(c1-c2))<self.c.tol_equiv:
                     return self
                 else:
                     return linear3d(-1,vector3d(0,0,0))
             else:
-                s = scal(n1,n2)
-                nn = n1%n2
-                x1 = (scal(c1,n1)-s*scal(c2,n2))/(1-s*s)
-                x2 = (scal(c2,n2)-s*scal(c1,n1))/(1-s*s)
+                s = n1.dot(n2)
+                nn = n1.cross(n2)
+                x1 = (c1.dot(n1)-s*c2.dot(n2))/(1-s*s)
+                x2 = (c2.dot(n2)-s*c1.dot(n1))/(1-s*s)
                 return linear3d(1,x1*n1+x2*n2,nn)
  
 def vecreal(v):
@@ -134,7 +137,7 @@ def invariant_subspace(R):
     n = matrix3z()
     diagon3(lmb,n,R.R)
     T = vector3z(R.T[0],R.T[1],R.T[2])
-    t = vector3z(scal(n[0],T), scal(n[1],T), scal(n[2],T))
+    t = vector3z(n[0].dot(T), n[1].dot(T), n[2].dot(T))
     x = vector3z(0,0,0)
     nn=[]
     for i in range(3):
@@ -153,7 +156,7 @@ def invariant_subspace(R):
     elif d==1:
         return linear3d(1,rc,vecreal(nn[0]))
     elif d==2:
-        return linear3d(2,rc,vecreal(nn[0]%nn[1]))
+        return linear3d(2,rc,vecreal(nn[0].cross(nn[1])))
     elif d==3:
         return linear3d(3,rc)
    
@@ -165,7 +168,7 @@ def merge_equiv_subs(subspaces,subgroups,multab):
     while i<len(subspaces):
         if not already[i] and subspaces[i].dim != -1:
             idx = [j for j,l in enumerate(subspaces) if l==subspaces[i] ]
-            print i,idx
+            print(i,idx)
             g = []
             for j in idx:
                 g = g + subgroups[j]
@@ -185,14 +188,14 @@ def add_subs(multab,subgroups,subspaces,sg,ss):
         subgroups.append(sg)
 
 def recurs_add_subs(multab,subgroups,subspaces,sg,ss,i,n):
-    for j in xrange(i[-1]+1,n):
+    for j in range(i[-1]+1,n):
         nss = ss & subspaces[j]
         if nss.dim in [1,2]:
-            print '  '*len(i),i+[j],nss
+            print('  '*len(i),i+[j],nss)
             recurs_add_subs(multab,subgroups,subspaces,complete_subgroup(subgroups[j] + sg,multab), nss, i+[j], n)
         elif nss.dim == 0:
             add_subs(multab,subgroups,subspaces,complete_subgroup(subgroups[j] + sg,multab),nss)
-            print '  '*len(i),i+[j],nss,sg, len(subgroups[subspaces.index(nss)])
+            print('  '*len(i),i+[j],nss,sg, len(subgroups[subspaces.index(nss)]))
 
 def add_subspace(subspaces,elements,s,g):
     try:
@@ -205,7 +208,7 @@ def add_subspace(subspaces,elements,s,g):
             elements.append(set(g))
             #elements.append(complete_subgroup(g))
 
-def find_point_subgroups(G):
+def find_point_subgroups2(G):
 
     # unbind
     GG = [rotrans_d(g.T,g.R) for g in G]
@@ -233,9 +236,9 @@ def find_point_subgroups(G):
     for  i in xrange(n):
         print i, subspaces[i], len(elements[i])
     '''
-    for i in xrange(n):
+    for i in range(n):
         if subspaces[i].dim==0:
-            for j in xrange(n):
+            for j in range(n):
                 if subspaces[i].c in subspaces[j]:
                     #elements[i] = complete_subgroup(elements[i] + elements[j])
                     elements[i] = elements[i] | elements[j]
@@ -251,9 +254,9 @@ def find_point_subgroups(G):
         nnewnew = len(subspaces)
         #print nnew,nnewnew
 
-        for i in xrange(nnew,len(subspaces)):
+        for i in range(nnew,len(subspaces)):
             if subspaces[i].dim in (1,2):
-                for j in xrange(n):
+                for j in range(n):
                     if subspaces[j].dim in (1,2):
                         add_subspace(subspaces,elements, subspaces[i] & subspaces[j], \
                                      #elements[i] + elements[j])
@@ -298,3 +301,332 @@ def find_point_subgroups1(G):
 def find_cryst_symm(geom,R):
     B = array_point_group_d()
     bravais_point_group(B,geom.cell,R)
+
+def rotrans_2frac(r):
+    cl = r.cell
+    a=matrix3d(cl[0],cl[1],cl[2]).tran()
+    return rotrans_d(a.inv()*r.T, a.inv()*r.R*a)
+
+def rotrans_2cart(r,cl):
+    a=matrix3d(cl[0],cl[1],cl[2]).tran()
+    return bound_rotrans_d(a*r.T, a*r.R*a.inv(), cl)
+
+def rotrans_circle(r):
+    F = rotrans_d(r.T,r.R)
+    G=F
+    circle = [F]
+    while (G.R - matrix3d.identity()).norm() > rotrans_d.tol_rot:
+        G = G*F
+        circle.append(G)
+    t = G.T
+    n = len(circle)
+    return circle
+
+def LI_vecs(M, eps):
+    dim = len(M)
+    LI=[]
+    I=[]
+    for i in range(dim):
+        tmp=[]
+        for r in LI:
+            tmp.append(r)
+        MM = [x for x in M[i]]
+        tmp.append(MM)                #set tmp=LI+[M[i]]
+        if matrix_rank(tmp,tol=eps)>len(LI):    #test if M[i] is linearly independent from all (row) vectors in LI
+            I.append(i)
+            LI.append(MM)             #note that matrix_rank does not need to take in a square matrix
+    return I                           #return set of linearly independent (row) vectors
+
+def lincomb(y,x):
+    n=len(x)
+    A = [[x[i].dot(x[j]) for j in range(n)] for i in range(n)]
+    b = [y.dot(x[i]) for i in range(n)]
+    return solve(A,b)
+
+def nullspace(a,eps):
+    indep = LI_vecs(a,eps)
+    dep = [i for i in range(len(a)) if not i in indep]
+    if indep == []:
+        return indep, dep, [[-1e0 if j==i else 0e0 for j in range(len(a))] for i in range(len(a))]
+    if dep == []:
+        return indep, dep, []
+    basis = [a[i] for i in indep]
+    ns = []
+    for i in dep:
+        x = lincomb(a[i],basis)
+        coeffs = [0e0 for j in range(len(a))]
+        for j in range(len(basis)):
+            coeffs[indep[j]] = x[j]
+        coeffs[i] = -1e0
+        ns.append(coeffs)
+    return indep, dep, ns
+
+def round(x):
+    return floor(x+.5)
+
+def inspect_rotrans(r):
+    eps = 1e-5
+    cl = r.cell
+    v = [vector3d(0), cl[0], cl[1], cl[2]]
+    t=[]
+    p=[]
+    for i in range(4):
+        c = rotrans_circle(rotrans_d(r.T+v[i], r.R))
+        pp=vector3d(0,0,0)
+        for g in c:
+            pp = pp + g.T
+        pp = pp/len(c)
+        p.append(pp)
+        t.append(c[-1].T)
+    a = [t[1]-t[0],t[2]-t[0],t[3]-t[0],t[0]]
+    b = [p[1]-p[0],p[2]-p[0],p[3]-p[0],p[0]]
+    indep, dep, ns = nullspace(a,eps)
+    if 3 in indep:
+        # no way to make this rotrans a point symmetry
+        return []
+    print(ns)
+    center = []
+    for i in range(-1,len(ns)-1):
+        v = vector3d(0e0)
+        for j in range(4):
+            v = v - ns[i][j]*b[j]
+        center.append(v)
+    idxx = []
+    for j in range(3):
+        if abs(ns[-1][j] - round(ns[-1][j])) < eps:
+            idxx.append( -round(ns[-1][j]))
+        else:
+            return []
+    idx = [index(idxx)]
+    for i in range(len(ns)-1):
+        idxx = []
+        for j in range(3):
+            if abs(ns[i][j] - round(ns[i][j])) < eps:
+                idxx.append( -round(ns[i][j]))
+        if len(idxx)==3:
+            idx.append(index(idxx))
+    return idx
+
+def rotrans_grid(r,idx):
+    d = len(idx)
+    rf = rotrans_2frac(r)
+    rf_shifted = [rotrans_2frac(shift_r(r,i)) for i in idx]
+    pt_cntr = invariant_subspace(rf).point
+    pt_shifted = [invariant_subspace(rfs).point for rfs in rf_shifted]
+    cl = periodic_cell_d(3)
+    for i in range(d):
+        cl[i] = pt_shifted[i] - pt_cntr
+    if (d)==1:
+        n = [vector3d(1,0,0),vector3d(0,1,0),vector3d(0,0,1)]
+        n1 = min(n, key = lambda x: abs(x.dot(cl[0])))
+        cl[1] = n1
+    if (d)<=2:
+        cl[2] = cl[0].cross(cl[1])
+    S = sphere_shape_d(.5*sqrt(3),-1e0*pt_cntr)
+    fmin = S.fmin(cl)
+    fmax = S.fmax(cl)
+    grid0 = [ floor(fmin[i]) if i<d else 0 for i in range(3)] 
+    grid1 = [ floor(fmax[i])+1 if i<d else 0 for i in range(3)]
+    grd = []
+    for g in index_range(grid0,grid1):
+        I = index([0,0,0])
+        for i in range(d):
+            I = I + idx[i]*g[i]
+        S = invariant_subspace(rotrans_2frac(shift_r(r,I)))
+        print(S.dim,I,S.point, S.point.norm() < .5*sqrt(3))
+        if ( S.point.norm() < .5*sqrt(3) ):
+            grd.append(I)
+    return grd
+
+def relevant_subspaces(r):
+    I = inspect_rotrans(r)
+    if I==[]:
+        return [],[]
+    rr = shift_r(r,I[0])
+    grd=rotrans_grid(rr,I[1:])
+    return [invariant_subspace(shift_r(rr,g)) for g in grd],[shift_r(rr,g) for g in grd]
+        
+def check_symm_point(GC,uc,pt):
+    eps = 1e-5
+    res = []
+    for g in GC:
+        f = uc.cell.cart2frac(g*pt - pt)
+        n = round(f[0])
+        m = round(f[1])
+        l = round(f[2])
+        if (f - vector3d(n,l,m)).norm()<eps:
+            res.append(rotrans_d(g.T+n*uc.cell[0]+m*uc.cell[1]+l*uc.cell[2], g.R))
+    return res
+
+        
+
+def find_point_subgroups2(GC,uc):
+    eps = 1e-5
+    images = [[] for i in range(len(uc))]
+    already = [False for i in range(len(uc))]
+    for at in range(len(uc)):
+        if not already[at]:
+            atom = uc.atom[at]
+            r0 = uc.pos(at)
+            for j in range(len(GC)):
+                r = GC[j]*r0
+                r = uc.cell.reduce(r)
+                found = False
+                for at1 in range(len(uc)):
+                    if uc.atom[at1]==atom:
+                        for I in index_range([-1,-1,-1],[1,1,1]):
+                            if (r - uc.pos(at1,I)).norm()<eps:
+                                if not at1 in images[at]:
+                                    images[at].append(at1)
+                                    already[at1] = True
+                                found = True
+                                break
+                if not found:
+                    print(at,j,r0,r)
+    #return images, already
+    at=0
+    for i in range(len(uc)):
+        if len(images[i])>0:
+            if len(images[at]) == 0 or  len(images[at]) < len(images[i]):
+                at = i
+    #print(at,images[at])
+    #candidate points:
+    r0 = uc.pos(at)
+    pt_groups = []
+    for at1 in images[at]:
+        for I in index_range([-1,-1,-1],[1,1,1]):
+            r1 = uc.pos(at1,I)
+            pt = (r0 + r1)/2
+            print(pt)
+            if uc.cell.within(pt):
+                cand_group = check_symm_point(GC,uc,pt)
+                if len(cand_group) > 1:
+                    pt_groups.append((cand_group,pt))
+    return pt_groups
+                
+#-----------------------------------------------------------------------
+
+def shift_r(r,I):
+    cl = r.cell
+    return bound_rotrans_d(r.T + cl[0]*I[0] + cl[1]*I[1] + cl[2]*I[2], r.R, r.cell)
+
+def order_r(r):
+    eps = 1e-5
+    I = matrix3d.identity();
+    n=1
+    M = r.R
+    while (M-I).norm() > eps:
+        M = M*r.R
+        n += 1
+    return n
+
+def abelian_division(G):
+    A = group_analyzer_cgd(G)
+    grps = []
+    gen = []
+    for i in range(len(G)):
+        a = set(A.abelian_sub(i))
+        if not a in grps:
+            grps.append(a)
+            gen.append(i)
+    return gen
+
+#---------------------------------------------
+
+def subs_merge(subs,groups,sucessors,i,grp,pred):
+             for g in grp:
+        if not g in groups[i]:
+            groups[i].append(g)
+    for p in pred:
+        if not i in sucessors[p]:
+            sucessors[p].append(i)
+
+def subs_new(subs,groups,sucessors,s,grp,pred):
+    i = len(subs)
+    subs.append(s)
+    newg = []
+    for g in grp:
+        if not g in newg:
+            newg.append(g)
+    groups.append(newg)
+    sucessors.append([])
+    for p in pred:
+        sucessors[p].append(i)
+
+def subs_check(subs,groups,sucessors,i,j):
+    if subs[i].within(subs[j]):
+        subs_merge(subs,groups,sucessors,j,groups[i],[i])
+
+def subs_is_relevant(S,cell):
+    if S.dim == -1 or S.dim == 3:
+        return False
+    elif S.dim == 0:
+        return cell.within_centered(S.point)
+    else:
+        return cell.cart2frac(S.point).norm() < .5*sqrt(3)
+
+
+    
+def find_point_subgroups(GC):
+    geners = abelian_division(GC)
+    subs = []
+    groups = []
+    sucessors = []
+    for g in geners:
+        r1 = relevant_subspaces(GC[g])
+        print(r1)
+        ss, rr = relevant_subspaces(GC[g])
+        for i in range(len(ss)):
+            if not ss[i] in subs:
+                subs_new(subs,groups,sucessors,ss[i],[rr[i]],[])
+            else:
+                subs_merge(subs,groups,sucessors,subs.index(ss[i]),[rr[i]],[])
+    for i in range(len(subs)):
+        for j in range(len(subs)):
+            if i!=j:
+                subs_check(subs,groups,sucessors,i,j)
+    inew = 0
+    while inew < len(subs):
+        inewest = len(subs)
+        for ig1 in range(inewest):
+            for ig2 in range(inew, inewest):
+                if ig1!=ig2:
+                    s = subs[ig1] & subs[ig2]
+                    if not subs_is_relevant(s,GC[0].cell):
+                        continue
+                    found = False
+                    ifound = -1
+                    pred = []
+                    if s == subs[ig1]:
+                        found = True
+                        ifound = ig1
+                        pred = [ig2]
+                    elif s == subs[ig2]:
+                        found = True
+                        ifound = ig2
+                        pred = [ig1]
+                    else:
+                        for i in range(len(subs)):
+                            if i!=ig1 and i!=ig2 and s == subs[i]:
+                                found = True
+                                ifound = i
+                                pred = [ig1,ig2]
+                                break
+                    if found:
+                        subs_merge(subs,groups,sucessors,ifound,groups[ig1] + groups[ig2], pred)
+                    else:
+                        subs_new(subs,groups,sucessors,s,groups[ig1] + groups[ig2], [ig1,ig2])
+                        print(len(subs),subs[-1].dim, subs[-1].point, subs[-1].axis)
+        inew = inewest
+    S=[]
+    G=[]
+    for i in range(len(subs)):
+        if sucessors[i]==[]:
+            S.append(subs[i])
+            GG=[]
+            for g in groups[i]:
+                symm_add(GG,g)
+            G.append(GG)                            
+    return S,G
+
+

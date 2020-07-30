@@ -14,7 +14,7 @@
 #undef slots
 #include <pybind11/pybind11.h>
 #include <pybind11/operators.h>
-//#include <pybind11/stl.h>
+#include <pybind11/stl.h>
 #include <pyqpp/py_indexed_property.hpp>
 namespace py = pybind11;
 #pragma pop_macro("slots")
@@ -329,20 +329,25 @@ class neighbours_table : public geometry_observer<REAL> {
   int ntp;
 
   // Bonding distance between i-th and j-th atomic types
-  inline REAL distance(int i, int j) {return _disttable[i*ntp+j];}
+  inline REAL distance(int i, int j) const {return _disttable[i*ntp+j];}
+
+  inline REAL & distance(int i, int j) {return _disttable[i*ntp+j];}
 
   inline void resize_disttable(){
-    //      if (_disttable != nullptr)
-    //        delete []_disttable;
-    delete []_disttable;
+    if (_disttable != nullptr)
+      delete []_disttable;
+    ntp = geom->n_types();
+    if (ntp < 1)
+      IndexError("Number of atomic types is zero. Maybe, you should initialize typetable?");
+    _disttable = new REAL[ntp*ntp];
   }
 
   void build_disttable(){
     resize_disttable();
     for (int i=0; i<ntp; i++)
       for (int j=0; j<=i; j++) {
-        _disttable[ntp*i+j] = btbl->distance(geom->atom_of_type(i),geom->atom_of_type(j));
-        _disttable[ntp*j+i] = btbl->distance(geom->atom_of_type(i),geom->atom_of_type(j));
+        distance(i,j) = btbl->distance(geom->atom_of_type(i),geom->atom_of_type(j));
+        distance(j,i) = btbl->distance(geom->atom_of_type(i),geom->atom_of_type(j));
 
       }
   }
@@ -543,11 +548,11 @@ public:
   bool reference_mode;
   bool transl_mode;
 
-  neighbours_table( geometry<REAL, CELL> & g, bonding_table<REAL> & t) : ngrain(index::D(3)){
+  neighbours_table( geometry<REAL, CELL> & g, bonding_table<REAL> & t) :
+                    ngrain(index::D(3)), _disttable(nullptr) {
     btbl = &t;
-    geom = &g;
-    DIM = geom->get_DIM();
-    //_disttable.clear();
+    geom = & g;
+    DIM = geom -> get_DIM();
     build_disttable();
     reference_mode = false;
     transl_mode = true;
@@ -556,9 +561,9 @@ public:
   }
 
   ~neighbours_table() {
-    //        if (_disttable != nullptr)
     //          delete [] _disttable;
-    delete [] _disttable;
+    if (_disttable != nullptr)
+      delete [] _disttable;
   }
 
   REAL get_grain_size(){return grainsize;}
@@ -842,7 +847,7 @@ public:
     }
   }
 
-  void ref_shaded(int at, before_after st,bool sh){}
+  void ref_shaded(int at, before_after st, bool sh){}
 
   uint32_t get_flags() override {
     return geometry_observer_supports_default
@@ -854,25 +859,16 @@ public:
            | geometry_observer_supports_reorder;
   };
 
-  void added(before_after st, const STRING_EX & a, const vector3<REAL> & r) override {}
-  void inserted(int at, before_after st, const STRING_EX & a, const vector3<REAL> & r) override {}
-  void changed(int at, before_after st, const STRING_EX & a, const vector3<REAL> & r) override {}
-  void erased(int at, before_after st) override {}
-  void shaded(int at, before_after st, bool sh) override {}
-  void reordered(const std::vector<int> &, before_after) override {}
-  void geometry_destroyed () override {}
-
-  void dim_changed(before_after ord) override {
-
-  }
-
-  void cell_changed(before_after ord) override {
-
-  }
-
-  void xfield_changed(int xid, int at, before_after ord) override {
-
-  }
+  virtual void added(before_after st, const STRING_EX & a, const vector3<REAL> & r){}
+  virtual void inserted(int at, before_after st, const STRING_EX & a,const vector3<REAL> & r){}
+  virtual void changed(int at, before_after st, const STRING_EX & a,const vector3<REAL> & r){}
+  virtual void erased(int at, before_after st){}
+  virtual void shaded(int at, before_after st, bool sh){}
+  virtual void reordered(const std::vector<int> &, before_after){}
+  void geometry_destroyed() override {}
+  void dim_changed(before_after ord) override {}
+  void cell_changed(before_after ord) override {}
+  void xfield_changed(int xid, int at, before_after ord) override {}
 
   //------------------------------------------------------------
   bool operator==(const neighbours_table & t) const{

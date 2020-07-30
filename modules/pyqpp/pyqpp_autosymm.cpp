@@ -1,4 +1,5 @@
 #include <pyqpp/pyqpp.hpp>
+#include <symm/subspace.hpp>
 #include <symm/autosymm.hpp>
 #include <symm/shoenflis.hpp>
 #include <symm/point_groups.hpp>
@@ -17,8 +18,8 @@ void def_autosymm (py::module m, const char * pyname) {
   //m.def("bravais_point_group1", &qpp::bravais_point_group1<REAL>);
   m.def("find_cryst_symm", &qpp::py_find_cryst_symm2<REAL>);
   m.def("find_cryst_symm", &qpp::py_find_cryst_symm1<REAL>);
-  m.def("find_point_subgroups", &qpp::py_find_point_subgroups1<REAL,true>);
-  m.def("find_point_subgroups", &qpp::py_find_point_subgroups1<REAL,false>);
+  m.def("find_point_subgroups", &qpp::py_find_point_subgroups<REAL>);
+  //m.def("find_point_subgroups", &qpp::py_find_point_subgroups1<REAL,false>);
   //m.def("find_point_subgroups", &qpp::py_find_point_subgroups2<REAL,true>);
   //m.def("find_point_subgroups", &qpp::py_find_point_subgroups2<REAL,false>);
   m.def("find_translations", &qpp::py_find_translations<REAL>);
@@ -52,13 +53,18 @@ void def_autosymm (py::module m, const char * pyname) {
   qpp::shnfl<REAL>::fingerprint::py_export(m,fpname.c_str());
 
   m.def("pg_approx_find",   &qpp::pg_approx_find<REAL>);
-  m.def("pg_approx_mutab",  &qpp::pg_approx_multab<REAL>);
+  m.def("pg_approx_multab",  &qpp::pg_approx_multab<REAL>);
   m.def("pg_max_order",     &qpp::pg_max_order<REAL>,
 	py::arg("G"), py::arg("angle_error") = 8*qpp::matrix3<REAL>::tol_equiv);
 
-  std::string sbname = fmt::format("{0}_{1}","subspace_of3d",pyname);  
-  qpp::subspace_of3d<REAL>::py_export(m,sbname.c_str());
-  m.def("invariant_subspace",  &qpp::invariant_subspace<REAL>);
+  std::string sbname = fmt::format("{0}_{1}","subspace3",pyname);  
+  qpp::subspace3<REAL>::py_export(m,sbname.c_str());
+  m.def("invariant_subspace",  [](const qpp::matrix4<REAL> & R) -> qpp::subspace3<REAL>
+	{ return qpp::invariant_subspace(R); });
+  m.def("invariant_subspace",  [](const qpp::rotrans<REAL,true> & R) -> qpp::subspace3<REAL>
+	{ return qpp::invariant_subspace(R); });
+  m.def("invariant_subspace",  [](const qpp::rotrans<REAL,false> & R) -> qpp::subspace3<REAL>
+	{ return qpp::invariant_subspace(R); });
 
   std::string pgaxname = fmt::format("{0}_{1}","point_group_axes",pyname);
   py::class_<qpp::point_group_axes<REAL> >(m, pgaxname.c_str())
@@ -70,7 +76,24 @@ void def_autosymm (py::module m, const char * pyname) {
     .def_readwrite("orders",        &qpp::point_group_axes<REAL>::orders )
     .def_readwrite("rotoinversion", &qpp::point_group_axes<REAL>::rotoinversion )
     .def_readwrite("inversion",     &qpp::point_group_axes<REAL>::inversion )
-    ;  
+    ;
+
+  std::string pganame = fmt::format("{0}{1}","group_analyzer_pg",pyname);
+  qpp::group_analyzer<qpp::matrix3<REAL>,qpp::array_group<qpp::matrix3<REAL> > >::
+    py_export(m,pganame.c_str());
+
+  /*
+  m.def("double_group",
+	& qpp::double_group<qpp::matrix3<REAL>,qpp::array_group<qpp::matrix3<REAL> > > );
+  */
+  pganame = fmt::format("{0}{1}","group_analyzer_cg",pyname);
+  qpp::group_analyzer<qpp::rotrans<REAL,true>, qpp::array_group<qpp::rotrans<REAL,true> > >::
+    py_export(m,pganame.c_str());
+
+  /*
+  m.def("double_group",
+	& qpp::double_group<qpp::rotrans<REAL,true>, qpp::array_group<qpp::rotrans<REAL,true> > >);
+  */
 }
 
 void pyqpp_autosymm_export (py::module m) {
@@ -82,7 +105,9 @@ void pyqpp_autosymm_export (py::module m) {
 #endif
 
   qpp::permutation::py_export(m);
-
+  qpp::group_analyzer<qpp::permutation, qpp::array_group<qpp::permutation> >::
+    py_export(m,"group_analyzer_permutation");
+ 
   py::class_<qpp::Bool>(m, "Bool")
     .def(py::init<>())
     .def(py::init<bool>())

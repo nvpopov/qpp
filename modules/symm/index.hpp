@@ -1,6 +1,14 @@
 #ifndef QPP_INDEX_H
 #define QPP_INDEX_H
 
+#include <ostream>
+#include <sstream>
+#include <initializer_list>
+#include <stdexcept>
+#include <geom/lace3d.hpp>
+#include <data/errors.hpp>
+#include <io/strfun.hpp>
+
 #if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
 #pragma push_macro("slots")
 #undef slots
@@ -10,15 +18,6 @@
 namespace py = pybind11;
 #pragma pop_macro("slots")
 #endif
-
-
-#include <ostream>
-#include <sstream>
-#include <initializer_list>
-#include <stdexcept>
-#include <geom/lace3d.hpp>
-#include <data/errors.hpp>
-#include <io/strfun.hpp>
 
 namespace qpp {
 
@@ -92,6 +91,13 @@ public:
       res(d) = idx[d] - I(d);
     return res;
 
+  }
+
+  inline index operator*(int n) const {
+    index res = D(DIM);
+    for (int d=0; d<DIM; d++)
+      res(d) = idx[d]*n;
+    return res;
   }
 
   //! Index I is added to this index componentwise
@@ -305,6 +311,11 @@ public:
   index py_sub(const index &I2) const
   { return (*this)-I2; }
 
+  index py_mul(int n) const
+  {
+    return (*this)*n;
+  }
+
   static void py_export( py::module m, const char * pyname){
 
     py::class_<index >(m, pyname)
@@ -323,6 +334,7 @@ public:
         //	.def(py::repr(py::self))
         .def(py::self + py::self)
         .def(py::self - py::self)
+        .def("__mul__", & index::py_mul)
         //.def("__add__", & index::py_add )
         //.def("__sub__", & index::py_sub )
         .def(py::self == py::self)
@@ -461,17 +473,9 @@ class index_range{
   index a,b;
 
 public:
-  index_range(const index & _a,
-              const index & _b) :
-                                 a(_a), b(_b) {}
-
-  index_range(const py::list & l1,
-              const py::list & l2) :
-                                    a(l1), b(l2){}
-
-  index_range(const py::tuple & l1,
-              const py::tuple & l2) :
-                                     a(l1), b(l2) {}
+  index_range(const index & _a, const index & _b) :  a(_a), b(_b) {}
+  index_range(const py::list & l1, const py::list & l2) : a(l1), b(l2){}
+  index_range(const py::tuple & l1, const py::tuple & l2) : a(l1), b(l2) {}
 
   iterator  __iter__()
   { return iterator(a,b); }

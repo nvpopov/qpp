@@ -1,4 +1,4 @@
-from qpp_cpp import *
+from pyqpp import *
 
 g=geometry_d(0)
 
@@ -22,4 +22,4 @@ n=ngbr_table_d(g,b)
 n.build()
 
 for i in range(0,g.nat()):
-   print n[i]
+   print(i,n[i])
