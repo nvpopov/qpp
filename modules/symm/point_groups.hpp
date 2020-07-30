@@ -115,7 +115,7 @@ namespace qpp{
         for (int k=0; k<3; k++)
           S(j,k) += g.pos(i)(j)*g.pos(i)(k);
 
-    std::cout << "S= " << S << "\n";
+    //std::cout << "S= " << S << "\n";
 
     diagon3d(lambda,axes,S);
   }
@@ -325,54 +325,27 @@ namespace qpp{
   void fix4_point_group(array_group<matrix3<REAL> > & G, const static_table<int> & M){
     int N = G.size();
     static_table<matrix3<REAL> > F(N,N);
-
-    //std::cout << "fix4: alive 1\n";
-
     for (int i=0; i<N; i++)
-      for (int j=0; j<N; j++){
-          F(i,j) = G[i]*G[j] - G[M(i,j)];
-          //std::cout << "Fij " << i << " " << j << " " << F(i,j) << "\n";
-        }
+      for (int j=0; j<N; j++)
+	F(i,j) = G[i]*G[j] - G[M(i,j)];
 
     std::vector<matrix3<REAL> > Ginv(N);
-
-    for (int j=0; j<N; j++){
+    for (int j=0; j<N; j++)
         Ginv[j] = G[j].inverse();
-        //std::cout << j << " inv " << Ginv[j] << "\n";
-      }
-
-    //std::cout << "fix4: alive 2\n";
 
     std::vector<matrix3<REAL> > Di(N);
     for (int i=0; i<N; i++){
-
-        //std::cout << "Di " << i << "\n";
-
         matrix3<REAL> D(REAL(0));
         for (int j=0; j<N; j++)
           D += Ginv[j]*F(j,i) + F(i,j)*Ginv[j];
         D /= 2*N;
         Di[i] = D;
-
-        //std::cout << i << " Di " << Di[i] << "\n";
-
       }
-
-    //std::cout << "fix4: alive 3\n";
 
     for (int i=0; i<N; i++){
-
-        //std::cout << "unitarize " << i << "\n";
-
         G[i] = G[i] - Di[i];
-
-        //std::cout << "new Gi " << i << " " << G[i] << "\n";
-
         unitarize(G[i]);
-
-        //std::cout << "unitarized "  << G[i] << "\n";
       }
-    //std::cout << "fix4: alive 4\n";
   }
 
   // -------------------------------------------------------------------------------
@@ -386,26 +359,10 @@ namespace qpp{
     REAL eps = matrix3<REAL>::tol_equiv*N;
     REAL err;
 
-    //std::cout << "Befor cycle\n";
-
     while (true) {
-
-        /*
-      std::cout << "multab:\n";
-      for (int i=0; i<N; i++){
-  std::cout << i << "[";
-  for (int j=0; j<N; j++)
-    std::cout << M(i,j)<< ",";
-  std::cout << "]\n";
-      }
-      */
-
         err = REAL(0);
         for (int i=0; i<N; i++)
           for (int j=0; j<N; j++){
-
-              //std::cout << "Sij calc " << i << " " << j << "\n";
-
               matrix3<REAL> F = G[i]*G[j]-G[M(i,j)];
               REAL s(0);
               for (int k=0; k<3; k++)
@@ -415,16 +372,11 @@ namespace qpp{
             }
         err = std::sqrt(err);
 
-        std::cout << "fix_point_group: iteration = " << it << " error = " << err << "\n";
-
         if (err < eps) break;
         fix4_point_group(G,M);
 
-        if (++it > maxit) OverflowError("Too many iterations in fix_point_group");
-
-        //break;
+        if (++it > maxit) OverflowError("Too many iterations in reconstruct_point_group");
       }
-
   }
 
   // -------------------------------------------------------------------------------
@@ -438,15 +390,14 @@ namespace qpp{
     int maxord=1;
     for (int i=0; i<G.size(); i++){
       if (A.order(i)>maxord)
-  maxord=A.order(i);
+	maxord=A.order(i);
     }
     std::vector<STRING_EX> cand_groups = shnfl<REAL>::groups_by_order(maxord);
 
     for (int i=cand_groups.size()-1; i>=0; i--)
       {
-  //std::cout << cand_groups[i] << " " << shnfl<REAL>::group(cand_groups[i]).size() << "\n";
-  if (shnfl<REAL>::group(cand_groups[i]).size() != G.size() )
-    cand_groups.erase(cand_groups.begin()+i);
+	if (shnfl<REAL>::group(cand_groups[i]).size() != G.size() )
+	  cand_groups.erase(cand_groups.begin()+i);
       }
 
     REAL fpeps = matrix3<REAL>::tol_equiv*G.size();
@@ -457,12 +408,12 @@ namespace qpp{
 
     for (const STRING_EX &s:cand_groups)
       if ( typename shnfl<REAL>::fingerprint(shnfl<REAL>::group(s),fpeps)
-     .compare(FG, fpeps) )
-  {
-    found = true;
-    res = s;
-    break;
-  }
+	   .compare(FG, fpeps) )
+	{
+	  found = true;
+	  res = s;
+	  break;
+	}
     return res;
   }
 
@@ -506,16 +457,16 @@ namespace qpp{
 
     best_axes(axes,lmb,g);
 
-    std::cout << "lmb= " << lmb << " axes= " << axes << "\n";
+    //std::cout << "lmb= " << lmb << " axes= " << axes << "\n";
 
     naxis = axes.col(2);
-    std::cout << " linaxis = " <<  naxis << "\n";
+    //std::cout << " linaxis = " <<  naxis << "\n";
 
     for (int i=0; i<g.nat(); i++) {
         vector3<REAL> r = g.pos(i);
 
-        std::cout << "i= " << i << " r= " << r << " r*n= " << naxis.dot(r)
-                  << " r-n(r*n) = " << r - naxis*naxis.dot(r) << "\n";
+        //std::cout << "i= " << i << " r= " << r << " r*n= " << naxis.dot(r)
+        //          << " r-n(r*n) = " << r - naxis*naxis.dot(r) << "\n";
 
         if ( (r - naxis*naxis.dot(r)).norm() > R ) {
             linear = false;
@@ -525,7 +476,7 @@ namespace qpp{
 
     nplane = axes.col(0);
 
-    std::cout << " planaxis = " <<  nplane << "\n";
+    //std::cout << " planaxis = " <<  nplane << "\n";
 
     for (int i=0; i<g.nat(); i++) {
         vector3<REAL> r = g.pos(i);
@@ -549,13 +500,13 @@ namespace qpp{
             G = shnfl<REAL>::Dnh(4);
             G.name = "D_inf_h";
 
-            std::cout << "linear molecule with Dh\n";
+            //std::cout << "linear molecule with Dh\n";
           }
         else{
             G = shnfl<REAL>::Cnv(4);
             G.name = "C_inf_v";
-
-            std::cout << "linear molecule with Cv\n";
+	    
+            //std::cout << "linear molecule with Cv\n";
           }
 
         for (int j=0; j < G.size(); j++)
@@ -569,7 +520,7 @@ namespace qpp{
         g.add("refpoint",  nplane*h);
         g.add("refpoint", -nplane*h);
 
-        std::cout << "Planar molecule\n";
+        //std::cout << "Planar molecule\n";
       }
 
     // sort atoms in reverse order by the distance from centre
@@ -580,8 +531,8 @@ namespace qpp{
 
     //std::cout << g.pos(0).norm() << " " << g.pos(g.nat()-1).norm() << "\n";
 
-    write_xyz(std::cout,g);
-    std::cout << "centre: " << cntr << "\n";
+    //write_xyz(std::cout,g);
+    //std::cout << "centre: " << cntr << "\n";
 
     // estimate maximum angle error during the fit
     REAL angle_error = 2*std::asin(R/(g.pos(0).norm())), theta;
@@ -717,7 +668,7 @@ FOUND:
 
     STRING_EX Gname = point_group_symbol(G);
 
-    std::cout << " group= " << Gname << " found= " << found << "\n";
+    //std::cout << " group= " << Gname << " found= " << found << "\n";
 
     G.name = Gname;
 
@@ -870,8 +821,8 @@ FOUND:
         b.push_back(r);
       }
 
-    for (int i=0; i<a.size(); i++)
-      std::cout << a[i] << " -> " << b[i] << "\n";
+    //for (int i=0; i<a.size(); i++)
+    //  std::cout << a[i] << " -> " << b[i] << "\n";
 
     return best_transform(res,a,b);
 

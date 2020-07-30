@@ -14,7 +14,7 @@ namespace py = pybind11;
 #endif
 
 namespace qpp {
-
+  
   /*!\brief The genform_group class implements
     Positionary Generator Form (PGF) for arbitrary finite group.
   */

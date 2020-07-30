@@ -10,6 +10,7 @@
 #include <Eigen/Eigen>
 #include <unsupported/Eigen/MatrixFunctions>
 #include <data/types.hpp>
+#include <data/errors.hpp>
 #include <consts.hpp>
 
 #if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
@@ -37,7 +38,7 @@ namespace qpp {
   template <typename ELEM> using matrix4 = Eigen::Matrix<ELEM, 4, 4>;
   template <typename ELEM, int n> using matrixnn = Eigen::Matrix<ELEM, n, n>;
   template <typename ELEM, int n, int m> using matrixnm = Eigen::Matrix<ELEM, n, m>;
-
+  template <typename ELEM> using matrix = Eigen::Matrix<ELEM, Eigen::Dynamic, Eigen::Dynamic>;
 
   template<int FIXED_N, int FIXED_M>
   struct check_is_vector3 {
@@ -221,11 +222,21 @@ namespace qpp {
 
       //template<typename = std::enable_if<check_is_vector3<N , M>::value> >
       inline VALTYPE py_getitem_v(int i) const
-      { return (*this)[i]; }
+      {
+	if (i<0) i+=3;
+	if (i<0 || i>=3)
+	  IndexError("vector3: index out of range");
+	return (*this)[i];
+      }
 
       //template<typename = std::enable_if<check_is_vector3<N , M>::value> >
       inline void py_setitem_v(int i, VALTYPE v)
-      { (*this)[i] = v;  }
+      {
+	if (i<0) i+=3;
+	if (i<0 || i>=3)
+	  IndexError("vector3: index out of range");	
+	(*this)[i] = v;
+      }
 
       //template<typename = std::enable_if<check_is_vector3<N , M>::value> >
       inline VALTYPE py_getx(){return (*this)[0];}
@@ -788,6 +799,13 @@ namespace qpp {
   typename numeric_type<VALTYPE>::norm generic_matrix<VALTYPE, N, M>::tol_equiv =
       generic_matrix<VALTYPE, N, M>::tol_equiv_default();
 
+    // -------------------------------------------------------------
+
+  template<class CMPLX>
+  vector3<typename numeric_type<CMPLX>::real> vecreal(const vector3<CMPLX> & v){
+    return vector3<typename numeric_type<CMPLX>::real>(v(0).real(), v(1).real(), v(2).real() );
+  }
+
   /*
   template<int N, int M>
   float generic_matrix<float, N, M>::tol_equiv = 1e-10;
@@ -808,6 +826,100 @@ namespace qpp {
   template<class VALTYPE, int N, int M>
   generic_matrix<VALTYPE, N, M> generic_matrix<VALTYPE, N, M>::unity =
       generic_matrix<VALTYPE, N, M>::Identity();
+
+  // ------------------------------------------------------------------------------
+
+  /*! \brief Evaluate dense matrix rank
+    @param[in] M the matrix
+    @param[in] eps the threshold for zero eigenvalues
+   */
+  template<class VALTYPE, class MTR>
+  int matrix_rank(const MTR & M, VALTYPE eps){
+    Eigen::FullPivLU<MTR> lu(M);
+    lu.setThreshold(eps);
+    return lu.rank();
+  }
+
+  /*! \brief Find linearly independent vectors in the sequence of vectors
+    @param[in] M the matrix containing the input vectors as columns
+    @param[in] eps  the threshold for zero eigenvalues
+    @return the list of linearly independent vectors
+   */
+  template<class VALTYPE, class MTR>
+  std::vector<int> LI_vectors(const MTR &M, VALTYPE eps){
+    std::vector<int> LI;
+    qpp::matrix<VALTYPE> A(M.rows(),0);
+    int r = 0;
+    
+    for (int i=0; i<M.cols(); i++){
+      if (A.cols()==r)
+	A.conservativeResize(M.rows(),r+1);
+      A.col(A.cols()-1) = M.col(i);
+      if (matrix_rank(A,eps)==r+1)
+	{
+	  LI.push_back(i);
+	  r++;
+	}
+    }
+    return LI;
+  }
+
+  /*! \brief expand a vector as a linear combination of other vectors
+   *   y = SUM_i c_i*x_i
+    @param[in] x the matrix containing x_i vectors as columns
+    @param[in] y the y vector
+    @return vector of c_i coefficients
+   */
+  template<class VALTYPE, class MTR, int S>
+  Eigen::Matrix<VALTYPE, Eigen::Dynamic, 1> linear_combination(const MTR & x,
+							       const Eigen::Matrix<VALTYPE, S, 1> & y)
+  {
+    int n = x.cols();
+    matrix<VALTYPE> A(n,n);
+    Eigen::Matrix<VALTYPE, Eigen::Dynamic, 1> b(n);
+    for (int i=0; i<n; i++)
+      for (int j=0; j<n; j++)
+	A(i,j) = x.col(i).dot(x.col(j));
+    for (int i=0; i<n; i++)
+      b(i) = y.dot(x.col(i));
+    Eigen::FullPivLU<matrix<VALTYPE> > lu(A);
+    return lu.solve(b);
+  }
+  
+
+  template <class VALTYPE, class MTR>
+  void nullspace(std::vector<int> &indep, std::vector<int> &dep, matrix<VALTYPE> & NS,
+		 const MTR & M, VALTYPE eps)
+  {
+    indep = LI_vectors(M,eps);    
+    dep.clear();
+    for (int i=0; i<M.cols(); i++)
+      if (std::find(indep.begin(),indep.end(),i) == indep.end() )
+	dep.push_back(i);
+
+    if (indep.size()==0)
+      {
+	NS = - matrix<VALTYPE>::Identity(M.cols(), M.cols());
+	return;
+      }
+    
+    matrix<VALTYPE> bas(M.rows(), indep.size());
+    for (int i=0; i<indep.size(); i++)
+      bas.col(i) = M.col(indep[i]);
+    
+    NS = matrix<VALTYPE>::Zero(M.cols(), dep.size());
+    for (int i=0; i<dep.size(); i++)
+      {
+	int j = dep[i];
+	Eigen::Matrix<VALTYPE, Eigen::Dynamic, 1> col = M.col(j);
+	auto coeff = linear_combination(bas,col);
+	for (int k = 0; k<indep.size(); k++)
+	  NS.col(i)(indep[k]) = coeff(k);
+	NS.col(i)(j) = VALTYPE(-1);
+      }
+  }
+  
+  // ------------------------------------------------------------------------------
 
 #if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
 

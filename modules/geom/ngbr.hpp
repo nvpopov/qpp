@@ -328,21 +328,26 @@ namespace qpp {
       // Number of atomic types
       int ntp;
 
-      // Bonding distance between i-th and j-th atomic types
-      inline REAL distance(int i, int j) {return _disttable[i*ntp+j];}
+    // Bonding distance between i-th and j-th atomic types
+    inline REAL distance(int i, int j) const {return _disttable[i*ntp+j];}
+    
+    inline REAL & distance(int i, int j) {return _disttable[i*ntp+j];}
 
-      inline void resize_disttable(){
-        //      if (_disttable != nullptr)
-        //        delete []_disttable;
-        delete []_disttable;
-      }
+    inline void resize_disttable(){      
+      if (_disttable != nullptr)
+	delete []_disttable;
+      ntp = geom->n_types();
+      if (ntp < 1)
+	IndexError("Number of atomic types is zero. Maybe, you should initialize typetable?");
+      _disttable = new REAL[ntp*ntp];
+    }
 
       void build_disttable(){
         resize_disttable();
         for (int i=0; i<ntp; i++)
           for (int j=0; j<=i; j++) {
-              _disttable[ntp*i+j] = btbl->distance(geom->atom_of_type(i),geom->atom_of_type(j));
-              _disttable[ntp*j+i] = btbl->distance(geom->atom_of_type(i),geom->atom_of_type(j));
+	    distance(i,j) = btbl->distance(geom->atom_of_type(i),geom->atom_of_type(j));
+            distance(j,i) = btbl->distance(geom->atom_of_type(i),geom->atom_of_type(j));
 
             }
       }
@@ -544,11 +549,10 @@ namespace qpp {
       bool transl_mode;
 
       neighbours_table( geometry<REAL, CELL> & g, bonding_table<REAL> & t) :
-        ngrain(index::D(3)){
+        ngrain(index::D(3)), _disttable(nullptr) {
         btbl = &t;
         geom = & g;
-        DIM = geom -> DIM;
-        //_disttable.clear();
+        DIM = geom -> DIM;        
         build_disttable();
         reference_mode = false;
         transl_mode = true;
@@ -557,9 +561,9 @@ namespace qpp {
       }
 
       ~neighbours_table() {
-        //        if (_disttable != nullptr)
         //          delete [] _disttable;
-        delete [] _disttable;
+	if (_disttable != nullptr)
+	  delete [] _disttable;
       }
 
       REAL get_grain_size(){return grainsize;}

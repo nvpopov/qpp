@@ -202,6 +202,22 @@ namespace qpp{
   rotrans<REAL,BOUND>
   rotrans<REAL,BOUND>::unity(vector3<REAL>::Zero(), matrix3<REAL>::unity);
 
+  template<class REAL, bool BOUND>
+  matrix4<REAL> rotrans4d(const rotrans<REAL,BOUND> & R)
+  {
+    matrix4<REAL> res = matrix4<REAL>::Identity();
+    res.block(0,0,3,3) = R.R;
+    res.block(0,3,3,1) = R.T;
+    return res;
+  }
+
+  template <class REAL>
+  rotrans<REAL,true> rotrans_shift(const rotrans<REAL, true> & r, const index & I)
+  {
+    auto & cl = *r.cell;
+    return rotrans<REAL,true>(vector3<double>(r.T + cl(0)*I(0) + cl(1)*I(1) + cl(2)*I(2)), r.R, r.cell);
+  }
+
   //!\brief Inverse of rotrans R, P=R^(-1). Means R*P==1.
   //  template<class REAL, bool BOUND>
   //  rotrans<REAL,BOUND> invert(const rotrans<REAL,BOUND> & R){
