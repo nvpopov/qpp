@@ -1,8 +1,6 @@
 #ifndef QPP_AUTOSYMM_H
 #define QPP_AUTOSYMM_H
 
-#include <geom/geom.hpp>
-#include <geom/ngbr.hpp>
 #include <geom/shape.hpp>
 #include <symm/cell.hpp>
 #include <symm/gen_cell.hpp>
@@ -10,6 +8,7 @@
 #include <symm/group_theory.hpp>
 #include <symm/point_groups.hpp>
 #include <symm/permut.hpp>
+#include <symm/subspace.hpp>
 #include <Eigen/Dense>
 #include <algorithm>
 #include <iomanip>
@@ -24,6 +23,7 @@
 namespace py = pybind11;
 #pragma pop_macro("slots")
 #endif
+
 
 namespace qpp {
 
@@ -81,305 +81,11 @@ namespace qpp {
   }
 
   // -------------------------------------------------------------
-
+  /*
   template <class REAL>
-  struct subspace_of3d {
-
-      int dim;
-      vector3<REAL> point, axis;
-
-      subspace_of3d(int __dim, const vector3<REAL> & __pt,
-                    const vector3<REAL> & __n = vector3<REAL>(0)) {
-        dim = __dim;
-        point = __pt;
-        axis = __n.normalized();
-      }
-
-      subspace_of3d(const subspace_of3d<REAL> & L){
-        dim = L.dim;
-        point = L.point;
-        axis = L.axis;
-      }
-
-      subspace_of3d & operator=(const subspace_of3d<REAL> & L){
-        dim = L.dim;
-        point = L.point;
-        axis = L.axis;
-        return *this;
-      }
-
-      bool within (const vector3<REAL> & x) const {
-
-        REAL tol_equiv = vector3<REAL>::tol_equiv;
-        if (dim == -1) return false;
-        else if (dim == 0)
-          return (point - x).norm() < tol_equiv;
-        else if (dim == 1) {
-            vector3<REAL> y = x - point;
-            y = y - axis*(y.dot(axis));
-            return y.norm() < tol_equiv;
-          }
-        else if (dim == 2){
-            vector3<REAL>  y = x - point;
-            return std::abs(y.dot(axis)) < tol_equiv;
-          }
-        else if (dim == 3)
-          return true;
-        return false;
-
-      }
-
-      bool operator== (const subspace_of3d<REAL> & L ) const {
-
-        if (L.dim != dim)
-          return false;
-        if (dim == 0)
-          return (point-L.point).norm() < vector3<REAL>::tol_equiv;
-        else if ( dim == 1 || dim == 2)
-          return ((axis-L.axis).norm() < vector3<REAL>::tol_equiv ) && within(L.point);
-        else if (dim == -1 || dim == 3)
-          return true;
-
-        return false;
-
-      }
-
-      bool operator!= (const subspace_of3d<REAL> & L ) const {
-        return !(*this == L);
-      }
-
-      subspace_of3d<REAL> operator& (const subspace_of3d<REAL> & L) const {
-
-        int d1,d2;
-        vector3<REAL> p1,p2,n1,n2;
-
-        if ( dim > L.dim ){
-            d1 = dim; d2 = L.dim;
-            p1 = point;  p2 = L.point;
-            n1 = axis;   n2 = L.axis;
-          }
-        else{
-            d1 = L.dim; d2 = dim;
-            p1 = L.point;  p2 = point;
-            n1 = L.axis;   n2 = axis;
-          }
-
-        if (d1 == 3)
-          return subspace_of3d<REAL>(d2,p2,n2);
-
-        if (d2 == -1)
-          return subspace_of3d<REAL>(-1,vector3<REAL>(0,0,0));
-
-        if  (d2 == 0){
-            if ( subspace_of3d(d1,p1,n1).within(p2) )
-              return subspace_of3d<REAL>(0,p2);
-            else
-              return subspace_of3d<REAL>(-1,vector3<REAL>(0,0,0));
-          }
-
-        if ( d1 == 1 && d2 == 1) {
-            if ((n1-n2).norm() < vector3<REAL>::tol_equiv ||
-                (n1+n2).norm() <  vector3<REAL>::tol_equiv) {
-                if (subspace_of3d<REAL>(d1,p1,n1).within(p2))
-                  return *this;
-                else
-                  return subspace_of3d<REAL>(-1,vector3<REAL>(0,0,0));
-              }
-            else if (std::abs((p2-p1).dot(n1.cross(n2))) <  vector3<REAL>::tol_equiv) {
-                REAL s = n1.dot(n2);
-                REAL x1 = ((n1 - s*n2).dot(p2-p1))/(1-s*s);
-                return subspace_of3d<REAL>(0,p1+x1*n1);
-              }
-            else
-              return subspace_of3d<REAL>(-1,vector3<REAL>(0,0,0));
-          }
-
-        if (d1 == 2 && d2 == 1) {
-            if (std::abs(n1.dot(n2)) < vector3<REAL>::tol_equiv){
-                if (std::abs(n1.dot(p2-p1)) < vector3<REAL>::tol_equiv)
-                  return subspace_of3d<REAL>(1,p2,n2);
-                else
-                  return subspace_of3d<REAL>(-1,vector3<REAL>(0,0,0));
-              }
-            else
-              return  subspace_of3d(0,p2+n2*n1.dot(p1-p2)/n1.dot(n2));
-          }
-
-        if (d1 == 2 && d2 == 2) {
-            if ((n1-n2).norm() < vector3<REAL>::tol_equiv ||
-                (n1+n2).norm() < vector3<REAL>::tol_equiv){
-                if (std::abs(n1.dot(p1-p2)) <  vector3<REAL>::tol_equiv)
-                  return *this;
-                else
-                  return subspace_of3d<REAL>(-1,vector3<REAL>(0,0,0));
-              }
-            else {
-                REAL s = n1.dot(n2);
-                vector3<REAL> nn = n1.cross(n2);
-                REAL x1 = (p1.dot(n1)-s*p2.dot(n2))/(1-s*s);
-                REAL x2 = (p2.dot(n2)-s*p1.dot(n1))/(1-s*s);
-                return subspace_of3d<REAL>(1,x1*n1+x2*n2,nn);
-              }
-          }
-      }
-
-#if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
-
-      static void py_export(py::module m, const char * pyname){
-        py::class_<subspace_of3d<REAL> >(m, pyname)
-            .def(py::init<int, const vector3<REAL> &, const vector3<REAL> &>(),
-                 py::arg("dim"), py::arg("point"), py::arg("axis") = vector3<REAL>(0))
-            .def("within", & subspace_of3d<REAL>::within)
-            .def_readwrite("dim", & subspace_of3d<REAL>::dim)
-            .def_readwrite("point", & subspace_of3d<REAL>::point)
-            .def_readwrite("axis", & subspace_of3d<REAL>::axis)
-            .def(py::self==py::self)
-            .def(py::self!=py::self)
-            .def("__and__", [](const subspace_of3d<REAL> &self, const subspace_of3d<REAL> & other)
-        {return self & other; })
-            ;
-      }
-
-#endif
-
-  };
-
-  // -------------------------------------------------------------
-
-  template<class CMPLX>
-  vector3<typename numeric_type<CMPLX>::real> vecreal(const vector3<CMPLX> & v){
-    return vector3<typename numeric_type<CMPLX>::real>(v(0).real(), v(1).real(), v(2).real() );
-  }
-
-  // -------------------------------------------------------------
-
-  template<class REAL>
-  subspace_of3d<REAL> invariant_subspace(const rotrans<REAL,false> & R) {
-    vector3<REAL> axis, point;
-    REAL phi;
-    bool inv;
-    int dim;
-    REAL eps = vector3<REAL>::tol_equiv;
-
-    REAL epscos = std::sqrt(eps);
-
-    analyze_transform(axis, phi, inv, R.R);
-
-    if (!inv) {
-        if (phi < epscos) {
-            // Unity matrix
-            if ( R.T.norm() < eps ) {
-                dim = 3;
-                point = {0,0,0};
-                //std::cout << "  ---- invariant_subspace ----- unity matrix - d3\n";
-              }
-            else {
-                dim = -1;
-                point = {0,0,0};
-                //std::cout << "  ---- invariant_subspace ----- unity matrix - d-1\n";
-              }
-          }
-        else if (std::abs(axis.dot(R.T)) < eps) {
-            // Rotation case
-            dim = 1;
-            point = R.T - RotMtrx(axis,-phi)*R.T;
-            point /= 2e0*(1 - std::cos(phi));
-            //std::cout << "  ---- invariant_subspace ----- rotation\n";
-          }
-        else {
-            // Chiral axis case
-            dim = -1;
-            point = {0,0,0};
-            //std::cout << "  ---- invariant_subspace ----- chiral axis\n";
-          }
-      }
-    else {
-        if ( phi < epscos ) {
-            // Pure inversion case
-            dim = 0;
-            point = 0.5*R.T;
-            //std::cout << "  ---- invariant_subspace ----- inversion\n";
-          }
-        else if ( std::abs(phi - REAL(pi)) < epscos) {
-            if ( (R.T - axis*axis.dot(R.T)).norm() < eps ) {
-                // Mirror plane case
-                dim = 2;
-                point = 0.5*R.T;
-                //std::cout << "  ---- invariant_subspace ----- mirror plane\n";
-              }
-            else {
-                // Glide plane case
-                dim = -1;
-                point = {0,0,0};
-                //std::cout << "  ---- invariant_subspace ----- glide plane\n";
-              }
-          }
-        else {
-            // Rotoinversion case
-            dim = 0;
-            vector3<REAL> Tpar = axis*axis.dot(R.T),
-                Tperp = R.T - Tpar;
-            point = 0.5*Tpar + 0.5*(Tperp + RotMtrx(axis,-phi)*Tperp)/(1+std::cos(phi) );
-            //std::cout << "  ---- invariant_subspace ----- rotoinversion\n";
-          }
-      }
-
-    return subspace_of3d(dim, point, axis);
-
-  }
-
-  // -------------------------------------------------------------
-
-  template<class REAL>
-  std::optional<subspace_of3d<REAL> > invariant_subspace1(const rotrans<REAL,false> & R){
-    matrix3<typename numeric_type<REAL>::complex> n;
-    vector3<typename numeric_type<REAL>::complex> lmb;
-    diagon3d(lmb,n,R.R);
-
-    vector3<typename numeric_type<REAL>::complex>
-        T(R.T[0],R.T[1],R.T[2]),
-        t(n.row(0).dot(T), n.row(1).dot(T), n.row(2).dot(T)),
-        x(0,0,0);
-
-    int d = 0, ni[3];
-
-    for (int i=0; i<3; i++)
-      if (abs(lmb[i]-REAL(1)) < vector3<REAL>::tol_equiv) {
-          if (abs(t[i]) < vector3<REAL>::tol_equiv) {
-              ni[d] = i;
-              d++;
-            }
-          else return std::optional<subspace_of3d<REAL> >({ -1, vector3<REAL>(0,0,0) });
-        }
-      else
-        x[i] = t[i]/(REAL(1)-lmb[i]);
-
-    vector3<typename numeric_type<REAL>::complex> c =
-        x[0]*n.row(0)+x[1]*n.row(1)+x[2]*n.row(2);
-    vector3<REAL> rc = vecreal(c);
-
-    if (d==0)
-      return std::optional<subspace_of3d<REAL> >({ 0, rc});
-    else if (d==1)
-      return std::optional<subspace_of3d<REAL> >({ 1, rc,
-                                                   vecreal<typename numeric_type<REAL>::complex>(n.row(ni[0])) });
-    else if (d==2)
-      return std::optional<subspace_of3d<REAL> >({ 2, rc,
-                                                   vecreal<typename numeric_type<REAL>::complex>(
-                                                   n.row(ni[0]).cross(n.row(ni[1]))) });
-    else if (d==3)
-      return std::optional<subspace_of3d<REAL> >({ 3, rc});
-
-    return std::nullopt;
-  }
-
-
-  // -------------------------------------------------------------
-
-  template <class REAL>
-  void add_subspace(std::vector<subspace_of3d<REAL> > & subspaces,
+  void add_subspace(std::vector<subspace3<REAL> > & subspaces,
                     std::vector<std::vector<rotrans<REAL,false> > > &elements,
-                    const subspace_of3d<REAL> &s,
+                    const subspace3<REAL> &s,
                     const std::vector<rotrans<REAL,false> > &g){
     int i=0;
     while (i<subspaces.size() && subspaces[i] != s) i++;
@@ -404,7 +110,7 @@ namespace qpp {
         std::cout << "\n";
       }
   }
-
+  */
   enum{
     bravais_triclinic = 1,
     bravais_monoclinic = 2,
@@ -482,6 +188,7 @@ namespace qpp {
       }
 
     // debug
+    /*
     std::cout << "find_translations\n";
     for (int t=0; t<t1.size(); t++)
       {
@@ -497,7 +204,7 @@ namespace qpp {
         std::cout << ")";
       }
     std::cout << "\n";
-
+    */
 
     if (! std::equal(t1.begin(), t1.end(), t2.begin()))
       return;
@@ -522,7 +229,7 @@ namespace qpp {
       if (t1[t].size()>t1[i].size())
         t=i;
 
-    std::cout << "t= " << t << "\n";
+    //std::cout << "t= " << t << "\n";
 
     for (int i=0; i<t1[t].size(); i++){
         vector3<REAL> v = g2.pos(t2[t][i]) - g1.pos(t1[t][0]), vs=v;
@@ -533,7 +240,7 @@ namespace qpp {
           g.coord(j) += vs;
 
 
-        std::cout << i << " v= " << v << "\n";
+        //std::cout << i << " v= " << v << "\n";
 
 
         bool is_transl = true;
@@ -577,13 +284,14 @@ FOUND:
       }
 
     //debug
-
+    /*
     std::cout << "alive after all!\n";
     for (int i=0; i<transl.size(); i++)
       {
         std::cout << i << transl[i];
         std::cout << perm[i].to_string() << "\n";
       }
+    */
 
   }
 
@@ -607,13 +315,13 @@ FOUND:
 
   /*! \brief Find the crystalline symmetry group
     @param[out] G - the crystalline group of bound rotranslational
-operations in array form.
+    operations in array form.
     Bound rotranslational operations are used to make the group finite
     @param[in] geom - the geometry of unit cell together with lattice vectors,
- which should be
+    which should be
     stored in geom.cell object. This geometry must be 3D - periodic
     @param[in] R( - the tolerance radius. Symmetry operation is considered
-valid, if the displacement of atom due to
+    valid, if the displacement of atom due to
     this operation is less than R
    */
   template<class REAL>
@@ -681,27 +389,283 @@ valid, if the displacement of atom due to
     generator_form(G,G1);
   }
 
+  // ----------------------------------------------------------------------------
+
+  template <class REAL, bool BOUND>
+  std::vector< rotrans<REAL,false> > rotrans_circle(const rotrans<REAL,BOUND> & r)
+  {
+    rotrans<REAL,false> F(r.T,r.R),
+      G = F;
+    std::vector< rotrans<REAL,false> > circle={G};
+    while ( (G.R - matrix3<REAL>::Identity()).norm() > rotrans<REAL,false>::tol_rot )
+      {
+	G = G*F;
+	circle.push_back(G);
+      }
+    return circle;
+  }
+
+  template <class REAL>
+  std::vector< index > inspect_rotrans(const rotrans<REAL,true> & r, REAL eps)
+  {
+    std::vector<index> I = {index({1,0,0}), index({0,1,0}), index({0,0,1}), index({0,0,0})};
+    matrix<REAL>  trns(3,4), cntr(3,4);
+    for (int i=0; i<4; i++)
+      {
+	auto cicrle = rotrans_circle(rotrans_shift(r,I[i]));
+	vector3<REAL> c(0);
+	for (const auto & g : cicrle)
+	  c += g.T;
+	c = c/cicrle.size();
+	cntr.col(i) = c;
+	trns.col(i) = cicrle.back().T;
+      }
+    for (int i=0; i<3; i++){
+      trns.col(i) -= trns.col(3);
+      cntr.col(i) -= cntr.col(3);
+    }
+    std::vector<int> indep, dep;
+    matrix<REAL> ns;
+    nullspace(indep, dep, ns, trns, eps);
+    int d = ns.cols();
+    if (indep.back()==3) return {};
+    std::vector<index> ret;
+    index idx({0,0,0});
+    for (int j=0; j<3; j++)
+      if ( std::abs(ns.col(d-1)(j) - round(ns.col(d-1)(j)) ) < eps )
+	idx(j) = - round(ns.col(d-1)(j));
+      else
+	return {};
+    ret.push_back(idx);
+    for (int i=0; i<d-1; i++)
+      {
+	bool succ = true;
+	for (int j=0; j<3; j++)
+	  if ( std::abs(ns.col(i)(j) - round(ns.col(i)(j)) ) < eps )
+	    idx(j) = - round(ns.col(i)(j));
+	  else
+	    succ = false;
+	if (succ)
+	  ret.push_back(idx);
+      }
+    return ret;
+  }
+
+  // ----------------------------------------------------------------------------
+
+  template<class REAL, class TRANSF = int>
+  struct highsymmsite{
+
+    subspace3<REAL> S;
+    std::vector<TRANSF> group;
+    //bool maximal;
+    std::vector<int> next;
+
+    highsymmsite(const subspace3<REAL> & s, const std::vector<TRANSF> & g):
+      S(s), group(g) {}
+    
+  };
+
+  template<class T>
+  bool belongs_to(const T & t, const std::vector<T> G)
+  {
+    return std::find(G.begin(),G.end(),t) != G.end();
+  }
+  
+  template <class T>
+  bool is_subset(const std::vector<T> G1, const std::vector<T> G){
+    for (const T & i : G1)
+      if ( ! belongs_set(i,G) )
+	return false;
+    return true;
+  }
+
+  template<class T>
+  void merge_to_set( std::vector<T> & A, const std::vector<T> & B){
+    for (const T & b:B)
+      if (!belongs_to(b,A))
+	A.push_back(b);
+  }
+  
+  template<class TRANSF>
+  void complete_group(std::vector<TRANSF> & S){
+    std::vector<TRANSF> N = S;
+    while (N.size()>0)
+      {
+	std::vector<TRANSF> NN;
+	for (auto *c : { &S, &N } )
+	  for (const auto & i : *c)
+	    for (const auto & j : N)
+	      {
+		TRANSF k = i*j;
+		if ( !belongs_to(k,S) && !belongs_to(k,N) && !belongs_to(k,NN))
+		  NN.push_back(k);
+		k = j*i;
+		if ( !belongs_to(k,S) && !belongs_to(k,N) && !belongs_to(k,NN))
+		  NN.push_back(k);
+	      }
+	for (const auto &i : N)
+	  S.push_back(i);
+	N = NN;
+      }
+  }
+
+  template<class REAL>
+  void fps_merge( std::vector<highsymmsite<REAL, rotrans<REAL,true> > > & H,
+		  int to, const std::vector<int> & from){
+    for (int i:from)
+      {
+	H[i].next.push_back(to);
+	merge_to_set(H[to].group,H[i].group);
+      }
+  }
+
+  template<class REAL>
+  void fps_add( std::vector<highsymmsite<REAL, rotrans<REAL,true> > > & H,
+		const subspace3<REAL> & s, int i1, int i2){
+    std::vector< rotrans<REAL,true> > g(H[i1].group);
+    merge_to_set(g,H[i2].group);
+    H.push_back( highsymmsite<REAL, rotrans<REAL,true> >(s,g) );
+    H[i1].next.push_back(H.size()-1);
+    H[i2].next.push_back(H.size()-1);      
+  }
+  
   /*! \brief Finds all point subgroups of crystalline symmetry group.
     Can be used to list all high symmetry sites in the lattice.
-    @param subs (OUT)    - std::vector containing point subgroups
-    @param cntrs (OUT)   - std::vector containing the central points of the point groups
-    @param G (IN)        - crystalline symmetry group in array form
+    @param groups (OUT)    - std::vector containing point subgroups
+    @param subspaces (OUT) - std::vector containing the central points of the point groups
+    @param G (IN)          - crystalline symmetry group in array form
    */
+  template<class REAL, bool BOUND>
+  void find_point_subgroups(std::vector<array_group<matrix3<REAL> > > & groups,
+			    std::vector<subspace3<REAL> > & subspaces,
+			    const array_group<rotrans<REAL,BOUND> > & G)
+  {
+    
+  }
 
+    /*
+    //double the UC
+    periodic_cell<REAL> cell8(*G[0].cell);
+    for (int i=0; i<3; i++)
+      cell8(i) *= 2;
+    
+    array_group<rotrans<REAL,true> > G8("",rotrans<REAL,true>(matrix3<REAL>::unity, & cell8));
+
+    //array_group<rotrans<REAL,true> > G8(G);
+
+    int N = G.size();
+    
+    for (iterator j({0,0,0},{1,1,1}); !j.end(); j++)
+      for (int i=0; i < N; i++)
+	{
+	  std::cout << i << j << std::endl;
+	  G8.add(rotrans<REAL,true>(G[0].cell->transform(G[i].T,j),G[i].R, & cell8));
+	}
+      
+    std::cout << "size= " << G8.size() << "\n";
+    //group_analyzer<rotrans<REAL,true>, array_group<rotrans<REAL,true> > > A(G8);
+    //group_analyzer<rotrans<REAL,true>, array_group<rotrans<REAL,true> > > B(G);
+    //auto C = double_group(double_group(double_group(B)));
+
+    /*
+    for (int i=0; i<G8.size(); i++)
+      for (int j=0; j<G8.size(); j++)
+	if (A.multab(i,j)!=C.multab(i,j))
+	  std::cout << i << " " << j << " " << A.multab(i,j) << " " << C.multab(i,j) << std::endl;
+    
+
+    // Form all possible invariant subspaces of abelian subgroups
+    // Combine (multiply) subgroups with coinciding subspaces
+    std::vector<highsymmsite<REAL, rotrans<REAL,true> > > H;
+    for (int i=0; i < G8.size(); i++)
+      {
+	auto s = invariant_subspace(G8[i]);
+	if (s.dim == -1)
+	  continue;
+	bool found = false;
+	for (int j=0; j<H.size(); j++)
+	  if ( H[j].S == s )
+	    {
+	      if (!belongs_to(G8[i],H[j].group))
+		H[j].group.push_back(G8[i]);
+	      found = true;
+	      break;
+	    }
+	if (!found)
+	  H.push_back(highsymmsite<REAL, rotrans<REAL,true> >(s,{G8[i]}));
+      }
+    //for (int i=0; i<H.size(); i++)
+    //  complete_group(H[i].group);
+
+    int inew = 0;
+
+    while (inew < H.size())
+      {
+	int inewest = H.size();
+	for (int ig1 = 0; ig1 < inewest; ig1++)
+	  for (int ig2 = inew; ig2 < inewest; ig2++)
+	    if (ig1!=ig2)
+	    {
+	      subspace3<REAL> s = H[ig1].S & H[ig2].S;
+
+	      bool found = false;
+	      
+	      if (s == H[ig1].S)
+		{
+		  fps_merge(H,ig1,{ig2});
+		  found = true;
+		}
+	      if (s == H[ig2].S)
+		{
+		  fps_merge(H,ig2,{ig1});
+		  found = true;
+		}
+
+	      for (int i=0; i<H.size(); i++)
+		if (i!=ig1 && i!=ig2 && s == H[i].S)
+		  {
+		    merge_to_set(H[i].group,H[ig1].group);
+		    merge_to_set(H[i].group,H[ig2].group);
+		  }
+	      
+	      
+	    }
+	inew = inewest;
+      }
+
+    for (int i=0; i<H.size(); i++)
+      //if (H[i].next.size()==0)
+	{
+	  /*
+	  std::cout << "{";
+	  for (const auto & j:H[i].group)
+	    std::cout << j << ","; 
+	    std::cout << "} "
+	  std::cout << i << " dim= " << H[i].S.dim << " " << G[0].cell->reduce(H[i].S.point)
+		    << " " << H[i].S.axis << H[i].next.size();
+	  for (int j:H[i].next)
+	    std::cout << " " << j ;
+	  std::cout << "\n";
+	}
+    //G = G8;
+  }
+    */
   /*
   template<class REAL>
-  void find_point_subgroups(std::vector<array_group<matrix3<REAL> > > & subs,
+  void find_point_subgroups(std::vector<array_group<matrix3<REAL> > > & groups,
                             std::vector<vector3<REAL> > &cntrs,
                             std::vector<int> & dims,
                             const array_group<rotrans<REAL,false> > & G){}
   */
 
+  /*
   template<class REAL>
-  void find_point_subgroups(std::vector<array_group<matrix3<REAL> > > & groups,
-                            std::vector<subspace_of3d<REAL> > & subspaces,
-                            const array_group<rotrans<REAL,false> > & G){
-
-    //std::vector<subspace_of3d<REAL> > subspaces;
+  void find_point_subgroups1(std::vector<array_group<matrix3<REAL> > > & groups,
+			     std::vector<subspace3<REAL> > & subspaces,
+			     const array_group<rotrans<REAL,false> > & G){
+    
+    //std::vector<subspace3<REAL> > subspaces;
     std::vector<std::vector<rotrans<REAL,false> > > elements;
 
     //std::cout << "find_point_subs:\n";
@@ -745,7 +709,7 @@ valid, if the displacement of atom due to
           std::cout << elements[i][j];
         std::cout << "\n";
       }
-    */
+    
 
     int nnew = 0, n = subspaces.size();
     bool contin = true;
@@ -774,7 +738,7 @@ valid, if the displacement of atom due to
         );
     reorder(subspaces,idx);
     reorder(elements, idx);
-    */
+    
     for (int i=0; i<subspaces.size(); i++){
         groups.push_back(array_group<matrix3<REAL> >());
         for (int j=0; j<elements[i].size(); j++)
@@ -792,13 +756,13 @@ valid, if the displacement of atom due to
             for (int j=0; j<elements[i].size(); j++)
               groups[n].generate(elements[i][j].R);
           }
-    */
+    
   }
-
-
+  */
+  /*
   template<class REAL>
   void find_point_subgroups(std::vector<array_group<matrix3<REAL> > > & groups,
-                            std::vector<subspace_of3d<REAL> > & subspaces,
+                            std::vector<subspace3<REAL> > & subspaces,
                             const array_group<rotrans<REAL,true> > & G)
   {
     array_group<rotrans<REAL,false> > G1;
@@ -808,7 +772,7 @@ valid, if the displacement of atom due to
 
     find_point_subgroups(groups,subspaces,G1);
   }
-
+  */
 
 #if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
 
@@ -826,12 +790,12 @@ valid, if the displacement of atom due to
                            ::tol_geom_default)
   { find_cryst_symm(G,geom,R); }
 
-  template<class REAL, bool BOUND>
-  void py_find_point_subgroups1(py::list & groups, py::list &subspaces,
-                                const array_group<rotrans<REAL,BOUND> >
+  template<class REAL>
+  void py_find_point_subgroups(py::list & groups, py::list &subspaces,
+			       const array_group<rotrans<REAL,true> >
                                 & G){
     std::vector<array_group<matrix3<REAL> > >  vgroups;
-    std::vector<subspace_of3d<REAL> > vsubspaces;
+    std::vector<subspace3<REAL> > vsubspaces;
     find_point_subgroups(vgroups,vsubspaces,G);
     for (int i = 0; i < vgroups.size(); i++){
         groups.append(vgroups[i]);

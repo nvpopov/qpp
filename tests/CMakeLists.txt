@@ -12,3 +12,6 @@ add_test(NAME test_ccd
     WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
 add_subdirectory(test-symm)
+
+add_subdirectory(test-geom)
+

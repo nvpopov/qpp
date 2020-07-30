@@ -66,6 +66,18 @@ namespace qpp {
     b.default_distance = geom.tol_geom;
     neighbours_table<REAL,CELL> n(geom,b);
     n.build();
+
+    /*
+    std::cout << "treat crowd\n";
+    for (int i = 0; i < geom.nat(); i++)
+      {
+	std::cout << i << " ";
+	for (int j =0; j< n.n(i); j++)
+	  std::cout << n(i,j)<< " ";
+	std::cout << "\n";
+      }
+    */
+    
     std::vector<int> todel;
     todel.resize(geom.nat());
     for (int i = 0; i < geom.nat(); i++)
@@ -73,8 +85,14 @@ namespace qpp {
     for (int i = 0; i < geom.nat(); i++)
       if ( todel[i] == -1 && n.n(i)>0)
         for (int j = 0; j < n.n(i); j++)
-          if (geom.atom(i)==geom.atom(j))
+          if (geom.atom(i)==geom.atom(n(i,j)))
             todel[n(i,j)] = i;
+
+    /*
+    std::cout << "treat crowd\n";
+    for (int i = 0; i < geom.nat(); i++)
+      std::cout << i << " " << todel[i] << "\n";
+    */
 
     xgeometry<REAL,CELL> *xgeom = dynamic_cast<xgeometry<REAL,CELL>*>(&geom);
     bool merge = (mode & crowd_merge) && xgeom != nullptr;

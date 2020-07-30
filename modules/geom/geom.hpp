@@ -598,14 +598,14 @@ The supercell concept generalization for the geometry class looks like:
     public:
       virtual void add (const STRING_EX & a, const vector3<REAL> & r1)
       { _add(a,r1); }
-
-      void add (STRING_EX a, const REAL _x, const REAL _y, const REAL _z)
+    
+      void add (const STRING_EX & a,  REAL _x,  REAL _y,  REAL _z)
       {  add(a,{_x,_y,_z}); }
 
       virtual void insert (int at, const STRING_EX & a, const vector3<REAL> & r1)
       { _insert(at,a,r1); }
 
-      void insert (int at, const STRING_EX & a, const REAL _x, const REAL _y, const REAL _z)
+      void insert (int at, const STRING_EX & a,  REAL _x,  REAL _y,  REAL _z)
       { insert(at,a,{_x,_y,_z}); }
 
       virtual void erase (int at)

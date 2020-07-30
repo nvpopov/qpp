@@ -93,6 +93,13 @@ namespace qpp {
 
       }
 
+    inline index operator*(int n) const {
+      index res = D(DIM);
+      for (int d=0; d<DIM; d++)
+	res(d) = idx[d]*n;
+      return res;
+    }
+
       //! Index I is added to this index componentwise
       inline index& operator+= (const index & I) {
 
@@ -304,24 +311,30 @@ namespace qpp {
       index py_sub(const index &I2) const
       { return (*this)-I2; }
 
+    index py_mul(int n) const
+    {
+      return (*this)*n;
+    }
+
       static void py_export( py::module m, const char * pyname){
 
         py::class_<index >(m, pyname)
-            .def(py::init<>())
-            .def(py::init<py::list&>())
-            .def(py::init<py::tuple&>())
-            .def(py::init<index const&>())
-            //TODO: last parameter is optional
-            .def(py::init<index const&, int, int >())
-            //.def(py::init<int>())
-            .def("__getitem__",&index::py_getitem)
-            .def("__setitem__",&index::py_setitem)
-            .def("sub",  &index::sub)
-            .def("sub",  &index::sub1)
-            //	.def(py::str(py::self))
-            //	.def(py::repr(py::self))
-      .def(py::self + py::self)
-      .def(py::self - py::self)
+	  .def(py::init<>())
+	  .def(py::init<py::list&>())
+	  .def(py::init<py::tuple&>())
+	  .def(py::init<index const&>())
+	  //TODO: last parameter is optional
+	  .def(py::init<index const&, int, int >())
+	  //.def(py::init<int>())
+	  .def("__getitem__",&index::py_getitem)
+	  .def("__setitem__",&index::py_setitem)
+	  .def("sub",  &index::sub)
+	  .def("sub",  &index::sub1)
+	  //	.def(py::str(py::self))
+	  //	.def(py::repr(py::self))
+	  .def(py::self + py::self)
+	  .def(py::self - py::self)
+	  .def("__mul__", & index::py_mul)
       //.def("__add__", & index::py_add )
       //.def("__sub__", & index::py_sub )
             .def(py::self == py::self)

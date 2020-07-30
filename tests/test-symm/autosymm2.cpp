@@ -32,7 +32,7 @@ int main(){
 
   std::cout << "R = " << R << " T= " << T << "\n";
 
-  std::optional<subspace_of3d<double> > L = invariant_subspace(rotrans<double>(T,R));
+  std::optional<subspace3<double> > L = invariant_subspace(rotrans<double>(T,R));
 
   if (L) std::cout << "dim= " << (*L).dim << " pt= " << (*L).point << " n= " << (*L).axis << "\n";
 }
