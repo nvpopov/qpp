@@ -25,7 +25,9 @@ struct do_not_expose_me_as_ndarray {};
 #include <ostream>
 #include <sstream>
 #include <initializer_list>
+#include <assert.h>
 #include <Eigen/Eigen>
+#include <Eigen/Dense>
 #include <unsupported/Eigen/MatrixFunctions>
 #include <data/types.hpp>
 #include <data/errors.hpp>

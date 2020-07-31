@@ -1,7 +1,6 @@
 #ifndef QPP_AUTOSYMM_H
 #define QPP_AUTOSYMM_H
 
-#include <Eigen/Dense>
 #include <algorithm>
 #include <geom/shape.hpp>
 #include <iomanip>
