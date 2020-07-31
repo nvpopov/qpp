@@ -20,7 +20,7 @@ namespace py = pybind11;
 #pragma pop_macro("slots")
 #endif
 
-namespace qpp{
+namespace qpp {
 
 // -----------------------------------------------------------------------
 
@@ -53,12 +53,13 @@ bool equiv_geoms (std::vector<int> & ord,
   }
 
   return true;
+
 }
 
 // -----------------------------------------------------------------------
 
 template<class REAL, class CELL>
-bool equiv_geoms (const geometry<REAL,CELL> & g1,
+bool equiv_geoms(const geometry<REAL,CELL> & g1,
                  const geometry<REAL,CELL> & g2,
                  REAL R = geometry<REAL,CELL>::tol_geom_default) {
   std::vector<int> ord;
@@ -71,6 +72,7 @@ template<class REAL>
 bool best_transform (matrix3<REAL> & res,
                     const std::vector<vector3<REAL> > &a,
                     const std::vector<vector3<REAL> > &b) {
+
   REAL eps = vector3<REAL>::tol_equiv;
 
   matrix3<REAL> C = matrix3<REAL>::Zero();
@@ -101,6 +103,7 @@ bool best_transform (matrix3<REAL> & res,
 
   res = S*C;
   return true;
+
 }
 
 // -----------------------------------------------------------------------
@@ -108,6 +111,7 @@ bool best_transform (matrix3<REAL> & res,
 template<class REAL>
 void best_axes(matrix3<REAL> & axes, vector3<REAL> & lambda,
                const geometry<REAL, periodic_cell<REAL> > & g) {
+
   matrix3<REAL> S = matrix3<REAL>::Zero();
 
   for (int i=0; i<g.size(); i++)
@@ -118,6 +122,7 @@ void best_axes(matrix3<REAL> & axes, vector3<REAL> & lambda,
   //std::cout << "S= " << S << "\n";
 
   diagon3d(lambda,axes,S);
+
 }
 
 /*
@@ -179,9 +184,9 @@ return true;
   */
     // -----------------------------------------------------------------------
 
-    template<class REAL>
-    void analyze_transform (vector3<REAL> & axis, REAL & phi, bool & inversion,
-                           const matrix3<REAL> & R) {
+template<class REAL>
+void analyze_transform(vector3<REAL> & axis, REAL & phi, bool & inversion,
+                       const matrix3<REAL> & R) {
 
   REAL eps = matrix3<REAL>::tol_equiv;
 
@@ -247,6 +252,7 @@ void unitarize(matrix3<REAL> & U) {
 template<class REAL>
 int pg_approx_find(const array_group<matrix3<REAL> > & G,
                    const matrix3<REAL> & M, REAL angle_error) {
+
   REAL norm_error = std::sqrt(8e0)*std::sin(0.5*angle_error);
 
   int i0;
@@ -259,6 +265,7 @@ int pg_approx_find(const array_group<matrix3<REAL> > & G,
     }
 
   return (err > norm_error) ? -1 : i0;
+
 }
 
 // -------------------------------------------------------------
@@ -267,10 +274,12 @@ template<class REAL>
 void pg_approx_multab(std::vector<std::vector<int> > & multab,
                       const array_group<matrix3<REAL> > & G,
                       REAL angle_error) {
+
   for (int i=0; i<G.size(); i++)
     for (int j=0; j<G.size(); j++)
       if (multab[i][j] == -1)
         multab[i][j] = pg_approx_find(G, matrix3<REAL>(G[i]*G[j]), angle_error);
+
 }
 
 // -------------------------------------------------------------
@@ -278,6 +287,7 @@ void pg_approx_multab(std::vector<std::vector<int> > & multab,
 template<class REAL>
 int pg_max_order(const array_group<matrix3<REAL> > & G,
                  REAL angle_error = 8*matrix3<REAL>::tol_equiv) {
+
   matrix3<REAL> E = matrix3<REAL>::Identity();
   matrix3<REAL> I = -E;
   int i0 = pg_approx_find(G,E,angle_error);
@@ -299,16 +309,17 @@ int pg_max_order(const array_group<matrix3<REAL> > & G,
   if (2 * REAL(pi) / n < angle_error)
     ValueError("pg_max_order : the principle axis roation angle is smaller than angle_error");
   return n;
+
 }
 
 
 // -------------------------------------------------------------------------------
 
 template <class REAL>
-void complete_point_group(array_group<matrix3<REAL> > & G,
-                          std::vector<permutation> & P) {
+void complete_point_group(array_group<matrix3<REAL> > & G, std::vector<permutation> & P) {
+
   for (int i=0; i<P.size(); i++)
-    for (int j=0; j<=i; j++){
+    for (int j=0; j<=i; j++) {
       permutation p = P[i]*P[j];
       auto idx = std::find(P.begin(),P.end(),p);
       if (idx==P.end()){
@@ -322,18 +333,19 @@ void complete_point_group(array_group<matrix3<REAL> > & G,
 // -------------------------------------------------------------------------------
 
 template<class REAL>
-void fix4_point_group(array_group<matrix3<REAL> > & G, const static_table<int> & M){
+void fix4_point_group(array_group<matrix3<REAL> > & G, const static_table<int> & M) {
+
   int N = G.size();
-  static_table<matrix3<REAL> > F(N,N);
+  static_table<matrix3<REAL>> F(N,N);
   for (int i=0; i<N; i++)
     for (int j=0; j<N; j++)
       F(i,j) = G[i]*G[j] - G[M(i,j)];
 
-  std::vector<matrix3<REAL> > Ginv(N);
+  std::vector<matrix3<REAL>> Ginv(N);
   for (int j=0; j<N; j++)
     Ginv[j] = G[j].inverse();
 
-  std::vector<matrix3<REAL> > Di(N);
+  std::vector<matrix3<REAL>> Di(N);
   for (int i=0; i<N; i++){
     matrix3<REAL> D(REAL(0));
     for (int j=0; j<N; j++)
@@ -342,16 +354,17 @@ void fix4_point_group(array_group<matrix3<REAL> > & G, const static_table<int> &
     Di[i] = D;
   }
 
-  for (int i=0; i<N; i++){
+  for (int i=0; i<N; i++) {
     G[i] = G[i] - Di[i];
     unitarize(G[i]);
   }
+
 }
 
 // -------------------------------------------------------------------------------
 
 template<class REAL>
-void reconstruct_point_group(array_group<matrix3<REAL> > & G, const static_table<int> & M){
+void reconstruct_point_group(array_group<matrix3<REAL> > & G, const static_table<int> & M) {
 
   int maxit = 100;
   int N = G.size();
@@ -377,13 +390,14 @@ void reconstruct_point_group(array_group<matrix3<REAL> > & G, const static_table
 
     if (++it > maxit) OverflowError("Too many iterations in reconstruct_point_group");
   }
+
 }
 
 // -------------------------------------------------------------------------------
 
 template<class REAL>
-STRING_EX point_group_symbol(const array_group<matrix3<REAL> > & G)
-{
+STRING_EX point_group_symbol(const array_group<matrix3<REAL> > & G) {
+
   group_analyzer<matrix3<REAL>, array_group<matrix3<REAL> > > A(G);
 
   // Define the maximum order
@@ -392,10 +406,10 @@ STRING_EX point_group_symbol(const array_group<matrix3<REAL> > & G)
     if (A.order(i)>maxord)
       maxord=A.order(i);
   }
+
   std::vector<STRING_EX> cand_groups = shnfl<REAL>::groups_by_order(maxord);
 
-  for (int i=cand_groups.size()-1; i>=0; i--)
-  {
+  for (int i=cand_groups.size()-1; i>=0; i--) {
     if (shnfl<REAL>::group(cand_groups[i]).size() != G.size() )
       cand_groups.erase(cand_groups.begin()+i);
   }
@@ -407,14 +421,14 @@ STRING_EX point_group_symbol(const array_group<matrix3<REAL> > & G)
   STRING_EX res = "";
 
   for (const STRING_EX &s:cand_groups)
-    if ( typename shnfl<REAL>::fingerprint(shnfl<REAL>::group(s),fpeps)
-            .compare(FG, fpeps) )
-    {
+    if (typename shnfl<REAL>::fingerprint(shnfl<REAL>::group(s),fpeps).compare(FG, fpeps)){
       found = true;
       res = s;
       break;
     }
+
   return res;
+
 }
 
 // -------------------------------------------------------------------------------
@@ -424,12 +438,13 @@ void find_point_symm(array_group<matrix3<REAL> > & G,
                      const geometry<REAL, periodic_cell<REAL> > & geom,
                      vector3<REAL> &new_centre,
                      REAL R = geometry<REAL,periodic_cell<REAL> >::tol_geom_default) {
+
   if (geom.nat() == 0)
     return;
 
   if (geom.nat() == 1) {
     G = shnfl<REAL>::Oh();
-    G.name = "SO3";
+    G.m_name = "SO3";
     return;
   }
 
@@ -496,15 +511,15 @@ void find_point_symm(array_group<matrix3<REAL> > & G,
 
     bool dnh = equiv_geoms(g,g1,R);
 
-    if (dnh){
+    if (dnh) {
       G = shnfl<REAL>::Dnh(4);
-      G.name = "D_inf_h";
+      G.m_name = "D_inf_h";
 
       //std::cout << "linear molecule with Dh\n";
     }
     else{
       G = shnfl<REAL>::Cnv(4);
-      G.name = "C_inf_v";
+      G.m_name = "C_inf_v";
 
       //std::cout << "linear molecule with Cv\n";
     }
@@ -514,7 +529,7 @@ void find_point_symm(array_group<matrix3<REAL> > & G,
     return;
   }
 
-  if (planar){
+  if (planar) {
     // add two reference points on both sides of the symmetry plane
     REAL h = std::sqrt(lmb[2]/g.nat());
     g.add("refpoint",  nplane*h);
@@ -524,10 +539,9 @@ void find_point_symm(array_group<matrix3<REAL> > & G,
   }
 
   // sort atoms in reverse order by the distance from centre
-  g.sort(
-      [](const geometry<REAL> & gg, int ii)->REAL
-      {return -gg.pos(ii).norm();}
-      );
+  g.sort([](const geometry<REAL> & gg, int ii)->REAL {
+              return -gg.pos(ii).norm();
+            });
 
   //std::cout << g.pos(0).norm() << " " << g.pos(g.nat()-1).norm() << "\n";
 
@@ -544,13 +558,12 @@ void find_point_symm(array_group<matrix3<REAL> > & G,
   bool found = false;
 
   for (j=1; j<g.nat() && g.pos(j).norm()>R; j++)
-    for (i=0; i<j; i++){
+    for (i=0; i<j; i++) {
 
       ri = g.pos(i);
       rj = g.pos(j);
 
-      REAL cos_t = (g.pos(i).dot(g.pos(j))) /
-                   (g.pos(i).norm() * g.pos(j).norm());
+      REAL cos_t = (g.pos(i).dot(g.pos(j))) / (g.pos(i).norm() * g.pos(j).norm());
       if ( cos_t < REAL(-1) )
         cos_t = -REAL(1);
       if (cos_t > REAL(1) )
@@ -558,11 +571,13 @@ void find_point_symm(array_group<matrix3<REAL> > & G,
 
       theta = std::acos(cos_t);
 
-      if ( theta > angle_error && theta < REAL(pi) - angle_error ){
+      if ( theta > angle_error && theta < REAL(pi) - angle_error ) {
         found = true;
         goto FOUND;
       }
+
     }
+
 FOUND:
   if (!found)
     return;
@@ -571,13 +586,12 @@ FOUND:
   std::vector<int> img_i, img_j;
   REAL Ri = ri.norm(), Rj = rj.norm();
 
-  for (int k = 0; k<g.nat(); k++){
+  for (int k = 0; k<g.nat(); k++) {
     REAL Rk = g.pos(k).norm();
-    if ( Ri+R > Rk && Rk > Ri-R && g.atom(i)==g.atom(k) )
+    if (Ri+R > Rk && Rk > Ri-R && g.atom(i)==g.atom(k))
       img_i.push_back(k);
-    if ( Rj+R > Rk && Rk > Rj-R && g.atom(j)==g.atom(k) )
+    if (Rj+R > Rk && Rk > Rj-R && g.atom(j)==g.atom(k))
       img_j.push_back(k);
-
     if ( Rk <= Ri-R && Rk <= Rj-R )
       break;
   }
@@ -608,13 +622,13 @@ FOUND:
       vector3<REAL> ri1 = g.pos(i1), rj1 = g.pos(j1);
 
       REAL cos_t1 = (ri1.dot(rj1))/(ri1.norm()*rj1.norm());
-      if ( cos_t1 < -REAL(1) )
+      if (cos_t1 < -REAL(1))
         cos_t1 = -REAL(1);
-      if (cos_t1 > REAL(1) )
+      if (cos_t1 > REAL(1))
         cos_t1 = REAL(1);
 
       REAL theta1 = std::acos(cos_t1);
-      if ( std::abs(theta - theta1) >= angle_error  )
+      if (std::abs(theta - theta1) >= angle_error)
         continue;
 
       matrix3<REAL> U;
@@ -626,15 +640,15 @@ FOUND:
 
       std::vector<int> pp;
       if (equiv_geoms(pp,g,g1,R))
-        if (std::find(P.begin(),P.end(),permutation(pp)) == P.end())
-        {
+        if (std::find(P.begin(),P.end(),permutation(pp)) == P.end()) {
+
           P.push_back(permutation(pp));
           G.add(U);
 
           /*
-    std::cout << permutation(pp).to_string();
-                std::cout << "\n";
-    */
+          std::cout << permutation(pp).to_string();
+          std::cout << "\n";
+          */
         }
 
       best_transform(U,{ri,rj,ri.cross(rj)/sqrt(Ri*Rj)},
@@ -644,15 +658,13 @@ FOUND:
         g1.coord(k) = U*g.coord(k);
 
       if (equiv_geoms(pp,g,g1,R))
-        if (std::find(P.begin(),P.end(),permutation(pp))==P.end())
-        {
+        if (std::find(P.begin(),P.end(),permutation(pp))==P.end()) {
           P.push_back(permutation(pp));
           G.add(U);
-
           /*
-    std::cout << permutation(pp).to_string();
-                std::cout << "\n";
-    */
+          std::cout << permutation(pp).to_string();
+          std::cout << "\n";
+          */
         }
     }
 
@@ -663,17 +675,15 @@ FOUND:
   group_analyzer<permutation> AP(P);
 
   // Correct point group according to the multiplication table
-
   reconstruct_point_group(G,AP.multab);
 
   STRING_EX Gname = point_group_symbol(G);
 
   //std::cout << " group= " << Gname << " found= " << found << "\n";
 
-  G.name = Gname;
+  G.m_name = Gname;
 
 }
-
 
 //----------------------------------------------------
 
@@ -691,8 +701,8 @@ struct point_group_axes{
   point_group_axes(){}
 
   point_group_axes(const point_group_axes & A):
-                                                center(A.center), inversion(A.inversion), naxes(A.naxes), nplanes(A.nplanes),
-                                                axes(A.axes), planes(A.planes), orders(A.orders), rotoinversion(A.rotoinversion)
+         center(A.center), inversion(A.inversion), naxes(A.naxes), nplanes(A.nplanes),
+         axes(A.axes), planes(A.planes), orders(A.orders), rotoinversion(A.rotoinversion)
   {}
 
   point_group_axes(const array_group< matrix3<REAL> > & G){
@@ -789,8 +799,7 @@ struct point_group_axes{
 #if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
 
 template<class REAL>
-bool py_best_transform( matrix3<REAL> & res,
-                       const py::list &A, const py::list &B){
+bool py_best_transform(matrix3<REAL> & res, const py::list &A, const py::list &B) {
   std::vector<vector3<REAL> > a,b;
 
   if (py::len(A) != py::len(B))
@@ -829,7 +838,8 @@ bool py_best_transform( matrix3<REAL> & res,
 }
 
 template<class REAL>
-py::list py_analyze_transform(const matrix3<REAL> & R){
+py::list py_analyze_transform(const matrix3<REAL> & R) {
+
   vector3<REAL> axis;
   REAL phi;
   bool inversion;
@@ -841,10 +851,12 @@ py::list py_analyze_transform(const matrix3<REAL> & R){
   res.append(inversion);
 
   return res;
+
 }
 
 template<class REAL>
-void py_reconstruct_point_group(array_group<matrix3<REAL> > & G, const py::list & M){
+void py_reconstruct_point_group(array_group<matrix3<REAL> > & G, const py::list & M) {
+
   int N = G.size();
   static_table<int> multab(N,N);
   if (py::len(M)!=N)
@@ -866,6 +878,7 @@ void py_reconstruct_point_group(array_group<matrix3<REAL> > & G, const py::list 
   }
 
   reconstruct_point_group(G,multab);
+
 }
 
 

@@ -11,7 +11,7 @@
 namespace qpp{
 
 template<class TRANSFORM, class ARRAY = std::vector<TRANSFORM> >
-class group_analyzer{
+class group_analyzer {
 
   // All group elements are stored here
   const ARRAY & G;
@@ -26,11 +26,10 @@ class group_analyzer{
 
   // where in mtab is the record for i-th times j-th element
   /*
-      inline int mtidx(int i, int j) const
-      {
-      return i*G.size()+j;
-      }
-    */
+   inline int mtidx(int i, int j) const {
+    return i*G.size()+j;
+   }
+  */
 
 public:
 
@@ -199,35 +198,36 @@ public:
 
   }
 
-  void complete_sub(std::set<int> & S){
+  void complete_sub(std::set<int> & S) {
+
     std::set<int> N = S;
-    while (N.size()>0)
-    {
+    while (N.size()>0) {
       std::set<int> NN;
-      for (auto *c : { &S, &N } )
+      for (auto *c : { &S, &N })
         for (const int & i : *c)
-          for (const int & j : N)
-          {
+          for (const int & j : N) {
             int k = multab(i,j);
-            if ( S.find(k) == S.end() && N.find(k) == N.end() )
+            if (S.find(k) == S.end() && N.find(k) == N.end())
               NN.insert(k);
             k = multab(j,i);
-            if ( S.find(k) == S.end() && N.find(k) == N.end() )
+            if (S.find(k) == S.end() && N.find(k) == N.end())
               NN.insert(k);
           }
       for (const int &i : N)
         S.insert(i);
       N = NN;
     }
+
   }
 
-  void complete_sub(std::vector<int> & S){
+  void complete_sub(std::vector<int> & S) {
     std::set<int> SS( S.begin(), S.end() );
     complete_sub(SS);
     S = std::vector<int>(SS.begin(), SS.end());
   }
 
   std::vector<int> find_generators(const std::vector<int> & H) {
+
     int N = size();
     if (H.size() == N)
       return std::vector<int>();
@@ -246,13 +246,13 @@ public:
               } );
 
     /*
-        std::cout << "F sorted:\n";
-        for (int i : F)
-        std::cout << " " << i << "(" << order(i) << ")";
-        std::cout << "\n";
-      */
+      std::cout << "F sorted:\n";
+      for (int i : F)
+      std::cout << " " << i << "(" << order(i) << ")";
+      std::cout << "\n";
+    */
 
-    for (int g : F){
+    for (int g : F) {
       //std::cout << "trying " << g << "\n";
 
       H1.clear();
@@ -267,13 +267,15 @@ public:
         }
       }
     }
+
     return std::vector<int>({-1});
+
   }
 
   //-------------------------------------------------------------------------------------
 
   // Constructors
-  group_analyzer(const ARRAY & _G) : G(_G){
+  group_analyzer(const ARRAY & _G) : G(_G) {
     //mtab = NULL;
     //ordr = NULL;
 
@@ -289,21 +291,19 @@ public:
     //std::cout << "alive4\n";
   }
 
-  group_analyzer( const static_table<int> & __multab) : multab(__multab),
-                                                      G(ARRAY())
-  {
+  group_analyzer( const static_table<int> & __multab) : multab(__multab), G(ARRAY()) {
     build_orders();
   }
 
-  ~group_analyzer(){
+  ~group_analyzer() {
     //      if (ordr != nullptr) delete [] ordr;
     delete [] ordr;
   }
 
 #if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
 
-  py::list py_complete_sub(const py::list & S)
-  {
+  py::list py_complete_sub(const py::list & S) {
+
     std::set<int> s;
     for (auto item : S) s.insert(py::cast<int>(item));
     complete_sub(s);
@@ -311,26 +311,27 @@ public:
     py::list S1;
     for (int i:s) S1.append(i);
     return S1;
+
   }
 
-  int py_multab(int i, int j){
+  int py_multab(int i, int j) {
     return multab(i,j);
   }
 
-  py::list py_classes()
-  {
+  py::list py_classes() {
+
     py::list res;
-    for (const auto & c : cltab)
-    {
+    for (const auto & c : cltab) {
       py::list cl;
       for (const auto & i : c)
         cl.append(i);
       res.append(cl);
     }
     return res;
+
   }
 
-  static void py_export(py::module m, const char * pyname){
+  static void py_export(py::module m, const char * pyname) {
     py::class_<group_analyzer<TRANSFORM,ARRAY> >(m, pyname)
         .def(py::init<const ARRAY &>())
         .def("complete_sub", & group_analyzer<TRANSFORM,ARRAY>::py_complete_sub )
@@ -350,8 +351,9 @@ public:
 
 // -------------------------------------------------------------------------------
 
-template <class TRANSFORM, class ARRAY = std::vector<TRANSFORM> >
-void generator_form(genform_group<TRANSFORM> & R, ARRAY & G){
+template <class TRANSFORM, class ARRAY = std::vector<TRANSFORM>>
+void generator_form(genform_group<TRANSFORM> & R, ARRAY & G) {
+
   group_analyzer<TRANSFORM,ARRAY> A(G);
   std::vector<int> ee = {0}, gg = A.find_generators(ee);
   int DIM = gg.size();
@@ -363,13 +365,12 @@ void generator_form(genform_group<TRANSFORM> & R, ARRAY & G){
 
   R.auto_orders();
 
-  //return R;
 }
 
 // -------------------------------------------------------------------------------
 
-template <class VALTYPE, class TRANSFORM, class ARRAY = std::vector<TRANSFORM> >
-class group_characters{
+template <class VALTYPE, class TRANSFORM, class ARRAY = std::vector<TRANSFORM>>
+class group_characters {
 
   // All group elements are stored here
   const ARRAY & G;
@@ -388,29 +389,32 @@ public:
   matrix chi;
   int nirrep;
 
-  group_characters(const ARRAY & _G,
-                   const group_analyzer<TRANSFORM,ARRAY> & _A) :
-                                                                 G(_G), A(_A){
+  group_characters(const ARRAY & _G, const group_analyzer<TRANSFORM,ARRAY> & _A) : G(_G), A(_A){
     //std::cout << "before characters\n";
     build_chi();
   }
 
   // Regular representation matrix for i-th element
-  matrix regrep(int i){
+  matrix regrep(int i) {
+
     matrix R = matrix::Zero(G.size(),G.size());
 
     for (int j=0; j<G.size(); j++)
       R(j,A.multab(j,i)) = VALTYPE(1);
+
     return R;
+
   }
 
   // ----------------------------------------------------------
   // Scalar product of character chi with irrep character
-  VALTYPE chi_scal(const vector &ch, int irrep){
+  VALTYPE chi_scal(const vector &ch, int irrep) {
+
     VALTYPE s(0);
     for (int cl = 0; cl < A.n_classes(); cl++)
       s += std::conj(ch(cl))*chi(irrep,cl)*VALTYPE(A.class_size(cl));
     return s;
+
   }
 
   // ------------------------------------------------------------
@@ -419,9 +423,9 @@ public:
   // Decompose the subspace of the regular representation defined by its
   // basis vectors n(i) into invariant subspaces
   // n(i,j) = delta_ij in the beginning
-  void subspace_decompose(matrix &n, std::vector<int> &dims){
-    // n(i,j) is j-th component of i-th basis vector of the subspace
-    // dims array contains the dimensions of invariant subspaces
+  void subspace_decompose(matrix &n, std::vector<int> &dims) {
+  // n(i,j) is j-th component of i-th basis vector of the subspace
+  // dims array contains the dimensions of invariant subspaces
 
     int N = G.size();
     if (N!=n.rows() || N!=n.cols())
@@ -446,15 +450,14 @@ public:
         S(i,j) = ele;
       }
 
-
     // Step 3. Diagonalize it
     //std::cout << "step3\n";
     Eigen::SelfAdjointEigenSolver<matrix> es;
 
     es.compute(S,Eigen::ComputeEigenvectors);
 
-    auto  eig = es.eigenvalues();
-    auto  vecs = es.eigenvectors();
+    auto eig = es.eigenvalues();
+    auto vecs = es.eigenvectors();
 
     //      std::cout << "Eigval\n";
     eig /= eig(N-1);
@@ -483,13 +486,15 @@ public:
 
     //std::cout << "step5\n";
     n = n*vecs;
+
   }
 
   // Build character table by decomposing the regular representation
   // into invariant subspaces
   // fixme - find more efficient algorithm (MeatAxe?)
   // fixme - should this algorithm be recursive?
-  void build_chi(){
+  void build_chi() {
+
     int N = G.size();
     //chi.resize(A.n_classes());
 
@@ -510,11 +515,12 @@ public:
 
     chi.resize(1, A.n_classes());
 
-    for (int rep = 0; rep < dims.size(); rep++){
+    for (int rep = 0; rep < dims.size(); rep++) {
+
       i1 = i0 + dims[rep] - 1;
 
       vector new_chi(A.n_classes());
-      for (int cl = 0; cl < A.n_classes(); cl++){
+      for (int cl = 0; cl < A.n_classes(); cl++) {
         int g = A.class_element(cl,0);
         matrix R(dims[rep], dims[rep]);
         R = n.block(
@@ -529,12 +535,12 @@ public:
 
       bool already = false;
       for (int irrep=0; irrep < nfound; irrep++)
-        if ( std::abs(chi_scal(new_chi, irrep)) > chi_tol ){
+        if (std::abs(chi_scal(new_chi, irrep)) > chi_tol) {
           already = true;
           break;
         }
 
-      if (!already){
+      if (!already) {
         chi.conservativeResize(nfound+1, A.n_classes() );
         for (int cl = 0; cl < A.n_classes(); cl++)
           chi(nfound, cl) = new_chi(cl);
@@ -542,6 +548,7 @@ public:
       }
 
       i0 = i1 + 1;
+
     }
 
     nirrep = nfound;

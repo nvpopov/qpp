@@ -121,8 +121,7 @@ namespace qpp {
   // ----------------------------------------------------------------------------
 
   template<class REALDST, class CELLDST, class REALSRC, class CELLSRC>
-  void copy_header(geometry<REALDST,CELLDST> & dst,
-                   const geometry<REALSRC,CELLSRC> & src) {
+  void copy_header(geometry<REALDST,CELLDST> & dst, const geometry<REALSRC,CELLSRC> & src) {
 
     xgeometry<REALDST,CELLDST> *xdst = nullptr;
     xgeometry<REALSRC,CELLSRC> *xsrc = nullptr;
@@ -141,7 +140,8 @@ namespace qpp {
           }
         else
           xdst->set_format({"atom","x","y","z"},
-          {basic_types::type_string, basic_types::type_real, basic_types::type_real, basic_types::type_real});
+          {basic_types::type_string, basic_types::type_real,
+           basic_types::type_real, basic_types::type_real});
       }
   }
 

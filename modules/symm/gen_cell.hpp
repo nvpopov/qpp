@@ -55,8 +55,8 @@ for some geometry
 
 template <class REAL, class TRANSFORM>
 struct gen_cell : public genform_group<TRANSFORM> {
-  using genform_group<TRANSFORM>::_begin;
-  using genform_group<TRANSFORM>::_end;
+  using genform_group<TRANSFORM>::m_idx_begin;
+  using genform_group<TRANSFORM>::m_idx_end;
   using genform_group<TRANSFORM>::DIM;
   using genform_group<TRANSFORM>::generators;
   using genform_group<TRANSFORM>::generate;
@@ -117,7 +117,7 @@ struct gen_cell : public genform_group<TRANSFORM> {
     // std::cerr << "symmetrize for " << r << "\n";
 
     points.push_back(r);
-    for (iterator I(_begin, _end); !I.end(); I++) {
+    for (iterator I(m_idx_begin, m_idx_end); !I.end(); I++) {
       if (I == index::D(DIM).all(0)) continue;
 
       vector3<REAL> r1 = transform(r, I);
@@ -173,8 +173,8 @@ struct gen_cell : public genform_group<TRANSFORM> {
         symmetry operation");*/
       generators.push_back(py::cast<TRANSFORM>(G[i]));
     }
-    _begin = __begin;
-    _end = __end;
+    m_idx_begin = __begin;
+    m_idx_end = __end;
   }
 
   gen_cell(const py::list &G) : genform_group<TRANSFORM>() {
@@ -187,7 +187,7 @@ struct gen_cell : public genform_group<TRANSFORM> {
         expected symmetry operation");*/
       generators.push_back(py::cast<TRANSFORM>(G[i]));
     }
-    _begin = _end = index::D(DIM).all(0);
+    m_idx_begin = m_idx_end = index::D(DIM).all(0);
   }
 
   TRANSFORM py_getgen(int i) {

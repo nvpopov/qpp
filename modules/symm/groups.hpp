@@ -23,32 +23,35 @@ class genform_group {
 public:
 
   std::vector<TRANSFORM> generators;
-  index _begin, _end;
+  index m_idx_begin, m_idx_end;
   int DIM;
-  STRING_EX name;
+  STRING_EX m_name;
 
-  genform_group(int dim = 0, const STRING_EX & _name = "") {
+  genform_group(int dim = 0, const STRING_EX & name = "") {
     DIM=dim;
     generators.resize(DIM);
-    _begin = index::D(DIM);
-    _end   = index::D(DIM);
-    name = _name;
+    m_idx_begin = index::D(DIM);
+    m_idx_end   = index::D(DIM);
+    m_name = name;
   }
 
   genform_group(const std::vector<TRANSFORM> & g,
-                const index & __begin, const index & __end,
+                const index & idx_begin, const index & idx_end,
                 const STRING_EX & _name = "") {
+
     DIM = g.size();
     generators.resize(DIM);
     int d=0;
     for (const TRANSFORM & t : g)
       generators[d++]=t;
-    _begin = __begin;
-    _end   = __end;
-    name = _name;
+    m_idx_begin = idx_begin;
+    m_idx_end   = idx_end;
+    m_name = _name;
+
   }
 
   genform_group(const std::vector<TRANSFORM> & g, const STRING_EX & _name = "") {
+
     DIM = g.size();
     generators.resize(DIM);
 
@@ -56,13 +59,15 @@ public:
     for (const TRANSFORM & t : g)
       generators[d++]=t;
 
-    _begin = index::D(DIM);
-    _end   = index::D(DIM);
-    name = _name;
+    m_idx_begin = index::D(DIM);
+    m_idx_end   = index::D(DIM);
+    m_name = _name;
+
   }
 
   genform_group(const genform_group<TRANSFORM> & G) :
-                                                     DIM(G.DIM), generators(G.generators), _begin(G._begin), _end(G._end), name(G.name){}
+                DIM(G.DIM), generators(G.generators),
+                m_idx_begin(G.m_idx_begin), m_idx_end(G.m_idx_end), m_name(G.m_name){}
 
   int get_dim() {return DIM;}
 
@@ -70,32 +75,36 @@ public:
     DIM = D;
     generators.resize(DIM);
 
-    _begin = index::D(DIM);
-    _end   = index::D(DIM);
+    m_idx_begin = index::D(DIM);
+    m_idx_end   = index::D(DIM);
   }
 
   TRANSFORM operator()(const index & n) const {
+
     if (DIM==0)
       return TRANSFORM::unity;
 
     //TRANSFORM A = pow(generators[0],n(0));
     TRANSFORM A = generators[0].pow(n(0));
-    for (int d = 1; d<DIM; d++){
+    for (int d = 1; d<DIM; d++) {
       //A = A*pow(generators[d],n(d));
       TRANSFORM Anp = A * generators[d].pow(n(d));
       A = Anp;
     }
+
     return A;
+
   }
 
   template <class ARRAY>
   void generate(ARRAY & group) {
-    for (iterator n(_begin, _end); !n.end(); n++)
+    for (iterator n(m_idx_begin, m_idx_end); !n.end(); n++)
       group.push_back((*this)(n));
   }
 
   void auto_order(int d) {
-    _begin(d) = 0;
+
+    m_idx_begin(d) = 0;
     const TRANSFORM & g = generators[d];
     TRANSFORM a = g;
     int n=1;
@@ -103,7 +112,9 @@ public:
       a = a*g;
       n++;
     }
-    _end(d) = n-1;
+
+    m_idx_end(d) = n-1;
+
   }
 
   void auto_orders() {
@@ -112,10 +123,10 @@ public:
   }
 
   inline index begin() const
-  { return _begin;}
+  { return m_idx_begin;}
 
   inline index end() const
-  { return _end;}
+  { return m_idx_end;}
 
 };
 
@@ -141,30 +152,32 @@ public:
 
   static int default_lim_size;
   int lim_size;
-  STRING_EX name;
+  STRING_EX m_name;
 
   std::vector<TRANSFORM> group;
 
   int index(const TRANSFORM & g) {
+
     int i;
     bool result=false;
     for (i = 0; i < group.size(); i++)
-      if ( group[i] == g ){
+      if (group[i] == g) {
         result = true;
         break;
       }
+
     return result? i : -1;
+
   }
 
-  array_group(const STRING_EX & _name="",
-              TRANSFORM E = TRANSFORM::unity) {
-    name = _name;
+  array_group(const STRING_EX &name="", TRANSFORM E = TRANSFORM::unity) {
+    m_name = name;
     group.push_back(E);
     lim_size = default_lim_size;
   }
 
   array_group(const array_group<TRANSFORM> & G):
-                                                 group(G.group), lim_size(G.lim_size), name(G.name)
+              group(G.group), lim_size(G.lim_size), m_name(G.m_name)
   {}
 
   inline TRANSFORM & operator[](int i)
@@ -186,7 +199,8 @@ public:
     group.erase(group.begin()+i);
   }
 
-  void generate(const TRANSFORM & g){
+  void generate(const TRANSFORM & g) {
+
     if ( index(g) >= 0 )
       return;
     int inew = size();
@@ -222,16 +236,16 @@ public:
 
       inew = inewest;
     }
+
   }
 
-  virtual void write(std::basic_ostream<CHAR_EX,TRAITS> &os,
-                     int offset=0) const {
+  virtual void write(std::basic_ostream<CHAR_EX,TRAITS> &os, int offset=0) const {
     // fixme
   }
 
 #if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
 
-  inline TRANSFORM py_getitem(int i){
+  inline TRANSFORM py_getitem(int i) {
     if (i<0)
       i += size();
     if (i<0 || i>=size())
@@ -239,12 +253,14 @@ public:
     return group[i];
   }
 
-  inline void py_setitem(int i, const TRANSFORM & t){
+  inline void py_setitem(int i, const TRANSFORM & t) {
+
     if (i<0)
       i += size();
     if (i<0 || i>=size())
       IndexError("cell: index out of range");
     group[i] = t;
+
   }
 
   static void py_export(py::module m, const char * pyname){
@@ -260,7 +276,7 @@ public:
         .def("__getitem__",  & array_group<TRANSFORM>::py_getitem)
         .def("__setitem__",  & array_group<TRANSFORM>::py_setitem)
         .def("__len__", & array_group<TRANSFORM>::size)
-        .def_readwrite("name", & array_group<TRANSFORM>::name)
+        .def_readwrite("name", & array_group<TRANSFORM>::m_name)
         .def_readwrite("lim_size", & array_group<TRANSFORM>::lim_size)
         .def_readwrite_static("default_lim_size", & array_group<TRANSFORM>::default_lim_size)
         ;

@@ -212,8 +212,8 @@ matrix4<REAL> rotrans4d(const rotrans<REAL,BOUND> & R) {
 template <class REAL>
 rotrans<REAL,true> rotrans_shift(const rotrans<REAL, true> & r, const index & I) {
   auto & cl = *r.cell;
-  return rotrans<REAL,true>(vector3<double>(r.T + cl(0)*I(0) + cl(1)*I(1) + cl(2)*I(2)),
-                             r.R, r.cell);
+  return rotrans<REAL,true>(
+      vector3<double>(r.T + cl(0)*I(0) + cl(1)*I(1) + cl(2)*I(2)),r.R, r.cell);
 }
 
 //!\brief Inverse of rotrans R, P=R^(-1). Means R*P==1.
