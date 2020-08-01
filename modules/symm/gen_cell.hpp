@@ -71,8 +71,7 @@ struct gen_cell : public genform_group<TRANSFORM> {
 
   gen_cell(int dim = 0) : genform_group<TRANSFORM>(dim) { init_default(); }
 
-  gen_cell(const std::vector<TRANSFORM> &g, const index &__begin,
-           const index &__end)
+  gen_cell(const std::vector<TRANSFORM> &g, const index &__begin, const index &__end)
       : genform_group<TRANSFORM>(g, __begin, __end) {
     init_default();
   }
@@ -155,8 +154,7 @@ struct gen_cell : public genform_group<TRANSFORM> {
     return r;
   }
 
-  virtual void write(std::basic_ostream<CHAR_EX, TRAITS> &os,
-                     int offset = 0) const {
+  virtual void write(std::basic_ostream<CHAR_EX, TRAITS> &os, int offset = 0) const {
     // fixme - implement this
   }
 

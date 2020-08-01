@@ -28,54 +28,54 @@ namespace qpp {
 template <class REAL>
 class bonding_table {
 
-  struct _covrad_record {
+  struct covrad_record_t {
     STRING_EX at;
     REAL d;
 
-    _covrad_record(const STRING_EX & _at, REAL _d){
+    covrad_record_t(const STRING_EX & _at, REAL _d) {
       at = _at;
       d = _d;
     }
 
   };
 
-  std::vector<_covrad_record> _covrads;
+  std::vector<covrad_record_t> p_covrads;
 
-  inline bool _covrad_match(const STRING_EX & at, int i) const {
-    return at == _covrads[i].at;
+  inline bool covrad_match(const STRING_EX & at, int i) const {
+    return at == p_covrads[i].at;
   }
 
-  inline int _find_covrad(const STRING_EX & at) const {
-    for (int i=0; i<_covrads.size(); i++)
-      if (_covrad_match(at,i))
+  inline int find_covrad(const STRING_EX & at) const {
+    for (int i=0; i<p_covrads.size(); i++)
+      if (covrad_match(at,i))
         return i;
     return -1;
   }
 
   // -------------------------------------------------
 
-  struct _ngbr_record {
+  struct ngbr_record_t {
     STRING_EX at1, at2;
     REAL d;
 
-    _ngbr_record(const STRING_EX & _at1, const STRING_EX & _at2, REAL _d){
+    ngbr_record_t(const STRING_EX & _at1, const STRING_EX & _at2, REAL _d) {
       at1 = _at1;
       at2 = _at2;
       d = _d;
     }
   };
 
-  std::vector<_ngbr_record> _records;
+  std::vector<ngbr_record_t> p_records;
 
-  inline bool _record_match(const STRING_EX & at1,
-                            const STRING_EX & at2, int i) const{
-    return ( at1 == _records[i].at1 && at2 == _records[i].at2 ) ||
-           ( at2 == _records[i].at1 && at1 == _records[i].at2 );
+  inline bool record_match(const STRING_EX & at1,
+                            const STRING_EX & at2, int i) const {
+    return ( at1 == p_records[i].at1 && at2 == p_records[i].at2 )
+           || ( at2 == p_records[i].at1 && at1 == p_records[i].at2 );
   }
 
-  inline int _find_record(const STRING_EX & at1, const STRING_EX & at2) const{
-    for (int i=0; i<_records.size(); i++)
-      if (_record_match(at1,at2,i))
+  inline int find_record(const STRING_EX & at1, const STRING_EX & at2) const {
+    for (int i=0; i<p_records.size(); i++)
+      if (record_match(at1,at2,i))
         return i;
     return -1;
   }
@@ -88,54 +88,54 @@ public:
 
   REAL default_distance;
 
-  REAL covrad(const STRING_EX & at){
-    int i = _find_covrad(at);
-    return i>-1 ? _covrads[i].d : 0e0;
+  REAL covrad(const STRING_EX &at) {
+    int i = find_covrad(at);
+    return i>-1 ? p_covrads[i].d : 0e0;
   }
 
-  void set_covrad(const STRING_EX  & at, const REAL & d){
-    int i = _find_covrad(at);
+  void set_covrad(const STRING_EX &at, const REAL & d) {
+    int i = find_covrad(at);
     if (i>-1)
-      _covrads[i].d = d;
+      p_covrads[i].d = d;
     else
-      _covrads.push_back(_covrad_record(at,d));
+      p_covrads.push_back(covrad_record_t(at,d));
   }
 
-  REAL pair(const STRING_EX   at1, const STRING_EX   at2){
-    int i = _find_record(at1,at2);
-    return i>-1 ? _records[i].d : 0e0;
+  REAL pair(const STRING_EX at1, const STRING_EX at2) {
+    int i = find_record(at1,at2);
+    return i>-1 ? p_records[i].d : 0e0;
   }
 
-  void set_pair(const STRING_EX   at1, const STRING_EX   at2, const REAL &d){
-    int i = _find_record(at1,at2);
+  void set_pair(const STRING_EX   at1, const STRING_EX at2, const REAL &d) {
+    int i = find_record(at1,at2);
     if (i>-1)
-      _records[i].d = d;
+      p_records[i].d = d;
     else
-      _records.push_back(_ngbr_record(at1,at2,d));
+      p_records.push_back(ngbr_record_t(at1,at2,d));
   }
 
-  REAL distance(const STRING_EX & at1, const STRING_EX   at2){
-    int i = _find_record(at1,at2);
+  REAL distance(const STRING_EX &at1, const STRING_EX at2) {
+    int i = find_record(at1,at2);
     if (i>-1)
-      return _records[i].d;
+      return p_records[i].d;
 
-    i = _find_covrad(at1);
-    int j = _find_covrad(at2);
+    i = find_covrad(at1);
+    int j = find_covrad(at2);
 
     if ( i>-1 && j>-1 )
-      return _covrads[i].d + _covrads[j].d;
+      return p_covrads[i].d + p_covrads[j].d;
 
     return default_distance;
   }
 
 
-  void clear(){
-    _records.clear();
-    _covrads.clear();
+  void clear() {
+    p_records.clear();
+    p_covrads.clear();
     default_distance = 0e0;
   }
 
-  virtual void write(std::basic_ostream<CHAR_EX,TRAITS> &os, int offset=0) const{
+  virtual void write(std::basic_ostream<CHAR_EX,TRAITS> &os, int offset=0) const {
     for (int k=0; k<offset; k++) os << " ";
     os << "bonding_table";
     if (name != "")
@@ -145,12 +145,12 @@ public:
     for (int k=0; k<offset+2; k++) os << " ";
     os << "default = " << default_distance << ";\n";
 
-    for (const auto & c : _covrads){
+    for (const auto & c : p_covrads) {
       for (int k=0; k<offset+2; k++) os << " ";
       os << "covrad(" << c.at << ") = " << c.d << ";\n";
     }
 
-    for (const auto & p : _records){
+    for (const auto & p : p_records) {
       for (int k=0; k<offset+2; k++) os << " ";
       os << "pair(" << p.at1 << "," << p.at2 << ") = " << p.d << ";\n";
     }
@@ -159,22 +159,22 @@ public:
     os << "}\n";
   }
 
-  void merge(const bonding_table<REAL> & bt){
+  void merge(const bonding_table<REAL> & bt) {
     default_distance = std::max(default_distance, bt.default_distance);
-    for (int i=0; i<bt._records.size(); i++){
-      int j = _find_record( bt._records[i].at1, bt._records[i].at2);
+    for (int i=0; i<bt.p_records.size(); i++) {
+      int j = find_record( bt.p_records[i].at1, bt.p_records[i].at2);
       if (j==-1)
-        _records.push_back(bt._records[i]);
+        p_records.push_back(bt.p_records[i]);
       else
-        _records[j].d = std::max( _records[j].d, bt._records[i].d);
+        p_records[j].d = std::max( p_records[j].d, bt.p_records[i].d);
     }
 
-    for (int i=0; i<bt._covrads.size(); i++){
-      int j = _find_covrad( bt._covrads[i].at );
+    for (int i=0; i<bt.p_covrads.size(); i++) {
+      int j = find_covrad( bt.p_covrads[i].at );
       if (j==-1)
-        _covrads.push_back(bt._covrads[i]);
+        p_covrads.push_back(bt.p_covrads[i]);
       else
-        _covrads[j].d = std::max( _covrads[j].d, bt._covrads[i].d);
+        p_covrads[j].d = std::max( p_covrads[j].d, bt.p_covrads[i].d);
     }
   }
 
@@ -186,14 +186,14 @@ public:
   py_indexed_property<SELF, REAL, const STRING_EX &,
                       &SELF::covrad, &SELF::set_covrad> py_covrad;
 
-  REAL py_getpair(const STRING_EX){ return -1;}
-  void py_setpair(const STRING_EX, const REAL &){}
+  REAL py_getpair(const STRING_EX) { return -1;}
+  void py_setpair(const STRING_EX, const REAL &) {}
 
-  REAL py_getpair2(const STRING_EX at1, const STRING_EX  at2){
+  REAL py_getpair2(const STRING_EX at1, const STRING_EX  at2) {
     return pair(at1,at2);
   }
 
-  void py_setpair2(const STRING_EX at1, const STRING_EX  at2, const REAL & d){
+  void py_setpair2(const STRING_EX at1, const STRING_EX  at2, const REAL & d) {
     set_pair(at1,at2,d);
   }
 
@@ -201,22 +201,22 @@ public:
                        &SELF::py_getpair, &SELF::py_setpair,
                        &SELF::py_getpair2, &SELF::py_setpair2 > py_pair;
 
-  py::dict to_dict(){
+  py::dict to_dict() {
     py::dict d;
     d["default"] = default_distance;
 
-    for (auto i = _covrads.begin(); i!=_covrads.end(); i++)
+    for (auto i = p_covrads.begin(); i != p_covrads.end(); i++)
       d[i->at.c_str()] = i->d;
 
-    for (auto i = _records.begin(); i!=_records.end(); i++)
+    for (auto i = p_records.begin(); i != p_records.end(); i++)
       d[py::make_tuple(i->at1, i->at2)] = i->d;
 
     return d;
   }
 
-  void from_dict( py::dict & d){
+  void from_dict( py::dict & d) {
 
-    for(auto p : d){
+    for(auto p : d) {
       //std::vector p = py::cast<std::vector>(pnc);
       REAL val = this->default_distance;
       if (!py::isinstance<py::float_>(p.second))
@@ -225,7 +225,7 @@ public:
       else val = py::cast<REAL>(p.second);
 
       //bp::extract<STRING> ks(p[0]);
-      if (py::isinstance<py::str>(p.first)){
+      if (py::isinstance<py::str>(p.first)) {
         STRING_EX s = py::cast<STRING_EX>(p.first);
         if (s=="default")
           default_distance = val;
@@ -233,7 +233,7 @@ public:
           set_covrad(s,val);
       }
 
-      else if (py::cast<py::tuple>(p.first)){
+      else if (py::cast<py::tuple>(p.first)) {
         py::tuple t = py::cast<py::tuple>(p.first);
         if (py::len(t)!=2)
           TypeError("bonding_table::from_dict: Invalid dictionary, "
@@ -253,7 +253,7 @@ public:
     }
   }
 
-  static void py_export(py::module m, const char * pyname){
+  static void py_export(py::module m, const char * pyname) {
     std::string sPropNameCovRad =
         fmt::format("{0}_{1}",pyname,"idx_prop_covrad");
     py_indexed_property<SELF, REAL, const STRING_EX & , &SELF::covrad,
@@ -294,7 +294,7 @@ public:
 
 #endif
 
-  bonding_table(const STRING_EX & __name = ""){
+  bonding_table(const STRING_EX & __name = "") {
     name = __name;
     default_distance = 0e0;
 #if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
@@ -317,34 +317,34 @@ class neighbours_table : public geometry_observer<REAL> {
   int DIM;
 
   // The geometry for which neighbours table is
-  geometry<REAL, CELL> * geom;
+  geometry<REAL, CELL> *geom{};
 
   // The bonding distances data
-  bonding_table<REAL> *btbl;
+  bonding_table<REAL> *btbl{};
 
   // Internal bonding distances table
-  REAL* _disttable;
+  REAL* p_disttable{};
 
   // Number of atomic types
-  int ntp;
+  int p_ntp;
 
   // Bonding distance between i-th and j-th atomic types
-  inline REAL distance(int i, int j) const {return _disttable[i*ntp+j];}
+  inline REAL distance(int i, int j) const {return p_disttable[i*p_ntp+j];}
 
-  inline REAL & distance(int i, int j) {return _disttable[i*ntp+j];}
+  inline REAL & distance(int i, int j) {return p_disttable[i*p_ntp+j];}
 
-  inline void resize_disttable(){
-    if (_disttable != nullptr)
-      delete []_disttable;
-    ntp = geom->n_types();
-    if (ntp < 1)
+  inline void resize_disttable() {
+    if (p_disttable != nullptr)
+      delete []p_disttable;
+    p_ntp = geom->n_types();
+    if (p_ntp < 1)
       IndexError("Number of atomic types is zero. Maybe, you should initialize typetable?");
-    _disttable = new REAL[ntp*ntp];
+    p_disttable = new REAL[p_ntp*p_ntp];
   }
 
-  void build_disttable(){
+  void build_disttable() {
     resize_disttable();
-    for (int i=0; i<ntp; i++)
+    for (int i=0; i<p_ntp; i++)
       for (int j=0; j<=i; j++) {
         distance(i,j) = btbl->distance(geom->atom_of_type(i),geom->atom_of_type(j));
         distance(j,i) = btbl->distance(geom->atom_of_type(i),geom->atom_of_type(j));
@@ -353,14 +353,14 @@ class neighbours_table : public geometry_observer<REAL> {
   }
   // ------------------------------------------
 
-  std::vector<std::vector<index> > _table;
+  std::vector<std::vector<index> > p_table;
 
 public:
   // Number of neighbours of i-th atom
-  inline int n(int i) const {return _table[i].size();}
+  inline int n(int i) const {return p_table[i].size();}
 
   // j-th neighbour of i-th atom
-  inline index table(int i, int j) const {return _table[i][j];}
+  inline index table(int i, int j) const {return p_table[i][j];}
 
   // Synonym
   inline index operator()(int i, int j) const{
@@ -377,15 +377,15 @@ public:
 
 private:
 
-  inline void _add_ngbr(int i, const index & j){
+  inline void add_ngbr_impl(int i, const index & j) {
     bool found = false;
-    for (int k = 0; k < _table[i].size(); k++ )
-      if (_table[i][k]==j){
+    for (int k = 0; k < p_table[i].size(); k++ )
+      if (p_table[i][k]==j) {
         found = true;
         break;
       }
     if (!found)
-      _table[i].push_back(j);
+      p_table[i].push_back(j);
   }
 
   // ------------------------------------------
@@ -395,12 +395,12 @@ private:
 public:
   bool auto_grainsize;
 
-  void set_auto_update(bool au){
-    if (au && !auto_update){
+  void set_auto_update(bool au) {
+    if (au && !auto_update) {
       geom->add_observer(*this);
       auto_update = true;
     }
-    else if (!au && auto_update){
+    else if (!au && auto_update) {
       geom->remove_observer(*this);
       auto_update = false;
     }
@@ -415,19 +415,19 @@ private:
   index ngrain;
   std::vector<std::vector<index> > grains;
 
-  void translational_grain_setup(){
+  void translational_grain_setup() {
     // find largest neighbourung distance
     //std::cout << "trnsl grain setup\n";
 
     bool ndef = true;
 
-    for (int i=0; i<geom->size(); i++){
+    for (int i=0; i<geom->size(); i++) {
       vector3<REAL> r = geom->pos(i);
-      if (ndef){
+      if (ndef) {
         Rmin = Rmax = r;
         ndef = false;
       }
-      for (int j=0; j<3; j++){
+      for (int j=0; j<3; j++) {
         if ( Rmin(j) > r(j) )
           Rmin(j) = r(j);
         if ( Rmax(j) < r(j) )
@@ -436,7 +436,7 @@ private:
     }
     //std::cout <<  "Rmin = " << Rmin << " Rmax= " << Rmax << "\n";
 
-    if (DIM!=0){
+    if (DIM!=0) {
       //std::cout << "Extension of Rmin, Rmax\n";
       Rmin -= vector3<REAL>(1,1,1)*(grainsize+1e-5);
       Rmax += vector3<REAL>(1,1,1)*(grainsize+1e-5);
@@ -451,21 +451,21 @@ private:
     //" ngrain = " << ngrain << "\n";
   }
 
-  REAL optimal_grainsize(){
+  REAL optimal_grainsize() {
     const REAL alpha = 1, beta = 0;
     REAL Vol = (Rmax(0)-Rmin(0))*(Rmax(1)-Rmin(1))*(Rmax(2)-Rmin(2));
     return std::pow(Vol,1./3)*std::pow(alpha/geom->nat(), 1./(3*(beta+1)));
 
   }
 
-  void grain_setup(){
+  void grain_setup() {
 
-    if (auto_grainsize){
+    if (auto_grainsize) {
       grainsize = REAL(0);
       int ntp = geom->n_atom_types();
       for (int i=0; i<ntp*ntp; i++)
-        if (_disttable[i] > grainsize )
-          grainsize = _disttable[i];
+        if (p_disttable[i] > grainsize )
+          grainsize = p_disttable[i];
     }
 
     translational_grain_setup();
@@ -474,7 +474,7 @@ private:
 
     //std::cout << "gs= " << grainsize << " opt_gs= " << opt_gs << "\n";
 
-    if (auto_grainsize && grainsize < opt_gs ){
+    if (auto_grainsize && grainsize < opt_gs ) {
       grainsize = opt_gs;
       for (int i=0; i<3; i++)
         ngrain(i) = int( (Rmax(i)-Rmin(i))/grainsize ) + 1;
@@ -482,21 +482,21 @@ private:
 
   }
 
-  inline int gidx(int i, int j, int k){
+  inline int gidx(int i, int j, int k) {
     return i + ngrain(0)*j + ngrain(0)*ngrain(1)*k;
   }
 
-  inline int gidx(const index & I){
+  inline int gidx(const index & I) {
     return I(0) + ngrain(0)*I(1) + ngrain(0)*ngrain(1)*I(2);
   }
 
-  inline std::vector<index> & grain(int i, int j, int k){
+  inline std::vector<index> & grain(int i, int j, int k) {
     return grains[gidx(i,j,k)];
   }
 
-  inline std::vector<index> & grain(const index & I){return grains[gidx(I)];}
+  inline std::vector<index> & grain(const index & I) {return grains[gidx(I)];}
 
-  inline index igrain(const index & at){
+  inline index igrain(const index & at) {
     vector3<REAL> r = geom->r(at);
     index I = index::D(3);
     for (int j=0; j<3; j++)
@@ -504,14 +504,14 @@ private:
     return I;
   }
 
-  inline void to_grain(const index & at){
+  inline void to_grain(const index & at) {
     index I=igrain(at);
     if ( I(0)>=0 && I(0)<ngrain(0) && I(1)>=0 &&
         I(1)<ngrain(1) && I(2)>=0 && I(2)<ngrain(2) )
       grain(I).push_back(at);
   }
 
-  void graining(){
+  void graining() {
     for (int i=0; i<grains.size(); i++)
       grains[i].clear();
     grains.clear();
@@ -549,7 +549,7 @@ public:
   bool transl_mode;
 
   neighbours_table( geometry<REAL, CELL> & g, bonding_table<REAL> & t) :
-                    ngrain(index::D(3)), _disttable(nullptr) {
+                    ngrain(index::D(3)), p_disttable(nullptr) {
     btbl = &t;
     geom = & g;
     DIM = geom -> get_DIM();
@@ -562,17 +562,17 @@ public:
 
   ~neighbours_table() {
     //          delete [] _disttable;
-    if (_disttable != nullptr)
-      delete [] _disttable;
+    if (p_disttable != nullptr)
+      delete [] p_disttable;
   }
 
-  REAL get_grain_size(){return grainsize;}
+  REAL get_grain_size() {return grainsize;}
 
-  void set_grain_size(REAL gs){auto_grainsize = false;grainsize = gs;}
+  void set_grain_size(REAL gs) {auto_grainsize = false;grainsize = gs;}
 
   // -------------------------------------------------------------------
 
-  void reference_build(){
+  void reference_build() {
 
     //std::cout << "reference build\n";
 
@@ -584,10 +584,10 @@ public:
               if ( (geom->pos(i) - geom->pos(k,I)).norm() <
                       distance(geom->type_table(i), geom->type_table(k))
                   && !( i==k && I==index::D(DIM).all(0)) )
-                _table[i].push_back(atom_index(k,I));
+                p_table[i].push_back(atom_index(k,I));
   }
 
-  void translational_build(){
+  void translational_build() {
     //std::cout << "translational build\n";
 
     index dirray[14];
@@ -622,17 +622,17 @@ public:
     int Nprint=200;
     int nprint=0;
 
-    for (iterator I(shift1, ngrain-shift2); !I.end(); I++){
+    for (iterator I(shift1, ngrain-shift2); !I.end(); I++) {
       int g1 = gidx(I);
       if (grains[g1].size()>0)
-        for (const index & DI : dirray){
+        for (const index & DI : dirray) {
           index J = I + DI;
           if ( J(0)<0 || J(0)>=ngrain(0) || J(1)<0 || J(1)>=ngrain(1) ||
               J(2)<0 || J(2)>=ngrain(2))
             continue;
           int g2 = gidx(J);
 
-          if (++nprint == Nprint){
+          if (++nprint == Nprint) {
             nprint =0;
             //std::cout << I << " = " << g1 << " + " <<
             //DI << " = " << J << " = " << g2 << " grains.size= "
@@ -640,7 +640,7 @@ public:
           }
 
           for (int c2 = 0; c2 < grains[g2].size(); c2++)
-            for (int c1 = 0; c1 < ( g1==g2? c2 : grains[g1].size()); c1++){
+            for (int c1 = 0; c1 < ( g1==g2? c2 : grains[g1].size()); c1++) {
 
               index at1 = grains[g1][c1];
               index at2 = grains[g2][c2];
@@ -657,16 +657,16 @@ public:
                         }
                       */
 
-              if ( r <= distance(geom->type(at1), geom->type(at2))){
-                if ( at1.sub(1) == index::D(DIM).all(0) ){
-                  _add_ngbr(at1,at2);
+              if ( r <= distance(geom->type(at1), geom->type(at2))) {
+                if ( at1.sub(1) == index::D(DIM).all(0) ) {
+                  add_ngbr_impl(at1,at2);
                   index at= at1;
                   at.sub(1) -= at2.sub(1);
                   /*
                               for (int dd=0; dd<DIM; dd++)
                                 at.setcell(dd,-at2.cell(dd));
                               */
-                  _add_ngbr(at2,at);
+                  add_ngbr_impl(at2,at);
 
                   /*
                               if (at1==31 || at1==41)
@@ -675,11 +675,11 @@ public:
                               */
 
                 }
-                else if ( at2.sub(1) == index::D(DIM).all(0) ){
-                  _add_ngbr(at2,at1);
+                else if ( at2.sub(1) == index::D(DIM).all(0) ) {
+                  add_ngbr_impl(at2,at1);
                   index at= at2;
                   at.sub(1) -= at1.sub(1);
-                  _add_ngbr(at1,at);
+                  add_ngbr_impl(at1,at);
 
                 }
 
@@ -689,12 +689,12 @@ public:
     }
   }
 
-  void build(){
-    for (int i=0; i<_table.size(); i++)
-      _table[i].clear();
-    _table.resize(geom->nat());
+  void build() {
+    for (int i=0; i<p_table.size(); i++)
+      p_table[i].clear();
+    p_table.resize(geom->nat());
 
-    if (reference_mode){
+    if (reference_mode) {
       reference_build();
       return;
     }
@@ -709,7 +709,7 @@ public:
       std::cout <<typeid(periodic_cell<DIM,REAL>).hash_code() << "\n";
       */
 
-    if (transl_mode && typeid(CELL) == typeid(periodic_cell<REAL>)){
+    if (transl_mode && typeid(CELL) == typeid(periodic_cell<REAL>)) {
       translational_build();
       return;
     }
@@ -724,7 +724,7 @@ public:
       */
 
     for (int at=0; at<geom->nat(); at++)
-      if (!geom->shadow(at)){
+      if (!geom->shadow(at)) {
         index I = igrain(index::D(DIM+1).atom(at));
         int g1 = gidx(I);
 
@@ -735,10 +735,10 @@ public:
 
         //std::cout << "g1= " << g1 << " I= " << I << "\n";
 
-        for (iterator DI({-1,-1,-1},{1,1,1}); !DI.end(); DI++){
+        for (iterator DI({-1,-1,-1},{1,1,1}); !DI.end(); DI++) {
           auto J = I + DI;
           if (J(0)>=0 && J(0)<ngrain(0) && J(1)>=0 &&
-              J(1)<ngrain(1) && J(2)>=0 && J(2)<ngrain(2) ){
+              J(1)<ngrain(1) && J(2)>=0 && J(2)<ngrain(2) ) {
             int g2 = gidx(J);
 
             //std::cout << g1 << I << g2 << J << "\n";
@@ -756,10 +756,10 @@ public:
       gpairs.resize( std::distance(gpairs.begin(),last) );
       */
 
-    for (const auto & gp : gpairs){
+    for (const auto & gp : gpairs) {
       int g1 = gp.first, g2 = gp.second;
       for (int c1 = 0; c1 < grains[g1].size(); c1++)
-        for (int c2 = 0; c2 < (g1==g2 ? c1 : grains[g2].size()); c2++){
+        for (int c2 = 0; c2 < (g1==g2 ? c1 : grains[g2].size()); c2++) {
           index at1 = grains[g1][c1];
           index at2 = grains[g2][c2];
 
@@ -777,11 +777,11 @@ public:
           //at2.cell << " grain " << I+DI <<  " DI =" << DI <<"\n";
 
           if ( r <= distance(geom->type_table(at1),
-                            geom->type_table(at2))){
+                            geom->type_table(at2))) {
             if ( at1.sub(1) == index::D(DIM).all(0) )
-              _add_ngbr(at1, at2);
+              add_ngbr_impl(at1, at2);
             if ( at2.sub(1) == index::D(DIM).all(0) )
-              _add_ngbr(at2, at1);
+              add_ngbr_impl(at2, at1);
           }
 
         }
@@ -796,9 +796,9 @@ public:
   void ref_inserted(int at,
                     before_after st,
                     const STRING_EX & a,
-                    const vector3<REAL> & r){
-    if (st == DEP::after){
-      _table.insert(_table.begin()+at, std::vector<index>());
+                    const vector3<REAL> & r) {
+    if (st == DEP::after) {
+      p_table.insert(p_table.begin()+at, std::vector<index>());
       for (int i=0; i<geom->nat(); i++)
         if (! geom->shadow(i))
           for (iterator j(geom->cell.begin(),
@@ -806,48 +806,48 @@ public:
             if ( !(i==at && j==index::D(DIM).all(0)) &&
                 norm(geom->r(at) - geom->r(i, j)) <
                     distance(geom->type_table(at), geom->type_table(i))
-                ){
-              _table[at].push_back(index({i,j}));
+                ) {
+              p_table[at].push_back(index({i,j}));
               index iat = {at};
               iat.sub(1) -= j;
-              _table[i].push_back(iat);
+              p_table[i].push_back(iat);
             }
     }
   }
 
   void ref_added(before_after st,
                  const STRING_EX & a,
-                 const vector3<REAL> & r){
+                 const vector3<REAL> & r) {
     ref_inserted(geom->nat()-1,st,a,r);
   }
 
   void ref_moved(int at,
                  before_after st,
-                 const vector3<REAL> & r){
+                 const vector3<REAL> & r) {
 
   }
 
   void ref_erased(int at,
-                  before_after st){
+                  before_after st) {
 
-    if (st==DEP::before){
-      _table.erase(_table.begin()+at);
+    if (st==DEP::before) {
+      p_table.erase(p_table.begin()+at);
 
       for (int i=geom->nat()-2; i>=0; i--)
         for (int j=n(i)-1; j>=0; j--)
-          if (_table[i][j](0)==at){
+          if (p_table[i][j](0)==at) {
             //std::cerr << "erase " << i << " " << _table[i][j] << "\n";
-            _table[i].erase(_table[i].begin()+j);
+            p_table[i].erase(p_table[i].begin()+j);
           }
-          else if (_table[i][j](0)>at){
+          else if (p_table[i][j](0)>at) {
             //std::cerr << _table[i][j] << "->";
-            _table[i][j](0)--;
+            p_table[i][j](0)--;
             //std::cerr << _table[i][j] << "\n";
           }
     }
   }
 
-  void ref_shaded(int at, before_after st, bool sh){}
+  void ref_shaded(int at, before_after st, bool sh) {}
 
   uint32_t get_flags() override {
     return geometry_observer_supports_default
@@ -859,12 +859,12 @@ public:
            | geometry_observer_supports_reorder;
   };
 
-  virtual void added(before_after st, const STRING_EX & a, const vector3<REAL> & r){}
-  virtual void inserted(int at, before_after st, const STRING_EX & a,const vector3<REAL> & r){}
-  virtual void changed(int at, before_after st, const STRING_EX & a,const vector3<REAL> & r){}
-  virtual void erased(int at, before_after st){}
-  virtual void shaded(int at, before_after st, bool sh){}
-  virtual void reordered(const std::vector<int> &, before_after){}
+  virtual void added(before_after st, const STRING_EX & a, const vector3<REAL> & r) {}
+  virtual void inserted(int at, before_after st, const STRING_EX & a,const vector3<REAL> & r) {}
+  virtual void changed(int at, before_after st, const STRING_EX & a,const vector3<REAL> & r) {}
+  virtual void erased(int at, before_after st) {}
+  virtual void shaded(int at, before_after st, bool sh) {}
+  virtual void reordered(const std::vector<int> &, before_after) {}
   void geometry_destroyed() override {}
   void dim_changed(before_after ord) override {}
   void cell_changed(before_after ord) override {}
@@ -872,15 +872,15 @@ public:
 
   //------------------------------------------------------------
   bool operator==(const neighbours_table & t) const{
-    if (_table.size() != t._table.size())
+    if (p_table.size() != t.p_table.size())
       return false;
-    for (int i=0; i<_table.size(); i++){
-      if (_table[i].size() != t._table[i].size())
+    for (int i=0; i<p_table.size(); i++) {
+      if (p_table[i].size() != t.p_table[i].size())
         return false;
-      for (int j=0; j<_table[i].size(); j++){
+      for (int j=0; j<p_table[i].size(); j++) {
         bool found = false;
-        for (int k=0; k<_table[i].size(); k++)
-          if (_table[i][j]==t._table[i][k]){
+        for (int k=0; k<p_table[i].size(); k++)
+          if (p_table[i][j]==t.p_table[i][k]) {
             found=true;
             break;
           }
@@ -930,7 +930,7 @@ public:
     return table(i,j);
   }
 
-  static void py_export(py::module m, const char * pyname){
+  static void py_export(py::module m, const char * pyname) {
     py::class_<neighbours_table<REAL,CELL> >(m, pyname)
         .def(py::init< geometry<REAL, CELL> &, bonding_table<REAL> & >())
         .def_property("auto_update",
