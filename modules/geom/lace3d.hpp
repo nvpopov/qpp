@@ -73,6 +73,7 @@ template <typename VALTYPE, int N, int M>
 class generic_matrix : public Eigen::Matrix<VALTYPE, N, M >,
                        public pybind11::detail::do_not_expose_me_as_ndarray {
 public:
+
   static typename numeric_type<VALTYPE>::norm tol_equiv;
   static generic_matrix unity;
 
@@ -91,8 +92,7 @@ public:
   generic_matrix(void):Eigen::Matrix<VALTYPE, N, M >() {}
 
   template<typename = std::enable_if<check_is_vector3<N , M>::value> >
-  generic_matrix(VALTYPE x, VALTYPE y, VALTYPE z):
-                                                    Eigen::Matrix<VALTYPE, N, M>() {
+  generic_matrix(VALTYPE x, VALTYPE y, VALTYPE z): Eigen::Matrix<VALTYPE, N, M>() {
     (*this)(0) = x;
     (*this)(1) = y;
     (*this)(2) = z;
@@ -101,8 +101,7 @@ public:
   template<typename = std::enable_if<check_is_matrix3<N , M>::value> >
   generic_matrix(const generic_matrix<VALTYPE, 3, 1> &v1,
                  const generic_matrix<VALTYPE, 3, 1> &v2,
-                 const generic_matrix<VALTYPE, 3, 1> &v3):
-                                                            Eigen::Matrix<VALTYPE, N, M>() {
+                 const generic_matrix<VALTYPE, 3, 1> &v3): Eigen::Matrix<VALTYPE, N, M>() {
     (*this).row(0) = v1;
     (*this).row(1) = v2;
     (*this).row(2) = v3;
@@ -112,7 +111,7 @@ public:
   generic_matrix(const VALTYPE v00, const VALTYPE v01, const VALTYPE v02,
                  const VALTYPE v10, const VALTYPE v11, const VALTYPE v12,
                  const VALTYPE v20, const VALTYPE v21, const VALTYPE v22):
-                                                                            Eigen::Matrix<VALTYPE, N, M>() {
+                 Eigen::Matrix<VALTYPE, N, M>() {
 
     (*this).row(0)(0) = v00;
     (*this).row(0)(1) = v01;
@@ -805,7 +804,7 @@ void diagon3d(vector3<typename numeric_type<VALTYPE>::complex> & eigvals,
   // sort eigenvalues in ascending order
   int i0=0,i1,i2=0;
 
-  for (int i=0; i<3; i++){
+  for (int i=0; i<3; i++) {
     if ( eigvals(i).real() < eigvals(i0).real() )
       i0 = i;
     if ( eigvals(i).real() > eigvals(i2).real() )
@@ -892,10 +891,12 @@ template<> double generic_matrix<double, 3,1>::tol_equiv = 1e-5;
     @param[in] eps the threshold for zero eigenvalues
    */
 template<class VALTYPE, class MTR>
-int matrix_rank(const MTR & M, VALTYPE eps){
+int matrix_rank(const MTR & M, VALTYPE eps) {
+
   Eigen::FullPivLU<MTR> lu(M);
   lu.setThreshold(eps);
   return lu.rank();
+
 }
 
 /*! \brief Find linearly independent vectors in the sequence of vectors
@@ -904,7 +905,8 @@ int matrix_rank(const MTR & M, VALTYPE eps){
     @return the list of linearly independent vectors
    */
 template<class VALTYPE, class MTR>
-std::vector<int> LI_vectors(const MTR &M, VALTYPE eps){
+std::vector<int> LI_vectors(const MTR &M, VALTYPE eps) {
+
   std::vector<int> LI;
   qpp::matrix<VALTYPE> A(M.rows(),0);
   int r = 0;
@@ -919,7 +921,9 @@ std::vector<int> LI_vectors(const MTR &M, VALTYPE eps){
       r++;
     }
   }
+
   return LI;
+
 }
 
 /*! \brief expand a vector as a linear combination of other vectors
@@ -929,9 +933,8 @@ std::vector<int> LI_vectors(const MTR &M, VALTYPE eps){
     @return vector of c_i coefficients
    */
 template<class VALTYPE, class MTR, int S>
-Eigen::Matrix<VALTYPE, Eigen::Dynamic, 1> linear_combination(const MTR & x,
-                                                             const Eigen::Matrix<VALTYPE, S, 1> & y)
-{
+Eigen::Matrix<VALTYPE, Eigen::Dynamic, 1>linear_combination(const MTR & x,
+                                                            const Eigen::Matrix<VALTYPE, S, 1> &y) {
   int n = x.cols();
   matrix<VALTYPE> A(n,n);
   Eigen::Matrix<VALTYPE, Eigen::Dynamic, 1> b(n);
@@ -942,21 +945,21 @@ Eigen::Matrix<VALTYPE, Eigen::Dynamic, 1> linear_combination(const MTR & x,
     b(i) = y.dot(x.col(i));
   Eigen::FullPivLU<matrix<VALTYPE> > lu(A);
   return lu.solve(b);
+
 }
 
 
 template <class VALTYPE, class MTR>
 void nullspace(std::vector<int> &indep, std::vector<int> &dep, matrix<VALTYPE> & NS,
-               const MTR & M, VALTYPE eps)
-{
+               const MTR & M, VALTYPE eps) {
+
   indep = LI_vectors(M,eps);
     dep.clear();
   for (int i=0; i<M.cols(); i++)
     if (std::find(indep.begin(),indep.end(),i) == indep.end() )
       dep.push_back(i);
 
-  if (indep.size()==0)
-  {
+  if (indep.size()==0) {
     NS = - matrix<VALTYPE>::Identity(M.cols(), M.cols());
     return;
   }
@@ -966,8 +969,7 @@ void nullspace(std::vector<int> &indep, std::vector<int> &dep, matrix<VALTYPE> &
     bas.col(i) = M.col(indep[i]);
 
   NS = matrix<VALTYPE>::Zero(M.cols(), dep.size());
-  for (int i=0; i<dep.size(); i++)
-  {
+  for (int i=0; i<dep.size(); i++) {
     int j = dep[i];
     Eigen::Matrix<VALTYPE, Eigen::Dynamic, 1> col = M.col(j);
     auto coeff = linear_combination(bas,col);
@@ -975,6 +977,7 @@ void nullspace(std::vector<int> &indep, std::vector<int> &dep, matrix<VALTYPE> &
       NS.col(i)(indep[k]) = coeff(k);
     NS.col(i)(j) = VALTYPE(-1);
   }
+
 }
 
 // ------------------------------------------------------------------------------

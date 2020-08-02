@@ -101,12 +101,11 @@ TEST_CASE("xgeometry tests") {
     periodic_cell<double> cl(0);
     xgeometry<double, periodic_cell<double> >
     g2(cl,
-       {"atom",      "number", "z",       "charge",
-            "x",       "y",       "mass",    "magmom",  "word"},
-           {basic_types::type_string, basic_types::type_int, basic_types::type_real,
-            basic_types::type_real, basic_types::type_real, basic_types::type_real,
-            basic_types::type_real, basic_types::type_real, basic_types::type_string},
-           "rich_geometry");
+       {"atom","number", "z", "charge", "x", "y", "mass", "magmom", "word"},
+       {basic_types::type_string, basic_types::type_int, basic_types::type_real,
+        basic_types::type_real, basic_types::type_real, basic_types::type_real,
+        basic_types::type_real, basic_types::type_real, basic_types::type_string},
+       "rich_geometry");
 
     g2.xadd("H",   1,   0.3, 0.6,   3,  6, 1.01, 3.731e-3, "hydrogen");
     g2.xadd("U",  92,   3.4, 4.4,   7,  9, 238,  1.23e-2,  "uranium");
@@ -123,8 +122,8 @@ TEST_CASE("xgeometry tests") {
 
     std::vector<qpp::datum> s = {qpp::datum("Hru"), qpp::datum(555),
                                  qpp::datum(-1.11), qpp::datum(2.22),
-                                 qpp::datum(3.33), qpp::datum(-1.11),
-                                 qpp::datum(2.22), qpp::datum(3.33),
+                                 qpp::datum(3.33),  qpp::datum(-1.11),
+                                 qpp::datum(2.22),  qpp::datum(3.33),
                                  qpp::datum("piggy-piggy")};
 
     g2.add("", qpp::vector3<double>::Zero());
@@ -246,9 +245,9 @@ TEST_CASE("xgeometry tests") {
 
     qpp::geometry<double, periodic_cell<double>> g;
 
-    g.cell(0) = vector3<double>(4,0,0);
-    g.cell(1) = vector3<double>(0,6,0);
-    g.cell(2) = vector3<double>(0,0,4);
+    g.cell(0) = vector3<double>(4, 0, 0);
+    g.cell(1) = vector3<double>(0, 6, 0);
+    g.cell(2) = vector3<double>(0, 0, 4);
 
     g.add("Carbon",         -1.676283510,      0.000000000,      1.911126199);
     g.add("Oxygen",         -1.753146399,      1.141923181,      1.514919538);

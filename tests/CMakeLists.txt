@@ -2,6 +2,7 @@ add_executable(run_tests
                run_tests.cpp
                test_lace3d.cpp
                test_ccd.cpp
+	       test_symmetry.cpp
                test_compute.cpp
                test_geom.cpp)
 
