@@ -95,6 +95,9 @@ class geometry : public basic_geometry<REAL> {
   /// Special logical array allows to "hide" or "shadow" some atoms
   std::vector<Bool> p_shadow;
 
+  /// Selected atoms
+  std::vector<short> p_sel;
+
   int p_DIM;
 
   using basic_geometry<REAL>::p_observers;
@@ -166,8 +169,10 @@ class geometry : public basic_geometry<REAL> {
 
   //! \brief The name of i-th atom
   inline STRING_EX &atom(int at) { return p_atm[at]; }
-
   inline STRING_EX atom(int at) const { return p_atm[at]; }
+
+  inline short &selected(int at) { return p_sel[at]; }
+  inline short selected(int at) const { return p_sel[at]; }
 
   /// \brief Gives the coordinates of an atom in the geometry
   ///  @param at - the number of atom in the geometry
@@ -380,6 +385,7 @@ class geometry : public basic_geometry<REAL> {
     p_atm.reserve(GEOM_DEFAULT_RESERVE_AMOUNT);
     p_crd.reserve(GEOM_DEFAULT_RESERVE_AMOUNT);
     p_shadow.reserve(GEOM_DEFAULT_RESERVE_AMOUNT);
+    p_sel.reserve(GEOM_DEFAULT_RESERVE_AMOUNT);
 
 #if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
     py_atoms.bind(this);
@@ -410,6 +416,7 @@ class geometry : public basic_geometry<REAL> {
   geometry(const geometry<REAL, CELL> &g) : cell(g.cell),
                                             p_atm(g.p_atm),
                                             p_crd(g.p_crd),
+                                            p_sel(g.p_sel),
                                             p_shadow(g.p_shadow),
                                             p_type_table(g.p_type_table),
                                             p_symm_rad(g.p_symm_rad),
@@ -470,6 +477,7 @@ void copy(const geometry<DIM, REAL> &G)
     p_atm.push_back(a);
     p_crd.push_back(r2);
     p_shadow.push_back(false);
+    p_sel.push_back(false);
 
     if (auto_update_types) p_type_table.push_back(define_type(a));
 
@@ -490,6 +498,8 @@ void copy(const geometry<DIM, REAL> &G)
     p_atm.erase(p_atm.begin() + at);
     p_crd.erase(p_crd.begin() + at);
     p_shadow.erase(p_shadow.begin() + at);
+    p_sel.erase(p_sel.begin() + at);
+
     if (auto_update_types) p_type_table.erase(p_type_table.begin() + at);
 
     if (p_has_observers)
@@ -512,6 +522,7 @@ void copy(const geometry<DIM, REAL> &G)
     p_atm.insert(p_atm.begin() + at, a);
     p_crd.insert(p_crd.begin() + at, r2);
     p_shadow.insert(p_shadow.begin() + at, false);
+    p_sel.insert(p_sel.begin() + at, false);
 
     if (auto_update_types)
       p_type_table.insert(p_type_table.begin() + at, define_type(a));
@@ -600,12 +611,14 @@ void copy(const geometry<DIM, REAL> &G)
     std::vector<STRING_EX> atm(p_atm);
     std::vector<vector3<REAL> > crd(p_crd);
     std::vector<Bool> shadow(p_shadow);
+    std::vector<short> sel(p_sel);
 
     // bool reorder_types = (_type_table.size() == size());
 
     for (int i = 0; i < size(); i++) {
       p_atm[i]    = atm[ord[i]];
       p_crd[i]    = crd[ord[i]];
+      p_sel[i]    = sel[ord[i]];
       p_shadow[i] = shadow[ord[i]];
     }
 
@@ -632,6 +645,7 @@ void copy(const geometry<DIM, REAL> &G)
     p_crd.clear();
     p_atm.clear();
     p_shadow.clear();
+    p_sel.clear();
     clear_type_table();
   }
 

@@ -44,8 +44,8 @@ TEST_CASE("Reciporal lattice tests") {
 TEST_CASE("xgeometry tests") {
 
   SECTION("Rich geometry(from xgeom1.cpp)") {
-    periodic_cell<float> cl(0);
 
+    periodic_cell<float> cl(0);
     xgeometry<float, periodic_cell<float> >
         G(cl,
           {"atom", "number", "charge", "x", "y", "z", "optx", "opty", "optz", "fullname"},
@@ -455,5 +455,86 @@ TEST_CASE("xgeometry tests") {
     REQUIRE(g1.pos(3)  == vector3<double>{1, 1, 0});
 
   }
+
+  SECTION("selection tests - geom") {
+
+    geometry<double> g(0);
+
+    g.add("C1", 1, 1, 1);
+    g.add("C2", 1, 1, 0);
+    g.add("C3", 1, 0, 0);
+    g.add("C4", 0, 0, 0);
+
+    REQUIRE(g.selected(0) == false);
+    REQUIRE(g.selected(1) == false);
+    REQUIRE(g.selected(2) == false);
+    REQUIRE(g.selected(3) == false);
+
+    g.selected(0) = false;
+    g.selected(1) = true;
+    g.selected(2) = false;
+    g.selected(3) = true;
+
+    REQUIRE(g.selected(0) == false);
+    REQUIRE(g.selected(1) == true);
+    REQUIRE(g.selected(2) == false);
+    REQUIRE(g.selected(3) == true);
+
+  }
+
+  SECTION("selection tests - xgeom") {
+
+    periodic_cell<double> cl(0);
+    xgeometry<double, periodic_cell<double>> g(cl,
+            {"atom","number", "z", "charge", "select", "x", "y", "mass", "magmom", "word"},
+            {basic_types::type_string,
+             basic_types::type_int,
+             basic_types::type_real,
+             basic_types::type_real,
+             basic_types::type_bool,
+             basic_types::type_real,
+             basic_types::type_real,
+             basic_types::type_real,
+             basic_types::type_real,
+             basic_types::type_string},
+            "rich_geometry");
+
+    g.add("C1", 1, 1, 1);
+    g.add("C2", 1, 1, 0);
+    g.add("C3", 1, 0, 0);
+    g.add("C4", 0, 0, 0);
+
+    REQUIRE(g.selected(0) == false);
+    REQUIRE(g.selected(1) == false);
+    REQUIRE(g.selected(2) == false);
+    REQUIRE(g.selected(3) == false);
+
+    g.selected(0) = false;
+    g.selected(1) = true;
+    g.selected(2) = false;
+    g.selected(3) = true;
+
+    REQUIRE(g.selected(0) == false);
+    REQUIRE(g.selected(1) == true);
+    REQUIRE(g.selected(2) == false);
+    REQUIRE(g.selected(3) == true);
+
+    g.xfield<bool>(4, 0) = true;
+    g.xfield<bool>(4, 1) = false;
+    g.xfield<bool>(4, 2) = true;
+    g.xfield<bool>(4, 3) = false;
+
+    REQUIRE(g.xfield<bool>(4, 0) == true);
+    REQUIRE(g.xfield<bool>(4, 1) == false);
+    REQUIRE(g.xfield<bool>(4, 2) == true);
+    REQUIRE(g.xfield<bool>(4, 3) == false);
+
+    REQUIRE(g.selected(0) == true);
+    REQUIRE(g.selected(1) == false);
+    REQUIRE(g.selected(2) == true);
+    REQUIRE(g.selected(3) == false);
+
+  }
+
 
 }

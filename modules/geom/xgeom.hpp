@@ -43,11 +43,12 @@ private:
   std::vector<Bool>         p_field_additive;
 
   int p_nxreal, p_nxint, p_nxbool, p_nxstring, p_nfields;
-  int p_ix_charge, p_ix_x, p_ix_y, p_ix_z, p_ix_atom, p_ix_mass, p_ix_number;
+  int p_ix_charge, p_ix_x, p_ix_y, p_ix_z, p_ix_atom, p_ix_mass, p_ix_number, p_ix_sel;
 
   using geometry<REAL, CELL>::p_atm;
   using geometry<REAL, CELL>::p_crd;
   using geometry<REAL, CELL>::p_shadow;
+  using geometry<REAL, CELL>::p_sel;
   using geometry<REAL, CELL>::reorder_types;
   using geometry<REAL, CELL>::size;
   using geometry<REAL, CELL>::p_has_observers;
@@ -170,7 +171,7 @@ public:
 
     int is = 0, ib = 0, ir = 0, ii = 0;
 
-    p_ix_x = p_ix_y = p_ix_z = p_ix_atom = -1;
+    p_ix_x = p_ix_y = p_ix_z = p_ix_atom = p_ix_sel = -1;
     p_ix_charge = p_ix_mass = p_ix_number = -1;
 
     for (int j = 0; j < p_nfields; j++) {
@@ -192,7 +193,9 @@ public:
         p_field_idx[j] = ii++;
         if ( field_name(j) == "number" ) p_ix_number = j;
       } else if ( tp == basic_types::type_bool ) {
+        p_field_type[j] = basic_types::type_bool;
         p_field_idx[j] = ib++;
+        if ( field_name(j) == "select" ) p_ix_sel = j;
       } else {
         throw std::invalid_argument("xgeometry::format: invalid type");
       }
@@ -212,6 +215,7 @@ public:
       if (p_ix_charge >= 0) p_ix_charge += 4;
       if (p_ix_mass >= 0)   p_ix_mass   += 4;
       if (p_ix_number >= 0) p_ix_number += 4;
+      if (p_ix_sel >= 0)    p_ix_sel += 4;
 
       p_nfields  += 4;
       p_nxstring += 1;
@@ -302,19 +306,30 @@ public:
       throw std::invalid_argument("xgeometry::xfield - wrong type for the field " + t2s(i));
 
     if (attributes<T>::type == basic_types::type_string) {
+
       if (i==p_ix_atom) return convert<T&,STRING_EX&>::get(p_atm[j]);
       else return convert<T&,STRING_EX&>::get(p_xstring[p_field_idx[i]][j]);
+
     } else if (attributes<T>::type == basic_types::type_bool) {
+
+      if (i==p_ix_sel) return convert<T&,short&>::get(p_sel[j]);
       return  convert<T&,short&>::get(p_xbool[p_field_idx[i]][j]);
+
     } else if (attributes<T>::type == basic_types::type_int) {
+
       return convert<T&,int&>::get(p_xint[p_field_idx[i]][j]);
+
     } else if (attributes<T>::type == attributes<REAL>::type) {
+
       if (i==p_ix_x) return convert<T&,REAL&>::get(p_crd[j].x());
       else if (i==p_ix_y) return convert<T&,REAL&>::get(p_crd[j].y());
       else if (i==p_ix_z) return convert<T&,REAL&>::get(p_crd[j].z());
       else return convert<T&,REAL&>::get(p_xreal[p_field_idx[i]][j]);
+
     } else {
+
       throw std::invalid_argument("Illegal type of xgeometry extra field");
+
     }
 
   }
@@ -330,13 +345,21 @@ public:
       throw std::invalid_argument("xgeometry::xfield - wrong type for the field " + t2s(i));
 
     if (attributes<T>::type == basic_types::type_string) {
+
       if (i==p_ix_atom) return convert<T,STRING_EX>::get(p_atm[j]);
       else return  convert<T,STRING_EX>::get(p_xstring[p_field_idx[i]][j]);
+
     } else if (attributes<T>::type == basic_types::type_bool) {
+
+      if (i==p_ix_sel) return convert<T,short>::get(p_sel[j]);
       return  convert<T,short>::get(p_xbool[p_field_idx[i]][j]);
+
     } else if (attributes<T>::type == basic_types::type_int) {
+
       return convert<T,int>::get(p_xint[p_field_idx[i]][j]);
+
     } else if (attributes<T>::type == attributes<REAL>::type) {
+
       if (i==p_ix_x)
         return convert<T,REAL>::get(p_crd[j].x());
       else if (i==p_ix_y)
@@ -345,8 +368,11 @@ public:
         return convert<T,REAL>::get(p_crd[j].z());
       else
         return convert<T,REAL>::get(p_xreal[p_field_idx[i]][j]);
+
     } else {
+
       throw std::invalid_argument("Illegal type of xgeometry extra field");
+
     }
 
   }
