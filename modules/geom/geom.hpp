@@ -990,64 +990,6 @@ inline void py_setcell(CELL & cl)
 
 template <class REAL, class CELL> REAL geometry<REAL, CELL>::tol_geom_default = 1e-5;
 
-#if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
-
-template <class REAL>
-struct py_geometry_observer : geometry_observer<REAL> {
-
-  using geometry_observer<REAL>::geometry_observer;
-
-  uint32_t get_flags() override {
-    PYBIND11_OVERLOAD_PURE(uint32_t, geometry_observer<REAL>, get_flags);
-  };
-
-  void added(before_after s, const STRING_EX &a, const vector3<REAL> &v) override {
-    PYBIND11_OVERLOAD_PURE(void, geometry_observer<REAL>, added, s, a, v);
-  }
-
-  void inserted(int at, before_after s, const STRING_EX &a, const vector3<REAL> &v) override {
-    PYBIND11_OVERLOAD_PURE(void, geometry_observer<REAL>, inserted, at, s, a, v);
-  }
-
-  void changed(int at, before_after s, const STRING_EX &a, const vector3<REAL> &v) override {
-    PYBIND11_OVERLOAD_PURE(void, geometry_observer<REAL>, changed, at, s, a, v);
-  }
-
-  void erased(int at, before_after s) override {
-    PYBIND11_OVERLOAD_PURE(void, geometry_observer<REAL>, erased, at, s);
-  }
-
-  void shaded(int at, before_after s, bool h) override {
-    PYBIND11_OVERLOAD_PURE(void, geometry_observer<REAL>, shaded, at, s, h);
-  }
-
-  void reordered(const std::vector<int> &ord, before_after s) override {
-    PYBIND11_OVERLOAD_PURE(void, geometry_observer<REAL>, reordered, ord, s);
-  }
-
-  void selected(int at, before_after s) override {
-    PYBIND11_OVERLOAD_PURE(void, geometry_observer<REAL>, selected, at, s);
-  }
-
-  void geometry_destroyed() override {
-    PYBIND11_OVERLOAD_PURE(void, geometry_observer<REAL>, geometry_destroyed);
-  }
-
-  void dim_changed(before_after s) override {
-    PYBIND11_OVERLOAD_PURE(void, geometry_observer<REAL>, dim_changed, s);
-  }
-
-  void cell_changed(before_after s) override {
-    PYBIND11_OVERLOAD_PURE(void, geometry_observer<REAL>, cell_changed, s);
-  }
-
-  void xfield_changed(int xid, int at, before_after s) override {
-    PYBIND11_OVERLOAD_PURE(void, geometry_observer<REAL>, xfield_changed, xid, at, s);
-  }
-
-};
-#endif
-
 }  // namespace qpp
 
 #endif
