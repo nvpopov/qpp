@@ -470,10 +470,10 @@ TEST_CASE("xgeometry tests") {
     REQUIRE(g.selected(2) == false);
     REQUIRE(g.selected(3) == false);
 
-    g.selected(0) = false;
-    g.selected(1) = true;
-    g.selected(2) = false;
-    g.selected(3) = true;
+    g.select(0, false);
+    g.select(1, true);
+    g.select(2, false);
+    g.select(3, true);
 
     REQUIRE(g.selected(0) == false);
     REQUIRE(g.selected(1) == true);
@@ -509,10 +509,10 @@ TEST_CASE("xgeometry tests") {
     REQUIRE(g.selected(2) == false);
     REQUIRE(g.selected(3) == false);
 
-    g.selected(0) = false;
-    g.selected(1) = true;
-    g.selected(2) = false;
-    g.selected(3) = true;
+    g.select(0, false);
+    g.select(1, true);
+    g.select(2, false);
+    g.select(3, true);
 
     REQUIRE(g.selected(0) == false);
     REQUIRE(g.selected(1) == true);

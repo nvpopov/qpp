@@ -78,33 +78,14 @@ public:
     cmp_pos(r);
   }
 
-  void erased(int at, before_after st) override {
-
-  }
-
-  void shaded(int at, before_after st, bool sh) override {
-
-  }
-
-  void reordered(const std::vector<int> &, before_after) override {
-
-  }
-
-  void geometry_destroyed() override {
-
-  }
-
-  void dim_changed(before_after ord) override {
-
-  }
-
-  void cell_changed(before_after ord) override {
-
-  }
-
-  void xfield_changed(int at, int xid, before_after) override {
-
-  }
+  void erased(int at, before_after st) override {}
+  void shaded(int at, before_after st, bool sh) override {}
+  void reordered(const std::vector<int> &, before_after) override {}
+  void selected(int at, before_after ord) override {}
+  void geometry_destroyed() override {}
+  void dim_changed(before_after ord) override {}
+  void cell_changed(before_after ord) override {}
+  void xfield_changed(int at, int xid, before_after) override {}
 
 };
 

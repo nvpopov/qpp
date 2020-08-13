@@ -859,12 +859,14 @@ public:
            | geometry_observer_supports_reorder;
   };
 
-  virtual void added(before_after st, const STRING_EX & a, const vector3<REAL> & r) {}
-  virtual void inserted(int at, before_after st, const STRING_EX & a,const vector3<REAL> & r) {}
-  virtual void changed(int at, before_after st, const STRING_EX & a,const vector3<REAL> & r) {}
-  virtual void erased(int at, before_after st) {}
-  virtual void shaded(int at, before_after st, bool sh) {}
-  virtual void reordered(const std::vector<int> &, before_after) {}
+  void added(before_after st, const STRING_EX & a, const vector3<REAL> & r) override {}
+  void inserted(int at, before_after st, const STRING_EX & a,const vector3<REAL> & r) override {}
+  void changed(int at, before_after st, const STRING_EX & a,const vector3<REAL> & r) override {}
+  void erased(int at, before_after st) override {}
+  void shaded(int at, before_after st, bool sh) override {}
+  void reordered(const std::vector<int> &, before_after) override {}
+  void selected(int at, before_after ord) override {}
+
   void geometry_destroyed() override {}
   void dim_changed(before_after ord) override {}
   void cell_changed(before_after ord) override {}

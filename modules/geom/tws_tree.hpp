@@ -47,11 +47,11 @@ struct query_ray_add_ignore_img {
   }
 };
 
-/// tws tree node forward declaration                                        ///
+/// tws tree node forward declaration
 template<typename REAL, typename AINT>
 struct tws_node_t;
 
-/// data to store in rtree                                                ///
+/// data to store in rtree
 template<typename REAL = float, typename AINT = size_t>
 struct tws_node_content_t {
   AINT m_atm;
@@ -59,7 +59,7 @@ struct tws_node_content_t {
   tws_node_content_t(const AINT _atm, const index _idx) noexcept {m_atm = _atm; m_idx = _idx;}
 };
 
-/// data to store in rtree                                                ///
+/// data to store in rtree
 template<typename REAL = float, typename AINT = size_t>
 struct tws_node_content_bonds_t {
   AINT m_atm;
@@ -217,7 +217,6 @@ struct bonding_table_t {
     for (auto& record : m_dist) update_pair_max_dist(record.first.m_a, record.first.m_b);
   }
 };
-
 
 /// \brief action bitmask for use in do_action
 const uint32_t act_clear_tree        = 1 << 0;
@@ -1116,21 +1115,11 @@ public:
     m_tree_is_dirty = true;
   }
 
-  void geometry_destroyed() override {
-
-  }
-
-  void dim_changed(before_after ord) override {
-
-  }
-
-  void cell_changed(before_after ord) override {
-
-  }
-
-  void xfield_changed(int xid, int at, before_after ord) override {
-
-  }
+  void selected(int at, before_after ord) override {}
+  void geometry_destroyed() override {}
+  void dim_changed(before_after ord) override {}
+  void cell_changed(before_after ord) override {}
+  void xfield_changed(int xid, int at, before_after ord) override {}
 
 }; // class tws_tree
 

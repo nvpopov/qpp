@@ -171,8 +171,23 @@ class geometry : public basic_geometry<REAL> {
   inline STRING_EX &atom(int at) { return p_atm[at]; }
   inline STRING_EX atom(int at) const { return p_atm[at]; }
 
-  inline short &selected(int at) { return p_sel[at]; }
+  //inline short &selected(int at) { return p_sel[at]; }
   inline short selected(int at) const { return p_sel[at]; }
+  void select(int at, bool vselect = true) {
+
+    if (p_has_observers)
+      for (int i = 0; i < p_observers.size(); i++)
+        if (p_cached_obs_flags[i] & geometry_observer_supports_select)
+          p_observers[i]->selected(at, before_after::before);
+
+    p_sel[at] = vselect;
+
+    if (p_has_observers)
+      for (int i = 0; i < p_observers.size(); i++)
+        if (p_cached_obs_flags[i] & geometry_observer_supports_select)
+          p_observers[i]->selected(at, before_after::after);
+
+  }
 
   /// \brief Gives the coordinates of an atom in the geometry
   ///  @param at - the number of atom in the geometry
@@ -1008,6 +1023,10 @@ struct py_geometry_observer : geometry_observer<REAL> {
 
   void reordered(const std::vector<int> &ord, before_after s) override {
     PYBIND11_OVERLOAD_PURE(void, geometry_observer<REAL>, reordered, ord, s);
+  }
+
+  void selected(int at, before_after s) override {
+    PYBIND11_OVERLOAD_PURE(void, geometry_observer<REAL>, selected, at, s);
   }
 
   void geometry_destroyed() override {

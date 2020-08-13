@@ -951,6 +951,8 @@ public:
     else if (field_type(i) == basic_types::type_int) return py::cast(xfield<int>(i,j));
     else if (field_type(i) == basic_types::type_bool) return py::cast(xfield<bool>(i,j));
 
+    return py::none();
+
   }
 
   void py_setfield(int i, int j, const py::object & o) {
