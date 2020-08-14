@@ -5,6 +5,10 @@
 //
 // For the license information refer to format.h.
 
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS
+#endif
+
 #include "fmt/format.h"
 #include "gtest-extra.h"
 
@@ -13,22 +17,21 @@
 
 // A custom argument formatter that doesn't print `-` for floating-point values
 // rounded to 0.
-class custom_arg_formatter :
-    public fmt::arg_formatter<fmt::back_insert_range<fmt::internal::buffer>> {
+class custom_arg_formatter
+    : public fmt::detail::arg_formatter<fmt::format_context::iterator, char> {
  public:
-  typedef fmt::back_insert_range<fmt::internal::buffer> range;
-  typedef fmt::arg_formatter<range> base;
+  using base = fmt::detail::arg_formatter<fmt::format_context::iterator, char>;
 
-  custom_arg_formatter(
-      fmt::format_context &ctx, fmt::format_specs *s = FMT_NULL)
-  : base(ctx, s) {}
+  custom_arg_formatter(fmt::format_context& ctx,
+                       fmt::format_parse_context* parse_ctx,
+                       fmt::format_specs* s = nullptr, const char* = nullptr)
+      : base(ctx, parse_ctx, s) {}
 
   using base::operator();
 
   iterator operator()(double value) {
     // Comparing a float to 0.0 is safe.
-    if (round(value * pow(10, spec()->precision)) == 0.0)
-      value = 0;
+    if (round(value * pow(10, specs()->precision)) == 0.0) value = 0;
     return base::operator()(value);
   }
 };
@@ -36,12 +39,13 @@ class custom_arg_formatter :
 std::string custom_vformat(fmt::string_view format_str, fmt::format_args args) {
   fmt::memory_buffer buffer;
   // Pass custom argument formatter as a template arg to vwrite.
-  fmt::vformat_to<custom_arg_formatter>(buffer, format_str, args);
+  fmt::vformat_to<custom_arg_formatter>(
+      fmt::detail::buffer_appender<char>(buffer), format_str, args);
   return std::string(buffer.data(), buffer.size());
 }
 
 template <typename... Args>
-std::string custom_format(const char *format_str, const Args & ... args) {
+std::string custom_format(const char* format_str, const Args&... args) {
   auto va = fmt::make_format_args(args...);
   return custom_vformat(format_str, va);
 }

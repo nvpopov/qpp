@@ -171,8 +171,9 @@ class geometry : public basic_geometry<REAL> {
   inline STRING_EX &atom(int at) { return p_atm[at]; }
   inline STRING_EX atom(int at) const { return p_atm[at]; }
 
-  //inline short &selected(int at) { return p_sel[at]; }
+  // selection stuff
   inline short selected(int at) const { return p_sel[at]; }
+  void toggle_selected(int at) { select(at, !p_sel[at]); }
   void select(int at, bool vselect = true) {
 
     if (p_has_observers)
@@ -188,6 +189,11 @@ class geometry : public basic_geometry<REAL> {
           p_observers[i]->selected(at, before_after::after);
 
   }
+
+  auto begin_selected() { return p_sel.cbegin();};
+  auto end_selected() { return p_sel.cend();};
+
+  // end of selection stuff
 
   /// \brief Gives the coordinates of an atom in the geometry
   ///  @param at - the number of atom in the geometry
