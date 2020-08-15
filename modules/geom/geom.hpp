@@ -192,6 +192,19 @@ class geometry : public basic_geometry<REAL> {
 
   auto begin_selected() { return p_sel.cbegin();};
   auto end_selected() { return p_sel.cend();};
+  bool no_one_is_selected() {
+    return std::accumulate(p_sel.cbegin(), p_sel.cend(), 0) == 0;
+  }
+
+  std::optional<size_t> nth_selected_index(int nth_atom) {
+    int nth_atom_l{0};
+    for (int i = 0; i < nat(); i++)
+      if (selected(i)) {
+        nth_atom_l++;
+        if (nth_atom_l == nth_atom) return std::optional<size_t>{i};
+      }
+    return std::nullopt;
+  }
 
   // end of selection stuff
 
