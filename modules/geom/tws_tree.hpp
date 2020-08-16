@@ -1115,7 +1115,7 @@ public:
     m_tree_is_dirty = true;
   }
 
-  void selected(int at, before_after ord) override {}
+  void selected(int nth, before_after, bool state) override {}
   void dim_changed(before_after ord) override {}
   void cell_changed(before_after ord) override {}
   void xfield_changed(int xid, int at, before_after ord) override {}

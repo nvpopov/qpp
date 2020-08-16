@@ -865,7 +865,7 @@ public:
   void erased(int at, before_after st) override {}
   void shaded(int at, before_after st, bool sh) override {}
   void reordered(const std::vector<int> &, before_after) override {}
-  void selected(int at, before_after ord) override {}
+  void selected(int nth, before_after, bool state) override {}
 
   void dim_changed(before_after ord) override {}
   void cell_changed(before_after ord) override {}

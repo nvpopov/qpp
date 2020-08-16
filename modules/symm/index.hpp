@@ -196,6 +196,10 @@ public:
     return ! ((*this) == I);
   }
 
+  bool is_zero() {
+    return std::all_of(idx, idx + DIM, [](int i){return i == 0;});
+  }
+
   struct factory {
 
     int DIM;

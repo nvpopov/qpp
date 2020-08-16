@@ -3,13 +3,14 @@
 
 #include <algorithm>
 #include <cmath>
-#include <data/data.hpp>
-#include <functional>
-#include <geom/lace3d.hpp>
-#include <numeric>
 #include <symm/index.hpp>
+#include <symm/index_set.hpp>
 #include <cassert>
 #include <vector>
+#include <numeric>
+#include <functional>
+#include <data/data.hpp>
+#include <geom/lace3d.hpp>
 
 namespace qpp {
 
@@ -49,6 +50,7 @@ const uint32_t geometry_observer_supports_dim_change        = 1 << 8;
 const uint32_t geometry_observer_supports_cell_change       = 1 << 9;
 const uint32_t geometry_observer_supports_xfield_change     = 1 << 10;
 const uint32_t geometry_observer_supports_select            = 1 << 11;
+
 /*!
  * \class geometry_observer
  * \brief Geometry updated objects
@@ -66,7 +68,7 @@ struct geometry_observer {
   virtual void erased(int at, before_after) = 0;
   virtual void shaded(int at, before_after, bool) = 0;
   virtual void reordered(const std::vector<int> &, before_after) = 0;
-  virtual void selected(int at, before_after) = 0;
+  virtual void selected(int nth, before_after, bool state) = 0;
   virtual void dim_changed(before_after) = 0;
   virtual void cell_changed(before_after) = 0;
   virtual void xfield_changed(int at, int xid, before_after) = 0;
@@ -165,8 +167,8 @@ struct py_geometry_observer : geometry_observer<REAL> {
     PYBIND11_OVERLOAD_PURE(void, geometry_observer<REAL>, reordered, ord, s);
   }
 
-  void selected(int at, before_after s) override {
-    PYBIND11_OVERLOAD_PURE(void, geometry_observer<REAL>, selected, at, s);
+  void selected(int nth, before_after s, bool state) override {
+    PYBIND11_OVERLOAD_PURE(void, geometry_observer<REAL>, selected, nth, s, state);
   }
 
   void dim_changed(before_after s) override {

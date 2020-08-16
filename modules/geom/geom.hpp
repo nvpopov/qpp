@@ -17,6 +17,7 @@ namespace py = pybind11;
 
 #include <geom/basic_geom.hpp>
 #include <symm/cell.hpp>
+#include <unordered_set>
 
 namespace qpp {
 
@@ -96,7 +97,7 @@ class geometry : public basic_geometry<REAL> {
   std::vector<Bool> p_shadow;
 
   /// Selected atoms
-  std::vector<short> p_sel;
+  std::vector<atom_index_set_key> p_sel;
 
   int p_DIM;
 
@@ -171,42 +172,92 @@ class geometry : public basic_geometry<REAL> {
   inline STRING_EX &atom(int at) { return p_atm[at]; }
   inline STRING_EX atom(int at) const { return p_atm[at]; }
 
-  // selection stuff
-  inline short selected(int at) const { return p_sel[at]; }
-  void toggle_selected(int at) { select(at, !p_sel[at]); }
+  /********************** selection stuff **********************/
+  inline auto iselected_iter(int at, const index at_idx) const {
+    auto sfnc = [&at, &at_idx](const atom_index_set_key &seld) {
+      return seld.m_atm == at && seld.m_idx == at_idx;
+    };
+    return std::find_if(begin(p_sel), end(p_sel), sfnc);
+  }
+
+  ///is selected by index
+  inline bool iselected(int at, const index at_idx) const {
+    return iselected_iter(at, at_idx) != end(p_sel);
+  }
+
+  ///is selected atom(real, index=0)
+  inline bool selected(int at) const {
+    return iselected(at, index::D(get_DIM()).all(0));
+  }
+
+  void iselect(int at, index at_idx, bool vselect = true) {
+
+    auto isl_iter = iselected_iter(at, at_idx);
+    if ((isl_iter != end(p_sel)) == vselect) {
+      return;
+    }
+
+    if (p_has_observers)
+      for (int i = 0; i < p_observers.size(); i++)
+        if (p_cached_obs_flags[i] & geometry_observer_supports_select)
+          p_observers[i]->selected(at, before_after::before, vselect);
+
+    if (vselect) {
+      p_sel.push_back({at, at_idx});
+    } else {
+      p_sel.erase(isl_iter);
+    }
+
+    if (p_has_observers)
+      for (int i = 0; i < p_observers.size(); i++)
+        if (p_cached_obs_flags[i] & geometry_observer_supports_select)
+          p_observers[i]->selected(at, before_after::after, vselect);
+
+  }
+
   void select(int at, bool vselect = true) {
-
-    if (p_has_observers)
-      for (int i = 0; i < p_observers.size(); i++)
-        if (p_cached_obs_flags[i] & geometry_observer_supports_select)
-          p_observers[i]->selected(at, before_after::before);
-
-    p_sel[at] = vselect;
-
-    if (p_has_observers)
-      for (int i = 0; i < p_observers.size(); i++)
-        if (p_cached_obs_flags[i] & geometry_observer_supports_select)
-          p_observers[i]->selected(at, before_after::after);
-
+    iselect(at, index::D(get_DIM()).all(0), vselect);
   }
 
-  auto begin_selected() { return p_sel.cbegin();};
-  auto end_selected() { return p_sel.cend();};
-  bool no_one_is_selected() {
-    return std::accumulate(p_sel.cbegin(), p_sel.cend(), 0) == 0;
+  void toggle_iselected(int at, index at_idx) {
+    auto isl_iter = iselected_iter(at, at_idx);
+    iselect(at, at_idx, isl_iter == end(p_sel));
   }
 
-  std::optional<size_t> nth_selected_index(int nth_atom) {
-    int nth_atom_l{0};
-    for (int i = 0; i < nat(); i++)
-      if (selected(i)) {
-        nth_atom_l++;
-        if (nth_atom_l == nth_atom) return std::optional<size_t>{i};
-      }
-    return std::nullopt;
+  void toggle_selected(int at) {
+    toggle_iselected(at, index::D(0).all(0));
   }
 
-  // end of selection stuff
+  auto cbegin_selected() { return p_sel.cbegin();};
+  auto cend_selected() { return p_sel.cend();};
+  auto begin_selected() { return p_sel.begin();};
+  auto end_selected() { return p_sel.end();};
+
+  bool no_selected() {
+    return p_sel.empty();
+  }
+
+  size_t num_selected() {
+    return std::count_if(begin(p_sel), end(p_sel), [](auto &elem) {
+      return elem.m_idx.is_zero();
+    });
+  }
+
+  size_t num_aselected() {
+    return p_sel.size();
+  }
+
+  size_t num_iselected() {
+    return std::count_if(begin(p_sel), end(p_sel), [](auto &elem) {
+      return !elem.m_idx.is_zero();
+    });
+  }
+
+  std::optional<atom_index_set_key> nth_selected(int nth_atom) {
+    if (nth_atom >= p_sel.size()) return std::nullopt;
+    return p_sel[nth_atom];
+  }
+  /********************** end of selection stuff **********************/
 
   /// \brief Gives the coordinates of an atom in the geometry
   ///  @param at - the number of atom in the geometry
@@ -315,13 +366,7 @@ class geometry : public basic_geometry<REAL> {
     return t;
   }
 
-  // unifficent - need to be cached
   inline int get_atom_count_by_type(int atype) {
-    //    int retval = 0;
-
-    //    for (int i = 0; i < p_type_table.size(); i++)
-    //      if (p_type_table[i] == atype) retval += 1;
-    //    return retval;
     auto cnt_if_lambda = [atype](int atype_ex){ return atype_ex == atype;};
     return std::count_if(begin(p_type_table), end(p_type_table), cnt_if_lambda);
   }
@@ -511,7 +556,6 @@ void copy(const geometry<DIM, REAL> &G)
     p_atm.push_back(a);
     p_crd.push_back(r2);
     p_shadow.push_back(false);
-    p_sel.push_back(false);
 
     if (auto_update_types) p_type_table.push_back(define_type(a));
 
@@ -556,7 +600,6 @@ void copy(const geometry<DIM, REAL> &G)
     p_atm.insert(p_atm.begin() + at, a);
     p_crd.insert(p_crd.begin() + at, r2);
     p_shadow.insert(p_shadow.begin() + at, false);
-    p_sel.insert(p_sel.begin() + at, false);
 
     if (auto_update_types)
       p_type_table.insert(p_type_table.begin() + at, define_type(a));
@@ -645,14 +688,14 @@ void copy(const geometry<DIM, REAL> &G)
     std::vector<STRING_EX> atm(p_atm);
     std::vector<vector3<REAL> > crd(p_crd);
     std::vector<Bool> shadow(p_shadow);
-    std::vector<short> sel(p_sel);
+    //std::vector<short> sel(p_sel);
 
     // bool reorder_types = (_type_table.size() == size());
 
     for (int i = 0; i < size(); i++) {
       p_atm[i]    = atm[ord[i]];
       p_crd[i]    = crd[ord[i]];
-      p_sel[i]    = sel[ord[i]];
+     // p_sel[i]    = sel[ord[i]];
       p_shadow[i] = shadow[ord[i]];
     }
 

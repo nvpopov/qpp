@@ -43,7 +43,7 @@ private:
   std::vector<Bool>         p_field_additive;
 
   int p_nxreal, p_nxint, p_nxbool, p_nxstring, p_nfields;
-  int p_ix_charge, p_ix_x, p_ix_y, p_ix_z, p_ix_atom, p_ix_mass, p_ix_number, p_ix_sel;
+  int p_ix_charge, p_ix_x, p_ix_y, p_ix_z, p_ix_atom, p_ix_mass, p_ix_number;
 
   using geometry<REAL, CELL>::p_atm;
   using geometry<REAL, CELL>::p_crd;
@@ -83,6 +83,16 @@ public:
   using geometry<REAL, CELL>::auto_update_types;
   using geometry<REAL, CELL>::add_observer;
   using geometry<REAL, CELL>::remove_observer;
+  using geometry<REAL, CELL>::select;
+  using geometry<REAL, CELL>::selected;
+  using geometry<REAL, CELL>::iselect;
+  using geometry<REAL, CELL>::iselected;
+  using geometry<REAL, CELL>::toggle_selected;
+  using geometry<REAL, CELL>::toggle_iselected;
+  using geometry<REAL, CELL>::no_selected;
+  using geometry<REAL, CELL>::num_selected;
+  using geometry<REAL, CELL>::num_aselected;
+  using geometry<REAL, CELL>::num_iselected;
 
   virtual bool is_xgeometry() const{return true;}
 
@@ -171,7 +181,7 @@ public:
 
     int is = 0, ib = 0, ir = 0, ii = 0;
 
-    p_ix_x = p_ix_y = p_ix_z = p_ix_atom = p_ix_sel = -1;
+    p_ix_x = p_ix_y = p_ix_z = p_ix_atom = -1;
     p_ix_charge = p_ix_mass = p_ix_number = -1;
 
     for (int j = 0; j < p_nfields; j++) {
@@ -195,7 +205,6 @@ public:
       } else if ( tp == basic_types::type_bool ) {
         p_field_type[j] = basic_types::type_bool;
         p_field_idx[j] = ib++;
-        if ( field_name(j) == "select" ) p_ix_sel = j;
       } else {
         throw std::invalid_argument("xgeometry::format: invalid type");
       }
@@ -215,7 +224,6 @@ public:
       if (p_ix_charge >= 0) p_ix_charge += 4;
       if (p_ix_mass >= 0)   p_ix_mass   += 4;
       if (p_ix_number >= 0) p_ix_number += 4;
-      if (p_ix_sel >= 0)    p_ix_sel += 4;
 
       p_nfields  += 4;
       p_nxstring += 1;
@@ -312,7 +320,7 @@ public:
 
     } else if (attributes<T>::type == basic_types::type_bool) {
 
-      if (i==p_ix_sel) return convert<T&,short&>::get(p_sel[j]);
+      //if (i==p_ix_sel) return convert<T&,short&>::get(selected(j));
       return  convert<T&,short&>::get(p_xbool[p_field_idx[i]][j]);
 
     } else if (attributes<T>::type == basic_types::type_int) {
@@ -351,7 +359,7 @@ public:
 
     } else if (attributes<T>::type == basic_types::type_bool) {
 
-      if (i==p_ix_sel) return convert<T,short>::get(p_sel[j]);
+      //if (i==p_ix_sel) return selected(j);
       return  convert<T,short>::get(p_xbool[p_field_idx[i]][j]);
 
     } else if (attributes<T>::type == basic_types::type_int) {
