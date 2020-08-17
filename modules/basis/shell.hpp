@@ -257,10 +257,10 @@ public:
   { _coeff[i+j*_nprim] = c; }
 
   inline FREAL py_get_coeff1(int i)
-  { TypeError("Contraction coefficient needs 2 indicies"); }
+  { throw std::runtime_error("Contraction coefficient needs 2 indicies"); }
 
   inline void py_set_coeff1(int i, const FREAL & c)
-  { TypeError("Contraction coefficient needs 2 indicies"); }
+  { throw std::runtime_error("Contraction coefficient needs 2 indicies"); }
 
   py_indexed_property< SELF, STRING_EX, int,
                       &SELF::py_get_label, &SELF::py_set_label> py_label;
@@ -275,31 +275,24 @@ public:
                       &SELF::py_get_coeff1, &SELF::py_set_coeff1,
                       &SELF::py_get_coeff, &SELF::py_set_coeff > py_coeff;
 
-  static void py_props(py::module m, const char * pyname){
+  static void py_props(py::module m, const char * pyname) {
 
-    std::string sPropNameLabel =
-         fmt::format("{0}_{1}",pyname,"idx_prop_label");
-    py_indexed_property< SELF, STRING_EX, int,
-        &SELF::py_get_label, &SELF::py_set_label>::py_export(
-          m, sPropNameLabel.c_str());
+    std::string sPropNameLabel = fmt::format("{0}_{1}",pyname,"idx_prop_label");
+    py_indexed_property<SELF, STRING_EX, int, &SELF::py_get_label, &SELF::py_set_label
+                        >::py_export(m, sPropNameLabel.c_str());
 
-    std::string sPropNameL =
-         fmt::format("{0}_{1}",pyname,"idx_prop_l");
-    py_indexed_property< SELF, int, int,
-        &SELF::py_get_l, &SELF::py_set_l>::py_export(m, sPropNameL.c_str());
+    std::string sPropNameL =  fmt::format("{0}_{1}",pyname,"idx_prop_l");
+    py_indexed_property< SELF, int, int, &SELF::py_get_l, &SELF::py_set_l
+                        >::py_export(m, sPropNameL.c_str());
 
-    std::string sPropNameAlpha =
-         fmt::format("{0}_{1}",pyname,"idx_prop_alpha");
-    py_indexed_property< SELF, FREAL, int,
-        &SELF::py_get_alpha, &SELF::py_set_alpha>::py_export(
-          m, sPropNameAlpha.c_str());
+    std::string sPropNameAlpha = fmt::format("{0}_{1}",pyname,"idx_prop_alpha");
+    py_indexed_property< SELF, FREAL, int, &SELF::py_get_alpha, &SELF::py_set_alpha
+                        >::py_export(m, sPropNameAlpha.c_str());
 
-    std::string sPropNameCoeff =
-         fmt::format("{0}_{1}",pyname,"idx_prop_coeff");
-    py_2indexed_property<SELF, FREAL, FREAL, int,
-        &SELF::py_get_coeff1, &SELF::py_set_coeff1,
-        &SELF::py_get_coeff, &SELF::py_set_coeff >::py_2export(
-          m, sPropNameCoeff.c_str());
+    std::string sPropNameCoeff = fmt::format("{0}_{1}",pyname,"idx_prop_coeff");
+    py_2indexed_property<SELF, FREAL, FREAL, int, &SELF::py_get_coeff1, &SELF::py_set_coeff1,
+        &SELF::py_get_coeff, &SELF::py_set_coeff >::py_2export( m, sPropNameCoeff.c_str());
+
   }
 
 #endif

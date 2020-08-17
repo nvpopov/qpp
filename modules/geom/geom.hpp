@@ -257,6 +257,7 @@ class geometry : public basic_geometry<REAL> {
     if (nth_atom >= p_sel.size()) return std::nullopt;
     return p_sel[nth_atom];
   }
+
   /********************** end of selection stuff **********************/
 
   /// \brief Gives the coordinates of an atom in the geometry
@@ -576,7 +577,6 @@ void copy(const geometry<DIM, REAL> &G)
     p_atm.erase(p_atm.begin() + at);
     p_crd.erase(p_crd.begin() + at);
     p_shadow.erase(p_shadow.begin() + at);
-    p_sel.erase(p_sel.begin() + at);
 
     if (auto_update_types) p_type_table.erase(p_type_table.begin() + at);
 
@@ -817,13 +817,13 @@ inline void py_setcell(CELL & cl)
 
   STRING_EX py_getatom(int i) {
     if (i < 0) i += nat();
-    if (i < 0 || i >= nat()) IndexError("geometry::atom::Index out of range");
+    if (i < 0 || i >= nat()) std::runtime_error("geometry::atom::Index out of range");
     return atom(i);
   }
 
   void py_setatom(int i, const STRING_EX &a) {
     if (i < 0) i += nat();
-    if (i < 0 || i >= nat()) IndexError("geometry::atom::Index out of range");
+    if (i < 0 || i >= nat()) std::runtime_error("geometry::atom::Index out of range");
     change(i, a, coord(i));
   }
 
@@ -831,13 +831,13 @@ inline void py_setcell(CELL & cl)
 
   bool py_getshadow(int i) {
     if (i < 0) i += nat();
-    if (i < 0 || i >= nat()) IndexError("geometry::shadow::Index out of range");
+    if (i < 0 || i >= nat()) std::runtime_error("geometry::shadow::Index out of range");
     return shadow(i);
   }
 
   void py_setshadow(int i, const bool &b) {
     if (i < 0) i += nat();
-    if (i < 0 || i >= nat()) IndexError("geometry::shadow::Index out of range");
+    if (i < 0 || i >= nat()) std::runtime_error("geometry::shadow::Index out of range");
     shadow(i, b);
   }
 
@@ -862,13 +862,13 @@ inline void py_setcell(CELL & cl)
 
   vector3<REAL> py_getvec(int i) {
     if (i < 0) i += nat();
-    if (i < 0 || i >= nat()) IndexError("geometry::coord::Index out of range");
+    if (i < 0 || i >= nat()) std::runtime_error("geometry::coord::Index out of range");
     return coord(i);
   }
 
   void py_setvec(int i, const vector3<REAL> &v) {
     if (i < 0) i += nat();
-    if (i < 0 || i >= nat()) IndexError("geometry::coord::Index out of range");
+    if (i < 0 || i >= nat()) std::runtime_error("geometry::coord::Index out of range");
     change(i, atom(i), v);
   }
 
@@ -879,14 +879,14 @@ inline void py_setcell(CELL & cl)
   template <int d>
   REAL py_getxyz(int i) {
     if (i < 0) i += nat();
-    if (i < 0 || i >= nat()) IndexError("geometry::x,y,z:: Index out of range");
+    if (i < 0 || i >= nat()) std::runtime_error("geometry::x,y,z:: Index out of range");
     return py_getcoord(i, d);
   }
 
   template <int d>
   void py_setxyz(int i, const REAL &c) {
     if (i < 0) i += nat();
-    if (i < 0 || i >= nat()) IndexError("geometry::x,y,z:: Index out of range");
+    if (i < 0 || i >= nat()) std::runtime_error("geometry::x,y,z:: Index out of range");
     py_setcoord(i, d, c);
   }
 
@@ -896,8 +896,9 @@ inline void py_setcell(CELL & cl)
 
   REAL py_getsymmrad(const char *at) {
     int t = type_of_atom(at);
-    if (t == -1) KeyError("geometry::symmrad::get_symmrad: Atom not specified");
-    else return p_symm_rad[t];
+    if (t != -1) return p_symm_rad[t];
+    std::runtime_error("geometry::symmrad::get_symmrad: Atom not specified");
+    return 0;
   }
 
   void py_setsymmrad(const char *at, const REAL &r) {
@@ -991,18 +992,18 @@ inline void py_setcell(CELL & cl)
 
   void py_insert1(int i, const STRING_EX &a, const vector3<REAL> &r1) {
     if (i < 0) i += nat();
-    if (i < 0 || i > nat()) IndexError("geometry::Index out of range");
+    if (i < 0 || i > nat()) std::runtime_error("geometry::Index out of range");
     insert(i, a, r1);
   }
 
   void py_insert2(int i, const STRING_EX &a, const REAL _x, const REAL _y, const REAL _z) {
     if (i < 0) i += nat();
-    if (i < 0 || i > nat()) IndexError("geometry::Index out of range");
+    if (i < 0 || i > nat()) std::runtime_error("geometry::Index out of range");
     insert(i, a, _x, _y, _z);
   }
 
   virtual void py_insert_list(int i, const py::list &l) {
-    if (!py_check_axyz(l)) TypeError("geometry::Invalid list. List must be [atom,x,y,z]");
+    if (!py_check_axyz(l)) std::runtime_error("geometry::Invalid list. List must be [atom,x,y,z]");
 
     insert(i, py::cast<STRING_EX>(l[0]),
            py::cast<REAL>(l[1]), py::cast<REAL>(l[2]), py::cast<REAL>(l[3]));
@@ -1010,7 +1011,7 @@ inline void py_setcell(CELL & cl)
 
   void py_insert3(int at, const py::list &l) {
     if (at < 0) at += nat();
-    if (at < 0 || at > nat()) IndexError("geometry::Index out of range");
+    if (at < 0 || at > nat()) std::runtime_error("geometry::Index out of range");
 
     if (py::len(l) == 0) return;
     if (py::isinstance<py::list>(l[0])) {
@@ -1023,13 +1024,13 @@ inline void py_setcell(CELL & cl)
 
   void py_erase(int at) {
     if (at < 0) at += nat();
-    if (at < 0 || at >= nat()) IndexError("geometry::Index out of range");
+    if (at < 0 || at >= nat()) std::runtime_error("geometry::Index out of range");
     erase(at);
   }
 
   virtual py::list py_getitem(int i) const {
     if (i < 0) i += nat();
-    if (i < 0 || i >= nat()) IndexError("geometry::Index out of range");
+    if (i < 0 || i >= nat()) std::runtime_error("geometry::Index out of range");
     py::list l;
     l.append(atom(i));
     l.append(coord(i).x());
@@ -1040,8 +1041,8 @@ inline void py_setcell(CELL & cl)
 
   virtual void py_setitem(int i, const py::list &l) {
     if (i < 0) i += nat();
-    if (i < 0 || i >= nat()) IndexError("geometry::Index out of range");
-    if (!py_check_axyz(l)) TypeError("geometry::Invalid list. List must be [atom,x,y,z]");
+    if (i < 0 || i >= nat()) std::runtime_error("geometry::Index out of range");
+    if (!py_check_axyz(l)) std::runtime_error("geometry::Invalid list. List must be [atom,x,y,z]");
     STRING_EX a1 = py::cast<STRING_EX>(l[0]);
     REAL x1 = py::cast<REAL>(l[1]), y1 = py::cast<REAL>(l[2]), z1 = py::cast<REAL>(l[3]);
     change(i, a1, {x1, y1, z1});

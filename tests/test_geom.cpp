@@ -482,58 +482,26 @@ TEST_CASE("xgeometry tests") {
 
   }
 
-//  SECTION("selection tests - xgeom") {
+  SECTION("selection tests - geom 3d") {
 
-//    periodic_cell<double> cl(0);
-//    xgeometry<double, periodic_cell<double>> g(cl,
-//            {"atom","number", "z", "charge", "select", "x", "y", "mass", "magmom", "word"},
-//            {basic_types::type_string,
-//             basic_types::type_int,
-//             basic_types::type_real,
-//             basic_types::type_real,
-//             basic_types::type_bool,
-//             basic_types::type_real,
-//             basic_types::type_real,
-//             basic_types::type_real,
-//             basic_types::type_real,
-//             basic_types::type_string},
-//            "rich_geometry");
+    geometry<double> g(3);
 
-//    g.add("C1", 1, 1, 1);
-//    g.add("C2", 1, 1, 0);
-//    g.add("C3", 1, 0, 0);
-//    g.add("C4", 0, 0, 0);
+    g.add("C1", 1, 1, 1);
+    g.add("C2", 1, 1, 0);
+    g.add("C3", 1, 0, 0);
+    g.add("C4", 0, 0, 0);
 
-//    REQUIRE(g.selected(0) == false);
-//    REQUIRE(g.selected(1) == false);
-//    REQUIRE(g.selected(2) == false);
-//    REQUIRE(g.selected(3) == false);
+    g.select(0, false);
+    g.select(1, true);
+    g.select(2, false);
+    g.select(3, true);
 
-//    g.select(0, false);
-//    g.select(1, true);
-//    g.select(2, false);
-//    g.select(3, true);
+    REQUIRE(g.num_selected() == 2);
+    REQUIRE(g.num_aselected() == 2);
+    REQUIRE(g.num_iselected() == 0);
 
-//    REQUIRE(g.selected(0) == false);
-//    REQUIRE(g.selected(1) == true);
-//    REQUIRE(g.selected(2) == false);
-//    REQUIRE(g.selected(3) == true);
 
-//    g.xfield<bool>(4, 0) = true;
-//    g.xfield<bool>(4, 1) = false;
-//    g.xfield<bool>(4, 2) = true;
-//    g.xfield<bool>(4, 3) = false;
 
-//    REQUIRE(g.xfield<bool>(4, 0) == true);
-//    REQUIRE(g.xfield<bool>(4, 1) == false);
-//    REQUIRE(g.xfield<bool>(4, 2) == true);
-//    REQUIRE(g.xfield<bool>(4, 3) == false);
-
-//    REQUIRE(g.selected(0) == true);
-//    REQUIRE(g.selected(1) == false);
-//    REQUIRE(g.selected(2) == true);
-//    REQUIRE(g.selected(3) == false);
-
-//  }
+  }
 
 }
