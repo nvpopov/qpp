@@ -89,7 +89,7 @@ public:
   using geometry<REAL, CELL>::iselected;
   using geometry<REAL, CELL>::toggle_selected;
   using geometry<REAL, CELL>::toggle_iselected;
-  using geometry<REAL, CELL>::no_selected;
+  using geometry<REAL, CELL>::no_aselected;
   using geometry<REAL, CELL>::num_selected;
   using geometry<REAL, CELL>::num_aselected;
   using geometry<REAL, CELL>::num_iselected;
@@ -261,9 +261,8 @@ public:
       p_field_additive[p_ix_charge] = true;
 
     if (p_ix_atom == -1 || p_ix_x == -1 || p_ix_y == -1 || p_ix_z == -1) {
-      throw std::invalid_argument(
-          "xgeometry::format: the geometry does not have either atom names,"
-          " x, y, or z coordinates");
+      throw std::invalid_argument("xgeometry::format: the geometry does not have either atom names,"
+                                  " x, y, or z coordinates");
     }
 
     p_xstring.resize(p_nxstring);
@@ -359,7 +358,6 @@ public:
 
     } else if (attributes<T>::type == basic_types::type_bool) {
 
-      //if (i==p_ix_sel) return selected(j);
       return  convert<T,short>::get(p_xbool[p_field_idx[i]][j]);
 
     } else if (attributes<T>::type == basic_types::type_int) {

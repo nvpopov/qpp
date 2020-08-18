@@ -233,7 +233,7 @@ class geometry : public basic_geometry<REAL> {
   auto begin_selected() { return p_sel.begin();};
   auto end_selected() { return p_sel.end();};
 
-  bool no_selected() {
+  bool no_aselected() {
     return p_sel.empty();
   }
 
@@ -253,7 +253,7 @@ class geometry : public basic_geometry<REAL> {
     });
   }
 
-  std::optional<atom_index_set_key> nth_selected(int nth_atom) {
+  std::optional<atom_index_set_key> nth_aselected(int nth_atom) {
     if (nth_atom >= p_sel.size()) return std::nullopt;
     return p_sel[nth_atom];
   }
@@ -524,17 +524,17 @@ class geometry : public basic_geometry<REAL> {
   }
 
   /*
-void copy(const geometry<DIM, REAL> &G)
-{
-  // fixme - what is necessary to copy?
-  clear();
-  trnf = G.trnf;
-  atm = G.atm;
-  _crd = G._crd;
-  _shadow = G._shadow;
-  geomtol = G.geomtol;
-  frac = G.frac;
-}
+  void copy(const geometry<DIM, REAL> &G)
+  {
+    // fixme - what is necessary to copy?
+    clear();
+    trnf = G.trnf;
+    atm = G.atm;
+    _crd = G._crd;
+    _shadow = G._shadow;
+    geomtol = G.geomtol;
+    frac = G.frac;
+  }
 */
 
   // ----------------------- Manipulations with atoms -----------------------
@@ -688,14 +688,11 @@ void copy(const geometry<DIM, REAL> &G)
     std::vector<STRING_EX> atm(p_atm);
     std::vector<vector3<REAL> > crd(p_crd);
     std::vector<Bool> shadow(p_shadow);
-    //std::vector<short> sel(p_sel);
-
-    // bool reorder_types = (_type_table.size() == size());
 
     for (int i = 0; i < size(); i++) {
       p_atm[i]    = atm[ord[i]];
       p_crd[i]    = crd[ord[i]];
-     // p_sel[i]    = sel[ord[i]];
+      // p_sel[i]    = sel[ord[i]];
       p_shadow[i] = shadow[ord[i]];
     }
 
@@ -765,16 +762,16 @@ void copy(const geometry<DIM, REAL> &G)
     if (name != "") os << " " << name;
     os << "(" << get_DIM() << "d,atom,x,y,z){\n";
 
-    /*
-  os << "(";
-  for (int i=0; i<n_param(); i++)
-    {
-      param(i)->write(os);
-      if (i<n_param()-1)
-        os << ",";
-    }
-  os << "){\n";
-  */
+      /*
+    os << "(";
+    for (int i=0; i<n_param(); i++)
+      {
+        param(i)->write(os);
+        if (i<n_param()-1)
+          os << ",";
+      }
+    os << "){\n";
+    */
 
     cell.write(os, offset + 4);
 
