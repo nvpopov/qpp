@@ -68,7 +68,7 @@ struct geometry_observer {
   virtual void erased(int at, before_after) = 0;
   virtual void shaded(int at, before_after, bool) = 0;
   virtual void reordered(const std::vector<int> &, before_after) = 0;
-  virtual void selected(int nth, before_after, bool state) = 0;
+  virtual void selected(atom_index_set_key &sel_at, before_after, bool state) = 0;
   virtual void dim_changed(before_after) = 0;
   virtual void cell_changed(before_after) = 0;
   virtual void xfield_changed(int at, int xid, before_after) = 0;
@@ -167,8 +167,8 @@ struct py_geometry_observer : geometry_observer<REAL> {
     PYBIND11_OVERLOAD_PURE(void, geometry_observer<REAL>, reordered, ord, s);
   }
 
-  void selected(int nth, before_after s, bool state) override {
-    PYBIND11_OVERLOAD_PURE(void, geometry_observer<REAL>, selected, nth, s, state);
+  void selected(atom_index_set_key &sel_at, before_after s, bool state) override {
+    PYBIND11_OVERLOAD_PURE(void, geometry_observer<REAL>, selected, sel_at, s, state);
   }
 
   void dim_changed(before_after s) override {

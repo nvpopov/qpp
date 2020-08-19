@@ -190,33 +190,39 @@ class geometry : public basic_geometry<REAL> {
     return iselected(at, index::D(get_DIM()).all(0));
   }
 
-  void iselect(int at, index at_idx, bool vselect = true) {
+  void iselect(int at, index at_idx, bool vselect = true,
+               std::optional<size_t> pos = std::nullopt, bool emit_event = true) {
 
     auto isl_iter = iselected_iter(at, at_idx);
     if ((isl_iter != end(p_sel)) == vselect) {
       return;
     }
 
-    if (p_has_observers)
+    auto new_sel = atom_index_set_key{at, at_idx};
+
+    if (emit_event && p_has_observers)
       for (int i = 0; i < p_observers.size(); i++)
         if (p_cached_obs_flags[i] & geometry_observer_supports_select)
-          p_observers[i]->selected(at, before_after::before, vselect);
+          p_observers[i]->selected(new_sel, before_after::before, vselect);
 
     if (vselect) {
-      p_sel.push_back({at, at_idx});
+      if (pos)
+        p_sel.insert(begin(p_sel) + *pos, new_sel);
+      else
+        p_sel.push_back(new_sel);
     } else {
       p_sel.erase(isl_iter);
     }
 
-    if (p_has_observers)
+    if (emit_event && p_has_observers)
       for (int i = 0; i < p_observers.size(); i++)
         if (p_cached_obs_flags[i] & geometry_observer_supports_select)
-          p_observers[i]->selected(at, before_after::after, vselect);
+          p_observers[i]->selected(new_sel, before_after::after, vselect);
 
   }
 
-  void select(int at, bool vselect = true) {
-    iselect(at, index::D(get_DIM()).all(0), vselect);
+  void select(int at, bool vselect = true, std::optional<size_t> pos = std::nullopt) {
+    iselect(at, index::D(get_DIM()).all(0), vselect, pos);
   }
 
   void toggle_iselected(int at, index at_idx) {
