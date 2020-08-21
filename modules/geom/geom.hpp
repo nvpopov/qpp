@@ -231,7 +231,7 @@ class geometry : public basic_geometry<REAL> {
   }
 
   void toggle_selected(int at) {
-    toggle_iselected(at, index::D(0).all(0));
+    toggle_iselected(at, index::D(get_DIM()).all(0));
   }
 
   auto cbegin_selected() { return p_sel.cbegin();};
