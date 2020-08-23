@@ -441,7 +441,7 @@ public:
 
     if (j < 0) j += nat();
     if (j < 0 || j >= nat())
-      throw std::invalid_argument("xgeometry::py_getitem: index out of range");
+      throw std::out_of_range("xgeometry::py_getitem: index out of range");
 
     v.resize(nfields());
     for (int i=0; i<nfields(); i++){
@@ -458,7 +458,7 @@ public:
     if (j < 0) j += nat();
 
     if (j < 0 || j >= nat())
-      throw std::invalid_argument("xgeometry::set_fields: index out of range");
+      throw std::out_of_range("xgeometry::set_fields: index out of range");
 
     if (v.size()!=nfields())
       throw std::invalid_argument("xgeometry::set_fields: wrong number of fields");
@@ -753,7 +753,7 @@ public:
 
     if (i < 0) i += nat();
     if (i < 0 || i >= nat())
-      throw std::invalid_argument("xgeometry::py_getitem: index out of range");
+      throw std::out_of_range("xgeometry::py_getitem: index out of range");
 
     if (p_ix_charge >= 0)
       return p_xreal[p_field_idx[p_ix_charge]][i];
@@ -767,7 +767,7 @@ public:
 
     if (i < 0) i+=nat();
     if (i < 0 || i>= nat())
-      throw std::invalid_argument("xgeometry::py_getitem: index out of range");
+      throw std::out_of_range("xgeometry::py_getitem: index out of range");
 
     if (p_ix_charge >= 0)
       return p_xreal[p_field_idx[p_ix_charge]][i];
@@ -785,7 +785,7 @@ public:
 
     if (i < 0) i += nat();
     if (i < 0 || i >= nat())
-      throw std::invalid_argument("xgeometry::py_getitem: index out of range");
+      throw std::out_of_range("xgeometry::py_getitem: index out of range");
 
     if (p_ix_number >= 0)
       return p_xint[p_field_idx[p_ix_number]][i];
@@ -799,7 +799,7 @@ public:
 
     if (i < 0) i += nat();
     if (i < 0 || i >= nat())
-      throw std::invalid_argument("xgeometry::py_getitem: index out of range");
+      throw std::out_of_range("xgeometry::py_getitem: index out of range");
 
     if (p_ix_number >= 0)
       return p_xint[p_field_idx[p_ix_number]][i];
@@ -818,7 +818,7 @@ public:
 
     if (i < 0) i+=nat();
     if (i < 0 || i>= nat())
-      throw std::invalid_argument("xgeometry::py_getitem: index out of range");
+      throw std::out_of_range("xgeometry::py_getitem: index out of range");
 
     if (p_ix_mass >= 0)
       return p_xreal[p_field_idx[p_ix_mass]][i];
@@ -832,7 +832,7 @@ public:
 
     if (i < 0) i+=nat();
     if (i < 0 || i>= nat())
-      throw std::invalid_argument("xgeometry::py_getitem: index out of range");
+      throw std::out_of_range("xgeometry::py_getitem: index out of range");
 
     if (p_ix_mass >= 0)
       return p_xreal[p_field_idx[p_ix_mass]][i];
@@ -880,7 +880,7 @@ public:
 
     if (j<0) j+=nat();
     if (j<0 || j>= nat())
-      throw std::invalid_argument("xgeometry::py_getitem: index out of range");
+      throw std::out_of_range("xgeometry::py_getitem: index out of range");
     py::list l;
 
     for (int i=0; i<nfields(); i++){
@@ -897,7 +897,7 @@ public:
   virtual void py_setitem(int j, const py::list & l) {
 
     if (j<0) j+=nat();
-    if (j<0 || j>= nat()) throw std::invalid_argument("xgeometry:: index out of range");
+    if (j<0 || j>= nat()) throw std::out_of_range("xgeometry:: index out of range");
     if (py::len(l) != nfields())
       throw std::invalid_argument("xgeometry:: bad list of fields");
 
@@ -950,7 +950,7 @@ public:
 
     if (j<0) j+= nat();
     if (j<0 || j>=nat())
-      throw std::invalid_argument("xgeometry: atom index out of range");
+      throw std::out_of_range("xgeometry: atom index out of range");
 
     if (field_type(i) == basic_types::type_string) return py::cast(xfield<STRING_EX>(i,j));
     else if (field_type(i) == basic_types::type_real) return py::cast(xfield<REAL>(i,j));
@@ -965,11 +965,11 @@ public:
 
     if (i<0) i += nfields();
     if (i<0 || i >= nfields())
-      throw std::invalid_argument("xgeometry: field index out of range");
+      throw std::out_of_range("xgeometry: field index out of range");
 
     if (j<0) j+= nat();
     if (j<0 || j>=nat())
-      throw std::invalid_argument("xgeometry: atom index out of range");
+      throw std::out_of_range("xgeometry: atom index out of range");
 
     basic_types t = field_type(i);
     if (t == basic_types::type_string) {
@@ -1007,7 +1007,7 @@ public:
 
     if (i<0) i += nfields();
     if (i<0 || i >= nfields())
-      throw std::invalid_argument("xgeometry: field index out of range");
+      throw std::out_of_range("xgeometry: field index out of range");
     return additive(i);
 
   }
@@ -1016,7 +1016,7 @@ public:
 
     if (i<0) i += nfields();
     if (i<0 || i >= nfields())
-      throw std::invalid_argument("xgeometry: field index out of range");
+      throw std::out_of_range("xgeometry: field index out of range");
     additive(i) = a;
 
   }
