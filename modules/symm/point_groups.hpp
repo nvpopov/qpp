@@ -429,7 +429,7 @@ namespace qpp{
 
     if (geom.nat() == 1) {
         G = shnfl<REAL>::Oh();
-        G.name = "SO3";
+        G.m_name = "SO3";
         return;
       }
 
@@ -498,13 +498,13 @@ namespace qpp{
 
         if (dnh){
             G = shnfl<REAL>::Dnh(4);
-            G.name = "D_inf_h";
+            G.m_name = "D_inf_h";
 
             //std::cout << "linear molecule with Dh\n";
           }
         else{
             G = shnfl<REAL>::Cnv(4);
-            G.name = "C_inf_v";
+            G.m_name = "C_inf_v";
 	    
             //std::cout << "linear molecule with Cv\n";
           }
@@ -670,7 +670,7 @@ FOUND:
 
     //std::cout << " group= " << Gname << " found= " << found << "\n";
 
-    G.name = Gname;
+    G.m_name = Gname;
 
   }
 

@@ -12,7 +12,7 @@ namespace py = pybind11;
 #pragma pop_macro("slots")
 #endif
 
-#include <classic/potentials.hpp>
+//#include <classic/potentials.hpp>
 #include <geom/geom.hpp>
 #include <basis/basis.hpp>
 #include <basis/ecp.hpp>
