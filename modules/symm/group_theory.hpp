@@ -10,557 +10,550 @@
 
 namespace qpp{
 
-template<class TRANSFORM, class ARRAY = std::vector<TRANSFORM> >
-class group_analyzer {
+  template<class TRANSFORM, class ARRAY = std::vector<TRANSFORM> >
+  class group_analyzer{
+    
+    // All group elements are stored here
+    const ARRAY & G;
 
-  // All group elements are stored here
-  const ARRAY & G;
+    // Orders
+    int* ordr{nullptr};
 
-  // Orders
-  int* ordr{nullptr};
+    // The elements of the classes
+    // cltab[i][j] is the j-th element of i-th class
+    std::vector<std::vector<int> > cltab;
+    std::vector<int> classof;
 
-  // The elements of the classes
-  // cltab[i][j] is the j-th element of i-th class
-  std::vector<std::vector<int> > cltab;
-  std::vector<int> classof;
-
-  // where in mtab is the record for i-th times j-th element
-  /*
-   inline int mtidx(int i, int j) const {
-    return i*G.size()+j;
-   }
-  */
-
-public:
-
-  // Multiplication table
-  //  int * mtab;
-  static_table<int> multab;
-
-  inline int size() const {return multab.size(0);}
-
-  // --------------------------------------------
-  // Finds element g of the group and returns its index
-  int index(const TRANSFORM & g) const {
-    int i;
-    bool result=false;
-
-    for (i=0; i<G.size(); i++)
-      if ( G[i] == g) {
-        result = true;
-        break;
+    // where in mtab is the record for i-th times j-th element
+    /*
+      inline int mtidx(int i, int j) const
+      {
+      return i*G.size()+j;
       }
+    */
 
-    return result? i : -1;
-  }
+  public:
 
-  // Construction of the group multiplication table
-  void build_multab() {
-    //        if (mtab!=NULL) delete mtab;
-    //mtab = new int[G.size()*G.size()];
+    // Multiplication table
+    //  int * mtab;
+    static_table<int> multab;
 
-    multab.resize(G.size(),G.size());
+    inline int size() const {return multab.size(0);}
 
-    for (int i = 0; i<G.size(); i++)
-      for (int j = 0; j<G.size(); j++)
-        multab(i,j) = index(G[i]*G[j]);
-  }
+    // --------------------------------------------
+    // Finds element g of the group and returns its index
+    int index(const TRANSFORM & g) const {
+      int i;
+      bool result=false;
 
-  // Find orders of all elements
-  void build_orders() {
+      for (i=0; i<G.size(); i++)
+	if ( G[i] == g) {
+	  result = true;
+	  break;
+	}
 
-    //        if (ordr != nullptr) delete [] ordr;
-    delete [] ordr;
-    ordr = new int [size()];
-
-    for (int g = 0; g < size(); g++) {
-      int n = 0, h = g;
-      while (h != 0) {
-        n++;
-        h = multab(h,g);
-      }
-      ordr[g] = n + 1;
+      return result? i : -1;
     }
 
-  }
+    // Construction of the group multiplication table
+    void build_multab() {
+      //        if (mtab!=NULL) delete mtab;
+      //mtab = new int[G.size()*G.size()];
 
-  // Find the classes
-  void build_classes() {
+      multab.resize(G.size(),G.size());
 
-    std::vector<bool> already(size());
-    for (int i=0; i<size(); i++) already[i] = false;
-
-    int Ncl = 0;
-    do {
-      int i=0;
-      while (i<size() && already[i]) i++;
-      if (i==size()) break;
-      cltab.resize(Ncl+1);
-
-      for (int j=0; j<size(); j++){
-        int k = multab(multab(j,i),invert(j));
-        if (!already[k]) {
-          cltab[Ncl].push_back(k);
-          already[k] = true;
-        }
-      }
-
-      Ncl++;
-    } while (true);
-
-    classof.resize(size());
-
-    for (int i=0; i<size(); i++) {
-      bool found = false;
-      int jcl;
-      for (jcl=0; jcl<cltab.size(); jcl++) {
-
-        for (int k=0; k<cltab[jcl].size(); k++)
-          if (cltab[jcl][k]==i) {
-            found = true; break;
-          }
-
-        if (found){
-          classof[i]=jcl;
-          break;
-        }
-      }
+      for (int i = 0; i<G.size(); i++)
+	for (int j = 0; j<G.size(); j++)
+	  multab(i,j) = index(G[i]*G[j]);
     }
 
-    //std::cout << "Nclasses= " << cltab.size() << "\n";
-  }
+    // Find orders of all elements
+    void build_orders() {
 
-  // multiplication table
-  /*
+      //        if (ordr != nullptr) delete [] ordr;
+      delete [] ordr;
+      ordr = new int [size()];
+
+      for (int g = 0; g < size(); g++) {
+	int n = 0, h = g;
+	while (h != 0) {
+	  n++;
+	  h = multab(h,g);
+	}
+	ordr[g] = n + 1;
+      }
+
+    }
+
+    // Find the classes
+    void build_classes() {
+
+      std::vector<bool> already(size());
+      for (int i=0; i<size(); i++) already[i] = false;
+
+      int Ncl = 0;
+      do {
+	int i=0;
+	while (i<size() && already[i]) i++;
+	if (i==size()) break;
+	cltab.resize(Ncl+1);
+
+	for (int j=0; j<size(); j++){
+	  int k = multab(multab(j,i),invert(j));
+	  if (!already[k]) {
+	    cltab[Ncl].push_back(k);
+	    already[k] = true;
+	  }
+	}
+
+	Ncl++;
+      } while (true);
+
+      classof.resize(size());
+
+      for (int i=0; i<size(); i++) {
+	bool found = false;
+	int jcl;
+	for (jcl=0; jcl<cltab.size(); jcl++) {
+
+	  for (int k=0; k<cltab[jcl].size(); k++)
+	    if (cltab[jcl][k]==i) {
+	      found = true; break;
+	    }
+
+	  if (found){
+	    classof[i]=jcl;
+	    break;
+	  }
+	}
+      }
+
+      //std::cout << "Nclasses= " << cltab.size() << "\n";
+    }
+
+    // multiplication table
+    /*
       inline int multab(int i, int j) const {
       return mtab[mtidx(i,j)];
       }
     */
 
-  // order of the element
-  inline int order(int i) const {
-    return ordr[i];
-  }
-
-  // inverse of i-th element
-  int invert(int i) const {
-    int j=0;
-    while (multab(i,j)!=0) j++;
-    return j;
-  }
-
-  // number of classes
-  inline int n_classes() const {
-    return cltab.size();
-  }
-
-  // nember of elements in i-th class
-  inline int class_size(int i) const {
-    return cltab[i].size();
-  }
-
-  // j-th element of i-th class
-  inline int class_element(int i, int j) const {
-    return cltab[i][j];
-  }
-
-  // class of i-th element
-  inline int class_of(int i) const {
-    return classof[i];
-  }
-
-  // --------------------------------------------------------
-
-  // Construct abelian subgroup with g-th element
-  std::vector<int> abelian_sub(int g) {
-    std::vector<int> sub = {0};
-    int h = g;
-    while (h!=0){
-      sub.push_back(h);
-      h = multab(g,h);
-    }
-    return sub;
-  }
-
-  std::vector<int> mul_subs(const std::vector<int> & G1, const std::vector<int> &G2) {
-
-    std::vector<int> res;
-    res.resize(G1.size()*G2.size());
-    int i=0;
-
-    for (int g1 : G1)
-      for (int g2 : G2)
-        res[i++] = multab(g1,g2);
-
-    std::sort(res.begin(), res.end());
-    res.erase( std::unique( res.begin(), res.end() ), res.end() );
-    return res;
-
-  }
-
-  void complete_sub(std::set<int> & S) {
-
-    std::set<int> N = S;
-    while (N.size()>0) {
-      std::set<int> NN;
-      for (auto *c : { &S, &N })
-        for (const int & i : *c)
-          for (const int & j : N) {
-            int k = multab(i,j);
-            if (S.find(k) == S.end() && N.find(k) == N.end())
-              NN.insert(k);
-            k = multab(j,i);
-            if (S.find(k) == S.end() && N.find(k) == N.end())
-              NN.insert(k);
-          }
-      for (const int &i : N)
-        S.insert(i);
-      N = NN;
+    // order of the element
+    inline int order(int i) const {
+      return ordr[i];
     }
 
-  }
-
-  void complete_sub(std::vector<int> & S) {
-    std::set<int> SS( S.begin(), S.end() );
-    complete_sub(SS);
-    S = std::vector<int>(SS.begin(), SS.end());
-  }
-
-  std::vector<int> find_generators(const std::vector<int> & H) {
-
-    int N = size();
-    if (H.size() == N)
-      return std::vector<int>();
-
-    std::vector<int> H1(H), F;
-    std::sort(H1.begin(),H1.end());
-    int i1=0;
-    for (int i=0; i<N; i++){
-      while (H1[i1]<i && i1 < H1.size()-1) i1++;
-      if ( N % (H.size()*order(i))==0 &&  i!=H1[i1] )
-        F.push_back(i);
+    // inverse of i-th element
+    int invert(int i) const {
+      int j=0;
+      while (multab(i,j)!=0) j++;
+      return j;
     }
-    std::sort(F.begin(),F.end(),
-              [this] (const int & a, const int & b) -> bool {
-                return order(a) > order(b) ? true : order(a)==order(b) && a<b;
-              } );
 
-    /*
-      std::cout << "F sorted:\n";
-      for (int i : F)
-      std::cout << " " << i << "(" << order(i) << ")";
-      std::cout << "\n";
-    */
+    // number of classes
+    inline int n_classes() const {
+      return cltab.size();
+    }
 
-    for (int g : F) {
-      //std::cout << "trying " << g << "\n";
+    // nember of elements in i-th class
+    inline int class_size(int i) const {
+      return cltab[i].size();
+    }
 
-      H1.clear();
-      H1 = mul_subs(H, abelian_sub(g) );
-      if (H1.size() == H.size()*order(g)){
-        std::vector<int> gg = find_generators(H1);
-        bool success = !(gg.size()==1 && gg[0]==-1);
-        if (success)
-        {
-          gg.insert(gg.begin(),g);
-          return gg;
-        }
+    // j-th element of i-th class
+    inline int class_element(int i, int j) const {
+      return cltab[i][j];
+    }
+
+    // class of i-th element
+    inline int class_of(int i) const {
+      return classof[i];
+    }
+
+    // --------------------------------------------------------
+
+    // Construct abelian subgroup with g-th element
+    std::vector<int> abelian_sub(int g) {
+      std::vector<int> sub = {0};
+      int h = g;
+      while (h!=0){
+	sub.push_back(h);
+	h = multab(g,h);
       }
+      return sub;
     }
 
-    return std::vector<int>({-1});
+    std::vector<int> mul_subs(const std::vector<int> & G1, const std::vector<int> &G2) {
 
-  }
+      std::vector<int> res;
+      res.resize(G1.size()*G2.size());
+      int i=0;
 
-  //-------------------------------------------------------------------------------------
+      for (int g1 : G1)
+	for (int g2 : G2)
+	  res[i++] = multab(g1,g2);
 
-  // Constructors
-  group_analyzer(const ARRAY & _G) : G(_G) {
-    //mtab = NULL;
-    //ordr = NULL;
+      std::sort(res.begin(), res.end());
+      res.erase( std::unique( res.begin(), res.end() ), res.end() );
+      return res;
 
-    //std::cout << "alive1\n";
-    build_multab();
+    }
 
-    //std::cout << "alive2\n";
-    build_orders();
+    void complete_sub(std::set<int> & S){
+      std::set<int> N = S;
+      while (N.size()>0)
+	{
+	  std::set<int> NN;
+	  for (auto *c : { &S, &N } )
+	    for (const int & i : *c)
+	      for (const int & j : N)
+		{
+		  int k = multab(i,j);
+		  if ( S.find(k) == S.end() && N.find(k) == N.end() )
+		    NN.insert(k);
+		  k = multab(j,i);
+		  if ( S.find(k) == S.end() && N.find(k) == N.end() )
+		    NN.insert(k);
+		}
+	  for (const int &i : N)
+	    S.insert(i);
+	  N = NN;
+	}
+    }
+    
+    void complete_sub(std::vector<int> & S){
+      std::set<int> SS( S.begin(), S.end() );
+      complete_sub(SS);
+      S = std::vector<int>(SS.begin(), SS.end());
+    }
 
-    //std::cout << "alive3\n";
-    //build_classes();
+    std::vector<int> find_generators(const std::vector<int> & H) {
+      int N = size();
+      if (H.size() == N)
+	return std::vector<int>();
 
-    //std::cout << "alive4\n";
-  }
+      std::vector<int> H1(H), F;
+      std::sort(H1.begin(),H1.end());
+      int i1=0;
+      for (int i=0; i<N; i++){
+	while (H1[i1]<i && i1 < H1.size()-1) i1++;
+	if ( N % (H.size()*order(i))==0 &&  i!=H1[i1] )
+	  F.push_back(i);
+      }
+      std::sort(F.begin(),F.end(),
+		[this] (const int & a, const int & b) -> bool {
+		  return order(a) > order(b) ? true : order(a)==order(b) && a<b;
+		} );
 
-  group_analyzer( const static_table<int> & __multab) : multab(__multab), G(ARRAY()) {
-    build_orders();
-  }
+      /*
+	std::cout << "F sorted:\n";
+	for (int i : F)
+        std::cout << " " << i << "(" << order(i) << ")";
+	std::cout << "\n";
+      */
 
-  ~group_analyzer() {
-    //      if (ordr != nullptr) delete [] ordr;
-    delete [] ordr;
-  }
+      for (int g : F){
+	//std::cout << "trying " << g << "\n";
+
+	H1.clear();
+	H1 = mul_subs(H, abelian_sub(g) );
+	if (H1.size() == H.size()*order(g)){
+	  std::vector<int> gg = find_generators(H1);
+	  bool success = !(gg.size()==1 && gg[0]==-1);
+	  if (success)
+	    {
+	      gg.insert(gg.begin(),g);
+	      return gg;
+	    }
+	}
+      }
+      return std::vector<int>({-1});
+    }
+
+    //-------------------------------------------------------------------------------------
+
+      // Constructors
+      group_analyzer(const ARRAY & _G) : G(_G){
+        //mtab = NULL;
+        //ordr = NULL;
+
+        //std::cout << "alive1\n";
+        build_multab();
+
+        //std::cout << "alive2\n";
+        build_orders();
+
+        //std::cout << "alive3\n";
+        //build_classes();
+
+        //std::cout << "alive4\n";
+      }
+
+      group_analyzer( const static_table<int> & __multab) : multab(__multab),
+							    G(ARRAY())
+      {
+	build_orders();
+      }
+    
+      ~group_analyzer(){
+        //      if (ordr != nullptr) delete [] ordr;
+        delete [] ordr;
+      }
 
 #if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
 
-  py::list py_complete_sub(const py::list & S) {
+    py::list py_complete_sub(const py::list & S)
+    {
+      std::set<int> s;
+      for (auto item : S) s.insert(py::cast<int>(item));
+      complete_sub(s);
 
-    std::set<int> s;
-    for (auto item : S) s.insert(py::cast<int>(item));
-    complete_sub(s);
-
-    py::list S1;
-    for (int i:s) S1.append(i);
-    return S1;
-
-  }
-
-  int py_multab(int i, int j) {
-    return multab(i,j);
-  }
-
-  py::list py_classes() {
-
-    py::list res;
-    for (const auto & c : cltab) {
-      py::list cl;
-      for (const auto & i : c)
-        cl.append(i);
-      res.append(cl);
+      py::list S1;
+      for (int i:s) S1.append(i);
+      return S1;
     }
-    return res;
 
-  }
+    int py_multab(int i, int j){
+      return multab(i,j);
+    }
 
-  static void py_export(py::module m, const char * pyname) {
-    py::class_<group_analyzer<TRANSFORM,ARRAY> >(m, pyname)
-        .def(py::init<const ARRAY &>())
-        .def("complete_sub", & group_analyzer<TRANSFORM,ARRAY>::py_complete_sub )
-        .def("abelian_sub", & group_analyzer<TRANSFORM,ARRAY>::abelian_sub)
-        .def("mul_subs", & group_analyzer<TRANSFORM,ARRAY>::mul_subs)
-        .def("order", & group_analyzer<TRANSFORM,ARRAY>::order)
-        .def("multab", & group_analyzer<TRANSFORM,ARRAY>::py_multab)
-        .def("classes", & group_analyzer<TRANSFORM,ARRAY>::py_classes)
-        .def("build_classes", & group_analyzer<TRANSFORM,ARRAY>::build_classes )
-        ;
-  }
+    py::list py_classes()
+    {
+      py::list res;
+      for (const auto & c : cltab)
+	{
+	  py::list cl;
+	  for (const auto & i : c)
+	    cl.append(i);
+	  res.append(cl);
+	}
+      return res;
+    }
+    
+    static void py_export(py::module m, const char * pyname){
+      py::class_<group_analyzer<TRANSFORM,ARRAY> >(m, pyname)
+	.def(py::init<const ARRAY &>())
+	.def("complete_sub", & group_analyzer<TRANSFORM,ARRAY>::py_complete_sub )
+	.def("abelian_sub", & group_analyzer<TRANSFORM,ARRAY>::abelian_sub)
+	.def("mul_subs", & group_analyzer<TRANSFORM,ARRAY>::mul_subs)
+	.def("order", & group_analyzer<TRANSFORM,ARRAY>::order)
+	.def("multab", & group_analyzer<TRANSFORM,ARRAY>::py_multab)
+	.def("classes", & group_analyzer<TRANSFORM,ARRAY>::py_classes)
+	.def("build_classes", & group_analyzer<TRANSFORM,ARRAY>::build_classes )
+	;
+    }
 
 #endif
 
+    
+  };
 
-};
+  // -------------------------------------------------------------------------------
 
-// -------------------------------------------------------------------------------
+  template <class TRANSFORM, class ARRAY = std::vector<TRANSFORM> >
+  void generator_form(genform_group<TRANSFORM> & R, ARRAY & G){
+    group_analyzer<TRANSFORM,ARRAY> A(G);
+    std::vector<int> ee = {0}, gg = A.find_generators(ee);
+    int DIM = gg.size();
 
-template <class TRANSFORM, class ARRAY = std::vector<TRANSFORM>>
-void generator_form(genform_group<TRANSFORM> & R, ARRAY & G) {
+    //genform_group<TRANSFORM> R(DIM);
+    R.set_dim(DIM);
+    for (int d = 0; d<DIM; d++)
+      R.generators[d] = G[gg[d]];
 
-  group_analyzer<TRANSFORM,ARRAY> A(G);
-  std::vector<int> ee = {0}, gg = A.find_generators(ee);
-  int DIM = gg.size();
+    R.auto_orders();
 
-  //genform_group<TRANSFORM> R(DIM);
-  R.set_dim(DIM);
-  for (int d = 0; d<DIM; d++)
-    R.generators[d] = G[gg[d]];
-
-  R.auto_orders();
-
-}
-
-// -------------------------------------------------------------------------------
-
-template <class VALTYPE, class TRANSFORM, class ARRAY = std::vector<TRANSFORM>>
-class group_characters {
-
-  // All group elements are stored here
-  const ARRAY & G;
-
-  // The group is already partitioned into classes
-  const group_analyzer<TRANSFORM,ARRAY> & A;
-
-  typedef Eigen::Matrix<VALTYPE, Eigen::Dynamic, Eigen::Dynamic> matrix;
-  typedef Eigen::Matrix<VALTYPE, Eigen::Dynamic, 1> vector;
-
-public:
-
-  double chi_tol = 1e-6;
-
-  // Character table
-  matrix chi;
-  int nirrep;
-
-  group_characters(const ARRAY & _G, const group_analyzer<TRANSFORM,ARRAY> & _A) : G(_G), A(_A){
-    //std::cout << "before characters\n";
-    build_chi();
+    //return R;
   }
 
-  // Regular representation matrix for i-th element
-  matrix regrep(int i) {
+  // -------------------------------------------------------------------------------
 
-    matrix R = matrix::Zero(G.size(),G.size());
+  template <class VALTYPE, class TRANSFORM, class ARRAY = std::vector<TRANSFORM> >
+  class group_characters{
 
-    for (int j=0; j<G.size(); j++)
-      R(j,A.multab(j,i)) = VALTYPE(1);
+      // All group elements are stored here
+      const ARRAY & G;
 
-    return R;
+      // The group is already partitioned into classes
+      const group_analyzer<TRANSFORM,ARRAY> & A;
 
-  }
+      typedef Eigen::Matrix<VALTYPE, Eigen::Dynamic, Eigen::Dynamic> matrix;
+      typedef Eigen::Matrix<VALTYPE, Eigen::Dynamic, 1> vector;
 
-  // ----------------------------------------------------------
-  // Scalar product of character chi with irrep character
-  VALTYPE chi_scal(const vector &ch, int irrep) {
+    public:
 
-    VALTYPE s(0);
-    for (int cl = 0; cl < A.n_classes(); cl++)
-      s += std::conj(ch(cl))*chi(irrep,cl)*VALTYPE(A.class_size(cl));
-    return s;
+      double chi_tol = 1e-6;
 
-  }
+      // Character table
+      matrix chi;
+      int nirrep;
 
-  // ------------------------------------------------------------
-  // Version 2 - noniterative
-  //
-  // Decompose the subspace of the regular representation defined by its
-  // basis vectors n(i) into invariant subspaces
-  // n(i,j) = delta_ij in the beginning
-  void subspace_decompose(matrix &n, std::vector<int> &dims) {
-  // n(i,j) is j-th component of i-th basis vector of the subspace
-  // dims array contains the dimensions of invariant subspaces
-
-    int N = G.size();
-    if (N!=n.rows() || N!=n.cols())
-      throw  std::range_error("group_characters::subspace_decompose : "
-                             "only regular representaion subspaces!");
-
-    // Step 1. Form the matrix commuting the regular representation
-    //std::cout << "step1\n";
-
-    matrix R = matrix::Random(N,N);
-    R = R + R.adjoint().eval();
-
-    matrix S(N,N);
-
-    for (int i=0; i<N; i++)
-      for (int j=0; j<=i; j++){
-        VALTYPE ele = VALTYPE(0);
-
-        for (int g=0; g<N; g++)
-          ele += R(A.multab(i,g), A.multab(j,g));
-
-        S(i,j) = ele;
+      group_characters(const ARRAY & _G,
+                       const group_analyzer<TRANSFORM,ARRAY> & _A) :
+        G(_G), A(_A){
+        //std::cout << "before characters\n";
+        build_chi();
       }
 
-    // Step 3. Diagonalize it
-    //std::cout << "step3\n";
-    Eigen::SelfAdjointEigenSolver<matrix> es;
+      // Regular representation matrix for i-th element
+      matrix regrep(int i){
+        matrix R = matrix::Zero(G.size(),G.size());
 
-    es.compute(S,Eigen::ComputeEigenvectors);
-
-    auto eig = es.eigenvalues();
-    auto vecs = es.eigenvectors();
-
-    //      std::cout << "Eigval\n";
-    eig /= eig(N-1);
-    //std::cout <<  eig << std::endl;
-
-    //std::cout << "Eigvec\n";
-    //std::cout <<  vecs << std::endl;
-
-    // Step 4. Count invariant subspaces
-    // fixme! - check the constant, move its definition
-    //std::cout << "step4\n";
-    dims.clear();
-    int d = 1;
-    for (int i=1; i<N; i++)
-      if ( std::abs(eig(i)-eig(i-1))<chi_tol )
-        d++;
-      else{
-        dims.push_back(d);
-        d=1;
+        for (int j=0; j<G.size(); j++)
+          R(j,A.multab(j,i)) = VALTYPE(1);
+        return R;
       }
 
-    dims.push_back(d);
-
-    // Step 5. Transform basis vectors n so that they are
-    // basis vector for invariant subspaces just found
-
-    //std::cout << "step5\n";
-    n = n*vecs;
-
-  }
-
-  // Build character table by decomposing the regular representation
-  // into invariant subspaces
-  // fixme - find more efficient algorithm (MeatAxe?)
-  // fixme - should this algorithm be recursive?
-  void build_chi() {
-
-    int N = G.size();
-    //chi.resize(A.n_classes());
-
-    matrix n = matrix::Identity(N, N);
-
-    std::vector<int> dims;
-
-    subspace_decompose(n, dims);
-
-    //std::cout << "subspaces found with dims:\n";
-    //for (int i=0; i<dims.size(); i++)
-    //std::cout << dims[i] << " ";
-    //std::cout << "\n";
-
-    // Find character
-    int i0=0, i1;
-    int nfound = 0;
-
-    chi.resize(1, A.n_classes());
-
-    for (int rep = 0; rep < dims.size(); rep++) {
-
-      i1 = i0 + dims[rep] - 1;
-
-      vector new_chi(A.n_classes());
-      for (int cl = 0; cl < A.n_classes(); cl++) {
-        int g = A.class_element(cl,0);
-        matrix R(dims[rep], dims[rep]);
-        R = n.block(
-                 0, i0, n.rows(), i1-i0+1).adjoint()*regrep(g)*n.block(
-                            0,i0,n.rows(), i1-i0+1);
-        new_chi(cl) = R.trace();
-      }
-
-      //std::cout << "New character \n";
-      //for (int cl = 0; cl < n_irrep(); cl++) std::cout << new_chi(cl) << " ";
-      //std::cout << "\n";
-
-      bool already = false;
-      for (int irrep=0; irrep < nfound; irrep++)
-        if (std::abs(chi_scal(new_chi, irrep)) > chi_tol) {
-          already = true;
-          break;
-        }
-
-      if (!already) {
-        chi.conservativeResize(nfound+1, A.n_classes() );
+      // ----------------------------------------------------------
+      // Scalar product of character chi with irrep character
+      VALTYPE chi_scal(const vector &ch, int irrep){
+        VALTYPE s(0);
         for (int cl = 0; cl < A.n_classes(); cl++)
-          chi(nfound, cl) = new_chi(cl);
-        nfound++;
+          s += std::conj(ch(cl))*chi(irrep,cl)*VALTYPE(A.class_size(cl));
+        return s;
       }
 
-      i0 = i1 + 1;
+      // ------------------------------------------------------------
+      // Version 2 - noniterative
+      //
+      // Decompose the subspace of the regular representation defined by its
+      // basis vectors n(i) into invariant subspaces
+      // n(i,j) = delta_ij in the beginning
+      void subspace_decompose(matrix &n, std::vector<int> &dims){
+        // n(i,j) is j-th component of i-th basis vector of the subspace
+        // dims array contains the dimensions of invariant subspaces
 
-    }
+        int N = G.size();
+        if (N!=n.rows() || N!=n.cols())
+          throw  std::range_error("group_characters::subspace_decompose : "
+                                  "only regular representaion subspaces!");
 
-    nirrep = nfound;
+        // Step 1. Form the matrix commuting the regular representation
+        //std::cout << "step1\n";
 
-    for (int i = 0; i < chi.rows(); i++)
-      for (int j = 0; j < chi.rows(); j++)
-        if (std::abs(chi(i, j))<=chi_tol)
-          chi(i, j) = VALTYPE(0);
-  }
+        matrix R = matrix::Random(N,N);
+        R = R + R.adjoint().eval();
+
+        matrix S(N,N);
+
+        for (int i=0; i<N; i++)
+          for (int j=0; j<=i; j++){
+              VALTYPE ele = VALTYPE(0);
+
+              for (int g=0; g<N; g++)
+                ele += R(A.multab(i,g), A.multab(j,g));
+
+              S(i,j) = ele;
+            }
 
 
-};
+        // Step 3. Diagonalize it
+        //std::cout << "step3\n";
+        Eigen::SelfAdjointEigenSolver<matrix> es;
+
+        es.compute(S,Eigen::ComputeEigenvectors);
+
+        auto  eig = es.eigenvalues();
+        auto  vecs = es.eigenvectors();
+
+        //      std::cout << "Eigval\n";
+        eig /= eig(N-1);
+        //std::cout <<  eig << std::endl;
+
+        //std::cout << "Eigvec\n";
+        //std::cout <<  vecs << std::endl;
+
+        // Step 4. Count invariant subspaces
+        // fixme! - check the constant, move its definition
+        //std::cout << "step4\n";
+        dims.clear();
+        int d = 1;
+        for (int i=1; i<N; i++)
+          if ( std::abs(eig(i)-eig(i-1))<chi_tol )
+            d++;
+          else{
+              dims.push_back(d);
+              d=1;
+            }
+
+        dims.push_back(d);
+
+        // Step 5. Transform basis vectors n so that they are
+        // basis vector for invariant subspaces just found
+
+        //std::cout << "step5\n";
+        n = n*vecs;
+      }
+
+      // Build character table by decomposing the regular representation
+      // into invariant subspaces
+      // fixme - find more efficient algorithm (MeatAxe?)
+      // fixme - should this algorithm be recursive?
+      void build_chi(){
+        int N = G.size();
+        //chi.resize(A.n_classes());
+
+        matrix n = matrix::Identity(N, N);
+
+        std::vector<int> dims;
+
+        subspace_decompose(n, dims);
+
+        //std::cout << "subspaces found with dims:\n";
+        //for (int i=0; i<dims.size(); i++)
+        //std::cout << dims[i] << " ";
+        //std::cout << "\n";
+
+        // Find character
+        int i0=0, i1;
+        int nfound = 0;
+
+        chi.resize(1, A.n_classes());
+
+        for (int rep = 0; rep < dims.size(); rep++){
+            i1 = i0 + dims[rep] - 1;
+
+            vector new_chi(A.n_classes());
+            for (int cl = 0; cl < A.n_classes(); cl++){
+                int g = A.class_element(cl,0);
+                matrix R(dims[rep], dims[rep]);
+                R = n.block(
+                      0, i0, n.rows(), i1-i0+1).adjoint()*regrep(g)*n.block(
+                      0,i0,n.rows(), i1-i0+1);
+                new_chi(cl) = R.trace();
+              }
+
+            //std::cout << "New character \n";
+            //for (int cl = 0; cl < n_irrep(); cl++) std::cout << new_chi(cl) << " ";
+            //std::cout << "\n";
+
+            bool already = false;
+            for (int irrep=0; irrep < nfound; irrep++)
+              if ( std::abs(chi_scal(new_chi, irrep)) > chi_tol ){
+                  already = true;
+                  break;
+                }
+
+            if (!already){
+                chi.conservativeResize(nfound+1, A.n_classes() );
+                for (int cl = 0; cl < A.n_classes(); cl++)
+                  chi(nfound, cl) = new_chi(cl);
+                nfound++;
+              }
+
+            i0 = i1 + 1;
+          }
+
+        nirrep = nfound;
+
+        for (int i = 0; i < chi.rows(); i++)
+          for (int j = 0; j < chi.rows(); j++)
+            if (std::abs(chi(i, j))<=chi_tol)
+              chi(i, j) = VALTYPE(0);
+      }
+
+
+  };
 
 }
 

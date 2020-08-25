@@ -223,12 +223,24 @@ S,G = autosymm.find_point_subgroups(CG)
 
 print('High symmetry sites in the unit cell:')
 for i in range(len(S)):
+<<<<<<< HEAD
     #p = S[i].point
     p = S[i].c
     f = uc.cell.cart2frac(p)
     #n = S[i].axis
     n = S[i].n
     print('\n{:d}) {} symmetry  center=({:10.5f},{:10.5f},{:10.5f}) '.format(i,point_group_symbol(G[i]),f[0],f[1],f[2]))
+=======
+    p = S[i].point
+    #p = S[i].c
+    f = uc.cell.cart2frac(p)
+    n = S[i].axis
+    #n = S[i].n
+    Gi = array_point_group_d()
+    for g in G[i]:
+        Gi.add(g.R)
+    print('\n{:d}) {} symmetry  center=({:10.5f},{:10.5f},{:10.5f}) '.format(i,point_group_symbol(Gi),f[0],f[1],f[2]))
+>>>>>>> asm_uc2
 #    print('\nsite #{:d} symmetry= {} cartesian= {:10.5f} {:10.5f} {:10.5f} fractional= {:10.5f} {:10.5f} {:10.5f} '.format(i,point_group_symbol(G[i]), p[0],p[1],p[2],f[0],f[1],f[2]))
     print(' dim = {:d} axis=({:10.5f},{:10.5f},{:10.5f})'.format(S[i].dim, n[0], n[1], n[2]))
 #    for X in G[i]:

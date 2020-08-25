@@ -132,7 +132,7 @@ class linear3d:
 def vecreal(v):
     return vector3d(v[0].real,v[1].real,v[2].real)
 
-def invariant_subspace(R):
+def invariant_subspace_trash(R):
     lmb=vector3z()
     n = matrix3z()
     diagon3(lmb,n,R.R)
@@ -534,7 +534,7 @@ def abelian_division(G):
 #---------------------------------------------
 
 def subs_merge(subs,groups,sucessors,i,grp,pred):
-             for g in grp:
+    for g in grp:
         if not g in groups[i]:
             groups[i].append(g)
     for p in pred:
