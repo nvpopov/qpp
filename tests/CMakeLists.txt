@@ -13,5 +13,5 @@ add_test(NAME test_ccd
 
 add_subdirectory(test-symm)
 
-add_subdirectory(test-geom)
+#add_subdirectory(test-geom)
 
