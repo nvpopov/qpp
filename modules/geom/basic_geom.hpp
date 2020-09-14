@@ -115,6 +115,7 @@ public:
   }
 
   void remove_observer(geometry_observer<REAL> &d) {
+
     auto i = p_observers.begin();
 
     while (i != p_observers.end()) {
@@ -127,7 +128,9 @@ public:
       i++;
     }
 
-    if (p_observers.size() == 0) p_has_observers = false;
+    if (p_observers.size() == 0)
+      p_has_observers = false;
+
   }
 
 };
