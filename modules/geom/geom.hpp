@@ -172,21 +172,21 @@ class geometry : public basic_geometry<REAL> {
   inline STRING_EX &atom(int at) { return p_atm[at]; }
   inline STRING_EX atom(int at) const { return p_atm[at]; }
 
-  void set_cell_vector(const vector3<REAL> &vec, int dim) {
+  void set_cell_vector(const vector3<REAL> &vec, int dim, bool emit_event = true) {
 
     static_assert (cell_has_only_tsym<CELL>::value, "cell doesn't have translation symmetry");
 
-    if (dim < 0 || dim < get_DIM())
+    if (dim < 0 || dim >= get_DIM())
       throw std::out_of_range("invalid dim");
 
-    if (p_has_observers)
+    if (p_has_observers && emit_event)
       for (int i = 0; i < p_observers.size(); i++)
         if (p_cached_obs_flags[i] & geometry_observer_supports_cell_change)
           p_observers[i]->cell_changed(before_after::before);
 
     cell.v[dim] = vec;
 
-    if (p_has_observers)
+    if (p_has_observers && emit_event)
       for (int i = 0; i < p_observers.size(); i++)
         if (p_cached_obs_flags[i] & geometry_observer_supports_cell_change)
           p_observers[i]->cell_changed(before_after::after);
@@ -194,13 +194,10 @@ class geometry : public basic_geometry<REAL> {
   }
 
   vector3<REAL> get_cell_vector(int dim) const {
-
     static_assert (cell_has_only_tsym<CELL>::value, "cell doesn't have translation symmetry");
-
-    if (dim < 0 || dim < get_DIM())
+    if (dim < 0 || dim >= get_DIM())
       throw std::out_of_range("invalid dim");
     return cell.v[dim];
-
   }
 
   /********************** selection stuff **********************/
