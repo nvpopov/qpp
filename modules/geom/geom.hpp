@@ -139,25 +139,20 @@ class geometry : public basic_geometry<REAL> {
   }
 
   void set_DIM(int new_DIM) {
-
-    if (p_DIM == new_DIM) return;
-
+    if (p_DIM == new_DIM)
+      return;
     if (p_has_observers)
       for (int i = 0; i < p_observers.size(); i++)
         if (p_cached_obs_flags[i] & geometry_observer_supports_dim_change)
           p_observers[i]->dim_changed(before_after::before);
-
     p_DIM = new_DIM;
-
     if constexpr (cell_has_tsym_DIM<CELL>::value) {
       cell.DIM = new_DIM;
     }
-
     if (p_has_observers)
       for (int i = 0; i < p_observers.size(); i++)
         if (p_cached_obs_flags[i] & geometry_observer_supports_dim_change)
           p_observers[i]->dim_changed(before_after::after);
-
   }
 
   virtual bool is_xgeometry() const { return false; }
@@ -173,24 +168,18 @@ class geometry : public basic_geometry<REAL> {
   inline STRING_EX atom(int at) const { return p_atm[at]; }
 
   void set_cell_vector(const vector3<REAL> &vec, int dim, bool emit_event = true) {
-
     static_assert (cell_has_only_tsym<CELL>::value, "cell doesn't have translation symmetry");
-
     if (dim < 0 || dim >= get_DIM())
       throw std::out_of_range("invalid dim");
-
     if (p_has_observers && emit_event)
       for (int i = 0; i < p_observers.size(); i++)
         if (p_cached_obs_flags[i] & geometry_observer_supports_cell_change)
           p_observers[i]->cell_changed(before_after::before);
-
     cell.v[dim] = vec;
-
     if (p_has_observers && emit_event)
       for (int i = 0; i < p_observers.size(); i++)
         if (p_cached_obs_flags[i] & geometry_observer_supports_cell_change)
           p_observers[i]->cell_changed(before_after::after);
-
   }
 
   vector3<REAL> get_cell_vector(int dim) const {
@@ -220,19 +209,15 @@ class geometry : public basic_geometry<REAL> {
 
   void iselect(int at, index at_idx, bool vselect = true,
                std::optional<size_t> pos = std::nullopt, bool emit_event = true) {
-
     auto isl_iter = iselected_iter(at, at_idx);
     if ((isl_iter != end(p_sel)) == vselect) {
       return;
     }
-
     auto new_sel = atom_index_set_key{at, at_idx};
-
     if (emit_event && p_has_observers)
       for (int i = 0; i < p_observers.size(); i++)
         if (p_cached_obs_flags[i] & geometry_observer_supports_select)
           p_observers[i]->selected(new_sel, before_after::before, vselect);
-
     if (vselect) {
       if (pos)
         p_sel.insert(begin(p_sel) + *pos, new_sel);
@@ -241,12 +226,10 @@ class geometry : public basic_geometry<REAL> {
     } else {
       p_sel.erase(isl_iter);
     }
-
     if (emit_event && p_has_observers)
       for (int i = 0; i < p_observers.size(); i++)
         if (p_cached_obs_flags[i] & geometry_observer_supports_select)
           p_observers[i]->selected(new_sel, before_after::after, vselect);
-
   }
 
   void select(int at, bool vselect = true, std::optional<size_t> pos = std::nullopt) {
@@ -288,8 +271,21 @@ class geometry : public basic_geometry<REAL> {
   }
 
   std::optional<atom_index_set_key> nth_aselected(int nth_atom) {
-    if (nth_atom >= p_sel.size()) return std::nullopt;
+    if (nth_atom >= p_sel.size())
+      return std::nullopt;
     return p_sel[nth_atom];
+  }
+
+  std::optional<atom_index_set_key> nth_selected(int nth_atom) {
+    int ic{0};
+    for (auto &sel : p_sel) {
+      if (sel.m_idx.is_zero()) {
+        if (ic == nth_atom)
+          return std::optional{sel};
+        ic++;
+      }
+    }
+    return std::nullopt;
   }
 
   /********************** end of selection stuff **********************/

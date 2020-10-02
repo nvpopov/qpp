@@ -708,7 +708,6 @@ namespace qpp {
     << subspaces[i].point << " n= " << subspaces[i].axis
     << " ng= " << elements[i].size() << "\n";
 
-    /*
     for (int i=0; i<subspaces.size(); i++)
     {
     std::cout << "d= " << subspaces[i].dim << " pt= " << subspaces[i].pt << " n= " << subspaces[i].n;
