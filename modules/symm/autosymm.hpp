@@ -575,7 +575,7 @@ namespace qpp {
   //group_analyzer<rotrans<REAL,true>, array_group<rotrans<REAL,true> > > B(G);
   //auto C = double_group(double_group(double_group(B)));
 
-  /*
+
   for (int i=0; i<G8.size(); i++)
   for (int j=0; j<G8.size(); j++)
   if (A.multab(i,j)!=C.multab(i,j))

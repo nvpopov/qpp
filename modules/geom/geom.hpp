@@ -588,7 +588,8 @@ class geometry : public basic_geometry<REAL> {
     p_crd.push_back(r2);
     p_shadow.push_back(false);
 
-    if (auto_update_types) p_type_table.push_back(define_type(a));
+    if (auto_update_types)
+      p_type_table.push_back(define_type(a));
 
     if (p_has_observers)
       for (int i = 0; i < p_observers.size(); i++)
@@ -599,6 +600,15 @@ class geometry : public basic_geometry<REAL> {
 
   inline void erase_impl(int at) {
 
+    //unselect atom first
+    if (!p_sel.empty()) {
+      std::vector<atom_index_set_key> tmp_sel;
+      std::copy_if(begin(p_sel), end(p_sel), std::back_inserter(tmp_sel),
+                   [at](const atom_index_set_key &sel_rec) -> bool {return sel_rec.m_atm == at;});
+      for (auto &need_to_unsel : tmp_sel)
+        iselect(need_to_unsel.m_atm, need_to_unsel.m_idx, false);
+    }
+
     if (p_has_observers)
       for (int j = 0; j < p_observers.size(); j++)
         if (p_cached_obs_flags[j] & geometry_observer_supports_erase)
@@ -608,7 +618,8 @@ class geometry : public basic_geometry<REAL> {
     p_crd.erase(p_crd.begin() + at);
     p_shadow.erase(p_shadow.begin() + at);
 
-    if (auto_update_types) p_type_table.erase(p_type_table.begin() + at);
+    if (auto_update_types)
+      p_type_table.erase(p_type_table.begin() + at);
 
     if (p_has_observers)
       for (int j = 0; j < p_observers.size(); j++)
