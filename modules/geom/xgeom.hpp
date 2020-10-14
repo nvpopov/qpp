@@ -488,13 +488,13 @@ public:
   // ----------------------------------------------------
 
   virtual void erase(int j) {
-
     geometry<REAL,CELL>::erase(j);
-
-    for (int i=0; i<p_nxreal; i++) p_xreal[i].erase(p_xreal[i].begin()+j);
-    for (int i=0; i<p_nxint; i++) p_xint[i].erase(p_xint[i].begin()+j);
-    for (int i=0; i<p_nxbool; i++) p_xbool[i].erase(p_xbool[i].begin()+j);
-
+    for (int i=0; i<p_nxreal; i++)
+      p_xreal[i].erase(p_xreal[i].begin()+j);
+    for (int i=0; i<p_nxint; i++)
+      p_xint[i].erase(p_xint[i].begin()+j);
+    for (int i=0; i<p_nxbool; i++)
+      p_xbool[i].erase(p_xbool[i].begin()+j);
   }
 
   void add(const STRING_EX & a, const vector3<REAL> & r,
@@ -502,21 +502,23 @@ public:
            std::initializer_list<REAL> xtr = {},
            std::initializer_list<int> xti = {},
            std::initializer_list<bool> xtb = {}) {
-
     int i = 0;
-    for (const auto & xs : xts) p_xstring[i++].push_back(xs);
+    for (const auto & xs : xts)
+      p_xstring[i++].push_back(xs);
 
     i = 0;
-    for (const auto & xr : xtr) p_xreal[i++].push_back(xr);
+    for (const auto & xr : xtr)
+      p_xreal[i++].push_back(xr);
 
     i = 0;
-    for (const auto & xi : xti) p_xint[i++].push_back(xi);
+    for (const auto & xi : xti)
+      p_xint[i++].push_back(xi);
 
     i = 0;
-    for (const auto & xb : xtb) p_xbool[i++].push_back(xb);
+    for (const auto & xb : xtb)
+      p_xbool[i++].push_back(xb);
 
     geometry<REAL,CELL>::add(a,r);
-
   }
 
   void insert(const int j, const STRING_EX & a, const vector3<REAL> &r,
@@ -524,54 +526,59 @@ public:
               std::initializer_list<REAL> xtr = {},
               std::initializer_list<int> xti = {},
               std::initializer_list<bool> xtb = {}) {
-
     int i = 0;
-    for ( const auto & xs : xts ) p_xstring[i].insert( p_xstring[i++].begin() + j, xs);
+    for ( const auto & xs : xts )
+      p_xstring[i].insert( p_xstring[i++].begin() + j, xs);
 
     i = 0;
-    for ( const auto & xr : xtr ) p_xreal[i].insert( p_xreal[i++].begin() + j, xr);
+    for ( const auto & xr : xtr )
+      p_xreal[i].insert( p_xreal[i++].begin() + j, xr);
 
     i = 0;
-    for ( const auto & xi : xti ) p_xint[i].insert( p_xint[i++].begin() + j, xi);
+    for ( const auto & xi : xti )
+      p_xint[i].insert( p_xint[i++].begin() + j, xi);
 
     i = 0;
-    for ( const auto & xb : xtb ) p_xbool[i].insert( p_xbool[i++].begin() + j, xb);
+    for ( const auto & xb : xtb )
+      p_xbool[i].insert( p_xbool[i++].begin() + j, xb);
 
     geometry<REAL,CELL>::insert(j,a,r);
-
   }
 
   virtual void add(const STRING_EX &a, const vector3<REAL> & r) {
-
-    for (int i=0; i<p_nxstring; i++) p_xstring[i].push_back("");
-    for (int i=0; i<p_nxreal; i++) p_xreal[i].push_back(REAL(0));
-    for (int i=0; i<p_nxint; i++) p_xint[i].push_back(0);
-    for (int i=0; i<p_nxbool; i++) p_xbool[i].push_back( false );
-
+    for (int i=0; i<p_nxstring; i++)
+      p_xstring[i].push_back("");
+    for (int i=0; i<p_nxreal; i++)
+      p_xreal[i].push_back(REAL(0));
+    for (int i=0; i<p_nxint; i++)
+      p_xint[i].push_back(0);
+    for (int i=0; i<p_nxbool; i++)
+      p_xbool[i].push_back( false );
     geometry<REAL,CELL>::add(a, r);
-
   }
 
   virtual void insert(const int j, STRING_EX a, const vector3<REAL> &r) {
-
-    for (int i=0; i<p_nxstring; i++) p_xstring[i].insert(p_xstring[i].begin()+j, "" );
-    for (int i=0; i<p_nxreal; i++) p_xreal[i].insert(p_xreal[i].begin()+j, REAL(0) );
-    for (int i=0; i<p_nxint; i++) p_xint[i].insert(p_xint[i].begin()+j, 0);
-    for (int i=0; i<p_nxbool; i++) p_xbool[i].insert(p_xbool[i].begin()+j, false);
-
+    for (int i=0; i<p_nxstring; i++)
+      p_xstring[i].insert(p_xstring[i].begin()+j, "" );
+    for (int i=0; i<p_nxreal; i++)
+      p_xreal[i].insert(p_xreal[i].begin()+j, REAL(0) );
+    for (int i=0; i<p_nxint; i++)
+      p_xint[i].insert(p_xint[i].begin()+j, 0);
+    for (int i=0; i<p_nxbool; i++)
+      p_xbool[i].insert(p_xbool[i].begin()+j, false);
     geometry<REAL,CELL>::insert(j,a,r);
-
   }
 
   virtual void clear() {
-
     geometry<REAL,CELL>::clear();
-
-    for (int i=0; i<p_nxstring; i++) p_xstring[i].clear();
-    for (int i=0; i<p_nxreal; i++) p_xreal[i].clear();
-    for (int i=0; i<p_nxint; i++) p_xint[i].clear();
-    for (int i=0; i<p_nxbool; i++) p_xbool[i].clear();
-
+    for (int i=0; i<p_nxstring; i++)
+      p_xstring[i].clear();
+    for (int i=0; i<p_nxreal; i++)
+      p_xreal[i].clear();
+    for (int i=0; i<p_nxint; i++)
+      p_xint[i].clear();
+    for (int i=0; i<p_nxbool; i++)
+      p_xbool[i].clear();
   }
 
   virtual void add(STRING_EX a, REAL _x, REAL _y, REAL _z) {
@@ -579,7 +586,6 @@ public:
   }
 
   virtual void reorder (const std::vector<int> & ord) {
-
     for (int i=0; i<p_observers.size(); i++)
       p_observers[i]->reordered(ord, before_after::before);
     // fixme - might be inefficient for large molecules
@@ -618,7 +624,6 @@ public:
 
     for (int i=0; i<p_observers.size(); i++)
       p_observers[i]->reordered(ord, before_after::after);
-
   }
 
 
@@ -631,9 +636,7 @@ public:
   // ---------------------------------------------------------
 
   void clone(xgeometry<REAL,CELL> &dst, const bool copy_data = true) {
-
     dst.clear();
-
     dst.p_DIM = get_DIM();
 
     //copy cell vectors
@@ -650,21 +653,21 @@ public:
         get_fields(i, v);
         dst.set_fields(i,v);
       }
-
       dst.build_types();
     }
-
   }
 
   template<class T>
   void parse_field(int i, int j, T t) {
-
     basic_types f = field_type(i);
-    if (f == basic_types::type_string) xfield<STRING_EX>(i,j) = convert<STRING_EX,T>::get(t);
-    else if (f == basic_types::type_real) xfield<REAL>(i,j) = convert<REAL,T>::get(t);
-    else if (f == basic_types::type_int) xfield<int>(i,j) = convert<int,T>::get(t);
-    else if (f == basic_types::type_bool) xfield<bool>(i,j) = convert<bool,T>::get(t);
-
+    if (f == basic_types::type_string)
+      xfield<STRING_EX>(i,j) = convert<STRING_EX,T>::get(t);
+    else if (f == basic_types::type_real)
+      xfield<REAL>(i,j) = convert<REAL,T>::get(t);
+    else if (f == basic_types::type_int)
+      xfield<int>(i,j) = convert<int,T>::get(t);
+    else if (f == basic_types::type_bool)
+      xfield<bool>(i,j) = convert<bool,T>::get(t);
   }
 
   // ----------------------------------------
@@ -684,34 +687,29 @@ public:
 
   template<typename... Args>
   void xfill(int j, Args... args) {
-
     parse(0,j,args...);
     if (auto_update_types)
       type(j) = define_type(p_atm[j]);
-
   }
 
   template<typename... Args>
   void xadd(Args... args) {
-
     add("",{REAL(0),REAL(0),REAL(0)});
     xfill(size()-1, args... );
-
   }
 
   template<typename... Args>
   void xinsert(int at, Args... args) {
-
     insert(at,"",{REAL(0),REAL(0),REAL(0)});
     xfill(at, args... );
-
   }
 
   // ----------------------------------------
 
   virtual void write(std::basic_ostream<CHAR_EX,TRAITS> &os, int offset=0) const {
 
-    for (int k=0; k<offset; k++) os << " ";
+    for (int k=0; k<offset; k++)
+      os << " ";
     os << "geometry";
     if (name != "")
       os << " " << name;
@@ -720,23 +718,32 @@ public:
 
     for (int i=0; i<nfields(); i++){
       std::cout << ", " << field_name(i) << " = ";
-      if (field_type(i) == basic_types::type_string) std::cout << "string";
-      else if (field_type(i) == basic_types::type_real) std::cout << "real";
-      else if (field_type(i) == basic_types::type_int) std::cout << "int";
-      else if (field_type(i) == basic_types::type_bool) std::cout << "bool";
+      if (field_type(i) == basic_types::type_string)
+        std::cout << "string";
+      else if (field_type(i) == basic_types::type_real)
+        std::cout << "real";
+      else if (field_type(i) == basic_types::type_int)
+        std::cout << "int";
+      else if (field_type(i) == basic_types::type_bool)
+        std::cout << "bool";
     }
     os << ")\n";
 
     for (int k=0; k<offset+2; k++) os << " ";
     os << "{\n";
 
-    for (int i=0; i<size(); i++){
-      for (int k=0; k<offset+3; k++) os << " ";
+    for (int i=0; i<size(); i++) {
+      for (int k=0; k<offset+3; k++)
+        os << " ";
       for (int j=0; j<nfields(); j++)
-        if (field_type(j) == basic_types::type_string) os << " " << xfield<STRING_EX>(j,i);
-        else if (field_type(j) == basic_types::type_real) os << " " << xfield<REAL>(j,i);
-        else if (field_type(j) == basic_types::type_int) os << " " << xfield<int>(j,i);
-        else if (field_type(j) == basic_types::type_bool) os << " " << t2s(xfield<bool>(j,i));
+        if (field_type(j) == basic_types::type_string)
+          os << " " << xfield<STRING_EX>(j,i);
+        else if (field_type(j) == basic_types::type_real)
+          os << " " << xfield<REAL>(j,i);
+        else if (field_type(j) == basic_types::type_int)
+          os << " " << xfield<int>(j,i);
+        else if (field_type(j) == basic_types::type_bool)
+          os << " " << t2s(xfield<bool>(j,i));
       os << "\n";
     }
 
@@ -750,31 +757,27 @@ public:
   bool has_charge(){ return p_ix_charge >= 0; }
 
   REAL charge(int i) const {
-
-    if (i < 0) i += nat();
+    if (i < 0)
+      i += nat();
     if (i < 0 || i >= nat())
       throw std::out_of_range("xgeometry::py_getitem: index out of range");
-
     if (p_ix_charge >= 0)
       return p_xreal[p_field_idx[p_ix_charge]][i];
     else
       throw std::runtime_error("\"charge\" field is requested for the geometry which"
                                " does not have charges");
-
   }
 
   REAL & charge(int i) {
-
-    if (i < 0) i+=nat();
+    if (i < 0)
+      i+=nat();
     if (i < 0 || i>= nat())
       throw std::out_of_range("xgeometry::py_getitem: index out of range");
-
     if (p_ix_charge >= 0)
       return p_xreal[p_field_idx[p_ix_charge]][i];
     else
       throw std::runtime_error("\"charge\" field is requested for the geometry "
                                "which does not have charges");
-
   }
 
   //-----------------------------------------------------------
@@ -782,31 +785,27 @@ public:
   bool has_number(){ return p_ix_number >= 0; }
 
   int number(int i) const {
-
-    if (i < 0) i += nat();
+    if (i < 0)
+      i += nat();
     if (i < 0 || i >= nat())
       throw std::out_of_range("xgeometry::py_getitem: index out of range");
-
     if (p_ix_number >= 0)
       return p_xint[p_field_idx[p_ix_number]][i];
     else
       throw std::runtime_error("\"number\" field is requested for the geometry "
                                "which does not have numbers");
-
   }
 
   int & number(int i) {
-
-    if (i < 0) i += nat();
+    if (i < 0)
+      i += nat();
     if (i < 0 || i >= nat())
       throw std::out_of_range("xgeometry::py_getitem: index out of range");
-
     if (p_ix_number >= 0)
       return p_xint[p_field_idx[p_ix_number]][i];
     else
       throw std::runtime_error("\"number\" field is requested for the geometry "
                                "which does not have numbers");
-
   }
 
   //-----------------------------------------------------------
@@ -815,38 +814,33 @@ public:
   { return p_ix_mass >= 0; }
 
   REAL mass(int i) const {
-
-    if (i < 0) i+=nat();
+    if (i < 0)
+      i+=nat();
     if (i < 0 || i>= nat())
       throw std::out_of_range("xgeometry::py_getitem: index out of range");
-
     if (p_ix_mass >= 0)
       return p_xreal[p_field_idx[p_ix_mass]][i];
     else
       throw std::runtime_error("\"mass\" field is requested for the geometry"
                                " which does not have masses");
-
   }
 
   REAL & mass(int i) {
-
-    if (i < 0) i+=nat();
+    if (i < 0)
+      i+=nat();
     if (i < 0 || i>= nat())
       throw std::out_of_range("xgeometry::py_getitem: index out of range");
-
     if (p_ix_mass >= 0)
       return p_xreal[p_field_idx[p_ix_mass]][i];
     else
       throw std::runtime_error("\"mass\" field is requested for the geometry"
                                " which does not have masses");
-
   }
 
 #if defined(PY_EXPORT) || defined(QPPCAD_PY_EXPORT)
 
-  xgeometry(CELL & __cell, const py::list f, const STRING_EX & __name = "") :
-                                                                            geometry<REAL,CELL>(__cell, __name) {
-
+  xgeometry(CELL & __cell, const py::list f, const STRING_EX & __name = "")
+    : geometry<REAL,CELL>(__cell, __name) {
     init_xdefault();
 
     std::vector<STRING_EX> fn;
@@ -865,72 +859,68 @@ public:
       fn.push_back(py::cast<STRING_EX>(t[0]));
       STRING_EX s = py::cast<STRING_EX>(t[1]);
 
-      if (s == "string") ft.push_back(basic_types::type_string);
-      else if (s == "real") ft.push_back(basic_types::type_real);
-      else if (s == "int") ft.push_back(basic_types::type_int);
-      else if (s == "bool") ft.push_back(basic_types::type_bool);
-      else throw std::invalid_argument("In xgeometry constructor - bad field type");
+      if (s == "string")
+        ft.push_back(basic_types::type_string);
+      else if (s == "real")
+        ft.push_back(basic_types::type_real);
+      else if (s == "int")
+        ft.push_back(basic_types::type_int);
+      else if (s == "bool")
+        ft.push_back(basic_types::type_bool);
+      else
+        throw std::invalid_argument("In xgeometry constructor - bad field type");
     }
 
     set_format(fn,ft);
-
   }
 
   virtual py::list py_getitem(int j) const {
-
     if (j<0) j+=nat();
     if (j<0 || j>= nat())
       throw std::out_of_range("xgeometry::py_getitem: index out of range");
     py::list l;
 
     for (int i=0; i<nfields(); i++){
-      if (field_type(i) == basic_types::type_string) l.append(xfield<STRING_EX>(i,j));
-      else if (field_type(i) == basic_types::type_real) l.append(xfield<REAL>(i,j));
-      else if (field_type(i) == basic_types::type_int) l.append(xfield<int>(i,j));
-      else if (field_type(i) == basic_types::type_bool) l.append(xfield<bool>(i,j));
+      if (field_type(i) == basic_types::type_string)
+        l.append(xfield<STRING_EX>(i,j));
+      else if (field_type(i) == basic_types::type_real)
+        l.append(xfield<REAL>(i,j));
+      else if (field_type(i) == basic_types::type_int)
+        l.append(xfield<int>(i,j));
+      else if (field_type(i) == basic_types::type_bool)
+        l.append(xfield<bool>(i,j));
     }
 
     return l;
-
   }
 
   virtual void py_setitem(int j, const py::list & l) {
-
-    if (j<0) j+=nat();
-    if (j<0 || j>= nat()) throw std::out_of_range("xgeometry:: index out of range");
+    if (j<0)
+      j+=nat();
+    if (j<0 || j>= nat())
+      throw std::out_of_range("xgeometry:: index out of range");
     if (py::len(l) != nfields())
       throw std::invalid_argument("xgeometry:: bad list of fields");
 
     for (int i=0; i<nfields(); i++){
-
       if (field_type(i) == basic_types::type_string) {
-
         if (!py::isinstance<py::str>(l[i]))
           throw std::invalid_argument("xgeometry:: bad list of fields");
         xfield<STRING_EX>(i,j) = py::cast<STRING_EX>(l[i]);
-
       } else if (field_type(i) == basic_types::type_real) {
-
         if (!py::isinstance<py::float_>(l[i]))
           throw std::invalid_argument("xgeometry:: bad list of fields");
         xfield<REAL>(i,j) = py::cast<REAL>(l[i]);
-
       } else if (field_type(i) == basic_types::type_int) {
-
         if (!py::isinstance<py::int_>(l[i]))
           throw std::invalid_argument("xgeometry:: bad list of fields");
         xfield<int>(i,j) = py::cast<int>(l[i]);
-
       } else if (field_type(i) == basic_types::type_bool) {
-
         if (!py::isinstance<py::bool_>(l[i]))
           throw std::invalid_argument("xgeometry:: bad list of fields");
         xfield<bool>(i,j) = py::cast<bool>(l[i]);
-
       }
-
     }
-
   }
 
   py::object py_getfield1(int i) {
@@ -943,8 +933,8 @@ public:
   }
 
   py::object py_getfield(int i, int j) {
-
-    if (i<0) i += nfields();
+    if (i<0)
+      i += nfields();
     if (i<0 || i >= nfields())
       throw std::invalid_argument("xgeometry: field index out of range");
 
@@ -952,22 +942,26 @@ public:
     if (j<0 || j>=nat())
       throw std::out_of_range("xgeometry: atom index out of range");
 
-    if (field_type(i) == basic_types::type_string) return py::cast(xfield<STRING_EX>(i,j));
-    else if (field_type(i) == basic_types::type_real) return py::cast(xfield<REAL>(i,j));
-    else if (field_type(i) == basic_types::type_int) return py::cast(xfield<int>(i,j));
-    else if (field_type(i) == basic_types::type_bool) return py::cast(xfield<bool>(i,j));
+    if (field_type(i) == basic_types::type_string)
+      return py::cast(xfield<STRING_EX>(i,j));
+    else if (field_type(i) == basic_types::type_real)
+      return py::cast(xfield<REAL>(i,j));
+    else if (field_type(i) == basic_types::type_int)
+      return py::cast(xfield<int>(i,j));
+    else if (field_type(i) == basic_types::type_bool)
+      return py::cast(xfield<bool>(i,j));
 
     return py::none();
-
   }
 
   void py_setfield(int i, int j, const py::object & o) {
-
-    if (i<0) i += nfields();
+    if (i<0)
+      i += nfields();
     if (i<0 || i >= nfields())
       throw std::out_of_range("xgeometry: field index out of range");
 
-    if (j<0) j+= nat();
+    if (j<0)
+      j+= nat();
     if (j<0 || j>=nat())
       throw std::out_of_range("xgeometry: atom index out of range");
 
@@ -997,28 +991,24 @@ public:
       xfield<bool>(i,j) = py::cast<bool>(o);
 
     }
-
   }
 
   py_2indexed_property<SELF, py::object, py::object, int, &SELF::py_getfield1,
                        &SELF::py_setfield1, &SELF::py_getfield, &SELF::py_setfield > py_fields;
 
   bool py_getadd(int i) {
-
-    if (i<0) i += nfields();
+    if (i<0)
+      i += nfields();
     if (i<0 || i >= nfields())
       throw std::out_of_range("xgeometry: field index out of range");
     return additive(i);
-
   }
 
   void py_setadd(int i, const bool &a) {
-
     if (i<0) i += nfields();
     if (i<0 || i >= nfields())
       throw std::out_of_range("xgeometry: field index out of range");
     additive(i) = a;
-
   }
 
   py_indexed_property<SELF, bool, int, &SELF::py_getadd, &SELF::py_setadd > py_add;
@@ -1029,7 +1019,6 @@ public:
   }
 
   static void py_export(py::module m, const char * pyname) {
-
     std::string sPropNameField = fmt::format("{0}_{1}",pyname,"idx_prop_xfield");
     py_2indexed_property<SELF, py::object, py::object, int, &SELF::py_getfield1,
                          &SELF::py_setfield1, &SELF::py_getfield,

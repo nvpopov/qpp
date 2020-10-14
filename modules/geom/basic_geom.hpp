@@ -60,7 +60,6 @@ const uint32_t geometry_observer_supports_select            = 1 << 11;
 */
 template <class REAL>
 struct geometry_observer {
-
   virtual uint32_t get_flags() = 0;
   virtual void added(before_after, const STRING_EX &,const vector3<REAL> &) = 0;
   virtual void inserted(int at, before_after, const STRING_EX &, const vector3<REAL> &) = 0;
@@ -72,7 +71,7 @@ struct geometry_observer {
   virtual void dim_changed(before_after) = 0;
   virtual void cell_changed(before_after) = 0;
   virtual void xfield_changed(int at, int xid, before_after) = 0;
-
+  virtual ~geometry_observer(){};
 };
 
 template <class REAL>
@@ -100,24 +99,18 @@ public:
   // ----------------------- Managing observers -----------------------
 
   void add_observer(geometry_observer<REAL> &d) {
-
     auto it = std::find(p_observers.begin(), p_observers.end(), &d);
-
     if (it != p_observers.end()) {
       p_has_observers = true;
       return;
     }
-
     p_observers.push_back(&d);
     p_cached_obs_flags.push_back(d.get_flags());
     p_has_observers = true;
-
   }
 
   void remove_observer(geometry_observer<REAL> &d) {
-
     auto i = p_observers.begin();
-
     while (i != p_observers.end()) {
       if (*i == &d) {
         p_observers.erase(i);
@@ -127,10 +120,8 @@ public:
       }
       i++;
     }
-
     if (p_observers.size() == 0)
       p_has_observers = false;
-
   }
 
 };

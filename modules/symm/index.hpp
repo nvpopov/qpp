@@ -196,7 +196,7 @@ public:
     return ! ((*this) == I);
   }
 
-  bool is_zero() {
+  bool is_zero() const {
     return std::all_of(idx, idx + DIM, [](int i){return i == 0;});
   }
 

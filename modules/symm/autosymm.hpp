@@ -644,7 +644,7 @@ namespace qpp {
   for (int i=0; i<H.size(); i++)
   //if (H[i].next.size()==0)
   {
-  /*
+
   std::cout << "{";
   for (const auto & j:H[i].group)
   std::cout << j << ","; 
@@ -734,7 +734,7 @@ namespace qpp {
     nnew = nnewnew;
     }
 
-    /*
+
     std::vector<int> idx;
     for (int i=0; i<subspaces.size(); i++) idx.push_back(i);
 
@@ -751,7 +751,7 @@ namespace qpp {
     groups[i].generate(elements[i][j].R);
     }
 
-    /*
+
     for (int d=0; d<3; d++)
     for (int i=0; i<subspaces.size(); i++)
     if (subspaces[i].dim==d){
