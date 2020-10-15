@@ -150,7 +150,7 @@ qpp_basis_data(qpp_declaration * q) :
       while (center->n_decl()>0)
         center->erase_decl(0);
     }
-  /*
+
       for (int i=0; i<n_decl(); i++)
   if (decl(i)->category()=="center" && (decl(i)->gettype() & qtype_parameter ) )
     {
@@ -443,7 +443,7 @@ virtual STRING_EX label(int i)
 // Calculate the values of basis functions on a grid
 virtual boost::numeric::ublas::vector<FREAL> & values(const std::vector<vector3d<CREAL> > & grid){}
 
-/*    virtual int n_next() const
+     virtual int n_next() const
     {
       return geom == NULL ? 0 : 1;
     }

@@ -4,7 +4,8 @@ add_executable(run_tests
                test_ccd.cpp
 	       test_symmetry.cpp
                test_compute.cpp
-               test_geom.cpp)
+               test_geom.cpp
+	       test_tws_tree.cpp)
 
 target_link_libraries(run_tests qpp)
 

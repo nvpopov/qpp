@@ -287,6 +287,33 @@ public:
     return std::nullopt;
   }
 
+  void rebuild_after_erase(const AINT changed_atom) {
+    // Before erase we have : 0 1 2 3 4 5 6 7 8 num=9
+    // After erase we have  : 0 1 2 3 4 6 7 8 num=8
+    // We need to change all data for 6 7 8 to 5 6 7
+    // All data means m_img_atoms and ngbs and atoms inside tree
+    //
+    // First update the tree itself was 6 7 8 -> now 5 6 7
+    int num_occurences = geom->nat() - changed_atom;
+    for (auto &flat_view : m_flat_view) {
+      auto &content = *flat_view.m_content;
+      auto fr_lmbd = [changed_atom, &num_occurences](tws_node_cnt_t<REAL, AINT> &ndcnt) {
+        if (ndcnt.m_atm > changed_atom) {
+          ndcnt.m_atm -= 1;
+          num_occurences--;
+        };
+      };
+      std::for_each(begin(content), end(content), fr_lmbd);
+    }
+    // Now update the ngbs
+    auto &delete_atom_ngbs = m_ngb_table[changed_atom];
+
+  }
+
+  void rebuild_after_resize(const AINT changed_atom) {
+    //
+  }
+
   void check_img_eps() {
     auto const max_cell_v_l_boundary = 25.0;
     if (!geom)
@@ -692,8 +719,8 @@ public:
   /// \param atm
   /// \param idx
   /// \return
-  bool traverse_insert_object_to_tree(tws_node_t<REAL, AINT> *cur_node, const AINT atm,
-                                      const index & idx) {
+  bool traverse_insert_object_to_tree(tws_node_t<REAL, AINT> *cur_node,
+                                      const AINT atm, const index & idx) {
 
     vector3<REAL> p = geom->pos(atm, idx);
     vector3<REAL> cn_size = cur_node->m_bb.max - cur_node->m_bb.min;
