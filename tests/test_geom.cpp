@@ -18,10 +18,10 @@ TEST_CASE("Reciporal lattice tests") {
   REQUIRE(cell_2d.DIM == 2);
 
   for (size_t i = 0; i < 3; i++) {
-      REQUIRE(cell_0d.get_reciporal_vectors(i) == std::nullopt);
-      REQUIRE(cell_1d.get_reciporal_vectors(i) == std::nullopt);
-      REQUIRE(cell_2d.get_reciporal_vectors(i) == std::nullopt);
-    }
+    REQUIRE(cell_0d.get_reciporal_vectors(i) == std::nullopt);
+    REQUIRE(cell_1d.get_reciporal_vectors(i) == std::nullopt);
+    REQUIRE(cell_2d.get_reciporal_vectors(i) == std::nullopt);
+  }
 
   periodic_cell<float> cell_3d(3);
   REQUIRE(cell_3d.DIM == 3);
@@ -100,12 +100,12 @@ TEST_CASE("xgeometry tests") {
 
     periodic_cell<double> cl(0);
     xgeometry<double, periodic_cell<double> >
-    g2(cl,
-       {"atom","number", "z", "charge", "x", "y", "mass", "magmom", "word"},
-       {basic_types::type_string, basic_types::type_int, basic_types::type_real,
-        basic_types::type_real, basic_types::type_real, basic_types::type_real,
-        basic_types::type_real, basic_types::type_real, basic_types::type_string},
-       "rich_geometry");
+        g2(cl,
+           {"atom","number", "z", "charge", "x", "y", "mass", "magmom", "word"},
+           {basic_types::type_string, basic_types::type_int, basic_types::type_real,
+            basic_types::type_real, basic_types::type_real, basic_types::type_real,
+            basic_types::type_real, basic_types::type_real, basic_types::type_string},
+           "rich_geometry");
 
     g2.xadd("H",   1,   0.3, 0.6,   3,  6, 1.01, 3.731e-3, "hydrogen");
     g2.xadd("U",  92,   3.4, 4.4,   7,  9, 238,  1.23e-2,  "uranium");
@@ -166,7 +166,7 @@ TEST_CASE("xgeometry tests") {
     auto C4 = RotMtrx<double>({0,0,1}, pi/2);
     auto C3 = RotMtrx<double>({1,1,1}, 2*pi/3);
     auto C31 = RotMtrx<double>({1,-1,-1}, 2*pi/3);
-//    auto S6 = RotMtrx<double>({1,1,1},pi/3)*Sigma<double>({1,1,1});
+    //    auto S6 = RotMtrx<double>({1,1,1},pi/3)*Sigma<double>({1,1,1});
     matrix3<double> Inv = matrix3<double>::Identity()*-1.0f;
 
     gen_cell<double, decltype(C4)> G({C4,C3,C31,Inv});
@@ -182,26 +182,26 @@ TEST_CASE("xgeometry tests") {
     replicate(geom_dst1, geom_src1, G, G.begin(), G.end(), crowd_exclude);
     REQUIRE(geom_dst1.nat() == 54);
 
-// TODO: default_symmetrize_radius???
-//    geometry<double, decltype(G)> geom_src2(G);
-//    G.auto_orders();
-//    geom_src2.auto_symmetrize = true;
-//    geom_src2.auto_update_types = true;
-//    geom_src2.default_symmetrize_radius = 1;
-//    geom_src2.add("C", 0, 0, 1.);
-//    geom_src2.add("H", 1, 2, 3);
-//    geometry<double> geom_dst2(0);
-//    replicate(geom_dst2, geom_src2, G, G.begin(), G.end(), crowd_exclude );
-//    REQUIRE(geom_dst2.nat() == 72);
+    // TODO: default_symmetrize_radius???
+    //    geometry<double, decltype(G)> geom_src2(G);
+    //    G.auto_orders();
+    //    geom_src2.auto_symmetrize = true;
+    //    geom_src2.auto_update_types = true;
+    //    geom_src2.default_symmetrize_radius = 1;
+    //    geom_src2.add("C", 0, 0, 1.);
+    //    geom_src2.add("H", 1, 2, 3);
+    //    geometry<double> geom_dst2(0);
+    //    replicate(geom_dst2, geom_src2, G, G.begin(), G.end(), crowd_exclude );
+    //    REQUIRE(geom_dst2.nat() == 72);
 
-//    std::cout << geom2.nat() << "\n\n";
-//    for (int at=0; at<geom2.nat(); at++)
-//      std::cout<<fmt::format("{} {:3.5f} {:3.4f}",
-//                               geom2.atom(at),
-//                               geom2.coord(at).x(),
-//                               geom2.coord(at).y())<<std::endl;
-//    std::ofstream ofstr("goh.xyz");
-//    write_xyz(ofstr, geom2);
+    //    std::cout << geom2.nat() << "\n\n";
+    //    for (int at=0; at<geom2.nat(); at++)
+    //      std::cout<<fmt::format("{} {:3.5f} {:3.4f}",
+    //                               geom2.atom(at),
+    //                               geom2.coord(at).x(),
+    //                               geom2.coord(at).y())<<std::endl;
+    //    std::ofstream ofstr("goh.xyz");
+    //    write_xyz(ofstr, geom2);
 
   }
 
@@ -231,13 +231,13 @@ TEST_CASE("xgeometry tests") {
     REQUIRE(*max_ngbs == 5);
     REQUIRE(avg_ngbs == 4);
 
-//    for (int i=0; i<g.size(); i++)
-//      for (int j=0; j<ngbr.n(i); j++){
-//        qpp::index k = ngbr.table(i,j);
-//        std::cout << g.atom(i) << " " << i << " " <<
-//            g.atom(k) << " " << k << " " <<
-//            (g.pos(i) - g.pos(k)).norm() << "\n";
-//      }
+    //    for (int i=0; i<g.size(); i++)
+    //      for (int j=0; j<ngbr.n(i); j++){
+    //        qpp::index k = ngbr.table(i,j);
+    //        std::cout << g.atom(i) << " " << i << " " <<
+    //            g.atom(k) << " " << k << " " <<
+    //            (g.pos(i) - g.pos(k)).norm() << "\n";
+    //      }
 
   }
 
@@ -388,13 +388,13 @@ TEST_CASE("xgeometry tests") {
     //b.reference_mode = true;
     b.build();
 
-//    for (int i=0; i<amino.nat(); i++)
-//    {
-//      std::cout << "atom " << i;
-//      for (int j=0; j<b.n(i); j++)
-//        std::cout << " " << b(i,j);
-//      std::cout << std::endl;
-//    }
+    //    for (int i=0; i<amino.nat(); i++)
+    //    {
+    //      std::cout << "atom " << i;
+    //      for (int j=0; j<b.n(i); j++)
+    //        std::cout << " " << b(i,j);
+    //      std::cout << std::endl;
+    //    }
 
     REQUIRE(b(0, 0) == 1);
     REQUIRE(b(0, 1) == 4);
@@ -499,8 +499,6 @@ TEST_CASE("xgeometry tests") {
     REQUIRE(g.num_selected() == 2);
     REQUIRE(g.num_aselected() == 2);
     REQUIRE(g.num_iselected() == 0);
-
-
 
   }
 

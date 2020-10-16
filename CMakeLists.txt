@@ -90,6 +90,7 @@ include_directories(${PROJECT_SOURCE_DIR}/deps/fmtlib/include)
 include_directories(${PROJECT_SOURCE_DIR}/deps/fmtlib/CppNumericalSolvers)
 include_directories(${PROJECT_SOURCE_DIR}/deps/pugixml/src)
 include_directories(${PROJECT_SOURCE_DIR}/deps)
+include_directories(${PROJECT_SOURCE_DIR}/modules/)
 #add_subdirectory(${CMAKE_SOURCE_DIR}/deps/fmtlib)
 
 #Python related stuff
@@ -114,7 +115,7 @@ add_custom_target(ideheaders SOURCES ${ide_headers} ${ide_headersc}
 #end ideheaders
 
 #Global includes
-include_directories(modules/)
+include_directories(${PROJECT_SOURCE_DIR}/modules)
 
 add_subdirectory(modules)
 
