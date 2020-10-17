@@ -94,7 +94,7 @@ public:
   using geometry<REAL, CELL>::num_aselected;
   using geometry<REAL, CELL>::num_iselected;
 
-  virtual bool is_xgeometry() const{return true;}
+  virtual bool is_xgeometry() const{ return true; }
 
   inline int nfields() const{ return p_nfields; }
 
@@ -121,13 +121,11 @@ public:
             p_field_idx(__nxreal + __nxint + __nxbool + __nxstring),
             p_field_additive(__nxreal + __nxint + __nxbool + __nxstring),
             geometry<REAL,CELL>(__cell, __name) {
-
     init_xdefault();
     p_nxreal   = __nxreal;
     p_nxint    = __nxint;
     p_nxbool   = __nxbool;
     p_nxstring = __nxstring;
-
   }
 
   ///
@@ -164,7 +162,6 @@ public:
   /// \param ft
   ///
   void set_format(const std::vector<STRING_EX> & fn, const std::vector<basic_types> & ft) {
-
     p_field_name = fn;
     p_field_type = ft;
     p_nxstring = std::count(ft.begin(), ft.end(), basic_types::type_string);
@@ -185,30 +182,34 @@ public:
     p_ix_charge = p_ix_mass = p_ix_number = -1;
 
     for (int j = 0; j < p_nfields; j++) {
-
       basic_types tp = field_type(j);
-
       if ( tp == basic_types::type_string ) {
         p_field_idx[j] = is++;
-        if ( field_name(j) == "atom" ) p_ix_atom = j;
-      } else if ( tp == basic_types::type_real || tp == attributes<REAL>::type ){
+        if ( field_name(j) == "atom" )
+          p_ix_atom = j;
+      } else if ( tp == basic_types::type_real || tp == attributes<REAL>::type ) {
         p_field_type[j] = basic_types::type_real;
         p_field_idx[j] = ir++;
-        if ( field_name(j) == "x" )      p_ix_x = j;
-        else if ( field_name(j) == "y" ) p_ix_y = j;
-        else if ( field_name(j) == "z" ) p_ix_z = j;
-        else if ( field_name(j) == "charge" ) p_ix_charge = j;
-        else if ( field_name(j) == "mass" )   p_ix_mass   = j;
-      } else if ( tp == basic_types::type_int ){
+        if ( field_name(j) == "x" )
+          p_ix_x = j;
+        else if ( field_name(j) == "y" )
+          p_ix_y = j;
+        else if ( field_name(j) == "z" )
+          p_ix_z = j;
+        else if ( field_name(j) == "charge" )
+          p_ix_charge = j;
+        else if ( field_name(j) == "mass" )
+          p_ix_mass   = j;
+      } else if ( tp == basic_types::type_int ) {
         p_field_idx[j] = ii++;
-        if ( field_name(j) == "number" ) p_ix_number = j;
+        if ( field_name(j) == "number" )
+          p_ix_number = j;
       } else if ( tp == basic_types::type_bool ) {
         p_field_type[j] = basic_types::type_bool;
         p_field_idx[j] = ib++;
       } else {
         throw std::invalid_argument("xgeometry::format: invalid type");
       }
-
     }
 
     /*
@@ -218,7 +219,6 @@ public:
       */
 
     if (p_ix_atom == -1 && p_ix_x == -1 && p_ix_y==-1 && p_ix_z==-1) {
-
       p_ix_atom = 0;
       p_ix_x = 1; p_ix_y = 2; p_ix_z = 3;
       if (p_ix_charge >= 0) p_ix_charge += 4;
@@ -250,17 +250,20 @@ public:
             else if (field_type(j)==type_real)
               _field_idx[j] += 3;
           */
-
     }
 
     p_field_additive.resize(p_nfields);
 
-    for (int i=0; i<p_nfields; i++) p_field_additive[i] = false;
+    for (int i=0; i<p_nfields; i++)
+      p_field_additive[i] = false;
 
     if (p_ix_charge>=0)
       p_field_additive[p_ix_charge] = true;
 
-    if (p_ix_atom == -1 || p_ix_x == -1 || p_ix_y == -1 || p_ix_z == -1) {
+    if (p_ix_atom == -1
+        || p_ix_x == -1
+        || p_ix_y == -1
+        || p_ix_z == -1) {
       throw std::invalid_argument("xgeometry::format: the geometry does not have either atom names,"
                                   " x, y, or z coordinates");
     }
@@ -269,7 +272,6 @@ public:
     p_xreal.resize(p_nxreal);
     p_xint.resize(p_nxint);
     p_xbool.resize(p_nxbool);
-
   }
 
   ///
@@ -282,10 +284,8 @@ public:
   xgeometry(CELL & __cell,  const std::vector<STRING_EX> & fn,
             const std::vector<basic_types> & ft,
             const STRING_EX & __name = "") : geometry<REAL,CELL>(__cell, __name) {
-
     init_xdefault();
     set_format(fn,ft);
-
   }
 
   int nfields_string() const{ return p_nxstring; }
@@ -302,70 +302,59 @@ public:
 
   template<class T>
   T & xfield(int i, int j) {
-
     assert(get_geom_data_access_mode() == geom_data_access_mode::allow_direct_access);
 
     basic_types ft = field_type(i);
 
-    if (ft == basic_types::type_real) ft = attributes<REAL>::type;
+    if (ft == basic_types::type_real)
+      ft = attributes<REAL>::type;
 
     if (attributes<T>::type != ft)
       throw std::invalid_argument("xgeometry::xfield - wrong type for the field " + t2s(i));
 
     if (attributes<T>::type == basic_types::type_string) {
-
-      if (i==p_ix_atom) return convert<T&,STRING_EX&>::get(p_atm[j]);
-      else return convert<T&,STRING_EX&>::get(p_xstring[p_field_idx[i]][j]);
-
+      if (i==p_ix_atom)
+        return convert<T&,STRING_EX&>::get(p_atm[j]);
+      else
+        return convert<T&,STRING_EX&>::get(p_xstring[p_field_idx[i]][j]);
     } else if (attributes<T>::type == basic_types::type_bool) {
-
       //if (i==p_ix_sel) return convert<T&,short&>::get(selected(j));
       return  convert<T&,short&>::get(p_xbool[p_field_idx[i]][j]);
-
     } else if (attributes<T>::type == basic_types::type_int) {
-
       return convert<T&,int&>::get(p_xint[p_field_idx[i]][j]);
-
     } else if (attributes<T>::type == attributes<REAL>::type) {
-
-      if (i==p_ix_x) return convert<T&,REAL&>::get(p_crd[j].x());
-      else if (i==p_ix_y) return convert<T&,REAL&>::get(p_crd[j].y());
-      else if (i==p_ix_z) return convert<T&,REAL&>::get(p_crd[j].z());
+      if (i==p_ix_x)
+        return convert<T&,REAL&>::get(p_crd[j].x());
+      else if (i==p_ix_y)
+        return convert<T&,REAL&>::get(p_crd[j].y());
+      else if (i==p_ix_z)
+        return convert<T&,REAL&>::get(p_crd[j].z());
       else return convert<T&,REAL&>::get(p_xreal[p_field_idx[i]][j]);
-
     } else {
-
       throw std::invalid_argument("Illegal type of xgeometry extra field");
-
     }
-
   }
 
   template<class T>
   inline T xfield(int i, int j) const {
-
     basic_types ft = field_type(i);
 
-    if (ft == basic_types::type_real) ft = attributes<REAL>::type;
+    if (ft == basic_types::type_real)
+      ft = attributes<REAL>::type;
 
     if (attributes<T>::type != ft)
       throw std::invalid_argument("xgeometry::xfield - wrong type for the field " + t2s(i));
 
     if (attributes<T>::type == basic_types::type_string) {
-
-      if (i==p_ix_atom) return convert<T,STRING_EX>::get(p_atm[j]);
-      else return  convert<T,STRING_EX>::get(p_xstring[p_field_idx[i]][j]);
-
+      if (i==p_ix_atom)
+        return convert<T,STRING_EX>::get(p_atm[j]);
+      else
+        return  convert<T,STRING_EX>::get(p_xstring[p_field_idx[i]][j]);
     } else if (attributes<T>::type == basic_types::type_bool) {
-
       return  convert<T,short>::get(p_xbool[p_field_idx[i]][j]);
-
     } else if (attributes<T>::type == basic_types::type_int) {
-
       return convert<T,int>::get(p_xint[p_field_idx[i]][j]);
-
     } else if (attributes<T>::type == attributes<REAL>::type) {
-
       if (i==p_ix_x)
         return convert<T,REAL>::get(p_crd[j].x());
       else if (i==p_ix_y)
@@ -374,60 +363,49 @@ public:
         return convert<T,REAL>::get(p_crd[j].z());
       else
         return convert<T,REAL>::get(p_xreal[p_field_idx[i]][j]);
-
     } else {
-
       throw std::invalid_argument("Illegal type of xgeometry extra field");
-
     }
-
   }
 
   template<class T>
   inline T & xfield(const STRING_EX & f, int j) {
-
     assert(get_geom_data_access_mode() == geom_data_access_mode::allow_direct_access);
-
     int i = 0;
-    while (p_field_name[i]!=f && i<nfields()) i++;
-
+    while (p_field_name[i]!=f && i<nfields()) {
+      i++;
+    }
     if (i<nfields()) {
       return xfield<T>(i,j);
     } else {
       throw std::invalid_argument("Field not found in xgeometry");
     }
-
   }
 
   template<class T>
   T xfield(const STRING_EX & f, int j) const {
-
     int i = 0;
-    while (p_field_name[i]!=f && i<nfields()) i++;
-
+    while (p_field_name[i]!=f && i<nfields()) {
+      i++;
+    }
     if (i<nfields()) {
       return xfield<T>(i,j);
     } else {
       throw std::invalid_argument("Field not found in xgeometry");
     }
-
   }
 
   template<class T>
   void set_xfield(int i, int j, T value, bool notify_observer = true) {
-
     if (notify_observer && p_has_observers)
       for (int q = 0; q < p_observers.size(); q++)
         if (p_cached_obs_flags[q] & geometry_observer_supports_xfield_change)
           p_observers[q]->xfield_changed(i, j, before_after::before);
-
     xfield<T>(i, j) = value;
-
     if (notify_observer && p_has_observers)
       for (int q = 0; q < p_observers.size(); q++)
         if (p_cached_obs_flags[q] & geometry_observer_supports_xfield_change)
           p_observers[q]->xfield_changed(i, j, before_after::after);
-
   }
 
   template<class T>
@@ -438,28 +416,28 @@ public:
   // ----------------------------------------------------
 
   virtual void get_fields(int j, std::vector<datum> & v) const {
-
-    if (j < 0) j += nat();
+    if (j < 0)
+      j += nat();
     if (j < 0 || j >= nat())
       throw std::out_of_range("xgeometry::py_getitem: index out of range");
-
     v.resize(nfields());
     for (int i=0; i<nfields(); i++){
-      if (field_type(i) == basic_types::type_string) v[i] = xfield<STRING_EX>(i,j);
-      else if (field_type(i) == basic_types::type_real) v[i] = xfield<REAL>(i,j);
-      else if (field_type(i) == basic_types::type_int) v[i] = xfield<int>(i,j);
-      else if (field_type(i) == basic_types::type_bool) v[i] = xfield<bool>(i,j);
+      if (field_type(i) == basic_types::type_string)
+        v[i] = xfield<STRING_EX>(i,j);
+      else if (field_type(i) == basic_types::type_real)
+        v[i] = xfield<REAL>(i,j);
+      else if (field_type(i) == basic_types::type_int)
+        v[i] = xfield<int>(i,j);
+      else if (field_type(i) == basic_types::type_bool)
+        v[i] = xfield<bool>(i,j);
     }
-
   }
 
   virtual void set_fields(int j, const std::vector<datum> & v) {
-
-    if (j < 0) j += nat();
-
+    if (j < 0)
+      j += nat();
     if (j < 0 || j >= nat())
       throw std::out_of_range("xgeometry::set_fields: index out of range");
-
     if (v.size()!=nfields())
       throw std::invalid_argument("xgeometry::set_fields: wrong number of fields");
 
@@ -482,7 +460,6 @@ public:
     if (p_has_observers)
       for (int i=0; i<p_observers.size(); i++)
         p_observers[i]->changed(j, before_after::after, a1, r1);
-
   }
 
   // ----------------------------------------------------
@@ -505,19 +482,15 @@ public:
     int i = 0;
     for (const auto & xs : xts)
       p_xstring[i++].push_back(xs);
-
     i = 0;
     for (const auto & xr : xtr)
       p_xreal[i++].push_back(xr);
-
     i = 0;
     for (const auto & xi : xti)
       p_xint[i++].push_back(xi);
-
     i = 0;
     for (const auto & xb : xtb)
       p_xbool[i++].push_back(xb);
-
     geometry<REAL,CELL>::add(a,r);
   }
 
@@ -529,19 +502,15 @@ public:
     int i = 0;
     for ( const auto & xs : xts )
       p_xstring[i].insert( p_xstring[i++].begin() + j, xs);
-
     i = 0;
     for ( const auto & xr : xtr )
       p_xreal[i].insert( p_xreal[i++].begin() + j, xr);
-
     i = 0;
     for ( const auto & xi : xti )
       p_xint[i].insert( p_xint[i++].begin() + j, xi);
-
     i = 0;
     for ( const auto & xb : xtb )
       p_xbool[i].insert( p_xbool[i++].begin() + j, xb);
-
     geometry<REAL,CELL>::insert(j,a,r);
   }
 
@@ -606,22 +575,18 @@ public:
       std::vector<STRING_EX> __xstring(p_xstring[i]);
       for (int j=0; j<size(); j++) p_xstring[i][j] = __xstring[ord[j]];
     }
-
     for (int i=0; i<p_nxreal; i++){
       std::vector<REAL> __xreal(p_xreal[i]);
       for (int j=0; j<size(); j++) p_xreal[i][j] = __xreal[ord[j]];
     }
-
     for (int i=0; i<p_nxint; i++){
       std::vector<int> __xint(p_xint[i]);
       for (int j=0; j<size(); j++)  p_xint[i][j] = __xint[ord[j]];
     }
-
     for (int i=0; i<p_nxbool; i++){
       std::vector<short> __xbool(p_xbool[i]);
       for (int j=0; j<size(); j++) p_xbool[i][j] = __xbool[ord[j]];
     }
-
     for (int i=0; i<p_observers.size(); i++)
       p_observers[i]->reordered(ord, before_after::after);
   }
@@ -638,13 +603,10 @@ public:
   void clone(xgeometry<REAL,CELL> &dst, const bool copy_data = true) {
     dst.clear();
     dst.p_DIM = get_DIM();
-
     //copy cell vectors
     for (size_t i = 0; i < get_DIM(); i++) dst.cell.v[i] = cell.v[i];
-
     //copy xgeom headers
     dst.set_format(p_field_name, p_field_type);
-
     //copy data
     if (copy_data) {
       for (size_t i = 0; i < nat(); i++) {
@@ -707,7 +669,6 @@ public:
   // ----------------------------------------
 
   virtual void write(std::basic_ostream<CHAR_EX,TRAITS> &os, int offset=0) const {
-
     for (int k=0; k<offset; k++)
       os << " ";
     os << "geometry";
@@ -715,7 +676,6 @@ public:
       os << " " << name;
     os << "(";
     cell.write(os);
-
     for (int i=0; i<nfields(); i++){
       std::cout << ", " << field_name(i) << " = ";
       if (field_type(i) == basic_types::type_string)
@@ -728,10 +688,8 @@ public:
         std::cout << "bool";
     }
     os << ")\n";
-
     for (int k=0; k<offset+2; k++) os << " ";
     os << "{\n";
-
     for (int i=0; i<size(); i++) {
       for (int k=0; k<offset+3; k++)
         os << " ";
@@ -746,10 +704,8 @@ public:
           os << " " << t2s(xfield<bool>(j,i));
       os << "\n";
     }
-
     for (int k=0; k<offset+2; k++) os << " ";
     os << "}\n";
-
   }
 
   // Some named fields ----------------------------------------------

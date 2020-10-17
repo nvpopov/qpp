@@ -418,7 +418,6 @@ class geometry : public basic_geometry<REAL> {
   inline int type_of_atom(int i) const { return type_table(i); }
 
   virtual void build_type_table() {
-
     p_atm_types.clear();
     p_symm_rad.clear();
     p_type_table.resize(size());
@@ -432,7 +431,6 @@ class geometry : public basic_geometry<REAL> {
       }
       p_type_table[i] = t;
     }
-
     //      ngbr.resize_disttable();
   }
 
@@ -531,7 +529,6 @@ class geometry : public basic_geometry<REAL> {
                                             p_type_table(g.p_type_table),
                                             p_symm_rad(g.p_symm_rad),
                                             p_atm_types(g.p_atm_types) {
-
     init_default();
 
     p_DIM = g.get_DIM();
@@ -545,7 +542,6 @@ class geometry : public basic_geometry<REAL> {
 
     // observers
     //p_has_observers = g.p_has_observers;
-
   }
 
   ~geometry() {
@@ -572,7 +568,6 @@ class geometry : public basic_geometry<REAL> {
  protected:
 
   inline void add_impl(const STRING_EX &a, const vector3<REAL> &r1) {
-
     vector3<REAL> r2 = r1;
     if (auto_symmetrize) {
       REAL rad = symmetrize_radius(a);
@@ -595,11 +590,9 @@ class geometry : public basic_geometry<REAL> {
       for (int i = 0; i < p_observers.size(); i++)
         if (p_cached_obs_flags[i] & geometry_observer_supports_add)
           p_observers[i]->added(before_after::after, a, r2);
-
   }
 
   inline void erase_impl(int at) {
-
     //unselect atom first
     if (!p_sel.empty()) {
       std::vector<atom_index_set_key> tmp_sel;
@@ -625,13 +618,12 @@ class geometry : public basic_geometry<REAL> {
       for (int j = 0; j < p_observers.size(); j++)
         if (p_cached_obs_flags[j] & geometry_observer_supports_erase)
           p_observers[j]->erased(at, before_after::after);
-
   }
 
   inline void insert_impl(int at, const STRING_EX &a, const vector3<REAL> &r1) {
-
     vector3<REAL> r2 = r1;
-    if (auto_symmetrize) r2 = cell.symmetrize(r1, symmetrize_radius(a));
+    if (auto_symmetrize)
+      r2 = cell.symmetrize(r1, symmetrize_radius(a));
 
     if (p_has_observers)
       for (int j = 0; j < p_observers.size(); j++)
@@ -653,7 +645,6 @@ class geometry : public basic_geometry<REAL> {
 
   inline void change_impl(int at, const STRING_EX &a1, const vector3<REAL> &r1,
                           bool notify_observer) {
-
     if (notify_observer && p_has_observers)
       for (int i = 0; i < p_observers.size(); i++)
         if (p_cached_obs_flags[i] & geometry_observer_supports_change)
@@ -669,11 +660,12 @@ class geometry : public basic_geometry<REAL> {
       for (int i = 0; i < p_observers.size(); i++)
         if (p_cached_obs_flags[i] & geometry_observer_supports_change)
           p_observers[i]->changed(at, before_after::after, a1, r1);
-
   }
 
  public:
-  virtual void add(const STRING_EX &a, const vector3<REAL> &r1) { add_impl(a, r1); }
+  virtual void add(const STRING_EX &a, const vector3<REAL> &r1) {
+    add_impl(a, r1);
+  }
 
   void add(STRING_EX a, const REAL _x, const REAL _y, const REAL _z) {
     add(a, {_x, _y, _z});
@@ -690,7 +682,6 @@ class geometry : public basic_geometry<REAL> {
   virtual void erase(int at) { erase_impl(at); }
 
   inline void shadow(int at, bool sh) {
-
     for (int i = 0; i < p_observers.size(); i++)
       if (p_cached_obs_flags[i] & geometry_observer_supports_shadow)
         p_observers[i]->shaded(at, before_after::before, sh);
@@ -700,7 +691,6 @@ class geometry : public basic_geometry<REAL> {
     for (int i = 0; i < p_observers.size(); i++)
       if (p_cached_obs_flags[i] & geometry_observer_supports_shadow)
         p_observers[i]->shaded(at, before_after::after, sh);
-
   }
 
   virtual void change(int at, const STRING_EX &a1, const vector3<REAL> &r1,
@@ -713,14 +703,14 @@ class geometry : public basic_geometry<REAL> {
   }
 
   void reorder_types(const std::vector<int> &ord) {
-    if (p_type_table.size() != size()) return;
-
+    if (p_type_table.size() != size())
+      return;
     std::vector<int> type_table(p_type_table);
-    for (int i = 0; i < size(); i++) p_type_table[i] = type_table[ord[i]];
+    for (int i = 0; i < size(); i++)
+      p_type_table[i] = type_table[ord[i]];
   }
 
   virtual void reorder(const std::vector<int> &ord) {
-
     for (int i = 0; i < p_observers.size(); i++)
       if (p_cached_obs_flags[i] & geometry_observer_supports_reorder)
         p_observers[i]->reordered(ord, before_after::before);
@@ -765,9 +755,10 @@ class geometry : public basic_geometry<REAL> {
   }
 
   virtual void get_fields(int j, std::vector<datum> &v) const {
-
-    if (j < 0) j += nat();
-    if (j < 0 || j >= nat()) std::out_of_range("xgeometry::py_getitem: index out of range");
+    if (j < 0)
+      j += nat();
+    if (j < 0 || j >= nat())
+      std::out_of_range("xgeometry::py_getitem: index out of range");
 
     v.clear();
     v.push_back(atom(j));
@@ -775,11 +766,11 @@ class geometry : public basic_geometry<REAL> {
     v.push_back(rl(0));
     v.push_back(rl(1));
     v.push_back(rl(2));
-
   }
 
   virtual void set_fields(int j, const std::vector<datum> &v) {
-    if (j < 0) j += nat();
+    if (j < 0)
+      j += nat();
 
     if (j < 0 || j >= nat())
       std::out_of_range("xgeometry::py_getitem: index out of range");
@@ -798,9 +789,11 @@ class geometry : public basic_geometry<REAL> {
   }
 
   virtual void write(std::basic_ostream<CHAR_EX, TRAITS> &os, int offset = 0) const {
-    for (int k = 0; k < offset; k++) os << " ";
+    for (int k = 0; k < offset; k++)
+      os << " ";
     os << "geometry";
-    if (name != "") os << " " << name;
+    if (name != "")
+      os << " " << name;
     os << "(" << get_DIM() << "d,atom,x,y,z){\n";
 
       /*

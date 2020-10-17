@@ -7,17 +7,31 @@ using namespace qpp;
 
 TEST_CASE("TWS tree") {
 
-  SECTION ("Basic test") {
+  SECTION ("Basic test - erase") {
 
     xgeometry<double, periodic_cell<double>> g(3);
-    g.set_cell_vector({5, 0, 0}, 0);
-    g.set_cell_vector({0, 5, 0}, 0);
-    g.set_cell_vector({0, 0, 5}, 0);
+    g.set_cell_vector({7, 0, 0}, 0);
+    g.set_cell_vector({0, 7, 0}, 1);
+    g.set_cell_vector({0, 0, 7}, 2);
     g.add("C", {0, 0, 0});
+    g.add("C", {2.5, 2.5, 2.5});
+    g.add("Ca",{1, 0, 0});
 
-    REQUIRE(g.nat() == 1);
+    REQUIRE(g.nat() == 3);
 
     tws_tree_t<double, periodic_cell<double>, std::uint32_t> tr1(g);
+    tr1.do_action(act_clear_all | act_build_all);
+    REQUIRE(tr1.n(0) == 1);
+    REQUIRE(tr1.n(1) == 0);
+    REQUIRE(tr1.n(2) == 1);
+
+    REQUIRE(tr1.m_ngb_table.size() == 3);
+    tr1.m_auto_bonding = true;
+    tr1.m_auto_build = true;
+    g.erase(1);
+    REQUIRE(tr1.m_ngb_table.size() == 2);
+    REQUIRE(tr1.n(0) == 1);
+    REQUIRE(tr1.n(1) == 1);
 
   }
 
