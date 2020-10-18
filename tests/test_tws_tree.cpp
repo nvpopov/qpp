@@ -6,9 +6,7 @@
 using namespace qpp;
 
 TEST_CASE("TWS tree") {
-
   SECTION ("Basic test - erase") {
-
     xgeometry<double, periodic_cell<double>> g(3);
     g.set_cell_vector({7, 0, 0}, 0);
     g.set_cell_vector({0, 7, 0}, 1);
@@ -33,7 +31,31 @@ TEST_CASE("TWS tree") {
     REQUIRE(tr1.n(0) == 1);
     REQUIRE(tr1.n(1) == 1);
 
-  }
+    g.add("C", {2.5, 2.5, 2.5});
+    REQUIRE(g.nat() == 3);
+    REQUIRE(tr1.n(0) == 1);
+    REQUIRE(tr1.n(1) == 1);
+    REQUIRE(tr1.n(2) == 0);
 
+    g.erase(2);
+    g.erase(1);
+    g.erase(0);
+
+    g.add("C", {0, 0, 0});
+    g.add("O", {2.5, 2.5, 2.5});
+    g.add("Ca",{1, 0, 0});
+    g.insert(1, "Zn", {2.8, 2.8, 2.8});
+
+    REQUIRE(g.nat() == 4);
+    REQUIRE(g.atom_name(0) == "C");
+    REQUIRE(g.atom_name(1) == "Zn");
+    REQUIRE(g.atom_name(2) == "O");
+    REQUIRE(g.atom_name(3) == "Ca");
+    REQUIRE(tr1.n(0) == 1);
+    REQUIRE(tr1.n(1) == 0);
+    REQUIRE(tr1.n(2) == 0);
+    REQUIRE(tr1.n(3) == 1);
+
+  }
 }
 

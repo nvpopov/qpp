@@ -257,6 +257,8 @@ public:
   bool m_keep_img_atoms{false};
   bool m_tree_is_dirty{false};
   bool m_atoms_existence_is_broken{false};
+  bool m_rebuild_all_on_erase{true};
+  bool m_rebuild_all_on_insert{true};
 
   std::vector<img_atom_t<REAL, AINT>>                       m_img_atoms;
   std::vector<std::vector<tws_node_cnt_t<REAL, AINT>>>      m_ngb_table;
@@ -1032,8 +1034,14 @@ public:
   /// \param a
   /// \param r
   void inserted(int at, before_after st, const STRING_EX & a, const vector3<REAL> & r) override {
-    if (st == before_after::after) {
-      do_action(act_check_consistency);
+    if (m_auto_bonding && m_auto_build) {
+      if (st == before_after::before) {
+        if (m_rebuild_all_on_insert)
+          do_action(act_clear_all);
+      } else { /* after */
+        if (m_rebuild_all_on_insert)
+          do_action(act_check_consistency | act_rebuild_all);
+      }
     }
     m_tree_is_dirty = true;
     m_atoms_existence_is_broken = true;
@@ -1070,9 +1078,11 @@ public:
   void erased(int at, before_after st) override {
     if (m_auto_bonding && m_auto_build) {
       if (st == before_after::before) {
-        do_action(act_clear_all);
+        if (m_rebuild_all_on_erase)
+          do_action(act_clear_all);
       } else { /* after */
-        do_action(act_check_consistency | act_rebuild_all);
+        if (m_rebuild_all_on_erase)
+          do_action(act_check_consistency | act_rebuild_all);
       }
     }
     m_tree_is_dirty = true;
