@@ -164,32 +164,61 @@ struct bonding_table_t {
 
   std::unordered_map<qpp::sym_key<AINT>, bonding_table_record_t<REAL>, sym_key_hash<AINT>> m_dist;
   std::map<AINT, REAL> m_max_dist;
+  std::set<AINT> m_has_types;
 
   template<typename CELL>
-  void init_default(geometry<REAL, CELL> *geom) {
-    for (AINT i = 0; i < geom->n_atom_types(); i++) {
-      REAL max_bond_rad = 0.0;
-      for (AINT  j = 0; j <  geom->n_atom_types(); j++) {
-        auto table_idx1  = ptable::number_by_symbol(geom->atom_of_type(i));
-        auto table_idx2  = ptable::number_by_symbol(geom->atom_of_type(j));
-        if (table_idx1 && table_idx2) {
-          auto bond_rad_1 = ptable::cov_rad_by_number(*table_idx1);
-          auto bond_rad_2 = ptable::cov_rad_by_number(*table_idx2);
-          if (bond_rad_1 && bond_rad_2) {
-            m_dist[sym_key<AINT>(i,j)].m_bonding_dist = *bond_rad_1 + *bond_rad_2;
-            max_bond_rad = std::max<REAL>(max_bond_rad, *bond_rad_1 + *bond_rad_2);
-            m_dist[sym_key<AINT>(i,j)].m_enabled = true;
-          } else {
-            m_dist[sym_key<AINT>(i,j)].m_enabled = false;
-          }
-        }
+  void init_for_type_pair(geometry<REAL, CELL> *geom, const int atype1, const int atype2,
+                          bool overwrite_existing = false) {
+    if (!geom)
+      throw std::runtime_error("invalid geom");
+    if (atype1 >= geom->n_types() || atype2 >= geom->n_types())
+      return;
+    sym_key<AINT> sk{atype1, atype2};
+    auto dist_iter = m_dist.find(sk);
+    if (dist_iter != end(m_dist) && !overwrite_existing) //record exists - do nothing
+      return;
+    auto table_idx1  = ptable::number_by_symbol(geom->atom_of_type(atype1));
+    auto table_idx2  = ptable::number_by_symbol(geom->atom_of_type(atype2));
+    if (table_idx1 && table_idx2) {
+      auto bond_rad_1 = ptable::cov_rad_by_number(*table_idx1);
+      auto bond_rad_2 = ptable::cov_rad_by_number(*table_idx2);
+      if (bond_rad_1 && bond_rad_2) {
+        m_dist[sk].m_bonding_dist = *bond_rad_1 + *bond_rad_2;
+        m_dist[sk].m_enabled = true;
+        m_max_dist[atype1] = std::max(m_max_dist[atype1], m_dist[sk].m_bonding_dist);
+        m_max_dist[atype2] = std::max(m_max_dist[atype2], m_dist[sk].m_bonding_dist);
+        m_has_types.insert(atype1);
+        m_has_types.insert(atype2);
+      } else {
+        m_dist[sk].m_enabled = false;
       }
-      m_max_dist[i] = max_bond_rad;
     }
   }
 
+  template<typename CELL>
+  void init_for_single_type(geometry<REAL, CELL> *geom, const int atype) {
+    if (!geom)
+      throw std::runtime_error("invalid geom");
+    if (atype >= geom->n_types())
+      return;
+    auto hastype_iter = m_has_types.find(atype);
+    if (hastype_iter != end(m_has_types))
+      return;
+    for (AINT i = 0; i < geom->n_atom_types(); i++)
+      init_for_type_pair(geom, i, atype, true);
+  }
+
+  template<typename CELL>
+  void init_default(geometry<REAL, CELL> *geom) {
+    if (!geom)
+      throw std::runtime_error("invalid geom");
+    for (AINT i = 0; i < geom->n_atom_types(); i++)
+      for (AINT j = i; j <  geom->n_atom_types(); j++)
+        init_for_type_pair(geom, i, j, true);
+  }
+
   void update_dist_for_pair(const AINT i, const AINT j, const REAL new_dist) {
-    auto it = m_dist.find(sym_key<AINT>(i,j));
+    auto it = m_dist.find(sym_key<AINT>{i,j});
     if (it != m_dist.end()) {
       it->second.m_bonding_dist = new_dist;
       it->second.m_override = true;
@@ -1039,6 +1068,12 @@ public:
         if (m_rebuild_all_on_insert)
           do_action(act_clear_all);
       } else { /* after */
+        if (m_auto_build)
+          insert_object_to_tree(at);
+        if (m_auto_bonding) {
+          m_bonding_table.init_for_single_type(geom, geom->type_of_atom(at));
+          find_neighbours(at);
+        }
         if (m_rebuild_all_on_insert)
           do_action(act_check_consistency | act_rebuild_all);
       }

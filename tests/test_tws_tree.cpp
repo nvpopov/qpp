@@ -44,17 +44,41 @@ TEST_CASE("TWS tree") {
     g.add("C", {0, 0, 0});
     g.add("O", {2.5, 2.5, 2.5});
     g.add("Ca",{1, 0, 0});
-    g.insert(1, "Zn", {2.8, 2.8, 2.8});
+    REQUIRE(g.n_atom_types() == 3);
+    REQUIRE(g.type_of_atom(0) == 0);
+    REQUIRE(g.type_of_atom(1) == 2);
+    REQUIRE(g.type_of_atom(2) == 1);
 
+    g.insert(1, "Zn", {2.8, 2.8, 2.8});
+    REQUIRE(tr1.m_ngb_table.size() == 4);
     REQUIRE(g.nat() == 4);
+    REQUIRE(g.n_atom_types() == 4);
+    REQUIRE(g.type_of_atom(0) == 0); //C
+    REQUIRE(g.type_of_atom(1) == 3); //Zn
+    REQUIRE(g.type_of_atom(2) == 2); //0
+    REQUIRE(g.type_of_atom(3) == 1); //Ca
     REQUIRE(g.atom_name(0) == "C");
     REQUIRE(g.atom_name(1) == "Zn");
     REQUIRE(g.atom_name(2) == "O");
     REQUIRE(g.atom_name(3) == "Ca");
+
     REQUIRE(tr1.n(0) == 1);
-    REQUIRE(tr1.n(1) == 0);
-    REQUIRE(tr1.n(2) == 0);
+    REQUIRE(tr1.n(1) == 1);
+    REQUIRE(tr1.n(2) == 1);
     REQUIRE(tr1.n(3) == 1);
+    REQUIRE(tr1.m_bonding_table.m_dist[{g.type_of_atom(3), g.type_of_atom(0)}].m_bonding_dist
+            == Approx(2.659999));
+    REQUIRE(tr1.m_bonding_table.m_dist[{g.type_of_atom(0), g.type_of_atom(3)}].m_bonding_dist
+            == Approx(2.659999));
+//    REQUIRE(tr1.m_bonding_table.m_dist[{g.type_of_atom(0), g.type_of_atom(1)}].m_bonding_dist
+//            == Approx(2.659999));
+
+    //Print out bonding dists
+    for (int i = 0; i < g.n_atom_types(); i++)
+      for (int j = 0; j < g.n_atom_types(); j++)
+        std::cout << fmt::format("(i={}, j={}, dist={})",
+                                 i, j, tr1.m_bonding_table.m_dist[{i,j}].m_bonding_dist)
+                  << std::endl;
 
   }
 }
