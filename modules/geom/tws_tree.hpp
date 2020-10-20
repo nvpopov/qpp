@@ -54,7 +54,7 @@ struct query_ray_add_ignore_img {
 template<typename REAL, typename AINT>
 struct tws_node_t;
 
-/// data to store in rtree
+/// data to store in twstree
 template<typename REAL, typename AINT = size_t>
 struct tws_node_cnt_t {
   AINT m_atm;
@@ -70,7 +70,7 @@ template<typename REAL, typename AINT>
 struct tws_node_content_bonds_t {
   AINT m_atm;
   index m_idx;
-  matrix4<float> m_mat_model;
+  matrix4<REAL> m_mat_model;
   tws_node_content_bonds_t(const AINT atm, const index idx) noexcept {
     m_atm = atm; m_idx = idx;
   }
@@ -293,10 +293,8 @@ public:
   std::vector<std::vector<tws_node_cnt_t<REAL, AINT>>>      m_ngb_table;
   bonding_table_t<REAL, AINT>                               m_bonding_table;
 
-  /// \brief aux_rtree constructor
-  /// \param g
-  explicit tws_tree_t(xgeometry<REAL, CELL> & g) {
-    geom = & g;
+  explicit tws_tree_t(xgeometry<REAL, CELL> &g) {
+    geom = &g;
     geom->add_observer(*this);
   }
 
@@ -306,17 +304,36 @@ public:
   }
 
   std::optional<AINT> find_img_atom(const AINT atm, const index idx) {
-    for (AINT i = 0; i < m_img_atoms.size(); i++)
-      if (m_img_atoms[i].m_atm == atm && m_img_atoms[i].m_idx == idx)
-        return std::optional<AINT>(i);
-    return std::nullopt;
+    auto find_lambda = [&atm, &idx](const auto &el){return el.m_atm == atm && el.m_idx == idx;};
+    auto iter = std::find_if(begin(m_img_atoms), end(m_img_atoms), find_lambda);
+    return iter != end(m_img_atoms) ?
+           std::optional<AINT>(std::distance(begin(m_img_atoms), iter)) :
+           std::nullopt;
   }
 
+  /**
+   * @brief find_img_atom_by_id
+   * @param atm
+   * @return
+   */
   std::optional<AINT> find_img_atom_by_id(const AINT atm) {
-    for (AINT i = 0; i < m_img_atoms.size(); i++)
-      if (m_img_atoms[i].atm == atm)
-        return std::optional<AINT>(i);
-    return std::nullopt;
+    auto find_lambda = [&atm](const auto &el){return el.m_atm == atm;};
+    auto iter = std::find_if(begin(m_img_atoms), end(m_img_atoms), find_lambda);
+    return iter != end(m_img_atoms) ?
+           std::optional<AINT>(std::distance(begin(m_img_atoms), iter)) :
+           std::nullopt;
+  }
+
+  std::vector<AINT> find_all_occurences_of_atom_by_id(const AINT atm) {
+    std::vector<AINT> result;
+    AINT i{0};
+    auto fe_lambda = [&result, &atm, &i] (auto &el) {
+      if (el.m_atm == atm)
+        result.push_back(i);
+      i++;
+    };
+    std::for_each(begin(m_img_atoms), end(m_img_atoms), fe_lambda);
+    return result;
   }
 
   void rebuild_after_erase(const AINT changed_atom) {
@@ -324,25 +341,37 @@ public:
     // After erase we have  : 0 1 2 3 4 6 7 8 num=8
     // We need to change all data for 6 7 8 to 5 6 7
     // All data means m_img_atoms and ngbs and atoms inside tree
-    //
-    // First update the tree itself was 6 7 8 -> now 5 6 7
-    int num_occurences = geom->nat() - changed_atom;
-    for (auto &flat_view : m_flat_view) {
-      auto &content = *flat_view.m_content;
-      auto fr_lmbd = [changed_atom, &num_occurences](tws_node_cnt_t<REAL, AINT> &ndcnt) {
-        if (ndcnt.m_atm > changed_atom) {
-          ndcnt.m_atm -= 1;
-          num_occurences--;
-        };
-      };
-      std::for_each(begin(content), end(content), fr_lmbd);
-    }
-    // Now update the ngbs
-    auto &delete_atom_ngbs = m_ngb_table[changed_atom];
 
+    if (changed_atom >= m_atom_node_lookup.size())
+      throw std::runtime_error("Ill formed atom-node lookup table...");
+
+    //update tree
+    auto nd_cnt_erase_lambda = [changed_atom](auto &el){ return el.m_atm == changed_atom;};
+    auto nd_cnt_update_anum = [changed_atom](auto &el){
+      if (el.m_atm > changed_atom)
+        el.m_atm -= 1;
+    };
+    for (int i = changed_atom + 1; i < geom->nat(); i++) {
+      auto &ndlkp = m_atom_node_lookup[i];
+      for (atom_node_lookup_t<REAL, AINT>& ndlkp_inst : ndlkp) {
+        if (auto nd = ndlkp_inst.m_node; nd) {
+          auto &nd_cnt = nd->m_content;
+          //erase first
+          nd_cnt.erase(std::remove_if(begin(nd_cnt), end(nd_cnt), nd_cnt_erase_lambda),end(nd_cnt));
+          //update indicies next
+          std::for_each(begin(nd_cnt), end(nd_cnt), nd_cnt_update_anum);
+        }
+      }
+    }
+    //we dont need lookup for <changed_atom>
+    m_atom_node_lookup.erase(changed_atom);
+
+    //update ngb table
+
+    //update img atoms
   }
 
-  void rebuild_after_resize(const AINT changed_atom) {
+  void rebuild_after_insert(const AINT changed_atom) {
     //
   }
 
@@ -458,10 +487,6 @@ public:
     }
   }
 
-  /// \brief clr_bond_real_im
-  /// \param atm1
-  /// \param atm2
-  /// \param idx2
   void clr_bond_real_img(const AINT atm1, const AINT atm2, const index idx2) {
     for (auto it = m_ngb_table[atm1].begin(); it != m_ngb_table[atm1].end(); )
       if (it->m_atm == atm2 && it->m_idx == idx2)
@@ -470,11 +495,6 @@ public:
         ++it;
   }
 
-
-  /// \brief clr_bond_im_real
-  /// \param img_atom_id
-  /// \param atm2
-  /// \param idx2
   void clr_bond_img_real(const AINT img_atom_id, const AINT atm2, const index idx2) {
     for (auto it = m_img_atoms[img_atom_id].begin(); it != m_img_atoms[img_atom_id].end();)
       if (it->m_atm == atm2 && it->m_idx == idx2)
@@ -483,9 +503,6 @@ public:
         ++it;
   }
 
-  /// \brief clr_bond_im_real
-  /// \param img_atom_id
-  /// \param atm2
   void clr_bond_img_real(const AINT img_atom_id, const int atm2) {
     for (auto it = m_img_atoms[img_atom_id].m_img_bonds.begin();
          it != m_img_atoms[img_atom_id].m_img_bonds.end(); )
@@ -495,8 +512,6 @@ public:
         ++it;
   }
 
-  /// \brief clear_atom_bonding_data
-  /// \param atm
   void clr_atom_bond_data(const AINT atm) {
     for(auto &bond : m_ngb_table[atm])
       if (bond.m_idx.is_zero() || geom->get_DIM() == 0) {
@@ -509,9 +524,6 @@ public:
     m_ngb_table[atm].clear();
   }
 
-  /// \brief clear_atom_pair_bonding_data
-  /// \param atm1
-  /// \param atm2
   void clr_atom_pair_bond_data(const AINT atm1, const AINT atm2) {
     if (m_ngb_table[atm1].size() > 0) {
       auto new_end = std::remove_if(m_ngb_table[atm1].begin(), m_ngb_table[atm1].end(),
@@ -522,8 +534,6 @@ public:
     }
   }
 
-  /// \brief clear_atom_from_tree
-  /// \param atm
   std::vector<index> clr_atom_from_tree(const AINT atm) {
 
     std::vector<index> image_idx;
@@ -572,11 +582,8 @@ public:
     m_atom_node_lookup[atm].clear();
 
     return image_idx;
-
   }
 
-  /// \brief apply_shift
-  /// \param vShift
   void apply_shift(const vector3<REAL> vec_shift) {
     for (auto *node : m_flat_view) {
       node->m_bb.min += vec_shift;
@@ -584,15 +591,10 @@ public:
     }
   }
 
-  /// \brief apply_visitor
-  /// \param f
   void apply_visitor(std::function<void(tws_node_t<REAL, AINT>*, int)> f) {
     traverse_apply_visitor(root, 0, f);
   }
 
-  /// \brief traverse_apply_visitor
-  /// \param curNode
-  /// \param f
   void traverse_apply_visitor(tws_node_t<REAL, AINT> *cur_node, int deep_level,
                               std::function<void(tws_node_t<REAL, AINT>*, int)> f) {
     if (!root)
@@ -603,9 +605,6 @@ public:
         traverse_apply_visitor(child, deep_level + 1, f);
   }
 
-  /// \brief query_ray
-  /// \param vRayStart
-  /// \param vRayDir
   template<typename adding_result_policy = query_ray_add_all<REAL> >
   void query_ray(ray_t<REAL> &_ray,
                  std::vector<tws_query_data_t<REAL, AINT> > &res,
@@ -624,10 +623,6 @@ public:
                                              xgeom_hide_field_id);
   }
 
-  /// \brief traverse_query_ray
-  /// \param curNode
-  /// \param vRayStart
-  /// \param vRayDir
   template<typename adding_result_policy>
   void traverse_query_ray(tws_node_t<REAL, AINT> *cur_node,
                           ray_t<REAL> &_ray,
@@ -688,10 +683,6 @@ public:
 
   }
 
-  /// \brief query_sphere
-  /// \param fSphRad
-  /// \param vSphCnt
-  /// \param res
   void query_sphere(const REAL sph_r, const vector3<REAL> sph_cnt,
                     std::vector<tws_node_cnt_t<REAL, AINT>> &res) {
     if (!root)
@@ -699,11 +690,6 @@ public:
     traverse_query_sphere(root, sph_r, sph_cnt, res);
   }
 
-  /// \brief traverse_query_sphere
-  /// \param curNode
-  /// \param fSphRad
-  /// \param vSphCnt
-  /// \param res
   void traverse_query_sphere(tws_node_t<REAL, AINT> *cur_node,
                              const REAL &sph_r, const vector3<REAL> &sph_cnt,
                              std::vector<tws_node_cnt_t<REAL, AINT>> &res) {
@@ -728,9 +714,6 @@ public:
         insert_object_to_tree(atm, i);
   }
 
-  /// \brief Insert oject to tree
-  /// \param atm
-  /// \param idx
   void insert_object_to_tree(const AINT atm, const index idx) {
     do_action(act_check_root);
     if (m_atom_node_lookup.size() != geom->nat())
@@ -746,11 +729,6 @@ public:
     traverse_insert_object_to_tree(root, atm, idx);
   }
 
-  /// \brief traverse_insert_object_to_tree
-  /// \param curNode
-  /// \param atm
-  /// \param idx
-  /// \return
   bool traverse_insert_object_to_tree(tws_node_t<REAL, AINT> *cur_node,
                                       const AINT atm, const index & idx) {
 
@@ -795,10 +773,6 @@ public:
 
   }
 
-  /// \brief push_data_to_tws_node
-  /// \param curNode
-  /// \param atm
-  /// \param idx
   void push_data_to_tws_node(tws_node_t<REAL, AINT> *cur_node, const AINT atm, const index idx) {
     //pass any atom with any index to tws-tree
     cur_node->m_content.push_back(tws_node_cnt_t<REAL, AINT>(atm, idx));
@@ -808,9 +782,6 @@ public:
       m_img_atoms.push_back(img_atom_t<REAL, AINT>(atm, idx));
   }
 
-  /// \brief grow_tws_root
-  /// \param atm
-  /// \param idx
   void grow_tws_root(const AINT atm, const index & idx) {
 #ifdef TWS_TREE_DEBUG
     fmt::print(">>> pre grow vol={0} {1} {2} {3} nc = {4}, root_bb : min={5}, max={6}\n",
@@ -851,23 +822,18 @@ public:
 #endif
   }
 
-  /// \brief n
-  /// \param i
-  /// \return
-  AINT n(AINT i) const {return m_ngb_table[i].size();}
+  AINT n(AINT i) const {
+    return m_ngb_table[i].size();
+  }
 
-  /// \brief table
-  /// \param i
-  /// \param j
-  /// \return
-  /// TODO: move to optional
-  index table_idx(AINT i, AINT j) const {return m_ngb_table[i][j].m_idx;}
-  AINT  table_atm(AINT i, AINT j) const {return m_ngb_table[i][j].m_atm;}
+  index table_idx(AINT i, AINT j) const {
+    return m_ngb_table[i][j].m_idx;
+  }
 
-  /// \brief add_ngbr
-  /// \param ha
-  /// \param i
-  /// \param j
+  AINT  table_atm(AINT i, AINT j) const {
+    return m_ngb_table[i][j].m_atm;
+  }
+
   void add_ngbr(AINT ha, AINT i, const index j) {
     bool found = false;
     for (AINT k = 0; k < m_ngb_table[ha].size(); k++ )
@@ -879,7 +845,6 @@ public:
       m_ngb_table[ha].push_back(tws_node_cnt_t<REAL, AINT>(i, j));
   }
 
-  /// \brief find_all_neighbours
   void find_all_neighbours() {
     for (AINT i = 0; i < geom->nat(); i++)
       find_neighbours(i, index::D(geom->get_DIM()).all(0));
@@ -888,8 +853,6 @@ public:
         find_neighbours(img_atom.m_atm, img_atom.m_idx);
   }
 
-  /// \brief find_neighbours
-  /// \param at_num
   void find_neighbours(AINT at_num) {
     find_neighbours(at_num, index::D(geom->get_DIM()).all(0));
     if (m_build_img_atoms_bonds)
@@ -898,8 +861,6 @@ public:
           find_neighbours(m_img_atoms[i].m_atm, m_img_atoms[i].m_idx);
   }
 
-  /// \brief find_neighbours
-  /// \param atNum
   void find_neighbours(AINT at_num, index idx) {
     if (!root)
       return;
@@ -998,7 +959,6 @@ public:
     }
   }
 
-  /// \brief manual_build
   void manual_build() {
     for (AINT i = 0; i < geom->nat(); i++) insert_object_to_tree(i);
 #ifdef TWS_TREE_DEBUG
@@ -1006,17 +966,12 @@ public:
 #endif
   }
 
-  /// \brief debug_print
   void debug_print() {
     AINT totalEntries = 0;
     debug_print_traverse(root, 1, totalEntries);
     fmt::print("Total entries = {}\n ", totalEntries);
   }
 
-  /// \brief debug_print_traverse
-  /// \param node
-  /// \param iDeepLevel
-  /// \param totalEntries
   void debug_print_traverse(tws_node_t<REAL, AINT> *node, AINT deep_level, AINT &tot_entries) {
     REAL fake_aabb_vol = 1.0;
     for (AINT i = 0; i < DIM_RECT; i++)
@@ -1041,10 +996,7 @@ public:
            | geometry_observer_supports_reorder;
   };
 
-  /// \brief added
-  /// \param st
-  /// \param a
-  /// \param r
+
   void added(before_after st, const STRING_EX & a, const vector3<REAL> & r) override {
     if (st == before_after::after) {
       do_action(act_check_consistency);
@@ -1057,11 +1009,6 @@ public:
     m_atoms_existence_is_broken = true;
   }
 
-  /// \brief inserted
-  /// \param at
-  /// \param st
-  /// \param a
-  /// \param r
   void inserted(int at, before_after st, const STRING_EX & a, const vector3<REAL> & r) override {
     if (m_auto_bonding && m_auto_build) {
       if (st == before_after::before) {
@@ -1082,11 +1029,6 @@ public:
     m_atoms_existence_is_broken = true;
   }
 
-  /// \brief changed
-  /// \param at
-  /// \param st
-  /// \param a
-  /// \param r
   void changed(int at, before_after st, const STRING_EX & a, const vector3<REAL> & r) override {
     if (st == before_after::after) {
       if (m_auto_bonding && m_auto_build) {
@@ -1107,9 +1049,6 @@ public:
     m_tree_is_dirty = true;
   }
 
-  /// \brief erased
-  /// \param at
-  /// \param st
   void erased(int at, before_after st) override {
     if (m_auto_bonding && m_auto_build) {
       if (st == before_after::before) {
@@ -1124,10 +1063,6 @@ public:
     m_atoms_existence_is_broken = true;
   }
 
-  /// \brief shaded
-  /// \param at
-  /// \param st
-  /// \param sh
   void shaded(int at, before_after st, bool sh) override {
     m_tree_is_dirty = true;
   }
