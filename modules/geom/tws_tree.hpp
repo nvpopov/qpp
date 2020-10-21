@@ -346,14 +346,16 @@ public:
       throw std::runtime_error("Ill formed atom-node lookup table...");
 
     //update tree
-    auto nd_cnt_erase_lambda = [changed_atom](auto &el){ return el.m_atm == changed_atom;};
+    auto nd_cnt_erase_lambda = [changed_atom](auto &el){
+      return el.m_atm == changed_atom;
+    };
     auto nd_cnt_update_anum = [changed_atom](auto &el){
       if (el.m_atm > changed_atom)
         el.m_atm -= 1;
     };
     for (int i = changed_atom + 1; i < geom->nat(); i++) {
       auto &ndlkp = m_atom_node_lookup[i];
-      for (atom_node_lookup_t<REAL, AINT>& ndlkp_inst : ndlkp) {
+      for (atom_node_lookup_t<REAL, AINT> &ndlkp_inst : ndlkp) {
         if (auto nd = ndlkp_inst.m_node; nd) {
           auto &nd_cnt = nd->m_content;
           //erase first
@@ -488,28 +490,33 @@ public:
   }
 
   void clr_bond_real_img(const AINT atm1, const AINT atm2, const index idx2) {
-    for (auto it = m_ngb_table[atm1].begin(); it != m_ngb_table[atm1].end(); )
-      if (it->m_atm == atm2 && it->m_idx == idx2)
-        m_ngb_table[atm1].erase(it);
-      else
-        ++it;
+    auto new_end_l = [&atm2, &idx2](auto &el) {
+      return el.m_atm == atm2 && el.m_idx == idx2;
+    };
+    auto new_end = std::remove_if(begin(m_ngb_table[atm1]),
+                                  end(m_ngb_table[atm1]),
+                                  new_end_l);
+    m_ngb_table[atm1].erase(new_end, end(m_ngb_table[atm1]));
   }
 
-  void clr_bond_img_real(const AINT img_atom_id, const AINT atm2, const index idx2) {
-    for (auto it = m_img_atoms[img_atom_id].begin(); it != m_img_atoms[img_atom_id].end();)
-      if (it->m_atm == atm2 && it->m_idx == idx2)
-        m_img_atoms[img_atom_id].erase(it);
-      else
-        ++it;
+  void clr_bond_img_real(const AINT iatid, const AINT atm2, const index idx2) {
+    auto new_end_l = [&atm2, &idx2](auto &el) {
+      return el.m_atm == atm2 && el.m_idx == idx2;
+    };
+    auto new_end = std::remove_if(begin(m_img_atoms[iatid].m_img_bonds),
+                                  end(m_img_atoms[iatid].m_img_bonds),
+                                  new_end_l);
+    m_ngb_table[iatid].erase(new_end, end(m_img_atoms[iatid].m_img_bonds));
   }
 
-  void clr_bond_img_real(const AINT img_atom_id, const int atm2) {
-    for (auto it = m_img_atoms[img_atom_id].m_img_bonds.begin();
-         it != m_img_atoms[img_atom_id].m_img_bonds.end(); )
-      if (it->m_atm == atm2)
-        m_img_atoms[img_atom_id].m_img_bonds.erase(it);
-      else
-        ++it;
+  void clr_bond_img_real(const AINT iatid, const int atm2) {
+    auto new_end_l = [&atm2](auto &el) {
+      return el.m_atm == atm2;
+    };
+    auto new_end = std::remove_if(begin(m_img_atoms[iatid].m_img_bonds),
+                                  end(m_img_atoms[iatid].m_img_bonds),
+                                  new_end_l);
+    m_ngb_table[iatid].erase(new_end, end(m_img_atoms[iatid].m_img_bonds));
   }
 
   void clr_atom_bond_data(const AINT atm) {
