@@ -58,6 +58,14 @@ struct aabb_3d_t {
     return (max+min)*0.5;
   }
 
+  vector3<REAL> diagonal() {
+    return max - min;
+  }
+
+  vector3<REAL> diagonal_inverted() {
+    return min - max;
+  }
+
   /// \brief squared_dist_point
   /// \param point
   /// \return

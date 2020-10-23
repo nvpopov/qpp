@@ -29,7 +29,7 @@
 
 #define TWS_TREE_DEBUG
 
-namespace qpp{
+namespace qpp {
 
 template<typename INT_TYPE>
 inline INT_TYPE enc_tws_idx(const INT_TYPE a, const INT_TYPE b, const INT_TYPE c) {
@@ -120,23 +120,17 @@ struct tws_node_t {
   tws_node_t() noexcept {}
 
   void rm_cnt_by_id(const AINT atm) {
-    for (auto it = m_content.begin(); it != m_content.end();){
-      if(it->m_atm == atm)
-        it = m_content.erase(it);
-      else
-        ++it;
-    }
+    auto rm_l = [&atm] (auto &el) { return el.m_atm == atm; };
+    auto new_end = std::remove_if(begin(m_content), end(m_content), rm_l);
+    m_content.erase(new_end, end(m_content));
   }
 
   void rm_cnt_idx_store(const AINT atm, std::vector<index> &idx_vec) {
-    for (auto it = m_content.begin(); it != m_content.end();){
-      if(it->m_atm == atm) {
-        idx_vec.push_back(it->m_idx);
-        it = m_content.erase(it);
-      } else {
-        ++it;
-      }
-    }
+    auto rm_l = [&atm, &idx_vec] (auto &el) {
+      if (el.m_atm == atm) {idx_vec.push_back(el.m_idx); return true;} else {return false;};
+    };
+    auto new_end = std::remove_if(begin(m_content), end(m_content), rm_l);
+    m_content.erase(new_end, end(m_content));
   }
 
 };
@@ -304,7 +298,7 @@ public:
   }
 
   std::optional<AINT> find_img_atom(const AINT atm, const index idx) {
-    auto find_lambda = [&atm, &idx](const auto &el){return el.m_atm == atm && el.m_idx == idx;};
+    auto find_lambda = [&atm, &idx] (const auto &el) {return el.m_atm == atm && el.m_idx == idx;};
     auto iter = std::find_if(begin(m_img_atoms), end(m_img_atoms), find_lambda);
     return iter != end(m_img_atoms) ?
            std::optional<AINT>(std::distance(begin(m_img_atoms), iter)) :
@@ -317,7 +311,7 @@ public:
    * @return
    */
   std::optional<AINT> find_img_atom_by_id(const AINT atm) {
-    auto find_lambda = [&atm](const auto &el){return el.m_atm == atm;};
+    auto find_lambda = [&atm] (const auto &el) {return el.m_atm == atm;};
     auto iter = std::find_if(begin(m_img_atoms), end(m_img_atoms), find_lambda);
     return iter != end(m_img_atoms) ?
            std::optional<AINT>(std::distance(begin(m_img_atoms), iter)) :
@@ -378,38 +372,40 @@ public:
   }
 
   void clr_bond_real_img(const AINT atm1, const AINT atm2, const index idx2) {
-    auto new_end_l = [&atm2, &idx2](auto &el) { return el.m_atm == atm2 && el.m_idx == idx2; };
-    auto new_end =
-        std::remove_if(begin(m_ngb_table[atm1]), end(m_ngb_table[atm1]), new_end_l);
-    m_ngb_table[atm1].erase(new_end, end(m_ngb_table[atm1]));
+    if (atm1 >= size(m_ngb_table) || atm2 >= geom->nat())
+      return;
+    auto &atm1_ngbs = m_ngb_table[atm1];
+    auto new_end_l = [&atm2, &idx2] (auto &el) { return el.m_atm == atm2 && el.m_idx == idx2; };
+    auto new_end = std::remove_if(begin(atm1_ngbs), end(atm1_ngbs), new_end_l);
+    atm1_ngbs.erase(new_end, end(atm1_ngbs));
   }
 
   void clr_bond_img_real(const AINT iatid, const AINT atm2, const index idx2) {
-    auto new_end_l = [&atm2, &idx2](auto &el) { return el.m_atm == atm2 && el.m_idx == idx2; };
-    auto new_end =
-        std::remove_if(begin(m_img_atoms[iatid].m_img_bonds), end(m_img_atoms[iatid].m_img_bonds),
-                       new_end_l);
-    m_ngb_table[iatid].erase(new_end, end(m_img_atoms[iatid].m_img_bonds));
+    if (iatid >= size(m_img_atoms) || atm2 >= geom->nat())
+      return;
+    auto &img_at_bnds = m_img_atoms[iatid].m_img_bonds;
+    auto new_end_l = [&atm2, &idx2] (auto &el) { return el.m_atm == atm2 && el.m_idx == idx2; };
+    auto new_end = std::remove_if(begin(img_at_bnds), end(img_at_bnds), new_end_l);
+    img_at_bnds.m_img_bonds.erase(new_end, end(img_at_bnds));
   }
 
   void clr_bond_img_real(const AINT iatid, const int atm2) {
-    auto new_end_l = [&atm2](auto &el) { return el.m_atm == atm2; };
-    auto new_end =
-        std::remove_if(begin(m_img_atoms[iatid].m_img_bonds), end(m_img_atoms[iatid].m_img_bonds),
-                             new_end_l);
-    m_ngb_table[iatid].erase(new_end, end(m_img_atoms[iatid].m_img_bonds));
+    if (iatid >= size(m_img_atoms) || atm2 >= geom->nat())
+      return;
+    auto &img_at_bnds = m_img_atoms[iatid].m_img_bonds;
+    auto new_end_l = [&atm2] (auto &el) { return el.m_atm == atm2; };
+    auto new_end = std::remove_if(begin(img_at_bnds), end(img_at_bnds), new_end_l);
+    img_at_bnds.erase(new_end, end(img_at_bnds));
   }
 
   void clr_atom_bond_data(const AINT atm) {
-    if (atm >= size(m_ngb_table)) {
+    if (atm >= size(m_ngb_table))
       return;
-    }
     for(auto &bond : m_ngb_table[atm])
       if (bond.m_idx.is_zero() || geom->get_DIM() == 0) {
         clr_atom_pair_bond_data(bond.m_atm, atm);
       } else {
-        std::optional<AINT> img_id = find_img_atom(bond.m_atm, bond.m_idx);
-        if (img_id)
+        if (std::optional<AINT> img_id = find_img_atom(bond.m_atm, bond.m_idx); img_id)
           clr_bond_img_real(*img_id, atm);
       }
     m_ngb_table[atm].clear();
@@ -468,7 +464,7 @@ public:
         std::optional<AINT> paired_img_id = find_img_atom(std::get<0>(pair), std::get<1>(pair));
         if (paired_img_id && paired_img_id < size(m_img_atoms)) {
           auto &img_bonds = m_img_atoms[*paired_img_id].m_img_bonds;
-          auto img_bndr_l = [&atm](auto &el){ return el.m_atm == atm;};
+          auto img_bndr_l = [&atm] (auto &el) { return el.m_atm == atm;};
           auto new_end = std::remove_if(begin(img_bonds), end(img_bonds), img_bndr_l);
           img_bonds.erase(new_end, end(img_bonds));
         }
@@ -745,7 +741,7 @@ public:
                                       const AINT atm, const index & idx) {
 
     vector3<REAL> p = geom->pos(atm, idx);
-    vector3<REAL> cn_size = cur_node->m_bb.max - cur_node->m_bb.min;
+    vector3<REAL> cn_size = cur_node->m_bb.diagonal();
     vector3<REAL> cn_center = cur_node->m_bb.center();
 
     bool in_cur_rect = point_aabb_test(p, cur_node->m_bb);
@@ -759,9 +755,9 @@ public:
         return true;
       }
       //it is necessary to determine the indexes of the point
-      int i_x = -1 + int((p[0]-cur_node->m_bb.min[0])/(cn_size[0]/3));
-      int i_y = -1 + int((p[1]-cur_node->m_bb.min[1])/(cn_size[1]/3));
-      int i_z = -1 + int((p[2]-cur_node->m_bb.min[2])/(cn_size[2]/3));
+      int i_x = -1 + static_cast<int>((p[0]-cur_node->m_bb.min[0])/(cn_size[0]/3));
+      int i_y = -1 + static_cast<int>((p[1]-cur_node->m_bb.min[1])/(cn_size[1]/3));
+      int i_z = -1 + static_cast<int>((p[2]-cur_node->m_bb.min[2])/(cn_size[2]/3));
       int nidx = enc_tws_idx(i_x, i_y, i_z);
       if (cur_node->m_sub_nodes[nidx] == nullptr) {
         tws_node_t<REAL, AINT> *new_node = new tws_node_t<REAL, AINT>();
@@ -769,14 +765,14 @@ public:
         //define the 0,0,0 max min
         vector3<REAL> z_min = cur_node->m_bb.min + cn_size / 3;
         vector3<REAL> z_max = cur_node->m_bb.max - cn_size / 3;
-        new_node->m_bb.min = z_min + vector3<REAL>(i_x * cn_size[0]/ 3,
-                                                   i_y * cn_size[1]/ 3,
-                                                   i_z * cn_size[2]/ 3);
-        new_node->m_bb.max = z_max + vector3<REAL>(i_x * cn_size[0]/ 3,
-                                                   i_y * cn_size[1]/ 3,
-                                                   i_z * cn_size[2]/ 3);
+        new_node->m_bb.min = z_min + vector3<REAL>(i_x * cn_size[0] / 3,
+                                                   i_y * cn_size[1] / 3,
+                                                   i_z * cn_size[2] / 3);
+        new_node->m_bb.max = z_max + vector3<REAL>(i_x * cn_size[0] / 3,
+                                                   i_y * cn_size[1] / 3,
+                                                   i_z * cn_size[2] / 3);
         cur_node->m_sub_nodes[nidx] = new_node;
-        cur_node->m_tot_childs+=1;
+        cur_node->m_tot_childs += 1;
       }
       traverse_insert_object_to_tree(cur_node->m_sub_nodes[nidx], atm, idx);
     }
@@ -796,7 +792,9 @@ public:
 
   void grow_tws_root(const AINT atm, const index & idx) {
 #ifdef TWS_TREE_DEBUG
-    fmt::print(">>> pre grow vol={0} {1} {2} {3} nc = {4}, root_bb : min={5}, max={6}\n",
+    fmt::print(">>> pre grow vol={0} {1} {2} {3} nc = {4},\n"
+               "    root_bb : min={5},\n "
+               "              max={6}\n",
                root->m_bb.volume(),
                geom->pos(atm,idx)[0],
                geom->pos(atm,idx)[1],
@@ -823,7 +821,9 @@ public:
     root = new_root;
 
 #ifdef TWS_TREE_DEBUG
-    fmt::print(">>> post grow vol={0} {1} {2} {3} nc = {4}, root_bb : min={5}, max={6}\n",
+    fmt::print(">>> post grow vol={0} {1} {2} {3} nc = {4},\n"
+               "    root_bb : min={5},\n"
+               "              max={6}\n",
                root->m_bb.volume(),
                geom->pos(atm,idx)[0],
                geom->pos(atm,idx)[1],
