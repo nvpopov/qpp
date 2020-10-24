@@ -297,6 +297,17 @@ public:
       geom->remove_observer(*this);
   }
 
+  std::optional<size_t> find_bond_rec(const int atm_base, const int atm_bnd, const index &idx) {
+    if (atm_base >= size(m_ngb_table))
+      return std::nullopt;
+    auto &ngb_rec = m_ngb_table[atm_base];
+    auto fnd_ld = [&atm_bnd, &idx] (auto &rec) { return rec.m_atm == atm_bnd && rec.m_idx == idx;};
+    auto find_iter = std::find_if(begin(ngb_rec), end(ngb_rec), fnd_ld);
+    return find_iter != end(ngb_rec) ?
+                          std::optional<size_t>{std::distance(begin(ngb_rec), find_iter)} :
+                          std::nullopt;
+  }
+
   std::optional<AINT> find_img_atom(const AINT atm, const index idx) {
     auto find_lambda = [&atm, &idx] (const auto &el) {return el.m_atm == atm && el.m_idx == idx;};
     auto iter = std::find_if(begin(m_img_atoms), end(m_img_atoms), find_lambda);
@@ -328,47 +339,6 @@ public:
     };
     std::for_each(begin(m_img_atoms), end(m_img_atoms), fe_lambda);
     return result;
-  }
-
-  void rebuild_after_erase(const AINT changed_atom) {
-    // Before erase we have : 0 1 2 3 4 5 6 7 8 num=9
-    // After erase we have  : 0 1 2 3 4 6 7 8 num=8
-    // We need to change all data for 6 7 8 to 5 6 7
-    // All data means m_img_atoms and ngbs and atoms inside tree
-
-    if (changed_atom >= m_atom_node_lookup.size())
-      throw std::runtime_error("Ill formed atom-node lookup table...");
-
-    //update tree
-    auto nd_cnt_erase_lambda = [changed_atom](auto &el){
-      return el.m_atm == changed_atom;
-    };
-    auto nd_cnt_update_anum = [changed_atom](auto &el){
-      if (el.m_atm > changed_atom)
-        el.m_atm -= 1;
-    };
-    for (int i = changed_atom + 1; i < geom->nat(); i++) {
-      auto &ndlkp = m_atom_node_lookup[i];
-      for (atom_node_lookup_t<REAL, AINT> &ndlkp_inst : ndlkp) {
-        if (auto nd = ndlkp_inst.m_node; nd) {
-          auto &nd_cnt = nd->m_content;
-          //erase first
-          nd_cnt.erase(std::remove_if(begin(nd_cnt), end(nd_cnt), nd_cnt_erase_lambda),end(nd_cnt));
-          //update indicies next
-          std::for_each(begin(nd_cnt), end(nd_cnt), nd_cnt_update_anum);
-        }
-      }
-    }
-    //we dont need lookup for <changed_atom>
-    m_atom_node_lookup.erase(changed_atom);
-
-    //update ngb table
-
-    //update img atoms
-  }
-
-  void rebuild_after_insert(const AINT changed_atom) {
-    //
   }
 
   void clr_bond_real_img(const AINT atm1, const AINT atm2, const index idx2) {
@@ -419,18 +389,91 @@ public:
     }
   }
 
+  void reindexing_after_erase(const AINT changed_atom) {
+    // Must be called after erase
+    // Before erase we have : 0 1 2 3 4 5 6 7 8 num=9
+    // After erase we have  : 0 1 2 3 4 6 7 8 num=8
+    // We need to change all data for 6 7 8 to 5 6 7
+    // All data means m_img_atoms and ngbs and atoms inside tree
+
+    auto zero_idx = index::D(geom->get_DIM()).all(0);
+
+    if (geom->nat() + 1 != size(m_atom_node_lookup))
+      throw std::runtime_error("Must be called after atom deletion");
+    if (changed_atom >= m_atom_node_lookup.size())
+      throw std::runtime_error("Ill formed atom-node lookup table...");
+
+    auto nd_c_erase_lambda = [changed_atom] (auto &el) { return el.m_atm == changed_atom;};
+    auto nd_c_upd_anum = [changed_atom] (auto &el) { if (el.m_atm > changed_atom) el.m_atm -= 1;};
+    //m_atom_node_lookup containts info for erased atom too
+//    for (int i = changed_atom + 1; i < geom->nat(); i++) {
+//      //update tree
+//      auto &ndlkp = m_atom_node_lookup[i];
+//      for (atom_node_lookup_t<REAL, AINT> &ndlkp_inst : ndlkp) {
+//        if (auto nd = ndlkp_inst.m_node; nd) {
+//          auto &nd_cnt = nd->m_content;
+//          //erase <changed_atom>
+//          nd_cnt.erase(std::remove_if(begin(nd_cnt), end(nd_cnt), nd_c_erase_lambda),end(nd_cnt));
+//          //rebuild indicies
+//          std::for_each(begin(nd_cnt), end(nd_cnt), nd_c_upd_anum);
+//        }
+//      }
+
+//      //update ngbs
+//      auto &ngb_vec = m_ngb_table[i];
+//      for (auto &ngb_rec : ngb_vec) {
+//        if (ngb_rec.m_idx.is_zero()) { // bond with real atom
+//          auto bond_rec = find_bond_rec(ngb_rec.m_atm, i, zero_idx);
+//          if (bond_rec && i > ngb_rec.m_atm)
+//            m_ngb_table[ngb_rec.m_atm][*bond_rec].m_atm -= 1;
+//        } else { //  bond with imaginary atom
+//          auto img_at = find_img_atom(ngb_rec.m_atm, ngb_rec.m_idx);
+//          if (img_at) {
+
+//          }
+//        }
+//      }
+
+//    }
+
+    //dumb way
+    for (int i = 0; i < geom->nat(); i++)
+      for (int q = 0; q < size(m_ngb_table[i]); q++)
+        if (m_ngb_table[i][q].m_atm > changed_atom)
+          m_ngb_table[i][q].m_atm -= 1;
+
+    for (int i = 0; i < size(m_img_atoms); i++) {
+      if (m_img_atoms[i].m_atm > changed_atom)
+        m_img_atoms[i].m_atm -= 1;
+      for (int q = 0; q < size(m_img_atoms[i].m_img_bonds); q++)
+        if (m_img_atoms[i].m_img_bonds[q].m_atm > changed_atom)
+          m_img_atoms[i].m_img_bonds[q].m_atm -= 1;
+    }
+    //we dont need lookup for <changed_atom>
+    m_atom_node_lookup.erase(begin(m_atom_node_lookup) + changed_atom);
+    m_ngb_table.erase(begin(m_ngb_table) + changed_atom);
+
+    //update ngb table
+
+    //update img atoms
+  }
+
+  void reindexing_after_insert(const AINT changed_atom) {
+    //updating atom lookup
+
+  }
+
   /**
    * @brief clr_atom_from_tree
+   * the procedure don't care about reindexing
    * @param atm
    * @param erase_lookup_record
    * @return
    */
   std::vector<index> clr_atom_from_tree(const AINT atm, bool erase_lookup_record) {
-    do_action(act_check_consistency);
-
     std::vector<index> img_idx;
 
-    //Atoms from 0d geometry always have (0,....,0) indicies
+    //Atoms from 0d geometry always have (0, . . . ,0) indicies
     if (geom->get_DIM() == 0
         && atm < size(m_atom_node_lookup)
         && !empty(m_atom_node_lookup[atm]))
@@ -441,7 +484,7 @@ public:
       for (auto& at_node : m_atom_node_lookup[atm])
         at_node.m_node->rm_cnt_idx_store(atm, img_idx);
 
-      //iterate over imaginary atoms, store secondary imaginary atom, erase required atom
+      //iterate over imaginary atoms, store secondary imaginary atom, erase required one
       std::vector<std::tuple<AINT, index>> pair_img_atoms;
       for (auto it = m_img_atoms.begin(); it != m_img_atoms.end();)
         if (it->m_atm == atm) {
@@ -847,9 +890,7 @@ public:
   }
 
   void add_ngbr(AINT ha, AINT i, const index j) {
-    auto fnd_l = [&i, &j] (auto &el) {
-      return el.m_atm == i && el.m_idx == j;
-    };
+    auto fnd_l = [&i, &j] (auto &el) { return el.m_atm == i && el.m_idx == j; };
     bool found = std::any_of(begin(m_ngb_table[ha]), end(m_ngb_table[ha]), fnd_l);
     if (!found)
       m_ngb_table[ha].push_back(tws_node_cnt_t<REAL, AINT>(i, j));
@@ -1065,8 +1106,12 @@ public:
         if (m_rebuild_all_on_erase)
           do_action(act_clear_all);
       } else { /* after */
-        if (m_rebuild_all_on_erase)
+        if (m_rebuild_all_on_erase) {
           do_action(act_check_consistency | act_rebuild_all);
+        } else {
+          clr_atom_from_tree(at, false);
+          reindexing_after_erase(at);
+        }
       }
     }
     m_tree_is_dirty = true;
