@@ -403,8 +403,8 @@ public:
     if (changed_atom >= m_atom_node_lookup.size())
       throw std::runtime_error("Ill formed atom-node lookup table...");
 
-    auto nd_c_erase_lambda = [changed_atom] (auto &el) { return el.m_atm == changed_atom;};
-    auto nd_c_upd_anum = [changed_atom] (auto &el) { if (el.m_atm > changed_atom) el.m_atm -= 1;};
+//    auto nd_c_erase_lambda = [changed_atom] (auto &el) { return el.m_atm == changed_atom;};
+//    auto nd_c_upd_anum = [changed_atom] (auto &el) { if (el.m_atm > changed_atom) el.m_atm -= 1;};
     //m_atom_node_lookup containts info for erased atom too
 //    for (int i = changed_atom + 1; i < geom->nat(); i++) {
 //      //update tree

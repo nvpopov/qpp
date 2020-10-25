@@ -7,6 +7,7 @@
 #include <fstream>
 
 using namespace qpp;
+
 using v3f = vector3<float>;
 using v3d = vector3<double>;
 using m3f = matrix3<float>;
