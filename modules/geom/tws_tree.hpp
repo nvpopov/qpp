@@ -31,6 +31,11 @@
 
 namespace qpp {
 
+enum reindexing_type : int {
+  after_erase,
+  after_insert
+};
+
 template<typename INT_TYPE>
 inline INT_TYPE enc_tws_idx(const INT_TYPE a, const INT_TYPE b, const INT_TYPE c) {
   return (a * 9)+ (b * 3) + c + 13;
@@ -389,7 +394,7 @@ public:
     }
   }
 
-  void reindexing_after_erase(const AINT changed_atom) {
+  void reindexing_after_change(const AINT changed_atom, reindexing_type reason) {
     // Must be called after erase
     // Before erase we have : 0 1 2 3 4 5 6 7 8 num=9
     // After erase we have  : 0 1 2 3 4 6 7 8 num=8
@@ -398,11 +403,13 @@ public:
 
     auto zero_idx = index::D(geom->get_DIM()).all(0);
 
-    if (geom->nat() + 1 != size(m_atom_node_lookup))
-      throw std::runtime_error("Must be called after atom deletion");
-    if (changed_atom >= m_atom_node_lookup.size())
-      throw std::runtime_error("Ill formed atom-node lookup table...");
-
+    if (reason == reindexing_type::after_erase) {
+      if (geom->nat() + 1 != size(m_atom_node_lookup))
+        throw std::runtime_error("Must be called after atom deletion");
+    } else if (reason == reindexing_type::after_insert) {
+      if (geom->nat() - 1 != size(m_atom_node_lookup))
+        throw std::runtime_error("Must be called after atom insertion");
+    }
 //    auto nd_c_erase_lambda = [changed_atom] (auto &el) { return el.m_atm == changed_atom;};
 //    auto nd_c_upd_anum = [changed_atom] (auto &el) { if (el.m_atm > changed_atom) el.m_atm -= 1;};
     //m_atom_node_lookup containts info for erased atom too
@@ -435,32 +442,34 @@ public:
 //      }
 
 //    }
-
+    if (reason == reindexing_type::after_insert) {
+      m_atom_node_lookup.insert(begin(m_atom_node_lookup) + changed_atom, {});
+      m_ngb_table.insert(begin(m_ngb_table) + changed_atom, {});
+    }
+    int at_imod = reason == reindexing_type::after_erase ? -1 : 1;
+    int ch_atom = reindexing_type::after_erase ? changed_atom : changed_atom;
     //dumb way
     for (int i = 0; i < geom->nat(); i++)
       for (int q = 0; q < size(m_ngb_table[i]); q++)
-        if (m_ngb_table[i][q].m_atm > changed_atom)
-          m_ngb_table[i][q].m_atm -= 1;
+        if (m_ngb_table[i][q].m_atm > ch_atom)
+          m_ngb_table[i][q].m_atm += at_imod;
 
     for (int i = 0; i < size(m_img_atoms); i++) {
-      if (m_img_atoms[i].m_atm > changed_atom)
-        m_img_atoms[i].m_atm -= 1;
+      if (m_img_atoms[i].m_atm > ch_atom)
+        m_img_atoms[i].m_atm += at_imod;
       for (int q = 0; q < size(m_img_atoms[i].m_img_bonds); q++)
-        if (m_img_atoms[i].m_img_bonds[q].m_atm > changed_atom)
-          m_img_atoms[i].m_img_bonds[q].m_atm -= 1;
+        if (m_img_atoms[i].m_img_bonds[q].m_atm > ch_atom)
+          m_img_atoms[i].m_img_bonds[q].m_atm += at_imod;
     }
     //we dont need lookup for <changed_atom>
-    m_atom_node_lookup.erase(begin(m_atom_node_lookup) + changed_atom);
-    m_ngb_table.erase(begin(m_ngb_table) + changed_atom);
+    if (reason == reindexing_type::after_erase) {
+      m_atom_node_lookup.erase(begin(m_atom_node_lookup) + changed_atom);
+      m_ngb_table.erase(begin(m_ngb_table) + changed_atom);
+    }
 
     //update ngb table
 
     //update img atoms
-  }
-
-  void reindexing_after_insert(const AINT changed_atom) {
-    //updating atom lookup
-
   }
 
   /**
@@ -865,8 +874,8 @@ public:
 
 #ifdef TWS_TREE_DEBUG
     fmt::print(">>> post grow vol={0} {1} {2} {3} nc = {4},\n"
-               "    root_bb : min={5},\n"
-               "              max={6}\n",
+               ">>> root_bb : min={5},\n"
+               ">>>           max={6}\n",
                root->m_bb.volume(),
                geom->pos(atm,idx)[0],
                geom->pos(atm,idx)[1],
@@ -1061,19 +1070,25 @@ public:
   }
 
   void inserted(int at, before_after st, const STRING_EX & a, const vector3<REAL> & r) override {
-    if (m_auto_bonding && m_auto_build) {
+    if (m_auto_build) {
       if (st == before_after::before) {
         if (m_rebuild_all_on_insert)
           do_action(act_clear_all);
       } else { /* after */
-        if (m_auto_build)
-          insert_object_to_tree(at);
-        if (m_auto_bonding) {
-          m_bonding_table.init_for_single_type(geom, geom->type_of_atom(at));
-          find_neighbours(at);
-        }
-        if (m_rebuild_all_on_insert)
+        if (m_rebuild_all_on_insert) {
           do_action(act_check_consistency | act_rebuild_all);
+          if (m_auto_bonding) {
+            m_bonding_table.init_for_single_type(geom, geom->type_of_atom(at));
+            find_neighbours(at);
+          }
+        } else {
+          reindexing_after_change(at, reindexing_type::after_insert);
+          insert_object_to_tree(at);
+          if (m_auto_bonding) {
+            m_bonding_table.init_for_single_type(geom, geom->type_of_atom(at));
+            find_neighbours(at);
+          }
+        }
       }
     }
     m_tree_is_dirty = true;
@@ -1101,7 +1116,7 @@ public:
   }
 
   void erased(int at, before_after st) override {
-    if (m_auto_bonding && m_auto_build) {
+    if (m_auto_build) {
       if (st == before_after::before) {
         if (m_rebuild_all_on_erase)
           do_action(act_clear_all);
@@ -1110,7 +1125,7 @@ public:
           do_action(act_check_consistency | act_rebuild_all);
         } else {
           clr_atom_from_tree(at, false);
-          reindexing_after_erase(at);
+          reindexing_after_change(at, reindexing_type::after_erase);
         }
       }
     }

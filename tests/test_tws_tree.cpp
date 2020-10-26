@@ -18,7 +18,8 @@ TEST_CASE("TWS tree") {
     REQUIRE(g.nat() == 3);
 
     tws_tree_t<double, periodic_cell<double>, std::uint32_t> tr1(g);
-    tr1.m_rebuild_all_on_erase = false;
+    tr1.m_rebuild_all_on_erase = true;
+    tr1.m_rebuild_all_on_insert = true;
     tr1.do_action(act_clear_all | act_build_all);
     REQUIRE(tr1.n(0) == 1);
     REQUIRE(tr1.n(1) == 0);
@@ -71,8 +72,8 @@ TEST_CASE("TWS tree") {
             == Approx(2.659999));
     REQUIRE(tr1.m_bonding_table.m_dist[{g.type_of_atom(0), g.type_of_atom(3)}].m_bonding_dist
             == Approx(2.659999));
-//    REQUIRE(tr1.m_bonding_table.m_dist[{g.type_of_atom(0), g.type_of_atom(1)}].m_bonding_dist
-//            == Approx(2.659999));
+    REQUIRE(tr1.m_bonding_table.m_dist[{g.type_of_atom(0), g.type_of_atom(1)}].m_bonding_dist
+            == Approx(2.21));
 
     //Print out bonding dists
     for (int i = 0; i < g.n_atom_types(); i++)
