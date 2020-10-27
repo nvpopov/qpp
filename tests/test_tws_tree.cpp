@@ -18,8 +18,8 @@ TEST_CASE("TWS tree") {
     REQUIRE(g.nat() == 3);
 
     tws_tree_t<double, periodic_cell<double>, std::uint32_t> tr1(g);
-    tr1.m_rebuild_all_on_erase = true;
-    tr1.m_rebuild_all_on_insert = true;
+    tr1.m_rebuild_all_on_erase = false;
+    tr1.m_rebuild_all_on_insert = false;
     tr1.do_action(act_clear_all | act_build_all);
     REQUIRE(tr1.n(0) == 1);
     REQUIRE(tr1.n(1) == 0);

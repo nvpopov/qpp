@@ -443,9 +443,10 @@ public:
 
 //    }
     if (reason == reindexing_type::after_insert) {
-      m_atom_node_lookup.insert(begin(m_atom_node_lookup) + changed_atom, {});
-      m_ngb_table.insert(begin(m_ngb_table) + changed_atom, {});
+      m_atom_node_lookup.insert(begin(m_atom_node_lookup) + changed_atom, {{}});
+      m_ngb_table.insert(begin(m_ngb_table) + changed_atom, {{}});
     }
+
     int at_imod = reason == reindexing_type::after_erase ? -1 : 1;
     int ch_atom = reindexing_type::after_erase ? changed_atom : changed_atom;
     //dumb way
@@ -900,8 +901,7 @@ public:
 
   void add_ngbr(AINT ha, AINT i, const index j) {
     auto fnd_l = [&i, &j] (auto &el) { return el.m_atm == i && el.m_idx == j; };
-    bool found = std::any_of(begin(m_ngb_table[ha]), end(m_ngb_table[ha]), fnd_l);
-    if (!found)
+    if (!std::any_of(begin(m_ngb_table[ha]), end(m_ngb_table[ha]), fnd_l))
       m_ngb_table[ha].push_back(tws_node_cnt_t<REAL, AINT>(i, j));
   }
 
@@ -967,7 +967,9 @@ public:
         bool both_atoms_im   = first_im && second_im;
 
         //both atoms are real
-        if (!img_pass && f_dr < bond_len && both_atoms_real
+        if (!img_pass
+            && f_dr < bond_len
+            && both_atoms_real
             && (at_num != r_el.m_atm || idx != r_el.m_idx)) {
           add_ngbr(at_num, r_el.m_atm, r_el.m_idx);
           add_ngbr(r_el.m_atm, at_num , r_el.m_idx);
