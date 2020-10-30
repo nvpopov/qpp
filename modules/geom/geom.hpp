@@ -601,6 +601,10 @@ class geometry : public basic_geometry<REAL> {
       for (auto &need_to_unsel : tmp_sel)
         iselect(need_to_unsel.m_atm, need_to_unsel.m_idx, false);
     }
+    //update sel > at
+    for (auto &rec : p_sel)
+      if (rec.m_atm > at)
+        rec.m_atm -= 1;
 
     if (p_has_observers)
       for (int j = 0; j < p_observers.size(); j++)
@@ -621,6 +625,11 @@ class geometry : public basic_geometry<REAL> {
   }
 
   inline void insert_impl(int at, const STRING_EX &a, const vector3<REAL> &r1) {
+    //update sel > at
+    for (auto &rec : p_sel)
+      if (rec.m_atm > at)
+        rec.m_atm += 1;
+
     vector3<REAL> r2 = r1;
     if (auto_symmetrize)
       r2 = cell.symmetrize(r1, symmetrize_radius(a));
