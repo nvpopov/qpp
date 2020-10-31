@@ -287,6 +287,7 @@ public:
   bool m_atoms_existence_is_broken{false};
   bool m_rebuild_all_on_erase{true};
   bool m_rebuild_all_on_insert{true};
+  bool m_use_ptable_for_bonding{true};
 
   std::vector<img_atom_t<REAL, AINT>>                       m_img_atoms;
   std::vector<std::vector<tws_node_cnt_t<REAL, AINT>>>      m_ngb_table;
@@ -925,7 +926,7 @@ public:
     if (!root)
       return;
 
-    if (m_bonding_table.m_dist.size() == 0)
+    if (m_bonding_table.m_dist.size() == 0 && m_use_ptable_for_bonding)
       m_bonding_table.init_default(geom);
 
     if (m_ngb_table.size() < geom->nat())
@@ -1064,8 +1065,11 @@ public:
       do_action(act_check_consistency);
       if (m_auto_build)
         insert_object_to_tree(geom->nat()-1);
-      if (m_auto_bonding)
+      if (m_auto_bonding) {
+        if (m_use_ptable_for_bonding)
+          m_bonding_table.init_for_single_type(geom, geom->type_of_atom(geom->nat()-1));
         find_neighbours(geom->nat()-1);
+      }
     }
     m_tree_is_dirty = true;
     m_atoms_existence_is_broken = true;
@@ -1080,7 +1084,8 @@ public:
         if (m_rebuild_all_on_insert) {
           do_action(act_check_consistency | act_rebuild_all);
           if (m_auto_bonding) {
-            m_bonding_table.init_for_single_type(geom, geom->type_of_atom(at));
+            if (m_use_ptable_for_bonding)
+              m_bonding_table.init_for_single_type(geom, geom->type_of_atom(at));
             find_neighbours(at);
           }
         } else {
