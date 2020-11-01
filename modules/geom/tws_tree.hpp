@@ -285,8 +285,8 @@ public:
   bool m_keep_img_atoms{false};
   bool m_tree_is_dirty{false};
   bool m_atoms_existence_is_broken{false};
-  bool m_rebuild_all_on_erase{true};
-  bool m_rebuild_all_on_insert{true};
+  bool m_rebuild_all_on_erase{false};
+  bool m_rebuild_all_on_insert{false};
   bool m_use_ptable_for_bonding{true};
 
   std::vector<img_atom_t<REAL, AINT>>                       m_img_atoms;
