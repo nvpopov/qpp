@@ -69,8 +69,8 @@ namespace qpp {
     auto sv_pos = split_sv(pos.text().get(), "\n");
     auto sv_names = split_sv(type.text().get(), "\n");
 
-    output.m_init_apos.reserve(sv_pos.size());
-    output.m_init_anames.reserve(sv_pos.size());
+    output.m_init_pos.reserve(sv_pos.size());
+    output.m_init_types.reserve(sv_pos.size());
     float x{0}, y{0}, z{0};
 
     for (const auto &rec : sv_pos) {
@@ -79,13 +79,13 @@ namespace qpp {
         s2t(sv_pos_ex[0].data(), x);
         s2t(sv_pos_ex[1].data(), y);
         s2t(sv_pos_ex[2].data(), z);
-        output.m_init_apos.push_back({x,y,z});
+        output.m_init_pos.push_back({x,y,z});
 
       }
 
     for (const auto &rec : sv_names) {
 
-        output.m_init_anames.push_back(std::string(rec));
+        output.m_init_types.push_back(std::string(rec));
 
       }
 

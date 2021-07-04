@@ -94,9 +94,9 @@ namespace qpp {
 //             0 Br   25.0000*   0    79.900   -4.771181   -3.484277    9.467528
 //             0  1      2       3      4          5           6           7
             std::string at_name = std::string(splt[1]);
-            output.m_init_anames.push_back(std::move(at_name));
+            output.m_init_types.push_back(std::move(at_name));
             output.m_init_achg.push_back(str2real(splt, 2, cur_line, s));
-            output.m_init_apos.push_back({
+            output.m_init_pos.push_back({
                                            str2real(splt, 5, cur_line, s) * bohr_to_angs,
                                            str2real(splt, 6, cur_line, s) * bohr_to_angs,
                                            str2real(splt, 7, cur_line, s) * bohr_to_angs
@@ -189,16 +189,16 @@ namespace qpp {
 
             sgetline(inp, s, cur_line);
 
-            output.m_steps.back().m_atoms_pos.resize(output.m_init_anames.size());
+            output.m_steps.back().m_atom_pos.resize(output.m_init_types.size());
 
-            for (size_t i = 0; i < output.m_init_anames.size(); i++) {
+            for (size_t i = 0; i < output.m_init_types.size(); i++) {
 
                 sgetline(inp, s, cur_line);
 
                 std::vector<std::string_view> splt = split_sv(s, " ");
                 check_min_split_size(splt, 4, cur_line, s);
 
-                output.m_steps.back().m_atoms_pos[i] = {
+                output.m_steps.back().m_atom_pos[i] = {
                   str2real(splt, 1, cur_line, s),
                   str2real(splt, 2, cur_line, s),
                   str2real(splt, 3, cur_line, s),
@@ -218,16 +218,16 @@ namespace qpp {
             sgetline(inp, s, cur_line);
             sgetline(inp, s, cur_line);
 
-            output.m_steps.back().m_atoms_grads.resize(output.m_init_anames.size());
+            output.m_steps.back().m_atom_grads.resize(output.m_init_types.size());
 
-            for (size_t i = 0; i < output.m_init_anames.size(); i++) {
+            for (size_t i = 0; i < output.m_init_types.size(); i++) {
 
                 sgetline(inp, s, cur_line);
 
                 std::vector<std::string_view> splt = split_sv(s, " ");
                 check_min_split_size(splt, 4, cur_line, s);
 
-                output.m_steps.back().m_atoms_grads[i] = {
+                output.m_steps.back().m_atom_grads[i] = {
                   str2real(splt, 3, cur_line, s),
                   str2real(splt, 4, cur_line, s),
                   str2real(splt, 5, cur_line, s),
@@ -287,9 +287,9 @@ namespace qpp {
 //               0 1 2    3
             sgetline(inp, s, cur_line);
 
-            output.m_steps.back().m_mulliken_net_chg_per_atom.resize(output.m_init_anames.size());
+            output.m_steps.back().m_mulliken_net_chg_per_atom.resize(output.m_init_types.size());
 
-            for (size_t i = 0; i < output.m_init_anames.size(); i++) {
+            for (size_t i = 0; i < output.m_init_types.size(); i++) {
 
                 sgetline(inp, s, cur_line);
                 std::vector<std::string_view> splt = split_sv(s, " ");

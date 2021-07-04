@@ -176,15 +176,15 @@ void read_ccd_from_firefly_output(std::basic_istream<CHAR_EX,TRAITS> & inp,
 
           if (!output.m_steps.empty()) {
             vector3<REAL> _pos{_qxyz[1], _qxyz[2], _qxyz[3]};
-            output.m_steps[cur_step].m_atoms_pos.push_back(_pos);
+            output.m_steps[cur_step].m_atom_pos.push_back(_pos);
           }
           else {
             vector3<REAL> _pos{_qxyz[1], _qxyz[2], _qxyz[3]};
-            output.m_init_apos.push_back(_pos*bohr_to_angs);
+            output.m_init_pos.push_back(_pos*bohr_to_angs);
             output.m_init_achg.push_back(_qxyz[0]);
             check_min_split_size(splt, 1, cur_line, s);
             std::string at_name = std::string(splt[0]);
-            output.m_init_anames.push_back(std::move(at_name));
+            output.m_init_types.push_back(std::move(at_name));
           }
         }
 
@@ -570,12 +570,12 @@ void read_ccd_from_firefly_output(std::basic_istream<CHAR_EX,TRAITS> & inp,
         y = str2real(splt, 3, cur_line, s);
         z = str2real(splt, 4, cur_line, s);
         if (!output.m_steps.empty()) {
-          output.m_steps[cur_step].m_atoms_pos.push_back(vector3<REAL>(x,y,z));
+          output.m_steps[cur_step].m_atom_pos.push_back(vector3<REAL>(x,y,z));
         }
         else if (!b_atoms_bootstraped) {
-          output.m_init_apos.push_back(vector3<REAL>(x,y,z));
+          output.m_init_pos.push_back(vector3<REAL>(x,y,z));
           std::string at_name = std::string(splt[0]);
-          output.m_init_anames.push_back(std::move(at_name));
+          output.m_init_types.push_back(std::move(at_name));
         }
         continue;
       }
@@ -596,7 +596,7 @@ void read_ccd_from_firefly_output(std::basic_istream<CHAR_EX,TRAITS> & inp,
         gx = str2real(splt, 3, cur_line, s);
         gy = str2real(splt, 4, cur_line, s);
         gz = str2real(splt, 5, cur_line, s);
-        output.m_steps[cur_step].m_atoms_grads.push_back(vector3<REAL>(gx,gy,gz));
+        output.m_steps[cur_step].m_atom_grads.push_back(vector3<REAL>(gx,gy,gz));
       }
       continue;
     }

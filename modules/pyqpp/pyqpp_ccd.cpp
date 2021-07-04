@@ -68,9 +68,9 @@ void pyqpp_ccd_step_export_tmpl(py::module m, const char * pyname) {
       py_ccd_step(m, pyname);
 
   py_ccd_step.def_readonly("toten", &comp_chem_program_step_t<REAL>::m_toten)
-             .def_readonly("pos", &comp_chem_program_step_t<REAL>::m_atoms_pos)
-             .def_readonly("grad", &comp_chem_program_step_t<REAL>::m_atoms_grads)
-             .def_readonly("vel", &comp_chem_program_step_t<REAL>::m_atoms_vels)
+             .def_readonly("pos", &comp_chem_program_step_t<REAL>::m_atom_pos)
+             .def_readonly("grad", &comp_chem_program_step_t<REAL>::m_atom_grads)
+             .def_readonly("vel", &comp_chem_program_step_t<REAL>::m_atom_vels)
              .def_readonly("en_spin_1_o",
                            &comp_chem_program_step_t<REAL>::m_eigen_values_spin_1_occ)
              .def_readonly("en_spin_1_u",
@@ -131,9 +131,9 @@ void pyqpp_ccd_export_tmpl(py::module m, const char * pyname) {
         .def_readonly("terminated_norm", &comp_chem_program_data_t<REAL>::m_is_terminated_normally)
         .def_readonly("gr_norm_min", &comp_chem_program_data_t<REAL>::m_global_gradient_norm_min)
         .def_readonly("gr_norm_max", &comp_chem_program_data_t<REAL>::m_global_gradient_norm_max)
-        .def_readonly("init_anames", &comp_chem_program_data_t<REAL>::m_init_anames)
+        .def_readonly("init_anames", &comp_chem_program_data_t<REAL>::m_init_types)
         .def_readonly("init_achg", &comp_chem_program_data_t<REAL>::m_init_achg)
-        .def_readonly("init_apos", &comp_chem_program_data_t<REAL>::m_init_apos)
+        .def_readonly("init_apos", &comp_chem_program_data_t<REAL>::m_init_pos)
         .def_readonly("steps", &comp_chem_program_data_t<REAL>::m_steps)
         .def_readonly("vibs", &comp_chem_program_data_t<REAL>::m_vibs);
 

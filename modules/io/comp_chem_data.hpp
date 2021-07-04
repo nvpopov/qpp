@@ -78,12 +78,13 @@ struct comp_chem_program_scf_step_info_t {
 
 template <class REAL>
 struct comp_chem_program_step_t {
-
   std::vector<comp_chem_program_scf_step_info_t<REAL> > m_scf_steps;
   double m_toten{double(0)};
-  generic_array_t<vector3<REAL>, REAL > m_atoms_pos;
-  generic_array_t<vector3<REAL>, REAL > m_atoms_grads;
-  generic_array_t<vector3<REAL>, REAL > m_atoms_vels;
+  generic_array_t<vector3<REAL>, REAL> m_atom_pos;
+  generic_array_t<vector3<REAL>, REAL> m_atom_grads;
+  generic_array_t<vector3<REAL>, REAL> m_atom_vels;
+  std::vector<std::string> m_atom_types;
+  int m_tot_nat{0};
 
   std::vector<REAL> m_eigen_values_spin_1_occ;
   std::vector<REAL> m_eigen_values_spin_1_unocc;
@@ -114,12 +115,10 @@ struct comp_chem_program_step_t {
   // for cell_opt steps
   bool m_cell_is_animable{false};
   std::array<vector3<REAL>, 3> m_cell;
-
 };
 
 template<class REAL>
 struct tddft_transition_rec_t {
-
   size_t m_from{0};
   ccd_spin_e m_from_spin{ccd_spin_e::spin_alpha};
 
@@ -127,12 +126,10 @@ struct tddft_transition_rec_t {
   ccd_spin_e m_to_spin{ccd_spin_e::spin_alpha};
 
   REAL m_amplitude{0};
-
 };
 
 template<class REAL>
 struct tddft_transitions_t {
-
   bool m_all_lhs_equal{false};
   bool m_all_rhs_equal{false};
 
@@ -142,20 +139,18 @@ struct tddft_transitions_t {
 
   /* lhs state, lhs spin, rhs state, rhs spin, amplitude */
   std::vector<tddft_transition_rec_t<REAL > > m_transition;
-
 };
 
 template <class REAL>
 struct comp_chem_program_data_t {
-
   // initial values
-  generic_array_t<vector3<REAL>, REAL > m_init_apos; // initial atoms pos
-  std::vector<std::string> m_init_anames; // initial atoms names
+  generic_array_t<vector3<REAL>, REAL > m_init_pos; // initial atoms pos
+  std::vector<std::string> m_init_types; // initial atoms names
   std::vector<REAL> m_init_achg; // initial atoms charges
 
   // general data
-  std::vector<comp_chem_program_step_t<REAL> > m_steps;
-  std::vector<comp_chem_program_vibration_info_t<REAL> > m_vibs;
+  std::vector<comp_chem_program_step_t<REAL>> m_steps;
+  std::vector<comp_chem_program_vibration_info_t<REAL>> m_vibs;
 
   // general info about the run
   comp_chem_program_e m_comp_chem_program{comp_chem_program_e::pr_unknown};
@@ -176,6 +171,8 @@ struct comp_chem_program_data_t {
   int m_n_spin_states{-1};
   bool m_is_terminated_normally{false};
 
+  bool m_noncons_nat{false};
+
   vector3<REAL> m_global_gradient_min{0,0,0};
   vector3<REAL> m_global_gradient_max{0,0,0};
   vector3<REAL> m_global_gradient_average{0,0,0};
@@ -183,7 +180,6 @@ struct comp_chem_program_data_t {
   REAL m_global_gradient_norm_max{0};
 
   std::vector<tddft_transitions_t<REAL> > m_tddft_trans_rec;
-
 };
 
 
@@ -205,34 +201,39 @@ bool validate_ccd(comp_chem_program_data_t<REAL> &ccd_inst, uint32_t flags) {
 
 template <class REAL>
 bool compile_ccd(comp_chem_program_data_t<REAL> &ccd_inst, uint32_t flags) {
+  //non constant number of atoms
+  if (ccd_inst.m_steps.size() > 1 && ccd_inst.m_noncons_nat) {
+    ccd_inst.m_steps[0].m_tot_nat = ccd_inst.m_tot_nat;
+    ccd_inst.m_steps[0].m_atom_pos = ccd_inst.m_init_pos;
+    ccd_inst.m_steps[0].m_atom_types = ccd_inst.m_init_types;
+  }
 
   if (flags & ccd_cf_remove_empty_geom_steps) {
     for (auto it = ccd_inst.m_steps.begin(); it != ccd_inst.m_steps.end();) {
-      if(it->m_atoms_pos.empty()) it = ccd_inst.m_steps.erase(it);
-      else ++it;
+      if(it->m_atom_pos.empty())
+        it = ccd_inst.m_steps.erase(it);
+      else
+        ++it;
     }
   }
 
   if (ccd_inst.m_run_t == comp_chem_program_run_e::rt_geo_opt && !ccd_inst.m_steps.empty()) {
-
     int total_valid_steps = 0;
-
     //calculate extremal gradient values for each step
     for (auto &step : ccd_inst.m_steps)
-      if (!step.m_atoms_grads.empty()) {
+      if (!step.m_atom_grads.empty()) {
         total_valid_steps += 1;
-        for (size_t i = 0; i < step.m_atoms_grads.size(); i++) {
-
-          REAL grad_norm = step.m_atoms_grads[i].norm();
+        for (size_t i = 0; i < step.m_atom_grads.size(); i++) {
+          REAL grad_norm = step.m_atom_grads[i].norm();
 
           if (grad_norm > step.m_grad_norm_max) {
             step.m_grad_norm_max = grad_norm;
-            step.m_grad_max = step.m_atoms_grads[i];
+            step.m_grad_max = step.m_atom_grads[i];
           }
 
           if (grad_norm < step.m_grad_norm_min) {
             step.m_grad_norm_min = grad_norm;
-            step.m_grad_min = step.m_atoms_grads[i];
+            step.m_grad_min = step.m_atom_grads[i];
           }
 
           if (grad_norm > ccd_inst.m_global_gradient_norm_max)
@@ -241,41 +242,33 @@ bool compile_ccd(comp_chem_program_data_t<REAL> &ccd_inst, uint32_t flags) {
           if (grad_norm < ccd_inst.m_global_gradient_norm_min)
             ccd_inst.m_global_gradient_norm_min = grad_norm;
 
-          step.m_grad_aver += step.m_atoms_grads[i];
+          step.m_grad_aver += step.m_atom_grads[i];
           step.m_grad_norm_average += grad_norm;
         }
 
-        step.m_grad_aver /= step.m_atoms_grads.size();
-        step.m_grad_norm_average /= step.m_atoms_grads.size();
-
+        step.m_grad_aver /= step.m_atom_grads.size();
+        step.m_grad_norm_average /= step.m_atom_grads.size();
       }
   }
 
   /* tddft data compilation */
   if (!ccd_inst.m_tddft_trans_rec.empty())
     for (auto &rec : ccd_inst.m_tddft_trans_rec) {
-
       bool all_lhs_equal{true};
       bool all_rhs_equal{true};
-
       if (rec.m_transition.size() > 1)
         for (size_t i = 1; i < rec.m_transition.size(); i++) {
-
           if (rec.m_transition[i-1].m_from != rec.m_transition[i].m_from)
             all_lhs_equal = false;
-
           if (rec.m_transition[i-1].m_to != rec.m_transition[i].m_to)
             all_lhs_equal = false;
 
         }
-
       rec.m_all_lhs_equal = all_lhs_equal;
       rec.m_all_rhs_equal = all_rhs_equal;
-
     }
 
   return true;
-
 }
 
 template <class REAL>
@@ -283,63 +276,69 @@ bool compile_geometry(comp_chem_program_data_t<REAL> &ccd_inst,
                       geometry<REAL, periodic_cell<REAL>> &g,
                       uint32_t compile_flags = ccd_cf_default_flags) {
 
-  if ((ccd_inst.m_init_apos.empty() || ccd_inst.m_init_anames.empty())
-      || (compile_flags & ccd_cf_allow_null_init_geom)) return false;
+  if ((ccd_inst.m_init_pos.empty() || ccd_inst.m_init_types.empty())
+      || (compile_flags & ccd_cf_allow_null_init_geom))
+    return false;
 
-  if ((ccd_inst.m_init_apos.size() != ccd_inst.m_init_anames.size())
-      || (compile_flags & ccd_cf_allow_different_size_pos_names)) return false;
+  if ((ccd_inst.m_init_pos.size() != ccd_inst.m_init_types.size())
+      || (compile_flags & ccd_cf_allow_different_size_pos_names))
+    return false;
 
-  if (ccd_inst.m_DIM != ccd_inst.m_cell_v.size()) return false;
+  if (ccd_inst.m_DIM != ccd_inst.m_cell_v.size())
+    return false;
 
-  if (ccd_inst.m_tot_nat == 0 && !ccd_inst.m_init_anames.empty())
-    ccd_inst.m_tot_nat = ccd_inst.m_init_anames.size();
+  if (ccd_inst.m_tot_nat == 0 && !ccd_inst.m_init_types.empty())
+    ccd_inst.m_tot_nat = ccd_inst.m_init_types.size();
 
   g.set_DIM(ccd_inst.m_DIM);
 
   if (g.get_DIM() > 0)
-    for (size_t i = 0; i < ccd_inst.m_DIM; i++) g.cell.v[i] = ccd_inst.m_cell_v[i];
+    for (size_t i = 0; i < ccd_inst.m_DIM; i++)
+      g.cell.v[i] = ccd_inst.m_cell_v[i];
 
-  for (size_t i = 0; i < ccd_inst.m_init_anames.size(); i++)
-    g.add(ccd_inst.m_init_anames[i], ccd_inst.m_init_apos[i]);
+  for (size_t i = 0; i < ccd_inst.m_init_types.size(); i++)
+    g.add(ccd_inst.m_init_types[i], ccd_inst.m_init_pos[i]);
 
   if (ccd_inst.m_init_achg.size() == ccd_inst.m_tot_nat && g.is_xgeometry()) {
-
     xgeometry<REAL, periodic_cell<REAL> > *xsrc = nullptr;
     xsrc = (xgeometry<REAL, periodic_cell<REAL> >*)(&g);
-
     if (xsrc)
-      for (size_t q = 0; q < xsrc->nat(); q++) xsrc->charge(q) = ccd_inst.m_init_achg[q];
-
+      for (size_t q = 0; q < xsrc->nat(); q++)
+        xsrc->charge(q) = ccd_inst.m_init_achg[q];
   }
 
   return true;
-
 }
 
 template <class REAL>
 bool compile_static_animation(comp_chem_program_data_t<REAL> &ccd_inst,
                               std::vector<geom_anim_record_t<REAL> > &anim_rec,
                               uint32_t compile_flags = ccd_cf_default_flags) {
-
   geom_anim_record_t<REAL> anim;
 
   anim.m_anim_type = geom_anim_e::anim_static;
   anim.m_anim_name = "static";
   anim.frames.resize(1);
-  anim.frames[0].atom_pos.resize(ccd_inst.m_init_apos.size());
-  for (size_t i = 0; i < ccd_inst.m_init_apos.size(); i++)
-    anim.frames[0].atom_pos[i] = ccd_inst.m_init_apos[i];
+  anim.frames[0].atom_pos.resize(ccd_inst.m_init_pos.size());
+  if (ccd_inst.m_noncons_nat) {
+    // store atom names in static anim in the case of non-constant atom number anims
+    anim.frames[0].atom_types.resize(ccd_inst.m_init_pos.size());
+  }
+
+  for (size_t i = 0; i < ccd_inst.m_init_pos.size(); i++) {
+    anim.frames[0].atom_pos[i] = ccd_inst.m_init_pos[i];
+    if (ccd_inst.m_noncons_nat)
+      anim.frames[0].atom_types[i] = ccd_inst.m_init_types[i];
+  }
 
   anim_rec.push_back(std::move(anim));
   return true;
-
 }
 
 template <class REAL>
 bool compile_animation(comp_chem_program_data_t<REAL> &ccd_inst,
                        std::vector<geom_anim_record_t<REAL> > &anim_rec,
                        uint32_t compile_flags = ccd_cf_default_flags) {
-
   if (ccd_inst.m_run_t != comp_chem_program_run_e::rt_geo_opt &&
       ccd_inst.m_run_t != comp_chem_program_run_e::rt_md &&
       ccd_inst.m_run_t != comp_chem_program_run_e::rt_vib &&
@@ -386,20 +385,18 @@ bool compile_animation(comp_chem_program_data_t<REAL> &ccd_inst,
   default:
     return false;
     break;
-
   };
 
   bool is_cell_opt =
       ccd_inst.m_run_t == comp_chem_program_run_e::rt_cell_opt && ccd_inst.m_DIM > 0;
 
   if (copy_steps_content) {
-
     geom_anim_record_t<REAL> anim;
     anim.m_anim_type = stored_anim_type;
     anim.m_anim_name = stored_anim_name;
 
     auto valid_step = [&is_cell_opt](comp_chem_program_step_t<REAL> &step) {
-      return !step.m_atoms_pos.empty() && (!is_cell_opt || step.m_cell_is_animable);
+      return !step.m_atom_pos.empty() && (!is_cell_opt || step.m_cell_is_animable);
     };
 
     // pre-calculation of valid steps
@@ -411,70 +408,64 @@ bool compile_animation(comp_chem_program_data_t<REAL> &ccd_inst,
 
     // we're starting to form an animation
     for (size_t i = 0; i < ccd_inst.m_steps.size(); i++)
-
       if (valid_step(ccd_inst.m_steps[i])) {
-
         steps_c += 1;
-
         // copy cell info
         if (is_cell_opt) {
           anim.frames[steps_c].m_cell_is_animable = true;
           for (size_t cell_i = 0; cell_i < ccd_inst.m_DIM; cell_i++)
             anim.frames[steps_c].m_cell[cell_i] = ccd_inst.m_steps[i].m_cell[cell_i];
         }
-
         // copy atom pos data
-        anim.frames[steps_c].atom_pos.resize(ccd_inst.m_steps[i].m_atoms_pos.size());
-        for (size_t q = 0; q < ccd_inst.m_steps[i].m_atoms_pos.size(); q++)
-          if (std::isnan(ccd_inst.m_steps[i].m_atoms_pos[q][0]) ||
-              std::isnan(ccd_inst.m_steps[i].m_atoms_pos[q][1]) ||
-              std::isnan(ccd_inst.m_steps[i].m_atoms_pos[q][0])) {
-            anim.frames[steps_c].atom_pos[q] = ccd_inst.m_init_apos[q];
+        anim.frames[steps_c].atom_pos.resize(ccd_inst.m_steps[i].m_atom_pos.size());
+        if (ccd_inst.m_noncons_nat) {
+          anim.frames[steps_c].tot_nat = ccd_inst.m_steps[i].m_tot_nat;
+          anim.frames[steps_c].atom_types.resize(anim.frames[steps_c].tot_nat);
+        }
+        for (size_t q = 0; q < ccd_inst.m_steps[i].m_atom_pos.size(); q++) {
+          if (std::isnan(ccd_inst.m_steps[i].m_atom_pos[q][0])
+              || std::isnan(ccd_inst.m_steps[i].m_atom_pos[q][1])
+              || std::isnan(ccd_inst.m_steps[i].m_atom_pos[q][2])) {
+            // TODO: what if num of init atoms < num of atoms in frame?
+            anim.frames[steps_c].atom_pos[q] = ccd_inst.m_init_pos[q];
           } else {
-            anim.frames[steps_c].atom_pos[q] = ccd_inst.m_steps[i].m_atoms_pos[q];
+            anim.frames[steps_c].atom_pos[q] = ccd_inst.m_steps[i].m_atom_pos[q];
           }
-
+          if (ccd_inst.m_noncons_nat) {
+           anim.frames[steps_c].atom_types[q] = ccd_inst.m_steps[i].m_atom_types[q];
+          }
+        }
       } // the animation has been formed. put it in the geom_anim_record_t
-
     // final decision on variable cell animation
     anim.m_variable_cell_anim = is_cell_opt && (steps_valid_c > 0);
-
     anim_rec.push_back(std::move(anim));
     return true;
-
-  } // if (copy_steps_content)
-
-  else {
-
-    if (ccd_inst.m_run_t == comp_chem_program_run_e::rt_vib ||
-        ccd_inst.m_run_t == comp_chem_program_run_e::rt_raman)
+  } else { // if (copy_steps_content)
+    if (ccd_inst.m_run_t == comp_chem_program_run_e::rt_vib
+        || ccd_inst.m_run_t == comp_chem_program_run_e::rt_raman)
       for (size_t v = 0; v < ccd_inst.m_vibs.size(); v++) {
         geom_anim_record_t<REAL> anim;
         anim.m_anim_type = stored_anim_type;
         anim.m_anim_name = fmt::format("f={} cm-1", ccd_inst.m_vibs[v].m_frequency);
-
         const int total_frames_upwards = 10;
         const int total_frames = total_frames_upwards * 2 + 1;
         anim.frames.resize(total_frames);
-
         for (int i = 0; i < total_frames; i++) {
           anim.frames[i].atom_pos.resize(ccd_inst.m_tot_nat);
           //transform index
           int tf_index = i;
-          if (i > total_frames_upwards) tf_index = total_frames - (i+1);
+          if (i > total_frames_upwards)
+            tf_index = total_frames - (i+1);
           for (size_t q = 0; q < ccd_inst.m_vibs[v].m_disp.size(); q++) {
-            anim.frames[i].atom_pos[q] =
-                ccd_inst.m_init_apos[q] + ccd_inst.m_vibs[v].m_disp[q] *
-                                              (REAL(tf_index) / total_frames_upwards);
+            anim.frames[i].atom_pos[q] = ccd_inst.m_init_pos[q]
+                                         + ccd_inst.m_vibs[v].m_disp[q]
+                                         * (static_cast<REAL>(tf_index) / total_frames_upwards);
           }
         }
         anim_rec.push_back(std::move(anim));
       }
-
   }
-
   return true;
-
 }
 
 } // namespace qpp

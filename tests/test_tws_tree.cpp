@@ -1,6 +1,8 @@
 #include "catch.hpp"
 #include <geom/lace3d.hpp>
 #include <geom/xgeom.hpp>
+
+#define NO_TWS_TREE_DEBUG
 #include <geom/tws_tree.hpp>
 
 using namespace qpp;
@@ -76,11 +78,11 @@ TEST_CASE("TWS tree") {
             == Approx(2.21));
 
     //Print out bonding dists
-    for (int i = 0; i < g.n_atom_types(); i++)
-      for (int j = 0; j < g.n_atom_types(); j++)
-        std::cout << fmt::format("(i={}, j={}, dist={})",
-                                 i, j, tr1.m_bonding_table.m_dist[{i,j}].m_bonding_dist)
-                  << std::endl;
+//    for (int i = 0; i < g.n_atom_types(); i++)
+//      for (int j = 0; j < g.n_atom_types(); j++)
+//        std::cout << fmt::format("(i={}, j={}, dist={})",
+//                                 i, j, tr1.m_bonding_table.m_dist[{i,j}].m_bonding_dist)
+//                  << std::endl;
 
   }
 }

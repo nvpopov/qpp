@@ -27,7 +27,9 @@
 #include <geom/primitive_intersections.hpp>
 #include <data/ptable.hpp>
 
+#ifndef NO_TWS_TREE_DEBUG
 #define TWS_TREE_DEBUG
+#endif
 
 namespace qpp {
 

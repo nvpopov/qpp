@@ -36,10 +36,10 @@ int main () {
 
   fmt::print(std::cout, "\nInitial geometry:\n");
   fmt::print(std::cout, "{:>15} {:>15} {:>15} {:>15}\n", "atom", "x", "y", "z");
-  for (size_t i = 0; i < cc_o.m_init_anames.size(); i++)
-    fmt::print(std::cout, "{:>15} {:15} {:15} {:15}\n", cc_o.m_init_anames[i],
-               cc_o.m_init_apos[i][0], cc_o.m_init_apos[i][1],
-               cc_o.m_init_apos[i][2]);
+  for (size_t i = 0; i < cc_o.m_init_types.size(); i++)
+    fmt::print(std::cout, "{:>15} {:15} {:15} {:15}\n", cc_o.m_init_types[i],
+               cc_o.m_init_pos[i][0], cc_o.m_init_pos[i][1],
+               cc_o.m_init_pos[i][2]);
 
   for (size_t i = 0; i < cc_o.m_steps.size(); i++) {
 
@@ -90,18 +90,18 @@ int main () {
 //        fmt::print(std::cout, "\nDipole moment = {}\n", *(cc_o.m_steps[i].m_dipole_moment));
 
       //write atom coordinates and gradients
-      if (!cc_o.m_steps[i].m_atoms_pos.empty() && !cc_o.m_steps[i].m_atoms_grads.empty()) {
+      if (!cc_o.m_steps[i].m_atom_pos.empty() && !cc_o.m_steps[i].m_atom_grads.empty()) {
           fmt::print(std::cout, "\n{:>15} {:>15} {:>15} {:>15} {:>15} {:>15} {:>15}\n",
                      "atom", "x", "y", "z", "dx", "dy", "dz");
-          for (size_t q = 0 ; q < cc_o.m_init_anames.size(); q++){
+          for (size_t q = 0 ; q < cc_o.m_init_types.size(); q++){
               fmt::print(std::cout, "{:>15} {:15} {:15} {:15} {:15} {:15} {:15}\n",
-                         cc_o.m_init_anames[q],
-                         cc_o.m_steps[i].m_atoms_pos[q][0],
-                         cc_o.m_steps[i].m_atoms_pos[q][1],
-                         cc_o.m_steps[i].m_atoms_pos[q][2],
-                         cc_o.m_steps[i].m_atoms_grads[q][0],
-                         cc_o.m_steps[i].m_atoms_grads[q][1],
-                         cc_o.m_steps[i].m_atoms_grads[q][2]);
+                         cc_o.m_init_types[q],
+                         cc_o.m_steps[i].m_atom_pos[q][0],
+                         cc_o.m_steps[i].m_atom_pos[q][1],
+                         cc_o.m_steps[i].m_atom_pos[q][2],
+                         cc_o.m_steps[i].m_atom_grads[q][0],
+                         cc_o.m_steps[i].m_atom_grads[q][1],
+                         cc_o.m_steps[i].m_atom_grads[q][2]);
             }
         }
 
