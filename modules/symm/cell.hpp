@@ -17,6 +17,7 @@ namespace py = pybind11;
 //#include <symm/transform.hpp>
 #include <cmath>
 #include <consts.hpp>
+#include <optional>
 #include <stdexcept>
 
 namespace qpp {
